@@ -1556,6 +1556,10 @@ artifact_check_no_file(void)
 	prt("The Battle Axe 'Lotharang'", i++, j);
 	artifact_screen_full(&i, j);
     }
+    if (MAEDHROS) {
+	prt("The Main Gauche of Maedhros", i++, j);
+	artifact_screen_full(&i, j);
+    }
     if (MORMEGIL) {
 	prt("The Two-Handed Sword 'Mormegil'", i++, j);
 	artifact_screen_full(&i, j);
@@ -1578,6 +1582,10 @@ artifact_check_no_file(void)
     }
     if (NIMTHANC) {
 	prt("The Dagger 'Nimthanc'", i++, j);
+	artifact_screen_full(&i, j);
+    }
+    if (OLORIN) {
+	prt("The Quarterstraff of Olorin", i++, j);
 	artifact_screen_full(&i, j);
     }
     if (ORCRIST) {
