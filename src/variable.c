@@ -58,7 +58,7 @@ int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
 int coin_type;			/* remember Creeping _xxx_ coin type -CWS */
 int opening_chest = 0;          /* don't generate another chest -CWS */
 
-struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */ 
+struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
 int rogue_like_commands;	/* set in config.h/main.c */
 
@@ -102,6 +102,10 @@ int panel_row_min,panel_row_max;
 int panel_col_min,panel_col_max;
 int panel_col_prt,panel_row_prt;
 
+/* player location in dungeon */
+int16 char_row;
+int16 char_col;
+
 #ifdef TARGET
 /* Targetting information, this code stolen from Morgul -CFT */
 int target_mode = FALSE;
@@ -121,3 +125,10 @@ recall_type *c_recall;
 #else
 recall_type c_recall[MAX_CREATURES];	/* Monster memories */
 #endif
+
+/* Player record for most player related info */
+player_type py;
+
+/* calculated base hp values for player at each level, store them so that
+   drain life + restore life does not affect hit points */
+int16u player_hp[MAX_PLAYER_LEVEL];
