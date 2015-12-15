@@ -1,15 +1,19 @@
-/* variable.c: Global variables */
+/* File: variable.c */
+
+/* Purpose: Global variables */
 
 #include "constant.h"
 #include "config.h"
 #include "types.h"
 
+/* Link a copyright message into the executable */
 const char *copyright[5] = {
-"Copyright (c) 1989 James E. Wilson, Robert A. Keoneke",
-"",
-"This software may be copied and distributed for educational, research, and",
-"not for profit purposes provided that this copyright and statement are",
-"included in all such copies."};
+    "Copyright (c) 1989 James E. Wilson, Robert A. Keoneke",
+    "",
+    "This software may be copied and distributed for educational, research,",
+    "and not for profit purposes provided that this copyright and statement",
+    "are included in all such copies."
+};
 
 /* a horrible hack: needed because compact_monster() can be called from
    creatures() via summon_monster() and place_monster() */
@@ -22,39 +26,57 @@ vtype died_from;
 
 vtype savefile;			/* The savefile to use. */
 
-int light_rad = 0, old_rad;				/* light radius spoo */
-int16 total_winner = FALSE;
+int light_rad = 0;		/* Current light radius (zero for none) */
+int old_rad;		/* Previous light radius (assume lite) */
+
+int16 total_winner = FALSE;	/* Semi-Hack -- Game has been won */
+
 int NO_SAVE=FALSE;
-int character_generated = 0;	/* don't save score until char gen finished */
-int character_saved = 0;	/* prevents save on kill after save_char() */
+
+int character_generated = 0;	/* A character has been generated */
+int character_saved = 0;	/* The character has been saved */
+
 int highscore_fd;		/* File descriptor to high score file */
-int LOAD=0;
-int32u randes_seed;		/* for restarting randes_state */
-int32u town_seed;		/* for restarting town_seed */
+
+int LOAD = 0;			/* Hack -- used for CHECK_LOAD */
+
+
+int32u randes_seed;		/* Hack -- consistent object colors */
+int32u town_seed;		/* Hack -- consistent town layout */
+
 char *old_state = NULL;         /* state array initialized by time -CWS */
 char *dummy_state = NULL;       /* dummy state array -CWS */
 
-int16 cur_height,cur_width;	/* Cur dungeon size    */
-int16 dun_level = 0;		/* Cur dungeon level   */
-int object_level = 0;		/* level for objects to be created -CWS  */
 int16 missile_ctr = 0;		/* Counter for missiles */
 int msg_flag;			/* Set with first msg  */
 vtype old_msg[MAX_SAVE_MSG];	/* Last message	      */
 int16 last_msg = 0;		/* Where last is held */
-int death = FALSE;		/* True if died	      */
-int find_flag;			/* Used in ANGBAND for .(dir) */
-int free_turn_flag;		/* Used in ANGBAND, do not move creatures  */
+
+int death = FALSE;		/* True if player has died */
+int free_turn_flag;		/* Command is "free", do not move creatures */
+int find_flag;			/* Number of turns spent running */
+
+int16 cur_height,cur_width;	/* Cur dungeon size    */
+int16 dun_level = 0;		/* Cur dungeon level   */
+int object_level = 0;		/* level for objects to be created -CWS  */
+
 int command_count;		/* Gives repetition of commands. -CJS- */
 int default_dir = FALSE;	/* Use last direction for repeated command */
+
 int32 turn = (-1);		/* Cur turn of game    */
 int32 old_turn = (-1);		/* Last feeling message */
+
 int wizard = FALSE;		/* Wizard flag	      */
 int to_be_wizard = FALSE;	/* used during startup, when -w option used */
+
 int16 panic_save = FALSE;	/* this is true if playing from a panic save */
 int16 noscore = FALSE;		/* Don't log the game. -CJS- */
+
 int is_home = FALSE;		/* Are we in our home? */
 int in_store_flag = FALSE;	/* Don't redisplay light in stores -DGK */
+
 int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
+
 int coin_type;			/* remember Creeping _xxx_ coin type -CWS */
 int opening_chest = 0;          /* don't generate another chest -CWS */
 
@@ -102,7 +124,7 @@ int panel_row_min,panel_row_max;
 int panel_col_min,panel_col_max;
 int panel_col_prt,panel_row_prt;
 
-/* player location in dungeon */
+/* Player location in dungeon */
 int16 char_row;
 int16 char_col;
 
@@ -129,6 +151,9 @@ recall_type c_recall[MAX_CREATURES];	/* Monster memories */
 /* Player record for most player related info */
 player_type py;
 
-/* calculated base hp values for player at each level, store them so that
-   drain life + restore life does not affect hit points */
+/* 
+ * Calculated base hp values for player at each level,
+ * store them so that drain life + restore life does not
+ * affect hit points.
+ */
 int16u player_hp[MAX_PLAYER_LEVEL];

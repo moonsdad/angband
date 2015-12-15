@@ -1,11 +1,13 @@
+/* File: main-cur.c */
+
+/* Purpose: Actual Unix Curses support for Angband */
+
 /*
- * unix.c: UNIX dependent code.					-CJS- 
- *
  * Copyright (c) 1989 James E. Wilson, Christopher J. Stuart 
  *
  * This software may be copied and distributed for educational, research, and
  * not for profit purposes provided that this copyright and statement are
- * included in all such copies. 
+ * included in all such copies.
  */
 
 #if defined(unix) || defined(__MINT__)
@@ -110,7 +112,8 @@ static
 #define ioctl	    Ioctl
 #endif
 
-/* Provides for a timeout on input. Does a non-blocking read, consuming the
+/*
+ * Provides for a timeout on input. Does a non-blocking read, consuming the
  * data if any, and then returns 1 if data was read, zero otherwise. 
  *
  * Porting: 
@@ -123,11 +126,9 @@ static
  * or you might hack a static accumulation of times to wait. When the
  * accumulation reaches a certain point, sleep for a second. There would need
  * to be a way of resetting the count, with a call made for commands like run
- * or rest. 
+ * or rest.
  */
-int 
-check_input(microsec)
-    int                 microsec;
+int check_input(int microsec)
 {
 #if defined(USG) && !defined(M_XENIX)
     int                 arg, result;
@@ -202,9 +203,7 @@ check_input(microsec)
  * careful with signals and interrupts, and does rudimentary job control, and
  * puts the terminal back in a standard mode. 
  */
-int 
-system_cmd(p)
-    char               *p;
+int system_cmd(char *p)
 {
     int                 pgrp, pid, i, mask;
     union wait          w;
@@ -212,9 +211,12 @@ system_cmd(p)
 
     mask = sigsetmask(~0);	   /* No interrupts. */
     restore_term();		   /* Terminal in original state. */
-/* Are we in the control terminal group? */
-    if (ioctl(0, TIOCGPGRP, (char *)&pgrp) < 0 || pgrp != getpgrp(0))
+
+    /* Are we in the control terminal group? */
+    if (ioctl(0, TIOCGPGRP, (char *)&pgrp) < 0 || pgrp != getpgrp(0)) {
 	pgrp = (-1);
+    }
+
     pid = fork();
     if (pid < 0) {
 	(void)sigsetmask(mask);
@@ -237,10 +239,15 @@ system_cmd(p)
 	    if (p)
 		execl(p, p, 0);
 	    execl("/bin/sh", "sh", 0);
-	} else
+	}
+	else {
 	    execl("/bin/sh", "sh", "-c", p, 0);
+	}
+
+	/* Hack (?) */
 	_exit(1);
     }
+
 /* Wait for child termination. */
     for (;;) {
 	i = wait3(&w, WUNTRACED, (struct rusage *) 0);
@@ -256,9 +263,12 @@ system_cmd(p)
 		break;
 	}
     }
-/* Get the control terminal back. */
-    if (pgrp >= 0)
+
+    /* Get the control terminal back. */
+    if (pgrp >= 0) {
 	(void)ioctl(0, TIOCSPGRP, (char *)&pgrp);
+    }
+
     (void)sigsetmask(mask);	   /* Interrupts on. */
     moriaterm();		   /* Terminal in moria mode. */
     return 0;
@@ -268,10 +278,7 @@ system_cmd(p)
 
 
 /* Find a default user name from the system. */
-void 
-user_name(buf, id)
-    char               *buf;
-    int id;
+void user_name(char *buf, int id)
 {
     struct passwd      *pwd;
 
@@ -282,10 +289,7 @@ user_name(buf, id)
 }
 
 /* expands a tilde at the beginning of a file name to a users home directory */
-int 
-tilde(file, exp)
-    const char   *file;
-    char         *exp;
+int tilde(const char *file, char *exp)
 {
     *exp = '\0';
     if (file) {
@@ -321,10 +325,7 @@ tilde(file, exp)
  * open a file just as does fopen, but allow a leading ~ to specify a home
  * directory 
  */
-FILE               *
-my_tfopen(file, mode)
-    const char               *file;
-    const char               *mode;
+FILE *my_tfopen(const char *ffile, const char *fmode)
 {
     char                buf[1024];
     extern int          errno;
@@ -339,10 +340,7 @@ my_tfopen(file, mode)
  * open a file just as does open, but expand a leading ~ into a home
  * directory name 
  */
-int 
-my_topen(file, flags, mode)
-    const char               *file;
-    int                 flags, mode;
+int my_topen(const char *file, int flags, int mode)
 {
     char                buf[1024];
     extern int          errno;

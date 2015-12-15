@@ -1,42 +1,59 @@
-/* config.h: configuration definitions
- *
- * Copyright (c) 1989 James E. Wilson
+/* File: config.h */
+
+/* Purpose: Angband specific configuration stuff */
+
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
  *
  * This software may be copied and distributed for educational, research, and
  * not for profit purposes provided that this copyright and statement are
  * included in all such copies.
  */
 
-/* Person to bother if something goes wrong.
- * Recompile files.c and misc2.c if these change.
+/*
+ * OPTION: Person to bother if something goes wrong.
  */
-
 #define WIZARD	"root"
 
-/* There's a bug that results in invisible monsters for some reason.  I have a
- * workaround that may fix this, but it is a HACK and may result in other
- * problems, as I have not tested it enough.  Comment out the
- * "#define GROSS_HACK" to disable this.  (this is in creature.c at line 73)
- ******
- * This should no longer be needed for Angband 2.6, but it doesn't hurt to
- * leave it in. -CWS
- */
 
-#define GROSS_HACK
-
-
-/* Other miscellaneous defines that can be configured as the local maintainer
+/*
+ * Other miscellaneous defines that can be configured as the local maintainer
  * wishes.
  */
 
 #define SET_UID		         /* define on multi-user systems                 */
 #undef CHECKHOURS            /* define if checking the 'hours' file          */
-#define ALLOW_FIDDLING       /* Allow the players to copy save files         */
+
+/*
+ * OPTION: Allow the player to copy save files.  Turning this off
+ * may or may not stop players from doing it, though.  In fact, this
+ * option is not even referenced on SET_UID machines.
+ */
+#define ALLOW_FIDDLING
+
 #define ALLOW_SCORE          /* Allow the user to check his score (v-key)    */
-#define ALLOW_ARTIFACT_CHECK /* Allow the user to check artifacts            */
-#define ALLOW_CHECK_UNIQUES  /* Allow player to check (dead) unique monsters */
-#define TARGET               /* Enable targeting mode                        */
-#define AUTOROLLER           /* Allow autorolling of characters              */
+
+/*
+ * OPTION: Allow checking of artifacts (in town)
+ */
+#define ALLOW_ARTIFACT_CHECK
+ 
+/*
+ * OPTION: Allow checking of dead uniques
+ */
+#define ALLOW_CHECK_UNIQUES
+
+/*
+ * OPTION: Allow characteres to be "auto-rolled"
+ */
+#define AUTOROLLER
+
+/*
+ * OPTION: Allow locations and monsters to be "targetted"
+ */
+#define TARGET
+
+
 #undef NICE		             /* Be nice to other users during autorolling    */
 #define SATISFY_HUNGER		 /* Do 'satisfy hunger' rather then 'create food'
 								to reduce the tedium for handling food. -CWS */
@@ -106,12 +123,13 @@
 #define ROGUE_LIKE TRUE
 
 
-/* for the AFS distributed file system, define this to ensure that
-   the program is secure with respect to the setuid code, this prohibits
-   inferior shells, also does not relinquish setuid priviledges at the start,
-   but instead calls the AFS library routines bePlayer(), beGames(),
-   and Authenticate() */
-
+/*
+ * OPTION: for the AFS distributed file system, define this to ensure that
+ * the program is secure with respect to the setuid code, this prohibits
+ * inferior shells, also does not relinquish setuid priviledges at the start,
+ * but instead calls the AFS library routines bePlayer(), beGames(),
+ * and Authenticate().
+ */
 /* #define SECURE */
 
 
@@ -357,4 +375,4 @@ extern int PlayerUID;
 
 #define MY_ABS(x) (((x)<0) ? (-x) : (x))
 
-/*****************************************************************************/
+

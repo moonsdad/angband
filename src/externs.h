@@ -1,10 +1,14 @@
-/* externs.h: declarations for global variables and initialized data
+/* File: externs.h */
 
-   Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+/* Purpose: macros, and extern's for functions and global variables */
 
-   This software may be copied and distributed for educational, research, and
-   not for profit purposes provided that this copyright and statement are
-   included in all such copies. */
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+ *
+ * This software may be copied and distributed for educational, research, and
+ * not for profit purposes provided that this copyright and statement are
+ * included in all such copies. 
+ */
 
 #define get_Yn get_check
 
@@ -26,9 +30,15 @@ extern char *sprintf();
 extern int errno;
 #endif
 
+/*****************************************************************************/
+
+
+/*
+ * Variable access to the version
+ */
 extern char *copyright[5];
 
-extern int player_uid;
+extern int player_uid;			/* The player's uid, or zero */
 extern int NO_SAVE;
 
 /* horrible hack: needed because compact_monster() can be called from deep
@@ -39,7 +49,12 @@ extern int16 log_index;			/* Index to log file. -CJS- */
 extern vtype died_from;
 extern vtype savefile;			/* The save file. -CJS- */
 
-/* These are options, set with set_options command -CJS- */
+/*
+ * These are options, set with set_options command -CJS-
+ */
+
+
+
 extern int rogue_like_commands;
 extern int find_cut;			/* Cut corners on a run */
 extern int find_examine;		/* Check corners on a run */
@@ -87,58 +102,70 @@ extern struct unique_mon u_list[MAX_CREATURES];
 
 extern int quests[MAX_QUESTS];
 
-/* global flags */
-extern int unfelt;
+/*
+ * global flags
+ */
+
+extern int LOAD;
+
 extern int in_store_flag;		/* flag so equippy chars work right -DGK */
 extern int good_item_flag;		/* True if an artifact has been created... */
-extern int LOAD;
+extern int unfelt;
 extern int new_level_flag;		/* Next level when true  */
 extern int teleport_flag;		/* Handle teleport traps  */
 extern int eof_flag;			/* Used to handle eof/HANGUP */
 extern int player_light;		/* Player carrying light */
-extern int light_rad,old_rad;           /* Light radius */
-extern int find_flag;        	/* Used in MORIA	      */
-extern int free_turn_flag;		/* Used in MORIA	      */
+extern int light_rad, old_rad;           /* Light radius */
+extern int find_flag;			/* Are we running */
+extern int free_turn_flag;		/* Is this turn free */
+
 extern int weapon_heavy;		/* Flag if the weapon too heavy -CJS- */
 extern int pack_heavy;			/* Flag if the pack too heavy -CJS- */
+
 extern char doing_inven;		/* Track inventory commands */
-extern int screen_change;		/* Screen changes (used in inven_commands) */
+extern int screen_change;		/* Notice disturbing of inventory */
+
 extern int be_nasty;
 extern int monster_is_afraid;	/* redo monster fear messages -CWS */
 
-extern int character_generated;	/* don't save score until char gen finished */
+extern int character_generated;	/* Character generation complete */
 extern int character_saved;		/* prevents save on kill after save_char() */
+
 extern int feeling;				/* level feeling */
 extern int highscore_fd;		/* High score file descriptor */
 extern int command_count;		/* Repetition of commands. -CJS- */
 extern int default_dir;			/* Use last direction in repeated commands */
+
 extern int16 noscore;			/* Don't score this game. -CJS- */
+
 extern int32u randes_seed;		/* For encoding colors */
 extern int32u town_seed;		/* Seed for town generation */
-extern char *old_state;			/* state array initialized by time -CWS */
-extern char *dummy_state;		/* dummy state array so that town/colors look
-                                 * the same -CWS */
 
-extern int16 dun_level;         /* Cur dungeon level   */
+extern char *old_state;			/* state array initialized by time -CWS */
+extern char *dummy_state;		/* dummy state array so that town/colors look  the same -CWS */
+
+extern int16 dun_level;			/* Cur dungeon level   */
 extern int16 object_level;		/* used to generate objects -CWS */
 extern int16 missile_ctr;		/* Counter for missiles */
 extern int msg_flag;			/* Set with first msg  */
 extern vtype old_msg[MAX_SAVE_MSG];	/* Last messages -CJS- */
 extern int16 last_msg;			/* Where in the array is the last */
-extern int death;				/* True if died	      */
-extern int32 turn;				/* Cur turn of game    */
-extern int32 old_turn;			/* last turn feeling was felt */
-extern int wizard;				/* Wizard flag	      */
+extern int death;			/* True if died	      */
+extern int32 turn;			/* Current game turn */
+extern int32 old_turn;			/* Last turn feeling was felt */
+extern int wizard;			/* Is the player currently a Wizard? */
 extern int to_be_wizard;
-extern int16 panic_save;		/* this is true if playing from a panic save */
+extern int16 panic_save;		/* true if playing from a panic save */
 
 extern int wait_for_more;
 
 extern char days[7][29];
 extern int closing_flag;		/* Used for closing   */
 
-extern int16 cur_height, cur_width;	/* Cur dungeon size    */
-/*  Following are calculated from max dungeon sizes		*/
+/*
+ * Dungeon info
+ */
+extern int16 cur_height, cur_width;
 extern int16 max_panel_rows, max_panel_cols;
 extern int panel_row, panel_col;
 extern int panel_row_min, panel_row_max;
@@ -160,8 +187,9 @@ extern cave_type (*cave)[MAX_WIDTH];
 extern cave_type cave[MAX_HEIGHT][MAX_WIDTH];
 #endif
 
-/* Following are player variables				*/
+/* A pointer to the main player record */
 extern player_type py;
+
 #ifdef MACGAME
 extern char *(*player_title)[MAX_PLAYER_LEVEL];
 extern race_type *race;
@@ -171,8 +199,10 @@ extern char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL];
 extern race_type race[MAX_RACES];
 extern background_type background[MAX_BACKGROUND];
 #endif
+
 extern int32u player_exp[MAX_PLAYER_LEVEL];
 extern int16u player_hp[MAX_PLAYER_LEVEL];
+
 extern int16 char_row;
 extern int16 char_col;
 
@@ -184,6 +214,8 @@ extern int8u rgold_adj[MAX_RACES][MAX_RACES];
 
 extern class_type class[MAX_CLASS];
 extern int16 class_level_adj[MAX_CLASS][MAX_LEV_ADJ];
+
+/*** Spell Information ***/
 
 /* Warriors don't have spells, so there is no entry for them. */
 #ifdef MACGAME
@@ -199,10 +231,13 @@ extern int32u spell_worked2;	/* Bit field for spells tried -CJS- */
 extern int32u spell_forgotten;	/* Bit field for spells forgotten -JEW- */
 extern int32u spell_forgotten2;	/* Bit field for spells forgotten -JEW- */
 extern int8u spell_order[64];	/* remember order that spells are learned in */
-extern int32u spellmasks[MAX_CLASS][2];
+extern int32u spellmasks[MAX_CLASS][2];	/* what spells can classes learn */
+
 /* used to check if player knows all spells knowable to him -CFT */
 extern int16u player_init[MAX_CLASS][5];
 extern int16 total_winner;
+
+/*** Store information ***/
 
 /* Following are store definitions				*/
 #ifdef MACGAME
@@ -219,6 +254,9 @@ extern int16u store_choice[MAX_STORES][STORE_CHOICES];
 #ifndef MAC
 extern int (*store_buy[MAX_STORES])();
 #endif
+
+
+/*** Miscellaneous Information ***/
 
 /* Following are treasure arrays	and variables			*/
 #ifdef MACGAME

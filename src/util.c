@@ -1,6 +1,8 @@
+/* File: util.c */
+
+/* Purpose: miscellanous utilities */
+
 /*
- * util.c: miscellanous utilities 
- *
  * Copyright (c) 1989 James E. Wilson 
  *
  * This software may be copied and distributed for educational, research, and
@@ -16,10 +18,7 @@
 /* For those systems that don't have stricmp. -hmj */
 
 #if defined(NEEDS_STRICMP)
-int
-my_stricmp(c1,c2)		/* avoid namespace collision -CWS */
-const char *c1;
-const char *c2;
+int my_stricmp(const char *c1,const char *c2)		/* avoid namespace collision -CWS */
 {
     char c3;
     char c4;
@@ -47,9 +46,7 @@ const char *c2;
 /* for those systems that don't have usleep */
 /* grabbed from the inl netrek server -cba  */
 
-int
-microsleep(microSeconds)
-unsigned long microSeconds;
+int microsleep(unsigned long microSeconds)
 {
     unsigned int        Seconds, uSec;
     int                 nfds, readfds, writefds, exceptfds;

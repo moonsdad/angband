@@ -1,52 +1,14 @@
-/* UNIX ANGBAND Version 5.0
-   main.c: initialization, main() function and main loop
+/* File: main.c */ 
 
-   Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+/* Purpose: initialization, main() function and main loop */
 
-   This software may be copied and distributed for educational, research, and
-   not for profit purposes provided that this copyright and statement are
-   included in all such copies. */
-
-
-/* Original copyright message follows. */
-
-/* ANGBAND Version 4.8	COPYRIGHT (c) Robert Alan Koeneke		*/
-/*									 */
-/*	 I lovingly dedicate this game to hackers and adventurers	 */
-/*	 everywhere...							 */
-/*									 */
-/*									 */
-/*	 Designer and Programmer : Robert Alan Koeneke			 */
-/*				   University of Oklahoma		 */
-/*									 */
-/*	 Assistant Programmers	 : Jimmey Wayne Todd			 */
-/*				   University of Oklahoma		 */
-/*									 */
-/*				   Gary D. McAdoo			 */
-/*				   University of Oklahoma		 */
-/*									 */
-/*	 UNIX Port		 : James E. Wilson			 */
-/*				   UC Berkeley				 */
-/*				   wilson@ernie.Berkeley.EDU		 */
-/*				   ucbvax!ucbernie!wilson		 */
-/*									 */
-/*	 MSDOS Port		 : Don Kneller				 */
-/*				   1349 - 10th ave			 */
-/*				   San Francisco, CA 94122		 */
-/*				   kneller@cgl.ucsf.EDU			 */
-/*				   ...ucbvax!ucsfcgl!kneller		 */
-/*				   kneller@ucsf-cgl.BITNET		 */
-/*									 */
-/*	 BRUCE ANGBAND		 : Christopher Stuart			 */
-/*				   Monash University			 */
-/*				   Melbourne, Victoria, AUSTRALIA	 */
-/*				   cjs@moncsbruce.oz			 */
-/*									 */
-/*	 ANGBAND may be copied and modified freely as long as the above	 */
-/*	 credits are retained.	No one who-so-ever may sell or market	 */
-/*	 this software in any form without the expressed written consent */
-/*	 of the author Robert Alan Koeneke.				 */
-/*									 */
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+ *
+ * This software may be copied and distributed for educational, research, and
+ * not for profit purposes provided that this copyright and statement are
+ * included in all such copies.
+ */
 
 #include <stdio.h>
 
@@ -132,10 +94,7 @@ GONDOR, THINGOL, THORONGIL, LUTHIEN, TUOR, ROHAN, TULKAS, NECKLACE, BARAHIR,
 CASPANION, RAZORBACK, BLADETURNER;
 
 /* Initialize, restore, and get the ball rolling.	-RAK-	*/
-int
-main(argc, argv)
-int argc;
-char *argv[];
+int main(int argc, char * argv[])
 {
     int generate, i;
     int result=FALSE, FIDDLE=FALSE;
@@ -604,8 +563,7 @@ char *argv[];
 
 
 /* Init players with some belongings			-RAK-	*/
-static void
-char_inven_init()
+static void char_inven_init()
 {
     register int i, j;
     inven_type inven_init;
@@ -632,8 +590,7 @@ char_inven_init()
 
 
 /* Initializes M_LEVEL array for use with PLACE_MONSTER	-RAK-	*/
-static void
-init_m_level()
+static void init_m_level()
 {
     register int i, k;
 
@@ -650,8 +607,7 @@ init_m_level()
 
 
 /* Initializes T_LEVEL array for use with PLACE_OBJECT	-RAK-	*/
-static void
-init_t_level()
+static void init_t_level()
 {
     register int i, l;
     int tmp[MAX_OBJ_LEVEL+1];
@@ -679,8 +635,7 @@ init_t_level()
 
 #if (COST_ADJ != 100)
 /* Adjust prices of objects				-RAK-	*/
-static void
-price_adjust()
+static void price_adjust()
 {
     register int i;
 
@@ -701,3 +656,5 @@ char *a;
 	} else a++;
     return (0);
 }
+
+

@@ -1,6 +1,8 @@
+/* File: arrays.c */ 
+
+/* Purpose: initialize various arrays */
+
 /*
- * files.c: misc code to access files used by Moria 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -89,6 +91,12 @@ char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
 char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
 char *ANGBAND_SAV;		/* was LIBDIR(save)			*/
 
+/*
+ * Find the path to all of our important files and directories...
+ * Use the ANGBAND_PATH environment var if possible, else use DEFAULT_PATH,
+ *
+ *  If your system can't do "getenv()", you'll have to kludge this.  [cjh]
+ */
 void get_file_paths()
 {
 #ifndef MAXPATHLEN
@@ -96,22 +104,13 @@ void get_file_paths()
 #define MAXPATHLEN 512
 #endif
 
-    char *angband_path;
+    /* Grab the base "path" */
+    char *angband_path = NULL;
 
-/* Find the path to our files...  if the ANGBAND_PATH environment var
- * isn't set, use DEFAULT_PATH to look for the files.  If your system
- * can't do environment variables, you'll have to kludge this.  [cjh]
- */
 
     angband_path = getenv( "ANGBAND_PATH" );
     if (angband_path == NULL) {
 
-#if 0 /* I don't think this is appropriate, particularly since this may
-       * well be set by a system-wide games administrator.  -CWS */
-
-       fprintf(stderr, "Warning: ANGBAND_PATH not set!\n" );
-       fprintf(stderr, "Warning: Using %s for ANGBAND_PATH.\n", DEFAULT_PATH );
-#endif
 	angband_path = (char *)malloc( strlen( DEFAULT_PATH ) + 1 );
 	strcpy( angband_path, DEFAULT_PATH );
     }

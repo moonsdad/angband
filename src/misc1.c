@@ -1,6 +1,8 @@
+/* File: misc1.c */
+
+/* Purpose: misc utility and initialization code */
+
 /*
- * Misc1.c: misc utility and initialization code, magic objects code 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -61,6 +63,7 @@ typedef struct statstime {
     long                avenrun[3];
     struct timeval      boottime;
     struct timeval      curtime;
+
 } statstime;
 
 
@@ -82,21 +85,24 @@ extern int peek;
 extern int rating;
 
 
-/* gets a new random seed for the random number generator */
-void
-init_seeds()
+/* 
+ * Gets a new random seed for the random number generator 
+ * Hack -- saves seeds for the town layout and object colors
+ */
+void init_seeds(void)
 {
+    /* Allocate some RNG arrays */
     old_state = (char *) malloc(256); /* excellent R.N.G. */
-    dummy_state = (char *) malloc(8); /* so-so R.N.G., but who cares? -CFT */
-    
+    dummy_state = (char *) malloc(8); /* simple R.N.G. */
+
     /* if malloc choked on 264 bytes, we're dead anyways */
     if (!old_state || !dummy_state) {
 	puts("\nError initializing; unable to malloc space for RNG arrays...\n");
 	exit(2);
     }
     
-    /* is 'unix' a std define for unix system?  I thought UNIX is more common?
-       This may need to be changed.  It's fine for PCs, anyways... -CFT */
+    /* is 'unix' a std define for unix system?  I thought UNIX is more common? */
+    /* This may need to be changed.  It's fine for PCs, anyways... -CFT */
 #ifdef unix
     /* Grab a random seed from the clock & PID... */
     (void) initstate(time(NULL), dummy_state, 8);
@@ -104,25 +110,30 @@ init_seeds()
 #else
     /* ...else just grab a random seed from the clock. -CWS */
     (void) initstate(time(NULL), dummy_state, 8);
-    (void) initstate(random(), old_state, 256);
+    (void)initstate(random(), old_state, 256);
 #endif /* unix */
+
+    /* Hack -- Extract seeds for the town layout and object colors */
     town_seed = random();
     randes_seed = random();
 }
 
-/* change to different random number generator state */
-void 
-set_seed(seed)
-int32u seed;
+
+/*
+ * change to different random number generator state
+ * Hack -- used to keep consistent object colors and town layout
+ */
+void set_seed(int32u seed)
 {
     setstate(dummy_state);
-    srandom((seed % 2147483646L) + 1);	/* necessary to keep the town/desc's */
-}                                       /* the same (legacy from rnd.c) -CWS */
+    srandom((seed % 2147483646L) + 1);
+}
 
 
-/* restore the normal random generator state */
-void 
-reset_seed()
+/*
+ * restore the normal random generator state
+ */
+void reset_seed(void)
 {
     (void)setstate(old_state);
 }
@@ -132,13 +143,15 @@ reset_seed()
 #define time_t long
 #endif
 
-/* Check the day-time strings to see if open		-RAK-	 */
-int 
-check_time()
+/*
+ * Check the day-time strings to see if open		-RAK-	
+ */
+int check_time(void)
 {
 #ifdef CHECKHOURS
     time_t              c;
     register struct tm *tp;
+
 #ifndef __MINT__
     struct statstime    st;
 #endif
@@ -148,16 +161,22 @@ check_time()
     if (days[tp->tm_wday][tp->tm_hour + 4] != 'X') {
 	return FALSE;
     }
-#if !(defined(__MINT__) || defined(NCR3K) || defined(linux) \
-|| defined(__386BSD__) || defined (__osf__))
- else {
+
+#if !(defined(__MINT__) || defined(NCR3K) || defined(linux) || \
+      defined(__386BSD__) || defined (__osf__))
+
+    else {
 	if (!rstat("localhost", &st)) {
-	    if (((int)((double)st.avenrun[2] / (double)FSCALE)) >= (int)LOAD)
+	    if (((int)((double)st.avenrun[2] / (double)FSCALE)) >= (int)LOAD) {
 		return FALSE;
+	    }
 	}
     }
+
 #endif /* MINT, etc */
+
 #endif /* CHECKHOURS - [cjh] */
+
     return TRUE;
 }
 
@@ -177,84 +196,94 @@ int maxval;
 
 #endif
 
-/* Generates a random integer number of NORMAL distribution -RAK- */
-int 
-randnor(mean, stand)
-int mean, stand;
+/*
+ * Generates a random integer number of NORMAL distribution -RAK- 
+ */
+int randnor(int mean, int stand)
 {
     register int tmp, offset, low, iindex, high;
 
     tmp = randint(MAX_SHORT);
 
-/* off scale, assign random value between 4 and 5 times SD */
+    /* off scale, assign random value between 4 and 5 times SD */
     if (tmp == MAX_SHORT) {
+
 	offset = 4 * stand + randint(stand);
 
-    /* one half are negative */
-	if (randint(2) == 1)
-	    offset = (-offset);
+	/* one half are negative */
+	if (randint(2) == 1) offset = (-offset);
 
 	return (mean + offset);
     }
-/* binary search normal normal_table to get index that matches tmp */
-/* this takes up to 8 iterations */
+
+
+    /* binary search normal normal_table to get index that matches tmp */
     low = 0;
     iindex = NORMAL_TABLE_SIZE >> 1;
     high = NORMAL_TABLE_SIZE;
+
+    /* this takes up to 8 iterations */
     while (TRUE) {
-	if ((normal_table[iindex] == tmp) || (high == (low + 1)))
+
+	if ((normal_table[iindex] == tmp) || (high == (low + 1))) {
 	    break;
+	}
+
 	if (normal_table[iindex] > tmp) {
 	    high = iindex;
 	    iindex = low + ((iindex - low) >> 1);
-	} else {
+	}
+	else {
 	    low = iindex;
 	    iindex = iindex + ((high - iindex) >> 1);
 	}
     }
 
-/* might end up one below target, check that here */
-    if (normal_table[iindex] < tmp)
-	iindex = iindex + 1;
+    /* might end up one below target, check that here */
+    if (normal_table[iindex] < tmp) iindex = iindex + 1;
 
-/* normal_table is based on SD of 64, so adjust the index value here, round
- * the half way case up 
- */
+    /* normal_table is based on SD of 64, so adjust the index value here, */
+    /* round the half way case up */
     offset = ((stand * iindex) + (NORMAL_TABLE_SD >> 1)) / NORMAL_TABLE_SD;
 
-/* one half should be negative */
-    if (randint(2) == 1)
-	offset = (-offset);
+
+    /* one half should be negative */
+    if (randint(2) == 1) offset = (-offset);
 
     return (mean + offset);
 }
 
 
-/* Returns position of first set bit			-RAK-	 */
-/* and clears that bit */
-int 
-bit_pos(test)
-int32u *test;
+/*
+ * Returns position of first set bit (and clears that bit) 
+ */
+int bit_pos(int32u *test)
 {
     register int    i;
     register int32u mask = 0x1L;
-
+    
+    /* Scan the input */
     for (i = 0; i < sizeof(*test) * 8; i++) {
+
+	/* Test and clear */
 	if (*test & mask) {
 	    *test &= ~mask;
 	    return (i);
 	}
+
+	/* Next! */
 	mask <<= 0x1L;
     }
 
-/* no one bits found */
+    /* no one bits found */
     return (-1);
 }
 
 
-/* Calculates current boundaries				-RAK-	 */
-void 
-panel_bounds()
+/*
+ * Calculates current boundaries
+ */
+void panel_bounds()
 {
     panel_row_min = panel_row * (SCREEN_HEIGHT / 2);
     panel_row_max = panel_row_min + SCREEN_HEIGHT - 1;
@@ -265,39 +294,38 @@ panel_bounds()
 }
 
 
-/* Given an row (y) and col (x), this routine detects  -RAK-	 */
 /*
- * when a move off the screen has occurred and figures new borders. Force
- * forcses the panel bounds to be recalculated, useful for 'W'here. 
+ * Given an row (y) and col (x), this routine detects when a move
+ * off the screen has occurred and figures new borders. -RAK-
+ *
+ * Force forcses the panel bounds to be recalculated, useful for 'W'here. 
  */
-int 
-get_panel(y, x, force)
-int y, x, force;
+int get_panel(int y, int x, int update)
 {
     register int prow, pcol;
     register int panel;
 
     prow = panel_row;
     pcol = panel_col;
+
     if (force || (y < panel_row_min + 2) || (y > panel_row_max - 2)) {
 	prow = ((y - SCREEN_HEIGHT / 4) / (SCREEN_HEIGHT / 2));
-	if (prow > max_panel_rows)
-	    prow = max_panel_rows;
-	else if (prow < 0)
-	    prow = 0;
+	if (prow > max_panel_rows) prow = max_panel_rows;
+	else if (prow < 0) prow = 0;
     }
+
     if (force || (x < panel_col_min + 3) || (x > panel_col_max - 3)) {
 	pcol = ((x - SCREEN_WIDTH / 4) / (SCREEN_WIDTH / 2));
-	if (pcol > max_panel_cols)
-	    pcol = max_panel_cols;
-	else if (pcol < 0)
-	    pcol = 0;
+	if (pcol > max_panel_cols) pcol = max_panel_cols;
+	else if (pcol < 0) pcol = 0;
     }
+
     if ((prow != panel_row) || (pcol != panel_col)) {
 	panel_row = prow;
 	panel_col = pcol;
 	panel_bounds();
 	panel = TRUE;
+
     /* stop movement if any */
 	if (find_bound)
 	    end_find();
@@ -307,19 +335,17 @@ int y, x, force;
 }
 
 
-/* Distance between two points				-RAK-	 */
-int 
-distance(y1, x1, y2, x2)
-int y1, x1, y2, x2;
+/* 
+ * Distance between two points				-RAK-
+ */
+int distance(int y1, int x1, int y2, int x2)
 {
     register int dy, dx;
 
     dy = y1 - y2;
-    if (dy < 0)
-	dy = (-dy);
+    if (dy < 0) dy = (-dy);
     dx = x1 - x2;
-    if (dx < 0)
-	dx = (-dx);
+    if (dx < 0) dx = (-dx);
 
     return ((((dy + dx) << 1) - (dy > dx ? dx : dy)) >> 1);
 }
@@ -330,9 +356,7 @@ int y1, x1, y2, x2;
  * note that y,x is always in_bounds(), i.e. 0 < y < cur_height-1, and 0 < x
  * < cur_width-1	 
  */
-int 
-next_to_walls(y, x)
-register int y, x;
+int next_to_walls(int y, int x)
 {
     register int        i;
     register cave_type *c_ptr;
@@ -360,9 +384,7 @@ register int y, x;
  * note that y, x is always in_bounds(), hence no need to check that j, k are
  * in_bounds(), even if they are 0 or cur_x-1 is still works 
  */
-int 
-next_to_corr(y, x)
-register int y, x;
+int next_to_corr(int y, int x)
 {
     register int        k, j, i;
     register cave_type *c_ptr;
@@ -380,21 +402,22 @@ register int y, x;
 }
 
 
-/* generates damage for 2d6 style dice rolls */
-int 
-damroll(num, sides)
-int num, sides;
+
+/*
+ * Generates damage for "2d6" style dice rolls
+ */
+int damroll(int num, int sides)
 {
     register int i, sum = 0;
-
-    for (i = 0; i < num; i++)
-	sum += randint(sides);
+    for (i = 0; i < num; i++) sum += randint(sides);
     return (sum);
 }
 
-int 
-pdamroll(array)
-int8u *array;
+
+/* 
+ * Old "array" format
+ */
+int pdamroll(int8u *array)
 {
     return damroll((int)array[0], (int)array[1]);
 }
@@ -420,9 +443,7 @@ int8u *array;
  * occur if deltaX and deltaY exceed 90. 
  */
 
-int 
-los(fromY, fromX, toY, toX)
-int fromY, fromX, toY, toX;
+int los(int fromY, int fromX, int toY, int toX)
 {
     register int tmp, deltaX, deltaY;
 
@@ -588,9 +609,7 @@ int fromY, fromX, toY, toX;
 
 
 /* Returns symbol for given row, column			-RAK-	 */
-unsigned char 
-loc_symbol(y, x)
-int y, x;
+unsigned char loc_symbol(int y, int x)
 {
     register cave_type    *cave_ptr;
     register struct flags *f_ptr;
@@ -631,9 +650,7 @@ int y, x;
 
 
 /* Tests a spot for light or field mark status		-RAK-	 */
-int 
-test_light(y, x)
-int y, x;
+int test_light(int y, int x)
 {
     register cave_type *cave_ptr;
 
@@ -646,8 +663,7 @@ int y, x;
 
 
 /* Prints the map of the dungeon			-RAK-	 */
-void 
-prt_map()
+void prt_map()
 {
     register int           i, j, k;
     register unsigned char tmp_char;
@@ -671,8 +687,7 @@ prt_map()
  * Return TRUE if any monsters were deleted, FALSE if could not delete any
  * monsters. 
  */
-int 
-compact_monsters()
+int compact_monsters()
 {
     register int           i;
     int                    cur_dis, delete_any;
@@ -718,44 +733,45 @@ compact_monsters()
 }
 
 
-/* Add to the players food time				-RAK-	 */
-void 
-add_food(num)
-int num;
+/*
+ * Add to the players food time				-RAK-	
+ */
+void add_food(int num)
 {
     register struct flags *p_ptr;
     register int           extra, penalty;
 
     p_ptr = &py.flags;
-    if (p_ptr->food < 0)
-	p_ptr->food = 0;
+    if (p_ptr->food < 0) p_ptr->food = 0;
     p_ptr->food += num;
-    if (num > 0 && p_ptr->food <= 0)
-	p_ptr->food = 32000;	   /* overflow check */
+    /* overflow check */
+    if (num > 0 && p_ptr->food <= 0) p_ptr->food = 32000;
+
     if (p_ptr->food > PLAYER_FOOD_MAX) {
+
 	msg_print("You are bloated from overeating. ");
 
-    /* Calculate how much of num is responsible for the bloating. Give the
+    /*
+     * Calculate how much of num is responsible for the bloating. Give the
      * player food credit for 1/50, and slow him for that many turns also.  
      */
 	extra = p_ptr->food - PLAYER_FOOD_MAX;
-	if (extra > num)
-	    extra = num;
+	if (extra > num) extra = num;
 	penalty = extra / 50;
 
 	p_ptr->slow += penalty;
-	if (extra == num)
-	    p_ptr->food = p_ptr->food - num + penalty;
-	else
-	    p_ptr->food = PLAYER_FOOD_MAX + penalty;
-    } else if (p_ptr->food > PLAYER_FOOD_FULL)
+	if (extra == num) p_ptr->food = p_ptr->food - num + penalty;
+	else p_ptr->food = PLAYER_FOOD_MAX + penalty;
+    }
+
+    else if (p_ptr->food > PLAYER_FOOD_FULL) {
 	msg_print("You are full. ");
+    }
 }
 
 
 /* Returns a pointer to next free space			-RAK-	 */
-int 
-popm()
+int popm()
 {
     if (mfptr == MAX_MALLOC)
 	if (!compact_monsters())
@@ -765,19 +781,14 @@ popm()
 
 
 /* Gives Max hit points					-RAK-	 */
-int 
-max_hp(array)
-int8u *array;
+int max_hp(int8u *array)
 {
     return ((int)(array[0]) * (int)(array[1]));
 }
 
 
 /* Places a monster at given location			-RAK-	 */
-int 
-place_monster(y, x, z, slp)
-register int y, x, z;
-int          slp;
+int place_monster(int y, int x, int z, int slp)
 {
     register int           cur_pos, j, ny,nx,count;
     register monster_type *mon_ptr;
@@ -896,8 +907,7 @@ int          slp;
 }
 
 /* Places a monster at given location			-RAK-	 */
-int 
-place_win_monster()
+int place_win_monster()
 {
     register int           y, x, cur_pos;
     register monster_type *mon_ptr;
@@ -936,9 +946,7 @@ place_win_monster()
 }
 
 
-static char *
-cap(str)
-char *str;
+static char *cap(char *str)
 {
     if ((*str >= 'a') && (*str <= 'z'))
 	*str = *str - 'a' + 'A';
@@ -946,11 +954,7 @@ char *str;
 }
 
 
-void 
-set_ghost(g, name, r, c, l)
-creature_type      *g;
-char               *name;
-int                 r, c, l;
+void set_ghost(creature_type *g, char *name, int r, int c, int l)
 {
     char ghost_race[20];
     char ghost_class[20];
@@ -1381,8 +1385,7 @@ int                 r, c, l;
 
 
 /* Places a monster at given location			-RAK-	 */
-int 
-place_ghost()
+int place_ghost()
 {
     register int           y, x, cur_pos;
     register monster_type *mon_ptr;
@@ -1480,9 +1483,7 @@ place_ghost()
  * level monsters (up to the given level) slightly more common than low level
  * monsters at any given level.   -CJS- 
  */
-int 
-get_mons_num(level)
-int level;
+int get_mons_num(int level)
 {
     register int i, j, num;
     int          old = level;
@@ -1529,9 +1530,7 @@ again:
     return i;
 }
 
-int 
-get_nmons_num(level)
-int level;
+int get_nmons_num(int level)
 {
     register int i, j, num;
     int          old;
@@ -1569,9 +1568,7 @@ again:
 }
 
 /* Ludwig's Brainstorm */
-static int 
-test_place(y, x)
-int y, x;
+static int test_place(int y, int x)
 {
     if (!in_bounds(y, x) ||
 	(cave[y][x].fval >= MIN_CLOSED_SPACE) ||
@@ -1582,9 +1579,7 @@ int y, x;
     return (1);
 }
 
-void 
-place_group(y, x, mon, slp)
-int y, x, mon, slp;
+void place_group(int y, int x, int mon, int slp)
 {
 /* prevent level rating from skyrocketing if they are out of depth... */
     int old = rating;
@@ -1657,9 +1652,7 @@ int y, x, mon, slp;
 
 
 /* Allocates a random monster				-RAK-	 */
-void 
-alloc_monster(num, dis, slp)
-int num, dis, slp;
+void alloc_monster(int num, int dis, int slp)
 {
     register int y, x, i;
     int          mon;
@@ -1706,10 +1699,7 @@ int num, dis, slp;
 
 
 /* Places creature adjacent to given location		-RAK-	 */
-int 
-summon_monster(y, x, slp)
-int *y, *x;
-int  slp;
+int summon_monster(int *y, int *x, int slp)
 {
     register int        i, j, k;
     int                 l, summon;
@@ -1742,9 +1732,7 @@ int  slp;
 
 
 /* Places undead adjacent to given location		-RAK-	 */
-int 
-summon_undead(y, x)
-int *y, *x;
+int summon_undead(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -1789,10 +1777,7 @@ int *y, *x;
 }
 
 /* As for summon undead */
-int 
-summon_demon(lev, y, x)
-int lev;
-int *y, *x;
+int summon_demon(int lev, int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -1837,9 +1822,7 @@ int *y, *x;
 }
 
 /* As for summon demon:-) ~Ludwig */
-int 
-summon_dragon(y, x)
-int *y, *x;
+int summon_dragon(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -1886,9 +1869,7 @@ int *y, *x;
 }
 
 /* Summon ringwraiths */
-int 
-summon_wraith(y, x)
-int *y, *x;
+int summon_wraith(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -1935,9 +1916,7 @@ int *y, *x;
 }
 
 /* Summon reptiles */
-int 
-summon_reptile(y, x)
-int *y, *x;
+int summon_reptile(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -1985,9 +1964,7 @@ int *y, *x;
 
 
 /* As for summon dragon, but keys on character ~Decado */
-int 
-summon_spider(y, x)
-int *y, *x;
+int summon_spider(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2034,9 +2011,7 @@ int *y, *x;
 }
 
 /* As for summon dragon, but keys on character ~Decado */
-int 
-summon_angel(y, x)
-int *y, *x;
+int summon_angel(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2081,9 +2056,7 @@ int *y, *x;
 }
 
 /* Summon ants */
-int 
-summon_ant(y, x)
-int *y, *x;
+int summon_ant(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2130,9 +2103,7 @@ int *y, *x;
 }
 
 /* Summon uniques */
-int 
-summon_unique(y, x)
-int *y, *x;
+int summon_unique(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2179,9 +2150,7 @@ int *y, *x;
 }
 
 /* Summon jabberwocks, for extra effect to the summon_unique spell */
-int 
-summon_jabberwock(y, x)
-int *y, *x;
+int summon_jabberwock(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2228,9 +2197,7 @@ int *y, *x;
 }
 
 /* Summon greater undead */
-int 
-summon_gundead(y, x)
-int *y, *x;
+int summon_gundead(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2278,9 +2245,7 @@ int *y, *x;
 }
 
 /* Summon ancient dragons */
-int 
-summon_ancientd(y, x)
-int *y, *x;
+int summon_ancientd(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2327,9 +2292,7 @@ int *y, *x;
 }
 
 /* As for summon hound, but keys on character ~Decado */
-int 
-summon_hound(y, x)
-int *y, *x;
+int summon_hound(int *y, int *x)
 {
     register int        i, j, k;
     int                 l, m, ctr, summon;
@@ -2377,9 +2340,7 @@ int *y, *x;
 }
 
 /* Place a sleepy jelly at the required coordinates ~Ludwig */
-int 
-summon_jelly(y, x)
-int *y, *x;
+int summon_jelly(int *y, int *x)
 {
     int l, m, summon;
 
@@ -2396,8 +2357,7 @@ int *y, *x;
 }
 
 /* If too many objects on floor level, delete some of them */
-static void 
-compact_objects()
+static void compact_objects()
 {
     register int        i, j;
     int                 ctr, cur_dis, chance;
@@ -2454,8 +2414,7 @@ compact_objects()
 }
 
 /* Gives pointer to next free space			-RAK-	 */
-int 
-popt()
+int popt()
 {
     if (tcptr == MAX_TALLOC)
 	compact_objects();
@@ -2468,9 +2427,7 @@ popt()
  * Delete_object() should always be called instead, unless the object in
  * question is not in the dungeon, e.g. in store1.c and files.c 
  */
-void 
-pusht(my_x)
-int my_x;
+void pusht(int my_x)
 {
     int16        x = (int16) my_x;
     register int i, j;
@@ -2490,9 +2447,7 @@ int my_x;
 
 
 /* Boolean : is object enchanted	  -RAK- */
-int 
-magik(chance)
-int chance;
+int magik(int chance)
 {
     if (randint(100) <= chance)
 	return (TRUE);
@@ -5800,8 +5755,7 @@ static struct opt_desc {
 
 
 /* Set or unset various boolean options.		-CJS- */
-void 
-set_options()
+void set_options()
 {
     register int i, max, ch;
     vtype        string;
@@ -5909,10 +5863,7 @@ set_options()
     }
 }
 
-static void
-magic_ammo(t_ptr, good, chance, special, cursed, level)
-inven_type *t_ptr;
-int         good, chance, special, cursed, level;
+static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int cursed, int level)
 {
     register inven_type *i_ptr = NULL;
     register int         i;

@@ -1,12 +1,21 @@
+/* File: save.c */
+
+/* Purpose: save and restore games and monster memory info */
+
 /*
- * save.c: save and restore games and monster memory info 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
  * not for profit purposes provided that this copyright and statement are
  * included in all such copies. 
  */
+
+/*
+ * This save package was brought to by			-JWT- and
+ * RAK- and has been completely rewritten for UNIX by	-JEW-  
+ */
+/* and has been completely rewritten again by	 -CJS-	 */
+/* and completely rewritten again! for portability by -JEW- */
 
 #include <stdio.h>
 
@@ -79,23 +88,20 @@ char *malloc();
  * these are used for the save file, to avoid having to pass them to every
  * procedure 
  */
-static FILE        *fileptr;
-static int8u        xor_byte;
-static int          from_savefile; /* can overwrite old savefile when save */
+static FILE        *fileptr;		/* Current save "file" */
+
+static int8u        xor_byte;	/* Simple encryption */
+
+static int8u        version_maj;	/* Major version */
+static int8u        version_min;	/* Minor version */
+static int8u        patch_level;	/* Patch level */
+
 static int32u       start_time;	   /* time that play started */
-static int8u        version_maj, version_min, patch_level;
 
-/*
- * This save package was brought to by			-JWT- and
- * RAK- and has been completely rewritten for UNIX by	-JEW-  
- */
-/* and has been completely rewritten again by	 -CJS-	 */
-/* and completely rewritten again! for portability by -JEW- */
+static int	from_savefile;	/* can overwrite old savefile when save */
 
 
-static char *
-basename(a)
-char *a;
+static char *basename(char *a)
 {
     char *b;
     char *strrchr();
@@ -105,25 +111,20 @@ char *a;
     return b;
 }
 
-static void 
-wr_unique(item)
-register struct unique_mon *item;
+static void wr_unique(register struct unique_mon *item)
 {
     wr_long((int32u) item->exist);
     wr_long((int32u) item->dead);
 }
 
-static void 
-rd_unique(item)
-register struct unique_mon *item;
+static void rd_unique(register struct unique_mon *item)
 {
     rd_long((int32u *) & item->exist);
     rd_long((int32u *) & item->dead);
 }
 
 
-static int 
-sv_write()
+static int sv_write()
 {
     int32u              l;
     register int        i, j;
@@ -637,8 +638,7 @@ sv_write()
     return TRUE;
 }
 
-int 
-save_char()
+int save_char()
 {
     vtype temp;
     char *tmp2;
@@ -665,9 +665,7 @@ save_char()
     return TRUE;
 }
 
-int 
-_save_char(fnam)
-char *fnam;
+int _save_char(char *fnam)
 {
     vtype temp;
     int   ok, fd;
@@ -757,9 +755,7 @@ char *fnam;
 
 /* Certain checks are ommitted for the wizard. -CJS- */
 
-int 
-get_char(generate)
-int *generate;
+int get_char(int *generate)
 {
     int                    i, j, fd, c, ok, total_count;
     int32u                 l, age, time_saved;
@@ -1610,17 +1606,13 @@ closefiles:
     return FALSE;		   /* not reached, unless on mac */
 }
 
-static void 
-wr_byte(c)
-int8u c;
+static void wr_byte(int8u c)
 {
     xor_byte ^= c;
     (void)putc((int)xor_byte, fileptr);
 }
 
-static void 
-wr_short(s)
-int16u s;
+static void wr_short(int16u s)
 {
     xor_byte ^= (s & 0xFF);
     (void)putc((int)xor_byte, fileptr);
@@ -1628,9 +1620,7 @@ int16u s;
     (void)putc((int)xor_byte, fileptr);
 }
 
-static void 
-wr_long(l)
-register int32u l;
+static void wr_long(register int32u l)
 {
     xor_byte ^= (l & 0xFF);
     (void)putc((int)xor_byte, fileptr);
@@ -1642,10 +1632,7 @@ register int32u l;
     (void)putc((int)xor_byte, fileptr);
 }
 
-static void 
-wr_bytes(c, count)
-int8u       *c;
-register int count;
+static void wr_bytes(int8u *c, register int count)
 {
     register int    i;
     register int8u *ptr;
@@ -1657,9 +1644,7 @@ register int count;
     }
 }
 
-static void 
-wr_string(str)
-register char *str;
+static void wr_string(register char *str)
 {
     while (*str != '\0') {
 	xor_byte ^= *str++;
@@ -1670,9 +1655,7 @@ register char *str;
 }
 
 static void 
-wr_shorts(s, count)
-int16u      *s;
-register int count;
+wr_shorts(int16u *s, register int count)
 {
     register int        i;
     register int16u    *sptr;
@@ -1686,9 +1669,7 @@ register int count;
     }
 }
 
-static void 
-wr_item(item)
-register inven_type *item;
+static void wr_item(register inven_type *item)
 {
     wr_short(item->index);
     wr_byte(item->name2);
@@ -1712,9 +1693,7 @@ register inven_type *item;
     wr_short((int16u) item->timeout);
 }
 
-static void 
-wr_monster(mon)
-register monster_type *mon;
+static void wr_monster(register monster_type *mon)
 {
     wr_short((int16u) mon->hp);
     wr_short((int16u) mon->maxhp); /* added -CWS */
@@ -1730,9 +1709,7 @@ register monster_type *mon;
     wr_byte(mon->monfear);	/* added -CWS */
 }
 
-static void 
-rd_byte(ptr)
-int8u *ptr;
+static void rd_byte(int8u *ptr)
 {
     int8u c;
 
@@ -1741,9 +1718,7 @@ int8u *ptr;
     xor_byte = c;
 }
 
-static void 
-rd_short(ptr)
-int16u *ptr;
+static void rd_short(int16u *ptr)
 {
     int8u  c;
     int16u s;
@@ -1755,9 +1730,7 @@ int16u *ptr;
     *ptr = s;
 }
 
-static void 
-rd_long(ptr)
-int32u *ptr;
+static void rd_long(int32u *ptr)
 {
     register int32u l;
     register int8u  c;
@@ -1773,10 +1746,7 @@ int32u *ptr;
     *ptr = l;
 }
 
-static void 
-rd_bytes(ptr, count)
-int8u *ptr;
-int    count;
+static void rd_bytes(int8u *ptr, int count)
 {
     int   i;
     int8u c, nc;
@@ -1790,9 +1760,7 @@ int    count;
     }
 }
 
-static void 
-rd_string(str)
-char *str;
+static void rd_string(char *str)
 {
     register int8u c;
 
@@ -1804,10 +1772,7 @@ char *str;
     while (*str++ != '\0');
 }
 
-static void 
-rd_shorts(ptr, count)
-int16u      *ptr;
-register int count;
+static void rd_shorts(int16u *ptr, register int count)
 {
     register int        i;
     register int16u    *sptr;
@@ -1824,9 +1789,7 @@ register int count;
     }
 }
 
-static void 
-rd_item(item)
-register inven_type *item;
+static void rd_item(register inven_type *item)
 {
     rd_short(&item->index);
     rd_byte(&item->name2);
@@ -1850,9 +1813,7 @@ register inven_type *item;
     rd_short((int16u *) & item->timeout);
 }
 
-static void 
-rd_monster(mon)
-register monster_type *mon;
+static void rd_monster(register monster_type *mon)
 {
     rd_short((int16u *) & mon->hp);
     if ((version_maj >= 2) && (version_min >= 6))
@@ -1876,3 +1837,5 @@ register monster_type *mon;
     else
 	mon->monfear = 0; /* this is not saved either -CWS */
 }
+
+

@@ -1,6 +1,8 @@
+/* File: magic.c */
+
+/* Purpose: code for mage/priest spells */
+
 /*
- * magic.c: code for mage spells 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -20,9 +22,10 @@ int detect_magic();
 int stair_creation();
 #endif
 
-/* Throw a magic spell					-RAK-	 */
-void 
-cast()
+/*
+ * Throw a magic spell					-RAK-	 
+ */
+void cast()
 {
     int                    i, j, item_val, dir;
     int                    choice, chance, result;
@@ -31,6 +34,7 @@ cast()
     register spell_type   *m_ptr;
 
     free_turn_flag = TRUE;
+
     if (py.flags.blind > 0)
 	msg_print("You can't see to read your spell book!");
     else if (no_light())
@@ -364,9 +368,11 @@ cast()
 }
 
 
-/* Pray like HELL.					-RAK-	 */
-void 
-pray()
+
+/*
+ * Pray
+ */
+void pray()
 {
     int i, j, item_val, dir;
     int choice, chance, result;
@@ -807,3 +813,4 @@ pray()
 	}
     }
 }
+

@@ -1,12 +1,18 @@
- /* constants.h: global constants used by Angband
+/* File: defines.h */
 
-   Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+/* Purpose: global constants used by Angband */
 
-   This software may be copied and distributed for educational, research, and
-   not for profit purposes provided that this copyright and statement are
-   included in all such copies. */
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+ *
+ * This software may be copied and distributed for educational, research, and
+ * not for profit purposes provided that this copyright and statement are
+ * included in all such copies.
+ */
 
-/* Note to the Wizard:
+
+/*
+ * Note to the Wizard:
  *
  *       Tweaking these constants can *GREATLY* change the game.
  *       Two years of constant tuning have generated these      
@@ -17,7 +23,8 @@
  *       cause errors.
  */
 
-/* Addendum:
+/*
+ * Addendum:
  * 
  * I have greatly expanded the number of defined constants.  However, if
  * you change anything below, without understanding EXACTLY how the game
@@ -25,7 +32,9 @@
  * constants at your own risk.
  */
 
-/* Current version number of Angband: 2.6.1
+
+/*
+ * Current version number of Angband: 2.6.1
  *
  * Note that 5.2 must never be used, as it was used in Angband 2.4-2.5.
  */
@@ -46,33 +55,51 @@
 #define FALSE 0
 #endif
 
+/* 
+ * Some constants
+ */
+
+
+
+/*
+ * These values are used to keep things "small"
+ */
 #define MAX_UCHAR       255
 #define MAX_SHORT       32767           /* maximum short/long signed ints */
 #define MAX_LONG        0xFFFFFFFFL
 
+
+/*
+ * Used for "Check Load"
+ */
 #ifndef MAXHOSTNAMELEN					/* may not be defined -b. eck */
-#define MAXHOSTNAMELEN  64
+# define MAXHOSTNAMELEN  64
 #endif
 
 /* Changing values below this line may be hazardous to your health! */
 
-/* message line location */
-#define MSG_LINE  0
+/*
+ * message line location
+ */
+#define MSG_LINE		0
 
 /* number of messages to save in a buffer */
 #define MAX_SAVE_MSG   22               /* How many messages to save -CJS- */
-#define MAX_SAVE_HISCORES 500
-/* How many hiscores to be saved */
+/*
+ * This is the maximum number of high scores to save
+ */
+#define MAX_SAVE_HISCORES	500
 
-/* Dungeon size parameters                                      */
-#define MAX_HEIGHT  66                  /* Multiple of 11; >= 22 */
-#define MAX_WIDTH  198                  /* Multiple of 33; >= 66 */
-#define SCREEN_HEIGHT  22
-#define SCREEN_WIDTH   66
+/* Dungeon size parameters */
+#define MAX_HEIGHT		66/* Multiple of 11; >= 22 */
+#define MAX_WIDTH		198/* Multiple of 33; >= 66 */
+#define SCREEN_HEIGHT		22
+#define SCREEN_WIDTH		66
 #define QUART_HEIGHT (SCREEN_HEIGHT / 4)
 #define QUART_WIDTH  (SCREEN_WIDTH / 4)
 
-/* Dungeon generation values
+/*
+ * Dungeon generation values
  *
  * Note: The entire design of dungeon can be changed by only
  * slight adjustments here.
@@ -97,7 +124,7 @@
 #define DUN_DEST         15     /* 1/x chance of having a destroyed level */
 #define SPEC_DEST        2
 
-/* Store constants                                              */
+/* Store constants */
 #define MAX_OWNERS       24     /* Number of owners to choose from       */
 #define MAX_STORES        8     /* Number of different stores            */
 #define STORE_INVEN_MAX  24     /* Max number of discrete objs in inven  */
@@ -120,7 +147,8 @@
 /* Number of dungeon objects */
 #define MAX_DUNGEON_OBJ  423
 
-/* Note that the following constants are all related, if you change one,
+/*
+ * Note that the following constants are all related, if you change one,
  * you must also change all succeeding ones.  Also, player_init[] and
  * store_choice[] may also have to be changed.
  */
@@ -165,7 +193,8 @@
 #define TREAS_GOLD_ALLOC  3     /* Amount of gold (and gems)           */
 
 
-/* Magic Treasure Generation constants                  
+/*
+ * Magic Treasure Generation constants                  
  * Note: Number of special objects, and degree of enchantments
  *       can be adjusted here.
  */
@@ -173,8 +202,8 @@
 #define OBJ_STD_ADJ     125     /* Adjust STD per level * 100        */
 #define OBJ_STD_MIN       7     /* Minimum STD                       */
 #define OBJ_TOWN_LEVEL    5     /* Town object generation level      */
-#define OBJ_BASE_MAGIC   15     /* Base amount of magic              */
-#define OBJ_BASE_MAX     70     /* Max amount of magic               */
+#define OBJ_BASE_MAGIC   15     /* Base magic_chance                 */
+#define OBJ_BASE_MAX     70     /* Maximum magic_chance              */
 #define OBJ_DIV_SPECIAL   4     /* magic_chance/# special magic      */
 #define OBJ_DIV_CURSED   13     /* 10*magic_chance/# cursed items    */
 
@@ -209,7 +238,7 @@
 #define MAX_MON_NATTACK     4   /* Max num attacks (used in mons memory)    */
 #define MIN_MONIX           2   /* Minimum index in m_list (1=py, 0=no mon) */
 
-/* Trap constants                                               */
+/* Mega Hack -- Trap constants */
 #define MAX_TRAP           18   /* Number of defined traps      */
 
 /* Descriptive constants                                        */
@@ -220,11 +249,11 @@
 #define MAX_ROCKS      42       /* Used with rings        */
 #define MAX_AMULETS    16       /* Used with amulets      */
 #define MAX_TITLES     45       /* Used with scrolls      */
-#define MAX_SYLLABLES  158      /* Used with scrolls      */
+#define MAX_SYLLABLES 158       /* Used with scrolls      */
 
 /* Player constants                                             */
-#define MAX_PLAYER_LEVEL    50  /* Maximum possible character level        */
 #define MAX_EXP      99999999L  /* Maximum amount of experience -CJS-      */
+#define MAX_PLAYER_LEVEL    50  /* Maximum possible character level        */
 #define MAX_RACES           10  /* Number of defined races                 */
 #define MAX_CLASS            6  /* Number of defined classes               */
 #define USE_DEVICE           3  /* x> Harder devices x< Easier devices     */
@@ -249,7 +278,8 @@
 #define CLA_DISARM      3
 #define CLA_SAVE        4
 
-/* this depends on the fact that CLA_SAVE values are all the same, if not,
+/*
+ * this depends on the fact that CLA_SAVE values are all the same, if not,
  * then should add a separate column for this
  */
 #define CLA_MISC_HIT    4
@@ -258,7 +288,9 @@
 /* Base to hit constants                                        */
 #define BTH_PLUS_ADJ    3       /* Adjust BTH per plus-to-hit   */
 
-/* magic numbers for players inventory array */
+/*
+ * magic numbers for players inventory array
+ */
 #define INVEN_WIELD		22		/* must be first item in equipment list */
 #define INVEN_HEAD      23
 #define INVEN_NECK      24
@@ -274,6 +306,9 @@
 
 /* Attribute indexes -CJS- */
 
+
+
+/* Hardcoded */
 #define A_STR	0
 #define A_INT	1
 #define A_WIS	2
@@ -298,19 +333,21 @@
 #endif /* NULL */
 
 
-/* Fval definitions: these describe the various types of dungeon floors and
+/*
+ * Fval definitions: these describe the various types of dungeon floors and
  * walls, if numbers above 15 are ever used, then the test against
  * MIN_CAVE_WALL will have to be changed, also the save routines will have
  * to be changed.
  */
 
-#define NULL_WALL       0
+#define NULL_WALL	0	/* Temp value for "generate.c" */
+
 #define DARK_FLOOR      1
 #define LIGHT_FLOOR     2
 #define NT_DARK_FLOOR   3
 #define NT_LIGHT_FLOOR  4
 #define MAX_CAVE_ROOM   4
-#define CORR_FLOOR      5
+#define CORR_FLOOR      5	/* Floor, in a corridor */
 #define BLOCKED_FLOOR   6       /* a corridor space with cl/st/se door or rubble */
 #define MAX_CAVE_FLOOR  6
 
@@ -321,10 +358,10 @@
 #define TMP2_WALL       9
 
 #define MIN_CAVE_WALL   12
-#define GRANITE_WALL    12
-#define MAGMA_WALL      13
-#define QUARTZ_WALL     14
-#define BOUNDARY_WALL   15
+#define GRANITE_WALL    12	/* Granite */
+#define MAGMA_WALL      13	/* Magma */
+#define QUARTZ_WALL     14	/* Quartz */
+#define BOUNDARY_WALL   15	/* Permanent */
 
 /* Column for stats    */
 #define STAT_COLUMN     0
@@ -340,7 +377,11 @@
 
 /* definitions for the psuedo-normal distribution generation */
 #define NORMAL_TABLE_SIZE       256
-#define NORMAL_TABLE_SD         64  /* the standard deviation for the table */
+#define NORMAL_TABLE_SD          64  /* the standard deviation for the table */
+
+
+/* Masks for the player's status field */
+#define PY_STATS        0x3F000000L
 
 /* definitions for the player's status field */
 #define PY_HUNGRY       0x00000001L
@@ -367,7 +408,6 @@
 #define PY_REPEAT       0x00200000L
 #define PY_ARMOR        0x00400000L
 
-#define PY_STATS        0x3F000000L
 #define PY_STR          0x01000000L /* these 6 stat flags must be adjacent */
 #define PY_INT          0x02000000L
 #define PY_WIS          0x04000000L
@@ -833,7 +873,9 @@
 #define TV_STORE_DOOR   110
 #define TV_MAX_VISIBLE  110
 
-/* spell types used by get_flags(), breathe(), fire_bolt() and fire_ball() */
+/*
+ * spell types used by get_flags(), breathe(), fire_bolt() and fire_ball()
+ */
 #define GF_MAGIC_MISSILE 0
 #define GF_LIGHTNING    1
 #define GF_POISON_GAS   2
@@ -957,6 +999,6 @@
 #define ST_PROBE        30L
 
 /* bit flags used in my revamped enchant() code -CFT */
-#define ENCH_TOHIT   1
-#define ENCH_TODAM   2
-#define ENCH_TOAC    4
+#define ENCH_TOHIT   0x01
+#define ENCH_TODAM   0x02
+#define ENCH_TOAC    0x04

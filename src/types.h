@@ -1,10 +1,15 @@
-/* types.h: global type declarations
+/* File: types.h */
 
-   Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+/* Purpose: global type declarations */
 
-   This software may be copied and distributed for educational, research, and
-   not for profit purposes provided that this copyright and statement are
-   included in all such copies. */
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+ *
+ * This software may be copied and distributed for educational, research, and
+ * not for profit purposes provided that this copyright and statement are
+ * included in all such copies.
+ */
+
 #if !defined(__alpha)
 typedef unsigned long  int32u;
 typedef long	       int32;
@@ -15,12 +20,21 @@ typedef int            int32;
 typedef unsigned short int16u;
 typedef short	       int16;
 typedef unsigned char  int8u;
-/* some machines will not accept 'signed char' as a type, and some accept it
-   but still treat it like an unsigned character, let's just avoid it,
-   any variable which can ever hold a negative value must be 16 or 32 bits */
+
+/*
+ * some machines will not accept 'signed char' as a type, and some accept it
+ * but still treat it like an unsigned character, let's just avoid it,
+ * any variable which can ever hold a negative value must be 16 or 32 bits 
+ */
+
+
+/*
+ * Some simple buffers (overkill)
+ */
 
 #define VTYPESIZ    160
 #define BIGVTYPESIZ 300
+
 typedef char vtype[VTYPESIZ];
 /* note that since its output can easily exceed 80 characters, objdes must
    always be called with a bigvtype as the first paramter */

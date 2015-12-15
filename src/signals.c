@@ -1,6 +1,8 @@
+/* File: signals.c */
+
+/* Purpose: signal handlers */
+
 /*
- * signals.c: signal handlers 
- *
  * Copyright (c) 1989 James E. Wilson 
  *
  * This software may be copied and distributed for educational, research, and
@@ -8,8 +10,10 @@
  * included in all such copies. 
  */
 
-/* This signal package was brought to you by		-JEW-  */
-/* Completely rewritten by				-CJS- */
+/*
+ * This signal package was brought to you by		-JEW- 
+ * Completely rewritten by				-CJS-
+ */
 
 /* Signals have no significance on the Mac */
 
@@ -108,23 +112,17 @@ static int          signal_count = 0;
 
 /* ARGSUSED */
 #ifndef USG
-static void 
-signal_handler(sig, code, scp)
-    int                 sig, code;
-    struct sigcontext  *scp;
+static void signal_handler(int sig, int code, struct sigcontext  *scp)
 {
     int                 smask;
 
     smask = sigsetmask(0) | (1 << sig);
 #else
 #ifdef __TURBOC__
-static void 
-signal_handler(sig)
+static void signal_handler(int sig)
 #else
-static void 
-signal_handler(sig)
+static void signal_handler(int sig)
 #endif
-    int                 sig;
 {
 
 #endif
@@ -215,8 +213,7 @@ static int          mask;
 
 #endif
 
-void 
-nosignals()
+void nosignals()
 {
 #if !defined(ATARIST_MWC)
 #ifdef SIGTSTP
@@ -234,8 +231,7 @@ nosignals()
 #endif
 }
 
-void 
-signals()
+void signals()
 {
 #if !defined(ATARIST_MWC)
 #ifdef SIGTSTP
@@ -253,8 +249,7 @@ signals()
 #endif
 }
 
-void
-init_signals()
+voidinit_signals()
 {
 #ifndef ATARIST_MWC
 #ifdef linux
@@ -331,8 +326,7 @@ init_signals()
  
 
 
-void 
-ignore_signals()
+void ignore_signals()
 {
 #if !defined(ATARIST_MWC)
     (void)signal(SIGINT, SIG_IGN);
@@ -342,8 +336,7 @@ ignore_signals()
 #endif
 }
 
-void 
-default_signals()
+void default_signals()
 {
 #if !defined(ATARIST_MWC)
     (void)signal(SIGINT, SIG_DFL);
@@ -353,8 +346,7 @@ default_signals()
 #endif
 }
 
-void 
-restore_signals()
+void restore_signals()
 {
 #if !defined(ATARIST_MWC)
 #ifndef linux

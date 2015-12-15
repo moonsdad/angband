@@ -1,6 +1,8 @@
+/* File: moria2.c */
+
+/* Purpose: misc code, mainly to handle player commands */
+
 /*
- * moria2.c: misc code, mainly to handle player commands 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -59,9 +61,7 @@ static int fearless();
 
 
 /* Player hit a trap.	(Chuckle)			-RAK-	 */
-static void 
-hit_trap(y, x)
-int y, x;
+static void hit_trap(int y, int x)
 {
     int                   i, ty, tx, num, dam;
     register cave_type   *c_ptr;
@@ -264,11 +264,7 @@ int y, x;
  * returns -1 if no spells in book returns 1 if choose a spell in book to
  * cast returns 0 if don't choose a spell, i.e. exit with an escape 
  */
-int 
-cast_spell(prompt, item_val, sn, sc)
-const char *prompt;
-int         item_val;
-int        *sn, *sc;
+int cast_spell(const char *prompt, int item_val, int *sn, int *sc)
 {
     int32u               j1, j2;
     register int         i, k;
@@ -319,10 +315,7 @@ int        *sn, *sc;
 /* on the TVAL of the object.  Traps are set off, money and most */
 /* objects are picked up.  Some objects, such as open doors, just */
 /* sit there.						       */
-void 
-carry(y, x, pickup)
-int y, x;
-int pickup;
+void carry(int y, int x, int pickup)
 {
     register int         locn, i;
     bigvtype             out_val, tmp_str;
@@ -380,17 +373,14 @@ int pickup;
 	hit_trap(y, x);
 }
 
-void 
-check_unique(m_ptr)
-monster_type *m_ptr;
+void check_unique(monster_type *m_ptr)
 {
     if (c_list[m_ptr->mptr].cdefense & UNIQUE)
 	u_list[m_ptr->mptr].exist = 0;
 }
 
 
-void 
-delete_unique()
+void delete_unique()
 {
     int i;
 
@@ -400,9 +390,7 @@ delete_unique()
 }
 
 /* Deletes a monster entry from the level		-RAK-	 */
-void 
-delete_monster(j)
-    int j;
+void delete_monster(int j)
 {
     register monster_type *m_ptr;
 
@@ -447,9 +435,7 @@ delete_monster(j)
  * monster record and reduce mfptr, this is called in breathe, and a couple
  * of places in creatures.c 
  */
-void 
-fix1_delete_monster(j)
-    int                 j;
+void fix1_delete_monster(int j)
 {
     register monster_type *m_ptr;
 
@@ -482,9 +468,7 @@ fix1_delete_monster(j)
 /* fix2_delete_monster does everything in delete_monster that wasn't done by
  * fix1_monster_delete above, this is only called in creatures() 
  */
-void 
-fix2_delete_monster(j)
-int j;
+void fix2_delete_monster(int j)
 {
     register monster_type *m_ptr;
 
@@ -515,10 +499,7 @@ int j;
 
 
 /* Creates objects nearby the coordinates given		-RAK-	  */
-static int 
-summon_object(y, x, num, typ, good)
-int    y, x, num, typ;
-int32u good;
+static int summon_object(int y, int x, int num, int typ, int32u  ood)
 {
     register int        i, j, k;
     register cave_type *c_ptr;
@@ -571,9 +552,7 @@ int32u good;
 
 
 /* Deletes object from given location			-RAK-	 */
-int 
-delete_object(y, x)
-int y, x;
+int delete_object(int y, int x)
 {
     register int        delete;
     register cave_type *c_ptr;
@@ -600,12 +579,7 @@ int y, x;
  * Returns a mask of bits from the given flags which indicates what the
  * monster is seen to have dropped.  This may be added to monster memory. 
  */
-int32u 
-monster_death(y, x, flags, good, win)
-int                 y, x;
-register int32u     flags;
-int32u              good;
-int32u              win;
+int32u monster_death(int y, int x, register int32u flags, int32u good, int32u win)
 {
     register int i, number;
     int32u       dump, res;
@@ -778,9 +752,7 @@ int32u              win;
 }
 
 /* return whether a monster is "fearless" and will never run away. -CWS */
-static int 
-fearless(c_ptr)
-creature_type *c_ptr;
+static int fearless(creature_type *c_ptr)
 {
     int flag = FALSE;
 
@@ -812,9 +784,7 @@ creature_type *c_ptr;
 /* Decreases monsters hit points and deletes monster if needed.	 */
 /* (Picking on my babies.)			       -RAK-   */
 /* added fear (DGK) and check whether to print fear messages -CWS */
-int 
-mon_take_hit(monptr, dam, print_fear)
-int monptr, dam, print_fear;
+int mon_take_hit(int monptr, int dam, int print_fear)
 {
     register int32u         i;
     int                     found = FALSE;
@@ -993,9 +963,7 @@ int monptr, dam, print_fear;
 
 
 /* Player attacks a (poor, defenseless) creature	-RAK-	 */
-static void 
-py_attack(y, x)
-int y, x;
+static void py_attack(int y, int x)
 {
     register int        k, blows;
     int                 crptr, monptr, tot_tohit, base_tohit;
@@ -1150,9 +1118,7 @@ int y, x;
 
 /* Moves player from one space to another.		-RAK-	 */
 /* Note: This routine has been pre-declared; see that for argument */
-void 
-move_char(dir, do_pickup)
-int dir, do_pickup;
+void move_char(int dir, int do_pickup)
 {
     int                 old_row, old_col, old_find_flag;
     int                 y, x;
@@ -1286,9 +1252,7 @@ int dir, do_pickup;
 
 /* Chests have traps too.				-RAK-	 */
 /* Note: Chest traps are based on the FLAGS value		 */
-static void 
-chest_trap(y, x)
-int y, x;
+static void chest_trap(int y, int x)
 {
     register int        i;
     int                 j, k;
@@ -1336,8 +1300,7 @@ int y, x;
 
 
 /* Opens a closed door or closed chest.		-RAK-	 */
-void 
-openobject()
+void openobject()
 {
     int                    y, x, i, dir;
     int                    flag, no_object;
@@ -1482,8 +1445,7 @@ openobject()
 
 
 /* Closes an open door.				-RAK-	 */
-void 
-closeobject()
+void closeobject()
 {
     int                    y, x, dir, no_object;
     vtype                  out_val, m_name;
@@ -1542,9 +1504,7 @@ closeobject()
 
 /* Tunneling through real wall: 10, 11, 12		-RAK-	 */
 /* Used by TUNNEL and WALL_TO_MUD				 */
-int 
-twall(y, x, t1, t2)
-int y, x, t1, t2;
+int twall(int y, int x, int t1, int t2)
 {
     register int        i, j;
     register cave_type *c_ptr;
@@ -1602,9 +1562,7 @@ int y, x, t1, t2;
 
 /* Tunnels through rubble and walls			-RAK-	 */
 /* Must take into account: secret doors,  special tools		  */
-void 
-tunnel(dir)
-int dir;
+void tunnel(int dir)
 {
     register int        i, tabil;
     register cave_type *c_ptr;
@@ -1742,8 +1700,7 @@ int dir;
 
 
 /* Disarms a trap					-RAK-	 */
-void 
-disarm_trap()
+void disarm_trap()
 {
     int                 y, x, level, tmp, dir, no_disarm;
     register int        tot, i;
@@ -1926,8 +1883,7 @@ static int map_diag2[] = {2, 1, 0, 4, 3};
  * highlight_seams option is set. 
  */
 
-void 
-look()
+void look()
 {
     register int        i, abort;
     int                 dir, dummy;
@@ -2030,9 +1986,7 @@ look()
      |
      | */
 
-static int 
-look_ray(y, from, to)
-int y, from, to;
+static int look_ray(int y, int from, int to)
 {
     register int        max_x, x;
     int                 transparent;
@@ -2108,10 +2062,7 @@ init_transparent:
 }
 
 
-static int 
-look_see(x, y, transparent)
-register int        x, y;
-int                *transparent;
+static int look_see(register int x, register int y, int *transparent)
 {
     const char         *dstring,*string;
     char               query = 'a';
@@ -2214,10 +2165,7 @@ int                *transparent;
 }
 
 
-static void 
-inven_throw(item_val, t_ptr)
-int         item_val;
-inven_type *t_ptr;
+static void inven_throw(int item_val, inven_type *t_ptr)
 {
     register inven_type *i_ptr;
 
@@ -2236,10 +2184,7 @@ inven_type *t_ptr;
 /* Obtain the hit and damage bonuses and the maximum distance for a thrown
  * missile. 
  */
-static void 
-facts(i_ptr, tbth, tpth, tdam, tdis, thits)
-    register inven_type *i_ptr;
-    int                 *tbth, *tpth, *tdam, *tdis, *thits;
+static void facts(register inven_type *i_ptr, int *tbth, int *tpth, int *tdam, int *tdis, int *thits)
 {
     register int        tmp_weight;
 
@@ -2359,10 +2304,7 @@ facts(i_ptr, tbth, tpth, tdam, tdis, thits)
 }
 
 
-static void 
-drop_throw(y, x, t_ptr)
-int                 y, x;
-inven_type         *t_ptr;
+static void drop_throw(int y, int x, inven_type *t_ptr)
 {
     register int i, j, k;
     int flag, cur_pos;
@@ -2434,9 +2376,7 @@ inven_type         *t_ptr;
 
 /* This is another adaptation of DGK's Fangband code to help throw item
    stay around (like Artifacts!) -CFT */
-static int
-stays_when_throw(i_ptr)
-inven_type *i_ptr;
+static int stays_when_throw(inven_type *i_ptr)
 {
   if ((i_ptr->tval >= TV_MIN_WEAR) && (i_ptr->tval <= TV_MAX_WEAR) &&
       (i_ptr->flags2 & TR_ARTIFACT))
@@ -2463,8 +2403,7 @@ inven_type *i_ptr;
 /* Note: Extra damage and chance of hitting when missiles are used */
 /* with correct weapon.  I.E.  wield bow and throw arrow.	 */
 /* Note: Some characters will now get multiple shots per turn -EAM */
-void 
-throw_object()
+void throw_object()
 {
     int item_val, tbth, tpth, tdam, tdis;
     int y, x, oldy, oldx, cur_dis, dir;
@@ -2688,9 +2627,7 @@ throw_object()
 /* Make a bash attack on someone.				-CJS- Used to
  * be part of bash above. 
  */
-static void 
-py_bash(y, x)
-int y, x;
+static void py_bash(int y, int x)
 {
     int                     monster, k, avg_max_hp, base_tohit, monptr;
     register creature_type *c_ptr;
@@ -2789,8 +2726,7 @@ int y, x;
  *
  * A creature with no such ability will attempt to bash a non-secret door. 
  */
-void 
-bash()
+void bash()
 {
     int                  y, x, dir, tmp;
     register cave_type  *c_ptr;
@@ -2872,9 +2808,7 @@ bash()
 }
 
 
-static const char *
-look_mon_desc(mnum)
-int mnum;
+static const char *look_mon_desc(int mnum)
 {
     monster_type *m = &m_list[mnum];
     int32         thp, tmax, perc;
@@ -2912,8 +2846,7 @@ int mnum;
 #ifdef TARGET
 /* This targetting code stolen from Morgul -CFT */
 /* Targetting routine 					CDW */
-void
-target()
+void target()
 {
     int monptr,exit,exit2;
     char query;
@@ -3071,9 +3004,7 @@ target()
 /* This targetting code stolen from Morgul -CFT */
 /* Assuming target_mode == TRUE, returns if the position is the target.
 						CDW */
-int
-at_target(row,col)
-int row, col;
+int at_target(int row,int col)
 {
 /* don't ever assume a condition holds, especially when it's so easy to test for. -CFT */
     if (target_mode == FALSE)
@@ -3087,9 +3018,7 @@ int row, col;
 #endif /* TARGET */
 
 void 
-mmove2(y, x, sourcey, sourcex, desty, destx)
-register int *y, *x;
-int           sourcey, sourcex, desty, destx;
+mmove2(register int *y, register int *x, int sourcey, int sourcex, int desty, int destx)
 {
     int d_y, d_x, k, dist, max_dist, min_dist, shift;
 

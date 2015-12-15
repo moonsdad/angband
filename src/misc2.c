@@ -1,6 +1,8 @@
+/* File: misc2.c */
+
+/* Purpose: misc code for monsters */
+
 /*
- * misc2.c: misc code for maintaining the dungeon, printing player info 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -58,9 +60,7 @@ static char blank_string[] = "                        ";
 extern int rating;
 
 /* Places a particular trap at location y, x		-RAK-	 */
-void 
-place_trap(y, x, subval)
-int y, x, subval;
+void place_trap(int y, int x, int subval)
 {
     register int cur_pos;
 
@@ -86,9 +86,7 @@ int y, x, subval;
 
 
 /* Places rubble at location y, x			-RAK-	 */
-void 
-place_rubble(y, x)
-int y, x;
+void place_rubble(int y, int x)
 {
     register int        cur_pos;
     register cave_type *cave_ptr;
@@ -113,9 +111,7 @@ int y, x;
 }
 
 /* if killed a 'Creeping _xxx_ coins'... -CWS */
-void
-get_coin_type(c_ptr)
-creature_type *c_ptr;
+void get_coin_type(creature_type *c_ptr)
 {
     if (!stricmp(c_ptr->name, "Creeping copper coins")) {
 	coin_type = 2;
@@ -139,9 +135,7 @@ creature_type *c_ptr;
 }
 
 /* Places a treasure (Gold or Gems) at given row, column -RAK-	 */
-void 
-place_gold(y, x)
-int y, x;
+void place_gold(int y, int x)
 {
     register int        i, cur_pos;
     register inven_type *t_ptr;
@@ -185,9 +179,7 @@ int y, x;
 
 
 /* Returns the array number of a random object		-RAK-	 */
-int 
-get_obj_num(level, good)
-int level, good;
+int get_obj_num(int level, int good)
 {
     register int i, j;
 
@@ -235,9 +227,7 @@ int level, good;
 
 
 
-int 
-special_place_object(y, x)
-int y, x;
+int special_place_object(int y, int x)
 {
     register int cur_pos, tmp;
     char         str[100];
@@ -469,9 +459,7 @@ again:
 }
 
 /* Places an object at given row, column co-ordinate    -RAK-   */
-void
-place_object(y, x)
-int y, x;
+void place_object(int y, int x)
 {
     register int cur_pos, tmp;
 
@@ -518,10 +506,7 @@ int y, x;
 }
 
 /* Places a GOOD-object at given row, column co-ordinate ~Ludwig */
-void 
-place_special(y, x, good)
-int    y, x;
-int32u good;
+void place_special(int y, int x, int32u good)
 {
     register int cur_pos, tmp;
     int          tv, is_good = FALSE;
@@ -592,10 +577,7 @@ int32u good;
 
 
 /* Allocates an object for tunnels and rooms		-RAK-	 */
-void 
-alloc_object(alloc_set, typ, num)
-int (*alloc_set) ();
-int typ, num;
+void alloc_object(int (*alloc_set) (), int typ, int num)
 {
     register int i, j, k;
 
@@ -628,9 +610,7 @@ int typ, num;
 
 
 /* Creates objects nearby the coordinates given		-RAK-	 */
-void 
-random_object(y, x, num)
-int y, x, num;
+void random_object(int y, int x, int num)
 {
     register int        i, j, k;
     register cave_type *cave_ptr;
@@ -659,9 +639,7 @@ int y, x, num;
     while (num != 0);
 }
 
-void 
-special_random_object(y, x, num)
-int y, x, num;
+void special_random_object(int y, int x, int num)
 {
     register int        i, j, k;
     register cave_type *cave_ptr;
@@ -691,10 +669,7 @@ int y, x, num;
 }
 
 /* Converts stat num into string			-RAK-	 */
-void 
-cnv_stat(my_stat, out_val)
-int   my_stat;
-char *out_val;
+void cnv_stat(int my_stat, char *out_val)
 {
     register int16u stat = my_stat;
     register int    part1, part2;
@@ -714,9 +689,7 @@ char *out_val;
 
 
 /* Print character stat in given row, column		-RAK-	 */
-void 
-prt_stat(stat)
-int stat;
+void prt_stat(int stat)
 {
     vtype out_val1;
 
@@ -728,21 +701,14 @@ int stat;
 
 /* Print character info in given row, column		-RAK-	 */
 /* the longest title is 13 characters, so only pad to 13 */
-void 
-prt_field(info, row, column)
-const char *info;
-int         row, column;
+void prt_field(const char *info, int row, int column)
 {
     put_buffer(&blank_string[BLANK_LENGTH - 13], row, column);
     put_buffer(info, row, column);
 }
 
 /* Print long number with header at given row, column */
-static void 
-prt_lnum(header, num, row, column)
-const char *header;
-int32       num;
-int         row, column;
+static void prt_lnum(const char *header, int32 num, int row, int column)
 {
     vtype out_val;
 
@@ -751,10 +717,7 @@ int         row, column;
 }
 
 /* Print number with header at given row, column	-RAK-	 */
-static void 
-prt_num(header, num, row, column)
-const char *header;
-int         num, row, column;
+static void prt_num(const char *header, int num, int row, int column)
 {
     vtype out_val;
 
@@ -763,10 +726,7 @@ int         num, row, column;
 }
 
 /* Print long number at given row, column */
-static void 
-prt_long(num, row, column)
-int32 num;
-int   row, column;
+static void prt_long(int32 num, int row, int column)
 {
     vtype out_val;
 
@@ -775,9 +735,7 @@ int   row, column;
 }
 
 /* Print number at given row, column	-RAK-	 */
-static void 
-prt_int(num, row, column)
-    int num, row, column;
+static void prt_int(int num, int row, int column)
 {
     vtype out_val;
 
@@ -787,9 +745,7 @@ prt_int(num, row, column)
 
 
 /* Adjustment for wisdom/intelligence				-JWT-	 */
-int 
-stat_adj(stat)
-    int stat;
+int stat_adj(int stat)
 {
     register int value;
 
@@ -837,8 +793,7 @@ stat_adj(stat)
 
 /* Adjustment for charisma				-RAK-	 */
 /* Percent decrease or increase in price of goods		 */
-int 
-chr_adj()
+int chr_adj()
 {
     register int charisma;
 
@@ -900,8 +855,7 @@ chr_adj()
 
 
 /* Returns a character's adjustment to hit points	 -JWT-	 */
-int 
-con_adj()
+int con_adj()
 {
     register int con;
 
@@ -941,8 +895,7 @@ con_adj()
 }
 
 
-const char *
-title_string()
+const char *title_string()
 {
     const char *p;
 
@@ -959,64 +912,56 @@ title_string()
 
 
 /* Prints title of character				-RAK-	 */
-void 
-prt_title()
+void prt_title()
 {
     prt_field(title_string(), 3, STAT_COLUMN);
 }
 
 
 /* Prints level						-RAK-	 */
-void 
-prt_level()
+void prt_level()
 {
     prt_int((int)py.misc.lev, 12, STAT_COLUMN + 6);
 }
 
 
 /* Prints players current mana points.		 -RAK-	 */
-void 
-prt_cmana()
+void prt_cmana()
 {
     prt_int(py.misc.cmana, 14, STAT_COLUMN + 6);
 }
 
 
 /* Prints Max hit points				-RAK-	 */
-void 
-prt_mhp()
+void prt_mhp()
 {
     prt_int(py.misc.mhp, 15, STAT_COLUMN + 6);
 }
 
 
 /* Prints players current hit points			-RAK-	 */
-void 
-prt_chp()
+void prt_chp()
 {
     prt_int(py.misc.chp, 16, STAT_COLUMN + 6);
 }
 
 
 /* prints current AC					-RAK-	 */
-void 
-prt_pac()
+void prt_pac()
 {
     prt_int(py.misc.dis_ac, 18, STAT_COLUMN + 6);
 }
 
 
 /* Prints current gold					-RAK-	 */
-void 
-prt_gold()
+void prt_gold()
 {
     prt_long(py.misc.au, 19, STAT_COLUMN + 3);
 }
 
 
 /* Prints depth in stat area				-RAK-	 */
-void 
-prt_depth()
+void prt_depth()
 {
     vtype               depths;
     register int        depth;
@@ -1031,8 +976,7 @@ prt_depth()
 
 
 /* Prints status of hunger				-RAK-	 */
-void 
-prt_hunger()
+void prt_hunger()
 {
     if (PY_WEAK & py.flags.status)
 	put_buffer("Weak  ", 23, 0);
@@ -1044,8 +988,7 @@ prt_hunger()
 
 
 /* Prints Blind status					-RAK-	 */
-void 
-prt_blind()
+void prt_blind()
 {
     if (PY_BLIND & py.flags.status)
 	put_buffer("Blind", 23, 7);
@@ -1055,8 +998,7 @@ prt_blind()
 
 
 /* Prints Confusion status				-RAK-	 */
-void 
-prt_confused()
+void prt_confused()
 {
     if (PY_CONFUSED & py.flags.status)
 	put_buffer("Confused", 23, 13);
@@ -1066,8 +1008,7 @@ prt_confused()
 
 
 /* Prints Fear status					-RAK-	 */
-void 
-prt_afraid()
+void prt_afraid()
 {
     if (PY_FEAR & py.flags.status)
 	put_buffer("Afraid", 23, 22);
@@ -1077,8 +1018,7 @@ prt_afraid()
 
 
 /* Prints Poisoned status				-RAK-	 */
-void 
-prt_poisoned()
+void prt_poisoned()
 {
     if (PY_POISONED & py.flags.status)
 	put_buffer("Poisoned", 23, 29);
@@ -1088,8 +1028,7 @@ prt_poisoned()
 
 
 /* Prints Searching, Resting, Paralysis, or 'count' status	-RAK-	 */
-void 
-prt_state()
+void prt_state()
 {
     char tmp[16];
 
@@ -1118,8 +1057,7 @@ prt_state()
 
 
 /* Prints the speed of a character.			-CJS- */
-void 
-prt_speed()
+void prt_speed()
 {
     register int i;
 
@@ -1147,8 +1085,7 @@ prt_speed()
 }
 
 
-void 
-prt_study()
+void prt_study()
 {
     py.flags.status &= ~PY_STUDY;
     if (py.flags.new_spells != 0)
@@ -1157,9 +1094,7 @@ prt_study()
 	put_buffer("     ", 23, 64);
 }
 
-void 
-cut_player(c)
-int c;
+void cut_player(int c)
 {
     py.flags.cut += c;
     c = py.flags.cut;
@@ -1179,8 +1114,7 @@ int c;
 	msg_print("You have been given a graze.");
 }
 
-void 
-prt_cut()
+void prt_cut()
 {
     int c = py.flags.cut;
 
@@ -1202,9 +1136,7 @@ prt_cut()
 	put_buffer("            ", 21, 0);
 }
 
-void 
-stun_player(s)
-int s;
+void stun_player(int s)
 {
     int t;
 
@@ -1250,8 +1182,7 @@ int s;
     }
 }
 
-void 
-prt_stun()
+void prt_stun()
 {
     int s = py.flags.stun;
 
@@ -1268,8 +1199,7 @@ prt_stun()
 }
 
 /* Prints winner status on display			-RAK-	 */
-void 
-prt_winner()
+void prt_winner()
 {
     if (wizard)
 	put_buffer("Wizard", 20, 0);
@@ -1280,10 +1210,7 @@ prt_winner()
 }
 
 
-int16u 
-modify_stat(stat, amount)
-int stat;
-int amount;
+int16u modify_stat(int stat, int amount)
 {
     register int    loop, i;
     register int16u tmp_stat;
@@ -1310,9 +1237,7 @@ int amount;
 
 
 /* Set the value of the stat which is actually used.	 -CJS- */
-void 
-set_use_stat(stat)
-int stat;
+void set_use_stat(int stat)
 {
     py.stats.use_stat[stat] = modify_stat(stat, py.stats.mod_stat[stat]);
 
@@ -1333,9 +1258,7 @@ int stat;
 
 
 /* Increases a stat by one randomized level		-RAK-	 */
-int 
-inc_stat(stat)
-register int stat;
+int inc_stat(register int stat)
 {
     register int tmp_stat, gain;
 
@@ -1366,9 +1289,7 @@ register int stat;
 
 
 /* Decreases a stat by one randomized level		-RAK-	 */
-int 
-dec_stat(stat)
-register int stat;
+int dec_stat(register int stat)
 {
     register int tmp_stat, loss;
 
@@ -1394,9 +1315,7 @@ register int stat;
 
 
 /* Restore a stat.  Return TRUE only if this actually makes a difference. */
-int 
-res_stat(stat)
-int stat;
+int res_stat(int stat)
 {
     register int i;
 
@@ -1414,9 +1333,7 @@ int stat;
  * Boost a stat artificially (by wearing something). If the display argument
  * is TRUE, then increase is shown on the screen. 
  */
-void 
-bst_stat(stat, amount)
-int stat, amount;
+void bst_stat(int stat, int amount)
 {
     py.stats.mod_stat[stat] += amount;
 
@@ -1427,8 +1344,7 @@ int stat, amount;
 
 
 /* Returns a character's adjustment to hit.		 -JWT-	 */
-int 
-tohit_adj()
+int tohit_adj()
 {
     register int total, stat;
 
@@ -1478,8 +1394,7 @@ tohit_adj()
 
 
 /* Returns a character's adjustment to armor class	 -JWT-	 */
-int 
-toac_adj()
+int toac_adj()
 {
     register int stat;
 
@@ -1509,8 +1424,7 @@ toac_adj()
 
 
 /* Returns a character's adjustment to disarm		 -RAK-	 */
-int 
-todis_adj()
+int todis_adj()
 {
     register int stat;
 
@@ -1532,8 +1446,7 @@ todis_adj()
 
 
 /* Returns a character's adjustment to damage		 -JWT-	 */
-int 
-todam_adj()
+int todam_adj()
 {
     register int stat;
 
@@ -1562,8 +1475,7 @@ todam_adj()
 
 
 /* Prints character-screen info				-RAK-	 */
-void 
-prt_stat_block()
+void prt_stat_block()
 {
     register int32u       status;
     register struct misc *m_ptr;
@@ -1636,8 +1548,7 @@ prt_equippy_chars()
 
 
 /* Draws entire screen					-RAK-	 */
-void 
-draw_cave()
+void draw_cave()
 {
     clear_screen();
     prt_stat_block();
@@ -1647,8 +1558,7 @@ draw_cave()
 
 
 /* Prints the following information on the screen.	-JWT-	 */
-void 
-put_character()
+void put_character()
 {
     register struct misc *m_ptr;
 
@@ -1668,8 +1578,7 @@ put_character()
 
 
 /* Prints the following information on the screen.	-JWT-	 */
-void 
-put_stats()
+void put_stats()
 {
     register struct misc *m_ptr;
     register int          i, temp;
@@ -1698,9 +1607,7 @@ put_stats()
 
 
 /* Returns a rating of x depending on y			-JWT-	 */
-const char *
-likert(x, y)
-int x, y;
+const char *likert(int x, int y)
 {
     if ((x/y) < 0)
 	return ("Very Bad");
@@ -1739,8 +1646,7 @@ int x, y;
 
 
 /* Prints age, height, weight, and SC			-JWT-	 */
-void 
-put_misc1()
+void put_misc1()
 {
     register struct misc *m_ptr;
 
@@ -1753,8 +1659,7 @@ put_misc1()
 
 
 /* Prints the following information on the screen.	-JWT-	 */
-void 
-put_misc2()
+void put_misc2()
 {
     register struct misc *m_ptr;
 
@@ -1782,8 +1687,7 @@ put_misc2()
 
 
 /* Prints ratings on certain abilities			-RAK-	 */
-void 
-put_misc3()
+void put_misc3()
 {
     int                   xbth, xbthb, xfos, xsrh, xstl, xdis, xsave, xdev;
     vtype                 xinfra;
@@ -1836,8 +1740,7 @@ put_misc3()
 
 
 /* Used to display the character on the screen.		-RAK-	 */
-void 
-display_char()
+void display_char()
 {
     put_character();
     put_misc1();
@@ -1848,8 +1751,7 @@ display_char()
 
 
 /* Gets a name for the character			-JWT-	 */
-void 
-get_name()
+void get_name()
 {
     char tmp[100];
 
@@ -1877,8 +1779,7 @@ get_name()
 
 
 /* Changes the name of the character			-JWT-	 */
-void 
-change_name()
+void change_name()
 {
     register char c;
     register int  flag;
@@ -1926,9 +1827,7 @@ change_name()
 
 
 /* Destroy an item in the inventory			-RAK-	 */
-void 
-inven_destroy(item_val)
-int item_val;
+void inven_destroy(int item_val)
 {
     register int         j;
     register inven_type *i_ptr;
@@ -1952,9 +1851,7 @@ int item_val;
  * Copies the object in the second argument over the first argument. However,
  * the second always gets a number of one except for ammo etc. 
  */
-void 
-take_one_item(s_ptr, i_ptr)
-register inven_type *s_ptr, *i_ptr;
+void take_one_item(register inven_type *s_ptr, register inven_type *i_ptr)
 {
     *s_ptr = *i_ptr;
     if ((s_ptr->number > 1) && (s_ptr->subval >= ITEM_SINGLE_STACK_MIN)
@@ -1964,9 +1861,7 @@ register inven_type *s_ptr, *i_ptr;
 
 
 /* Drops an item from inventory to given location	-RAK-	 */
-void 
-inven_drop(item_val, drop_all)
-register int item_val, drop_all;
+void inven_drop(register int item_val, register int drop_all)
 {
     int                  i;
     register inven_type *i_ptr;
@@ -2044,8 +1939,7 @@ register int perc;
 
 
 /* Computes current weight limit			-RAK-	 */
-int 
-weight_limit()
+int weight_limit()
 {
     register int32 weight_cap;
 
@@ -2058,9 +1952,7 @@ weight_limit()
 
 
 /* this code must be identical to the inven_carry() code below */
-int 
-inven_check_num(t_ptr)
-register inven_type *t_ptr;
+int inven_check_num(register inven_type *t_ptr)
 {
     register int i;
 
@@ -2081,9 +1973,7 @@ register inven_type *t_ptr;
 }
 
 /* return FALSE if picking up an object would change the players speed */
-int 
-inven_check_weight(i_ptr)
-register inven_type *i_ptr;
+int inven_check_weight(register inven_type *i_ptr)
 {
     register int i, new_inven_weight;
 
@@ -2102,8 +1992,7 @@ register inven_type *i_ptr;
 
 
 /* Are we strong enough for the current pack and weapon?  -CJS-	 */
-void 
-check_strength()
+void check_strength()
 {
     register int         i;
     register inven_type *i_ptr;
@@ -2174,9 +2063,7 @@ check_strength()
  * me). -CFT 
  */
 
-int 
-inven_carry(i_ptr)
-register inven_type *i_ptr;
+int inven_carry(register inven_type *i_ptr)
 {
     register int         locn = 0, i;
     register int         typ, subt;
@@ -2265,9 +2152,7 @@ register inven_type *i_ptr;
 
 
 /* Returns spell chance of failure for spell		-RAK-	 */
-int 
-spell_chance(spell)
-int spell;
+int spell_chance(int spell)
 {
     register spell_type *s_ptr;
     register int         chance;
@@ -2354,11 +2239,7 @@ int spell;
  * if nonconsec is -1: spells numbered consecutively from 'a' to 'a'+num >=0:
  * spells numbered by offset from nonconsec 
  */
-void 
-print_spells(spell, num, comment, nonconsec)
-int         *spell;
-register int num;
-int          comment, nonconsec;
+void print_spells(int *spell, register int num, int comment, int nonconsec)
 {
     register int         i, j;
     vtype                out_val;
@@ -2411,13 +2292,7 @@ int          comment, nonconsec;
 
 
 /* Returns spell pointer				-RAK-	 */
-int 
-get_spell(spell, num, sn, sc, prompt, first_spell)
-int          *spell;
-register int  num;
-register int *sn, *sc;
-const char   *prompt;
-int           first_spell;
+int get_spell(int *spell, register int num, register int *sn, register int *sc, const char *prompt, int first_spell)
 {
     register spell_type *s_ptr;
     int                  flag, redraw, offset, i;
@@ -2493,9 +2368,7 @@ int           first_spell;
 /* calculate number of spells player should have, and learn forget spells
  * until that number is met -JEW- 
  */
-void 
-calc_spells(stat)
-int stat;
+void calc_spells(int stat)
 {
     register int    i;
     register int32u mask;
@@ -2705,8 +2578,7 @@ int stat;
 
 
 /* gain spells when player wants to		- jw */
-void 
-gain_spells()
+void gain_spells()
 {
     char                query;
     int                 stat, diff_spells, new_spells;
@@ -2852,9 +2724,7 @@ gain_spells()
 
 
 /* Gain some mana if you know at least one spell	-RAK-	 */
-void 
-calc_mana(stat)
-int stat;
+void calc_mana(int stat)
 {
     register int          new_mana, levels;
     register struct misc *p_ptr;
@@ -3005,8 +2875,7 @@ int stat;
 
 
 /* Increases hit points and level			-RAK-	 */
-static void 
-gain_level()
+static void gain_level()
 {
     vtype               out_val;
     register struct misc *p_ptr;
@@ -3030,8 +2899,7 @@ gain_level()
 }
 
 /* Prints experience					-RAK-	 */
-void 
-prt_experience()
+void prt_experience()
 {
     register struct misc *p_ptr;
     char out_val[100];
@@ -3062,8 +2930,7 @@ prt_experience()
 
 
 /* Calculate the players hit points */
-void 
-calc_hitpoints()
+void calc_hitpoints()
 {
     register int          hitpoints;
     register struct misc *p_ptr;
@@ -3098,10 +2965,7 @@ calc_hitpoints()
 
 
 /* Inserts a string into a string				 */
-void 
-insert_str(object_str, mtc_str, insert)
-char       *object_str;
-const char *mtc_str, *insert;
+void insert_str(char *object_str, const char *mtc_str, const char *insert)
 {
     int            obj_len;
     char          *bound, *pc;
@@ -3134,12 +2998,7 @@ const char *mtc_str, *insert;
 }
 
 
-void 
-insert_lnum(object_str, mtc_str, number, show_sign)
-char                *object_str;
-register const char *mtc_str;
-int32                number;
-int                  show_sign;
+void insert_lnum(char *object_str, register const char *mtc_str, int32 number, int  show_sign)
 {
     int            mlen;
     vtype          str1, str2;
@@ -3173,8 +3032,7 @@ int                  show_sign;
 
 
 /* lets anyone enter wizard mode after a disclaimer...		- JEW - */
-int 
-enter_wiz_mode()
+int enter_wiz_mode()
 {
     register int answer;
 
@@ -3195,10 +3053,7 @@ enter_wiz_mode()
 
 
 /* Weapon weight VS strength and dexterity		-RAK-	 */
-int 
-attack_blows(weight, wtohit)
-int  weight;
-int *wtohit;
+int attack_blows(int  weight, int *wtohit)
 {
     register int adj_weight;
     register int str_index, dex_index, s, d;
@@ -3300,11 +3155,7 @@ int *wtohit;
 
 
 /* Special damage due to magical abilities of object	-RAK-	 */
-int 
-tot_dam(i_ptr, tdam, monster)
-register inven_type *i_ptr;
-register int         tdam;
-int                  monster;
+int tot_dam(register inven_type *i_ptr, register int tdam, int monster)
 {
     register creature_type *m_ptr;
     register recall_type   *r_ptr;
@@ -3403,10 +3254,7 @@ int                  monster;
 
 
 /* Critical hits, Nasty way to die.			-RAK-	 */
-int 
-critical_blow(weight, plus, dam, attack_type)
-register int weight, plus, dam;
-int          attack_type;
+int critical_blow(register int weight, register int plus, register int dam, int  attack_type)
 {
     register int critical;
 
@@ -3441,10 +3289,7 @@ int          attack_type;
 /* Given direction "dir", returns new row, column location -RAK- */
 /* targeting code stolen from Morgul -CFT */
 /* 'dir=0' moves toward target				    CDW  */
-int 
-mmove(dir, y, x)
-int                 dir;
-register int       *y, *x;
+int mmove(int dir, register int *y, register int *x)
 {
     register int new_row = 0, new_col = 0;
     int          boolflag;
@@ -3508,8 +3353,7 @@ register int       *y, *x;
 
 
 /* Saving throws for player character.		-RAK-	 */
-int 
-player_saves()
+int player_saves()
 {
     /* MPW C couldn't handle the expression, so split it into two parts */
     int16 temp = class_level_adj[py.misc.pclass][CLA_SAVE];
@@ -3523,10 +3367,7 @@ player_saves()
 
 
 /* Finds range of item in inventory list		-RAK-	 */
-int 
-find_range(item1, item2, j, k)
-int           item1, item2;
-register int *j, *k;
+int find_range(int item1, int item2, register int *j, register int *k)
 {
     register int         i;
     register inven_type *i_ptr;
@@ -3559,9 +3400,7 @@ register int *j, *k;
 
 
 /* Teleport the player to a new location		-RAK-	 */
-void 
-teleport(dis)
-int dis;
+void teleport(int dis)
 {
     register int y, x, count;
 
@@ -3599,8 +3438,7 @@ int dis;
 
 
 /* Add a comment to an object description.		-CJS- */
-void 
-scribe_object()
+void scribe_object()
 {
     int   item_val, j;
     vtype out_val, tmp_str;
@@ -3627,27 +3465,20 @@ scribe_object()
 }
 
 /* Append an additional comment to an object description.	-CJS- */
-void 
-add_inscribe(i_ptr, type)
-inven_type *i_ptr;
-int         type;
+void add_inscribe(inven_type *i_ptr, int type)
 {
     i_ptr->ident |= (int8u) type;
 }
 
 /* Replace any existing comment in an object description with a new one. CJS */
-void 
-inscribe(i_ptr, str)
-inven_type *i_ptr;
-const char *str;
+void inscribe(inven_type *i_ptr, const char *str)
 {
     (void)strcpy(i_ptr->inscrip, str);
 }
 
 
 /* We need to reset the view of things.			-CJS- */
-void 
-check_view()
+void check_view()
 {
     register int        i, j;
     register cave_type *c_ptr, *d_ptr;

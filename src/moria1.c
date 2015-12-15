@@ -1,6 +1,8 @@
+/* File: moria1.c */
+
+/* Purpose: player inventory (and related commands) */
+
 /*
- * moria1.c: misc code, mainly to handle player movement, inventory, etc. 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -57,9 +59,7 @@ static int  see_nothing();
  * code in movement_rate() allows monsters to have attacks in correct
  * proportions, and still uses only int math -CFT 
  */
-void 
-change_speed(num)
-register int num;
+void change_speed(register int num)
 {
     py.flags.speed += num;
     py.flags.status |= PY_SPEED;
@@ -73,10 +73,7 @@ register int num;
  * Only calculates properties with cumulative effect.  Properties that depend
  * on everything being worn are recalculated by calc_bonuses() -CJS - 
  */
-void 
-py_bonuses(t_ptr, factor)
-register inven_type *t_ptr;
-register int         factor;
+void py_bonuses(register inven_type *t_ptr, register int factor)
 {
     register int i, amount;
 
@@ -114,8 +111,7 @@ register int         factor;
 
 /* Recalculate the effect of all the stuff we use.		  -CJS- */
 /* Also initialise race intrinsics    SM */
-void 
-calc_bonuses()
+void calc_bonuses()
 {
     register int32u        item_flags;
     register int32u        item_flags2;
@@ -422,11 +418,7 @@ calc_bonuses()
  * parameter col gives a column at which to start, but if the display does
  * not fit, it may be moved left.  The return value is the left edge used. 
  */
-int 
-show_inven(r1, r2, weight, col, test)
-register int r1, r2;
-int weight, col;
-int (*test) ();
+int show_inven(register int r1, register int r2, int weight, int col, int (*test) ())
 {
     register int i, j, k;
     int          total_weight, len, l, lim;
@@ -497,9 +489,7 @@ int (*test) ();
 
 
 /* Return a string describing how a given equipment item is carried. -CJS- */
-const char *
-describe_use(i)
-register int i;
+const char *describe_use(register int i)
 {
     register const char *p;
 
@@ -550,9 +540,7 @@ register int i;
 
 /* Displays equipment items from r1 to end	-RAK-	 */
 /* Keep display as far right as possible. -CJS- */
-int 
-show_equip(weight, col)
-int weight, col;
+int show_equip(int weight, int col)
 {
     register int         i, line;
     int                  total_weight, l, len, lim;
@@ -653,9 +641,7 @@ int weight, col;
 }
 
 /* Remove item from equipment list		-RAK-	 */
-void 
-takeoff(item_val, posn)
-int item_val, posn;
+void takeoff(int item_val, int posn)
 {
     register const char *p;
     bigvtype             out_val, prt2;
@@ -686,10 +672,7 @@ int item_val, posn;
 
 
 /* Used to verify if this really is the item we wish to wear or read. */
-int 
-verify(prompt, item)
-const char *prompt;
-int         item;
+int verify(const char *prompt, int  item)
 {
     bigvtype out_str, object;
 
@@ -740,9 +723,7 @@ static int scr_state, scr_left, scr_base;
 static int wear_low, wear_high;
 
 /* Draw the inventory screen. */
-static void 
-inven_screen(new_scr)
-int new_scr;
+static void inven_screen(int new_scr)
 {
     register int line = 0;
 
@@ -788,9 +769,7 @@ int new_scr;
 }
 
 /* This does all the work. */
-void 
-inven_command(command)
-int command;
+void inven_command(int command)
 {
     register int         slot = 0, item;
     int                  tmp, tmp2, selecting, from, to, light_chg = FALSE;
@@ -1353,13 +1332,7 @@ int command;
 
 
 /* Get the ID of an item and return the CTR value of it	-RAK-	 */
-int 
-get_item(com_val, pmt, i, j, test)
-int        *com_val;
-const char *pmt;
-int         i, j;
-int       (*test) ();
-
+int get_item(int *com_val, const char *pmt, int i, int j, int       (*test) ())
 {
     vtype        out_val;
     char         which;
@@ -1522,8 +1495,7 @@ int       (*test) ();
 /* hooks which I have not had time to re-think.		 -RAK-	 */
 
 /* Returns true if player has no light			-RAK-	 */
-int 
-no_light()
+int no_light()
 {
     register cave_type *c_ptr;
 
@@ -1535,9 +1507,7 @@ no_light()
 
 
 /* map rogue_like direction commands into numbers */
-static char 
-map_roguedir(my_comval)
-register int my_comval;
+static char map_roguedir(register int my_comval)
 {
     char comval = (char)my_comval;
 
@@ -1576,10 +1546,7 @@ register int my_comval;
 
 /* Prompts for a direction				-RAK-	 */
 /* Direction memory added, for repeated commands.  -CJS */
-int 
-get_dir(prompt, dir)
-const char *prompt;
-int        *dir;
+int get_dir(const char *prompt, int * dir)
 {
     char        command;
     int         save;
@@ -1643,10 +1610,7 @@ int        *dir;
  * Similar to get_dir, except that no memory exists, and it is		-CJS-
  * allowed to enter the null direction. 
  */
-int 
-get_alldir(prompt, dir)
-const char *prompt;
-int *dir;
+int get_alldir(const char *prompt, int *dir)
 {
     char command;
 
@@ -1672,9 +1636,7 @@ int *dir;
 
 
 /* Moves creature record from one space to another	-RAK-	 */
-void 
-move_rec(y1, x1, y2, x2)
-register int y1, x1, y2, x2;
+void move_rec(register int y1, register int x1, register int y2, register int x2)
 {
     int tmp;
 
@@ -1684,9 +1646,7 @@ register int y1, x1, y2, x2;
     cave[y2][x2].cptr = tmp;
 }
 
-static void
-flood_light(y,x)
-int y,x;
+static void flood_light(int y,int x)
 {
     register cave_type *c_ptr;
     register int temp;
@@ -1707,8 +1667,7 @@ int y,x;
     }
 }
 
-static void flood_permanent(y,x)
-int y,x;
+static void flood_permanent(int y,int x)
 {
     register cave_type *c_ptr;
     c_ptr = &cave[y][x];
@@ -1739,9 +1698,7 @@ int y,x;
     }
 }
 
-static void
-flood_permanent_dark(y,x)
-int y,x;
+static void flood_permanent_dark(int y,int x)
 {
     register cave_type *c_ptr;
     c_ptr = &cave[y][x];
@@ -1785,9 +1742,7 @@ int y,x;
     }
 }
 
-void 
-light_room(y, x)
-    int                 y, x;
+void light_room(int y, int x)
 {
     register cave_type *c_ptr;
     register monster_type  *m_ptr;
@@ -1853,9 +1808,7 @@ light_room(y, x)
     }     
 }
 
-void 
-darken_room(y, x)
-    int                 y, x;
+void darken_room(int y, int x)
 {
     register cave_type *c_ptr;
 
@@ -1889,9 +1842,7 @@ darken_room(y, x)
 }
 
 /* Lights up given location				-RAK-	 */
-void 
-lite_spot(y, x)
-    register int        y, x;
+void lite_spot(register int y, register int x)
 {
     if (panel_contains(y, x))
 	print(loc_symbol(y, x), y, x);
@@ -1899,10 +1850,7 @@ lite_spot(y, x)
 
 /* Normal movement					 */
 /* When FIND_FLAG,  light only permanent features	 */
-static void 
-sub1_move_light(y1, x1, y2, x2)
-register int x1, x2;
-int y1, y2;
+static void sub1_move_light(int y1, register int x1, int y2, register int x2)
 {
     register int        i, j;
     register cave_type *c_ptr;
@@ -1960,10 +1908,7 @@ int y1, y2;
 
 /* When blinded,  move only the player symbol.		 */
 /* With no light,  movement becomes involved.		 */
-static void 
-sub3_move_light(y1, x1, y2, x2)
-register int y1, x1;
-int y2, x2;
+static void sub3_move_light(register int y1, register int x1, int y2, int x2)
 {
     if (light_flag) {
 	darken_player(y1, x1);
@@ -1980,9 +1925,7 @@ int y2, x2;
 	print('@', y2, x2);
 }
 
-void
-darken_player(y1, x1)
-int y1, x1;
+void darken_player(int y1, int x1)
 {
     int min_i, max_i, min_j, max_j, rad, i, j;
 
@@ -2003,9 +1946,7 @@ int y1, x1;
 
 /* Package for moving the character's light about the screen	 */
 /* Four cases : Normal, Finding, Blind, and Nolight	 -RAK-	 */
-void 
-move_light(y1, x1, y2, x2)
-int y1, x1, y2, x2;
+void move_light(int y1, int x1, int y2, int x2)
 {
     if (py.flags.blind > 0 || !player_light)
 	sub3_move_light(y1, x1, y2, x2);
@@ -2019,9 +1960,7 @@ int y1, x1, y2, x2;
  * indicates a major disturbance, which affects search. The second arg
  * indicates a light change. 
  */
-void 
-disturb(s, l)
-int s, l;
+void disturb(int s, int l)
 {
     command_count = 0;
     if (s && (py.flags.status & PY_SEARCH))
@@ -2037,8 +1976,7 @@ int s, l;
 
 
 /* Search Mode enhancement				-RAK-	 */
-void 
-search_on()
+void search_on()
 {
     change_speed(1);
     py.flags.status |= PY_SEARCH;
@@ -2047,8 +1985,7 @@ search_on()
     py.flags.food_digested++;
 }
 
-void 
-search_off()
+void search_off()
 {
     check_view();
     change_speed(-1);
@@ -2060,8 +1997,7 @@ search_off()
 
 
 /* Resting allows a player to safely restore his hp	-RAK-	 */
-void 
-rest()
+void rest()
 {
     int   rest_num;
     vtype rest_str;
@@ -2104,8 +2040,7 @@ rest()
 }
 
 
-void 
-rest_off()
+void rest_off()
 {
     py.flags.rest = 0;
     py.flags.status &= ~PY_REST;
@@ -2117,9 +2052,7 @@ rest_off()
 
 
 /* Attacker's level and plusses,  defender's AC		-RAK-	 */
-int 
-test_hit(bth, level, pth, ac, attack_type)
-int bth, level, pth, ac, attack_type;
+int test_hit(int bth, int level, int pth, int ac, int attack_type)
 {
     register int i, die;
 
@@ -2139,10 +2072,7 @@ int bth, level, pth, ac, attack_type;
 
 /* Decreases players hit points and sets death flag if necessary */
 /* -RAK-	 */
-void 
-take_hit(damage, hit_from)
-int damage;
-const char *hit_from;
+void take_hit(int damage, const char *hit_from)
 {
     if (py.flags.invuln > 0 && damage < 9000)
 	damage = 0;
@@ -2172,9 +2102,7 @@ const char *hit_from;
     
 /* Change a trap from invisible to visible		-RAK-	 */
 /* Note: Secret doors are handled here				 */
-void 
-change_trap(y, x)
-register int y, x;
+void change_trap(register int y, register int x)
 {
     register cave_type  *c_ptr;
     register inven_type *t_ptr;
@@ -2195,9 +2123,7 @@ register int y, x;
 
 
 /* Searches for hidden things.			-RAK-	 */
-void 
-search(y, x, chance)
-int y, x, chance;
+void search(int y, int x, int chance)
 {
     register int           i, j;
     register cave_type    *c_ptr;
@@ -2371,9 +2297,7 @@ static int chome[] = {-1, 8, 9, 10, 7, -1, 11, 6, 5, 4};
 static int find_openarea, find_breakright, find_breakleft, find_prevdir;
 static int find_direction;/* Keep a record of which way we are going. */
 
-void 
-find_init(dir)
-int dir;
+void find_init(int dir)
 {
     int          row, col, deepleft, deepright;
     register int i, shortleft, shortright;
@@ -2453,8 +2377,7 @@ int dir;
 	command_count = 0;
 }
 
-void 
-find_run()
+void find_run()
 {
 /* prevent infinite loops in find mode, will stop after moving 100 times */
     if (find_flag++ > 100) {
@@ -2465,8 +2388,7 @@ find_run()
 }
 
 /* Switch off the run flag - and get the light correct. -CJS- */
-void 
-end_find()
+void end_find()
 {
     if (find_flag) {
 	find_flag = FALSE;
@@ -2476,9 +2398,7 @@ end_find()
 }
 
 /* Do we see a wall? Used in running.		-CJS- */
-static int 
-see_wall(dir, y, x)
-int dir, y, x;
+static int see_wall(int dir, int y, int x)
 {
     char c;
 
@@ -2499,9 +2419,7 @@ int dir, y, x;
 }
 
 /* Do we see anything? Used in running.		-CJS- */
-static int 
-see_nothing(dir, y, x)
-    int                 dir, y, x;
+static int see_nothing(int dir, int y, int x)
 {
     if (!mmove(dir, &y, &x))	   /* check to see if movement there possible */
 	return FALSE;
@@ -2513,9 +2431,7 @@ see_nothing(dir, y, x)
 
 
 /* Determine the next direction for a run, or if we should stop.  -CJS- */
-void 
-area_affect(dir, y, x)
-int dir, y, x;
+void area_affect(int dir, int y, int x)
 {
     int                  newdir = 0, t, inv, check_dir = 0, row, col;
     register int         i, max, option, option2;
@@ -2665,9 +2581,7 @@ int dir, y, x;
 /* AC gets worse					-RAK-	 */
 /* Note: This routine affects magical AC bonuses so that stores	  */
 /* can detect the damage.					 */
-int 
-minus_ac(typ_dam)
-int32u typ_dam;
+int minus_ac(int32u typ_dam)
 {
     register int         i, j;
     int                  tmp[6], minus, do_damage;
@@ -2734,9 +2648,7 @@ int32u typ_dam;
 
 
 /* Corrode the unsuspecting person's armor		 -RAK-	 */
-void 
-corrode_gas(kb_str)
-const char *kb_str;
+void corrode_gas(const char *kb_str)
 {
     if (!py.flags.acid_im)
 	if (!minus_ac((int32u) TR_RES_ACID))
@@ -2746,10 +2658,7 @@ const char *kb_str;
 
 
 /* Poison gas the idiot.				-RAK-	 */
-void 
-poison_gas(dam, kb_str)
-int dam;
-const char *kb_str;
+void poison_gas(int dam, const char *kb_str)
 {
     if (py.flags.resist_poison > 0)
 	dam = 2 * dam / 3;
@@ -2765,10 +2674,7 @@ const char *kb_str;
 
 
 /* Burn the fool up.					-RAK-	 */
-void 
-fire_dam(dam, kb_str)
-int dam;
-const char *kb_str;
+void fire_dam(int dam, const char *kb_str)
 {
     if (py.flags.fire_resist)
 	dam = dam / 3;
@@ -2782,10 +2688,7 @@ const char *kb_str;
 
 
 /* Freeze him to death.				-RAK-	 */
-void 
-cold_dam(dam, kb_str)
-int dam;
-const char *kb_str;
+void cold_dam(int dam, const char *kb_str)
 {
     if (py.flags.cold_resist)
 	dam = dam / 3;
@@ -2799,10 +2702,7 @@ const char *kb_str;
 
 
 /* Lightning bolt the sucker away.			-RAK-	 */
-void 
-light_dam(dam, kb_str)
-int dam;
-const char *kb_str;
+void light_dam(int dam, const char *kb_str)
 {
     if (py.flags.resist_light)
 	dam = dam / 3;
@@ -2816,10 +2716,7 @@ const char *kb_str;
 
 
 /* Throw acid on the hapless victim			-RAK-	 */
-void 
-acid_dam(dam, kb_str)
-int dam;
-const char *kb_str;
+void acid_dam(int dam, const char *kb_str)
 {
     register int flag;
 

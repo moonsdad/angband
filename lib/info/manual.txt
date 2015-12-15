@@ -1,4 +1,5 @@
 
+
                       The Pits of Angband
  
  
@@ -718,25 +719,25 @@ Last modified April 1, 1994
  
                Original Directions
  
-                      |      /
-                  7    8     9
+                 \     |     /
+                  7    8    9
  
-               -  4          6  -
+               -  4         6  -
  
-                  1    2     3
-                 /     |
+                  1    2    3
+                 /     |     \
  
  
  
                Rogue-like Directions
  
-                       |       /
-                  y     k      u
+                 \     |     /
+                  y    k    u
  
-               -  h            l  -
+               -  h         l  -
  
-                  b     j      n
-                 /      |
+                  b    j    n
+                 /     |     \
  
  
           Movement is accomplished by specifying a  direction  immediately.
@@ -1901,7 +1902,6 @@ Last modified April 1, 1994
           The Morningstar 'Bloodspike' (2d6) (+8,+22)
                This Bloody weapon slays animals, trolls, and orcs.  It allows
                you to see invisible creatures, as well as giving the wielder  
- 
                great strength.
  
           The Quarterstaff 'Nar-i-vagil' (1d10) (+10,+20)
@@ -2128,8 +2128,7 @@ Last modified April 1, 1994
  
           8.6  Artifact Armours
  
-          During your childhood, you heard many rumors of unique armours of   
- 
+          During your childhood, you heard many rumors of unique armours of
           great   protection   and   abilities,  here  are  some  that  you 
           remember...
  
@@ -2504,7 +2503,6 @@ Last modified April 1, 1994
           him, and  Morgoth cannot be polymorphed, slept, charmed, or geno-
           cided.  Magical spells like Frost Ball are effective against him
           as are weapons, but he is difficult to kill and if allowed to escape
- 
           for a time he will heal himself.
  
           If you should  actually survive the attempt of  killing  Morgoth,

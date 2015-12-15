@@ -1,6 +1,8 @@
+/* File: wizard.c */ 
+
+/* Purpose: Version history and info, and wizard mode debugging aids. */
+
 /*
- * wizard.c: Version history and info, and wizard mode debugging aids. 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -27,9 +29,7 @@
 long atol();
 #endif
 
-int
-is_wizard(uid)
-int uid;
+int is_wizard(int uid)
 {
     FILE *fp;
     char  buf[100];
@@ -53,8 +53,7 @@ int uid;
 }
 
 /* Check to see which artifacts have been seen		 */
-void
-artifact_check()
+void artifact_check()
 {
     FILE *file1;
     vtype filename;
@@ -300,9 +299,7 @@ artifact_check()
 }
 
 /* Light up the dungeon					-RAK-	 */
-void
-wizard_light(light)
-int light;
+void wizard_light(int light)
 {
     register cave_type *c_ptr;
     register int        k, l, i, j;
@@ -331,8 +328,7 @@ int light;
 
 
 /* Wizard routine for gaining on stats			-RAK-	 */
-void
-change_character()
+void change_character()
 {
     register int          tmp_val;
     register int32        tmp_lval;
@@ -533,8 +529,7 @@ change_character()
 
 
 /* Wizard routine for creating objects			-RAK-	 */
-void
-wizard_create()
+void wizard_create()
 {
     register int         tmp_val;
     int                  i, j, k;
@@ -1391,10 +1386,7 @@ end:
 
 /* pause if screen fills up while printint up artifacts - cba */
 
-void
-artifact_screen_full(i, j)
-int *i;
-int  j;
+void artifact_screen_full(int *i, int j)
 {
     int t;
 
@@ -1411,8 +1403,7 @@ int  j;
 
 /* Print out the artifacts seen without using a file - cba */
 
-void
-artifact_check_no_file()
+void artifact_check_no_file()
 {
     int i, j;
 
@@ -1902,10 +1893,7 @@ artifact_check_no_file()
 
 /* print out the status of uniques - cba */
 
-void
-unique_screen_full(i, j)
-int *i;
-int  j;
+void unique_screen_full(int *i, int j)
 {
     int t;
 
@@ -1920,8 +1908,7 @@ int  j;
     }
 }
 
-void
-check_uniques()
+void check_uniques()
 {
     int      i, j, k;
     bigvtype msg;

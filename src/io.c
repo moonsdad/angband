@@ -1,6 +1,8 @@
+/* File: io.c */
+
+/* Purpose: mid-level I/O (uses term.c) */
+
 /*
- * io.c: terminal I/O code, uses the curses package 
- *
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
  * This software may be copied and distributed for educational, research, and
@@ -209,8 +211,7 @@ static WINDOW *savescr;	   /* Spare window for saving the screen.
  * Handle the stop and start signals. This ensures that the log is up to
  * date, and that the terminal is fully reset and restored.  
  */
-int 
-suspend()
+int suspend()
 {
 #ifdef USG
 /*
@@ -249,8 +250,7 @@ suspend()
 #endif
 
 /* initializes curses routines */
-void 
-init_curses()
+void init_curses()
 #ifdef MAC
 {
 /* Primary initialization is done in mac.c since game is restartable */
@@ -341,8 +341,7 @@ init_curses()
 #endif
 
 /* Set up the terminal into a suitable state for moria.	 -CJS- */
-void 
-moriaterm()
+void moriaterm()
 #ifdef MAC
 /* Nothing to do on Mac */
 {
@@ -427,10 +426,7 @@ moriaterm()
 
 
 /* Dump IO to buffer					-RAK-	 */
-void 
-put_buffer(out_str, row, col)
-const char *out_str;
-int         row, col;
+void put_buffer(const char *out_str, int row, int col)
 
 #ifdef MAC
 {
@@ -475,8 +471,7 @@ int         row, col;
 
 
 /* Dump the IO buffer to terminal			-RAK-	 */
-void 
-put_qio()
+void put_qio()
 {
     screen_change = TRUE;	   /* Let inven_command know something has
 				    * changed. */
@@ -484,8 +479,7 @@ put_qio()
 }
 
 /* Put the terminal in the original mode.			   -CJS- */
-void 
-restore_term()
+void restore_term()
 #ifdef MAC
 /* Nothing to do on Mac */
 {
@@ -532,8 +526,7 @@ restore_term()
 #endif
 
 
-void 
-shell_out()
+void shell_out()
 #ifdef MAC
 {
     alert_error("This command is not implemented on the Macintosh.");
@@ -708,8 +701,7 @@ shell_out()
  * operation can always be performed at any input prompt.  inkey() never
  * returns ^R.	 
  */
-char 
-inkey()
+char inkey()
 #ifdef MAC
 /* The Mac does not need ^R, so it just consumes it */
 /* This routine does nothing special with direction keys */
@@ -783,8 +775,7 @@ inkey()
 
 
 #ifdef MAC
-char 
-inkeydir()
+char inkeydir()
 /* The Mac does not need ^R, so it just consumes it */
 /* This routine translates the direction keys in rogue-like mode */
 /* Compare with inkeydir() below */
@@ -836,8 +827,7 @@ inkeydir()
 
 
 /* Flush the buffer					-RAK-	 */
-void 
-flush()
+void flush()
 #ifdef MAC
 {
 /* Removed put_qio() call.  Reduces flashing.  Doesn't seem to hurt. */
@@ -868,9 +858,7 @@ flush()
 
 
 /* Clears given line of text				-RAK-	 */
-void 
-erase_line(row, col)
-int row, col;
+void erase_line(int row, int col)
 
 #ifdef MAC
 {
@@ -898,8 +886,7 @@ int row, col;
 
 
 /* Clears screen */
-void 
-clear_screen()
+void clear_screen()
 #ifdef MAC
 {
     Rect area;
@@ -924,9 +911,7 @@ clear_screen()
 
 #endif
 
-void 
-clear_from(row)
-int row;
+void clear_from(int row)
 
 #ifdef MAC
 {
@@ -949,9 +934,7 @@ int row;
 
 /* Outputs a char to a given interpolated y, x position	-RAK-	 */
 /* sign bit of a character used to indicate standout mode. -CJS */
-void 
-print(ch, row, col)
-int ch, row, col;
+void print(int ch, int row, int col)
 {
     row -= panel_row_prt;	   /* Real co-ords convert to screen positions */
     col -= panel_col_prt;
@@ -979,9 +962,7 @@ int ch, row, col;
 
 
 /* Moves the cursor to a given interpolated y, x position	-RAK-	 */
-void 
-move_cursor_relative(row, col)
-int row, col;
+void move_cursor_relative(int row, int col)
 
 #ifdef MAC
 {
@@ -1017,9 +998,7 @@ int row, col;
 
 
 /* Print a message so as not to interrupt a counted command. -CJS- */
-void 
-count_msg_print(p)
-const char *p;
+void count_msg_print(const char *p)
 {
     int i;
 
@@ -1030,10 +1009,7 @@ const char *p;
 
 
 /* Outputs a line to a given y, x position		-RAK-	 */
-void 
-prt(str_buff, row, col)
-const char *str_buff;
-int         row, col;
+void prt(const char *str_buff, int row, int col)
 
 #ifdef MAC
 {
@@ -1064,9 +1040,7 @@ int         row, col;
 
 
 /* move cursor to a given y, x position */
-void 
-move_cursor(row, col)
-int row, col;
+void move_cursor(int row, int col)
 
 #ifdef MAC
 {
@@ -1083,9 +1057,7 @@ int row, col;
 
 /* Outputs message to top line of screen				 */
 /* These messages are kept for later reference.	 */
-void 
-msg_print(str_buff)
-const char *str_buff;
+void msg_print(const char *str_buff)
 {
     char   in_char;
     static len = 0;
@@ -1171,9 +1143,7 @@ const char *str_buff;
 }
 
 /* Used to verify a choice - user gets the chance to abort choice.  -CJS- */
-int 
-get_check(prompt)
-const char *prompt;
+int get_check(const char *prompt)
 {
     int res, y, x;
 
@@ -1213,10 +1183,7 @@ const char *prompt;
 
 /* Prompts (optional) and returns ord value of input char	 */
 /* Function returns false if <ESCAPE> is input	 */
-int 
-get_com(prompt, command)
-const char *prompt;
-char       *command;
+int get_com(const char *prompt, char *command)
 {
     int res;
 
@@ -1233,10 +1200,7 @@ char       *command;
 
 #ifdef MAC
 /* Same as get_com(), but translates direction keys from keypad */
-int 
-get_comdir(prompt, command)
-char *prompt;
-char *command;
+int get_comdir(char *prompt, char *command)
 {
     int res;
 
@@ -1256,10 +1220,7 @@ char *command;
 
 /* Gets a string terminated by <RETURN>		 */
 /* Function returns false if <ESCAPE> is input	 */
-int 
-get_string(in_str, row, column, slen)
-char *in_str;
-int   row, column, slen;
+int get_string(char *in_str, int row, int column, int slen)
 {
     register int start_col, end_col, i;
     char        *p;
@@ -1326,9 +1287,7 @@ int   row, column, slen;
 
 
 /* Pauses for user response before returning		-RAK-	 */
-void 
-pause_line(prt_line)
-int prt_line;
+void pause_line(int prt_line)
 {
     prt("[Press any key to continue.]", prt_line, 23);
     (void)inkey();
@@ -1339,9 +1298,7 @@ int prt_line;
 /* Pauses for user response before returning		-RAK-	 */
 /* NOTE: Delay is for players trying to roll up "perfect"	 */
 /* characters.  Make them wait a bit.			 */
-void 
-pause_exit(prt_line, delay)
-int prt_line, delay;
+void pause_exit(int prt_line, int delay)
 {
     char dummy;
 
@@ -1368,27 +1325,23 @@ int prt_line, delay;
 }
 
 #ifdef MAC
-void 
-save_screen()
+void save_screen()
 {
     mac_save_screen();
 }
 
-void 
-restore_screen()
+void restore_screen()
 {
     mac_restore_screen();
 }
 
 #else
-void 
-save_screen()
+void save_screen()
 {
     overwrite(stdscr, savescr);
 }
 
-void 
-restore_screen()
+void restore_screen()
 {
     overwrite(savescr, stdscr);
     touchwin(stdscr);
@@ -1396,8 +1349,7 @@ restore_screen()
 
 #endif
 
-void 
-bell()
+void bell()
 {
     put_qio();
 #ifdef MAC
@@ -1430,8 +1382,7 @@ bell()
 /* Display highest priority object in the RATIO by RATIO area */
 #define	RATIO 3
 
-void 
-screen_map()
+void screen_map()
 {
     register int i, j;
     static int8u screen_border[2][6] = {

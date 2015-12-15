@@ -1,25 +1,35 @@
-/* tables.c: store/attack/RNG/etc tables and variables
+/* File: tables.c */
 
-   Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+/* Purpose: store/attack/RNG/etc tables and variables */
 
-   This software may be copied and distributed for educational, research, and
-   not for profit purposes provided that this copyright and statement are
-   included in all such copies. */
+/*
+ * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke
+ *
+ * This software may be copied and distributed for educational, research, and
+ * not for profit purposes provided that this copyright and statement are
+ * included in all such copies.
+ */
 
 #include "constant.h"
 #include "config.h"
 #include "types.h"
 
 #if defined(CHECKHOURS)
-/* Operating hours for ANGBAND				-RAK-	*/
-/*	 X = Open; . = Closed					*/
-char days[7][29] = { "SUN:XXXXXXXXXXXXXXXXXXXXXXXX",
-		    "MON:XXXXXXXX.........XXXXXXX",
-		    "TUE:XXXXXXXX.........XXXXXXX",
-		    "WED:XXXXXXXX.........XXXXXXX",
-		    "THU:XXXXXXXX.........XXXXXXX",
-		    "FRI:XXXXXXXX.........XXXXXXX",
-		    "SAT:XXXXXXXXXXXXXXXXXXXXXXXX" };
+
+/* 
+ * Operating hours for ANGBAND	-RAK-
+ *	 X = Open; . = Closed
+ */
+char days[7][29] = {
+	"SUN:XXXXXXXXXXXXXXXXXXXXXXXX",
+	"MON:XXXXXXXX.........XXXXXXX",
+	"TUE:XXXXXXXX.........XXXXXXX",
+	"WED:XXXXXXXX.........XXXXXXX",
+	"THU:XXXXXXXX.........XXXXXXX",
+	"FRI:XXXXXXXX.........XXXXXXX",
+	"SAT:XXXXXXXXXXXXXXXXXXXXXXXX"
+};
+
 #endif
 
 store_type store[MAX_STORES];
@@ -228,7 +238,9 @@ const char *syllables[MAX_SYLLABLES] = {
 };
 #endif
 
-/* used to calculate the number of blows the player gets in combat */
+/*
+ * used to calculate the number of blows the player gets in combat
+ */
 int8u blows_table[11][12] = {
 /* STR/W:	   9  18  67  107  117  118  128  138  148  158  168 more : DEX */
 /* <2 */	{  1,  1,  1,   1,   1,   1,   2,   2,   2,   2,   2,   3},
@@ -246,9 +258,11 @@ int8u blows_table[11][12] = {
 };
 
 
-/* this table is used to generate a psuedo-normal distribution.	 See the
-   function randnor() in misc1.c, this is much faster than calling
-   transcendental function to calculate a true normal distribution */
+/*
+ * This table is used to generate a psuedo-normal distribution.
+ * See the function randnor() in misc1.c, this is much faster than calling
+ * transcendental function to calculate a true normal distribution
+ */
 int16u normal_table[NORMAL_TABLE_SIZE] = {
      206,     613,    1022,    1430,	1838,	 2245,	  2652,	   3058,
     3463,    3867,    4271,    4673,	5075,	 5475,	  5874,	   6271,
@@ -285,11 +299,14 @@ int16u normal_table[NORMAL_TABLE_SIZE] = {
 };
 
 
-/* Class titles for different levels				*/
+/*
+ * Class titles for different levels			
+ */
 #ifdef MACGAME
 const char *(*player_title)[MAX_PLAYER_LEVEL];
 #else
 const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
+
 	/* Warrior	 */
 {"Rookie","Private","Soldier","Mercenary","Veteran(1st)","Veteran(2nd)",
 "Veteran(3rd)","Warrior(1st)","Warrior(2nd)","Warrior(3rd)","Warrior(4th)",
@@ -300,6 +317,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Lord (8th)","Lord (9th)","Lord (10th)","Lord (11th)","Lord (12th)",
 "Lord (13th)","Lord (14th)","Lord (15th)","Lord (16th)","Lord (17th)",
 "Lord (18th)","Lord (19th)","Lord Gallant","Lord Keeper","Lord Noble"},
+
 	/* Mage		 */
 {"Novice","Apprentice","Trickster-1","Trickster-2","Trickster-3","Cabalist-1",
 "Cabalist-2","Cabalist-3","Visionist","Phantasmist","Shadowist","Spellbinder",
@@ -311,6 +329,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Wizard (10th)","Wizard (11th)","Wizard (12th)","Wizard (13th)",
 "Wizard (14th)","Wizard (15th)","Wizard (16th)","Wizard (17th)",
 "Wizard (18th)","Wizard (19th)","Wizard Lord"},
+
 	/* Priests	 */
 {"Believer","Acolyte(1st)","Acolyte(2nd)","Acolyte(3rd)","Adept (1st)",
 "Adept (2nd)","Adept (3rd)","Priest (1st)","Priest (2nd)","Priest (3rd)",
@@ -322,6 +341,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Low Lama","Lama-1","Lama-2","Lama-3","Lama-4","Lama-5","Lama-6","Lama-7",
 "Lama-8","Lama-9","High Lama","Great Lama","Patriarch",
 "High Priest","Great Priest","Noble Priest"},
+
 	/* Rogues	 */
 {"Vagabond","Footpad","Cutpurse","Robber","Burglar","Filcher","Sharper",
 "Magsman","Common Rogue","Rogue (1st)","Rogue (2nd)","Rogue (3rd)",
@@ -333,6 +353,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Thief (14th)","Thief (15th)","Thief (16th)","Thief (17th)","Thief (18th)",
 "Thief (19th)","High Thief","Master Thief","Executioner","Low Assassin",
 "Assassin","High Assassin","Guildsmaster"},
+
 	/* Rangers	 */
 {"Runner (1st)","Runner (2nd)","Runner (3rd)","Strider (1st)","Strider (2nd)",
 "Strider (3rd)","Scout (1st)","Scout (2nd)","Scout (3rd)","Scout (4th)",
@@ -345,6 +366,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Guide (14th)","Guide (15th)",
 "Pathfinder-1","Pathfinder-2","Pathfinder-3","Pathfinder-4","Pathfinder-5",
 "Pathfinder-6","Pathfinder-7","Ranger","High Ranger","Ranger Lord"},
+
 	/* Paladins	 */
 {"Gallant","Keeper (1st)","Keeper (2nd)","Keeper (3rd)","Keeper (4th)",
 "Keeper (5th)","Keeper (6th)","Keeper (7th)","Keeper (8th)","Keeper (9th)",
@@ -356,24 +378,35 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Warder (11th)","Warder (12th)","Warder (13th)","Warder (14th)",
 "Warder (15th)","Warder (16th)","Warder (17th)","Warder (18th)",
 "Warder (19th)","Guardian","Chevalier","Justiciar","Paladin","High Lord"}
+
 };
 #endif
 
 /* Base experience levels, may be adjusted up for race and/or class*/
 int32u player_exp[MAX_PLAYER_LEVEL] = {
-      10,      25,	45,	 70,	  100,	    140,      200,	280,
-     380,     500,     650,	850,	 1100,	   1400,     1800,     2300,
-    2900,    3600,    4400,    5400,	 6800,	   8400,    10200,    12500,
-   17500,   25000,  35000L,  50000L,   75000L,	100000L,  150000L,  200000L,
- 275000L, 350000L, 450000L, 550000L, 700000L, 850000L, 1000000L, 1250000L,
-1500000L, 1800000L, 2100000L, 2400000L, 2700000L, 3000000L, 3500000L, 4000000L,
-4500000L, 5000000L
+	10,		25,		45,		70,
+	100,		140,		200,		280,
+	380,		500,		650,		850,
+	1100,		1400,		1800,		2300,
+	2900,		3600,		4400,		5400,
+	6800,		8400,		10200,		12500,
+	17500,		25000,		35000L,		50000L,
+	75000L,		100000L,	150000L,	200000L,
+	275000L,	350000L,	450000L,	550000L,
+	700000L,	850000L,	1000000L,	1250000L,
+	1500000L,	1800000L,	2100000L,	2400000L,
+	2700000L,	3000000L,	3500000L,	4000000L,
+	4500000L,	5000000L
 };
 
-/*Race	STR,INT,WIS,DEX,CON,CHR,
-	Ages, heights, and weights (male then female)
-	Racial Bases for: dis,srh,stl,fos,bth,bthb,bsav,hitdie,
-	infra, exp base, choice-classes */
+
+/*
+ * Player Race Information:
+ *	STR,INT,WIS,DEX,CON,CHR,
+ *	Ages, heights, and weights (male then female)
+ *	Racial Bases for: dis,srh,stl,fos,bth,bthb,bsav,hitdie,
+ *	infra, exp base, choice-classes
+ */
 #ifdef MACGAME
 race_type *race;
 #else
@@ -436,11 +469,15 @@ const char *dsp_race[MAX_RACES] = {
   "HiElf"
 };
 #endif
-/* Background information					*/
+
+/*
+ * Background information				
+ */
 #ifdef MACGAME
 background_type *background;
 #else
 background_type background[MAX_BACKGROUND] = {
+
 {"You are the illegitimate and unacknowledged child ",		 10, 1, 2, 25},
 {"You are the illegitimate but acknowledged child ",		 20, 1, 2, 35},
 {"You are one of several children ",				 95, 1, 2, 45},
@@ -603,12 +640,16 @@ background_type background[MAX_BACKGROUND] = {
 {"ulcerous skin.",						 33,66, 0, 50},
 {"scabby skin.",						 66,66, 0, 50},
 {"leprous skin.",						100,66, 0, 50}
+
 };
 #endif
 
-/* Classes.							*/
+/*
+ * Player Classes.
+ */
 class_type class[MAX_CLASS] = {
 /*	  HP Dis Src Stl Fos bth btb sve S  I  W  D Co Ch  Spell Exp  spl */
+
 {"Warrior",9, 25, 14, 1, 38, 70, 55, 18, 5,-2,-2, 2, 2,-1, NONE,    0, 0},
 {"Mage",   0, 30, 16, 2, 20, 34, 20, 36,-5, 3, 0, 1,-2, 1, MAGE,   30, 1},
 {"Priest", 2, 25, 16, 2, 32, 48, 35, 30,-1,-3, 3,-1, 0, 2, PRIEST, 20, 1},
@@ -617,11 +658,16 @@ class_type class[MAX_CLASS] = {
 {"Paladin",6, 20, 12, 1, 38, 68, 40, 24, 3,-3, 1, 0, 2, 2, PRIEST, 35, 1}
 };
 
-/* making it 16 bits wastes a little space, but saves much signed/unsigned
-   headaches in its use */
-/* CLA_MISC_HIT is identical to CLA_SAVE, which takes advantage of
-   the fact that the save values are independent of the class */
+
+
+/*
+ * making it 16 bits wastes a little space, but saves much
+ * signed/unsigned headaches in its use
+ * CLA_MISC_HIT is identical to CLA_SAVE, which takes advantage of
+ * the fact that the save values are independent of the class
+ */
 int16 class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
+
 /*	       bth    bthb   device  disarm   save/misc hit  */
 /* Warrior */ {	4,	4,	2,	2,	3 },
 /* Mage    */ { 2,	2,	4,	2,	3 },
@@ -629,6 +675,7 @@ int16 class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
 /* Rogue   */ { 3,	4,	3,	4,	3 },
 /* Ranger  */ { 3,	4,	3,	3,	3 },
 /* Paladin */ { 3,	2,	3,	2,	3 }
+
 };
 
 int32u spell_learned = 0;	/* bit mask of spells learned */
@@ -639,14 +686,19 @@ int32u spell_forgotten = 0;	/* bit mask of spells learned but forgotten */
 int32u spell_forgotten2 = 0;	/* bit mask of spells learned but forgotten */
 int8u spell_order[64];		/* order spells learned/remembered/forgotten */
 
-/* Warriors don't have spells, so there is no entry for them.  Note that
-   this means you must always subtract one from the py.misc.pclass before
-   indexing into magic_spell[]. */
+/*
+ * Warriors don't have spells, so there is no entry for them.  Note that
+ * this means you must always subtract one from the py.misc.pclass before
+ * indexing into magic_spell[].
+ */
 #ifdef MACGAME
 spell_type (*magic_spell)[63];
 #else
 spell_type magic_spell[MAX_CLASS-1][63] = {
-  {		  /* Mage	   */
+
+  {
+      /*** Mage ***/
+
 /* Beginners Magic */
      {	1,  1, 22,   1},
      {	1,  1, 23,   1},
@@ -657,6 +709,7 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0},
      {	3,  3, 25,   1},
      {	3,  3, 27,   2},
+
 /* Conjuring and Tricks */
      {	3,  4, 30,   1},
      {	5,  4, 30,   6},
@@ -667,6 +720,7 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      {	7,  6, 30,  10},
      {	7,  6, 40,  12},
      {	9,  7, 44,  19},
+
 /* Incantations and Illusions */
      {	9,  7, 45,  19},
      {	9,  7, 75,  22},
@@ -676,6 +730,7 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 13,  7, 50,  22},
      { 15,  9, 50,  25},
      { 17,  9, 50,  31},
+
 /* Sorcery and Evocoations */
      { 19, 12, 55,  38},
      { 21, 12, 90,  44},
@@ -721,7 +776,10 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0},
      { 99, 99,  0,   0}
    },
-   {		  /* Priest	   */
+
+   {
+	/*** Priest ***/
+
      {	1,  1, 10,   1},
      {	1,  2, 15,   1},
      {	1,  2, 20,   1},
@@ -749,6 +807,7 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 13, 10, 45,  15},
      { 13, 11, 45,  16},
      { 15, 12, 50,  20},
+     
      { 15, 14, 50,  22},
      { 17, 14, 55,  32},
      { 21, 16, 60,  38},
@@ -794,7 +853,10 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0},
      { 99, 99,  0,   0}
    },
-   {		  /* Rogue	   */
+
+   {
+	/*** Rogue ***/
+
      { 99, 99,	0,   0},
      {	5,  1, 50,   1},
      {	7,  2, 55,   1},
@@ -868,7 +930,10 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0},
      { 99, 99,  0,   0}
    },
-   {		   /* Ranger	    */
+
+   {
+	/*** Ranger ***/
+
      {	3,  1, 30,   1},
      {	3,  2, 35,   2},
      {	3,  2, 35,   2},
@@ -939,7 +1004,10 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0},
      { 99, 99,  0,   0}
    },
-   {		  /* Paladin	   */
+
+   {
+	/*** Paladin ***/
+
      {	1,  1, 30,   1},
      {	2,  2, 35,   2},
      {	3,  3, 35,   3},
@@ -1014,30 +1082,36 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
 #endif
 
 const char *spell_names[127] = {
-  /* Mage Spells */
-  "Magic Missile",  "Detect Monsters",	"Phase Door",  "Light Area",
-  "Treasure Detection",
-  "Cure Light Wounds",	  "Object Detection",
+
+    /*** Mage Spells ***/
+
+  "Magic Missile",  "Detect Monsters", "Phase Door",  "Light Area",
+  "Treasure Detection", "Cure Light Wounds",  "Object Detection",
   "Find Hidden Traps/Doors",  "Stinking Cloud",
-  "Confusion",	"Lightning Bolt",  "Trap/Door Destruction", "Sleep I",
+
+  "Confusion", "Lightning Bolt",  "Trap/Door Destruction", "Sleep I",
   "Cure Poison",  "Teleport Self",  "Spear of Light",  "Frost Bolt",
+  "Turn Stone to Mud",
+  
 #ifdef SATISFY_HUNGER
-  "Turn Stone to Mud",	"Staisfy Hunger",	"Recharge Item I",  "Sleep II",
+  "Staisfy Hunger",
 #else
-  "Turn Stone to Mud",	"Create Food",	"Recharge Item I",  "Sleep II",
+  "Create Food",
 #endif
-  "Polymorph Other",  "Identify",  "Sleep III",	 "Fire Bolt",  "Slow Monster",
-  "Frost Ball",	 "Recharge Item II", "Teleport Other",	"Haste Self",
+  "Recharge Item I",  "Sleep II", "Polymorph Other",
+  "Identify",  "Sleep III",  "Fire Bolt",  "Slow Monster",
+
+  "Frost Ball", "Recharge Item II", "Teleport Other", "Haste Self",
   "Fire Ball", "Word of Destruction", "Genocide",
 
-/* Mordenkainen's Escapes */
+    /* Mordenkainen's Escapes */
   "Door Creation",
   "Stair Creation",
   "Teleport Level",
   "Earthquake",
   "Word of Recall",
 
-/* Raal's Tome of Destruction */
+    /* Raal's Tome of Destruction */
   "Acid Bolt",
   "Cloud Kill",
   "Acid Ball",
@@ -1045,21 +1119,21 @@ const char *spell_names[127] = {
   "Meteor Swarm",
   "Hellfire",
 
-/*Kelek's Grimoire of Power*/
+    /*Kelek's Grimoire of Power*/
   "Detect Evil",
   "Detect Enchantment",
   "Recharge Item III",
   "Genocide",
   "Mass Genocide",
 
-/* Resistance of Scarabtarices */
+    /* Resistance of Scarabtarices */
   "Resist Fire",
   "Resist Cold",
   "Resist Acid",
   "Resist Poison",
   "Resistance",
 
-/* tenser's transformations...*/
+    /* Tenser's transformations...*/
   "Heroism",
   "Shield",
   "Berserker",
@@ -1070,42 +1144,51 @@ const char *spell_names[127] = {
   "blank",
   "blank",
   "blank",
-  /* Priest Spells, start at index 31 now 63 ~Ludwig */
-  "Detect Evil",  "Cure Light Wounds",	"Bless",  "Remove Fear", "Call Light",
-  "Find Traps",	 "Detect Doors/Stairs",	 "Slow Poison",	 "Blind Creature",
-#ifdef SATISFY_HUNGER
-  "Portal",  "Cure Medium Wounds",  "Chant",  "Sanctuary",  "Satisfy Hunger",
-#else
-  "Portal",  "Cure Medium Wounds",  "Chant",  "Sanctuary",  "Create Food",
-#endif
-  "Remove Curse",  "Resist Heat and Cold",  "Neutralize Poison",
-  "Orb of Draining",  "Cure Serious Wounds",  "Sense Invisible",
-  "Protection from Evil",  "Earthquake",  "Sense Surroundings",
-  "Cure Critical Wounds",  "Turn Undead",  "Prayer",  "Dispel Undead",
-  "Heal",  "Dispel Evil",  "Glyph of Warding",	"Holy Word",
 
-/* Godly Insights... */
+
+    /*** Priest Spells (starting at 63) ***/
+
+  "Detect Evil",  "Cure Light Wounds", "Bless",  "Remove Fear",
+  "Call Light", "Find Traps",  "Detect Doors/Stairs",  "Slow Poison",
+  
+  "Blind Creature", "Portal",  "Cure Medium Wounds",  "Chant",
+  "Sanctuary",
+#ifdef SATISFY_HUNGER
+  "Satisfy Hunger",
+#else
+  "Create Food",
+#endif
+  "Remove Curse",  "Resist Heat and Cold",
+  
+  "Neutralize Poison", "Orb of Draining",  "Cure Serious Wounds",
+  "Sense Invisible", "Protection from Evil",  "Earthquake",
+  "Sense Surroundings", "Cure Critical Wounds",  "Turn Undead",
+  
+  "Prayer",  "Dispel Undead", "Heal",  "Dispel Evil",
+  "Glyph of Warding", "Holy Word",
+
+    /* Godly Insights... */
   "Detect Monsters",
   "Detection",
   "Perception",
   "Probing",
   "Clairvoyance",
 
-/* Purifications and Healing */
+    /* Purifications and Healing */
   "Cure Serious Wounds",
   "Cure Critical Wounds",
   "Healing",
   "Restoration",
   "Remembrance",
 
-/* Wrath of God */
+    /* Wrath of God */
   "Dispel Undead",
   "Dispel Evil",
   "Banishment",
   "Word of Destruction",
   "Annihilation",
 
-/* Holy Infusions */
+    /* Holy Infusions */
   "Unbarring Ways",
   "Recharging",
   "Dispel Curse",
@@ -1113,7 +1196,7 @@ const char *spell_names[127] = {
   "Enchant Armour",
   "Elemental Brand",
 
-/* Ethereal openings */
+    /* Ethereal openings */
   "Blink",
   "Teleport",
   "Teleport Away",
@@ -1144,9 +1227,10 @@ int16u player_init[MAX_CLASS][5] = {
         /* Last array object added for one extra useful object per class */
 };
 
-/* spellmasks[][] is used to control the "you seem to be missing a book"
-	messages, because they cause a little confusion, and a bit of
-	irritation.  -CFT */
+/*
+ * spellmasks[][] is used to control the "you seem to be missing a book"
+ * messages, because they look stupid otherwise.
+ */
 int32u spellmasks[MAX_CLASS][2] = {
 	{ 0x0L, 0x0L },			/* warrior */
 	{ 0xffffffafL, 0x0fffffffL },	/* mage */
@@ -1155,3 +1239,6 @@ int32u spellmasks[MAX_CLASS][2] = {
 	{ 0xffffffafL, 0x03fe77feL },	/* ranger */
 	{ 0xffffffffL, 0x03ffefffL }	/* paladin */
 };
+
+
+

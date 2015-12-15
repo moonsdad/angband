@@ -1,6 +1,11 @@
+=== Angband  ===
+
+There really isn't a proper README file for Angband yet.
+
 To get Angband running, edit config.h and the Makefile as directed.
-You may need to change the compiler, as well.  The code has been
-tested with the following systems: NEXTSTEP, SunOS, Ultrix, HPUX, Atari.
+You may need to change the compiler, as well.
+
+The code has been tested with the following systems: NEXTSTEP, SunOS, Ultrix, HPUX, Atari.
 Linux support is preliminary; contact Pete Berger@lm.net with Linux problems.
 
 I have included the BSD random() library because it offers a much better 
