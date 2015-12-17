@@ -77,19 +77,29 @@ typedef struct creature_type {
 
 /*
  * Monster attack and damage types
+ * Field order fixed by use in tables.c
  */
-typedef struct m_attack_type {
+typedef struct _monster_attack monster_attack;
+
+struct _monster_attack {
     byte attack_type;		    
     byte attack_desc;
     byte attack_dice;
     byte attack_sides;
-  } m_attack_type;
+};
 
 
 /*
- * Monster memories. -CJS-
+ * Monster memories (or "lore").
+ *
+ * Note that there is really no reason for "monster_lore" not to
+ * be part of "monster_race" except that it separates the things
+ * that get written to the save-file from those that do not.
  */
-typedef struct recall_type {
+
+typedef struct _monster_lore monster_lore;
+
+struct _monster_lore {
 
     u32b r_cmove;
     u32b r_spells;
@@ -98,11 +108,13 @@ typedef struct recall_type {
 
     u16b r_kills;		/* Count player killing monster */
     u16b r_deaths;		/* Count monster killing player */
+
     u32b r_cdefense;
+    byte r_attacks[MAX_MON_NATTACK];
+
     byte r_wake;		/* Number of times woken up (?) */
     byte r_ignore;		/* Number of times ignored (?) */
-    byte r_attacks[MAX_MON_NATTACK];
-  } recall_type;
+};
 
 struct unique_mon {
   s32b exist;
@@ -115,21 +127,36 @@ typedef struct describe_mon_type {
   char gender;			    /* one of 'm','f','n','p' to genderize monsters -CWS */
 } describe_mon_type;
 
-typedef struct monster_type {
-  s16b hp;			    /* Hit points		*/
-  s16b maxhp;			    /* Max Hit points		*/
-  s16b csleep;			    /* Inactive counter		*/
-  s16b cspeed;			    /* Movement speed		*/
-  u16b mptr;			    /* Pointer into creature was u16b	   */
-  /* Note: fy, fx, and cdis constrain dungeon size to less than 256 by 256 */
-  byte fy;			    /* Y Pointer into map	*/
-  byte fx;			    /* X Pointer into map	*/
-  byte cdis;			    /* Cur dis from player	*/
-  byte ml;
-  byte stunned;
-  byte confused;
-  byte monfear;		    /* Run away! Run away! -DGK */
-} monster_type;
+/*
+ * Monster information, for a specific monster.
+ *
+ * Note: fy, fx, and cdis  constrain dungeon size to 256x256
+ */
+
+typedef struct _monster_type monster_type;
+
+struct _monster_type {
+
+  byte fy;			/* Y location on map		*/
+  byte fx;			/* X location on map		*/
+
+  s16b hp;			/* Current Hit points		*/
+  s16b maxhp;			/* Max Hit points		*/
+
+  s16b csleep;			/* Inactive counter		*/
+
+  s16b cspeed;			/* Movement speed		*/
+  
+  u16b mptr;			/* Pointer into creature was u16b	   */
+
+  byte stunned;		/* Monster is stunned		*/
+  byte confused;		/* Monster is confused		*/
+  byte monfear;		/* Monster is afraid		*/
+
+  byte cdis;			/* Current dis from player	*/
+
+  byte ml;			/* Monster is "visible"		*/
+};
 
 typedef struct treasure_type {
   const char *name;		    /* Object name		      */
@@ -305,16 +332,24 @@ typedef struct player_type {
     } flags;
 } player_type;
 
+/* 
+ * spell name is stored in spell_names[] array
+ * at index i, +31 if priest
+ */
 
-typedef struct spell_type {  /* spell name is stored in spell_names[] array at index i, +31 if priest */
-  byte slevel;
-  byte smana;
-  byte sfail;
-  u16b sexp;			    /* 1/4 of exp gained for learning spell */
-} spell_type;
+typedef struct _spell_type spell_type;
+
+struct _spell_type {
+  byte slevel;		/* Required level */
+  byte smana;		/* Required mana */
+  byte sfail;		/* Minimum chance of failure */
+  u16b sexp;		/* 1/4 of exp gained for learning spell */
+};
 
 
-typedef struct race_type {
+typedef struct _player_race player_race;
+
+struct _player_race {
 
   const char	*trace;			    /* Type of race	    */
 
@@ -348,9 +383,11 @@ typedef struct race_type {
   byte infra;			/* See infra-red		 */
   byte b_exp;			/* Base experience factor	 */
   byte rtclass;			/* Bit field for class types */
-} race_type;
+};
 
-typedef struct class_type {
+typedef struct _player_class player_class;
+
+struct _player_class {
 
   const char *title;			    /* type of class		       */
 
@@ -374,14 +411,16 @@ typedef struct class_type {
   byte m_exp;			/* Class experience factor		*/
   byte first_spell_lev;		/* First level spells usable		*/
   byte age_adj;			/* age percentage (warrior = 100)	*/
-} class_type;
+};
 
 
 /*
  * Player background information
  */
 
-typedef struct background_type {
+typedef struct _player_background player_background;
+
+struct _player_background {
 
   const char *info;			    /* History information	    */
 
@@ -389,7 +428,7 @@ typedef struct background_type {
   byte chart;			    /* Table number		    */
   byte next;			    /* Pointer to next table	    */
   byte bonus;			    /* Bonus to the Social Class+50 */
-} background_type;
+};
 
 typedef struct cave_type {
   u16b cptr;

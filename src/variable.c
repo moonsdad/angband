@@ -77,15 +77,18 @@ int in_store_flag = FALSE;	/* Don't redisplay light in stores -DGK */
 
 int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
 
-int coin_type;			/* remember Creeping _xxx_ coin type -CWS */
-int opening_chest = 0;          /* don't generate another chest -CWS */
+int coin_type;			/* Hack -- force coin type */
+int opening_chest = 0;          /* Hack -- prevent chest generation */
+
 
 struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
 int rogue_like_commands;	/* set in config.h/main.c */
 
-/* options set via the '=' command */
+
+/*  OPTION: options set via the '=' command */
 /* note that the values set here will be the default settings */
+
 int find_cut = TRUE;
 int find_examine = TRUE;
 int find_bound = FALSE;
@@ -118,11 +121,11 @@ int wait_for_more = FALSE;	/* used when ^C hit during -more- prompt */
 int closing_flag = FALSE;	/* Used for closing   */
 
 /*  Following are calculated from max dungeon sizes		*/
-s16b max_panel_rows,max_panel_cols;
-int panel_row,panel_col;
-int panel_row_min,panel_row_max;
-int panel_col_min,panel_col_max;
-int panel_col_prt,panel_row_prt;
+s16b max_panel_rows, max_panel_cols;
+int panel_row, panel_col;
+int panel_row_min, panel_row_max;
+int panel_col_min, panel_col_max;
+int panel_col_prt, panel_row_prt;
 
 /* Player location in dungeon */
 s16b char_row;
@@ -143,13 +146,13 @@ cave_type cave[MAX_HEIGHT][MAX_WIDTH];
 #endif
 
 #ifdef MAC
-recall_type *c_recall;
+monster_lore *c_recall;
 #else
-recall_type c_recall[MAX_CREATURES];	/* Monster memories */
+monster_lore c_recall[MAX_CREATURES];	/* Monster memories */
 #endif
 
 /* Player record for most player related info */
-player_type py;
+player_type py;	/* player info record */
 
 /* 
  * Calculated base hp values for player at each level,

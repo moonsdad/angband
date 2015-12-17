@@ -15,7 +15,9 @@
 #include "types.h"
 #include "externs.h"
 
-/* For those systems that don't have stricmp. -hmj */
+/*
+ * For those systems that don't have stricmp. -hmj
+ */
 
 #if defined(NEEDS_STRICMP)
 int my_stricmp(const char *c1,const char *c2)		/* avoid namespace collision -CWS */

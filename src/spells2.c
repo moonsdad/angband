@@ -3042,8 +3042,10 @@ int genocide(int spell)
 }
 
 
-/* Change speed of any creature .			-RAK-	 */
-/* NOTE: cannot slow a winning creature (BALROG)		 */
+/*
+ * Change speed of any creature .			-RAK-
+ * NOTE: cannot slow a winning creature (BALROG)
+ */
 int speed_monsters(int spd)
 {
     register int        i, speed;
@@ -3068,27 +3070,36 @@ int speed_monsters(int spd)
 		(void)sprintf(out_val, "%s starts moving faster.", m_name);
 		msg_print(out_val);
 	    }
-	} else if ((r_ptr->level <
+	} else
+
+	 if ((r_ptr->level <
 	    randint((py.misc.lev - 10) < 1 ? 1 : (py.misc.lev - 10)) + 10) &&
 		   !(r_ptr->cdefense & UNIQUE)) {
+
 	    m_ptr->cspeed += spd;
+
 	    m_ptr->csleep = 0;
+
 	    if (m_ptr->ml) {
 		(void)sprintf(out_val, "%s starts moving slower.", m_name);
 		msg_print(out_val);
 		speed = TRUE;
 	    }
-	} else if (m_ptr->ml) {
+	}
+	else if (m_ptr->ml) {
 	    (void)sprintf(out_val, "%s is unaffected.", m_name);
 	    msg_print(out_val);
 	}
     }
+
     return (speed);
 }
 
 
-/* Sleep any creature .		-RAK-	 */
-int sleep_monsters2()
+/*
+ * Sleep any creature.		-RAK-	 
+ */
+int sleep_monsters2(void)
 {
     register int        i, sleep;
     register monster_type *m_ptr;
@@ -3100,20 +3111,25 @@ int sleep_monsters2()
 	m_ptr = &m_list[i];
 	r_ptr = &c_list[m_ptr->mptr];
 	monster_name(m_name, m_ptr, r_ptr);
+
 	if ((m_ptr->cdis > MAX_SIGHT) ||
 	    !los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx))
 	/* do nothing */
 	    ;
-	else if ((r_ptr->level >
+	else 
+
+	if ((r_ptr->level >
 	    randint((py.misc.lev - 10) < 1 ? 1 : (py.misc.lev - 10)) + 10) ||
 	    (r_ptr->cdefense & UNIQUE) || (r_ptr->cdefense & CHARM_SLEEP)) {
 	    if (m_ptr->ml) {
-		if (r_ptr->cdefense & CHARM_SLEEP)
+		if (r_ptr->cdefense & CHARM_SLEEP) {
 		    c_recall[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+		}
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 	    }
-	} else {
+	}
+	else {
 	    m_ptr->csleep = 500;
 	    if (m_ptr->ml) {
 		(void)sprintf(out_val, "%s falls asleep.", m_name);
@@ -3122,19 +3138,23 @@ int sleep_monsters2()
 	    }
 	}
     }
+
     return (sleep);
 }
 
 
 /* Polymorph any creature that player can see.  -RAK-   */
 /* NOTE: cannot polymorph a winning creature (BALROG)            */
+/*
+ * Crazy function -- polymorph all visible creatures.
+ */
 int mass_poly()
 {
     register int i;
     int mass;
     register monster_type  *m_ptr;
     register creature_type *r_ptr;
-    
+
     mass = FALSE;
     for (i = mfptr - 1; i >= MIN_MONIX; i--) {
 	m_ptr = &m_list[i];
@@ -3145,12 +3165,15 @@ int mass_poly()
 	    }
 	}
     }
-    return(mass);
+
+    return (mass);
 }
 
 
-/* Display evil creatures on current panel		-RAK-	 */
-int detect_evil()
+/*
+ * Display evil creatures on current panel		-RAK-	 
+ */
+int detect_evil(void)
 {
     register int        i, flag;
     register monster_type *m_ptr;
@@ -3160,24 +3183,31 @@ int detect_evil()
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
 	    (EVIL & c_list[m_ptr->mptr].cdefense)) {
+
+	    /* Draw the monster (even if invisible) */
 	    m_ptr->ml = TRUE;
-	/* works correctly even if hallucinating */
-	    print((char)c_list[m_ptr->mptr].cchar, (int)m_ptr->fy,
-		  (int)m_ptr->fx);
+	    /* works correctly even if hallucinating */
+	    print((char)c_list[m_ptr->mptr].cchar, (int)m_ptr->fy, (int)m_ptr->fx);
+
 	    flag = TRUE;
 	}
     }
+
     if (flag) {
 	msg_print("You sense the presence of evil!");
 	msg_print(NULL);
-    /* must unlight every monster just lighted */
+
+	/* must unlight every monster just lighted */
 	creatures(FALSE);
     }
+
     return (flag);
 }
 
 
-/* Change players hit points in some manner		-RAK-	 */
+/*
+ * Change players hit points in some manner		-RAK-	 
+ */
 int hp_player(int num)
 {
     register int          res;
@@ -3199,7 +3229,8 @@ int hp_player(int num)
 		msg_print("You feel a little better.");
 	    else
 		msg_print("You feel better.");
-	} else {
+	}
+	else {
 	    if (num < 7)
 		msg_print("You feel much better.");
 	    else
@@ -3207,11 +3238,14 @@ int hp_player(int num)
 	}
 	res = TRUE;
     }
+    
     return (res);
 }
 
 
-/* Cure players confusion				-RAK-	 */
+/*
+ * Cure players confusion				-RAK-	 
+ */
 int cure_confusion()
 {
     register int           cure;
@@ -3227,8 +3261,10 @@ int cure_confusion()
 }
 
 
-/* Cure players blindness				-RAK-	 */
-int cure_blindness()
+/*
+ * Cure players blindness				-RAK-	 
+ */
+int cure_blindness(void)
 {
     register int           cure;
     register struct flags *f_ptr;
@@ -3243,8 +3279,10 @@ int cure_blindness()
 }
 
 
-/* Cure poisoning					-RAK-	 */
-int cure_poison()
+/*
+ * Cure poisoning					-RAK-	 
+ */
+int cure_poison(void)
 {
     register int           cure;
     register struct flags *f_ptr;
@@ -3259,7 +3297,9 @@ int cure_poison()
 }
 
 
-/* Cure the players fear				-RAK-	 */
+/*
+ * Cure the players fear				-RAK-	 
+ */
 int remove_fear()
 {
     register int           result;
@@ -3275,10 +3315,14 @@ int remove_fear()
 }
 
 
-/* This is a fun one.  In a given block, pick some walls and	 */
-/* turn them into open spots.  Pick some open spots and turn	 */
-/* them into walls.  An "Earthquake" effect.	       -RAK-   */
-void earthquake()
+
+
+/*
+ * This is a fun one.  In a given block, pick some walls and
+ * turn them into open spots.  Pick some open spots and turn
+ * them into walls.  An "Earthquake" effect.	       -RAK-  
+ */
+void earthquake(void)
 {
     register int        i, j;
     register cave_type *c_ptr;
@@ -3287,11 +3331,14 @@ void earthquake()
     int                 kill, damage, tmp, y, x;
     vtype               out_val, m_name;
 
+    /* Shatter the terrain around the player */
     for (i = char_row - 10; i <= char_row + 10; i++)
 	for (j = char_col - 10; j <= char_col + 10; j++)
-	    if (((i != char_row) || (j != char_col)) &&
-		in_bounds(i, j) && (distance(char_row, char_col, i, j)<=10) &&
-		(randint(8) == 1)) {
+
+	    /* Verify legality and distance */
+	    if (((i != char_row) || (j != char_col)) && in_bounds(i, j)
+	    && (distance(char_row, char_col, i, j)<=10) && (randint(8) == 1)) {
+
 		c_ptr = &cave[i][j];
 		if (c_ptr->tptr != 0)
 		    if (((t_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
@@ -3300,38 +3347,49 @@ void earthquake()
 			|| (t_list[c_ptr->tptr].tval == TV_UP_STAIR)
 			|| (t_list[c_ptr->tptr].tval == TV_DOWN_STAIR)
 			|| (t_list[c_ptr->tptr].tval == TV_STORE_DOOR))
-			continue;  /* don't touch artifacts or stairs or
-				    * stores -CFT */
+			continue;  /* don't touch artifacts or stairs or stores -CFT */
 		    else
-			(void)delete_object(i, j);
+
+		/* Delete the object */
+		delete_object(i, j);
+
+		/* Hurt the monster, if any */
 		if (c_ptr->cptr > 1) {
+
 		    m_ptr = &m_list[c_ptr->cptr];
 		    r_ptr = &c_list[m_ptr->mptr];
 
 		    if (!(r_ptr->cmove & CM_PHASE) && !(r_ptr->cdefense & BREAK_WALL)) {
-			if ((movement_rate(c_ptr->cptr) == 0) ||
-			    (r_ptr->cmove & CM_ATTACK_ONLY))
+			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cmove & CM_ATTACK_ONLY)) 
+
 			/* monster can not move to escape the wall */
 			    kill = TRUE;
 			else {
 			/* only kill if there is nowhere for the monster to escape to */
 			    kill = TRUE;
-			    for (y = i - 1; y <= i + 1; y++)
-				for (x = j - 1; x <= j + 1; x++)
+			    for (y = i - 1; y <= i + 1; y++) {
+				for (x = j - 1; x <= j + 1; x++) {
 				    if (cave[y][x].fval >= MIN_CLOSED_SPACE)
 					kill = FALSE;
+				}
+			    }
 			}
-			if (kill)
+
+			if (kill) {
 			    damage = 320;
-			else
+			}
+			else {
 			    damage = damroll(3 + randint(3), 8+randint(5));
+			}
+
 			monster_name(m_name, m_ptr, r_ptr);
 			(void)sprintf(out_val, "%s wails out in pain!", m_name);
 			msg_print(out_val);
+
 			i = mon_take_hit((int)c_ptr->cptr, damage, TRUE);
 			if (i >= 0) {
-			    (void)sprintf(out_val, "%s is embedded in the rock.",
-					  m_name);
+			    sprintf(out_val, "%s is embedded in the rock.",
+				    m_name);
 			    msg_print(out_val);
 			/* prt_experience(); */
 			}
@@ -3343,15 +3401,14 @@ void earthquake()
 		    c_ptr->fm = FALSE;
 		} else if (c_ptr->fval <= MAX_CAVE_FLOOR) {
 		    tmp = randint(10);
-		    if (tmp < 6)
-			c_ptr->fval = QUARTZ_WALL;
-		    else if (tmp < 9)
-			c_ptr->fval = MAGMA_WALL;
-		    else
-			c_ptr->fval = GRANITE_WALL;
+		    if (tmp < 6) c_ptr->fval = QUARTZ_WALL;
+		    else if (tmp < 9) c_ptr->fval = MAGMA_WALL;
+		    else c_ptr->fval = GRANITE_WALL;
 
 		    c_ptr->fm = FALSE;
 		}
+
+		/* Redraw */
 		lite_spot(i, j);
 	    }
 }
@@ -3361,34 +3418,43 @@ void earthquake()
 int protect_evil()
 {
     register int           res;
-    register struct flags *f_ptr;
+    register struct flags *f_ptr = &py.flags;
 
-    f_ptr = &py.flags;
-    if (f_ptr->protevil == 0)
-	res = TRUE;
-    else
-	res = FALSE;
+    if (f_ptr->protevil == 0) res = TRUE; else res = FALSE;
+
     f_ptr->protevil += randint(25) + 3 * py.misc.lev;
+
     return (res);
 }
 
 
 /* Create some high quality mush for the player.	-RAK-	    */
 /* Nope, let's just fill him up and save everybody time... -CWS */
-void create_food()
+/*
+ * Make the player no longer hungry
+ */
+void create_food(void)
 {
-     msg_print("You feel full!");
-	 msg_print(NULL);
+    msg_print("You feel full!");
+    msg_print(NULL);
+
 #if defined(SATISFY_HUNGER)				/* new create food code -CWS */
-	 py.flags.food = PLAYER_FOOD_MAX;
+    /* No longer hungry */
+    py.flags.food = PLAYER_FOOD_MAX;
 #else
      /* add to food timer rather than create mush - cba */
      add_food(object_list[OBJ_MUSH].p1);
 #endif
-     py.flags.status &= ~(PY_WEAK | PY_HUNGRY);
-     prt_hunger();
+
+    /* Hack -- update the display */
+    py.flags.status &= ~(PY_WEAK | PY_HUNGRY);
+    prt_hunger();
 }
 
+
+/*
+ * Banish monsters -- a hack.
+ */
 int banish_creature(u32b cflag, int dist)
 {
     register int           i;
@@ -3406,6 +3472,7 @@ int banish_creature(u32b cflag, int dist)
 	    dispel = TRUE;
 	}
     }
+
     return (dispel);
 }
 
@@ -3415,7 +3482,7 @@ int probing()
     int                     probe;
     register monster_type  *m_ptr;
     register creature_type *r_ptr;
-    register recall_type   *mp;
+    register monster_lore   *mp;
     vtype                   out_val, m_name;
 
     msg_print("Probing...");
@@ -3424,6 +3491,7 @@ int probing()
 	m_ptr = &m_list[i];
 	r_ptr = &c_list[m_ptr->mptr];
 	mp = &c_recall[m_ptr->mptr];
+
 	if ((m_ptr->cdis <= MAX_SIGHT) &&
 	    los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx) && 
 	    (m_ptr->ml)) {
@@ -3435,39 +3503,59 @@ int probing()
 	    move_cursor_relative(m_ptr->fy, m_ptr->fx);
 	    msg_print(out_val);
 
-/* let's make probing do good things to the monster memory -CWS */
+	    /* let's make probing do good things to the monster memory -CWS */
 	    mp->r_cdefense = r_ptr->cdefense;
 	    mp->r_cmove = (r_ptr->cmove & ~CM_TREASURE);
+
+	    /* Probe worked */
 	    probe = TRUE;
 	}
     }
-    if (probe)
+
+    if (probe) {
 	msg_print("That's all.");
-    else
+    }
+    else {
 	msg_print("You find nothing to probe.");
+    }
+
     move_cursor_relative(char_row, char_col);
     return (probe);
 }
 
-/* Attempts to destroy a type of creature.  Success depends on	 */
-/* the creatures level VS. the player's level		 -RAK-	 */
+
+/*
+ * Attempts to destroy a type of creature.  Success depends on
+ * the creatures level VS. the player's level		 -RAK-	 
+ */
 int dispel_creature(int cflag, int damage)
 {
-    register int            i;
-    int                     k, dispel;
-    register monster_type  *m_ptr;
-    register creature_type *r_ptr;
-    vtype                   out_val, m_name;
+    register int	i;
+    int			k, dispel;
+    monster_type	*m_ptr;
+    creature_type	*r_ptr;
+    vtype		out_val, m_name;
 
     dispel = FALSE;
+
+    /* Affect all nearby monsters within line of sight */
     for (i = mfptr - 1; i >= MIN_MONIX; i--) {
+
+	/* Get the monster */
 	m_ptr = &m_list[i];
+
 	if ((cflag & c_list[m_ptr->mptr].cdefense) &&
 	    (m_ptr->cdis <= MAX_SIGHT) &&
 	    los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx)) {
+
+	/* Get the race */
 	    r_ptr = &c_list[m_ptr->mptr];
+	    /* Memorize the susceptibility */
 	    c_recall[m_ptr->mptr].r_cdefense |= cflag;
+
+	    /* Get the name */
 	    monster_name (m_name, m_ptr, r_ptr);
+
 	    k = mon_take_hit(i, randint(damage), FALSE);
 	    if (k >= 0)
 		(void)sprintf(out_val, "%s dissolves!", m_name);
@@ -3479,12 +3567,15 @@ int dispel_creature(int cflag, int damage)
 		prt_experience();
 	}
     }
+
     return (dispel);
 }
 
 
-/* Attempt to turn (confuse) undead creatures.	-RAK-	 */
-int turn_undead()
+/*
+ * Attempt to turn (confuse) undead creatures.	-RAK-	 
+ */
+int turn_undead(void)
 {
     register int            i, turn_und;
     register monster_type  *m_ptr;
@@ -3493,7 +3584,9 @@ int turn_undead()
 
     turn_und = FALSE;
     for (i = mfptr - 1; i >= MIN_MONIX; i--) {
+
 	m_ptr = &m_list[i];
+
 	r_ptr = &c_list[m_ptr->mptr];
 	if ((UNDEAD & r_ptr->cdefense)
 	    && (m_ptr->cdis <= MAX_SIGHT)
@@ -3508,18 +3601,23 @@ int turn_undead()
 		    c_recall[m_ptr->mptr].r_cdefense |= UNDEAD;
 		}
 		m_ptr->monfear = randint(py.misc.lev) * 2;
-	    } else if (m_ptr->ml) {
+	    }
+	    else if (m_ptr->ml) {
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 	    }
 	}
     }
+
     return (turn_und);
 }
 
 
-/* Leave a glyph of warding. Creatures will not pass over! -RAK- */
-void warding_glyph()
+/*
+ * Leave a glyph of warding. Creatures will not pass over it. -RAK- 
+ * 
+ */
+void warding_glyph(void)
 {
     register int        i;
     register cave_type *c_ptr;
@@ -3533,47 +3631,63 @@ void warding_glyph()
 }
 
 
-/* Lose experience					-RAK-	 */
+
+
+/*
+ * Lose experience					-RAK-	 
+ */
 void lose_exp(s32b amount)
 {
     register int          i;
     register struct misc *m_ptr;
-    register class_type  *c_ptr;
+    register player_class  *c_ptr;
 
     m_ptr = &py.misc;
-    if (amount > m_ptr->exp)
+    if (amount > m_ptr->exp) {
 	m_ptr->exp = 0;
-    else
+    }
+    else {
 	m_ptr->exp -= amount;
+    }
+
     prt_experience();
 
     i = 0;
     while (((player_exp[i] * m_ptr->expfact / 100) <= m_ptr->exp)
-	   && (i < MAX_PLAYER_LEVEL))
+	   && (i < MAX_PLAYER_LEVEL)) {
 	i++;
-/* increment i once more, because level 1 exp is stored in player_exp[0] */
+    }
+
+    /* increment i once more, because level 1 exp is stored in player_exp[0] */
     i++;
-    if (i > MAX_PLAYER_LEVEL)
-	i = MAX_PLAYER_LEVEL;
+
+    if (i > MAX_PLAYER_LEVEL) i = MAX_PLAYER_LEVEL;
+
     if (m_ptr->lev != i) {
+
 	m_ptr->lev = i;
 
 	calc_hitpoints();
+
 	c_ptr = &class[m_ptr->pclass];
 	if (c_ptr->spell == MAGE) {
 	    calc_spells(A_INT);
 	    calc_mana(A_INT);
-	} else if (c_ptr->spell == PRIEST) {
+	}
+	else if (c_ptr->spell == PRIEST) {
 	    calc_spells(A_WIS);
 	    calc_mana(A_WIS);
 	}
+
 	prt_level();
 	prt_title();
     }
 }
 
 
-/* Slow Poison						-RAK-	 */
+/*
+ * Slow Poison						-RAK-	 
+ */
 int slow_poison()
 {
     register int           slow;
@@ -3592,20 +3706,28 @@ int slow_poison()
 }
 
 
-/* Bless						-RAK-	 */
+/*
+ * Bless						-RAK-	 
+ */
 void bless(int amount)
 {
     py.flags.blessed += amount;
 }
 
 
-/* Detect Invisible for period of time			-RAK-	 */
+/*
+ * Detect Invisible for period of time			-RAK-	 
+ */
 void detect_inv2(int amount)
 {
     py.flags.detect_inv += amount;
 }
 
 
+/*
+ * Routine used by "earthquakes"
+ * Those routines will update the view, etc.
+ */
 static void replace_spot(int y, int x, int typ)
 {
     register cave_type *c_ptr;
@@ -3633,85 +3755,119 @@ static void replace_spot(int y, int x, int typ)
 	c_ptr->fval = QUARTZ_WALL;
 	break;
     }
+
+    /* this is no longer part of a room */
     c_ptr->pl = FALSE;
     c_ptr->fm = FALSE;
-    c_ptr->lr = FALSE;		   /* this is no longer part of a room */
+    c_ptr->lr = FALSE;
+
+
+    /* Delete the object, if any */
     if (c_ptr->tptr != 0)
 	(void)delete_object(y, x);
+
+    /* Delete the monster (if any) */
     if (c_ptr->cptr > 1)
 	delete_monster((int)c_ptr->cptr);
 }
 
 
-/* The spell of destruction.				-RAK-	 */
-/* NOTE : Winning creatures that are deleted will be considered	 */
-/* as teleporting to another level.  This will NOT win the */
-/* game.						       */
-void destroy_area(register int y, register int x)
+/*
+ * The spell of destruction.				-RAK-
+ * NOTE : Winning creatures that are deleted will be considered
+ * as teleporting to another level.  This will NOT win the game.
+ */
+void destroy_area(int y, int x)
 {
     register int i, j, k;
 
     msg_print("There is a searing blast of light!");
-    if (!py.flags.blindness_resist && !py.flags.light_resist)
+
+    if (!py.flags.blindness_resist && !py.flags.light_resist) {
 	py.flags.blind += 10 + randint(10);
+    }
+
+    /* No destroying the town */
     if (dun_level > 0) {
-	for (i = (y - 15); i <= (y + 15); i++)
-	    for (j = (x - 15); j <= (x + 15); j++)
+	for (i = (y - 15); i <= (y + 15); i++) {
+	    for (j = (x - 15); j <= (x + 15); j++) {
 		if (in_bounds(i, j) && (cave[i][j].fval != BOUNDARY_WALL) &&
 		    ((cave[i][j].tptr == 0) ||
 		     ((t_list[cave[i][j].tptr].tval != TV_UP_STAIR) &&
 		      (t_list[cave[i][j].tptr].tval != TV_DOWN_STAIR) &&
 		      (!(t_list[cave[i][j].tptr].flags2 & TR_ARTIFACT))))) {	/* DGK */
 		    k = distance(i, j, y, x);
-		    if (k == 0)	   /* player's spot... */
-			replace_spot(i, j, 1);	/* clear player's spot...
-						 * from um55 -CFT */
-		    else if (k < 13)
-			replace_spot(i, j, randint(6));
-		    else if (k < 16)
-			replace_spot(i, j, randint(9));
+		    /* clear player's spot... from um55 -CFT */
+		    if (k == 0) replace_spot(i, j, 1);
+		    else if (k < 13) replace_spot(i, j, randint(6));
+		    else if (k < 16) replace_spot(i, j, randint(9));
 		}
+	    }
+	}
     }
 
     /* We need to redraw the screen. -DGK */
     if (py.flags.blindness_resist || py.flags.light_resist) {
-	draw_cave();
+
+    /* Hack -- redraw the cave */
+    draw_cave();
 	creatures(FALSE);	   /* draw monsters */
     }
 }
 
-/* Revamped!  Now takes item pointer, number of times to try enchanting,
+
+/*
+ * Revamped!  Now takes item pointer, number of times to try enchanting,
  * and a flag of what to try enchanting.  Artifacts resist enchantment
  * some of the time, and successful enchantment to at least +0 might
- * break a curse on the item.  -CFT */
+ * break a curse on the item.  -CFT
+ *
+ * Enchants a plus onto an item.                        -RAK-   
+ */
 /* Enchants a plus onto an item.                        -RAK-   */
 int enchant(inven_type *i_ptr, int n, byte eflag)
 {
-    register int chance, res = FALSE, i, a = i_ptr->flags2 & TR_ARTIFACT;
+    register int chance, res = FALSE, i;
     int table[13] = {  10,  50, 100, 200, 300, 400,
-                           500, 700, 950, 990, 992, 995, 997 };
-    for(i=0; i<n; i++){
+			   500, 700, 950, 990, 992, 995, 997 };
+
+    /* Artifacts resist enchantment */
+    int a = i_ptr->flags2 & TR_ARTIFACT;
+
+    /* Try "n" times */
+    for (i=0; i<n; i++) {
+
 	chance = 0;
+
 	if (eflag & ENCH_TOHIT) {
+
 	    if (i_ptr->tohit < 1) chance = 0;
 	    else if (i_ptr->tohit > 13) chance = 1000;
 	    else chance = table[i_ptr->tohit-1];
+
 	    if ((randint(1000)>chance) && (!a || randint(7)>3)) {
+
 		i_ptr->tohit++;
 		res = TRUE;
-		if ((i_ptr->tohit >= 0) && (randint(4)==1) && /* only when you get */
-		    (i_ptr->flags & TR_CURSED)) { /*  it above -1 -CFT */
+
+		/* only when you get it above -1 -CFT */
+		if ((i_ptr->flags & TR_CURSED) &&
+		    (i_ptr->tohit >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
 		    i_ptr->flags &= ~TR_CURSED;
 		    i_ptr->ident &= ~ID_DAMD;
 		}
 	    }
 	}
+
 	if (eflag & ENCH_TODAM) {
+
 	    if (i_ptr->todam < 1) chance = 0;
 	    else if (i_ptr->todam > 13) chance = 1000;
 	    else chance = table[i_ptr->todam-1];
+
 	    if ((randint(1000)>chance) && (!a || randint(7)>3)) {
+
 		i_ptr->todam++;
 		res = TRUE;
 		if ((i_ptr->todam >= 0) && (randint(4)==1) && /* only when you get */
@@ -3722,24 +3878,32 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		}
 	    }
 	}
+
 	if (eflag & ENCH_TOAC) {
+
 	    if (i_ptr->toac < 1) chance = 0;
 	    else if (i_ptr->toac > 13) chance = 1000;
 	    else chance = table[i_ptr->toac-1];
+
 	    if ((randint(1000)>chance) && (!a || randint(7)>3)) {
+
 		i_ptr->toac++;
 		res = TRUE;
-		if ((i_ptr->toac >= 0) && (randint(4)==1) && /* only when you get */
-		    (i_ptr->flags & TR_CURSED)) { /*  it above -1 -CFT */
+
+		/* only when you get it above -1 -CFT */
+		if ((i_ptr->flags & TR_CURSED) &&
+		    (i_ptr->toac >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
 		    i_ptr->flags &= ~TR_CURSED;
 		    i_ptr->ident &= ~ID_DAMD;
 		}
 	    }
 	}
-    } /* for loop */
-    if (res) calc_bonuses ();
-    return(res);
+    }
+
+    if (res) calc_bonuses();
+
+    return (res);
 }
 
 

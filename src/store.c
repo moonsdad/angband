@@ -159,7 +159,9 @@ static void display_commands();
 static void store_prt_gold();
 #endif
 
-/* Comments vary.					-RAK-	 */
+/*
+ * Comments vary.					-RAK-	
+ */
 
 /*
  * Successful haggle.

@@ -70,7 +70,7 @@ struct previous {
 
     char history[4][60];
 
-    background_type     bg;
+    player_background     bg;
 
 } prev;
 
@@ -153,7 +153,7 @@ static int get_prev_stats()
 static void get_all_stats()
 {
     register player_type *p_ptr;
-    register race_type *r_ptr;
+    register player_race *r_ptr;
     register int        j;
 
     p_ptr = &py;
@@ -217,7 +217,7 @@ static void choose_race(void)
     int                  j, k, l, m, exit_flag;
     char                 s, tmp_str[80];
     register player_type *p_ptr;
-    register race_type   *r_ptr;
+    register player_race   *r_ptr;
 
     k = 0;
     l = 2;
@@ -378,7 +378,7 @@ static void get_history(void)
     register int             start_pos, end_pos, cur_len;
     int                      line_ctr, new_start = 0, social_class;
     char                     history_block[240];
-    background_type		*b_ptr;
+    player_background		*b_ptr;
 
     /* Get a block of history text */
     /* Special race */
@@ -554,7 +554,7 @@ static void get_class()
     char                buf[50];
     register struct misc *m_ptr;
     register player_type *p_ptr;
-    class_type         *c_ptr;
+    player_class         *c_ptr;
 
     c_ptr = &class[py.misc.pclass];
     p_ptr = &py;
@@ -658,7 +658,7 @@ static void get_class_choice()
     register int i, j;
     int          k, l, m;
     int          cl[MAX_CLASS], exit_flag;
-    class_type   *c_ptr;
+    player_class   *c_ptr;
     char         tmp_str[80], s;
     u32b       mask;
 
@@ -752,8 +752,8 @@ void create_character()
     int          stat[6];
     int          autoroll = 0;
     int          msstat = 0;/* Max autoroll w/ look for -SAC */
-    class_type   *cptr;
-    race_type    *rptr;
+    player_class   *cptr;
+    player_race    *rptr;
     char         inp[60];
 
 #endif

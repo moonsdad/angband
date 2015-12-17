@@ -132,7 +132,7 @@ static int sv_write()
     int                 count;
     byte               char_tmp, prev_char;
     register cave_type   *c_ptr;
-    register recall_type *r_ptr;
+    register monster_lore *r_ptr;
     struct stats         *s_ptr;
 
 #ifdef MSDOS
@@ -663,6 +663,8 @@ int save_char()
 #ifdef SECURE
     bePlayer();
 #endif
+
+    /* Successful save */
     return TRUE;
 }
 
@@ -672,14 +674,17 @@ int _save_char(char *fnam)
     int   ok, fd;
     byte char_tmp;
 
-    if (log_index < 0)
-	return TRUE;		   /* Nothing to save. */
+    if (log_index < 0) return TRUE;		   /* Nothing to save. */
 
     nosignals();
+
     put_qio();
     disturb(1, 0);		   /* Turn off resting and searching. */
+
     change_speed(-pack_heavy);	   /* Fix the speed */
     pack_heavy = 0;
+
+    /* Assume failure */
     ok = FALSE;
 #ifndef ATARIST_MWC
     fd = (-1);
@@ -689,9 +694,11 @@ int _save_char(char *fnam)
 #else
     fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL, 0666);
 #endif
+
     if (fd < 0 && access(fnam, 0) >= 0 &&
 	(from_savefile ||
 	 (wizard && get_check("Can't make new savefile. Overwrite old?")))) {
+
 #ifdef SET_UID
 	(void)chmod(fnam, 0600);
 	fd = my_topen(fnam, O_RDWR | O_TRUNC, 0600);
@@ -699,8 +706,11 @@ int _save_char(char *fnam)
 	(void)chmod(fnam, 0666);
 	fd = my_topen(fnam, O_RDWR | O_TRUNC, 0666);
 #endif
+
     }
     if (fd >= 0) {
+
+	/* Close the "fd" */
 	(void)close(fd);
 #endif				   /* !ATARIST_MWC */
     /* GCC for atari st defines atarist */
@@ -711,11 +721,16 @@ int _save_char(char *fnam)
 #endif
 #ifndef ATARIST_MWC
     }
+
 #endif
+
+    /* Successful open */
     if (fileptr != NULL) {
+
 #ifdef MSDOS
 	(void)setmode(fileno(fileptr), O_BINARY);
 #endif
+
 	xor_byte = 0;
 	wr_byte((byte) CUR_VERSION_MAJ);
 	xor_byte = 0;
@@ -727,29 +742,37 @@ int _save_char(char *fnam)
 	wr_byte(char_tmp);
     /* Note that xor_byte is now equal to char_tmp */
 
+	/* Write the savefile */
 	ok = sv_write();
-	if (fclose(fileptr) == EOF)
-	    ok = FALSE;
+
+	/* Attempt to close it */
+	if (fclose(fileptr) == EOF) ok = FALSE;
     }
+
+
+    /* Error */
     if (!ok) {
-	if (fd >= 0)
-	    (void)unlink(fnam);
+
+	if (fd >= 0) (void)unlink(fnam);
+
 	signals();
-	if (fd >= 0)
-	    (void)sprintf(temp, "Error writing to savefile");
-	else
-	/* here? */
-	    (void)sprintf(temp, "Can't create new savefile");
+
+	/* Oops */
+	if (fd >= 0) (void)sprintf(temp, "Error writing to savefile");
+	else (void)sprintf(temp, "Can't create new savefile"); /* here? */
 	msg_print(temp);
 	return FALSE;
-    } else
-	character_saved = 1;
+    }
+
+    /* Successful save */
+	else character_saved = 1;
 
     turn = (-1);
     log_index = (-1);
 
     signals();
 
+    /* Successful save */
     return TRUE;
 }
 
@@ -763,7 +786,7 @@ int get_char(int *generate)
     vtype                  temp;
     u16b                 int16u_tmp;
     register cave_type    *c_ptr;
-    register recall_type  *r_ptr;
+    register monster_lore  *r_ptr;
     struct misc           *m_ptr;
     struct stats          *s_ptr;
     register struct flags *f_ptr;

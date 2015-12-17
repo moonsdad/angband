@@ -408,9 +408,9 @@ u32b player_exp[MAX_PLAYER_LEVEL] = {
  *	infra, exp base, choice-classes
  */
 #ifdef MACGAME
-race_type *race;
+player_race *race;
 #else
-race_type race[MAX_RACES] = {
+player_race race[MAX_RACES] = {
    {"Human",	 0,  0,	 0,  0,	 0,  0,
       14,  6, 72,  6,180, 25, 66,  4,150, 20,
       0,  0,  0,  0,  0,  0,  0, 10,  0, 100, 0x3F,
@@ -474,9 +474,9 @@ const char *dsp_race[MAX_RACES] = {
  * Background information				
  */
 #ifdef MACGAME
-background_type *background;
+player_background *background;
 #else
-background_type background[MAX_BACKGROUND] = {
+player_background background[MAX_BACKGROUND] = {
 
 {"You are the illegitimate and unacknowledged child ",		 10, 1, 2, 25},
 {"You are the illegitimate but acknowledged child ",		 20, 1, 2, 35},
@@ -647,7 +647,8 @@ background_type background[MAX_BACKGROUND] = {
 /*
  * Player Classes.
  */
-class_type class[MAX_CLASS] = {
+player_class class[MAX_CLASS] = {
+
 /*	  HP Dis Src Stl Fos bth btb sve S  I  W  D Co Ch  Spell Exp  spl */
 
 {"Warrior",9, 25, 14, 1, 38, 70, 55, 18, 5,-2,-2, 2, 2,-1, NONE,    0, 0},

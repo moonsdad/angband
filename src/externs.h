@@ -10,6 +10,20 @@
  * included in all such copies. 
  */
 
+/*
+ * This file is not realy in very good shape.  What we SHOULD have
+ * is a correct list of available variables and functions.  What we
+ * actually have seems to work, but does not reflect the current state
+ * of the various files.
+ *
+ * We should NOT have both ANSI and non-ANSI versions in the same file.
+ * What we SHOULD have is a quick utility that converts ANSI to non-ANSI,
+ * and we should provide a version of the files on which this has been run.
+ */
+
+
+/*****************************************************************************/
+
 #define get_Yn get_check
 
 #include <stdio.h>
@@ -41,13 +55,15 @@ extern char *copyright[5];
 extern int player_uid;			/* The player's uid, or zero */
 extern int NO_SAVE;
 
-/* horrible hack: needed because compact_monster() can be called from deep
-   within creatures() via place_monster() and summon_monster() */
+/*
+ * horrible hack: needed because compact_monster() can be called from deep
+ *  within creatures() via place_monster() and summon_monster()
+ */
 extern int hack_monptr;
 
-extern s16b log_index;			/* Index to log file. -CJS- */
-extern vtype died_from;
-extern vtype savefile;			/* The save file. -CJS- */
+extern s16b log_index;		/* Index to log file. -CJS- */
+extern vtype died_from;		/* Cause of death */
+extern vtype savefile;		/* The save file name */
 
 /*
  * These are options, set with set_options command -CJS-
@@ -192,12 +208,12 @@ extern player_type py;
 
 #ifdef MACGAME
 extern char *(*player_title)[MAX_PLAYER_LEVEL];
-extern race_type *race;
-extern background_type *background;
+extern player_race *race;
+extern player_background *background;
 #else
 extern char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL];
-extern race_type race[MAX_RACES];
-extern background_type background[MAX_BACKGROUND];
+extern player_race race[MAX_RACES];
+extern player_background background[MAX_BACKGROUND];
 #endif
 
 extern u32b player_exp[MAX_PLAYER_LEVEL];
@@ -212,7 +228,7 @@ extern char *dsp_race[MAX_RACES]; /* Short strings for races. -CJS- */
 
 extern byte rgold_adj[MAX_RACES][MAX_RACES];
 
-extern class_type class[MAX_CLASS];
+extern player_class class[MAX_CLASS];
 extern s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ];
 
 /*** Spell Information ***/
@@ -284,11 +300,11 @@ extern creature_type c_list[MAX_CREATURES];
 extern describe_mon_type desc_list[MAX_CREATURES];
 extern monster_type m_list[MAX_MALLOC];
 extern s16b m_level[MAX_MONS_LEVEL+1];
-extern m_attack_type monster_attacks[N_MONS_ATTS];
+extern monster_attack monster_attacks[N_MONS_ATTS];
 #ifdef MAC
-extern recall_type *c_recall;
+extern monster_lore *c_recall;
 #else
-extern recall_type c_recall[MAX_CREATURES];	/* Monster memories. -CJS- */
+extern monster_lore c_recall[MAX_CREATURES];	/* Monster memories. -CJS- */
 #endif
 extern monster_type blank_monster; /* Blank monster values	*/
 extern s16b mfptr;				   /* Cur free monster ptr	*/
@@ -430,6 +446,7 @@ void generate_cave(void);
 void ident_char(void);
 
 /* io.c */
+
 #ifdef SIGTSTP
 int suspend(void);
 #endif

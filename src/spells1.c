@@ -3416,7 +3416,7 @@ int probing()
     int                     probe;
     register monster_type  *m_ptr;
     register creature_type *r_ptr;
-    register recall_type   *mp;
+    register monster_lore   *mp;
     vtype                   out_val, m_name;
 
     msg_print("Probing...");
@@ -3539,7 +3539,7 @@ void lose_exp(s32b amount)
 {
     register int          i;
     register struct misc *m_ptr;
-    register class_type  *c_ptr;
+    register player_class  *c_ptr;
 
     m_ptr = &py.misc;
     if (amount > m_ptr->exp)

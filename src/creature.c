@@ -3159,7 +3159,7 @@ void creatures(int attack)
 {
     register int          i, k;
     register monster_type *m_ptr;
-    recall_type           *r_ptr;
+    monster_lore           *r_ptr;
     u32b                notice, rcmove;
     int                   wake, ignore;
     vtype                 cdesc;

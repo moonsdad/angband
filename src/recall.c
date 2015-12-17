@@ -227,7 +227,7 @@ static int          roffpline;	   /* Place to print line now being loaded. */
  */
 int bool_roff_recall(int mon_num)
 {
-    register recall_type *mp;
+    register monster_lore *mp;
     register int          i;
 
     if (wizard) return TRUE;
@@ -258,7 +258,7 @@ int roff_recall(int mon_num)
     const char             *p, *q;
     attid                  *pu;
     vtype                   temp;
-    register recall_type   *mp;
+    register monster_lore   *mp;
     register creature_type *cp;
     register u32b         i, j, k;   /* changed from int, to avoid PC's 16bit ints -CFT */
 
@@ -268,7 +268,7 @@ int roff_recall(int mon_num)
     int                 breath = FALSE, magic = FALSE;
     char			sex;
 
-    recall_type        save_mem;
+    monster_lore        save_mem;
 
     cp = &c_list[mon_num];
     sex = cp->gender;
