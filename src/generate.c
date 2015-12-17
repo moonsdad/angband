@@ -71,7 +71,7 @@ static void special_pit(int, int, int);
 static void build_tunnel(int, int, int, int);
 static int next_to(int, int);
 static void try_door(int, int);
-static void new_spot(int16 *, int16 *);
+static void new_spot(s16b *, s16b *);
 static void build_pit(int, int);
 static void build_store(int, int, int);
 #else
@@ -208,7 +208,7 @@ static void fill_cave(int fval)
     register int        i, j;
     register cave_type *c_ptr;
 
-   /* Scan the cave (skip the outer walls) */
+    /* Scan the cave (skip the outer walls) */
     for (i = cur_height - 2; i > 0; i--) {
 	c_ptr = &cave[i][1];
 	for (j = cur_width - 2; j > 0; j--) {
@@ -234,7 +234,7 @@ static void place_boundary(void)
     cave_type(*left_ptr)[MAX_WIDTH];
     cave_type(*right_ptr)[MAX_WIDTH];
 
-/* put permanent wall on leftmost row and rightmost row */
+    /* put permanent wall on leftmost row and rightmost row */
     left_ptr = (cave_type(*)[MAX_WIDTH]) & cave[0][0];
     right_ptr = (cave_type(*)[MAX_WIDTH]) & cave[0][cur_width - 1];
 
@@ -245,7 +245,7 @@ static void place_boundary(void)
 	right_ptr++;
     }
 
-/* put permanent wall on top row and bottom row */
+    /* put permanent wall on top row and bottom row */
     top_ptr = &cave[0][0];
     bottom_ptr = &cave[cur_height - 1][0];
 
@@ -263,9 +263,9 @@ static void place_boundary(void)
  */
 static void place_streamer(int fval, int treas_chance)
 {
-    register int		i, tx, ty;
+    int		i, tx, ty;
     int		y, x, t1, t2, dir;
-    register cave_type	*c_ptr;
+    cave_type	*c_ptr;
 
     /* Choose starting point and direction */
     y = (cur_height / 2) + 11 - randint(23);
@@ -1067,7 +1067,7 @@ static void build_room(int yval, int xval)
 {
     register int        i, j, y_depth, x_right;
     int                 y_height, x_left;
-    int8u               floor;
+    byte               floor;
     register cave_type *c_ptr, *d_ptr;
 
     /* Choose lite or dark */
@@ -1143,7 +1143,7 @@ static void build_type1(int yval, int xval)
     int                 y_height, y_depth;
     int                 x_left, x_right, limit;
     register int        i0, i, j;
-    int8u               floor;
+    byte               floor;
     register cave_type *c_ptr, *d_ptr;
     
     /* Choose lite or dark */
@@ -1230,7 +1230,7 @@ static void build_type2(int yval, int xval)
 {
     register int        i, j, y_height, x_left;
     int                 y_depth, x_right, tmp;
-    int8u               floor;
+    byte               floor;
     register cave_type *c_ptr, *d_ptr;
 
     /* Large room */
@@ -1540,7 +1540,7 @@ static void build_type3(int yval, int xval)
     int                 y_height, y_depth;
     int                 x_left, x_right;
     register int        tmp, i, j;
-    int8u               floor;
+    byte               floor;
     register cave_type		*c_ptr;
 
 
@@ -1741,8 +1741,8 @@ static void build_type5(int yval, int xval)
  */
     char               *t;
     char                buf[50];
-    int8u               floor;
-    int8u               wall;
+    byte               floor;
+    byte               wall;
     register cave_type *c_ptr;
 
     if (dun_level <= randint(25))
@@ -2246,7 +2246,7 @@ static void special_pit(int yval, int xval, int type)
 {
     register int        i, j, y_height, x_left;
     int                 y_depth, x_right, colour;
-    int8u               floor;
+    byte               floor;
     register cave_type *c_ptr, *d_ptr;
 
     floor = DARK_FLOOR;
@@ -2642,6 +2642,7 @@ static void try_door(int y, int x)
     /* Paranoia */
     if (!in_bounds(y, x)) return;
 
+    /* Floor, next to walls, and corridors */
     if ((cave[y][x].fval == CORR_FLOOR) &&
 	(randint(100) > DUN_TUN_JCT) &&
 	 next_to(y, x)) {
@@ -2655,7 +2656,7 @@ static void try_door(int y, int x)
 /* Returns random co-ordinates				-RAK-	 */
 static void 
 new_spot(y, x)
-int16 *y, *x;
+s16b *y, *x;
 {
     register int        i, j;
     register cave_type *c_ptr;
@@ -2709,7 +2710,7 @@ static void cave_gen(void)
     register int		i, j, k;
     int          y1, x1, y2, x2, pick1, pick2, tmp;
     int          row_rooms, col_rooms, alloc_level;
-    int16        yloc[400], xloc[400];
+    s16b        yloc[400], xloc[400];
     int          pit_ok, spec_level;
 
     rating = 0;
@@ -2949,8 +2950,7 @@ static void tlink()
 
 
 /* Link all free space in monster list together			 */
-static void 
-mlink()
+static void mlink()
 {
     register int i;
 
@@ -3014,6 +3014,7 @@ static void town_gen(void)
 		c_ptr++;
 	    }
 	}
+
 	/* Make some daytime residents */
 	alloc_monster(MIN_MALLOC_TD, 3, TRUE);
     }

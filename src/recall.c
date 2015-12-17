@@ -219,6 +219,9 @@ static int          roffpline;	   /* Place to print line now being loaded. */
 
 
 
+
+
+
 /*
  * Do we know anything special about this monster?
  */
@@ -250,21 +253,20 @@ int bool_roff_recall(int mon_num)
 /*
  * Print out what we have discovered about this monster.
  */
-int roff_recall(mon_num)
-int mon_num;
+int roff_recall(int mon_num)
 {
     const char             *p, *q;
     attid                  *pu;
     vtype                   temp;
     register recall_type   *mp;
     register creature_type *cp;
-    register int32u         i, k;   /* changed from int, to avoid PC's 16bit ints -CFT */
-    int32u              j;
+    register u32b         i, j, k;   /* changed from int, to avoid PC's 16bit ints -CFT */
+
     int                 mspeed;
-    int32u              rcmove, rspells, rspells2, rspells3;
-    int32u              rcdefense; /* this was int16u, but c_recall[] uses int32u -CFT */
+    u32b              rcmove, rspells, rspells2, rspells3;
+    u32b              rcdefense; /* this was int16u, but c_recall[] uses u32b -CFT */
     int                 breath = FALSE, magic = FALSE;
-    char                sex;
+    char			sex;
 
     recall_type        save_mem;
 
@@ -282,16 +284,20 @@ int mon_num;
 	mp->r_kills = MAX_SHORT;
 	mp->r_wake = mp->r_ignore = MAX_UCHAR;
 
+	/* Count the total possible treasures */
 	j = (((cp->cmove & CM_4D2_OBJ) != 0) * 8) +
-	    (((cp->cmove & CM_2D2_OBJ) != 0) * 4) +
-	    (((cp->cmove & CM_1D2_OBJ) != 0) * 2) +
-	    ((cp->cmove & CM_90_RANDOM) != 0) +
-	    ((cp->cmove & CM_60_RANDOM) != 0);
+			 (((cp->cmove & CM_2D2_OBJ) != 0) * 4) +
+			 (((cp->cmove & CM_1D2_OBJ) != 0) * 2) +
+			 ((cp->cmove & CM_90_RANDOM) != 0) +
+			 ((cp->cmove & CM_60_RANDOM) != 0);
+
+	/* Full "flag" knowledge */
 	mp->r_cmove = (cp->cmove & ~CM_TREASURE) | (j << CM_TR_SHIFT);
 	mp->r_cdefense = cp->cdefense;
 	mp->r_spells = cp->spells | CS_FREQ;
 	mp->r_spells2 = cp->spells2;
 	mp->r_spells3 = cp->spells3;
+
 	j = 0;
 	pu = cp->damage;
 	while (*pu != 0 && j < 4) {
@@ -300,21 +306,28 @@ int mon_num;
 	    pu++;
 	}
     }
+
+
     roffpline = 0;
     roffp = roffbuf;
+
+    /* Load the various flags */
     rspells = mp->r_spells & cp->spells & ~CS_FREQ;
     rspells2 = mp->r_spells2 & cp->spells2;
     rspells3 = mp->r_spells3 & cp->spells3;
-/* the CM_WIN property is always known, set it if a win monster */
+
+    /* the CM_WIN property is always known, set it if a win monster */
     rcmove = mp->r_cmove | (CM_WIN & cp->cmove);
     rcdefense = mp->r_cdefense & cp->cdefense;
     if ((cp->cdefense & UNIQUE) || (sex == 'p'))
 	(void)sprintf(temp, "%s:\n", cp->name);
     else
 	(void)sprintf(temp, "The %s:\n", cp->name);
+
+    /* Begin a new "recall" */
     roff(temp);
-/* Conflict history. */
-/* changed to act better for unique monsters -CFT */
+	/* Conflict history. */
+	/* changed to act better for unique monsters -CFT */
 
     /* Treat unique differently... -CFT */
     if (cp->cdefense & UNIQUE) {
@@ -346,7 +359,7 @@ int mon_num;
     }
 
     /* Not unique, but killed us */
-    else if (mp->r_deaths) {	   /* not unique.... */
+    else if (mp->r_deaths) {
 
 	(void)sprintf(temp,
 		      "%d of your ancestors %s",
@@ -398,6 +411,10 @@ int mon_num;
 	roff(desc_list[k].desc);
 	roff("  ");
     }
+
+
+    /* Describe location */
+
     k = FALSE;
     if (cp->level == 0) {
 	sprintf(temp, "%s in the town",
@@ -417,7 +434,7 @@ int mon_num;
 
 
     /* Extract the "speed" */
-/* the c_list speed value is 10 greater, so that it can be a int8u */
+/* the c_list speed value is 10 greater, so that it can be a byte */
     mspeed = cp->speed - 10;
 
     /* Describe movement, if any observed */
@@ -542,13 +559,14 @@ int mon_num;
     }
 
 
-/* Spells known, if have been used against us. */
+    /* Spells known, if have been used against us. */
     /* Count something */
     i = 0;
 
     /* Describe the Breath, if any */
     k = TRUE;
 
+    /* First, handle (and forget!) the "breath" */
     if ((rspells & CS_BREATHE) ||
 	(rspells2 & CS_BREATHE2) ||
 	(rspells3 & CS_BREATHE3)) {
@@ -969,6 +987,8 @@ int mon_num;
 		roff(" or treasure");
 		if (j > 1) roff("s");
 	    }
+
+	/* End this sentence */
 	    roff(".  ");
 	}
 	else if (j != 1) roff(" treasures.  ");
@@ -977,13 +997,15 @@ int mon_num;
 
 
     /* We know about attacks it has used on us, and maybe the damage they do. */
-    /* k is the total number of known attacks, used for punctuation */
-	for (K = j = 0; j < 4; j++) {
+
+    /* Count the number of "known" attacks, used for punctuation */
+    for (K = j = 0; j < 4; j++) {
 	if (mp->r_attacks[j]) k++;
     }
 
     pu = cp->damage;
-    /* j counts the attacks as printed, used for punctuation */
+
+    /* Count the number of attacks s printed so far, used for punctuation */
     j = 0;
 
     /* Examine the actual attacks */    
@@ -991,7 +1013,7 @@ int mon_num;
 
 	int att_type, att_how, d1, d2;
 
-    /* Skip unknown attacks */
+	/* Skip unknown attacks */
 	if (!mp->r_attacks[i]) continue;
 
 	/* Extract the attack info */

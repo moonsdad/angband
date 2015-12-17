@@ -150,7 +150,7 @@ void magic_init(void)
     reset_seed();
 }
 
-int16 object_offset(inven_type *t_ptr)
+s16b object_offset(inven_type *t_ptr)
 {
     switch (t_ptr->tval) {
       case TV_ROD:
@@ -181,8 +181,8 @@ int16 object_offset(inven_type *t_ptr)
 /* Remove "Secret" symbol for identity of object			 */
 void known1(inven_type *i_ptr)
 {
-    int16 offset;
-    int8u indexx;
+    s16b offset;
+    byte indexx;
 
     if ((offset = object_offset(i_ptr)) < 0)
 	return;
@@ -195,8 +195,8 @@ void known1(inven_type *i_ptr)
 
 int known1_p(inven_type *i_ptr)
 {
-    int16 offset;
-    int8u indexx;
+    s16b offset;
+    byte indexx;
 
 /* Items which don't have a 'color' are always known1, so that they can be
  * carried in order in the inventory.  
@@ -251,8 +251,8 @@ int store_bought_p(inven_type *i_ptr)
 /* Remove an automatically generated inscription.	-CJS- */
 static void unsample(inven_type *i_ptr)
 {
-    int16 offset;
-    int8u indexx;
+    s16b offset;
+    byte indexx;
 
 /* used to clear ID_DAMD flag, but I think it should remain set */
     i_ptr->ident &= ~(ID_MAGIK | ID_EMPTY);
@@ -268,8 +268,8 @@ static void unsample(inven_type *i_ptr)
 /* Somethings been sampled -CJS- */
 void sample(inven_type *i_ptr)
 {
-    int16 offset;
-    int8u indexx;
+    s16b offset;
+    byte indexx;
 
     if ((offset = object_offset(i_ptr)) < 0)
 	return;

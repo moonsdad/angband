@@ -29,14 +29,17 @@
  * I have greatly expanded the number of defined constants.  However, if
  * you change anything below, without understanding EXACTLY how the game
  * uses the number, the program may stop working correctly.  Modify the
- * constants at your own risk.
+ * constants at your own risk.  Also note that not all constants in the
+ * code are written using the proper symbolic constant.  Several hard
+ * coded values are lurking around.
  */
 
 
 /*
- * Current version number of Angband: 2.6.1
+ * Current version number of Angband: 2.6.?
  *
  * Note that 5.2 must never be used, as it was used in Angband 2.4-2.5.
+ * Actually, by that time, nobody will want to use 2.5 savefiles!
  */
 
 #define CUR_VERSION_MAJ 2
@@ -65,14 +68,14 @@
  * These values are used to keep things "small"
  */
 #define MAX_UCHAR       255
-#define MAX_SHORT       32767           /* maximum short/long signed ints */
+#define MAX_SHORT       32767
 #define MAX_LONG        0xFFFFFFFFL
 
 
 /*
  * Used for "Check Load"
  */
-#ifndef MAXHOSTNAMELEN					/* may not be defined -b. eck */
+#ifndef MAXHOSTNAMELEN
 # define MAXHOSTNAMELEN  64
 #endif
 
@@ -90,11 +93,13 @@
  */
 #define MAX_SAVE_HISCORES	500
 
+
 /* Dungeon size parameters */
-#define MAX_HEIGHT		66/* Multiple of 11; >= 22 */
-#define MAX_WIDTH		198/* Multiple of 33; >= 66 */
-#define SCREEN_HEIGHT		22
-#define SCREEN_WIDTH		66
+#define MAX_HEIGHT		66	/* Multiple of 11; >= 22 */
+#define MAX_WIDTH		198	/* Multiple of 33; >= 66 */
+#define SCREEN_HEIGHT		22	/* Hard Coded */
+#define SCREEN_WIDTH		66	/* Hard Coded */
+
 #define QUART_HEIGHT (SCREEN_HEIGHT / 4)
 #define QUART_WIDTH  (SCREEN_WIDTH / 4)
 
@@ -105,23 +110,20 @@
  * slight adjustments here.
  */
 
-#define DUN_TUN_RND       9     /* was 9 1/Chance of Random direction           */
-#define DUN_TUN_CHG      70     /* was 70 Chance of changing direction (99 max) */
-#define DUN_TUN_CON      15     /* was 15 Chance of extra tunneling             */
-#define DUN_ROO_MEA      45     /* was 32 Mean of # of rooms, standard dev2     */
-#define DUN_TUN_PEN      25     /* was 25 % chance of room doors                */
-#define DUN_TUN_JCT       8     /* was 15 % chance of doors at tunnel junctions */
-#define DUN_STR_DEN       5     /* was 5 Density of streamers                   */
-#define DUN_STR_RNG       2     /* was 2 Width of streamers                     */
-#define DUN_STR_MAG       3     /* was 3 Number of magma streamers              */
-#define DUN_STR_MC       90     /* was 90 1/x chance of treasure per magma      */
-#define DUN_STR_QUA       2     /* was 2 Number of quartz streamers             */
-#define DUN_STR_QC       40     /* was 40 1/x chance of treasure per quartz     */
-#define DUN_UNUSUAL      200    /* was 300 Level/x chance of unusual room       */
-
-/* Special level constants - DGK */
-
-#define DUN_DEST         15     /* 1/x chance of having a destroyed level */
+#define DUN_TUN_RND       9     /* 1/Chance of Random direction          */
+#define DUN_TUN_CHG      70     /* Chance of changing direction (99 max) */
+#define DUN_TUN_CON      15     /* Chance of extra tunneling             */
+#define DUN_ROO_MEA      45     /* Mean of # of rooms, standard dev2     */
+#define DUN_TUN_PEN      25     /* Chance of room doors                  */
+#define DUN_TUN_JCT       8     /* Chance of doors at tunnel junctions   */
+#define DUN_STR_DEN       5     /* Density of streamers                  */
+#define DUN_STR_RNG       2     /* Width of streamers                    */
+#define DUN_STR_MAG       3     /* Number of magma streamers             */
+#define DUN_STR_MC       90     /* 1/chance of treasure per magma        */
+#define DUN_STR_QUA       2     /* Number of quartz streamers            */
+#define DUN_STR_QC       40     /* 1/chance of treasure per quartz       */
+#define DUN_UNUSUAL      200    /* Level/chance of unusual room          */
+#define DUN_DEST         15     /* 1/chance of having a destroyed level */
 #define SPEC_DEST        2
 
 /* Store constants */
@@ -223,11 +225,12 @@
 #define MAX_MALLOC        600   /* Max that can be allocated                */
 #define MAX_MALLOC_CHANCE 160   /* 1/x chance of new monster each round     */
 #define MAX_MONS_LEVEL     99   /* Maximum level of creatures               */
+
 #define MAX_SIGHT          20   /* Maximum dis a creature can be seen       */
 #define MAX_SPELL_DIS      18   /* Maximum dis creat. spell can be cast     */
 #define MAX_MON_MULT       75   /* Maximum reproductions on a level         */
 #define MON_MULT_ADJ        8   /* High value slows multiplication          */
-#define MON_NASTY          50   /* 1/x chance of high level creat           */
+#define MON_NASTY          50   /* 1/chance of high level creat             */
 #define MIN_MALLOC_LEVEL   14   /* Minimum number of monsters/level         */
 #define MIN_MALLOC_TD       4   /* Number of people on town level (day)     */
 #define MIN_MALLOC_TN       8   /* Number of people on town level (night)   */

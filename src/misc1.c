@@ -100,17 +100,22 @@ void init_seeds(void)
 	puts("\nError initializing; unable to malloc space for RNG arrays...\n");
 	exit(2);
     }
-    
+
     /* is 'unix' a std define for unix system?  I thought UNIX is more common? */
     /* This may need to be changed.  It's fine for PCs, anyways... -CFT */
+
 #ifdef unix
+
     /* Grab a random seed from the clock & PID... */
     (void) initstate(time(NULL), dummy_state, 8);
     (void) initstate(((getpid() << 1) * (time(NULL) >> 3)), old_state, 256);
+
 #else
+
     /* ...else just grab a random seed from the clock. -CWS */
     (void) initstate(time(NULL), dummy_state, 8);
     (void)initstate(random(), old_state, 256);
+
 #endif /* unix */
 
     /* Hack -- Extract seeds for the town layout and object colors */
@@ -123,7 +128,7 @@ void init_seeds(void)
  * change to different random number generator state
  * Hack -- used to keep consistent object colors and town layout
  */
-void set_seed(int32u seed)
+void set_seed(u32b seed)
 {
     setstate(dummy_state);
     srandom((seed % 2147483646L) + 1);
@@ -257,10 +262,10 @@ int randnor(int mean, int stand)
 /*
  * Returns position of first set bit (and clears that bit) 
  */
-int bit_pos(int32u *test)
+int bit_pos(u32b *test)
 {
     register int    i;
-    register int32u mask = 0x1L;
+    register u32b mask = 0x1L;
     
     /* Scan the input */
     for (i = 0; i < sizeof(*test) * 8; i++) {
@@ -417,7 +422,7 @@ int damroll(int num, int sides)
 /* 
  * Old "array" format
  */
-int pdamroll(int8u *array)
+int pdamroll(byte *array)
 {
     return damroll((int)array[0], (int)array[1]);
 }
@@ -781,7 +786,7 @@ int popm()
 
 
 /* Gives Max hit points					-RAK-	 */
-int max_hp(int8u *array)
+int max_hp(byte *array)
 {
     return ((int)(array[0]) * (int)(array[1]));
 }
@@ -1411,7 +1416,7 @@ int place_ghost()
 	    }
 	    fclose(fp);
 	    j = 1;
-	    if (i > 255) {	   /* avoid wrap-around of int8u hitdice, by
+	    if (i > 255) {	   /* avoid wrap-around of byte hitdice, by
 				    * factoring */
 		j = i / 32;
 		i = 32;
@@ -1438,7 +1443,7 @@ int place_ghost()
 		}
 		fclose(fp);
 		j = 1;
-		if (i > 255) {	   /* avoid wrap-around of int8u hitdice, by
+		if (i > 255) {	   /* avoid wrap-around of byte hitdice, by
 				    * factoring */
 		    j = i / 32;
 		    i = 32;
@@ -1467,8 +1472,8 @@ int place_ghost()
     mon_ptr->fy = y;
     mon_ptr->fx = x;
     mon_ptr->mptr = (MAX_CREATURES - 1);
-    mon_ptr->hp = (int16) ghost->hd[0] * (int16) ghost->hd[1];
-/* the c_list speed value is 10 greater, so that it can be a int8u */
+    mon_ptr->hp = (s16b) ghost->hd[0] * (s16b) ghost->hd[1];
+/* the c_list speed value is 10 greater, so that it can be a byte */
     mon_ptr->cspeed = c_list[mon_ptr->mptr].speed - 10;
     mon_ptr->stunned = 0;
     mon_ptr->cdis = distance(char_row, char_col, y, x);
@@ -2429,7 +2434,7 @@ int popt()
  */
 void pusht(int my_x)
 {
-    int16        x = (int16) my_x;
+    s16b        x = (s16b) my_x;
     register int i, j;
 
     if (x != tcptr - 1) {
@@ -4208,8 +4213,8 @@ magic_treasure(x, level, good, not_unique)
 int x, level, good, not_unique;
 {
     register inven_type *t_ptr;
-    register int32u      chance, special, cursed, i;
-    int32u               tmp;
+    register u32b      chance, special, cursed, i;
+    u32b               tmp;
 
     chance = OBJ_BASE_MAGIC + level;
     if (chance > OBJ_BASE_MAX)
@@ -4234,7 +4239,7 @@ int x, level, good, not_unique;
 	    || (t_ptr->index >= 408 && t_ptr->index <= 409)
 	    || (t_ptr->index >= 415 && t_ptr->index <= 419)) {
 
-	    int8u               artifact = FALSE;
+	    byte               artifact = FALSE;
 
 	/* all DSM are enchanted, I guess -CFT */
 	    t_ptr->toac += m_bonus(0, 5, level) + randint(5);
@@ -4249,7 +4254,7 @@ int x, level, good, not_unique;
 				    * artifact */
 		if (wizard || peek)
 		    msg_print("Dragon Scale Mail");
-		t_ptr->cost += ((int32) t_ptr->toac * 500L);
+		t_ptr->cost += ((s32b) t_ptr->toac * 500L);
 	    }
 	}
 	 /* end if is a DSM */ 

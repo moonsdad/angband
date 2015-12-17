@@ -60,8 +60,7 @@ int good_item_flag = FALSE;
 int create_up_stair = FALSE;
 int create_down_stair = FALSE;
 
-void 
-dungeon()
+void dungeon()
 {
     int                    find_count, i;
     int                    regen_amount; /* Regenerate hp and mana */
@@ -108,13 +107,17 @@ dungeon()
     opening_chest  = FALSE;
 
 #ifdef TARGET
-    target_mode = FALSE; /* target code taken from Morgul -CFT */
+    /* target code taken from Morgul -CFT */
+    target_mode = FALSE;
 #endif
     cave[char_row][char_col].cptr = 1;
 
-    if (create_up_stair && (dun_level == 0))	/* just in case... */
-	create_up_stair = FALSE;
+	/* just in case... */
+    if (create_up_stair && (dun_level == 0)) create_up_stair = FALSE;
+
+    /* Make a stairway. */
     if (create_up_stair || create_down_stair) {
+
 	register cave_type *c_ptr;
 	register int        cur_pos;
 
@@ -134,12 +137,16 @@ dungeon()
 		invcopy(&t_list[cur_pos], OBJ_DOWN_STAIR);
 	} else
 	    msg_print("The object resists your attempt to transform it into a stairway.");
+
+	/* Cancel the stair request */
 	create_down_stair = FALSE;
 	create_up_stair = FALSE;
     }
-/* Ensure we display the panel. Used to do this with a global var. -CJS- */
+
+    /* Ensure we display the panel. Used to do this with a global var. -CJS- */
     panel_row = panel_col = (-1);
-/* Light up the area around character	   */
+
+    /*  Check the view */
     check_view();
 
 /* must do this after panel_row/col set to -1, because search_off() will call
@@ -150,10 +157,11 @@ dungeon()
 	search_off();
 /* Light,  but do not move critters	    */
     creatures(FALSE);
-/* Print the depth			   */
+
+    /* Print the depth */
     prt_depth();
 
-/* FIXME: figure this out */
+    /* FIXME: figure this out */
     if (((turn - old_turn) > randint(50) + 50) && dun_level) {
 	unfelt = FALSE;
 	print_feeling();
@@ -162,13 +170,15 @@ dungeon()
 
 /* Loop until dead,  or new level		 */
     do {
-    /* Increment turn counter			 */
+
+	/* Advance the turn counter */
 	turn++;
+
 #ifdef CHECKHOURS
 #ifndef MAC
     /* The Mac ignores the game hours file		 */
-    /* Check for game hours			       */
-	if (((turn % 100) == 1) && !check_time())
+	/* Check for game hours			       */
+	if (((turn % 100) == 1) && !check_time()) {
 	    if (closing_flag > 2) {
 		msg_print("The gates to ANGBAND are now closed.");
 		(void)strcpy(died_from, "(closing gate: saved)");
@@ -177,28 +187,44 @@ dungeon()
 		    death = TRUE;
 		}
 		exit_game();
-	    } else {
+	    }
+	    else {
 		disturb(0, 0);
 		closing_flag++;
 		msg_print("The gates to ANGBAND are closing due to high load.");
 		msg_print("Please finish up or save your game.");
 	    }
+	}
 #endif
 #endif				   /* CHECKHOURS */
 
+	/*** Update the Stores ***/
     /* turn over the store contents every, say, 1000 turns */
+	/* Update the stores once a day */
 	if ((dun_level != 0) && ((turn % 1000) == 0)) {
+
 	/* if (peek) msg_print("Store update: "); */
 	    store_maint();
 	/* if (peek) msg_print("Complete "); */
 	}
-    /* Check for creature generation		 */
-	if (randint(MAX_MALLOC_CHANCE) == 1)
+
+
+	/*** Make, and Heal, the Monsters ***/
+
+	/* Check for creature generation */
+	if (randint(MAX_MALLOC_CHANCE) == 1) {
 	    alloc_monster(1, MAX_SIGHT, FALSE);
-	if (!(turn % 20))
-	    regen_monsters();
-    /* Check light status			       */
+	}
+
+	/* Check for creature regeneration */
+	if (!(turn % 20)) regen_monsters();
+
+
+	/*** Handle the Lights ***/
+
+	/* Check light status */
 	i_ptr = &inventory[INVEN_LIGHT];
+
 	if (player_light)
 	    if (i_ptr->p1 > 0) {
 		if (!(i_ptr->flags2 & TR_LIGHT))
@@ -341,10 +367,10 @@ dungeon()
 	    f_ptr->confused--;
 	    if (f_ptr->confused == 0) {
 		f_ptr->status &= ~PY_CONFUSED;
-		prt_confused();
 		msg_print("You feel less confused now.");
-		if (py.flags.rest > 0 || py.flags.rest == -1)
-		    rest_off();
+		prt_confused();
+
+		if (py.flags.rest > 0 || py.flags.rest == -1) rest_off();
 	    }
 	}
 
@@ -368,20 +394,23 @@ dungeon()
 	    }
 	}
 
-    /* Cut */
+	/* Cut */
 	if (f_ptr->cut > 0) {
 	    if (f_ptr->cut>1000) {
 		take_hit(3 , "a fatal wound");
 		disturb(1,0);
-	    } else if (f_ptr->cut>200) {
+	    }
+	    else if (f_ptr->cut>200) {
 		take_hit(3, "a fatal wound");
 		f_ptr->cut-=(con_adj()<0?1:con_adj())+1;
 		disturb(1,0);
-	    } else if (f_ptr->cut>100) {
+	    }
+	    else if (f_ptr->cut>100) {
 		take_hit(2, "a fatal wound");
 		f_ptr->cut-=(con_adj()<0?1:con_adj())+1;
 		disturb(1,0);
-	    } else {
+	    }
+	    else {
 		take_hit(1, "a fatal wound");
 		f_ptr->cut-=(con_adj()<0?1:con_adj())+1;
 		disturb(1,0);
@@ -2215,7 +2244,7 @@ static int valid_countcommand(char c)
 static void regenhp(int percent)
 {
     register struct misc *p_ptr;
-    register int32        new_chp, new_chp_frac;
+    register s32b        new_chp, new_chp_frac;
     int                   old_chp;
 
     p_ptr = &py.misc;
@@ -2246,7 +2275,7 @@ static void regenhp(int percent)
 static void regenmana(int percent)
 {
     register struct misc *p_ptr;
-    register int32        new_mana, new_mana_frac;
+    register s32b        new_mana, new_mana_frac;
     int                   old_cmana;
 
     p_ptr = &py.misc;
@@ -3232,8 +3261,8 @@ static void activate()
 /* Examine a Book					-RAK-	 */
 static void examine_book()
 {
-    int32u               j1;
-    int32u               j2;
+    u32b               j1;
+    u32b               j2;
     int                  i, k, item_val, flag;
     int                  spell_index[63];
     register inven_type *i_ptr;
@@ -3264,9 +3293,9 @@ static void examine_book()
 	    msg_print("You do not understand the language.");
 	else {
 	    i = 0;
-	    j1 = (int32u) inventory[item_val].flags;
+	    j1 = (u32b) inventory[item_val].flags;
 	    first_spell = bit_pos(&j1);	/* check which spell was first */
-	    j1 = (int32u) inventory[item_val].flags;	/* restore j1 value */
+	    j1 = (u32b) inventory[item_val].flags;	/* restore j1 value */
 	    while (j1) {
 		k = bit_pos(&j1);
 		s_ptr = &magic_spell[py.misc.pclass - 1][k];
@@ -3275,10 +3304,10 @@ static void examine_book()
 		    i++;
 		}
 	    }
-	    j2 = (int32u) inventory[item_val].flags2;
+	    j2 = (u32b) inventory[item_val].flags2;
 	    if (first_spell == -1) {	/* if none from other set of flags */
 		first_spell = 32 + bit_pos(&j2);	/* get 1st spell # */
-		j2 = (int32u) inventory[item_val].flags2;	/* and restore j2 */
+		j2 = (u32b) inventory[item_val].flags2;	/* and restore j2 */
 	    }
 	    while (j2) {
 		k = bit_pos(&j2);

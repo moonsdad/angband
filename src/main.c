@@ -75,7 +75,7 @@ creature_type ghost;
 
 
 /* Unique artifact weapon flags, even though some are in the wrong place!*/
-int32 GROND, RINGIL, AEGLOS, ARUNRUTH, MORMEGIL, ANGRIST, GURTHANG,
+s32b GROND, RINGIL, AEGLOS, ARUNRUTH, MORMEGIL, ANGRIST, GURTHANG,
   CALRIS, ANDURIL, STING, ORCRIST, GLAMDRING, DURIN, AULE, THUNDERFIST,
   BLOODSPIKE, DOOMCALLER, NARTHANC, NIMTHANC, DETHANC, GILETTAR, RILIA,
   BELANGIL, BALLI, LOTHARANG, FIRESTAR, ERIRIL, CUBRAGOL, BARD, COLLUIN,
@@ -86,7 +86,7 @@ int32 GROND, RINGIL, AEGLOS, ARUNRUTH, MORMEGIL, ANGRIST, GURTHANG,
   EONWE, THEODEN, ULMO, OSONDIR, TURMIL, TIL, DEATHWREAKER, AVAVIR, TARATOL;
 
 /* Unique artifact armor flags */
-int32 DOR_LOMIN, NENYA, NARYA, VILYA, BELEGENNON, FEANOR, ISILDUR, SOULKEEPER,
+s32b DOR_LOMIN, NENYA, NARYA, VILYA, BELEGENNON, FEANOR, ISILDUR, SOULKEEPER,
 FINGOLFIN, ANARION, POWER, PHIAL, BELEG, DAL, PAURHACH, PAURNIMMEN, PAURAEGEN,
 PAURNEN, CAMMITHRIM, CAMBELEG, INGWE, CARLAMMAS, HOLHENNETH, AEGLIN, CAMLOST,
 NIMLOTH, NAR, BERUTHIEL, GORLIM, ELENDIL, THORIN, CELEGORM, THRAIN,
@@ -161,6 +161,7 @@ int main(int argc, char * argv[])
 #endif
     
 #if defined(SET_UID) && !defined(SECURE)
+    /* Set the user id or quit */
     if (setuid(geteuid()) != 0) {
 	perror("Can't set permissions correctly!  Setuid call failed.\n");
 	exit(0);
@@ -182,38 +183,45 @@ int main(int argc, char * argv[])
 	perror("Can't get load-check.\n");
 	exit(0);
     }
-    
+
+    /* Find ourself */
     do {
 	if (fscanf(fp, "%s%d", temphost, &LOAD) == EOF) {
 	    LOAD=100;
 	    break;
 	}
-	if (temphost[0]=='#')
-	    (void)fgets(discard, (sizeof discard)-1, fp); /* Comment */
+
+	/* Hack -- Discard comments */
+	if (temphost[0]=='#') {
+	    (void)fgets(discard, (sizeof discard)-1, fp);
+	}
+
     } while (strcmp(temphost,thishost) && strcmp(temphost,"localhost"));
     /* Until we've found ourselves */
-    
+
     fclose(fp);
 #endif
-    
+
     /* use curses */
     init_curses();
-    
+
     /* check for user interface option */
     for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv)
 	switch (argv[0][1]) {
 	  case 'A':
 	  case 'a':
 	    if (is_wizard(player_uid))
-		peek=TRUE;
+	    peek=TRUE;
 	    else goto usage;
 	    break;
 	  case 'N':
-	  case 'n': new_game = TRUE; break;
+	  case 'n':
+	    new_game = TRUE;
+	    break;
 	  case 'O':
 	  case 'o':
-	    /* rogue_like_commands may be set in get_char(), so delay this
-	       until after read savefile if any */
+	    /* rogue_like_commands may be set in get_char() */
+	    /* so delay this until after read savefile if any */
 	    force_rogue_like = TRUE;
 	    force_keys_to = FALSE;
 	    break;
@@ -645,9 +653,7 @@ static void price_adjust()
 }
 #endif
 
-static int
-d_check(a)
-char *a;
+static int d_check(char *a)
 {
     while (*a)
 	if (iscntrl(*a)) {

@@ -164,13 +164,25 @@ static void signal_handler(int sig)
 		if (wait_for_more)
 		    put_buffer(" -more-", MSG_LINE, 0);
 		put_qio();
-		return;		   /* OK. We don't quit. */
+
+		/* OK. We don't quit. */
+		return;
 	    }
+
+	    /* Death */
 	    (void)strcpy(died_from, "Interrupting");
-	} else
+	}
+	else {
 	    (void)strcpy(died_from, "Abortion");
+	}
+
+	/* Interrupted */
 	prt("Interrupt!", 0, 0);
+
+	/* Suicide */
 	death = TRUE;
+
+	/* Save and exit */
 	exit_game();
     }
 

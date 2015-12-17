@@ -34,9 +34,9 @@ static int  check_mon_lite(int, int);
 static void get_moves(int, int *);
 static int  monster_critical(int, int, int);
 static void make_attack(int);
-static void make_move(int, int *, int32u *);
+static void make_move(int, int *, u32b *);
 static void mon_cast_spell(int, int *);
-static void mon_move(int, int32u *);
+static void mon_move(int, u32b *);
 static void shatter_quake(int, int);
 static void br_wall(int, int);
 #else
@@ -62,7 +62,7 @@ void update_mon(int monptr)
     register creature_type *r_ptr;
 
 #ifdef ATARIST_MWC
-    int32u                 holder;
+    u32b                 holder;
 #endif
 
     /* Can the monster be sensed in any way? */
@@ -289,7 +289,7 @@ static void get_moves(int monptr, register int *mm)
  */
 
     /* Apply fear if possible and necessary */
-    if (((int16)(py.misc.lev - 34 - c_list[(m_list[monptr]).mptr].level +
+    if (((s16b)(py.misc.lev - 34 - c_list[(m_list[monptr]).mptr].level +
 		 ((m_list[monptr].maxhp) % 8)) > 0)
 	|| m_list[monptr].monfear) { /* Run away!  Run away! -DGK */
     
@@ -486,7 +486,7 @@ static void make_attack(int monptr)
     int                    i, j, damage, flag, attackn, notice, visible;
     int                    shatter = FALSE;
     int                    CUT = FALSE, STUN = FALSE;
-    int32                  gold;
+    s32b                  gold;
     attid                  *attstr, *attstr_orig;
     vtype                  cdesc, tmp_str, ddesc;
 
@@ -497,7 +497,7 @@ static void make_attack(int monptr)
     register inven_type    *i_ptr;
 
     /* flag to see if blinked away (after steal) -CFT */
-    int8u                  blinked = 0;
+    byte                  blinked = 0;
 
 
     /* don't beat a dead body! */
@@ -1155,7 +1155,7 @@ static void make_attack(int monptr)
 
 		/* Allow complete resist */
 		if (!py.flags.disenchant_resist) {
-		    int8u               chance = 0;
+		    byte               chance = 0;
 
 		    /* Take some damage */
 		    take_hit(damage, ddesc);
@@ -1437,9 +1437,9 @@ static void make_attack(int monptr)
 /*
  * Make the move if possible, five choices		-RAK-	
  */
-static void make_move(int monptr, int *mm, int32u *rcmove)
+static void make_move(int monptr, int *mm, u32b *rcmove)
 {
-    int32u                movebits;
+    u32b                movebits;
     register cave_type    *c_ptr;
     register monster_type *m_ptr;
     register inven_type   *t_ptr;
@@ -1447,7 +1447,7 @@ static void make_move(int monptr, int *mm, int32u *rcmove)
     int                   i, newy, newx, do_turn, do_move, stuck_door;
 
 #ifdef ATARIST_MWC
-    int32u              holder;
+    u32b              holder;
 #endif
 
     i = 0;
@@ -1709,7 +1709,7 @@ static void make_move(int monptr, int *mm, int32u *rcmove)
 #endif
 		{
 /* used in code to prevent orcs from picking up Slay Orc weapons, etc -CFT */
-		    int32u t;
+		    u32b t;
 
 		    c_ptr = &cave[newy][newx];
 
@@ -1791,7 +1791,7 @@ static void make_move(int monptr, int *mm, int32u *rcmove)
  */
 static void mon_cast_spell(int monptr, int *took_turn)
 {
-    int32u		i;
+    u32b		i;
     int			y, x, chance, thrown_spell, r1;
     register int	k;
     int			spell_choice[64];
@@ -2896,7 +2896,7 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
     int                 result;
 
 #ifdef ATARIST_MWC
-    int32u              holder;
+    u32b              holder;
 #endif
 
 
@@ -2966,7 +2966,7 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 /*
  * Move the critters about the dungeon			-RAK-	
  */
-static void mon_move(int monptr, int32u *rcmove)
+static void mon_move(int monptr, u32b *rcmove)
 {
     register int           i, j;
     int                    k, move_test, dir;
@@ -2990,7 +2990,7 @@ static void mon_move(int monptr, int32u *rcmove)
 		msg_print(out_val);
 	    }
 	}
-	m_ptr->monfear = (int8u) t;
+	m_ptr->monfear = (byte) t;
     }
 /* Does the critter multiply?				   */
     if ((r_ptr->cmove & CM_MULTIPLY) && (MAX_MON_MULT >= mon_tot_mult) &&
@@ -3080,7 +3080,7 @@ static void mon_move(int monptr, int32u *rcmove)
 	    t -= randint(c_list[m_ptr->mptr].level / 10);
 	    if (t < 0)
 		t = 0;
-	    m_ptr->confused = (int8u) t;
+	    m_ptr->confused = (byte) t;
 	}
 	move_test = TRUE;
     }
@@ -3160,7 +3160,7 @@ void creatures(int attack)
     register int          i, k;
     register monster_type *m_ptr;
     recall_type           *r_ptr;
-    int32u                notice, rcmove;
+    u32b                notice, rcmove;
     int                   wake, ignore;
     vtype                 cdesc;
 
@@ -3335,7 +3335,7 @@ static void shatter_quake(int mon_y, int mon_x)
 			if ((r_ptr->cdefense & UNIQUE) && (m_ptr->hp < 0))
 			    m_ptr->hp = 0;
 			if (m_ptr->hp < 0) {
-			    int32u              temp, treas;
+			    u32b              temp, treas;
 
 			    (void)sprintf(out_val, "%s is embedded in the rock.",
 					  m_name);

@@ -113,8 +113,8 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 /* Also initialise race intrinsics    SM */
 void calc_bonuses()
 {
-    register int32u        item_flags;
-    register int32u        item_flags2;
+    register s32b        item_flags;
+    register s32b        item_flags2;
     int                    old_dis_ac;
     register struct flags *p_ptr;
     register struct misc  *m_ptr;
@@ -2581,7 +2581,7 @@ void area_affect(int dir, int y, int x)
 /* AC gets worse					-RAK-	 */
 /* Note: This routine affects magical AC bonuses so that stores	  */
 /* can detect the damage.					 */
-int minus_ac(int32u typ_dam)
+int minus_ac(s32b typ_dam)
 {
     register int         i, j;
     int                  tmp[6], minus, do_damage;
@@ -2651,7 +2651,7 @@ int minus_ac(int32u typ_dam)
 void corrode_gas(const char *kb_str)
 {
     if (!py.flags.acid_im)
-	if (!minus_ac((int32u) TR_RES_ACID))
+	if (!minus_ac((s32b) TR_RES_ACID))
 	    take_hit(randint(8), kb_str);
     inven_damage(set_corrodes, 5);
 }
@@ -2728,7 +2728,7 @@ void acid_dam(int dam, const char *kb_str)
 	dam = 1;
     flag = 0;
     if (!py.flags.resist_acid)
-	if (minus_ac((int32u) TR_RES_ACID))
+	if (minus_ac((s32b) TR_RES_ACID))
 	    flag = 1;
     if (py.flags.acid_resist)
 	flag += 2;

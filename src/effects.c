@@ -125,7 +125,7 @@ void lose_chr()
  */
 void eat(void)
 {
-    int32u                 i;
+    u32b                 i;
     int                    j, k, item_val, ident;
     register struct flags *f_ptr;
     register struct misc  *m_ptr;
@@ -154,10 +154,11 @@ void eat(void)
     ident = FALSE;
 
 	while (i != 0) {
-	    j = bit_pos(&i) + 1;
+
+    j = bit_pos(&i) + 1;
 
 	/* Analyze the effect */
-	    switch (j) {
+	switch (j) {
 
 	  case 1:
 		f_ptr = &py.flags;
@@ -169,38 +170,38 @@ void eat(void)
 
 	  case 2:
 		f_ptr = &py.flags;
-		if (!py.flags.blindness_resist) {
-		    f_ptr->blind += randint(250) + 10 * i_ptr->level + 100;
-		    draw_cave();
-		    msg_print("A veil of darkness surrounds you.");
-		    ident = TRUE;
-		}
-		break;
+	    if (!py.flags.blindness_resist) {
+		f_ptr->blind += randint(250) + 10 * i_ptr->level + 100;
+		draw_cave();
+		msg_print("A veil of darkness surrounds you.");
+		ident = TRUE;
+	    }
+	    break;
 
 	  case 3:
-		if (!py.flags.fear_resist) {
-		    f_ptr = &py.flags;
-		    f_ptr->afraid += randint(10) + i_ptr->level;
-		    msg_print("You feel terrified!");
-		    ident = TRUE;
-		}
-		break;
+	    if (!py.flags.fear_resist) {
+		f_ptr = &py.flags;
+		f_ptr->afraid += randint(10) + i_ptr->level;
+		msg_print("You feel terrified!");
+		ident = TRUE;
+	    }
+	    break;
 
 	  case 4:
-		f_ptr = &py.flags;
-		if ((!py.flags.confusion_resist) && (!py.flags.chaos_resist)) {
-		    f_ptr->confused += randint(10) + i_ptr->level;
-		    msg_print("You feel drugged.");
-		}
+	    f_ptr = &py.flags;
+	    if ((!py.flags.confusion_resist) && (!py.flags.chaos_resist)) {
+		f_ptr->confused += randint(10) + i_ptr->level;
+		msg_print("You feel drugged.");
+	    }
 		ident = TRUE;
-		break;
+	    break;
 
 	  case 5:
-		f_ptr = &py.flags;
-		f_ptr->image += randint(200) + 25 * i_ptr->level + 200;
-		msg_print("You feel drugged.");
-		ident = TRUE;
-		break;
+	    f_ptr = &py.flags;
+	    f_ptr->image += randint(200) + 25 * i_ptr->level + 200;
+	    msg_print("You feel drugged.");
+	    ident = TRUE;
+	    break;
 
 	  case 6:
 	    ident = cure_poison();
@@ -223,34 +224,34 @@ void eat(void)
 	    break;
 
 	  case 10:
+	    lose_str();
 	    ident = TRUE;
-		lose_str();
 	    break;
 
 	  case 11:
-		ident = TRUE;
 	    lose_con();
+	    ident = TRUE;
 	    break;
 
 #if 0				   /* 12 through 15 are not used */
 	  case 12:
-		ident = TRUE;
 	    lose_int();
+	    ident = TRUE;
 	    break;
 
 	  case 13:
-	    ident = TRUE;
 	    lose_wis();
+	    ident = TRUE;
 	    break;
 
 	  case 14:
-	    ident = TRUE;
 	    lose_dex();
+	    ident = TRUE;
 	    break;
 
 	  case 15:
-	    ident = TRUE;
 	    lose_chr();
+	    ident = TRUE;
 	    break;
 #endif
 
@@ -344,6 +345,7 @@ void eat(void)
 	    break;
 	    }
 	}
+
 	if (ident) {
 	    if (!known1_p(i_ptr)) {
 
@@ -380,7 +382,7 @@ void eat(void)
  */
 void quaff(void)
 {
-    int32u i, l;
+    u32b i, l;
     int    j, k, item_val;
     int    ident;
     register inven_type   *i_ptr;
@@ -627,8 +629,7 @@ void quaff(void)
 	    break;
 
 	  case 23:
-	    if (py.flags.fast == 0)
-		ident = TRUE;
+	    if (py.flags.fast == 0) ident = TRUE;
 	    if (py.flags.fast <= 0) {
 		py.flags.fast += randint(25) + 15;
 	    } else
@@ -636,8 +637,7 @@ void quaff(void)
 	    break;
 
 	  case 24:
-	    if (py.flags.slow == 0)
-		ident = TRUE;
+	    if (py.flags.slow == 0) ident = TRUE;
 	    py.flags.slow += randint(25) + 15;
 	    break;
 
@@ -677,7 +677,7 @@ void quaff(void)
 	  case 34:
 	    ident = TRUE;
 	    if (!py.flags.hold_life && py.misc.exp > 0) {
-		int32               m, scale;
+		s32b               m, scale;
 
 		msg_print("You feel your memories fade.");
 		m = py.misc.exp / 5;
@@ -879,13 +879,13 @@ void quaff(void)
 		    py.misc.ptodam += 5;
 		}
 		py.flags.stun = 0;
-		ident = TRUE;
 		msg_print("Your head stops stinging.");
+		ident = TRUE;
 	    }
 	    if (py.flags.cut > 0) {
 		py.flags.cut = 0;
-		ident = TRUE;
 		msg_print("Your wounds heal.");
+		ident = TRUE;
 	    }
 	    if (cure_blindness()) ident = TRUE;
 	    if (cure_confusion()) ident = TRUE;
@@ -933,7 +933,7 @@ void quaff(void)
  */
 void read_scroll(void)
 {
-    int32u                i;
+    u32b                i;
     int                   j, k, item_val, y, x;
     int                   tmp[6], used_up;
     bigvtype              out_val, tmp_str;
@@ -1128,8 +1128,8 @@ void read_scroll(void)
 	    break;
 
 	  case 12:
-	    ident = TRUE;
 	    map_area();
+	    ident = TRUE;
 	    break;
 
 	  case 13:
@@ -1137,8 +1137,8 @@ void read_scroll(void)
 	    break;
 
 	  case 14:
-	    ident = TRUE;
 	    warding_glyph();
+	    ident = TRUE;
 	    break;
 
 	  case 15:
@@ -1188,8 +1188,9 @@ void read_scroll(void)
 
 	  case 25:
 	    msg_print("This is a Recharge-Item scroll.");
-	    ident = TRUE;
+	    /* Hack -- Like identify, recharge can be cancelled */
 	    used_up = recharge(60);
+	    ident = TRUE;
 	    break;
 
 	  case 26:
@@ -1210,8 +1211,8 @@ void read_scroll(void)
 	    break;
 
 	  case 29:
-	    ident = TRUE;
 	    create_food();
+	    ident = TRUE;
 	    break;
 
 	  case 30:
@@ -1257,7 +1258,8 @@ void read_scroll(void)
 		else {
 
 		    /* Oops */
-		    sprintf(out_val, "A terrible black aura blasts your %s!", tmp_str);
+		    sprintf(out_val, "A terrible black aura blasts your %s!",
+				   tmp_str);
 			msg_print(out_val);
 
 		    /* Shatter the weapon */
@@ -1315,16 +1317,16 @@ void read_scroll(void)
 
 
 
-		    /* Message (and knowledge) */
-		    objdes(tmp_str, i_ptr, FALSE);
-		    (void) sprintf(out_val,"Your %s glows brightly!", tmp_str);
-		    msg_print(out_val);
+	    /* Message (and knowledge) */
+	    objdes(tmp_str, i_ptr, FALSE);
+	    (void) sprintf(out_val,"Your %s glows brightly!", tmp_str);
+	    msg_print(out_val);
 
-		    /* Attempt to enchant */
-		    if (!enchant(i_ptr, randint(3)+1, ENCH_TOAC)) {
-			msg_print("The enchantment fails.");
-		    }
-		    ident = TRUE;
+	    /* Attempt to enchant */
+	    if (!enchant(i_ptr, randint(3)+1, ENCH_TOAC)) {
+		msg_print("The enchantment fails.");
+	    }
+	    ident = TRUE;
 	    }
 
 	    break;
@@ -1355,40 +1357,41 @@ void read_scroll(void)
 		if (k > 0) {
 
 		/* Pick a random item */
-		    i_ptr = &inventory[k];
+	    i_ptr = &inventory[k];
 
 	    /* Describe */
-		    objdes(tmp_str, i_ptr, FALSE);
+	    objdes(tmp_str, i_ptr, FALSE);
 
 	    /* Attempt a saving throw for artifacts */
-		    if ((i_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
-			msg_print("A terrible black aura tries to surround your");
-		    sprintf(out_val, "%s, but it resists the effects!", tmp_str);
-			msg_print(out_val);
-		    }
+	    if ((i_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
+		msg_print("A terrible black aura tries to surround your");
+	    sprintf(out_val, "%s, but it resists the effects!", tmp_str);
+		msg_print(out_val);
+	    }
 
 	    /* not artifact or failed save... */
 	    else {
 
 		/* Oops */
-		    sprintf(out_val, "A terrible black aura blasts your %s!", tmp_str);
-			msg_print(out_val);
+	    sprintf(out_val, "A terrible black aura blasts your %s!",
+			       tmp_str);
+		msg_print(out_val);
 
 		/* Blast the armor */
-			py_bonuses(i_ptr, -1);	/* take off current bonuses -CFT */
-			i_ptr->name2 = SN_BLASTED;
-			i_ptr->flags = TR_CURSED;
-			i_ptr->flags2 = 0;
-			i_ptr->toac = (-randint(5) - randint(5));
-			i_ptr->tohit = i_ptr->todam = 0; /* in case gaunlets of
-							 * slaying... */
-			i_ptr->ac = (i_ptr->ac > 9) ? 1 : 0;
-			i_ptr->cost = (-1);
+		py_bonuses(i_ptr, -1);	/* take off current bonuses -CFT */
+		i_ptr->name2 = SN_BLASTED;
+		i_ptr->flags = TR_CURSED;
+		i_ptr->flags2 = 0;
+		i_ptr->toac = (-randint(5) - randint(5));
+		i_ptr->tohit = i_ptr->todam = 0; /* in case gaunlets of
+						 * slaying... */
+		i_ptr->ac = (i_ptr->ac > 9) ? 1 : 0;
+		i_ptr->cost = (-1);
 
 		/* Recalculate bonuses */
-			py_bonuses(i_ptr, 1);	/* now apply new "bonuses"  -CFT */
-			calc_bonuses();
-		    }
+		py_bonuses(i_ptr, 1);	/* now apply new "bonuses"  -CFT */
+		calc_bonuses();
+	    }
 
 		/* Well, you know all about it */
 		ident = TRUE;
@@ -1405,22 +1408,21 @@ void read_scroll(void)
 	    break;
 
 	  case 38:
-	    ident = TRUE;
 	    bless(randint(12) + 6);
+	    ident = TRUE;
 	    break;
 
 	  case 39:
-	    ident = TRUE;
 	    bless(randint(24) + 12);
+	    ident = TRUE;
 	    break;
 
 	  case 40:
-	    ident = TRUE;
 	    bless(randint(48) + 24);
+	    ident = TRUE;
 	    break;
 
 	  case 41:
-	    ident = TRUE;
 	    if (py.flags.word_recall == 0) {
 		py.flags.word_recall = 15 + randint(20);
 		msg_print("The air about you becomes charged...");
@@ -1429,6 +1431,7 @@ void read_scroll(void)
 		py.flags.word_recall = 0;
 		msg_print("A tension leaves the air around you...");
 	    }
+	    ident = TRUE;
 	    break;
 
 	  case 42:
@@ -1438,15 +1441,15 @@ void read_scroll(void)
 
 	  case 43:
 	    place_special(char_row, char_col, SPECIAL);
-	    ident = TRUE;
 	    prt_map();
+	    ident = TRUE;
 	    break;
 
 	  case 44:
 	    special_random_object(char_row, char_col, 1);
-	    ident = TRUE;
 	    prt_map();
-		break;
+	    ident = TRUE;
+	    break;
 
 	  default:
 		msg_print("Internal error in scroll()");
@@ -1469,7 +1472,10 @@ void read_scroll(void)
 	} else if (!known1_p(i_ptr))
 	    sample(i_ptr);
 
-	if (used_up) {
+    /* Allow certain scrolls to be "preserved" */
+    if (used_up) {
+
+    /* Destroy the scroll */
 	    desc_remain(item_val);
 	    inven_destroy(item_val);
 	}
@@ -1484,7 +1490,7 @@ void read_scroll(void)
  */
 void aim(void)
 {
-    int32u                i;
+    u32b                i;
     register int          l, ident;
     int                   item_val, done_effect, j, k, chance, dir;
     register inven_type  *i_ptr;
@@ -1519,11 +1525,10 @@ void aim(void)
 	    m_ptr = &py.misc;
 
     /* Chance of success */
-	    chance = m_ptr->save + stat_adj(A_INT)
-		- (int)(i_ptr->level>42?42:i_ptr->level)
-		+ (class_level_adj[m_ptr->pclass][CLA_DEVICE] * m_ptr->lev / 3);
+    chance = (m_ptr->save + stat_adj(A_INT) - (int)(i_ptr->level>42?42:i_ptr->level) +
+	      (class_level_adj[m_ptr->pclass][CLA_DEVICE] * m_ptr->lev / 3));
 
-	    if (py.flags.confused > 0) chance = chance / 2;
+    if (py.flags.confused > 0) chance = chance / 2;
 
     /* Give everyone a slight chance */
     if ((chance < USE_DEVICE) && (randint(USE_DEVICE - chance + 1) == 1)) {
@@ -1536,215 +1541,215 @@ void aim(void)
 	msg_print("You failed to use the wand properly.");
     }
 
-	    else if (i_ptr->p1 > 0) {
-		i = i_ptr->flags;
-		done_effect = 0;
-		(i_ptr->p1)--;
-		while (!done_effect) {
+    else if (i_ptr->p1 > 0) {
+	i = i_ptr->flags;
+	done_effect = 0;
+	(i_ptr->p1)--;
+	while (!done_effect) {
 
     /* Start at the player */
-		    k = char_row;
-		    l = char_col;
+	    k = char_row;
+	    l = char_col;
 
     /* Various effects */
-		    switch (i) {
+    switch (i) {
 
-		case WD_LT:
-		    msg_print("A line of blue shimmering light appears.");
-		    light_line(dir, char_row, char_col);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
+	case WD_LT:
+	    msg_print("A line of blue shimmering light appears.");
+	    light_line(dir, char_row, char_col);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
 
-		case WD_DRG_FIRE:
+	case WD_DRG_FIRE:
+	    fire_ball(GF_FIRE, dir, k, l, 100, 3);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+    case WD_DRG_FRST:
+	    fire_ball(GF_FROST, dir, k, l, 80, 3);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_DRG_BREA:
+		switch (randint(5)) {
+		  case 1:
 		    fire_ball(GF_FIRE, dir, k, l, 100, 3);
-		    ident = TRUE;
-			done_effect = 1;
 		    break;
-
-	    case WD_DRG_FRST:
+		  case 2:
 		    fire_ball(GF_FROST, dir, k, l, 80, 3);
-		    ident = TRUE;
-			done_effect = 1;
 		    break;
-
-		case WD_DRG_BREA:
-			switch (randint(5)) {
-			  case 1:
-			    fire_ball(GF_FIRE, dir, k, l, 100, 3);
-			    break;
-			  case 2:
-			    fire_ball(GF_FROST, dir, k, l, 80, 3);
-			    break;
-			  case 3:
-			    fire_ball(GF_ACID, dir, k, l, 90, 3);
-			    break;
-			  case 4:
-			    fire_ball(GF_LIGHTNING, dir, k, l, 70, 3);
-			    break;
-			  default:
-			    fire_ball(GF_POISON_GAS, dir, k, l, 70, 3);
-			    break;
-			}
-		    ident = TRUE;
-			done_effect = 1;
+		  case 3:
+		    fire_ball(GF_ACID, dir, k, l, 90, 3);
 		    break;
-
-		case WD_AC_BLTS:	/* Acid , New */
-			if (randint(5)==1)
-			    line_spell(GF_ACID,dir,k,l,damroll(5,8));
-			else
-			    fire_bolt(GF_ACID,dir,k,l,damroll(5,8));
-		    ident = TRUE;
-			done_effect = 1;
+		  case 4:
+		    fire_ball(GF_LIGHTNING, dir, k, l, 70, 3);
 		    break;
-
-		case WD_LT_BLTS:	/* Lightning */
-			if (randint(6)==1)
-			    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
-			else
-			    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
-			ident = TRUE;
-			done_effect = 1;
+		  default:
+		    fire_ball(GF_POISON_GAS, dir, k, l, 70, 3);
 		    break;
-
-		case WD_FT_BLTS:	/* Frost */
-			if (randint(6)==1)
-			    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
-			else
-			    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_FR_BLTS:	/* Fire */
-			if (randint(4)==1)
-			    line_spell(GF_FIRE,dir,k,l,damroll(6,8));
-			else
-			    fire_bolt(GF_FIRE, dir, k, l, damroll(6, 8));
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_ST_MUD:
-		    ident = wall_to_mud(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_POLY:
-		    ident = poly_monster(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_HEAL_MN:
-		    ident = hp_monster(dir, k, l, -damroll(4, 6));
-			done_effect = 1;
-		    break;
-
-		case WD_HAST_MN:
-		    ident = speed_monster(dir, k, l, 1);
-			done_effect = 1;
-		    break;
-
-		case WD_SLOW_MN:
-		    ident = speed_monster(dir, k, l, -1);
-			done_effect = 1;
-		    break;
-
-		case WD_CONF_MN:
-		    ident = confuse_monster(dir, k, l, 10);
-			done_effect = 1;
-		    break;
-
-		case WD_SLEE_MN:
-		    ident = sleep_monster(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_DRAIN:
-		    ident = drain_life(dir, k, l, 75);
-			done_effect = 1;
-		    break;
-
-		case WD_ANHIL:
-		    ident = drain_life(dir, k, l, 125);
-			done_effect = 1;
-		    break;
-
-		case WD_TR_DEST:
-		    ident = td_destroy2(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_MAG_MIS:
-			if (randint(6)==1)
-			    line_spell(GF_MAGIC_MISSILE,dir,k,l,damroll(2,6));
-			else
-			    fire_bolt(GF_MAGIC_MISSILE, dir, k, l, damroll(2, 6));
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_FEAR_MN:	/* Fear Monster */
-		    ident = fear_monster(dir, k, l, 10);
-			done_effect = 1;
-		    break;
-
-		case WD_CLONE:
-		    ident = clone_monster(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_TELE:
-		    ident = teleport_monster(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_DISARM:
-		    ident = disarm_all(dir, k, l);
-			done_effect = 1;
-		    break;
-
-		case WD_LT_BALL:
-		    fire_ball(GF_LIGHTNING, dir, k, l, 32, 2);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_CD_BALL:
-		    fire_ball(GF_FROST, dir, k, l, 48, 2);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_FR_BALL:
-		    fire_ball(GF_FIRE, dir, k, l, 72, 2);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_ST_CLD:
-		    fire_ball(GF_POISON_GAS, dir, k, l, 12, 2);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_AC_BALL:
-			fire_ball(GF_ACID, dir, k, l, 60, 2);
-		    ident = TRUE;
-			done_effect = 1;
-		    break;
-
-		case WD_WONDER:
-			i = randint(23);
-		    break;
-
-		default:
-		    msg_print("Oops.  Undefined wand effect.");
-			done_effect = 1;
-		    break;
-		    }
 		}
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_AC_BLTS:	/* Acid , New */
+		if (randint(5)==1)
+		    line_spell(GF_ACID,dir,k,l,damroll(5,8));
+		else
+		    fire_bolt(GF_ACID,dir,k,l,damroll(5,8));
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_LT_BLTS:	/* Lightning */
+		if (randint(6)==1)
+		    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
+		else
+		    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+		ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_FT_BLTS:	/* Frost */
+		if (randint(6)==1)
+		    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
+		else
+		    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_FR_BLTS:	/* Fire */
+		if (randint(4)==1)
+		    line_spell(GF_FIRE,dir,k,l,damroll(6,8));
+		else
+		    fire_bolt(GF_FIRE, dir, k, l, damroll(6, 8));
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_ST_MUD:
+	    ident = wall_to_mud(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_POLY:
+	    ident = poly_monster(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_HEAL_MN:
+	    ident = hp_monster(dir, k, l, -damroll(4, 6));
+		done_effect = 1;
+	    break;
+
+	case WD_HAST_MN:
+	    ident = speed_monster(dir, k, l, 1);
+		done_effect = 1;
+	    break;
+
+	case WD_SLOW_MN:
+	    ident = speed_monster(dir, k, l, -1);
+		done_effect = 1;
+	    break;
+
+	case WD_CONF_MN:
+	    ident = confuse_monster(dir, k, l, 10);
+		done_effect = 1;
+	    break;
+
+	case WD_SLEE_MN:
+	    ident = sleep_monster(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_DRAIN:
+	    ident = drain_life(dir, k, l, 75);
+		done_effect = 1;
+	    break;
+
+	case WD_ANHIL:
+	    ident = drain_life(dir, k, l, 125);
+		done_effect = 1;
+	    break;
+
+	case WD_TR_DEST:
+	    ident = td_destroy2(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_MAG_MIS:
+		if (randint(6)==1)
+		    line_spell(GF_MAGIC_MISSILE,dir,k,l,damroll(2,6));
+		else
+		    fire_bolt(GF_MAGIC_MISSILE, dir, k, l, damroll(2, 6));
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_FEAR_MN:	/* Fear Monster */
+	    ident = fear_monster(dir, k, l, 10);
+		done_effect = 1;
+	    break;
+
+	case WD_CLONE:
+	    ident = clone_monster(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_TELE:
+	    ident = teleport_monster(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_DISARM:
+	    ident = disarm_all(dir, k, l);
+		done_effect = 1;
+	    break;
+
+	case WD_LT_BALL:
+	    fire_ball(GF_LIGHTNING, dir, k, l, 32, 2);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_CD_BALL:
+	    fire_ball(GF_FROST, dir, k, l, 48, 2);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_FR_BALL:
+	    fire_ball(GF_FIRE, dir, k, l, 72, 2);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_ST_CLD:
+	    fire_ball(GF_POISON_GAS, dir, k, l, 12, 2);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_AC_BALL:
+		fire_ball(GF_ACID, dir, k, l, 60, 2);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case WD_WONDER:
+		i = randint(23);
+	    break;
+
+	default:
+	    msg_print("Oops.  Undefined wand effect.");
+		done_effect = 1;
+	    break;
+    }
+	}
 
     /* Apply identification */
 	    if (ident) {
@@ -1775,12 +1780,12 @@ void aim(void)
 
 
 
-/* 
- * Use a staff.					-RAK-	
+/*
+ * Use a staff.			-RAK-	
  */
-void use()
+void use(void)
 {
-    int32u                i;
+    u32b                i;
     int                   j, k, item_val, chance, y, x;
     register int          ident;
     register struct misc *m_ptr;
@@ -2098,7 +2103,7 @@ static int direction(int *dir)
  */
 void activate_rod(void)
 {
-    int32u              i;
+    u32b              i;
     register int        l, ident;
     int                 item_val, j, k, chance, dir;
     register inven_type *i_ptr;

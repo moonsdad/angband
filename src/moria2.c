@@ -32,7 +32,7 @@
 static int look_ray(int, int, int);
 static int look_see(int, int, int *);
 static void hit_trap(int, int);
-static int summon_object(int, int, int, int, int32u);
+static int summon_object(int, int, int, int, s32b);
 static void py_attack(int, int);
 static void chest_trap(int, int);
 static void inven_throw(int, struct inven_type *);
@@ -60,7 +60,9 @@ static int fearless();
 #endif
 
 
-/* Player hit a trap.	(Chuckle)			-RAK-	 */
+/* 
+ *Player hit a trap. (Chuckle) -RAK-
+ */
 static void hit_trap(int y, int x)
 {
     int                   i, ty, tx, num, dam;
@@ -71,50 +73,67 @@ static void hit_trap(int y, int x)
 
     end_find();
     change_trap(y, x);
+
+    /* Get the cave grid */
     c_ptr = &cave[y][x];
     p_ptr = &py.misc;
     t_ptr = &t_list[c_ptr->tptr];
+
+    /* Roll for damage */
     dam = pdamroll(t_ptr->damage);
+
+
+    /* Examine the trap sub-val */
     switch (t_ptr->subval) {
+
       case 1:			   /* Open pit */
 	msg_print("You fell into a pit!");
-	if (py.flags.ffall)
+	if (py.flags.ffall) {
 	    msg_print("You gently float down.");
+	}
 	else {
 	    objdes(tmp, t_ptr, TRUE);
 	    take_hit(dam, tmp);
 	}
 	break;
+
       case 2:			   /* Arrow trap */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, t_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("An arrow hits you.");
-	} else
+	}
+	else {
 	    msg_print("An arrow barely misses you.");
+	}
 	break;
+
       case 3:			   /* Covered pit */
 	msg_print("You fell into a covered pit.");
-	if (py.flags.ffall)
+	if (py.flags.ffall) {
 	    msg_print("You gently float down.");
+	}
 	else {
 	    objdes(tmp, t_ptr, TRUE);
 	    take_hit(dam, tmp);
 	}
 	place_trap(y, x, 0);
 	break;
+
       case 4:			   /* Trap door */
 	if (!is_quest(dun_level)) {/* that would be too easy... -CFT */
-	    msg_print("You fell through a trap door!");
-	    new_level_flag = TRUE;
-	    dun_level++;
-	    if (py.flags.ffall)
-		msg_print("You gently float down.");
-	    else {
-		objdes(tmp, t_ptr, TRUE);
-		take_hit(dam, tmp);
-	    }
-	    msg_print(NULL);	   /* make sure can see the message before new level */
+	msg_print("You fell through a trap door!");
+	new_level_flag = TRUE;
+	dun_level++;
+	if (py.flags.ffall) {
+	msg_print("You gently float down.");
+	}
+	else {
+	    objdes(tmp, t_ptr, TRUE);
+	    take_hit(dam, tmp);
+	}
+	/* make sure can see the message before new level */
+	msg_print(NULL);
 	}
 	 /* end normal */ 
 	else {			   /* it's a quest level, can't let them fall through */
@@ -195,45 +214,59 @@ static void hit_trap(int y, int x)
 	msg_print("You are splashed with acid!");
 	acid_dam(dam, "an acid trap");
 	break;
+
       case 14:			   /* Poison gas */
-	if (!(py.flags.poison_im || py.flags.poison_resist ||
-	      py.flags.resist_poison))
-	    poison_gas(dam, "a poison gas trap");
 	msg_print("A pungent green gas surrounds you!");
+	if (!(py.flags.poison_im || py.flags.poison_resist || py.flags.resist_poison))
+	poison_gas(dam, "a poison gas trap");
 	break;
+
       case 15:			   /* Blind Gas */
 	msg_print("A black gas surrounds you!");
-	if (!py.flags.blindness_resist)
+	if (!py.flags.blindness_resist) {
 	    py.flags.blind += randint(50) + 50;
+	}
 	break;
+
       case 16:			   /* Confuse Gas */
 	msg_print("A gas of scintillating colors surrounds you!");
-	if ((!py.flags.confusion_resist) && (!py.flags.chaos_resist))
+	if ((!py.flags.confusion_resist) && (!py.flags.chaos_resist)) {
 	    py.flags.confused += randint(15) + 15;
+	}
 	break;
+
       case 17:			   /* Slow Dart */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, t_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("A small dart hits you!");
-	    if (py.flags.free_act)
+	    if (py.flags.free_act) {
 		msg_print("You are unaffected.");
-	    else
+	    }
+	    else {
 		py.flags.slow += randint(20) + 10;
-	} else
+	    }
+	}
+	else {
 	    msg_print("A small dart barely misses you.");
+	}
 	break;
+
       case 18:			   /* CON Dart */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
-	    if (!py.flags.sustain_con) {
-		(void)dec_stat(A_CON);
 		objdes(tmp, t_ptr, TRUE);
 		take_hit(dam, tmp);
+	    if (!py.flags.sustain_con) {
+		(void)dec_stat(A_CON);
 		msg_print("A small dart saps your health!");
-	    } else
+	    }
+	    else {
 		msg_print("A small dart hits you.");
-	} else
+	    }
+	}
+	else {
 	    msg_print("A small dart barely misses you.");
+	}
 	break;
       case 19:			   /* Secret Door */
 	break;
@@ -259,28 +292,36 @@ static void hit_trap(int y, int x)
 }
 
 
-/* Return spell number and failure chance		-RAK-	 */
 /*
- * returns -1 if no spells in book returns 1 if choose a spell in book to
- * cast returns 0 if don't choose a spell, i.e. exit with an escape 
+ * Return spell number and failure chance
+ *
+ * returns -1 if no spells in book
+ * returns 1 if choose a spell in book to cast
+ * returns 0 if don't choose a spell, i.e. exit with an escape 
  */
 int cast_spell(const char *prompt, int item_val, int *sn, int *sc)
 {
-    int32u               j1, j2;
+    s32b               j1, j2;
     register int         i, k;
     int                  spell[63], result, first_spell;
     register spell_type *s_ptr;
 
-    if (!py.misc.pclass)
-	return 0;		   /* if a warrior, abort as if by ESC -CFT */
+    /* if a warrior, abort as if by ESC -CFT */
+    if (!py.misc.pclass) return 0;
+
+    /* Assume nothing to read */
     result = (-1);
+
     i = 0;
+
     j1 = inventory[item_val].flags;
     j2 = inventory[item_val].flags2;
+
     first_spell = bit_pos(&j1);
 /* set j1 again, since bit_pos modified it */
     j1 = inventory[item_val].flags & spell_learned;
     s_ptr = magic_spell[py.misc.pclass - 1];
+
     while (j1) {
 	k = bit_pos(&j1);
 	if (s_ptr[k].slevel <= py.misc.lev) {
@@ -499,7 +540,7 @@ void fix2_delete_monster(int j)
 
 
 /* Creates objects nearby the coordinates given		-RAK-	  */
-static int summon_object(int y, int x, int num, int typ, int32u  ood)
+static int summon_object(int y, int x, int num, int typ, s32b  ood)
 {
     register int        i, j, k;
     register cave_type *c_ptr;
@@ -572,20 +613,24 @@ int delete_object(int y, int x)
 }
 
 
-/* Allocates objects upon a creatures death		-RAK-	 */
-/* Oh well,  another creature bites the dust.  Reward the victor */
-/* based on flags set in the main creature record		 */
+
+
 /*
+ * Allocates basic objects upon a creatures death.
+ *
+ * Oh well,  another creature bites the dust.  Reward the victor based on 
+ * flags set in the main creature record.
+ *
  * Returns a mask of bits from the given flags which indicates what the
  * monster is seen to have dropped.  This may be added to monster memory. 
  */
-int32u monster_death(int y, int x, register int32u flags, int32u good, int32u win)
+s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 {
-    register int i, number;
-    int32u       dump, res;
+    register int			i, number;
+    s32b       dump, res;
 
 #if defined(ATARIST_MWC)
-    int32u              holder;	   /* avoid a compiler bug */
+    s32b              holder;	   /* avoid a compiler bug */
 #endif
 
     if (win) {		   /* MORGOTH */
@@ -751,13 +796,16 @@ int32u monster_death(int y, int x, register int32u flags, int32u good, int32u wi
     return res;
 }
 
-/* return whether a monster is "fearless" and will never run away. -CWS */
+/*
+ * return whether a monster is "fearless" and will never run away. -CWS
+ */
 static int fearless(creature_type *c_ptr)
 {
     int flag = FALSE;
 
-    if (c_ptr->cdefense & MINDLESS)
+    if (c_ptr->cdefense & MINDLESS) {
 	flag = TRUE;
+    }
 
     if (c_ptr->cdefense & UNDEAD) {
 	if (c_ptr->spells ||	   /* if undead, check to see if it's */
@@ -768,55 +816,72 @@ static int fearless(creature_type *c_ptr)
 	    flag = TRUE;	   /* "mindless" undead */
     }
 
-    if (c_ptr->cchar == 'E' || c_ptr->cchar == 'g' || c_ptr->cdefense & DEMON)
+    if (c_ptr->cchar == 'E' || c_ptr->cchar == 'g' || c_ptr->cdefense & DEMON) {
 	flag = TRUE;
+    }
 
-    if (c_ptr->cdefense & INTELLIGENT)	/* catch intelligent monsters */
+    /* catch intelligent monsters */
+    if (c_ptr->cdefense & INTELLIGENT) {
 	flag = FALSE;
+    }
 
-    if (!(c_ptr->cmove & CM_MOVE_NORMAL))	/* it can't run away */
+    /* it can't run away */
+    if (!(c_ptr->cmove & CM_MOVE_NORMAL)) {
 	flag = TRUE;
+    }
 
+    /* Result */    
     return (flag);
 }
 
 
-/* Decreases monsters hit points and deletes monster if needed.	 */
-/* (Picking on my babies.)			       -RAK-   */
-/* added fear (DGK) and check whether to print fear messages -CWS */
+/*
+ * Decreases monsters hit points and deletes monster if needed.
+ * (Picking on my babies.)			       -RAK-
+ * added fear (DGK) and check whether to print fear messages -CWS
+ */
 int mon_take_hit(int monptr, int dam, int print_fear)
 {
-    register int32u         i;
+    register s32b         i;
     int                     found = FALSE;
-    int32                   new_exp, new_exp_frac;
+    s32b                   new_exp, new_exp_frac;
     register monster_type  *m_ptr;
     register struct misc   *p_ptr;
     register creature_type *c_ptr;
     int                     m_take_hit = (-1);
-    int32u                  tmp;
+    s32b                  tmp;
     int                     percentage;
     char                    m_name[80];
     vtype                   out_val;
 
+    /* Get the creature */
     m_ptr = &m_list[monptr];
+
+    /* Hurt it, and wake it up */
     m_ptr->hp -= dam;
     m_ptr->csleep = 0;
+
     c_ptr = &c_list[m_ptr->mptr];
 
+    /* It is dead now */
     if (m_ptr->hp < 0) {
+
 	if (m_ptr->mptr == (MAX_CREATURES - 1)) {
+
 	    char                temp[100];
 
 	    if (!dun_level) {
 		sprintf(temp, "%s/%d", ANGBAND_BONES, c_list[m_ptr->mptr].level);
-	    } else {
+	    }
+	    else {
 		sprintf(temp, "%s/%d", ANGBAND_BONES, dun_level);
 	    }
+
 	    unlink(temp);
 	}
+
 	if (c_list[m_ptr->mptr].cdefense & QUESTOR) {
-	    for (i = 0; i < DEFINED_QUESTS; i++) {	/* search for monster's
-							 * lv, not... */
+	    for (i = 0; i < DEFINED_QUESTS; i++) {	/* search for monster's lv, not... */
 		if (quests[i] == c_list[m_ptr->mptr].level) {	/* ...cur lv. -CFT */
 		    quests[i] = 0;
 		    found = TRUE;
@@ -840,8 +905,8 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 			  (t_list[cave[ty][tx].tptr].tval <= TV_MAX_WEAR) &&
 			 (t_list[cave[ty][tx].tptr].flags2 & TR_ARTIFACT)) {
 			    do { /* pick new possible spot */
-				ny = ty + (int8u) randint(3) - 2;
-				nx = tx + (int8u) randint(3) - 2;
+				ny = ty + (byte) randint(3) - 2;
+				nx = tx + (byte) randint(3) - 2;
 			    } while (!in_bounds(ny, nx) ||
 				     (cave[ny][nx].fval > MAX_OPEN_SPACE));
 			    ty = ny;	/* this is a new spot, not in a wall/door/etc */
@@ -891,16 +956,21 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	new_exp = ((long)c_ptr->mexp * c_ptr->level) / p_ptr->lev;
 	new_exp_frac = ((((long)c_ptr->mexp * c_ptr->level) % p_ptr->lev)
 			* 0x10000L / p_ptr->lev) + p_ptr->exp_frac;
+
 	if (new_exp_frac >= 0x10000L) {
 	    new_exp++;
 	    p_ptr->exp_frac = new_exp_frac - 0x10000L;
-	} else
+	}
+	else {
 	    p_ptr->exp_frac = new_exp_frac;
+	}
 
 	p_ptr->exp += new_exp;
-	if (p_ptr->exp < p_ptr->max_exp) /* If player is drained, let him get
-                                          * something: 10% is better than nothing -CFT */
+
+	/* When drained, the player advances at 10% the normal rate */
+	if (p_ptr->exp < p_ptr->max_exp) {
 	    p_ptr->max_exp += new_exp/10;
+	}
 
 	/* can't call prt_experience() here, as that would result in "new level"
 	 * message appearing before "monster dies" message 
@@ -923,27 +993,41 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	    monster_is_afraid = 0;
 	    return (-1);
 	}
-	if (!(m_ptr->monfear) &&
-	    ((percentage <= 10 && randint(10) <= percentage) || (dam >= m_ptr->hp)))
+
 	/*
 	 * Run if at 10% or less of max hit points, or got hit for half its
 	 * current hit points -DGK 
 	 */
-	{
+	if (!(m_ptr->monfear) &&
+	    ((percentage <= 10 && randint(10) <= percentage) ||
+	     (dam >= m_ptr->hp))) {
+
+	    /* Hack -- note fear */             
 	    monster_is_afraid = 1;
+
+	    /* Take note */
 	    if (print_fear && m_ptr->ml &&
 		los(char_row, char_col, m_ptr->fy, m_ptr->fx)) {
 		monster_name(m_name, m_ptr, c_ptr);
 		sprintf(out_val, "%s flees in terror!", m_name);
 		msg_print(out_val);
 	    }
-	    m_ptr->monfear = randint(10) + ((dam >= m_ptr->hp && percentage > 7) ?
-					    20 : (11 - percentage) * 5);
-	} else if (m_ptr->monfear) {
+
+	    /* Timed fear */
+	    m_ptr->monfear = (randint(10) +
+			      ((dam >= m_ptr->hp && percentage > 7) ?
+			       20 : (11 - percentage) * 5));
+	}
+
+	/* Already afraid */
+	else if (m_ptr->monfear) {
+
+	    /* When hurt, get brave? */
 	    m_ptr->monfear -= randint(dam);
+
+	    /* No longer afraid */
 	    if (m_ptr->monfear <= 0) {
-		if (monster_is_afraid == 1)
-		    monster_is_afraid = (-1);
+		if (monster_is_afraid == 1) monster_is_afraid = (-1);
 		m_ptr->monfear = 0;
 		if (m_ptr->ml && print_fear) {
 		    char                sex = c_ptr->gender;
@@ -962,7 +1046,9 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 }
 
 
-/* Player attacks a (poor, defenseless) creature	-RAK-	 */
+/*
+ * Player attacks a (poor, defenseless) creature	-RAK-	 
+ */
 static void py_attack(int y, int x)
 {
     register int        k, blows;
@@ -976,7 +1062,8 @@ static void py_attack(int y, int x)
 
     m_list[crptr].csleep = 0;
     i_ptr = &inventory[INVEN_WIELD];
-/* Does the player know what he's fighting?	   */
+
+    /* Does the player know what he's fighting?	   */
     if (!m_list[crptr].ml)
 	(void)strcpy(m_name, "it");
     else {
@@ -985,28 +1072,44 @@ static void py_attack(int y, int x)
 	else
 	    (void)sprintf(m_name, "the %s", c_list[monptr].name);
     }
+    /* Proper weapon */
+    if (i_ptr->tval != TV_NOTHING) {
 
-    if (i_ptr->tval != TV_NOTHING) /* Proper weapon */
+	/* Calculate blows */
 	blows = attack_blows((int)i_ptr->weight, &tot_tohit);
-    else {			   /* Bare hands?   */
+    }
+
+   /* Bare hands?   */
+    else {
+
+	/* Two blows */
 	blows = 2;
+
+	/* Hard to hit */
 	tot_tohit = (-3);
     }
+
     if ((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
     /* Fix for arrows */
 	blows = 1;
     p_ptr = &py.misc;
     tot_tohit += p_ptr->ptohit;
-/* if creature not lit, make it more difficult to hit */
-    if (m_list[crptr].ml)
-	base_tohit = p_ptr->bth;
-    else
-	base_tohit = (p_ptr->bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1))
-	    - (p_ptr->lev * class_level_adj[p_ptr->pclass][CLA_BTH] / 2);
 
-/* Loop for number of blows,	trying to hit the critter.	  */
-    monster_is_afraid = 0;	   /* redo fear messages -CWS        */
+    /* If creature is lit, use base rates, else, make it harder to hit */
+    if (m_list[crptr].ml) {
+	base_tohit = p_ptr->bth;
+    }
+    else {
+	base_tohit = (p_ptr->bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1)) -
+	             (p_ptr->lev * class_level_adj[p_ptr->pclass][CLA_BTH] / 2);
+    }
+
+    /* Assume no fear messages need to be redone */
+    monster_is_afraid = 0;
+
+    /* Loop for number of blows, trying to hit the critter. */
     do {
+	/* We hit it! */
 	if (test_hit(base_tohit, (int)p_ptr->lev, tot_tohit,
 		     (int)c_list[monptr].ac, CLA_BTH)) {
 
@@ -1019,10 +1122,15 @@ static void py_attack(int y, int x)
 		k = pdamroll(i_ptr->damage);
 		k = tot_dam(i_ptr, k, monptr);
 		k = critical_blow((int)i_ptr->weight, tot_tohit, k, CLA_BTH);
-	    } else {		   /* Bare hands!?  */
+	    }
+
+	    /* Bare hands */
+	    else {
 		k = damroll(1, 1);
 		k = critical_blow(1, 0, k, CLA_BTH);
 	    }
+
+	    /* Apply the player damage bonuses */
 	    k += p_ptr->ptodam;
 
 	    if (wizard) {
@@ -1033,41 +1141,48 @@ static void py_attack(int y, int x)
 		msg_print(out_val);
 	    }
 
-	    if (k < 0)
-		k = 0;
+	    if (k < 0) k = 0;
 
+	    /* Confusion attack */
 	    if (py.flags.confuse_monster) {
 		py.flags.confuse_monster = FALSE;
 		msg_print("Your hands stop glowing.");
-		if ((c_list[monptr].cdefense & CHARM_SLEEP)
-		    || (randint(MAX_MONS_LEVEL) < c_list[monptr].level))
+		if ((c_list[monptr].cdefense & CHARM_SLEEP) ||
+		    (randint(MAX_MONS_LEVEL) < c_list[monptr].level)) {
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
+		}
 		else {
 		    (void)sprintf(out_val, "%s appears confused.", m_name);
 		    m_list[crptr].confused = TRUE;
 		}
-		if ((out_val[0] >= 'a') && (out_val[0] <= 'z'))
-		    out_val[0] -= 32;	/* upcase, because starts sentence
-					 * -CFT */
+
+		/* Uppercase and display the sentence */
+		if ((out_val[0] >= 'a') && (out_val[0] <= 'z')) out_val[0] -= 32;
 		msg_print(out_val);
-		if (m_list[crptr].ml && randint(4) == 1)
+
+		if (m_list[crptr].ml && randint(4) == 1) {
 		    c_recall[monptr].r_cdefense |=
 			c_list[monptr].cdefense & CHARM_SLEEP;
+		}
 	    }
-	    if (k < 0)
-		k = 0;		   /* no neg damage! */
+	    if (k < 0) k = 0;		   /* no neg damage! */
 
-	/* See if we done it in.				 */
+	    /* See if we done it in.  */
 	    if (mon_take_hit(crptr, k, FALSE) >= 0) {	/* never print msgs -CWS */
+
 		if ((c_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
 		    (c_list[monptr].cchar == 'E') ||
 		    (c_list[monptr].cchar == 'v') ||
-		    (c_list[monptr].cchar == 'g'))
+		    (c_list[monptr].cchar == 'g')) {
 		    (void)sprintf(out_val, "You have destroyed %s.", m_name);
-		else
+		}
+		else {
 		    (void)sprintf(out_val, "You have slain %s.", m_name);
+		}
 		msg_print(out_val);
 		prt_experience();
+
+		/* No more attacks */
 		blows = 0;
 	    }
 	    if ((i_ptr->tval >= TV_SLING_AMMO)
@@ -1082,13 +1197,16 @@ static void py_attack(int y, int x)
 		    calc_bonuses();
 		}
 	    }
-	} else {
+	}
+
+	else {
 	    (void)sprintf(out_val, "You miss %s.", m_name);
 	    msg_print(out_val);
 	}
+
 	blows--;
     }
-    while (blows >= 1);
+    while (blows > 0);
 
 /* redo fear messages to only print at the end -CWS */
 
@@ -1170,7 +1288,7 @@ void move_char(int dir, int do_pickup)
 		}
 	    /* In doorway of light-room?	       */
 		else if (c_ptr->lr && (py.flags.blind < 1)) {
-		    int8u lit = FALSE;	/* only call light_room once... -CFT */
+		    byte lit = FALSE;	/* only call light_room once... -CFT */
 
 		    for (i = (char_row - 1); !lit && i <= (char_row + 1); i++)
 			for (j = (char_col - 1); !lit && j <= (char_col + 1); j++) {
@@ -2677,26 +2795,36 @@ static void py_bash(int y, int x)
 		(void)sprintf(out_val, "You have slain %s.", m_name);
 	    msg_print(out_val);
 	    prt_experience();
-	} else {
+	}
+
+	else {
+
 	    m_name[0] = toupper((int)m_name[0]);	/* Capitalize */
-	/* Can not stun Balrog */
+
+	    /* Can not stun Balrog */
 	    avg_max_hp = (c_ptr->cdefense & MAX_HP ?
 			  c_ptr->hd[0] * c_ptr->hd[1] :
 			  (c_ptr->hd[0] * (c_ptr->hd[1] + 1)) >> 1);
-	    if ((100 + randint(400) + randint(400))
-		> (m_ptr->hp + avg_max_hp)) {
+
+	    /* Apply saving throw */
+	    if ((100 + randint(400) + randint(400)) >
+		(m_ptr->hp + avg_max_hp)) {
 		m_ptr->stunned += randint(3) + 1;
-		if (m_ptr->stunned > 24)
-		    m_ptr->stunned = 24;
+		if (m_ptr->stunned > 24) m_ptr->stunned = 24;
 		(void)sprintf(out_val, "%s appears stunned!", m_name);
-	    } else
+	    }
+	    else {
 		(void)sprintf(out_val, "%s ignores your bash!", m_name);
+	    }
 	    msg_print(out_val);
 	}
-    } else {
+    }
+    else {
 	(void)sprintf(out_val, "You miss %s.", m_name);
 	msg_print(out_val);
     }
+
+    /* Stumble */
     if (randint(150) > py.stats.use_stat[A_DEX]) {
 	msg_print("You are off balance.");
 	py.flags.paralysis = 1 + randint(2);
@@ -2811,8 +2939,8 @@ void bash()
 static const char *look_mon_desc(int mnum)
 {
     monster_type *m = &m_list[mnum];
-    int32         thp, tmax, perc;
-    int8u         living;
+    s32b         thp, tmax, perc;
+    byte         living;
 
     living = !((c_list[m->mptr].cdefense & (UNDEAD|DEMON)) ||
 	       ((c_list[m->mptr].cchar == 'E') ||
@@ -2831,9 +2959,9 @@ static const char *look_mon_desc(int mnum)
 
     if ((m->maxhp == 0) || (m->hp >= m->maxhp))	/* shouldn't ever need > -CFT */
 	return (living ? "unhurt" : "undamaged");
-    thp = (int32) m->hp;
-    tmax = (int32) m->maxhp;
-    perc = (int32) (thp * 100L) / tmax;
+    thp = (s32b) m->hp;
+    tmax = (s32b) m->maxhp;
+    perc = (s32b) (thp * 100L) / tmax;
     if (perc > 60)
 	return (living ? "somewhat wounded" : "somewhat damaged");
     if (perc > 25)
@@ -3057,3 +3185,5 @@ mmove2(register int *y, register int *x, int sourcey, int sourcex, int desty, in
     *y = d_y;
     *x = d_x;
 }
+
+

@@ -192,9 +192,10 @@ int check_input(int microsec)
 }
 
 #if 0
+
 /*
- * This is not used, however, this should be compared against shell_out in
- * io.c 
+ * This is not used.  It will only work on some systems.
+ * this should be compared against shell_out in io.c 
  */
 
 /*

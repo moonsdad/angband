@@ -59,13 +59,13 @@ static void get_money();
  */
 struct previous {
 
-    int16u age;
-    int16u wt;
-    int16u ht;
-    int16u sc;
-    int16  disarm;
+    u16b age;
+    u16b wt;
+    u16b ht;
+    u16b sc;
+    s16b  disarm;
 
-    int16u stat[6];
+    u16b stat[6];
 
 
     char history[4][60];
@@ -104,7 +104,7 @@ static void get_stats()
 static void change_stat(int stat, int amount)
 {
   py.stats.max_stat[stat] =
-        adjust_stat(py.stats.max_stat[stat], (int16) amount, FALSE);
+        adjust_stat(py.stats.max_stat[stat], (s16b) amount, FALSE);
 }
 
 
@@ -117,7 +117,7 @@ static void set_prev_stats()
 
     /* Save the stats */
     for (i = 0; i < 6; i++) {
-	prev.stat[i] = (int16u) py.stats.max_stat[i];
+	prev.stat[i] = (u16b) py.stats.max_stat[i];
     }
 
     return;
@@ -272,7 +272,7 @@ static void choose_race(void)
  * auto_roll is boolean and states maximum changes should be used rather
  * than random ones to allow specification of higher values to wait for
  */
-static int adjust_stat(int stat_value, int16 amount, int auto_roll)
+static int adjust_stat(int stat_value, s16b amount, int auto_roll)
 {
     register int i;
 
@@ -660,7 +660,7 @@ static void get_class_choice()
     int          cl[MAX_CLASS], exit_flag;
     class_type   *c_ptr;
     char         tmp_str[80], s;
-    int32u       mask;
+    u32b       mask;
 
     for (j = 0; j < MAX_CLASS; j++)
 	cl[j] = 0;
@@ -721,7 +721,7 @@ static int monval( int i)
 static void get_money()
 {
     register int        tmp, gold;
-    register int16u    *a_ptr;
+    register u16b    *a_ptr;
 
     a_ptr = py.stats.max_stat;
     tmp = monval(a_ptr[A_STR]) + monval(a_ptr[A_INT])
@@ -747,7 +747,7 @@ void create_character()
     register char       c;
 
 #ifdef AUTOROLLER
-    int32u       auto_round = 0;
+    u32b       auto_round = 0;
     register int i;
     int          stat[6];
     int          autoroll = 0;

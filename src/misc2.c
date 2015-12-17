@@ -38,9 +38,9 @@ char               *index();
 /* Lets do all prototypes correctly.... -CWS */
 #ifndef NO_LINT_ARGS
 #ifdef __STDC__
-static void prt_lnum(const char *, int32, int, int);
+static void prt_lnum(const char *, s32b, int, int);
 static void prt_num(const char *, int, int, int);
-static void prt_long(int32, int, int);
+static void prt_long(s32b, int, int);
 static void prt_int(int, int, int);
 #else
 static void prt_lnum();
@@ -492,7 +492,7 @@ void place_object(int y, int x)
     if (peek) {
 	if (object_list[sorted_objects[tmp]].level > dun_level) {
 	    char buf[200];
-	    int8u temp;
+	    byte temp;
 	    
 	    temp=t_list[cur_pos].ident;
 	    t_list[cur_pos].ident |= ID_STOREBOUGHT;
@@ -506,7 +506,7 @@ void place_object(int y, int x)
 }
 
 /* Places a GOOD-object at given row, column co-ordinate ~Ludwig */
-void place_special(int y, int x, int32u good)
+void place_special(int y, int x, u32b good)
 {
     register int cur_pos, tmp;
     int          tv, is_good = FALSE;
@@ -562,7 +562,7 @@ void place_special(int y, int x, int32u good)
     if (peek) {
 	if (object_list[sorted_objects[tmp]].level > object_level) {
 	    char                buf[200];
-	    int8u               t;
+	    byte               t;
 
 	    t = t_list[cur_pos].ident;
 	    t_list[cur_pos].ident |= ID_STOREBOUGHT;
@@ -671,7 +671,7 @@ void special_random_object(int y, int x, int num)
 /* Converts stat num into string			-RAK-	 */
 void cnv_stat(int my_stat, char *out_val)
 {
-    register int16u stat = my_stat;
+    register u16b stat = my_stat;
     register int    part1, part2;
 
     if (stat > 18) {
@@ -708,7 +708,7 @@ void prt_field(const char *info, int row, int column)
 }
 
 /* Print long number with header at given row, column */
-static void prt_lnum(const char *header, int32 num, int row, int column)
+static void prt_lnum(const char *header, s32b num, int row, int column)
 {
     vtype out_val;
 
@@ -726,7 +726,7 @@ static void prt_num(const char *header, int num, int row, int column)
 }
 
 /* Print long number at given row, column */
-static void prt_long(int32 num, int row, int column)
+static void prt_long(s32b num, int row, int column)
 {
     vtype out_val;
 
@@ -1210,10 +1210,10 @@ void prt_winner()
 }
 
 
-int16u modify_stat(int stat, int amount)
+u16b modify_stat(int stat, int amount)
 {
     register int    loop, i;
-    register int16u tmp_stat;
+    register u16b tmp_stat;
 
     tmp_stat = py.stats.cur_stat[stat];
     loop = (amount < 0 ? -amount : amount);
@@ -1477,7 +1477,7 @@ int todam_adj()
 /* Prints character-screen info				-RAK-	 */
 void prt_stat_block()
 {
-    register int32u       status;
+    register u32b       status;
     register struct misc *m_ptr;
     register int          i;
 
@@ -1676,7 +1676,7 @@ void put_misc2()
 	sprintf(buf, "%s%9s", "Exp to Adv.", "****");
 	put_buffer(buf, 12, 28);
     } else
-	prt_lnum("Exp to Adv.", (int32) (player_exp[m_ptr->lev - 1] *
+	prt_lnum("Exp to Adv.", (s32b) (player_exp[m_ptr->lev - 1] *
 					 m_ptr->expfact / 100), 12, 28);
     prt_lnum("Gold       ", m_ptr->au, 13, 28);
     prt_num("Max Hit Points ", m_ptr->mhp, 9, 52);
@@ -1941,7 +1941,7 @@ register int perc;
 /* Computes current weight limit			-RAK-	 */
 int weight_limit()
 {
-    register int32 weight_cap;
+    register s32b weight_cap;
 
     weight_cap = (long)py.stats.use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP
 	+ (long)py.misc.wt;
@@ -2371,8 +2371,8 @@ int get_spell(int *spell, register int num, register int *sn, register int *sc, 
 void calc_spells(int stat)
 {
     register int    i;
-    register int32u mask;
-    int32u          spell_flag;
+    register u32b mask;
+    u32b          spell_flag;
     int             j, offset;
     int             num_allowed, new_spells, num_known, levels;
     vtype           tmp_str;
@@ -2584,7 +2584,7 @@ void gain_spells()
     int                 stat, diff_spells, new_spells;
     int                 spells[63], offset, last_known;
     register int        i, j;
-    register int32u     spell_flag = 0, spell_flag2 = 0, mask;
+    register u32b     spell_flag = 0, spell_flag2 = 0, mask;
     vtype               tmp_str;
     struct misc         *p_ptr;
     register spell_type *msp_ptr;
@@ -2728,7 +2728,7 @@ void calc_mana(int stat)
 {
     register int          new_mana, levels;
     register struct misc *p_ptr;
-    register int32        value;
+    register s32b        value;
     register int          i;
     register inven_type  *i_ptr;
     int                   amrwgt, maxwgt;
@@ -2917,8 +2917,8 @@ void prt_experience()
 		 * this 300 is arbitrary, but it makes human ages work okay,
 		 * and I chose the other racial age adjs based on this as well -CFT
 		 */
-		p_ptr->age += randint((int16u)class[p_ptr->pclass].age_adj *
-				      (int16u)race[p_ptr->prace].m_age)/300;
+		p_ptr->age += randint((u16b)class[p_ptr->pclass].age_adj *
+				      (u16b)race[p_ptr->prace].m_age)/300;
 	    }
 	}
     }
@@ -2934,7 +2934,7 @@ void calc_hitpoints()
 {
     register int          hitpoints;
     register struct misc *p_ptr;
-    register int32        value;
+    register s32b        value;
 
     p_ptr = &py.misc;
     hitpoints = player_hp[p_ptr->lev - 1] + (con_adj() * p_ptr->lev);
@@ -2998,7 +2998,7 @@ void insert_str(char *object_str, const char *mtc_str, const char *insert)
 }
 
 
-void insert_lnum(char *object_str, register const char *mtc_str, int32 number, int  show_sign)
+void insert_lnum(char *object_str, register const char *mtc_str, s32b number, int  show_sign)
 {
     int            mlen;
     vtype          str1, str2;
@@ -3356,7 +3356,7 @@ int mmove(int dir, register int *y, register int *x)
 int player_saves()
 {
     /* MPW C couldn't handle the expression, so split it into two parts */
-    int16 temp = class_level_adj[py.misc.pclass][CLA_SAVE];
+    s16b temp = class_level_adj[py.misc.pclass][CLA_SAVE];
 
     if (randint(100) <= (py.misc.save + stat_adj(A_WIS)
 			 + (temp * py.misc.lev / 3)))
@@ -3467,7 +3467,7 @@ void scribe_object()
 /* Append an additional comment to an object description.	-CJS- */
 void add_inscribe(inven_type *i_ptr, int type)
 {
-    i_ptr->ident |= (int8u) type;
+    i_ptr->ident |= (byte) type;
 }
 
 /* Replace any existing comment in an object description with a new one. CJS */

@@ -327,134 +327,138 @@ void wizard_light(int light)
 }
 
 
-/* Wizard routine for gaining on stats			-RAK-	 */
-void change_character()
+
+/*
+ * Wizard routine for gaining on stats                  -RAK-    
+ */
+static void change_character()
 {
     register int          tmp_val;
-    register int32        tmp_lval;
-    int16u               *a_ptr;
+    register s32b        tmp_lval;
+    u16b               *a_ptr;
     vtype                 tmp_str;
     register struct misc *m_ptr;
 
     a_ptr = py.stats.max_stat;
     prt("(3 - 118) Strength     = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_STR] = tmp_val;
-	    (void)res_stat(A_STR);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+	a_ptr[A_STR] = tmp_val;
+	(void)res_stat(A_STR);
+    }
+    } else return;
 
     prt("(3 - 118) Intelligence = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_INT] = tmp_val;
-	    (void)res_stat(A_INT);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+    a_ptr[A_INT] = tmp_val;
+	(void)res_stat(A_INT);
+    }
+    } else return;
 
     prt("(3 - 118) Wisdom       = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_WIS] = tmp_val;
-	    (void)res_stat(A_WIS);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+    a_ptr[A_WIS] = tmp_val;
+	(void)res_stat(A_WIS);
+    }
+    } else return;
 
     prt("(3 - 118) Dexterity    = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_DEX] = tmp_val;
-	    (void)res_stat(A_DEX);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+    a_ptr[A_DEX] = tmp_val;
+	(void)res_stat(A_DEX);
+    }
+    } else return;
 
     prt("(3 - 118) Constitution = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_CON] = tmp_val;
-	    (void)res_stat(A_CON);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+    a_ptr[A_CON] = tmp_val;
+	(void)res_stat(A_CON);
+    }
+    } else return;
 
     prt("(3 - 118) Charisma     = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 2) && (tmp_val < 119)) {
-	    a_ptr[A_CHR] = tmp_val;
-	    (void)res_stat(A_CHR);
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 2) && (tmp_val < 119)) {
+    a_ptr[A_CHR] = tmp_val;
+    (void)res_stat(A_CHR);
+    }
+    } else return;
 
     m_ptr = &py.misc;
     prt("(1 - 32767) Hit points = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 5)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > 0) && (tmp_val <= MAX_SHORT)) {
-	    m_ptr->mhp = tmp_val;
-	    m_ptr->chp = tmp_val;
-	    m_ptr->chp_frac = 0;
-	    prt_mhp();
-	    prt_chp();
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > 0) && (tmp_val <= MAX_SHORT)) {
+	m_ptr->mhp = tmp_val;
+	m_ptr->chp = tmp_val;
+	m_ptr->chp_frac = 0;
+	prt_mhp();
+	prt_chp();
+    }
+    } else return;
 
     prt("(0 - 32767) Mana       = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 5)) {
-	tmp_val = atoi(tmp_str);
-	if ((tmp_val > -1) && (tmp_val <= MAX_SHORT) && (*tmp_str != '\0')) {
-	    m_ptr->mana = tmp_val;
-	    m_ptr->cmana = tmp_val;
-	    m_ptr->cmana_frac = 0;
-	    prt_cmana();
-	}
-    } else
-	return;
+
+    tmp_val = atoi(tmp_str);
+    if ((tmp_val > -1) && (tmp_val <= MAX_SHORT) && (*tmp_str != '\0')) {
+	m_ptr->mana = tmp_val;
+	m_ptr->cmana = tmp_val;
+	m_ptr->cmana_frac = 0;
+	prt_cmana();
+    }
+    } else return;
 
     (void)sprintf(tmp_str, "Current=%ld  Gold = ", (long)m_ptr->au);
     tmp_val = strlen(tmp_str);
     prt(tmp_str, 0, 0);
     if (get_string(tmp_str, 0, tmp_val, 7)) {
-	tmp_lval = atol(tmp_str);
-	if (tmp_lval > -1 && (*tmp_str != '\0')) {
-	    m_ptr->au = tmp_lval;
-	    prt_gold();
-	}
-    } else
-	return;
+
+    tmp_lval = atol(tmp_str);
+    if (tmp_lval > -1 && (*tmp_str != '\0')) {
+	m_ptr->au = tmp_lval;
+	prt_gold();
+    }
+    } else return;
+
     (void)sprintf(tmp_str, "Current=%ld  Max Exp = ", (long)m_ptr->max_exp);
     tmp_val = strlen(tmp_str);
     prt(tmp_str, 0, 0);
     if (get_string(tmp_str, 0, tmp_val, 7)) {
-	tmp_lval = atol(tmp_str);
-	if (tmp_lval > -1 && (*tmp_str != '\0')) {
-	    m_ptr->max_exp = tmp_lval;
-	    prt_experience();
-	}
-    } else
-	return;
+
+    tmp_lval = atol(tmp_str);
+    if (tmp_lval > -1 && (*tmp_str != '\0')) {
+	m_ptr->max_exp = tmp_lval;
+	prt_experience();
+    }
+    } else return;
 
     (void)sprintf(tmp_str, "Current=%d  (0-200) Searching = ", m_ptr->srh);
     tmp_val = strlen(tmp_str);
     prt(tmp_str, 0, 0);
     if (get_string(tmp_str, 0, tmp_val, 3)) {
-	tmp_val = atoi(tmp_str);
+
+    tmp_val = atoi(tmp_str);
 	if ((tmp_val > -1) && (tmp_val < 201) && (*tmp_str != '\0'))
 	    m_ptr->srh = tmp_val;
-    } else
-	return;
+    } else return;
 
     (void)sprintf(tmp_str, "Current=%d  (-1-18) Stealth = ", m_ptr->stl);
     tmp_val = strlen(tmp_str);
@@ -528,12 +532,14 @@ void change_character()
 }
 
 
-/* Wizard routine for creating objects			-RAK-	 */
+/*
+ * Wizard routine for creating objects		-RAK-	 
+ */
 void wizard_create()
 {
     register int         tmp_val;
     int                  i, j, k;
-    int32                tmp_lval;
+    s32b                tmp_lval;
     char                 tmp_str[100];
     register inven_type *i_ptr;
     treasure_type        t_type, *t_ptr;
@@ -555,33 +561,33 @@ void wizard_create()
 	return;
     }
     switch (ch) {
-      case 'W':
-      case 'w':
+
+      case 'W': case 'w':
 	prt("What type of Weapon?    : ", 0, 0);
 	prt("[S]word, [H]afted, [P]olearm, [B]ow, [A]mmo.", 1, 0);
 	if (!get_com((char *)0, &ch)) {
 	    restore_screen();
 	    return;
 	}
+
 	switch (ch) {
-	  case 'S':
-	  case 's':
+	  case 'S': case 's':
 	    i_ptr->tval = TV_SWORD;
 	    break;
-	  case 'H':
-	  case 'h':
-	    i_ptr->tval = TV_HAFTED;
-	    break;
-	  case 'P':
-	  case 'p':
+
+	  case 'P': case 'p':
 	    i_ptr->tval = TV_POLEARM;
 	    break;
-	  case 'B':
-	  case 'b':
+
+	  case 'H': case 'h':
+	    i_ptr->tval = TV_HAFTED;
+	    break;
+
+	  case 'B': case 'b':
 	    i_ptr->tval = TV_BOW;
 	    break;
-	  case 'A':
-	  case 'a':
+
+	  case 'A': case 'a':
 	    prt("What type of Ammo?    : ", 0, 0);
 	    prt("[A]rrow, [B]olt, [P]ebble.", 1, 0);
 	    if (!get_com((char *)0, &ch)) {
@@ -589,58 +595,52 @@ void wizard_create()
 		return;
 	    }
 	    switch (ch) {
-	      case 'A':
-	      case 'a':
+	      case 'A': case 'a':
 		i_ptr->tval = TV_ARROW;
 		break;
-	      case 'B':
-	      case 'b':
+	      case 'B': case 'b':
 		i_ptr->tval = TV_BOLT;
 		break;
-	      case 'P':
-	      case 'p':
+	      case 'P': case 'p':
 		i_ptr->tval = TV_SLING_AMMO;
 		break;
 	      default:
 		break;
 	    }
 	    break;
+
 	  default:
 	    restore_screen();
 	    return;
 	}
 	break;
-      case 'A':
-      case 'a':
+
+      case 'A': case 'a':
 	prt("What type of Armour?    : ", 0, 0);
 	prt("[A]rmour, [G]loves, [B]oots, [S]hields, [H]elms, [C]loaks.", 1, 0);
 	if (!get_com((char *)0, &ch)) {
 	    restore_screen();
 	    return;
 	}
+
 	switch (ch) {
-	  case 'S':
-	  case 's':
+
+	  case 'S': case 's':
 	    i_ptr->tval = TV_SHIELD;
 	    break;
-	  case 'H':
-	  case 'h':
+	  case 'H': case 'h':
 	    i_ptr->tval = TV_HELM;
 	    break;
-	  case 'G':
-	  case 'g':
+	  case 'G': case 'g':
 	    i_ptr->tval = TV_GLOVES;
 	    break;
-	  case 'B':
-	  case 'b':
+	  case 'B': case 'b':
 	    i_ptr->tval = TV_BOOTS;
 	    break;
-	  case 'C':
-	  case 'c':
+	  case 'C': case 'c':
 	    i_ptr->tval = TV_CLOAK;
 	    break;
-	  case 'A':
-	  case 'a':
+	  case 'A': case 'a':
 	    prt("What type of Armour?    : ", 0, 0);
 	    prt("[H]ard armour, [S]oft armour.", 1, 0);
 	    if (!get_com((char *)0, &ch)) {
@@ -648,52 +648,50 @@ void wizard_create()
 		return;
 	    }
 	    switch (ch) {
-	      case 'H':
-	      case 'h':
+	      case 'H': case 'h':
 		i_ptr->tval = TV_HARD_ARMOR;
 		break;
-	      case 'S':
-	      case 's':
+	      case 'S': case 's':
 		i_ptr->tval = TV_SOFT_ARMOR;
 		break;
 	      default:
 		break;
 	    }
 	    break;
+
 	  default:
 	    restore_screen();
 	    return;
 	}
 	break;
-      case 'O':
-      case 'o':
+
+      case 'O': case 'o':
 	prt("What type of Object?    : ", 0, 0);
-	prt(
-	    "[R]ing, [P]otion, [W]and/staff, [S]croll, [M]agicbook, [A]mulet, [T]ool.",
-	    1, 0);
+	prt("[R]ing, [P]otion, [W]and/staff, [S]croll, [M]agicbook, [A]mulet, [T]ool.", 1, 0);
 	if (!get_com((char *)0, &ch)) {
 	    restore_screen();
 	    return;
 	}
+
 	switch (ch) {
-	  case 'R':
-	  case 'r':
+
+	  case 'R': case 'r':
 	    i_ptr->tval = TV_RING;
 	    break;
-	  case 'P':
-	  case 'p':
+
+	  case 'P': case 'p':
 	    i_ptr->tval = TV_POTION1;
 	    break;
-	  case 'S':
-	  case 's':
+
+	  case 'S': case 's':
 	    i_ptr->tval = TV_SCROLL1;
 	    break;
-	  case 'A':
-	  case 'a':
+
+	  case 'A': case 'a':
 	    i_ptr->tval = TV_AMULET;
 	    break;
-	  case 'W':
-	  case 'w':
+
+	  case 'W': case 'w':
 	    prt("Wand, Staff or Rod?    : ", 0, 0);
 	    prt("[W]and, [S]taff, [R]od.", 1, 0);
 	    if (!get_com((char *)0, &ch)) {
@@ -701,12 +699,10 @@ void wizard_create()
 		return;
 	    }
 	    switch (ch) {
-	      case 'W':
-	      case 'w':
+	      case 'W': case 'w':
 		i_ptr->tval = TV_WAND;
 		break;
-	      case 'S':
-	      case 's':
+	      case 'S': case 's':
 		i_ptr->tval = TV_STAFF;
 		break;
 	      case 'R':
@@ -718,21 +714,19 @@ void wizard_create()
 		return;
 	    }
 	    break;
-	  case 'M':
-	  case 'm':
+	  case 'M': case 'm':
 	    prt("Spellbook or Prayerbook?    : ", 0, 0);
 	    prt("[S]pellbook, [P]rayerbook.", 1, 0);
 	    if (!get_com((char *)0, &ch)) {
 		restore_screen();
 		return;
 	    }
+
 	    switch (ch) {
-	      case 'P':
-	      case 'p':
+	      case 'P': case 'p':
 		i_ptr->tval = TV_PRAYER_BOOK;
 		break;
-	      case 'S':
-	      case 's':
+	      case 'S': case 's':
 		i_ptr->tval = TV_MAGIC_BOOK;
 		break;
 	      default:
@@ -740,8 +734,8 @@ void wizard_create()
 		return;
 	    }
 	    break;
-	  case 'T':
-	  case 't':
+
+	  case 'T': case 't':
 	    prt("Which Tool etc...?  : ", 0, 0);
 	    prt("[S]pike, [D]igger, [C]hest, [L]ight, [F]ood, [O]il.", 1, 0);
 	    if (!get_com((char *)0, &ch)) {
@@ -749,24 +743,19 @@ void wizard_create()
 		return;
 	    }
 	    switch (ch) {
-	      case 'S':
-	      case 's':
+	      case 'S': case 's':
 		i_ptr->tval = TV_SPIKE;
 		break;
-	      case 'd':
 	      case 'D':
 		i_ptr->tval = TV_DIGGING;
 		break;
-	      case 'C':
-	      case 'c':
+	      case 'C': case 'c':
 		i_ptr->tval = TV_CHEST;
 		break;
-	      case 'L':
-	      case 'l':
+	      case 'L': case 'l':
 		i_ptr->tval = TV_LIGHT;
 		break;
-	      case 'F':
-	      case 'f':
+	      case 'F': case 'f':
 		i_ptr->tval = TV_FOOD;
 		break;
 	      case 'O':
@@ -778,11 +767,13 @@ void wizard_create()
 		return;
 	    }
 	    break;
+
 	  default:
 	    restore_screen();
 	    return;
 	}
 	break;
+
       default:
 	restore_screen();
 	return;
@@ -943,11 +934,9 @@ again:
 	i_ptr->number = tmp_val;
 
     prt("Weight of item? [return=default]: ", 0, 0);
-    if (!get_string(tmp_str, 0, 35, 5))
-	goto end;
+    if (!get_string(tmp_str, 0, 35, 5)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->weight = tmp_val;
+    if (tmp_val) i_ptr->weight = tmp_val;
 
     if ((i_ptr->tval == TV_SWORD) ||
 	(i_ptr->tval == TV_HAFTED) ||
@@ -956,34 +945,30 @@ again:
 	(i_ptr->tval == TV_BOLT) ||
 	(i_ptr->tval == TV_SLING_AMMO) ||
 	(i_ptr->tval == TV_DIGGING)) {
+
 	i_ptr->ident |= ID_SHOW_HITDAM;
 	prt("Damage (dice): ", 0, 0);
-	if (!get_string(tmp_str, 0, 15, 3))
-	    goto end;
+	if (!get_string(tmp_str, 0, 15, 3)) goto end;
 	tmp_val = atoi(tmp_str);
-	if (tmp_val != 0)
-	    i_ptr->damage[0] = tmp_val;
+	if (tmp_val != 0) i_ptr->damage[0] = tmp_val;
+
 	prt("Damage (sides): ", 0, 0);
-	if (!get_string(tmp_str, 0, 16, 3))
-	    goto end;
+	if (!get_string(tmp_str, 0, 16, 3)) goto end;
 	tmp_val = atoi(tmp_str);
-	if (tmp_val != 0)
-	    i_ptr->damage[1] = tmp_val;
+	if (tmp_val != 0) i_ptr->damage[1] = tmp_val;
     }
+
     prt("+To hit: ", 0, 0);
-    if (!get_string(tmp_str, 0, 9, 3))
-	goto end;
+    if (!get_string(tmp_str, 0, 9, 3)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->tohit = tmp_val;
+    if (tmp_val != 0) i_ptr->tohit = tmp_val;
 
     prt("+To dam: ", 0, 0);
-    if (!get_string(tmp_str, 0, 9, 3))
-	goto end;
+    if (!get_string(tmp_str, 0, 9, 3)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->todam = tmp_val;
+    if (tmp_val != 0) i_ptr->todam = tmp_val;
 
+    /* Extra Armor Info */
     if ((i_ptr->tval == TV_SOFT_ARMOR) ||
 	(i_ptr->tval == TV_HARD_ARMOR) ||
 	(i_ptr->tval == TV_HELM) ||
@@ -991,32 +976,29 @@ again:
 	(i_ptr->tval == TV_BOOTS) ||
 	(i_ptr->tval == TV_GLOVES) ||
 	(i_ptr->tval == TV_SHIELD)) {
+
 	prt("Base AC : ", 0, 0);
-	if (!get_string(tmp_str, 0, 10, 3))
-	    goto end;
+	if (!get_string(tmp_str, 0, 10, 3)) goto end;
 	tmp_val = atoi(tmp_str);
-	if (tmp_val != 0)
-	    i_ptr->ac = tmp_val;
+	if (tmp_val != 0) i_ptr->ac = tmp_val;
     }
+
     prt("+To AC : ", 0, 0);
-    if (!get_string(tmp_str, 0, 9, 3))
-	goto end;
+    if (!get_string(tmp_str, 0, 9, 3)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->toac = tmp_val;
+    if (tmp_val != 0) i_ptr->toac = tmp_val;
 
     prt("Magic Plus Flag  : ", 0, 0);
-    if (!get_string(tmp_str, 0, 20, 5))
-	goto end;
+    if (!get_string(tmp_str, 0, 20, 5)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->p1 = tmp_val;
+    if (tmp_val != 0) i_ptr->p1 = tmp_val;
 
 
     save_screen();
     if ((i_ptr->tval <= TV_MAX_WEAR) && (i_ptr->tval >= TV_MIN_WEAR)) {
 
-    /* only then bother with TR_* flags, since otherwise they are meaningless... -CFT */
+    /* Only do TR_* flags for wearable objects */
+
 	if ((i_ptr->tval == TV_SWORD) ||
 	    (i_ptr->tval == TV_HAFTED) ||
 	    (i_ptr->tval == TV_POLEARM) ||
@@ -1024,301 +1006,245 @@ again:
 	    (i_ptr->tval == TV_BOLT) ||
 	    (i_ptr->tval == TV_SLING_AMMO) ||
 	    (i_ptr->tval == TV_DIGGING)) {
+
 	    if (get_com("Slay Evil? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_SLAY_EVIL;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLAY_EVIL;
+	    } else if (ch == '\033')goto end;
+
 	    if (get_com("Slay Animal? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_SLAY_ANIMAL;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLAY_ANIMAL;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Undead? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_SLAY_UNDEAD;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLAY_UNDEAD;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Giant? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_SLAY_GIANT;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SLAY_GIANT;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Demon? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_SLAY_DEMON;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SLAY_DEMON;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Troll? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_SLAY_TROLL;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SLAY_TROLL;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Orc? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_SLAY_ORC;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SLAY_ORC;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Slay Dragon? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_SLAY_DRAGON;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLAY_DRAGON;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Execute Dragon? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_SLAY_X_DRAGON;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLAY_X_DRAGON;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Frost Brand? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_FROST_BRAND;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_FROST_BRAND;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Fire Brand? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags |= TR_FLAME_TONGUE;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_FLAME_TONGUE;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Lightning Brand? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_LIGHTNING;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_LIGHTNING;
+	    } else if (ch == '\033') goto end;
+
 	    if (get_com("Earthquake Brand? [yn]: ", &ch)) {
-		if (ch == 'y' || ch == 'Y')
-		    i_ptr->flags2 |= TR_IMPACT;
-	    } else if (ch == '\033')
-		goto end;
+		if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IMPACT;
+	    } else if (ch == '\033') goto end;
 	}
 	if (get_com("Affect Strength? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_STR;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_STR;
 	} else if (ch == '\033')
 	    goto end;
+
 	if (get_com("Affect Intelligence? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_INT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_INT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Affect Wisdom? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_WIS;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_WIS;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Affect Dexterity? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_DEX;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_DEX;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Affect Constitution? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_CON;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_CON;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Affect Charisma? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_CHR;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_CHR;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Automatic Searching? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_SEARCH;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SEARCH;
+	} else if (ch == '\033')  goto end;
+
 	if (get_com("Slow Digestion? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_SLOW_DIGEST;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLOW_DIGEST;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Stealth? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_STEALTH;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_STEALTH;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Aggravate Monsters? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_AGGRAVATE;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_AGGRAVATE;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Regeneration? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_REGEN;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_REGEN;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Speed? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_SPEED;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SPEED;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Fire? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_RES_FIRE;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_RES_FIRE;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Cold? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_RES_COLD;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_RES_COLD;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Acid? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_RES_ACID;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_RES_ACID;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Lightning? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_RES_LIGHT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_RES_LIGHT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Poison? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_POISON;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_POISON;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Confusion? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_CONF;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_CONF;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Sound? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_SOUND;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_SOUND;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Light? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_LT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_LT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Dark? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_DARK;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_DARK;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Chaos? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_CHAOS;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_CHAOS;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Disenchantment? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_DISENCHANT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_DISENCHANT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Shards? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_SHARDS;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_SHARDS;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Nexus? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_NEXUS;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_NEXUS;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Nether? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_NETHER;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_NETHER;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist Blindness? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_RES_BLIND;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_RES_BLIND;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Sustain a stat (Magic value 10 for all stats)? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_SUST_STAT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SUST_STAT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("See invisible? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_SEE_INVIS;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SEE_INVIS;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Free Action? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_FREE_ACT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_FREE_ACT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Feather Falling? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_FFALL;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_FFALL;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Tunneling? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_TUNNEL;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_TUNNEL;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Infra-vision? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_INFRA;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_INFRA;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Resist life level loss? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_HOLD_LIFE;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_HOLD_LIFE;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Telepathy? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_TELEPATHY;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_TELEPATHY;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Immune to Fire? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_IM_FIRE;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IM_FIRE;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Immune to Cold? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_IM_COLD;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IM_COLD;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Immune to Acid? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_IM_ACID;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IM_ACID;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Immune to Lightning? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_IM_LIGHT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IM_LIGHT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Immune to Poison? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_IM_POISON;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_IM_POISON;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Give off Light? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_LIGHT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_LIGHT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Activatable Item? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_ACTIVATE;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_ACTIVATE;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Is it an Artifact? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags2 |= TR_ARTIFACT;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_ARTIFACT;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("Cursed? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y')
-		i_ptr->flags |= TR_CURSED;
-	} else if (ch == '\033')
-	    goto end;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_CURSED;
+	} else if (ch == '\033') goto end;
+
     } /* end if TV_MAX_WEAR >= i_ptr->tval >= TV_MIN_WEAR -CFT */
+
     prt("Cost : ", 0, 0);
     if (!get_string(tmp_str, 0, 9, 8)) {
 	restore_screen();
 	return;
     }
     tmp_lval = atol(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->cost = tmp_lval;
+    if (tmp_val) i_ptr->cost = tmp_lval;
 
     prt("Dungeon Level on which it is found : ", 0, 0);
     if (!get_string(tmp_str, 0, 39, 3)) {
@@ -1326,8 +1252,7 @@ again:
 	return;
     }
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0)
-	i_ptr->level = tmp_val;
+    if (tmp_val != 0) i_ptr->level = tmp_val;
 
     j = 0;
     i = 0;

@@ -534,7 +534,7 @@ void print_objects()
 		    }
 		    (void)fprintf(file1, "%d %s.\n", i_ptr->level, tmp_str);
 		}
-		pusht((int16) j);
+		pusht((s16b) j);
 		(void)fclose(file1);
 		prt("Completed.", 0, 0);
 	    } else
@@ -1180,7 +1180,7 @@ void exit_game(void)
     enablefilemenu(FALSE);
 #endif
 
-/* What happens upon dying.				-RAK-	 */
+    /* What happens upon dying.				-RAK-	 */
     msg_print(NULL);
     flush();			   /* flush all input */
     nosignals();		   /* Can't interrupt or suspend. */

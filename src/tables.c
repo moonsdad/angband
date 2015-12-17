@@ -89,7 +89,7 @@ owner_type owners[MAX_OWNERS] = {
 
 /* Buying and selling adjustments for character race VS store	*/
 /* owner race							 */
-int8u rgold_adj[MAX_RACES][MAX_RACES] = {
+byte rgold_adj[MAX_RACES][MAX_RACES] = {
 			/*Hum, HfE, Elf,  Hal, Gno, Dwa, HfO, HfT, Dun, HiE*/
 /*Human		 */	 { 100, 105, 105, 110, 113, 115, 120, 125, 100, 105},
 /*Half-Elf	 */	 { 110, 100, 100, 105, 110, 120, 125, 130, 110, 100},
@@ -106,7 +106,7 @@ int8u rgold_adj[MAX_RACES][MAX_RACES] = {
 #define MDO MAX_DUNGEON_OBJ
 
 /* object_list[] index of objects that may appear in the store */
-int16u store_choice[MAX_STORES][STORE_CHOICES] = {
+u16b store_choice[MAX_STORES][STORE_CHOICES] = {
 	/* General Store */
 {MDO,MDO,MDO,MDO,MDO,MDO,MDO,MDO,MDO+21,MDO+21,MDO+21,MDO+21,MDO+22,MDO+22,
  MDO+22,MDO+1,MDO+2,MDO+3,MDO+4,
@@ -241,7 +241,7 @@ const char *syllables[MAX_SYLLABLES] = {
 /*
  * used to calculate the number of blows the player gets in combat
  */
-int8u blows_table[11][12] = {
+byte blows_table[11][12] = {
 /* STR/W:	   9  18  67  107  117  118  128  138  148  158  168 more : DEX */
 /* <2 */	{  1,  1,  1,   1,   1,   1,   2,   2,   2,   2,   2,   3},
 /* <3 */	{  1,  1,  1,   1,   2,   2,   3,   3,   3,   3,   3,   4},
@@ -263,7 +263,7 @@ int8u blows_table[11][12] = {
  * See the function randnor() in misc1.c, this is much faster than calling
  * transcendental function to calculate a true normal distribution
  */
-int16u normal_table[NORMAL_TABLE_SIZE] = {
+u16b normal_table[NORMAL_TABLE_SIZE] = {
      206,     613,    1022,    1430,	1838,	 2245,	  2652,	   3058,
     3463,    3867,    4271,    4673,	5075,	 5475,	  5874,	   6271,
     6667,    7061,    7454,    7845,	8234,	 8621,	  9006,	   9389,
@@ -383,7 +383,7 @@ const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 #endif
 
 /* Base experience levels, may be adjusted up for race and/or class*/
-int32u player_exp[MAX_PLAYER_LEVEL] = {
+u32b player_exp[MAX_PLAYER_LEVEL] = {
 	10,		25,		45,		70,
 	100,		140,		200,		280,
 	380,		500,		650,		850,
@@ -666,7 +666,7 @@ class_type class[MAX_CLASS] = {
  * CLA_MISC_HIT is identical to CLA_SAVE, which takes advantage of
  * the fact that the save values are independent of the class
  */
-int16 class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
+s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
 
 /*	       bth    bthb   device  disarm   save/misc hit  */
 /* Warrior */ {	4,	4,	2,	2,	3 },
@@ -678,13 +678,13 @@ int16 class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
 
 };
 
-int32u spell_learned = 0;	/* bit mask of spells learned */
-int32u spell_learned2 = 0;	/* bit mask of spells learned */
-int32u spell_worked = 0;	/* bit mask of spells tried and worked */
-int32u spell_worked2 = 0;	/* bit mask of spells tried and worked */
-int32u spell_forgotten = 0;	/* bit mask of spells learned but forgotten */
-int32u spell_forgotten2 = 0;	/* bit mask of spells learned but forgotten */
-int8u spell_order[64];		/* order spells learned/remembered/forgotten */
+u32b spell_learned = 0;	/* bit mask of spells learned */
+u32b spell_learned2 = 0;	/* bit mask of spells learned */
+u32b spell_worked = 0;	/* bit mask of spells tried and worked */
+u32b spell_worked2 = 0;	/* bit mask of spells tried and worked */
+u32b spell_forgotten = 0;	/* bit mask of spells learned but forgotten */
+u32b spell_forgotten2 = 0;	/* bit mask of spells learned but forgotten */
+byte spell_order[64];		/* order spells learned/remembered/forgotten */
 
 /*
  * Warriors don't have spells, so there is no entry for them.  Note that
@@ -1217,7 +1217,7 @@ const char *spell_names[127] = {
 /* 356 = Food Ration, 365 = Wooden Torch, 123 = Cloak, 30 = Stiletto,
    103 = Soft Leather Armor, 318 = Beginners-Magic, 322 = Beginners Handbook */
 
-int16u player_init[MAX_CLASS][5] = {
+u16b player_init[MAX_CLASS][5] = {
 		{ MDO, MDO+21,  34, 109, 258},	/* Warrior	 */
 		{ MDO, MDO+21,  29, 330, 220},	/* Mage		 */
 		{ MDO, MDO+21,  53, 334, 242},	/* Priest	 */
@@ -1231,7 +1231,7 @@ int16u player_init[MAX_CLASS][5] = {
  * spellmasks[][] is used to control the "you seem to be missing a book"
  * messages, because they look stupid otherwise.
  */
-int32u spellmasks[MAX_CLASS][2] = {
+u32b spellmasks[MAX_CLASS][2] = {
 	{ 0x0L, 0x0L },			/* warrior */
 	{ 0xffffffafL, 0x0fffffffL },	/* mage */
 	{ 0xffffffffL, 0x03ffffffL },	/* priest */
