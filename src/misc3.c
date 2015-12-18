@@ -1,6 +1,6 @@
-/* File: misc2.c */
+/* File: misc3.c */ 
 
-/* Purpose: misc code for monsters */
+/* Purpose: misc code for objects */
 
 /*
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
@@ -18,7 +18,6 @@
 #include <sys/param.h>
 #endif
 
-#include "constant.h"
 #include "angband.h"
 
 #include <ctype.h>

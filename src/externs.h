@@ -527,6 +527,8 @@ unsigned char loc_symbol(int, int);
 int test_light(int, int);
 void prt_map(void);
 void add_food(int);
+
+/* misc2.c */
 int popm(void);
 int max_hp(byte *);
 int place_monster(int, int, int, int);
@@ -560,7 +562,7 @@ int next_to_walls(int, int);
 int get_nmons_num(int);
 int distance(int, int, int, int);
 
-/* misc2.c */
+/* misc3.c */
 void place_trap(int, int, int);
 void place_rubble(int, int);
 void place_gold(int, int);
