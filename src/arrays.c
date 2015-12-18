@@ -17,7 +17,6 @@
 #include <sys/param.h>
 #endif
 
-#include "constant.h"
 #include "angband.h"
 
 #ifdef ibm032

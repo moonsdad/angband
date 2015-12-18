@@ -11,7 +11,6 @@
  */
 
 #include <stdio.h>
-#include "constant.h"
 #include "angband.h"
 #include "monster.h"
 

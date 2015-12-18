@@ -23,7 +23,6 @@
 
 #include <stdio.h>
 
-#include "constant.h"
 #include "monster.h"
 
 #ifndef USG
@@ -631,7 +630,7 @@ static int sv_write()
     wr_byte((byte) c_list[MAX_CREATURES - 1].speed);
     wr_byte((byte) c_list[MAX_CREATURES - 1].cchar);
     wr_bytes(c_list[MAX_CREATURES - 1].hd, 2);
-    wr_bytes(c_list[MAX_CREATURES - 1].damage, sizeof(attid) * 4);
+    wr_bytes(c_list[MAX_CREATURES - 1].damage, sizeof(u16b ) * 4);
     wr_short((u16b) c_list[MAX_CREATURES - 1].level);
 
     if (ferror(fileptr) || (fflush(fileptr) == EOF))
@@ -1507,7 +1506,7 @@ int get_char(int *generate)
 
 	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].hd), 2);
 
-	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].damage), sizeof(attid) * 4);
+	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].damage), sizeof(u16b) * 4);
 	rd_short((u16b *) & (c_list[MAX_CREATURES - 1].level));
 	*generate = FALSE;	   /* We have restored a cave - no need to generate. */
 

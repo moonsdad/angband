@@ -2,7 +2,6 @@
 
 /* Purpose: Global variables */
 
-#include "constant.h"
 #include "angband.h"
 
 

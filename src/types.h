@@ -65,8 +65,6 @@ struct _monster_attack {
 };
 
 
-typedef u16b attid;
-
 typedef struct _creature_type creature_type;
 
 struct _creature_type {
@@ -87,7 +85,7 @@ struct _creature_type {
 
   u32b mexp;			/* Exp value for kill		*/
 
-  attid damage[4];		/* Type attack and damage	*/
+  u16b  damage[4];		/* Type attack and damage	*/
 
   u32b cmove;		/* Bit field		*/
   u32b cdefense;		/* Bit field		*/

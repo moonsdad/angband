@@ -69,30 +69,50 @@ extern vtype savefile;		/* The save file name */
  * These are options, set with set_options command -CJS-
  */
 
+/* Option set 1 */
 
+extern int rogue_like_commands;	/* Pick initial keyset */
+extern int quick_messages;		/* Quick messages -CWS */
+extern int prompt_carry_flag;		/* auto-pickupobjects */
+extern int carry_query_flag;		/* ask whether to pick something up */
 
-extern int rogue_like_commands;
+extern int equippy_chars;	/* do equipment characters -CWS */
+extern int highlight_seams;	/* Highlight magma and quartz */
+
+/* Option Set 2  */
+
 extern int find_cut;			/* Cut corners on a run */
 extern int find_examine;		/* Check corners on a run */
 extern int find_prself;			/* Print yourself on a run (slower) */
 extern int find_bound;			/* Stop run when the map shifts */
-extern int prompt_carry_flag;	/* auto-pickupobjects */
+extern int find_ignore_doors;	/* Run through open doors */
+
+
+/* Option set 3 -- Gameplay */
+
+extern int no_haggle_flag;		/* does the player have to haggle? -CWS */
+
 extern int show_weight_flag;	/* Display weights in inventory */
 extern int show_equip_weight_flag;	/* Display weights in equip list -CWS */
-extern int highlight_seams;		/* Highlight magma and quartz */
-extern int find_ignore_doors;	/* Run through open doors */
-extern int delay_spd;			/* 1-10 for delays */
-extern int hitpoint_warn;		/* Low hitpoint warning */
-extern int peek;				/* should we display additional msgs */
-extern int carry_query_flag;	/* ask whether to pick something up */
-extern int is_home;				/* are we in our home? */
-extern int in_store_flag;		/* Don't redisplay light in stores -DGK */
 extern int plain_descriptions;	/* don't add color to any obj -CWS */
-extern int no_haggle_flag;		/* does the player have to haggle? -CWS */
-extern int quick_messages;		/* do quick messages -CWS */
-extern int equippy_chars;		/* do equipment characters -CWS */
+
+
+/*
+ * More options
+ */
+extern int delay_spd;		/* 1-10 for delays */
+extern int hitpoint_warn;	/* Low hitpoint warning */
+
+
+/*
+ * More flags
+ */
+extern int in_store_flag;		/* Don't redisplay light in stores -DGK */
+extern int peek;				/* should we display additional msgs */
 extern int coin_type;			/* remember Creeping _xxx_ coin type -CWS */
 extern int opening_chest;		/* do not generate another chest -CWS */
+
+extern int is_home;				/* are we in our home? */
 
 /* Unique artifact weapon flags */
 extern s32b GROND, RINGIL, AEGLOS, ARUNRUTH, MORMEGIL, ANGRIST, GURTHANG,
@@ -379,7 +399,7 @@ extern char *ANGBAND_SAV;		/* was LIBDIR(save)					*/
 
 #ifdef __STDC__
 
-/* create.c */
+/* birth.c */
 void create_character(void);
 
 /* creature.c */
@@ -425,7 +445,7 @@ int is_quest(int);
 void rerate(void);
 int ruin_stat(int);
 
-/* eat.c */
+/* effects.c */
 void eat(void);
 
 /* files.c */
@@ -438,9 +458,6 @@ void print_objects(void);
 int file_character(void)
 #else
 int file_character(char *);
-#endif
-#ifdef NEW_FILEPATHS
-void get_file_paths( void );
 #endif
 
 /* generate.c */
@@ -483,6 +500,11 @@ void print(int, int, int);
 
 /* magic.c */
 void cast(void);
+
+/* arrays.c */
+#ifdef NEW_FILEPATHS
+void get_file_paths( void );
+#endif
 
 /* main.c */
 int main(int, char **);

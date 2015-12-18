@@ -10,7 +10,6 @@
  * included in all such copies. 
  */
 
-#include "constant.h"
 #include "angband.h"
 #include "monster.h"
 
@@ -254,7 +253,7 @@ int bool_roff_recall(int mon_num)
 int roff_recall(int mon_num)
 {
     const char             *p, *q;
-    attid                  *pu;
+    u16b                   *pu;
     vtype                   temp;
     register monster_lore   *mp;
     register creature_type *cp;

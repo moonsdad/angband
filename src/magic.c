@@ -10,7 +10,6 @@
  * included in all such copies. 
  */
 
-#include "constant.h"
 #include "angband.h"
 
 /* Lets do all prototypes correctly.... -CWS */

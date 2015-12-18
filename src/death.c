@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include "constant.h"
 #include "angband.h"
 
 #ifdef Pyramid

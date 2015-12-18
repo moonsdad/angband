@@ -44,7 +44,6 @@ long                wgetch();
 char               *getenv();
 #endif
 
-#include "constant.h"
 #include "angband.h"
 
 #include <ctype.h>

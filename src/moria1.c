@@ -12,8 +12,6 @@
 
 #include <stdio.h>
 #include <ctype.h>
-
-#include "constant.h"
 #include "angband.h"
 #include "monster.h"
 

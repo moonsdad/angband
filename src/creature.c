@@ -10,7 +10,6 @@
  * included in all such copies. 
  */
 
-#include "constant.h"
 #include "monster.h"
 #include "angband.h"
 
@@ -485,7 +484,7 @@ static void make_attack(int monptr)
     int                    shatter = FALSE;
     int                    CUT = FALSE, STUN = FALSE;
     s32b                  gold;
-    attid                  *attstr, *attstr_orig;
+    u16b                   *attstr, *attstr_orig;
     vtype                  cdesc, tmp_str, ddesc;
 
     register creature_type *r_ptr;

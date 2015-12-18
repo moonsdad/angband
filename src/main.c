@@ -20,7 +20,6 @@
 #include <sys/resource.h>
 #endif
 
-#include "constant.h"
 #include "angband.h"
 
 #ifdef USG
