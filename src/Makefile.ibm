@@ -1,0 +1,20 @@
+# File: Makefile.ibm
+
+# Purpose: Makefile support for "main-ibm.c"
+
+# Note: Rename to "Makefile" before using
+
+
+OBJS = \
+
+
+CC = gcc
+CFLAGS = -Wall -O2 -DUSE_IBM
+LIBS = 
+BINARY = ../angband.bin
+
+.c.o:
+        $(CC) $(CFLAGS) -c $*.c
+
+angband.exe: $(OBJS)
+        $(CC) $(CFLAGS)  -o $(BINARY) $(OBJS) $(LIBS)

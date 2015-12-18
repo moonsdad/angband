@@ -1,0 +1,24 @@
+# File: Makefile.win
+
+
+
+#.autodepend
+
+
+
+CC = \apps\bc\bin\bcc.exe
+
+CFLAGS = +borlandc.cfg
+
+LINK = \apps\bc\bin\tlink.exe
+
+RC = \apps\bc\bin\rc.exe
+
+LIBDIR = \apps\bc\lib
+
+INCLDIR = \apps\bc\include
+
+
+SRCS = \
+
+OBJS = \

@@ -1,0 +1,22 @@
+# File: Makefile.emx
+
+# Purpose: Makefile support for "main-emx.c"
+
+# Note: Rename this file "Makefile" before using
+
+# Note: Use "dmake" to compile (see "main-emx.c" for details).
+#       Since "dmake" does not demand "hard" tab stops as delimiters,
+#       don't bother to add them.
+
+OBJS = \
+
+CC = gcc
+CFLAGS = -O2 -DUSE_EMX
+LIBS = 
+
+.c.o:
+    $(CC) $(CFLAGS) -c $*.c
+
+angband.exe: $(OBJS)
+    $(CC) $(CFLAGS)  -o angband.exe $(OBJS) $(LIBS)
+    + move angband.exe ..

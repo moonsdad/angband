@@ -1,100 +1,114 @@
 # File: Makefile
 
 ##
-## Please take a look at config.h for *critical* configuration steps needed.
+## Note that you may have to make modifications below according
+## to your machine, available libraries, compilation options,
+## and your "visual module" of choice.  See below...
+##
+## Note that "main-ibm.c", "main-emx.c", and "main-win.c", all
+## visual module files for IBM-ish computers, have their own
+## Makefiles, see "Makefile.xxx".  And the Macintosh does not
+## use a Makefile, but a Think C 6.0 project file, see elsewhere.
+##
+
+##
 ## BINDIR is the directory where the angband binary will be installed
 ##
 
 BINDIR = /User/games/bin
 PROGRAM = angband
 
-####
-# If you use gcc, you may find that adding '-traditional-cpp' will fix
-# defining the LIBDIR in config.h.  '-Dconst' may also help if your compiler
-# complains about conflicting definitions
+###
+### Compiler flags
+###
+### '-O' means optimize.  '-g' is for debugging.
+###
+### If you are using gcc, you may combine both '-O' and '-g'.  Also:
+### '-pipe' uses pipes rather than temporary files (which is faster).
+### '-pg' enables profiling (for coders only).  '-W<something>' provides
+### additional warnings.
+###
+### To use an "alternative" definition, simply "modify" (or "replace")
+### the definition below with one that you like.  For example, you can
+### change the compiler to "cc".
+###
+### See also "config.h" and "h-config.h".
+###
+### Some "examples" are given below, they can be used by simply
+### remove one of the '#' signs from the list of compiler flag choices below:
+###
 
-CC = cc
 
-####
-# Compiler flags
-####
-# '-O' means optimize.  '-g' is for debugging.
 #
-# If you are using gcc, you may combine both '-O' and '-g'.  Also:
-# '-pipe' uses pipes rather than temporary files (which is faster).
-# '-pg' enables profiling (for coders only).  '-W<something>' provides
-# additional warnings.
-####
-# Remove one of the '#' from the list of compiler flag choices below:
-####
+# This is my compiler of choice, it seems to work most everywhere
+#
+CC = gcc
 
-# For normal compilers (ie, 'cc' on anything but a NeXT).
-# Once you are sure it works, you can and should use '-O' instead.
+
+## For normal compilers (ie, 'cc' on anything but a NeXT).
+## Once you are sure it works, you can and should use '-O' instead.
 # CFLAGS = -Wall -O1
 
-# For HPUX, the compiler flags for 'cc' should be:
+## For HPUX, the compiler flags for 'cc' should be:
 #CFLAGS = -Ae -Dunix -g
 
-####
-# For gcc (or NeXT) users only.
- 
-# Normal gcc users:
-# For SunOS 5.X (Solaris 2.X), add '-DSOLARIS'
+##
+## For gcc (or NeXT) users only.
+##
+## Normal gcc users:
+## For SunOS 5.X (Solaris 2.X), add '-DSOLARIS'
 CFLAGS = -g -O1 -pipe
 
-# Full optimization (but only when you know it works right!):
+## Full optimization (but only when you know it works right!):
 #CFLAGS = -O4 -pipe -fomit-frame-pointer
 
-# Developers:
+## Developers:
 #CFLAGS = -g -O1 -pipe -Wall -Wcast-align -Wpointer-arith -Wwrite-strings
 
-# Anal developers:     [ :-) ]
+## Anal developers:     [ :-) ]
 #CFLAGS = -g -O1 -pipe -Wall -Wcast-align -Wpointer-arith -Wwrite-strings \
  -Wshadow -Wcast-align -Waggregate-return 
 
-# Profiling:
+## Profiling:
 #CFLAGS = -pg -g -O1 -pipe-Wall -Wcast-align -Wpointer-arith -Wwrite-strings
 
-####
-# Libraries to link from
-####
-# some people might be able to (or even might have to) remove '-lrpcsvc'
+##
+## Libraries to link from
+##
+## some people might be able to (or even might have to) remove '-lrpcsvc'
 
 LIBS = -lcurses -ltermcap -lrpcsvc
 
-####
-# For Linux systems, this line should look like:
+##
+## For Linux systems, this line should look like:
 # LIBS = -lncurses -ltermcap -lbsd
 
-####
-# For NCR System 3000, you'll probably need this:
+##
+## For NCR System 3000, you'll probably need this:
 # LIBS=-lcurses -ltermcap -lmalloc -L/usr/ucblib -lucb
 
-####
-# For SunOS 5.X (Solaris 2.X), this line should look like:
+##
+## For SunOS 5.X (Solaris 2.X), this line should look like:
 # LIBS = -ltermlib -ltermcap -lrpcsvc -lnsl -lucb
 
-# For SunOS 5.X (Solaris 2.X), this line should look like:
-# ....unless you don't have the BSD/SunOS 4.x compatibility kit:
+## For SunOS 5.X (Solaris 2.X), this line should look like:
+## ....unless you don't have the BSD/SunOS 4.x compatibility kit:
 # LIBS = -ltermlib -ltermcap -lrpcsvc -lnsl
 
 
-####
-# If your system lacks the random() call, define EXTRAOBJS to include
-# random.o.  Otherwise, you can leave it out.
+##
+## If your system lacks the random() call, define EXTRAOBJS to include
+## random.o.  Otherwise, you can leave it out.
 
 #EXTRAOBJS=random.o
 
-####
-# For SunOS 5.X (Solaris 2.X), if you don't have the BSD/SunOS 4.x
-# compatibility kit.  Also, be sure to define NEEDS_USLEEP in config.h
+##
+## For SunOS 5.X (Solaris 2.X), if you don't have the BSD/SunOS 4.x
+## compatibility kit.  Also, be sure to define NEEDS_USLEEP in config.h
 # EXTRAOBJS=random.o bzero.o
 
-# Otherwise, just use this:
+## Otherwise, just use this:
 EXTRAOBJS=
-
-# end of user configurable stuff
-#######
 
 SOURCES = main.c misc1.c misc2.c store1.c files.c io.c create.c desc.c\
 	generate.c sets.c dungeon.c creature.c death.c eat.c help.c magic.c\
@@ -120,6 +134,10 @@ all: $(PROGRAM)
 .c.o:
 	$(CC) $(CFLAGS) -c $*.c
 
+#
+# Build the "Angband" program.
+#
+
 $(PROGRAM): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $(PROGRAM) $(LIBS)
 
@@ -138,8 +156,12 @@ spotless: clean
 	rm -f $(PROGRAM)
 	rm -f $(BINDIR)/$(PROGRAM)
 
+#
+# Generate dependancies automatically (not required)
+#
+
 depend:
-	/usr/local/bin/X11/makedepend $(INCLUDES) -p$(OBJDIR)/ $(SRCS)
+	makedepend $(INCLUDES) -p$(OBJDIR)/ $(SRCS)
 
 ####
 # verify that the monsters.c and describe_mon.c files correspond
@@ -197,3 +219,4 @@ wizard.o: constant.h types.h externs.h config.h
 describe_mon.o: monster.h externs.h types.h
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
