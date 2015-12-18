@@ -10,16 +10,13 @@
  * included in all such copies. 
  */
 
+#include "angband.h"
+
+
 #ifndef FSCALE
 #define FSCALE (1<<8)
 #endif
 
-#if defined(Pyramid) || defined(NeXT) || defined(sun) || \
-defined(NCR3K) || defined(linux) || defined(ibm032) || defined (__osf__)
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
 
 #if !defined(GEMDOS) && !defined(MAC)
 #ifndef VMS
@@ -29,20 +26,7 @@ defined(NCR3K) || defined(linux) || defined(ibm032) || defined (__osf__)
 #endif
 #endif
 
-#include <stdio.h>
-#include "constant.h"
 #include "monster.h"
-#include "angband.h"
-
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#else
-#include "string.h"
-#endif
-#else
-#include <strings.h>
-#endif
 
 typedef struct statstime {
     int                 cp_time[4];
@@ -65,19 +49,6 @@ typedef struct statstime {
 } statstime;
 
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static int   test_place(int, int);
-static char *cap(char *);
-static void  magic_ammo(inven_type *, int, int, int, int, int);
-#else
-static int   test_place();
-static char *cap();
-static void  magic_ammo();
-#endif
-static void compact_objects();
-#endif
 
 extern int peek;
 extern int rating;
@@ -142,16 +113,18 @@ void reset_seed(void)
 }
 
 
-#if !defined(time_t)
-#define time_t long
-#endif
-
 /*
  * Check the day-time strings to see if open		-RAK-	
  */
 int check_time(void)
 {
+
 #ifdef CHECKHOURS
+
+# if !defined(time_t)
+#  define time_t long
+# endif
+
     time_t              c;
     register struct tm *tp;
 
@@ -310,11 +283,9 @@ void panel_bounds()
  */
 int get_panel(int y, int x, int update)
 {
-    register int prow, pcol;
-    register int panel;
-
-    prow = panel_row;
-    pcol = panel_col;
+    int prow = panel_row;
+    int pcol = panel_col;
+    int panel;
 
     if (force || (y < panel_row_min + 2) || (y > panel_row_max - 2)) {
 	prow = ((y - SCREEN_HEIGHT / 4) / (SCREEN_HEIGHT / 2));
@@ -329,22 +300,27 @@ int get_panel(int y, int x, int update)
     }
 
     if ((prow != panel_row) || (pcol != panel_col)) {
+
+    /* Save the new panel info */
 	panel_row = prow;
 	panel_col = pcol;
+
+    /* Recalculate the boundaries */
 	panel_bounds();
+
 	panel = TRUE;
 
     /* stop movement if any */
-	if (find_bound)
-	    end_find();
-    } else
-	panel = FALSE;
+	if (find_bound) end_find();
+
+    } else panel = FALSE;
+
     return (panel);
 }
 
 
-/* 
- * Distance between two points				-RAK-
+/*
+ * Approximate Distance between two points
  */
 int distance(int y1, int x1, int y2, int x2)
 {
@@ -355,6 +331,7 @@ int distance(int y1, int x1, int y2, int x2)
     dx = x1 - x2;
     if (dx < 0) dx = (-dx);
 
+    /* Hack -- approximate the distance */
     return ((((dy + dx) << 1) - (dy > dx ? dx : dy)) >> 1);
 }
 

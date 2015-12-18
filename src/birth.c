@@ -12,44 +12,7 @@
 
 #include "angband.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#include <strings.h>
-#endif
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void change_stat(int, int);
-static int  monval(int);
-
-#else
-static void change_stat();
-static int  monval();
-
-#endif
-
-static void get_stats();
-static void set_prev_stats();
-static int  get_prev_stats();
-static void get_all_stats();
-static void put_auto_stats();
-static void choose_race();
-static void print_history();
-static void set_prev_history();
-static void get_prev_history();
-static void get_sex();
-static void get_ahw();
-static void set_prev_ahw();
-static void get_prev_ahw();
-static void get_class();
-static void get_class_choice();
-static void get_money();
-
-#endif
 
 /*
  * Hold the data from the previous "roll"

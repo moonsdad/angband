@@ -46,7 +46,6 @@ char               *getenv();
 
 #include "angband.h"
 
-#include <ctype.h>
 
 #if defined(SYS_V) && defined(lint)
 /*

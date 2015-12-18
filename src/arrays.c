@@ -10,45 +10,16 @@
  * included in all such copies. 
  */
 
-#include <stdio.h>
-#include <errno.h>
+#include "angband.h"
 
 #ifndef MSDOS
 #include <sys/param.h>
-#endif
-
-#include "angband.h"
-
-#ifdef ibm032
-#include <ctype.h>
-#endif
-
-#ifdef MSDOS
 extern int          errno;
-
 #endif
 
 #if defined(GEMDOS) && (__STDC__ == 0)
 #include <access.h>
 char               *strcat();
-
-#endif
-
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#include <fcntl.h>
-#ifdef __MINT__
-#include <ctype.h>
-#endif
-#endif
-#else
-#include <strings.h>
-#ifndef VMS
-#include <sys/file.h>
-#else
-#include <file.h>
-#endif
 #endif
 
 #ifndef VMS

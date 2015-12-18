@@ -34,10 +34,6 @@
 #endif
 
 #include <pwd.h>
-#include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
 
 #if defined(SYS_V) && defined(lint)
 /* for AIX, prevent hundreds of unnecessary lint errors, must define before
@@ -57,20 +53,17 @@ typedef struct {
 #endif
 
 #ifndef USG
-#include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/param.h>
 #endif
 
 #ifdef USG
-#include <string.h>
 #ifndef __MINT__
 #include <termio.h>
 #endif
 #include <fcntl.h>
 #else
-#include <strings.h>
 #if defined(atarist) && defined(__GNUC__) && !defined(__MINT__)
 /* doesn't have <sys/wait.h> */
 #else

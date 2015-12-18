@@ -10,41 +10,10 @@
  * included in all such copies. 
  */
 
-#include <stdio.h>
-#include <ctype.h>
 #include "angband.h"
 #include "monster.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#else
-char *strcat();
-int   strlen();
 
-#endif
-#else
-#include <strings.h>
-#endif
-
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void inven_screen(int);
-static char map_roguedir(int);
-static void sub1_move_light(int, int, int, int);
-static void sub3_move_light(int, int, int, int);
-static int see_wall(int, int, int);
-static int see_nothing(int, int, int);
-#else
-static void inven_screen();
-static char map_roguedir();
-static void sub1_move_light();
-static void sub3_move_light();
-static int  see_wall();
-static int  see_nothing();
-#endif
-#endif
 
 
 /*

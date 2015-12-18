@@ -10,21 +10,11 @@
  * included in all such copies. 
  */
 
-#include <stdio.h>
 #include "angband.h"
 #include "monster.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#include <strings.h>
-#endif
 
-#ifndef linux
-long atol();
-#endif
+
 
 int is_wizard(int uid)
 {

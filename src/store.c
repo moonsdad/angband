@@ -12,19 +12,9 @@
 
 #include "angband.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#ifndef VMS
-#include <strings.h>
-#endif
-#endif
 
-#ifndef linux
-long                atol();
-#endif
+
+
 
 static cptr comment1[14] = {
     "Done! ", "Accepted! ", "Fine. ", "Agreed! ", "Ok. ", "Taken! ",

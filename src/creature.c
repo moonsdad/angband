@@ -13,41 +13,8 @@
 #include "monster.h"
 #include "angband.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#else
-char *strcat();
-char *strcpy();
-#endif
-#else
-#include <strings.h>
-#endif
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static int  check_mon_lite(int, int);
-static void get_moves(int, int *);
-static int  monster_critical(int, int, int);
-static void make_attack(int);
-static void make_move(int, int *, u32b *);
-static void mon_cast_spell(int, int *);
-static void mon_move(int, u32b *);
-static void shatter_quake(int, int);
-static void br_wall(int, int);
-#else
-static int  check_mon_lite();
-static void get_moves();
-static int  monster_critical();
-static void make_attack();
-static void make_move();
-static void mon_cast_spell();
-static void mon_move();
-static void shatter_quake();
-static void br_wall();
-#endif
-#endif
+
 
 /*
  * Updates screen when monsters move about		-RAK-	

@@ -52,18 +52,26 @@ extern int errno;
  */
 extern char *copyright[5];
 
-extern int player_uid;			/* The player's uid, or zero */
 extern int NO_SAVE;
 
 /*
- * horrible hack: needed because compact_monster() can be called from deep
- *  within creatures() via place_monster() and summon_monster()
+ * horrible hack:
+ * Needed because compact_monster() can be called from within
+ * creatures() via place_monster() and summon_monster() 
  */
-extern int hack_monptr;
+
+extern int hack_monptr;			/* The "current" monster, if any */
+
+extern int player_uid;			/* The player's uid, or zero */
+
+extern vtype savefile;		/* The save file name */
+
+extern vtype died_from;		/* Cause of death */
 
 extern s16b log_index;		/* Index to log file. -CJS- */
-extern vtype died_from;		/* Cause of death */
-extern vtype savefile;		/* The save file name */
+
+extern char days[7][29];		/* The load check info */
+
 
 /*
  * These are options, set with set_options command -CJS-
@@ -73,28 +81,28 @@ extern vtype savefile;		/* The save file name */
 
 extern int rogue_like_commands;	/* Pick initial keyset */
 extern int quick_messages;		/* Quick messages -CWS */
-extern int prompt_carry_flag;		/* auto-pickupobjects */
-extern int carry_query_flag;		/* ask whether to pick something up */
+extern int prompt_carry_flag;		/* Require "g" key to pick up */
+extern int carry_query_flag;		/* Prompt for pickup */
 
 extern int equippy_chars;	/* do equipment characters -CWS */
 extern int highlight_seams;	/* Highlight magma and quartz */
 
 /* Option Set 2  */
 
-extern int find_cut;			/* Cut corners on a run */
-extern int find_examine;		/* Check corners on a run */
-extern int find_prself;			/* Print yourself on a run (slower) */
-extern int find_bound;			/* Stop run when the map shifts */
-extern int find_ignore_doors;	/* Run through open doors */
+extern int find_cut;		/* Cut corners */
+extern int find_examine;	/* Examine corners */
+extern int find_prself;		/* Print self on a run (slower) */
+extern int find_bound;		/* Stop on borders when the map shifts */
+extern int find_ignore_doors;	/* Run through doors */
 
 
 /* Option set 3 -- Gameplay */
 
-extern int no_haggle_flag;		/* does the player have to haggle? -CWS */
+extern int no_haggle_flag;	/* Cancel haggling */
 
-extern int show_weight_flag;	/* Display weights in inventory */
-extern int show_equip_weight_flag;	/* Display weights in equip list -CWS */
-extern int plain_descriptions;	/* don't add color to any obj -CWS */
+extern int show_weight_flag;	/* Show weights in inven */
+extern int show_equip_weight_flag;	/* Show weights in equip  */
+extern int plain_descriptions;	/* Plain descriptions don't add color */
 
 
 /*
@@ -107,12 +115,14 @@ extern int hitpoint_warn;	/* Low hitpoint warning */
 /*
  * More flags
  */
-extern int in_store_flag;		/* Don't redisplay light in stores -DGK */
-extern int peek;				/* should we display additional msgs */
-extern int coin_type;			/* remember Creeping _xxx_ coin type -CWS */
-extern int opening_chest;		/* do not generate another chest -CWS */
+extern int in_store_flag;		/* Currently in a store */
+extern int peek;			/* should we display additional msgs */
+extern int coin_type;			/* Hack -- creeping _xxx_ coin type */
+extern int opening_chest;		/* Hack -- do not generate another chest */
 
-extern int is_home;				/* are we in our home? */
+extern int is_home;			/* are we in our home? */
+
+extern int wait_for_more;
 
 /* Unique artifact weapon flags */
 extern s32b GROND, RINGIL, AEGLOS, ARUNRUTH, MORMEGIL, ANGRIST, GURTHANG,
@@ -143,9 +153,11 @@ extern int quests[MAX_QUESTS];
  */
 
 extern int LOAD;
+extern int closing_flag;		/* Used for closing   */
 
-extern int in_store_flag;		/* flag so equippy chars work right -DGK */
-extern int good_item_flag;		/* True if an artifact has been created... */
+extern int in_store_flag;		/* Notice when in stores */
+extern int good_item_flag;		/* Notice artifact created... */
+extern int feeling;			/* level feeling */
 extern int unfelt;
 extern int new_level_flag;		/* Next level when true  */
 extern int teleport_flag;		/* Handle teleport traps  */
@@ -167,15 +179,14 @@ extern int monster_is_afraid;	/* redo monster fear messages -CWS */
 extern int character_generated;	/* Character generation complete */
 extern int character_saved;		/* prevents save on kill after save_char() */
 
-extern int feeling;				/* level feeling */
 extern int highscore_fd;		/* High score file descriptor */
 extern int command_count;		/* Repetition of commands. -CJS- */
 extern int default_dir;			/* Use last direction in repeated commands */
 
 extern s16b noscore;			/* Don't score this game. -CJS- */
 
-extern u32b randes_seed;		/* For encoding colors */
-extern u32b town_seed;		/* Seed for town generation */
+extern u32b randes_seed;		/* Hack -- consistent object colors */
+extern u32b town_seed;		/* Hack -- consistent town layout */
 
 extern char *old_state;			/* state array initialized by time -CWS */
 extern char *dummy_state;		/* dummy state array so that town/colors look  the same -CWS */
@@ -190,13 +201,10 @@ extern int death;			/* True if died	      */
 extern s32b turn;			/* Current game turn */
 extern s32b old_turn;			/* Last turn feeling was felt */
 extern int wizard;			/* Is the player currently a Wizard? */
-extern int to_be_wizard;
+extern int to_be_wizard;		/* Does the player want to be a wizard? */
 extern s16b panic_save;		/* true if playing from a panic save */
 
-extern int wait_for_more;
 
-extern char days[7][29];
-extern int closing_flag;		/* Used for closing   */
 
 /*
  * Dungeon info
@@ -251,6 +259,12 @@ extern byte rgold_adj[MAX_RACES][MAX_RACES];
 extern player_class class[MAX_CLASS];
 extern s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ];
 
+/* used to check if player knows all spells knowable to him -CFT */
+extern u16b player_init[MAX_CLASS][5];
+
+extern s16b total_winner;
+
+
 /*** Spell Information ***/
 
 /* Warriors don't have spells, so there is no entry for them. */
@@ -269,9 +283,6 @@ extern u32b spell_forgotten2;	/* Bit field for spells forgotten -JEW- */
 extern byte spell_order[64];	/* remember order that spells are learned in */
 extern u32b spellmasks[MAX_CLASS][2];	/* what spells can classes learn */
 
-/* used to check if player knows all spells knowable to him -CFT */
-extern u16b player_init[MAX_CLASS][5];
-extern s16b total_winner;
 
 /*** Store information ***/
 

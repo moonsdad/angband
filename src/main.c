@@ -10,32 +10,16 @@
  * included in all such copies.
  */
 
-#include <stdio.h>
+#include "angband.h"
 
-/* include before constant, because param.h defines NULL incorrectly */
 #ifndef USG
 #include <sys/types.h>
 #include <sys/param.h>
-#include <sys/time.h>
 #include <sys/resource.h>
-#endif
-
-#include "angband.h"
-
-#ifdef USG
-#include <string.h>
-#else
-#include <strings.h>
 #endif
 
 #ifdef ultrix
 #include <sys/stat.h>
-#endif
-
-#include <ctype.h>
-
-#ifndef ibm032
-#include <time.h>
 #endif
 
 #if defined(ultrix) || defined(USG)

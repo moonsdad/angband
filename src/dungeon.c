@@ -13,39 +13,6 @@
 #include "angband.h"
 #include "monster.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#include <strings.h>
-#endif
-
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void        regenhp(int);
-static void        regenmana(int);
-static cptr value_check(inven_type *);
-#else
-static void        regenhp();
-static void        regenmana();
-/* static int      enchanted(); */
-static cptr value_check();
-#endif
-
-static void print_feeling();
-static char original_commands();
-static void do_command();
-static int  valid_countcommand();
-static void examine_book();
-static void activate();
-static void go_up();
-static void go_down();
-static void jamdoor();
-static void refill_lamp();
-static void regen_monsters();
-#endif
 
 /* ANGBAND game module					-RAK-	 */
 /* The code in this section has gone through many revisions, and */

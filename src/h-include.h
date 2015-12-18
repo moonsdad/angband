@@ -8,6 +8,8 @@
  */
 
 
+/* System includes/externs */
+#include "h-system.h"
 
 /* Basic types */
 #include "h-types.h"

@@ -12,22 +12,7 @@
 
 #include "angband.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#include <strings.h>
-#endif
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void unsample(inven_type *);
-#else
-static void unsample();
-#endif
-#endif
 
 char                titles[MAX_TITLES][10];
 

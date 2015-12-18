@@ -12,11 +12,7 @@
 
 #include "angband.h"
 
-#ifdef USG
-#include <string.h>
-#else
-#include <strings.h>
-#endif
+
 
 /*
  * This file includes code for eating food, drinking potions,

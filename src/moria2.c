@@ -10,50 +10,11 @@
  * included in all such copies. 
  */
 
-#include <ctype.h>
 #include "angband.h"
 #include "monster.h"
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#include <strings.h>
-#endif
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static int look_ray(int, int, int);
-static int look_see(int, int, int *);
-static void hit_trap(int, int);
-static int summon_object(int, int, int, int, s32b);
-static void py_attack(int, int);
-static void chest_trap(int, int);
-static void inven_throw(int, struct inven_type *);
-static void facts(struct inven_type *, int *, int *, int *, int *, int *);
-static void drop_throw(int, int, struct inven_type *);
-static void py_bash(int, int);
-static cptr look_mon_desc(int);
-static int fearless(creature_type *);
 
-#else
-static int look_ray();
-static int look_see();
-static void hit_trap();
-static int summon_object();
-static void py_attack();
-static void chest_trap();
-static void inven_throw();
-static void facts();
-static void drop_throw();
-static void py_bash();
-static cptr look_mon_desc();
-static int fearless();
-
-#endif
-#endif
 
 
 /* 

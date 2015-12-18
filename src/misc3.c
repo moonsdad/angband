@@ -20,32 +20,10 @@
 
 #include "angband.h"
 
-#include <ctype.h>
-
 #ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#else
+#ifdef ATARIST_MWC
 char               *index();
 #endif
-#else
-#include <strings.h>
-#endif
-
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void prt_lnum(cptr, s32b, int, int);
-static void prt_num(cptr, int, int, int);
-static void prt_long(s32b, int, int);
-static void prt_int(int, int, int);
-#else
-static void prt_lnum();
-static void prt_num();
-static void prt_long();
-static void prt_int();
-#endif
-static void gain_level();
 #endif
 
 static cptr stat_names[] = { "STR: ", "INT: ", "WIS: ",

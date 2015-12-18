@@ -21,8 +21,6 @@
  * and completely rewritten again! for portability by -JEW-
  */
 
-#include <stdio.h>
-
 #include "monster.h"
 
 #ifndef USG
@@ -34,51 +32,15 @@
 
 #ifdef USG
 #ifndef ATARIST_MWC
-#include <string.h>
 #include <fcntl.h>
-#else
-#include "string.h"
 #endif
-#else
-#include <strings.h>
 #endif
 
 #ifdef __MINT__
 # include <stat.h>		/* chmod() */
 #endif
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-static int sv_write();
-static void wr_byte();
-static void wr_short();
-static void wr_long();
-static void wr_bytes();
-static void wr_string();
-static void wr_shorts();
-static void wr_item();
-static void wr_monster();
-static void rd_byte();
-static void rd_short();
-static void rd_long();
-static void rd_bytes();
-static void rd_string();
-static void rd_shorts();
-static void rd_item();
-static void rd_monster();
-#endif
 
-#if !defined(ATARIST_MWC)
-#ifdef MAC
-#include <time.h>
-#else
-long time();
-
-#endif
-#else
-char *malloc();
-
-#endif
 
 #ifndef SET_UID
 #include <sys/stat.h>
