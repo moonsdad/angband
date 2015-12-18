@@ -15,13 +15,23 @@
 # include <sys/time.h>
 #endif
 
+
+/* this takes care of almost all "implicit declaration" warnings -CWS */
+
+#if defined(NeXT)
+#include <libc.h>
+#else
+#include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#endif
+
+
 #include <time.h>
 
 
-
-
-
-#ifdef __MINT__
+#if defined(__MINT__)
+# include <support.h>
 #include <string.h>
 #endif
 

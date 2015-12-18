@@ -8,6 +8,9 @@
  */
 
 
+/* System Configuration */
+#include "h-config.h"
+
 /* System includes/externs */
 #include "h-system.h"
 
