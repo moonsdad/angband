@@ -12,9 +12,7 @@
 
 #include <stdio.h>
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 #include "monster.h"
 
 #ifdef USG
@@ -628,18 +626,23 @@ void wizard_create()
 	  case 'S': case 's':
 	    i_ptr->tval = TV_SHIELD;
 	    break;
+
 	  case 'H': case 'h':
 	    i_ptr->tval = TV_HELM;
 	    break;
+
 	  case 'G': case 'g':
 	    i_ptr->tval = TV_GLOVES;
 	    break;
+
 	  case 'B': case 'b':
 	    i_ptr->tval = TV_BOOTS;
 	    break;
+
 	  case 'C': case 'c':
 	    i_ptr->tval = TV_CLOAK;
 	    break;
+
 	  case 'A': case 'a':
 	    prt("What type of Armour?    : ", 0, 0);
 	    prt("[H]ard armour, [S]oft armour.", 1, 0);

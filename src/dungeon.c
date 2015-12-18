@@ -11,9 +11,7 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 #include "monster.h"
 
 #ifdef USG
@@ -29,12 +27,12 @@
 #ifdef __STDC__
 static void        regenhp(int);
 static void        regenmana(int);
-static const char *value_check(inven_type *);
+static cptr value_check(inven_type *);
 #else
 static void        regenhp();
 static void        regenmana();
 /* static int      enchanted(); */
-static const char *value_check();
+static cptr value_check();
 #endif
 
 static void print_feeling();
@@ -1466,7 +1464,7 @@ int special_check(register inven_type *t_ptr)
 
 /* Is an item an enchanted weapon or armor and we don't know?  -CJS- */
 /* returns a description */
-static const char *value_check(register inven_type *t_ptr)
+static cptr value_check(register inven_type *t_ptr)
 {
     if (t_ptr->tval == TV_NOTHING)
 	return 0;

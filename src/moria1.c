@@ -14,9 +14,7 @@
 #include <ctype.h>
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 #include "monster.h"
 
 #ifdef USG
@@ -51,7 +49,8 @@ static int  see_nothing();
 #endif
 
 
-/* Changes speed of monsters relative to player		-RAK-
+/*
+ * Changes speed of monsters relative to player		-RAK-
  * Note: When the player is sped up or slowed down, I simply change the
  * speed of all the monsters.  This greatly simplified the logic.
  *****
@@ -66,8 +65,9 @@ void change_speed(register int num)
 }
 
 
-/* Player bonuses					-RAK-	 */
-/* When an item is worn or taken off, this re-adjusts the player
+/*
+ * Player bonuses					-RAK-	 
+ * When an item is worn or taken off, this re-adjusts the player
  * bonuses.  Factor=1 : wear; Factor=-1 : removed  
  *****
  * Only calculates properties with cumulative effect.  Properties that depend
@@ -109,8 +109,10 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 	py.flags.see_infra += amount;
 }
 
-/* Recalculate the effect of all the stuff we use.		  -CJS- */
-/* Also initialise race intrinsics    SM */
+/*
+ * Recalculate the effect of all the stuff we use.		  -CJS- 
+ * Also initialise race intrinsics    SM
+ */
 void calc_bonuses()
 {
     register s32b        item_flags;
@@ -412,13 +414,15 @@ void calc_bonuses()
 }
 
 
-/* Displays inventory items from r1 to r2	-RAK-	 */
 /*
- * Designed to keep the display as far to the right as possible.  The  -CJS-
- * parameter col gives a column at which to start, but if the display does
+ * Displays inventory items from r1 to r2	-RAK-
+ *
+ * Designed to keep the display as far to the right as possible.  -CJS-
+ *
+ * The parameter col gives a column at which to start, but if the display does
  * not fit, it may be moved left.  The return value is the left edge used. 
  */
-int show_inven(register int r1, register int r2, int weight, int col, int (*test) ())
+int show_inven(int r1, int r2, int weight, int col, int (*test) ())
 {
     register int i, j, k;
     int          total_weight, len, l, lim;
@@ -488,10 +492,11 @@ int show_inven(register int r1, register int r2, int weight, int col, int (*test
 }
 
 
-/* Return a string describing how a given equipment item is carried. -CJS- */
-const char *describe_use(register int i)
+/* 
+ * Return a string describing how a given equipment item is carried. -CJS- */
+cptr describe_use(register int i)
 {
-    register const char *p;
+    register cptr p;
 
     switch (i) {
       case INVEN_WIELD:
@@ -538,13 +543,14 @@ const char *describe_use(register int i)
 }
 
 
-/* Displays equipment items from r1 to end	-RAK-	 */
+/* 
+ * Displays equipment items from r1 to end	-RAK-	 */
 /* Keep display as far right as possible. -CJS- */
 int show_equip(int weight, int col)
 {
     register int         i, line;
     int                  total_weight, l, len, lim;
-    register const char *prt1;
+    register cptr prt1;
     bigvtype             prt2;
     vtype                out_val[INVEN_ARRAY_SIZE - INVEN_WIELD];
     register inven_type *i_ptr;
@@ -640,10 +646,11 @@ int show_equip(int weight, int col)
     return col;
 }
 
-/* Remove item from equipment list		-RAK-	 */
+/* 
+ * Remove item from equipment list		-RAK-	 */
 void takeoff(int item_val, int posn)
 {
-    register const char *p;
+    register cptr p;
     bigvtype             out_val, prt2;
     register inven_type *t_ptr;
 
@@ -672,7 +679,7 @@ void takeoff(int item_val, int posn)
 
 
 /* Used to verify if this really is the item we wish to wear or read. */
-int verify(const char *prompt, int  item)
+int verify(cptr prompt, int  item)
 {
     bigvtype out_str, object;
 
@@ -768,7 +775,8 @@ static void inven_screen(int new_scr)
     }
 }
 
-/* This does all the work. */
+/* 
+ * This does all the work. */
 void inven_command(int command)
 {
     register int         slot = 0, item;
@@ -1331,8 +1339,9 @@ void inven_command(int command)
 }
 
 
-/* Get the ID of an item and return the CTR value of it	-RAK-	 */
-int get_item(int *com_val, const char *pmt, int i, int j, int       (*test) ())
+/* 
+ * Get the ID of an item and return the CTR value of it	-RAK-	 */
+int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 {
     vtype        out_val;
     char         which;
@@ -1490,7 +1499,8 @@ int get_item(int *com_val, const char *pmt, int i, int j, int       (*test) ())
     return (item);
 }
 
-/* I may have written the town level code, but I'm not exactly	 */
+/* 
+ * I may have written the town level code, but I'm not exactly	 */
 /* proud of it.	 Adding the stores required some real slucky	 */
 /* hooks which I have not had time to re-think.		 -RAK-	 */
 
@@ -1506,7 +1516,8 @@ int no_light()
 }
 
 
-/* map rogue_like direction commands into numbers */
+/* 
+ * map rogue_like direction commands into numbers */
 static char map_roguedir(register int my_comval)
 {
     char comval = (char)my_comval;
@@ -1544,9 +1555,10 @@ static char map_roguedir(register int my_comval)
 }
 
 
-/* Prompts for a direction				-RAK-	 */
+/* 
+ * Prompts for a direction				-RAK-	 */
 /* Direction memory added, for repeated commands.  -CJS */
-int get_dir(const char *prompt, int * dir)
+int get_dir(cptr prompt, int * dir)
 {
     char        command;
     int         save;
@@ -1610,7 +1622,7 @@ int get_dir(const char *prompt, int * dir)
  * Similar to get_dir, except that no memory exists, and it is		-CJS-
  * allowed to enter the null direction. 
  */
-int get_alldir(const char *prompt, int *dir)
+int get_alldir(cptr prompt, int *dir)
 {
     char command;
 
@@ -1635,7 +1647,8 @@ int get_alldir(const char *prompt, int *dir)
 }
 
 
-/* Moves creature record from one space to another	-RAK-	 */
+/* 
+ * Moves creature record from one space to another	-RAK-	 */
 void move_rec(register int y1, register int x1, register int y2, register int x2)
 {
     int tmp;
@@ -1841,14 +1854,16 @@ void darken_room(int y, int x)
     }
 }
 
-/* Lights up given location				-RAK-	 */
+/* 
+ * Lights up given location				-RAK-	 */
 void lite_spot(register int y, register int x)
 {
     if (panel_contains(y, x))
 	print(loc_symbol(y, x), y, x);
 }
 
-/* Normal movement					 */
+/* 
+ * Normal movement					 */
 /* When FIND_FLAG,  light only permanent features	 */
 static void sub1_move_light(int y1, register int x1, int y2, register int x2)
 {
@@ -1906,7 +1921,8 @@ static void sub1_move_light(int y1, register int x1, int y2, register int x2)
 }
 
 
-/* When blinded,  move only the player symbol.		 */
+/* 
+ * When blinded,  move only the player symbol.		 */
 /* With no light,  movement becomes involved.		 */
 static void sub3_move_light(register int y1, register int x1, int y2, int x2)
 {
@@ -1944,7 +1960,8 @@ void darken_player(int y1, int x1)
         }
 }
 
-/* Package for moving the character's light about the screen	 */
+/* 
+ * Package for moving the character's light about the screen	 */
 /* Four cases : Normal, Finding, Blind, and Nolight	 -RAK-	 */
 void move_light(int y1, int x1, int y2, int x2)
 {
@@ -1975,7 +1992,8 @@ void disturb(int s, int l)
 }
 
 
-/* Search Mode enhancement				-RAK-	 */
+/* 
+ * Search Mode enhancement				-RAK-	 */
 void search_on()
 {
     change_speed(1);
@@ -1996,7 +2014,8 @@ void search_off()
 }
 
 
-/* Resting allows a player to safely restore his hp	-RAK-	 */
+/* 
+ * Resting allows a player to safely restore his hp	-RAK-	 */
 void rest()
 {
     int   rest_num;
@@ -2051,7 +2070,8 @@ void rest_off()
 }
 
 
-/* Attacker's level and plusses,  defender's AC		-RAK-	 */
+/* 
+ * Attacker's level and plusses,  defender's AC		-RAK-	 */
 int test_hit(int bth, int level, int pth, int ac, int attack_type)
 {
     register int i, die;
@@ -2070,9 +2090,10 @@ int test_hit(int bth, int level, int pth, int ac, int attack_type)
 }
 
 
-/* Decreases players hit points and sets death flag if necessary */
+/* 
+ * Decreases players hit points and sets death flag if necessary */
 /* -RAK-	 */
-void take_hit(int damage, const char *hit_from)
+void take_hit(int damage, cptr hit_from)
 {
     if (py.flags.invuln > 0 && damage < 9000)
 	damage = 0;
@@ -2100,7 +2121,8 @@ void take_hit(int damage, const char *hit_from)
 }
 
     
-/* Change a trap from invisible to visible		-RAK-	 */
+/* 
+ * Change a trap from invisible to visible		-RAK-	 */
 /* Note: Secret doors are handled here				 */
 void change_trap(register int y, register int x)
 {
@@ -2122,7 +2144,8 @@ void change_trap(register int y, register int x)
 }
 
 
-/* Searches for hidden things.			-RAK-	 */
+/* 
+ * Searches for hidden things.			-RAK-	 */
 void search(int y, int x, int chance)
 {
     register int           i, j;
@@ -2174,7 +2197,8 @@ void search(int y, int x, int chance)
 }
 
 
-/* The running algorithm:			-CJS-
+/* 
+ * The running algorithm:			-CJS-
 
    Overview: You keep moving until something interesting happens.
    If you are in an enclosed space, you follow corners. This is
@@ -2387,7 +2411,8 @@ void find_run()
 	move_char(find_direction, TRUE);
 }
 
-/* Switch off the run flag - and get the light correct. -CJS- */
+/* 
+ * Switch off the run flag - and get the light correct. -CJS- */
 void end_find()
 {
     if (find_flag) {
@@ -2397,7 +2422,8 @@ void end_find()
     }
 }
 
-/* Do we see a wall? Used in running.		-CJS- */
+/* 
+ * Do we see a wall? Used in running.		-CJS- */
 static int see_wall(int dir, int y, int x)
 {
     char c;
@@ -2418,7 +2444,8 @@ static int see_wall(int dir, int y, int x)
 	return FALSE;
 }
 
-/* Do we see anything? Used in running.		-CJS- */
+/* 
+ * Do we see anything? Used in running.		-CJS- */
 static int see_nothing(int dir, int y, int x)
 {
     if (!mmove(dir, &y, &x))	   /* check to see if movement there possible */
@@ -2430,7 +2457,8 @@ static int see_nothing(int dir, int y, int x)
 }
 
 
-/* Determine the next direction for a run, or if we should stop.  -CJS- */
+/* 
+ * Determine the next direction for a run, or if we should stop.  -CJS- */
 void area_affect(int dir, int y, int x)
 {
     int                  newdir = 0, t, inv, check_dir = 0, row, col;
@@ -2578,7 +2606,8 @@ void area_affect(int dir, int y, int x)
 }
 
 
-/* AC gets worse					-RAK-	 */
+/* 
+ * AC gets worse					-RAK-	 */
 /* Note: This routine affects magical AC bonuses so that stores	  */
 /* can detect the damage.					 */
 int minus_ac(s32b typ_dam)
@@ -2647,8 +2676,9 @@ int minus_ac(s32b typ_dam)
 }
 
 
-/* Corrode the unsuspecting person's armor		 -RAK-	 */
-void corrode_gas(const char *kb_str)
+/* 
+ * Corrode the unsuspecting person's armor		 -RAK-	 */
+void corrode_gas(cptr kb_str)
 {
     if (!py.flags.acid_im)
 	if (!minus_ac((s32b) TR_RES_ACID))
@@ -2657,8 +2687,9 @@ void corrode_gas(const char *kb_str)
 }
 
 
-/* Poison gas the idiot.				-RAK-	 */
-void poison_gas(int dam, const char *kb_str)
+/* 
+ * Poison gas the idiot.				-RAK-	 */
+void poison_gas(int dam, cptr kb_str)
 {
     if (py.flags.resist_poison > 0)
 	dam = 2 * dam / 3;
@@ -2673,8 +2704,9 @@ void poison_gas(int dam, const char *kb_str)
 }
 
 
-/* Burn the fool up.					-RAK-	 */
-void fire_dam(int dam, const char *kb_str)
+/* 
+ * Burn the fool up.					-RAK-	 */
+void fire_dam(int dam, cptr kb_str)
 {
     if (py.flags.fire_resist)
 	dam = dam / 3;
@@ -2687,8 +2719,9 @@ void fire_dam(int dam, const char *kb_str)
 }
 
 
-/* Freeze him to death.				-RAK-	 */
-void cold_dam(int dam, const char *kb_str)
+/* 
+ * Freeze him to death.				-RAK-	 */
+void cold_dam(int dam, cptr kb_str)
 {
     if (py.flags.cold_resist)
 	dam = dam / 3;
@@ -2701,8 +2734,10 @@ void cold_dam(int dam, const char *kb_str)
 }
 
 
-/* Lightning bolt the sucker away.			-RAK-	 */
-void light_dam(int dam, const char *kb_str)
+/* 
+ * Lightning bolt the sucker away.			-RAK-	
+ */
+void light_dam(int dam, cptr kb_str)
 {
     if (py.flags.resist_light)
 	dam = dam / 3;
@@ -2715,8 +2750,10 @@ void light_dam(int dam, const char *kb_str)
 }
 
 
-/* Throw acid on the hapless victim			-RAK-	 */
-void acid_dam(int dam, const char *kb_str)
+/*
+ * Throw acid on the hapless victim			-RAK-	
+ */
+void acid_dam(int dam, cptr kb_str)
 {
     register int flag;
 

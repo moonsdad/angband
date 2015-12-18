@@ -11,16 +11,14 @@
  */
 
 #include "constant.h"
-#include "config.h"
+#include "angband.h"
 #include "monster.h"
-#include "types.h"
-#include "externs.h"
 
 #include <stdio.h>
 
 #ifndef NO_LINT_ARGS
 #ifdef __STDC__
-static void roff(const char *);
+static void roff(cptr);
 #else
 static void         roff();
 #endif
@@ -199,7 +197,7 @@ static const char  *desc_immune[] = {
 };
 
 static vtype        roffbuf;	   /* Line buffer. */
-static char        *roffp;	   /* Pointer into line buffer. */
+static cptr roffp;	   /* Pointer into line buffer. */
 static int          roffpline;	   /* Place to print line now being loaded. */
 
 /* Pluralizer: count, singular, plural) */
@@ -1117,8 +1115,10 @@ int roff_recall(int mon_num)
 }
 
 
-/* Print out strings, filling up lines as we go. */
-static void roff(register const char *p)
+/*
+ * Print out strings, filling up lines as we go. 
+ */
+static void roff(register cptr p)
 {
     register char *q, *r;
     register int   linesize;

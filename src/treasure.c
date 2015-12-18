@@ -1135,7 +1135,7 @@ treasure_type object_list[MAX_OBJECTS] = {
 };
 #endif
 
-const char *special_names[SN_ARRAY_SIZE] = {
+cptr special_names[SN_ARRAY_SIZE] = {
 	NULL,			"of Resistance",	"of Resist Acid",
 	"of Resist Fire",	"of Resist Cold",	"of Resist Lightning",
 	"(Holy Avenger)",	"(Defender)",		"of Animal Slaying",

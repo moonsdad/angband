@@ -11,9 +11,7 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -61,7 +59,7 @@ int is_a_vowel(int ch)
 void magic_init(void)
 {
     register int        h, i, j, k;
-    register const char *tmp;
+    register cptr		tmp;
     vtype               string;
 
 
@@ -211,7 +209,9 @@ int known1_p(inven_type *i_ptr)
 }
 
 
-/* Remove "Secret" symbol for identity of plusses			 */
+/*
+ * Remove "Secret" symbol for identity of plusses			
+ */
 void known2(inven_type *i_ptr)
 {
     unsample(i_ptr);
@@ -248,7 +248,9 @@ int store_bought_p(inven_type *i_ptr)
     return (i_ptr->ident & ID_STOREBOUGHT);
 }
 
-/* Remove an automatically generated inscription.	-CJS- */
+/*
+ * Remove an automatically generated inscription.	-CJS-
+ */
 static void unsample(inven_type *i_ptr)
 {
     s16b offset;
@@ -278,8 +280,9 @@ void sample(inven_type *i_ptr)
     object_ident[offset + indexx] |= OD_TRIED;
 }
 
-/* Somethings been identified					 */
 /*
+ * Somethings been identified					 
+ *
  * extra complexity by CJS so that it can merge store/dungeon objects when
  * appropriate 
  */
@@ -356,11 +359,12 @@ void unmagic_name(inven_type *i_ptr)
  */
 void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 {
-/* base name, modifier string */
-    register const char *basenm, *modstr;
-    bigvtype             tmp_val;
+    /* base name, modifier string */
+    register cptr basenm, modstr;
+    int modify, append_name;
+    int indexx, p1_use;
     vtype                tmp_str, damstr;
-    int                  indexx, p1_use, modify, append_name;
+    bigvtype             tmp_val;
 
     indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
     basenm = object_list[i_ptr->index].name;

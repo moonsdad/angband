@@ -12,9 +12,7 @@
 
 #include "constant.h"
 #include "monster.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -81,7 +79,7 @@ void update_mon(int monptr)
 	if (py.flags.telepathy) {
 
 	    char c = c_list[m_ptr->mptr].cchar;
-	    const char *n = c_list[m_ptr->mptr].name;
+	    cptr n = c_list[m_ptr->mptr].name;
 
 
 	    /* Never sense monsters with "bizarre minds" */
@@ -274,7 +272,7 @@ static int check_mon_lite(int y, int x)
 /*
  * Choose correct directions for monster movement	-RAK-	 
  */
-static void get_moves(int monptr, register int *mm)
+static void get_moves(int monptr, int *mm)
 {
     int y, ay, x, ax, move_val;
 
@@ -1444,22 +1442,28 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
     register monster_type *m_ptr;
     register inven_type   *t_ptr;
 
-    int                   i, newy, newx, do_turn, do_move, stuck_door;
+    int                   i, newy, newx;
+
+    int stuck_door;
+
+    int do_move = FALSE;
+    int do_turn = FALSE;
+
+
+
 
 #ifdef ATARIST_MWC
     u32b              holder;
 #endif
 
     i = 0;
-    do_turn = FALSE;
-    do_move = FALSE;
 
     m_ptr = &m_list[monptr];
     movebits = c_list[m_ptr->mptr].cmove;
 
     do {
 
-    /* Get new position */
+	/* Get new position */
 	newy = m_ptr->fy;
 	newx = m_ptr->fx;
 	(void)mmove(mm[i], &newy, &newx);
@@ -1561,11 +1565,11 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 		    /* Stuck doors */
 		    else if (t_ptr->p1 < 0) {
 			if (randint((m_ptr->hp + 1) * (50 - t_ptr->p1)) <
-				40 * (m_ptr->hp - 10 + t_ptr->p1)) {
-				msg_print("You hear a door burst open!");
-				disturb(1, 0);
-				stuck_door = TRUE;
-				do_move = TRUE;
+			    40 * (m_ptr->hp - 10 + t_ptr->p1)) {
+			    msg_print("You hear a door burst open!");
+			    disturb(1, 0);
+			    stuck_door = TRUE;
+			    do_move = TRUE;
 			}
 		    }
 		}
@@ -1610,9 +1614,9 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 			invcopy(t_ptr, OBJ_OPEN_DOOR);
 
 			/* 50% chance of breaking door */
-			    t_ptr->p1 = 1 - randint(2);
+			t_ptr->p1 = 1 - randint(2);
 
-			    c_ptr->fval = CORR_FLOOR;
+			c_ptr->fval = CORR_FLOOR;
 
 			/* Redraw */
 			lite_spot(newy, newx);
@@ -1792,16 +1796,17 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 static void mon_cast_spell(int monptr, int *took_turn)
 {
     u32b		i;
-    int			y, x, chance, thrown_spell, r1;
+    int			y, x;
+    int			chance, thrown_spell, r1;
     register int	k;
     int			spell_choice[64];
     int		desperate = FALSE;
 
     vtype                  cdesc, outval, ddesc;
 
-    register struct flags  *f_ptr;
-    register monster_type  *m_ptr;
-    register creature_type *r_ptr;
+    struct flags  *f_ptr;
+    monster_type  *m_ptr;
+    creature_type *r_ptr;
 
     char                   sex;
 
@@ -3271,9 +3276,11 @@ void creatures(int attack)
 /* End processing monsters	   */
 }
 
-/* This is a fun one.  In a given block, pick some walls and	 */
-/* turn them into open spots.  Pick some open spots and turn	 */
-/* them into walls.  An "Earthquake" effect.	       -LVB-   */
+/*
+ * This is a fun one.  In a given block, pick some walls and	 
+ * turn them into open spots.  Pick some open spots and turn	 
+ * them into walls.  An "Earthquake" effect.	       -LVB-  
+ */
 static void shatter_quake(int mon_y, int mon_x)
 {
     register int           i, j, k, l;
@@ -3367,8 +3374,7 @@ static void shatter_quake(int mon_y, int mon_x)
 				break;
 			    }
 			}
-			if (!kill)
-			    break;
+			if (!kill) break;
 		    }
 
 		    switch (randint(3)) {
@@ -3469,8 +3475,7 @@ static void br_wall(int mon_y, int mon_x)
 		break;
 	    }
 	}
-	if (!kill)
-	    break;
+	if (!kill) break;
     }
 
     switch (randint(3)) {

@@ -13,10 +13,8 @@
 #include <ctype.h>
 
 #include "constant.h"
+#include "angband.h"
 #include "monster.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -39,7 +37,7 @@ static void inven_throw(int, struct inven_type *);
 static void facts(struct inven_type *, int *, int *, int *, int *, int *);
 static void drop_throw(int, int, struct inven_type *);
 static void py_bash(int, int);
-static const char *look_mon_desc(int);
+static cptr look_mon_desc(int);
 static int fearless(creature_type *);
 
 #else
@@ -53,7 +51,7 @@ static void inven_throw();
 static void facts();
 static void drop_throw();
 static void py_bash();
-static const char *look_mon_desc();
+static cptr look_mon_desc();
 static int fearless();
 
 #endif
@@ -156,8 +154,9 @@ static void hit_trap(int y, int x)
       case 5:			   /* Sleep gas */
 	if (py.flags.paralysis == 0) {
 	    msg_print("A strange white mist surrounds you!");
-	    if (py.flags.free_act)
+	    if (py.flags.free_act) {
 		msg_print("You are unaffected.");
+	    }
 	    else {
 		msg_print("You fall asleep.");
 		py.flags.paralysis += randint(10) + 4;
@@ -169,6 +168,7 @@ static void hit_trap(int y, int x)
 	place_object(y, x);
 	msg_print("Hmmm, there was something under this rock.");
 	break;
+
       case 7:			   /* STR Dart */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    if (!py.flags.sustain_str) {
@@ -176,27 +176,35 @@ static void hit_trap(int y, int x)
 		objdes(tmp, t_ptr, TRUE);
 		take_hit(dam, tmp);
 		msg_print("A small dart weakens you!");
-	    } else
+	    }
+	    else {
 		msg_print("A small dart hits you.");
-	} else
+	    }
+	}
+	else {
 	    msg_print("A small dart barely misses you.");
+	}
 	break;
+
       case 8:			   /* Teleport */
 	teleport_flag = TRUE;
 	msg_print("You hit a teleport trap!");
     /* Light up the teleport trap, before we teleport away.  */
 	move_light(y, x, y, x);
 	break;
+
       case 9:			   /* Rockfall */
 	take_hit(dam, "a falling rock");
 	(void)delete_object(y, x);
 	place_rubble(y, x);
 	msg_print("You are hit by falling rock.");
 	break;
+
       case 10:			   /* Corrode gas */
 	msg_print("A strange red gas surrounds you.");
 	corrode_gas("corrosion gas");
 	break;
+
       case 11:			   /* Summon mon */
 	(void)delete_object(y, x); /* Rune disappears.    */
 	num = 2 + randint(3);
@@ -206,10 +214,12 @@ static void hit_trap(int y, int x)
 	    (void)summon_monster(&ty, &tx, FALSE);
 	}
 	break;
+
       case 12:			   /* Fire trap */
 	msg_print("You are enveloped in flames!");
 	fire_dam(dam, "a fire trap");
 	break;
+
       case 13:			   /* Acid trap */
 	msg_print("You are splashed with acid!");
 	acid_dam(dam, "an acid trap");
@@ -299,11 +309,12 @@ static void hit_trap(int y, int x)
  * returns 1 if choose a spell in book to cast
  * returns 0 if don't choose a spell, i.e. exit with an escape 
  */
-int cast_spell(const char *prompt, int item_val, int *sn, int *sc)
+int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
 {
     s32b               j1, j2;
     register int         i, k;
-    int                  spell[63], result, first_spell;
+    int                  spell[63], result;
+    int                  first_spell;
     register spell_type *s_ptr;
 
     /* if a warrior, abort as if by ESC -CFT */
@@ -352,10 +363,12 @@ int cast_spell(const char *prompt, int item_val, int *sn, int *sc)
 }
 
 
-/* Player is on an object.  Many things can happen based -RAK-	 */
-/* on the TVAL of the object.  Traps are set off, money and most */
-/* objects are picked up.  Some objects, such as open doors, just */
-/* sit there.						       */
+/*
+ * Player is on an object.  Many things can happen based -RAK-	 
+ * on the TVAL of the object.  Traps are set off, money and most 
+ * objects are picked up.  Some objects, such as open doors, just 
+ * sit there.						      
+ */
 void carry(int y, int x, int pickup)
 {
     register int         locn, i;
@@ -430,7 +443,9 @@ void delete_unique()
 	    u_list[i].exist = 0;
 }
 
-/* Deletes a monster entry from the level		-RAK-	 */
+/*
+ * Deletes a monster entry from the level		-RAK-	 
+ */
 void delete_monster(int j)
 {
     register monster_type *m_ptr;
@@ -1079,7 +1094,7 @@ static void py_attack(int y, int x)
 	blows = attack_blows((int)i_ptr->weight, &tot_tohit);
     }
 
-   /* Bare hands?   */
+    /* Fists */
     else {
 
 	/* Two blows */
@@ -1234,8 +1249,10 @@ static void py_attack(int y, int x)
 }
 
 
-/* Moves player from one space to another.		-RAK-	 */
-/* Note: This routine has been pre-declared; see that for argument */
+/*
+ * Moves player from one space to another.		-RAK-	 
+ * Note: This routine has been pre-declared; see that for argument
+ */
 void move_char(int dir, int do_pickup)
 {
     int                 old_row, old_col, old_find_flag;
@@ -1368,8 +1385,10 @@ void move_char(int dir, int do_pickup)
 }
 
 
-/* Chests have traps too.				-RAK-	 */
-/* Note: Chest traps are based on the FLAGS value		 */
+/*
+ * Chests have traps too.				-RAK-	 
+ * Note: Chest traps are based on the FLAGS value		
+ */
 static void chest_trap(int y, int x)
 {
     register int        i;
@@ -1417,7 +1436,9 @@ static void chest_trap(int y, int x)
 }
 
 
-/* Opens a closed door or closed chest.		-RAK-	 */
+/*
+ * Opens a closed door or closed chest.		-RAK-	 
+ */
 void openobject()
 {
     int                    y, x, i, dir;
@@ -1817,7 +1838,9 @@ void tunnel(int dir)
 }
 
 
-/* Disarms a trap					-RAK-	 */
+/*
+ * Disarms a trap					-RAK-	
+ */
 void disarm_trap()
 {
     int                 y, x, level, tmp, dir, no_disarm;
@@ -2299,7 +2322,8 @@ static void inven_throw(int item_val, inven_type *t_ptr)
 }
 
 
-/* Obtain the hit and damage bonuses and the maximum distance for a thrown
+/*
+ * Obtain the hit and damage bonuses and the maximum distance for a thrown
  * missile. 
  */
 static void facts(register inven_type *i_ptr, int *tbth, int *tpth, int *tdam, int *tdis, int *thits)
@@ -2742,8 +2766,12 @@ void throw_object()
 }
 
 
-/* Make a bash attack on someone.				-CJS- Used to
- * be part of bash above. 
+
+
+
+/*
+ * Make a bash attack on someone.  -CJS-
+ * Used to be part of bash above. 
  */
 static void py_bash(int y, int x)
 {
@@ -2755,9 +2783,13 @@ static void py_bash(int y, int x)
     monster = cave[y][x].cptr;
     m_ptr = &m_list[monster];
     monptr = m_ptr->mptr;
-    c_ptr = &c_list[monptr];
     m_ptr->csleep = 0;
-/* Does the player know what he's fighting?	   */
+
+    /* Get the creature pointer, used many times below */
+    c_ptr = &c_list[monptr];
+
+    /* Does the player know what he's fighting?	   */
+    /* Extract the monster name (or "it") */
     if (!m_ptr->ml)
 	(void)strcpy(m_name, "it");
     else {
@@ -2766,14 +2798,22 @@ static void py_bash(int y, int x)
 	else
 	    (void)sprintf(m_name, "the %s", c_list[monptr].name);
     }
-    base_tohit = py.stats.use_stat[A_STR] + inventory[INVEN_ARM].weight / 2
-	+ py.misc.wt / 10;
-    if (!m_ptr->ml)
+
+    /* Attempt to bash */
+    base_tohit = (py.stats.use_stat[A_STR] +
+		  inventory[INVEN_ARM].weight / 2 +
+		   py.misc.wt / 10);
+
+    /* Harder to bash invisible monsters */
+    if (!m_ptr->ml) {
 	base_tohit = (base_tohit / 2) - (py.stats.use_stat[A_DEX] * (BTH_PLUS_ADJ - 1))
 	    - (py.misc.lev * class_level_adj[py.misc.pclass][CLA_BTH] / 2);
+    }
 
+    /* Hack -- test for contact */
     if (test_hit(base_tohit, (int)py.misc.lev,
 		 (int)py.stats.use_stat[A_DEX], (int)c_ptr->ac, CLA_BTH)) {
+
 	(void)sprintf(out_val, "You hit %s.", m_name);
 	msg_print(out_val);
 	k = pdamroll(inventory[INVEN_ARM].damage);
@@ -2781,18 +2821,22 @@ static void py_bash(int y, int x)
 				+ py.stats.use_stat[A_STR]), 0, k, CLA_BTH);
 	k += py.misc.wt / 60 + 3;
 
-	if (k < 0)
-	    k = 0;		   /* no neg damage! */
+	/* No negative damage */
+	if (k < 0) k = 0;
 
-    /* See if we done it in.				     */
+	/* See if we done it in.				     */
 	if (mon_take_hit(monster, k, TRUE) >= 0) {
+
+	    /* Appropriate message */
 	    if ((c_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
 		(c_list[monptr].cchar == 'E') ||
 		(c_list[monptr].cchar == 'v') ||
-		(c_list[monptr].cchar == 'g'))
+		(c_list[monptr].cchar == 'g')) {
 		(void)sprintf(out_val, "You have destroyed %s.", m_name);
-	    else
+	    }
+	    else {
 		(void)sprintf(out_val, "You have slain %s.", m_name);
+	    }
 	    msg_print(out_val);
 	    prt_experience();
 	}
@@ -2936,7 +2980,7 @@ void bash()
 }
 
 
-static const char *look_mon_desc(int mnum)
+static cptr look_mon_desc(int mnum)
 {
     monster_type *m = &m_list[mnum];
     s32b         thp, tmax, perc;

@@ -18,9 +18,7 @@
 #endif
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef ibm032
 #include <ctype.h>

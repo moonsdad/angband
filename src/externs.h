@@ -239,10 +239,10 @@ extern spell_type (*magic_spell)[63];
 #else
 extern spell_type magic_spell[MAX_CLASS-1][63];
 #endif
-extern const char *spell_names[127];
+extern cptr spell_names[127];
 extern u32b spell_learned;	/* Bit field for spells learnt -CJS- */
 extern u32b spell_learned2;	/* Bit field for spells learnt -CJS- */
-extern u32b spell_worked;		/* Bit field for spells tried -CJS- */
+extern u32b spell_worked;	/* Bit field for spells tried -CJS- */
 extern u32b spell_worked2;	/* Bit field for spells tried -CJS- */
 extern u32b spell_forgotten;	/* Bit field for spells forgotten -JEW- */
 extern u32b spell_forgotten2;	/* Bit field for spells forgotten -JEW- */
@@ -284,7 +284,7 @@ extern byte object_ident[OBJECT_IDENT_SIZE];
 extern s16b t_level[MAX_OBJ_LEVEL+1];
 extern inven_type t_list[MAX_TALLOC];
 extern inven_type inventory[INVEN_ARRAY_SIZE];
-extern const char *special_names[SN_ARRAY_SIZE];
+extern cptr special_names[SN_ARRAY_SIZE];
 extern s16b sorted_objects[MAX_DUNGEON_OBJ];
 extern s16b inven_ctr;			/* Total different obj's	*/
 extern s16b inven_weight;		/* Cur carried weight	*/
@@ -312,21 +312,21 @@ extern s16b mon_tot_mult;		   /* # of repro's of creature	*/
 
 /* Following are arrays for descriptive pieces			*/
 #ifdef MACGAME
-extern const char **colors;
-extern const char **mushrooms;
-extern const char **woods;
-extern const char **metals;
-extern const char **rocks;
-extern const char **amulets;
-extern const char **syllables;
+extern cptr *colors;
+extern cptr *mushrooms;
+extern cptr *woods;
+extern cptr *metals;
+extern cptr *rocks;
+extern cptr *amulets;
+extern cptr *syllables;
 #else
-extern const char *colors[MAX_COLORS];
-extern const char *mushrooms[MAX_MUSH];
-extern const char *woods[MAX_WOODS];
-extern const char *metals[MAX_METALS];
-extern const char *rocks[MAX_ROCKS];
-extern const char *amulets[MAX_AMULETS];
-extern const char *syllables[MAX_SYLLABLES];
+extern cptr colors[MAX_COLORS];
+extern cptr mushrooms[MAX_MUSH];
+extern cptr woods[MAX_WOODS];
+extern cptr metals[MAX_METALS];
+extern cptr rocks[MAX_ROCKS];
+extern cptr amulets[MAX_AMULETS];
+extern cptr syllables[MAX_SYLLABLES];
 #endif
 
 extern byte blows_table[11][12];
@@ -370,9 +370,13 @@ extern char *ANGBAND_SAV;		/* was LIBDIR(save)					*/
 #endif /* NEW_FILEPATHS */
 
 
-/* function return values */
-/* only extern functions declared here, static functions declared inside
-   the file that defines them */
+/*
+ * function return values
+ * only extern functions declared here, static functions declared
+ * inside the file that defines them.  Duh...
+ */
+
+
 #ifdef __STDC__
 
 /* create.c */
@@ -408,7 +412,7 @@ void unmagic_name(inven_type *);
 void objdes(char *, struct inven_type *, int);
 void scribe_object(void);
 void add_inscribe(inven_type *, int);
-void inscribe(inven_type *, const char *);
+void inscribe(inven_type *, cptr);
 void invcopy(inven_type *, int);
 void desc_charges(int);
 void desc_remain(int);
@@ -428,7 +432,7 @@ void eat(void);
 void init_scorefile(void);
 void init_files(void);
 void read_times(void);
-void helpfile(const char *);
+void helpfile(cptr);
 void print_objects(void);
 #ifdef MAC
 int file_character(void)
@@ -452,7 +456,7 @@ int suspend(void);
 #endif
 void init_curses(void);
 void moriaterm(void);
-void put_buffer(const char *, int, int);
+void put_buffer(cptr, int, int);
 void put_qio(void);
 void restore_term(void);
 void shell_out(void);
@@ -462,12 +466,12 @@ void erase_line(int, int);
 void clear_screen(void);
 void clear_from(int);
 void move_cursor_relative(int, int);
-void count_msg_print(const char *);
-void prt(const char *, int, int);
+void count_msg_print(cptr);
+void prt(cptr, int, int);
 void move_cursor(int, int);
-void msg_print(const char *);
-int get_check(const char *);
-int get_com(const char *, char *);
+void msg_print(cptr);
+int get_check(cptr);
+int get_com(cptr, char *);
 int get_string(char *, int, int, int);
 void pause_line(int);
 void pause_exit(int, int);
@@ -484,7 +488,7 @@ void cast(void);
 int main(int, char **);
 
 /* misc1.c */
-void init_seeds();
+void init_seeds(void);
 void set_seed(u32b);
 void reset_seed(void);
 int check_time(void);
@@ -544,11 +548,11 @@ void alloc_object(int (*)(), int, int);
 void random_object(int, int, int);
 void cnv_stat(int, char *);
 void prt_stat(int);
-void prt_field(const char *, int, int);
+void prt_field(cptr, int, int);
 int stat_adj(int);
 int chr_adj(void);
 int con_adj(void);
-const char *title_string(void);
+cptr title_string(void);
 void prt_title(void);
 void prt_level(void);
 void prt_cmana(void);
@@ -580,7 +584,7 @@ void prt_stat_block(void);
 void draw_cave(void);
 void put_character(void);
 void put_stats(void);
-const char *likert(int, int);
+cptr likert(int, int);
 void put_misc1(void);
 void put_misc2(void);
 void put_misc3(void);
@@ -598,14 +602,14 @@ void check_strength(void);
 int inven_carry(struct inven_type *);
 int spell_chance(int);
 void print_spells(int *, int, int, int);
-int get_spell(int *, int, int *, int *, const char *, int);
+int get_spell(int *, int, int *, int *, cptr, int);
 void calc_spells(int);
 void gain_spells(void);
 void calc_mana(int);
 void prt_experience(void);
 void calc_hitpoints(void);
-void insert_str(char *, const char *, const char *);
-void insert_lnum(char *, const char *, s32b, int);
+void insert_str(char *, cptr, cptr);
+void insert_lnum(char *, cptr, s32b, int);
 int enter_wiz_mode(void);
 int attack_blows(int, int *);
 int tot_dam(struct inven_type *, int, int);
@@ -632,15 +636,15 @@ void change_speed(int);
 void py_bonuses(struct inven_type *, int);
 void calc_bonuses(void);
 int show_inven(int, int, int, int, int ());
-const char *describe_use(int);
+cptr describe_use(int);
 int show_equip(int, int);
 void takeoff(int, int);
-int verify(const char *, int);
+int verify(cptr, int);
 void inven_command(int);
-int get_item(int *, const char *, int, int, int ());
+int get_item(int *, cptr, int, int, int ());
 int no_light(void);
-int get_dir(const char *, int *);
-int get_alldir(const char *, int *);
+int get_dir(cptr, int *);
+int get_alldir(cptr, int *);
 void move_rec(int, int, int, int);
 void light_room(int, int);
 void move_light(int, int, int, int);
@@ -650,7 +654,7 @@ void search_off(void);
 void rest(void);
 void rest_off(void);
 int test_hit(int, int, int, int, int);
-void take_hit(int, const char *);
+void take_hit(int, cptr);
 void change_trap(int, int);
 void search(int, int, int);
 void find_init(int);
@@ -658,16 +662,16 @@ void find_run(void);
 void end_find(void);
 void area_affect(int, int, int);
 int minus_ac(u32b);
-void corrode_gas(const char *);
-void poison_gas(int, const char *);
-void fire_dam(int, const char *);
-void cold_dam(int, const char *);
-void light_dam(int, const char *);
-void acid_dam(int, const char *);
+void corrode_gas(cptr);
+void poison_gas(int, cptr);
+void fire_dam(int, cptr);
+void cold_dam(int, cptr);
+void light_dam(int, cptr);
+void acid_dam(int, cptr);
 void darken_player(int, int);
 
 /* moria2.c */
-int cast_spell(const char * ,int, int *, int *);
+int cast_spell(cptr ,int, int *, int *);
 void delete_monster(int);
 void fix1_delete_monster(int);
 void fix2_delete_monster(int);
@@ -867,7 +871,7 @@ int banish_creature(u32b, int);
 int remove_all_curse(void);
 void darken_room(int, int);
 void lite_spot(int, int);
-const char *pain_message(int, int);
+cptr pain_message(int, int);
 void line_spell(int, int, int, int, int);
 
 /* staffs.c */
@@ -902,14 +906,14 @@ int check_input(int);
 int system_cmd(char *);
 #endif
 void user_name(char *, int);
-int tilde(const char *, char *);
-FILE *my_tfopen(const char *, const char *);
-int my_topen(const char *, int, int);
+int tilde(cptr, char *);
+FILE *my_tfopen(cptr, cptr);
+int my_topen(cptr, int, int);
 #endif
 
 /* util.c */
 #ifdef NEEDS_STRICMP
-int my_stricmp(const char *, const char *);
+int my_stricmp(cptr, cptr);
 #endif
 #ifdef NEEDS_USLEEP
 int microsleep(unsigned long);

@@ -32,9 +32,7 @@ defined(NCR3K) || defined(linux) || defined(ibm032) || defined (__osf__)
 #include <stdio.h>
 #include "constant.h"
 #include "monster.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -85,7 +83,7 @@ extern int peek;
 extern int rating;
 
 
-/* 
+/*
  * Gets a new random seed for the random number generator 
  * Hack -- saves seeds for the town layout and object colors
  */
@@ -186,10 +184,10 @@ int check_time(void)
 }
 
 #ifdef RI
-/* Generates a random integer x where 1<=X<=MAXVAL	-RAK-	 */
-int 
-randint(maxval)
-int maxval;
+/*
+ * Generates a random integer x where 1<=X<=MAXVAL	-RAK-	 
+ */
+int randint(int maxval)
 {
     register long randval;
 
@@ -203,6 +201,11 @@ int maxval;
 
 /*
  * Generates a random integer number of NORMAL distribution -RAK- 
+ *
+ * XXX This should probably be retested just for paranoia's sake.
+ *
+ * There has been some suspicion that this function actually uses
+ * a standard deviation of about 1.25 times the one given. XXX XXX
  */
 int randnor(int mean, int stand)
 {
@@ -613,7 +616,9 @@ int los(int fromY, int fromX, int toY, int toX)
 }
 
 
-/* Returns symbol for given row, column			-RAK-	 */
+/*
+ * Returns symbol for given row, column			-RAK-	 
+ */
 unsigned char loc_symbol(int y, int x)
 {
     register cave_type    *cave_ptr;
@@ -654,7 +659,9 @@ unsigned char loc_symbol(int y, int x)
 }
 
 
-/* Tests a spot for light or field mark status		-RAK-	 */
+/*
+ * Tests a spot for light or field mark status		-RAK-	 
+ */
 int test_light(int y, int x)
 {
     register cave_type *cave_ptr;
@@ -667,7 +674,9 @@ int test_light(int y, int x)
 }
 
 
-/* Prints the map of the dungeon			-RAK-	 */
+/*
+ * Prints the map of the dungeon			-RAK-	 
+ */
 void prt_map()
 {
     register int           i, j, k;
@@ -687,8 +696,9 @@ void prt_map()
 }
 
 
-/* Compact monsters					-RAK-	 */
 /*
+ * Compact monsters					-RAK-	 
+ *
  * Return TRUE if any monsters were deleted, FALSE if could not delete any
  * monsters. 
  */
@@ -739,7 +749,7 @@ int compact_monsters()
 
 
 /*
- * Add to the players food time				-RAK-	
+ * Add to the players food time				-RAK-	 
  */
 void add_food(int num)
 {
@@ -775,7 +785,9 @@ void add_food(int num)
 }
 
 
-/* Returns a pointer to next free space			-RAK-	 */
+/*
+ * Returns a pointer to next free space			-RAK-	 
+ */
 int popm()
 {
     if (mfptr == MAX_MALLOC)
@@ -785,14 +797,18 @@ int popm()
 }
 
 
-/* Gives Max hit points					-RAK-	 */
+/*
+ * Gives Max hit points					-RAK-	 
+ */
 int max_hp(byte *array)
 {
     return ((int)(array[0]) * (int)(array[1]));
 }
 
 
-/* Places a monster at given location			-RAK-	 */
+/*
+ * Places a monster at given location			-RAK-	 
+ */
 int place_monster(int y, int x, int z, int slp)
 {
     register int           cur_pos, j, ny,nx,count;
@@ -911,7 +927,9 @@ int place_monster(int y, int x, int z, int slp)
     return TRUE;
 }
 
-/* Places a monster at given location			-RAK-	 */
+/*
+ * Places a monster at given location			-RAK-	 
+ */
 int place_win_monster()
 {
     register int           y, x, cur_pos;
@@ -1389,7 +1407,9 @@ void set_ghost(creature_type *g, char *name, int r, int c, int l)
 }
 
 
-/* Places a monster at given location			-RAK-	 */
+/*
+ * Places a monster at given location			-RAK-	 
+ */
 int place_ghost()
 {
     register int           y, x, cur_pos;
@@ -1572,7 +1592,8 @@ again:
     return i;
 }
 
-/* Ludwig's Brainstorm */
+/*
+ * Ludwig's Brainstorm */
 static int test_place(int y, int x)
 {
     if (!in_bounds(y, x) ||
@@ -1656,7 +1677,8 @@ void place_group(int y, int x, int mon, int slp)
 }
 
 
-/* Allocates a random monster				-RAK-	 */
+/*
+ * Allocates a random monster				-RAK-	 */
 void alloc_monster(int num, int dis, int slp)
 {
     register int y, x, i;
@@ -1703,7 +1725,8 @@ void alloc_monster(int num, int dis, int slp)
 }
 
 
-/* Places creature adjacent to given location		-RAK-	 */
+/*
+ * Places creature adjacent to given location		-RAK-	 */
 int summon_monster(int *y, int *x, int slp)
 {
     register int        i, j, k;
@@ -1736,7 +1759,8 @@ int summon_monster(int *y, int *x, int slp)
 }
 
 
-/* Places undead adjacent to given location		-RAK-	 */
+/*
+ * Places undead adjacent to given location		-RAK-	 */
 int summon_undead(int *y, int *x)
 {
     register int        i, j, k;
@@ -1781,7 +1805,8 @@ int summon_undead(int *y, int *x)
     return (summon);
 }
 
-/* As for summon undead */
+/*
+ * As for summon undead */
 int summon_demon(int lev, int *y, int *x)
 {
     register int        i, j, k;
@@ -1826,7 +1851,8 @@ int summon_demon(int lev, int *y, int *x)
     return (summon);
 }
 
-/* As for summon demon:-) ~Ludwig */
+/*
+ * As for summon demon:-) ~Ludwig */
 int summon_dragon(int *y, int *x)
 {
     register int        i, j, k;
@@ -1873,7 +1899,8 @@ int summon_dragon(int *y, int *x)
     return (summon);
 }
 
-/* Summon ringwraiths */
+/*
+ * Summon ringwraiths */
 int summon_wraith(int *y, int *x)
 {
     register int        i, j, k;
@@ -1920,7 +1947,8 @@ int summon_wraith(int *y, int *x)
     return (summon);
 }
 
-/* Summon reptiles */
+/*
+ * Summon reptiles */
 int summon_reptile(int *y, int *x)
 {
     register int        i, j, k;
@@ -1968,7 +1996,8 @@ int summon_reptile(int *y, int *x)
 }
 
 
-/* As for summon dragon, but keys on character ~Decado */
+/*
+ * As for summon dragon, but keys on character ~Decado */
 int summon_spider(int *y, int *x)
 {
     register int        i, j, k;
@@ -2015,7 +2044,8 @@ int summon_spider(int *y, int *x)
     return (summon);
 }
 
-/* As for summon dragon, but keys on character ~Decado */
+/*
+ * As for summon dragon, but keys on character ~Decado */
 int summon_angel(int *y, int *x)
 {
     register int        i, j, k;
@@ -2060,7 +2090,8 @@ int summon_angel(int *y, int *x)
     return (summon);
 }
 
-/* Summon ants */
+/*
+ * Summon ants */
 int summon_ant(int *y, int *x)
 {
     register int        i, j, k;
@@ -2107,7 +2138,8 @@ int summon_ant(int *y, int *x)
     return (summon);
 }
 
-/* Summon uniques */
+/*
+ * Summon uniques */
 int summon_unique(int *y, int *x)
 {
     register int        i, j, k;
@@ -2154,7 +2186,8 @@ int summon_unique(int *y, int *x)
     return (summon);
 }
 
-/* Summon jabberwocks, for extra effect to the summon_unique spell */
+/*
+ * Summon jabberwocks, for extra effect to the summon_unique spell */
 int summon_jabberwock(int *y, int *x)
 {
     register int        i, j, k;
@@ -2201,7 +2234,8 @@ int summon_jabberwock(int *y, int *x)
     return (summon);
 }
 
-/* Summon greater undead */
+/*
+ * Summon greater undead */
 int summon_gundead(int *y, int *x)
 {
     register int        i, j, k;
@@ -2249,7 +2283,8 @@ int summon_gundead(int *y, int *x)
     return (summon);
 }
 
-/* Summon ancient dragons */
+/*
+ * Summon ancient dragons */
 int summon_ancientd(int *y, int *x)
 {
     register int        i, j, k;
@@ -2296,7 +2331,8 @@ int summon_ancientd(int *y, int *x)
     return (summon);
 }
 
-/* As for summon hound, but keys on character ~Decado */
+/*
+ * As for summon hound, but keys on character ~Decado */
 int summon_hound(int *y, int *x)
 {
     register int        i, j, k;
@@ -2344,7 +2380,8 @@ int summon_hound(int *y, int *x)
     return (summon);
 }
 
-/* Place a sleepy jelly at the required coordinates ~Ludwig */
+/*
+ * Place a sleepy jelly at the required coordinates ~Ludwig */
 int summon_jelly(int *y, int *x)
 {
     int l, m, summon;
@@ -2361,7 +2398,8 @@ int summon_jelly(int *y, int *x)
     return (summon);
 }
 
-/* If too many objects on floor level, delete some of them */
+/*
+ * If too many objects on floor level, delete some of them */
 static void compact_objects()
 {
     register int        i, j;
@@ -2418,7 +2456,8 @@ static void compact_objects()
 	prt_map();
 }
 
-/* Gives pointer to next free space			-RAK-	 */
+/*
+ * Gives pointer to next free space			-RAK-	 */
 int popt()
 {
     if (tcptr == MAX_TALLOC)
@@ -2427,8 +2466,9 @@ int popt()
 }
 
 
-/* Pushs a record back onto free space list		-RAK-	 */
 /*
+ * Pushs a record back onto free space list		-RAK-	 
+ *
  * Delete_object() should always be called instead, unless the object in
  * question is not in the dungeon, e.g. in store1.c and files.c 
  */
@@ -2451,7 +2491,8 @@ void pusht(int my_x)
 }
 
 
-/* Boolean : is object enchanted	  -RAK- */
+/*
+ * Boolean : is object enchanted	  -RAK- */
 int magik(int chance)
 {
     if (randint(100) <= chance)
@@ -2461,15 +2502,14 @@ int magik(int chance)
 }
 
 
-/* Enchant a bonus based on degree desired -RAK- */
 /*
+ * Enchant a bonus based on degree desired -RAK-
+ *
  * Lets just change this to make sense.  Now it goes from base to limit,
  * roughly proportional to the level.... -CWS 
  */
 
-int 
-m_bonus(base, limit, level)
-int base, limit, level;
+int m_bonus(int base, int limit, int level)
 {
     register int x, stand_dev, tmp, diff = limit - base;
 
@@ -2487,11 +2527,9 @@ int base, limit, level;
 	return (x);
 }
 
-int 
-unique_weapon(t_ptr)
-inven_type *t_ptr;
+int unique_weapon(inven_type *t_ptr)
 {
-    const char *name;
+    cptr name;
 
     if (be_nasty)
 	return 0;
@@ -3590,11 +3628,9 @@ inven_type *t_ptr;
     return 0;
 }
 
-int 
-unique_armour(t_ptr)
-inven_type *t_ptr;
+int unique_armour(inven_type *t_ptr)
 {
-    const char *name;
+    cptr name;
 
     if (be_nasty)
 	return 0;
@@ -4168,9 +4204,7 @@ inven_type *t_ptr;
     return 0;
 }
 
-void 
-give_1_hi_resist(t)		   /* JLS: gives one of the "new" resistances to */
-register inven_type *t;
+void give_1_hi_resist(inven_type *t)		   /* JLS: gives one of the "new" resistances to */
 {
     switch (randint(10)) {
       case 1:
@@ -4206,11 +4240,11 @@ register inven_type *t;
     }
 }
 
-/* Chance of treasure having magic abilities		-RAK-	 */
-/* Chance increases with each dungeon level			 */
-void 
-magic_treasure(x, level, good, not_unique)
-int x, level, good, not_unique;
+/*
+ * Chance of treasure having magic abilities		-RAK-	 
+ * Chance increases with each dungeon level			 
+ */
+void magic_treasure(int x, int level, int good, int not_unique)
 {
     register inven_type *t_ptr;
     register u32b      chance, special, cursed, i;
@@ -5734,7 +5768,7 @@ int x, level, good, not_unique;
 
 
 static struct opt_desc {
-    const char         *o_prompt;
+    cptr                o_prompt;
     int                *o_var;
 } options[] = {
 
@@ -5759,7 +5793,8 @@ static struct opt_desc {
 };
 
 
-/* Set or unset various boolean options.		-CJS- */
+/*
+ * Set or unset various boolean options.		-CJS- */
 void set_options()
 {
     register int i, max, ch;

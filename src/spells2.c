@@ -11,10 +11,8 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
+#include "angband.h"
 #include "monster.h"
-#include "externs.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -3359,11 +3357,15 @@ void earthquake(void)
 		    m_ptr = &m_list[c_ptr->cptr];
 		    r_ptr = &c_list[m_ptr->mptr];
 
-		    if (!(r_ptr->cmove & CM_PHASE) && !(r_ptr->cdefense & BREAK_WALL)) {
-			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cmove & CM_ATTACK_ONLY)) 
+		    if (!(r_ptr->cmove & CM_PHASE) &&
+			!(r_ptr->cdefense & BREAK_WALL)) {
 
 			/* monster can not move to escape the wall */
+			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cmove & CM_ATTACK_ONLY)) {
 			    kill = TRUE;
+			}
+
+			/* Monster MAY have somewhere to flee */
 			else {
 			/* only kill if there is nowhere for the monster to escape to */
 			    kill = TRUE;
@@ -3414,7 +3416,9 @@ void earthquake(void)
 }
 
 
-/* Evil creatures don't like this.		       -RAK-   */
+/*
+ * Evil creatures don't like this.		       -RAK-   
+ */
 int protect_evil()
 {
     register int           res;
@@ -3476,7 +3480,7 @@ int banish_creature(u32b cflag, int dist)
     return (dispel);
 }
 
-int probing()
+int probing(void)
 {
     register int            i;
     int                     probe;
@@ -3824,7 +3828,6 @@ void destroy_area(int y, int x)
  *
  * Enchants a plus onto an item.                        -RAK-   
  */
-/* Enchants a plus onto an item.                        -RAK-   */
 int enchant(inven_type *i_ptr, int n, byte eflag)
 {
     register int chance, res = FALSE, i;
@@ -3907,18 +3910,23 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 }
 
 
-const char *pain_message(int monptr, int dam)
+cptr pain_message(int monptr, int dam)
 {
     register monster_type *m_ptr;
     creature_type      *c_ptr;
-    int                 percentage, oldhp, newhp;
+    int				oldhp, newhp;
+    int				percentage;
 
-    if (dam == 0)
-	return "%s is unharmed.";  /* avoid potential div by 0 */
+    /* avoid potential div by 0 */
+    if (dam == 0) {
+	return "%s is unharmed.";
+    }
 
     m_ptr = &m_list[monptr];
     c_ptr = &c_list[m_ptr->mptr];
-#ifdef MSDOS			   /* more fix -CFT */
+
+    /* more fix -CFT */
+#ifdef MSDOS
     newhp = (s32b) (m_ptr->hp);
     oldhp = newhp + (s32b) dam;
 #else
@@ -3927,10 +3935,10 @@ const char *pain_message(int monptr, int dam)
 #endif
     percentage = (newhp * 100) / oldhp;
 
-    if ((c_ptr->cchar == 'j') ||   /* Non-verbal creatures like molds */
-	(c_ptr->cchar == 'Q') || (c_ptr->cchar == 'v') ||
-     (c_ptr->cchar == 'm') || ((c_ptr->cchar == 'e') && stricmp(c_ptr->name,
-							     "Beholder"))) {
+    /* Non-verbal creatures like molds */
+    if ((c_ptr->cchar == 'j') || (c_ptr->cchar == 'Q') || (c_ptr->cchar == 'v') || (c_ptr->cchar == 'm') ||
+	((c_ptr->cchar == 'e') && stricmp(c_ptr->name, "Beholder"))) {
+
 	if (percentage > 95)
 	    return "%s barely notices.";
 	if (percentage > 75)
@@ -3980,7 +3988,11 @@ const char *pain_message(int monptr, int dam)
 	if (percentage > 10)
 	    return "%s writhes in agony.";
 	return "%s cries out feebly.";
-    } else {
+    }
+
+    /* Another type of monsters (shrug,cry,scream) */
+    else {
+
 	if (percentage > 95)
 	    return "%s shrugs off the attack.";
 	if (percentage > 75)
@@ -3997,7 +4009,11 @@ const char *pain_message(int monptr, int dam)
     }
 }
 
-/* Removes curses from items in inventory		-RAK-	 */
+
+
+/*
+ * Removes curses from items in inventory		-RAK-	
+ */
 int remove_curse()
 {
     register int         i, result;
@@ -4048,7 +4064,10 @@ int remove_all_curse()
 }
 
 
-/* Restores any drained experience			-RAK-	 */
+
+/*
+ * Restores any drained experience			-RAK-	 
+ */
 int restore_level()
 {
     register int          restore;
@@ -4084,13 +4103,13 @@ static void pause_if_screen_full(int *i, int j)
     }
 }
 
-/* self-knowledge... idea from nethack.  Useful for determining powers and
+/*
+ * self-knowledge... idea from nethack.  Useful for determining powers and
  * resistences of items.  It saves the screen, clears it, then starts listing
  * attributes, a screenful at a time.  (There are a LOT of attributes to
  * list.  It will probably take 2 or 3 screens for a powerful character whose
  * using several artifacts...) -CFT 
  */
-
 void self_knowledge()
 {
     int    i, j;
@@ -4437,7 +4456,10 @@ void self_knowledge()
     if (f2 & TR_IMPACT)
 	prt("The unbelievable impact of your weapon can cause earthquakes.", i++, j);
 
+    /* Pause */
     pause_line(i);
+
+    /* Restore the screen */
     restore_screen();
 }
 
@@ -4454,7 +4476,8 @@ void self_knowledge()
 #define MORE_DAZED 16
 #define DEAD 32
 
-/* This function will process a bolt/ball/breath spell hitting a monster.
+/*
+ * This function will process a bolt/ball/breath spell hitting a monster.
  * It checks for resistances, and reduces damage accordingly, and also
  * adds in what "special effects" apply to the monsters.  'rad' is used to
  * indicate the distance from "ground 0" for ball spells.  For bolts, rad
@@ -4855,8 +4878,10 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     }	
 }
 
-/* This fn provides the ability to have a spell blast a line of creatures
-   for damage.  It should look pretty neat, too... -CFT */
+/*
+ * This fn provides the ability to have a spell blast a line of creatures
+ *  for damage.  It should look pretty neat, too... -CFT 
+ */
 void line_spell(int typ, int dir, int y, int x, int dam)
 {
     int ny,nx, dis = 0, flag = FALSE;

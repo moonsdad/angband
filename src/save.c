@@ -10,6 +10,9 @@
  * included in all such copies. 
  */
 
+#include "angband.h"
+
+
 /*
  * This save package was brought to by		-JWT- and -RAK-
  * and has been completely rewritten for UNIX by	-JEW-  
@@ -21,9 +24,6 @@
 #include <stdio.h>
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
 #include "monster.h"
 
 #ifndef USG
@@ -103,7 +103,7 @@ static u32b	start_time;	/* time that play started */
 static int	from_savefile;	/* can overwrite old savefile when save */
 
 
-static char *basename(char *a)
+cptr basename(char *a)
 {
     char *b;
     char *strrchr();

@@ -3,12 +3,21 @@
 /* Purpose: Actual Unix Curses support for Angband */
 
 /*
- * Copyright (c) 1989 James E. Wilson, Christopher J. Stuart 
+ * Copyright (c) 1989 James E. Wilson, Christopher J. Stuart , Robert A. Koeneke
  *
  * This software may be copied and distributed for educational, research, and
  * not for profit purposes provided that this copyright and statement are
  * included in all such copies.
  */
+
+/*
+ * Some annoying machines define "bool" in various packages
+ * Note that this "redefinition" should work on any machine.
+ */
+
+#define bool bool_hack
+#include "angband.h"
+#undef bool
 
 #if defined(unix) || defined(__MINT__)
 
@@ -290,7 +299,7 @@ void user_name(char *buf, int id)
 }
 
 /* expands a tilde at the beginning of a file name to a users home directory */
-int tilde(const char *file, char *exp)
+int tilde(cptr file, char *exp)
 {
     *exp = '\0';
     if (file) {
@@ -326,7 +335,7 @@ int tilde(const char *file, char *exp)
  * open a file just as does fopen, but allow a leading ~ to specify a home
  * directory 
  */
-FILE *my_tfopen(const char *ffile, const char *fmode)
+FILE *my_tfopen(cptr ffile, cptr fmode)
 {
     char                buf[1024];
     extern int          errno;
@@ -341,7 +350,7 @@ FILE *my_tfopen(const char *ffile, const char *fmode)
  * open a file just as does open, but expand a leading ~ into a home
  * directory name 
  */
-int my_topen(const char *file, int flags, int mode)
+int my_topen(cptr file, int flags, int mode)
 {
     char                buf[1024];
     extern int          errno;

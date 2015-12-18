@@ -15,6 +15,8 @@
  * Completely rewritten by				-CJS-
  */
 
+#include "angband.h"
+
 /* Signals have no significance on the Mac */
 
 #ifdef MAC
@@ -186,30 +188,41 @@ static void signal_handler(int sig)
 	exit_game();
     }
 
-/* Die. */
-    prt(
-	"OH NO!!!!!!  A gruesome software bug LEAPS out at you. There is NO defense!",
-	23, 0);
+    /* Die. */
+    prt("OH NO!!!!!!  A gruesome software bug LEAPS out at you. There is NO defense!", 23, 0);
+
+    /* Try to save anyway */
     if (!death && !character_saved && character_generated) {
+
+	/* Try a panic save */
 	panic_save = 1;
 	prt("Your guardian angel is trying to save you.", 0, 0);
+
+	/* Attempt to save */
 	(void)sprintf(died_from, "(panic save %d)", sig);
 	if (!save_char()) {
-	    (void)strcpy(died_from, "software bug");
-	    death = TRUE;
-	    turn = (-1);
-	}
-    } else {
+	/* Oops */
+	(void)strcpy(died_from, "software bug");
 	death = TRUE;
-	(void)_save_char(savefile);/* Quietly save the memory anyway. */
+	turn = (-1);
+	}
     }
+    else {
+	death = TRUE;
+	/* Quietly save the memory anyway. */
+	(void)_save_char(savefile);
+    }
+
     restore_term();
+
 #ifndef MSDOS
 /* always generate a core dump */
     (void)signal(sig, SIG_DFL);
     (void)kill(getpid(), sig);
     (void)sleep(5);
 #endif
+
+    /* Quit anyway */
     exit(1);
 }
 
@@ -261,7 +274,7 @@ void signals()
 #endif
 }
 
-voidinit_signals()
+void init_signals()
 {
 #ifndef ATARIST_MWC
 #ifdef linux

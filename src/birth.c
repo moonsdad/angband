@@ -11,9 +11,7 @@
  */
 
 #include "constant.h"
-#include "types.h"
-#include "config.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -70,13 +68,15 @@ struct previous {
 
     char history[4][60];
 
-    player_background     bg;
+    player_background bg;
 
 } prev;
 
 extern int peek;
 
-/* Generates character's stats			-JWT-	 */
+/*
+ * Generates character's stats			-JWT-	 
+ */
 static void get_stats()
 {
     register int i, tot;
@@ -100,7 +100,9 @@ static void get_stats()
 
 
 
-/* Changes stats by given amount                                -JWT-   */
+/*
+ * Changes stats by given amount                                -JWT-   
+ */
 static void change_stat(int stat, int amount)
 {
   py.stats.max_stat[stat] =
@@ -187,7 +189,7 @@ static void get_all_stats()
 }
 
 /* copied from misc2.c, so the display loop would work nicely -cft */
-static const char *stat_names[] = {"STR: ", "INT: ", "WIS: ", "DEX: ", "CON: ", "CHR: "};
+static cptr stat_names[] = {"STR: ", "INT: ", "WIS: ", "DEX: ", "CON: ", "CHR: "};
 
 
 #ifdef AUTOROLLER
@@ -321,7 +323,10 @@ static int adjust_stat(int stat_value, s16b amount, int auto_roll)
     return stat_value;
 }
 
-/* Will print the history of a character			-JWT-	 */
+
+/*
+ * Will print the history of a character			-JWT-	 
+ */
 static void print_history()
 {
     register int        i;
@@ -744,7 +749,7 @@ static void get_money()
 /* -JWT-	 */
 void create_character()
 {
-    register char       c;
+    char       c;
 
 #ifdef AUTOROLLER
     u32b       auto_round = 0;

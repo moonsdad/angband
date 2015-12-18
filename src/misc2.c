@@ -19,9 +19,7 @@
 #endif
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #include <ctype.h>
 
@@ -38,8 +36,8 @@ char               *index();
 /* Lets do all prototypes correctly.... -CWS */
 #ifndef NO_LINT_ARGS
 #ifdef __STDC__
-static void prt_lnum(const char *, s32b, int, int);
-static void prt_num(const char *, int, int, int);
+static void prt_lnum(cptr, s32b, int, int);
+static void prt_num(cptr, int, int, int);
 static void prt_long(s32b, int, int);
 static void prt_int(int, int, int);
 #else
@@ -51,7 +49,7 @@ static void prt_int();
 static void gain_level();
 #endif
 
-static const char *stat_names[] = { "STR: ", "INT: ", "WIS: ",
+static cptr stat_names[] = { "STR: ", "INT: ", "WIS: ",
 					"DEX: ", "CON: ", "CHR: "};
 
 #define BLANK_LENGTH	24
@@ -722,7 +720,7 @@ void prt_stat(int stat)
  *
  * the longest title is 13 characters, so only pad to 13
  */
-void prt_field(const char *info, int row, int column)
+void prt_field(cptr info, int row, int column)
 {
     put_buffer(&blank_string[BLANK_LENGTH - 13], row, column);
     put_buffer(info, row, column);
@@ -730,7 +728,7 @@ void prt_field(const char *info, int row, int column)
 
 /*
  * Print long number with header at given row, column */
-static void prt_lnum(const char *header, s32b num, int row, int column)
+static void prt_lnum(cptr header, s32b num, int row, int column)
 {
     vtype out_val;
 
@@ -740,7 +738,7 @@ static void prt_lnum(const char *header, s32b num, int row, int column)
 
 /*
  * Print number with header at given row, column	-RAK-	 */
-static void prt_num(const char *header, int num, int row, int column)
+static void prt_num(cptr header, int num, int row, int column)
 {
     vtype out_val;
 
@@ -923,9 +921,9 @@ int con_adj()
 }
 
 
-const char *title_string()
+cptr title_string()
 {
-    const char *p;
+    cptr p;
 
     if (py.misc.lev < 1)
 	p = "Babe in arms";
@@ -1664,7 +1662,7 @@ void put_stats()
 
 /*
  * Returns a rating of x depending on y			-JWT-	 */
-const char *likert(int x, int y)
+cptr likert(int x, int y)
 {
     if ((x/y) < 0)
 	return ("Very Bad");
@@ -2317,7 +2315,7 @@ void print_spells(int *spell, register int num, int comment, int nonconsec)
     vtype                out_val;
     register spell_type *s_ptr;
     int                  col, offset;
-    const char          *p;
+    cptr                 p;
     char                 spell_char;
 
     if (comment)
@@ -2365,7 +2363,7 @@ void print_spells(int *spell, register int num, int comment, int nonconsec)
 
 /*
  * Returns spell pointer				-RAK-	 */
-int get_spell(int *spell, register int num, register int *sn, register int *sc, const char *prompt, int first_spell)
+int get_spell(int *spell, register int num, register int *sn, register int *sc, cptr prompt, int first_spell)
 {
     register spell_type *s_ptr;
     int                  flag, redraw, offset, i;
@@ -2450,7 +2448,7 @@ void calc_spells(int stat)
     int             j, offset;
     int             num_allowed, new_spells, num_known, levels;
     vtype           tmp_str;
-    const char           *p;
+    cptr             p;
     register struct misc *p_ptr;
     register spell_type  *msp_ptr;
 
@@ -3045,13 +3043,13 @@ void calc_hitpoints()
 
 /*
  * Inserts a string into a string				 */
-void insert_str(char *object_str, const char *mtc_str, const char *insert)
+void insert_str(char *object_str, cptr mtc_str, cptr insert)
 {
     int            obj_len;
     char          *bound, *pc;
     register int   i, mtc_len;
     register char *temp_obj;
-    const char    *temp_mtc;
+    cptr           temp_mtc;
     char           out_val[80];
 
     mtc_len = strlen(mtc_str);
@@ -3078,7 +3076,7 @@ void insert_str(char *object_str, const char *mtc_str, const char *insert)
 }
 
 
-void insert_lnum(char *object_str, register const char *mtc_str, s32b number, int  show_sign)
+void insert_lnum(char *object_str, register cptr mtc_str, s32b number, int  show_sign)
 {
     int            mlen;
     vtype          str1, str2;
@@ -3563,7 +3561,7 @@ void add_inscribe(inven_type *i_ptr, int type)
 
 /*
  * Replace any existing comment in an object description with a new one. CJS */
-void inscribe(inven_type *i_ptr, const char *str)
+void inscribe(inven_type *i_ptr, cptr str)
 {
     (void)strcpy(i_ptr->inscrip, str);
 }

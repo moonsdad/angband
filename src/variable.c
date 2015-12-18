@@ -3,11 +3,11 @@
 /* Purpose: Global variables */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
+#include "angband.h"
+
 
 /* Link a copyright message into the executable */
-const char *copyright[5] = {
+cptr copyright[5] = {
     "Copyright (c) 1989 James E. Wilson, Robert A. Keoneke",
     "",
     "This software may be copied and distributed for educational, research,",

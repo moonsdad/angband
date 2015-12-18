@@ -11,16 +11,14 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 /*
  * For those systems that don't have stricmp. -hmj
  */
 
 #if defined(NEEDS_STRICMP)
-int my_stricmp(const char *c1,const char *c2)		/* avoid namespace collision -CWS */
+int my_stricmp(cptr c1,cptr c2)		/* avoid namespace collision -CWS */
 {
     char c3;
     char c4;

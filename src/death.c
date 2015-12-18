@@ -17,10 +17,8 @@
 
 #include <stdio.h>
 #include <signal.h>
-#include "config.h"
 #include "constant.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #ifdef Pyramid
 #include <sys/time.h>
@@ -29,7 +27,6 @@
 #endif
 
 #include <ctype.h>
-#include "config.h"
 
 #ifndef USG
 /* only needed for Berkeley UNIX */
@@ -95,7 +92,7 @@ struct passwd      *getpwuid();
 #ifndef NO_LINT_ARGS
 #ifdef __STDC__
 static void  date(char *);
-static char *center_string(char *, const char *);
+static char *center_string(char *, cptr);
 static void  print_tomb(void);
 static void  kingly(void);
 
@@ -128,7 +125,7 @@ static void date(char *day)
 }
 
 /* Centers a string within a 31 character string		-JWT-	 */
-static char *center_string(char *centered_str, const char *in_str)
+static char *center_string(char *centered_str, cptr in_str)
 {
     register int i, j;
 
@@ -269,8 +266,8 @@ void read_times(void)
 /* inform the user so he can tell the wizard about it	 */
 
     file1 = my_tfopen(ANGBAND_HOU, "r");
-    if (file1) != NULL) {
-	while (fgets(in_line, 80, file1) != NULL) {
+    if (file1) {
+	while (fgets(in_line, 80, file1)) {
 	    if (strlen(in_line) > 3) {
 		if (!strncmp(in_line, "SUN:", 4))
 		    (void)strcpy(days[0], in_line);
@@ -293,7 +290,7 @@ void read_times(void)
 
     else {
 	restore_term();
-	(void)fprintf(stderr, "There is no hours file \"%s\".\nPlease inform the wizard, %s, so he can correct this!\n", ANGBAND_HOU, WIZARD);
+	fprintf(stderr, "There is no hours file \"%s\".\nPlease inform the wizard, %s, so he can correct this!\n", ANGBAND_HOU, WIZARD);
 	exit(1);
     }
 
@@ -302,7 +299,7 @@ void read_times(void)
 	file1 = my_tfopen(ANGBAND_HOU, "r");
 	if (file1) {
 	    clear_screen();
-	    for (i = 0; fgets(in_line, 80, file1) != NULL; i++) {
+	    for (i = 0; fgets(in_line, 80, file1); i++) {
 		put_buffer(in_line, i, 0);
 	    }
 	    (void)fclose(file1);
@@ -326,7 +323,7 @@ void read_times(void)
 /*
  * File perusal.	    -CJS- primitive, but portable 
  */
-void helpfile(const char *filename)
+void helpfile(cptr filename)
 {
     bigvtype tmp_str;
     FILE    *file;
@@ -361,9 +358,11 @@ void helpfile(const char *filename)
     restore_screen();
 }
 
-/* Prints a list of random objects to a file.  Note that -RAK-	 */
-/* the objects produced is a sampling of objects which		 */
-/* be expected to appear on that level.				 */
+/*
+ * Prints a list of random objects to a file.  Note that -RAK-	 
+ * the objects produced is a sampling of objects which		 
+ * be expected to appear on that level.				
+ */
 void print_objects()
 {
     register int         i;
@@ -548,18 +547,26 @@ void print_objects()
 /*
  * Print the character to a file or device.
  */
-int file_character(char *filename1)
+int file_character(cptr filename1)
 {
-    register int          i;
-    int                   j, xbth, xbthb, xfos, xsrh, xstl, xdis, xsave, xdev;
+    register int		i;
+    int				j;
+    int				fd;
+    inven_type			*i_ptr;
+    cptr			p;
+    cptr			colon;
+    cptr			blank;
+
+    register FILE		*file1;
+
+    int                 xbth, xbthb, xfos, xsrh;
+    int			xstl, xdis, xsave, xdev;
     vtype                 xinfra;
-    int                   fd;
-    register FILE        *file1;
-    bigvtype              prt2;
+
     register struct misc *p_ptr;
-    register inven_type  *i_ptr;
-    vtype                 out_val, prt1;
-    const char           *p, *colon, *blank;
+
+    vtype			out_val, prt1;
+    bigvtype			prt2;
 
     fd = my_topen(filename1, O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd < 0 && errno == EEXIST) {
@@ -781,10 +788,10 @@ int file_character(char *filename1)
  */
 static void print_tomb()
 {
-    vtype                str, tmp_str;
     register int         i;
     char                 day[11];
-    register const char *p;
+    cptr		 p;
+    vtype                str, tmp_str;
     FILE                *fp;
 
     if (stricmp(died_from, "Interrupting") && !wizard) {
@@ -866,21 +873,28 @@ static void print_tomb()
 	       19, 0);
 
     flush();
+
     put_buffer("(ESC to abort, return to print on screen, or file name)", 23, 0);
     put_buffer("Character record?", 22, 0);
+
     if (get_string(str, 22, 18, 60)) {
+
 	for (i = 0; i < INVEN_ARRAY_SIZE; i++) {
-	    inven_type *i_ptr = &inventory[i];
-	    if (i_ptr && i_ptr->tval != TV_NOTHING) {
-		known1(i_ptr);
-		known2(i_ptr);
-	    }
+    inven_type *i_ptr = &inventory[i];
+    if (i_ptr && i_ptr->tval != TV_NOTHING) {
+	    known1(i_ptr);
+	    known2(i_ptr);
 	}
-	calc_bonuses();
-	clear_screen();
-	display_char();
-	put_buffer("Type ESC to skip the inventory:", 23, 0);
-	if (inkey() != ESCAPE) {
+    }
+
+    /* Show player */
+    clear_screen();
+    calc_bonuses();
+    display_char();
+
+    put_buffer("Type ESC to skip the inventory:", 23, 0);
+
+    if (inkey() != ESCAPE) {
 	    clear_screen();
 	    msg_print("You are using:");
 	    (void)show_equip(TRUE, 0);
@@ -936,10 +950,12 @@ long total_points()
 /*
  * Enters a players name on a hi-score table, if "legal".
  */
-static int top_twenty(void)
+static errr top_twenty(void)
 {
-    register int        i, j, k;
-    high_scores         scores[MAX_SAVE_HISCORES], myscore;
+    int        i, k;
+    int          j;
+
+    high_scores   scores[MAX_SAVE_HISCORES], myscore;
 
     /* Wipe screen */
     clear_screen();
@@ -1057,7 +1073,9 @@ static int top_twenty(void)
     return (0);
 }
 
-/* Enters a players name on the hi-score table     SM	 */
+/*
+ * Enters a players name on the hi-score table     SM	 
+ */
 void delete_entry(int which)
 {
     register int i;
@@ -1126,7 +1144,7 @@ void delete_entry(int which)
 static void kingly()
 {
     register struct misc *p_ptr;
-    register const char  *p;
+    register cptr p;
 
     /* Change the character attributes.		 */
     dun_level = 0;
@@ -1168,7 +1186,8 @@ static void kingly()
 }
 
 
-/* 
+/*
+ * Exit the game
  * Handles the gravestone end top-twenty routines	-RAK-	
  */
 void exit_game(void)
@@ -1181,22 +1200,33 @@ void exit_game(void)
 #endif
 
     /* What happens upon dying.				-RAK-	 */
+    /* Flush the messages */
     msg_print(NULL);
-    flush();			   /* flush all input */
-    nosignals();		   /* Can't interrupt or suspend. */
+
+    /* Flush the input */
+    flush();
+
+    /* Can't interrupt or suspend. */
+    nosignals();
+
     if (turn >= 0) {
-	if (total_winner)
-	    kingly();
+
+	/* Handle retirement */
+	if (total_winner) kingly();
+
+	/* You are dead */
 	print_tomb();
+
+	/* Handle score, show Top scores */
 	if (!wizard && !to_be_wizard)
-	    top_twenty();
-	else
-	    msg_print("Score not registered.");
+	top_twenty();
+	else msg_print("Score not registered.");
     }
+
     i = log_index;
-    (void)save_char();		   /* Save the memory at least. */
-    if (i > 0)
-	display_scores(0, 10);
+   /* Save the memory at least. */
+    (void)save_char();
+    if (i > 0) display_scores(0, 10);
     erase_line(23, 0);
     restore_term();
     exit(0);

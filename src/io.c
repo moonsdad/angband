@@ -45,9 +45,7 @@ char               *getenv();
 #endif
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
+#include "angband.h"
 
 #include <ctype.h>
 
@@ -426,7 +424,7 @@ void moriaterm()
 
 
 /* Dump IO to buffer					-RAK-	 */
-void put_buffer(const char *out_str, int row, int col)
+void put_buffer(cptr out_str, int row, int col)
 
 #ifdef MAC
 {
@@ -998,7 +996,7 @@ void move_cursor_relative(int row, int col)
 
 
 /* Print a message so as not to interrupt a counted command. -CJS- */
-void count_msg_print(const char *p)
+void count_msg_print(cptr p)
 {
     int i;
 
@@ -1009,7 +1007,7 @@ void count_msg_print(const char *p)
 
 
 /* Outputs a line to a given y, x position		-RAK-	 */
-void prt(const char *str_buff, int row, int col)
+void prt(cptr str_buff, int row, int col)
 
 #ifdef MAC
 {
@@ -1057,7 +1055,7 @@ void move_cursor(int row, int col)
 
 /* Outputs message to top line of screen				 */
 /* These messages are kept for later reference.	 */
-void msg_print(const char *str_buff)
+void msg_print(cptr str_buff)
 {
     char   in_char;
     static len = 0;
@@ -1143,7 +1141,7 @@ void msg_print(const char *str_buff)
 }
 
 /* Used to verify a choice - user gets the chance to abort choice.  -CJS- */
-int get_check(const char *prompt)
+int get_check(cptr prompt)
 {
     int res, y, x;
 
@@ -1183,7 +1181,7 @@ int get_check(const char *prompt)
 
 /* Prompts (optional) and returns ord value of input char	 */
 /* Function returns false if <ESCAPE> is input	 */
-int get_com(const char *prompt, char *command)
+int get_com(cptr prompt, char *command)
 {
     int res;
 

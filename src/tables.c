@@ -11,8 +11,7 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
+#include "angband.h"
 
 #if defined(CHECKHOURS)
 
@@ -148,17 +147,17 @@ int (*store_buy[MAX_STORES])() = {
 
 #ifdef MACGAME
 
-const char **colors;
-const char **mushrooms;
-const char **woods;
-const char **metals;
-const char **rocks;
-const char **amulets;
-const char **syllables;
+cptr *colors;
+cptr *mushrooms;
+cptr *woods;
+cptr *metals;
+cptr *rocks;
+cptr *amulets;
+cptr *syllables;
 
 #else
 
-const char *colors[MAX_COLORS] = {
+cptr colors[MAX_COLORS] = {
 /* Do not move the first three */
   "Icky Green", "Light Brown", "Clear",
   "Azure","Blue","Blue Speckled","Black","Brown","Brown Speckled","Bubbling",
@@ -173,14 +172,14 @@ const char *colors[MAX_COLORS] = {
   "Shimmering","Coagulated Crimson"
 };
 
-const char *mushrooms[MAX_MUSH] = {
+cptr mushrooms[MAX_MUSH] = {
   "Blue","Black","Black Spotted","Brown","Dark Blue","Dark Green","Dark Red",
   "Ecru","Furry","Green","Grey","Light Blue","Light Green","Plaid","Red",
   "Slimy","Tan","White","White Spotted","Wooden","Wrinkled"/*,"Yellow",
   "Shaggy","Red Spotted","Pale Blue","Dark Orange"*/
 };
 
-const char *woods[MAX_WOODS] = {
+cptr woods[MAX_WOODS] = {
   "Aspen","Balsa","Banyan","Birch","Cedar","Cottonwood","Cypress","Dogwood",
   "Elm","Eucalyptus","Hemlock","Hickory","Ironwood","Locust","Mahogany",
   "Maple","Mulberry","Oak","Pine","Redwood","Rosewood","Spruce","Sycamore",
@@ -189,7 +188,7 @@ const char *woods[MAX_WOODS] = {
   "Gnarled","Ivory","Decorative","Willow"*/
 };
 
-const char *metals[MAX_METALS] = {
+cptr metals[MAX_METALS] = {
   "Aluminum","Cast Iron","Chromium","Copper","Gold","Iron","Magnesium",
   "Molybdenum","Nickel","Rusty","Silver","Steel","Tin","Titanium","Tungsten",
   "Zirconium","Zinc","Aluminum-Plated","Copper-Plated","Gold-Plated",
@@ -198,7 +197,7 @@ const char *metals[MAX_METALS] = {
   "Lead"/*,"Lead-Plated","Ivory","Pewter"*/
 };
 
-const char *rocks[MAX_ROCKS] = {
+cptr rocks[MAX_ROCKS] = {
   "Alexandrite","Amethyst","Aquamarine","Azurite","Beryl","Bloodstone",
   "Calcite","Carnelian","Corundum","Diamond","Emerald","Fluorite","Garnet",
   "Granite","Jade","Jasper","Lapis Lazuli","Malachite","Marble","Moonstone",
@@ -208,13 +207,13 @@ const char *rocks[MAX_ROCKS] = {
   "Jet","Engagement","Adamantite"
 };
 
-const char *amulets[MAX_AMULETS] = {
+cptr amulets[MAX_AMULETS] = {
   "Amber","Driftwood","Coral","Agate","Ivory","Obsidian",
   "Bone","Brass","Bronze","Pewter","Tortoise Shell","Golden","Azure",
   "Crystal","Silver","Copper"
 };
 
-const char *syllables[MAX_SYLLABLES] = {
+cptr syllables[MAX_SYLLABLES] = {
   "a","ab","ag","aks","ala","an","ankh","app",
   "arg","arze","ash","aus","ban","bar","bat","bek",
   "bie","bin","bit","bjor","blu","bot","bu",
@@ -303,9 +302,9 @@ u16b normal_table[NORMAL_TABLE_SIZE] = {
  * Class titles for different levels			
  */
 #ifdef MACGAME
-const char *(*player_title)[MAX_PLAYER_LEVEL];
+cptr (*player_title)[MAX_PLAYER_LEVEL];
 #else
-const char *player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
+cptr player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 
 	/* Warrior	 */
 {"Rookie","Private","Soldier","Mercenary","Veteran(1st)","Veteran(2nd)",
@@ -456,7 +455,7 @@ player_race race[MAX_RACES] = {
 
 /* 5 char race for printing scores. */
 #if 0 /* not used */
-const char *dsp_race[MAX_RACES] = {
+cptr dsp_race[MAX_RACES] = {
   "Human",
   "H-Elf",
   "Elf  ",
@@ -1082,7 +1081,8 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
  };
 #endif
 
-const char *spell_names[127] = {
+
+cptr spell_names[127] = {
 
     /*** Mage Spells ***/
 

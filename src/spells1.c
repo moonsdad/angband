@@ -10,10 +10,8 @@
  */
 
 #include "constant.h"
-#include "config.h"
-#include "types.h"
+#include "angband.h"
 #include "monster.h"
-#include "externs.h"
 
 #ifdef USG
 #ifndef ATARIST_MWC
@@ -3744,7 +3742,7 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 }
 
 
-const char *pain_message(int monptr, int dam)
+cptr pain_message(int monptr, int dam)
 {
     register monster_type *m_ptr;
     creature_type      *c_ptr;
