@@ -26,26 +26,6 @@
 
 #define get_Yn get_check
 
-#include <stdio.h>
-
-/* many systems don't define these anywhere */
-#if defined(USG) || defined(DGUX) || defined(atarist)
-#if !(defined(HPUX) || defined(linux))
-extern int sprintf();
-#endif
-#else
-#if !(defined(MSDOS) || defined(NeXT) || defined(ultrix) || defined(linux) \
-|| defined(__386BSD__) || defined(SOLARIS))
-extern char *sprintf();
-#endif
-#endif
-
-#ifndef MSDOS
-extern int errno;
-#endif
-
-/*****************************************************************************/
-
 /*
  * Here's some functions that've been macroized rather than being called
  * from everywhere.  They're short enough so that inlining them will probably
@@ -280,7 +260,7 @@ extern u16b target_mon;
 #endif
 
 /*  Following are all floor definitions				*/
-#ifdef MAC
+#ifdef MACINTOSH
 extern cave_type (*cave)[MAX_WIDTH];
 #else
 extern cave_type cave[MAX_HEIGHT][MAX_WIDTH];
@@ -347,13 +327,13 @@ extern owner_type *owners;
 #else
 extern owner_type owners[MAX_OWNERS];
 #endif
-#ifdef MAC
+#ifdef MACINTOSH
 extern store_type *store;
 #else
 extern store_type store[MAX_STORES];
 #endif
 extern u16b store_choice[MAX_STORES][STORE_CHOICES];
-#ifndef MAC
+#ifndef MACINTOSH
 extern int (*store_buy[MAX_STORES])();
 #endif
 
@@ -387,7 +367,7 @@ extern describe_mon_type desc_list[MAX_CREATURES];
 extern monster_type m_list[MAX_MALLOC];
 extern s16b m_level[MAX_MONS_LEVEL+1];
 extern monster_attack monster_attacks[N_MONS_ATTS];
-#ifdef MAC
+#ifdef MACINTOSH
 extern monster_lore *c_recall;
 #else
 extern monster_lore c_recall[MAX_CREATURES];	/* Monster memories. -CJS- */
@@ -524,7 +504,7 @@ void init_files(void);
 void read_times(void);
 void helpfile(cptr);
 void print_objects(void);
-#ifdef MAC
+#ifdef MACINTOSH
 int file_character(void)
 #else
 int file_character(char *);
@@ -829,7 +809,7 @@ char *setstate(char *);
 void activate_rod(void);
 
 /* save.c */
-#ifdef MAC
+#ifdef MACINTOSH
 int save_char(int);
 #else
 int save_char(void);
@@ -863,7 +843,7 @@ int temple(int);
 int alchemist(int);
 int magic_shop(int);
 
-#ifdef MAC
+#ifdef MACINTOSH
 int store_buy(int, int);
 #endif
 
@@ -1389,7 +1369,7 @@ int weaponsmith();
 int temple();
 int alchemist();
 int magic_shop();
-#ifdef MAC
+#ifdef MACINTOSH
 int store_buy();
 #endif
 

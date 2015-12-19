@@ -19,7 +19,7 @@
 
 /* Signals have no significance on the Mac */
 
-#ifdef MAC
+#ifdef MACINTOSH
 
 void 
 nosignals()
@@ -77,25 +77,6 @@ typedef struct {
 /* must include before externs.h, because that uses SIGTSTP */
 #include <signal.h>
 
-#include "constant.h"
-#include "types.h"
-#include "externs.h"
-
-#ifndef USG
-/* only needed for Berkeley UNIX */
-#include <sys/types.h>
-#include <sys/param.h>
-#endif
-
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#endif
-#else
-#ifndef VMS
-#include <strings.h>
-#endif
-#endif
 
 #ifdef USG
 void                exit();

@@ -139,7 +139,7 @@ void dungeon()
 	turn++;
 
 #ifdef CHECKHOURS
-#ifndef MAC
+#ifndef MACINTOSH
     /* The Mac ignores the game hours file		 */
 	/* Check for game hours			       */
 	if (((turn % 100) == 1) && !check_time()) {

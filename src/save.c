@@ -24,27 +24,28 @@
 #include "monster.h"
 
 #ifndef USG
-/* stuff only needed for Berkeley UNIX */
-#include <sys/types.h>
 # include <sys/file.h>
 # include <sys/param.h>
-#endif
-
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <fcntl.h>
-#endif
 #endif
 
 #ifdef __MINT__
 # include <stat.h>		/* chmod() */
 #endif
 
-
-
-#ifndef SET_UID
-#include <sys/stat.h>
+#if !defined(SET_UID) && !defined(ALLOW_FIDDLING)
+# if defined(__EMX__) || defined(__GO32__) || defined(_Windows)
+#  include <sys/stat.h>
+# else
+#  include <stat.h>
+# endif
 #endif
+
+#ifdef linux
+# include <sys/types.h>
+# include <sys/stat.h>
+#endif
+
+
 
 /*
  * these are used for the save file, to avoid having to pass them to every
@@ -1582,7 +1583,7 @@ closefiles:
     log_index = (-1);
     prt("Please try again without that savefile.", 1, 0);
     signals();
-#ifdef MAC
+#ifdef MACINTOSH
     *exit_flag = TRUE;
 #else
     exit_game();

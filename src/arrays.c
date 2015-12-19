@@ -12,25 +12,20 @@
 
 #include "angband.h"
 
-#ifndef MSDOS
-#include <sys/param.h>
-extern int          errno;
-#endif
 
-#if defined(GEMDOS) && (__STDC__ == 0)
-#include <access.h>
-char               *strcat();
-#endif
-
-#ifndef VMS
-#if defined(ultrix) || defined(USG)
-void exit();
-
-#endif
-#endif
+/*
+ * Hack -- make sure we have a good "ANSI" definition for "CTRL()"
+ */
+#undef CTRL
+#define CTRL(C) ((C)&037)
 
 
-/* This is done first in main.c, so I'll rudely drop it into the front
+
+
+/*
+ * Prepare the ANGBAND_xxx filepath "constants".
+ *
+ * This is done first in main.c, so I'll rudely drop it into the front
  * of files.c...  If NEW_FILEPATHS is defined, we'll look for the ANGBAND_PATH
  * environment variable, and then look for the files in there.  This is
  * much nicer than having explicit paths, and should help us make things
@@ -42,25 +37,29 @@ void exit();
  * trouble, and your compiler vendor needs a good swift kick in the
  * forehead. [cjh]
  */
-#ifdef NEW_FILEPATHS
-char *ANGBAND_TST;		/* was LIBDIR(test)			*/
-char *ANGBAND_HOU;		/* was LIBDIR(files/hours)		*/
-char *ANGBAND_MOR;		/* was LIBDIR(files/news)		*/
-char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+
 char *ANGBAND_BONES;		/* was LIBDIR(bones)			*/
+char *ANGBAND_SAV;		/* was LIBDIR(save)			*/
+char *ANGBAND_TST;		/* was LIBDIR(test)			*/
+
+char *ANGBAND_MOR;		/* was LIBDIR(files/news)		*/
+char *ANGBAND_WELCOME;		/* was LIBDIR(files/welcome.hlp)	*/
+char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
+char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+
+char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
+char *ANGBAND_HOU;		/* was LIBDIR(files/hours)		*/
+char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
+char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+
 char *ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
 char *ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
 char *ANGBAND_WIZ_HELP;		/* was LIBDIR(files/rwizcmds.hlp)	*/
 char *ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
-char *ANGBAND_WELCOME;		/* was LIBDIR(files/welcome.hlp)	*/
-char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
-char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
-char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-char *ANGBAND_SAV;		/* was LIBDIR(save)			*/
+
 
 /*
- * Find the path to all of our important files and directories...
+ * Find the paths to all of our important files and directories...
  * Use the ANGBAND_PATH environment var if possible, else use DEFAULT_PATH,
  *
  *  If your system can't do "getenv()", you'll have to kludge this.  [cjh]

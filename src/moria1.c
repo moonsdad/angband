@@ -1559,7 +1559,7 @@ int get_dir(cptr prompt, int * dir)
 	prompt = "Which direction?";
     for (;;) {
 	save = command_count;	   /* Don't end a counted command. -CJS- */
-#ifdef MAC
+#ifdef MACINTOSH
 	if (!get_comdir(prompt, &command))
 #else
 	if (!get_com(prompt, &command))
@@ -1594,7 +1594,7 @@ int get_alldir(cptr prompt, int *dir)
     char command;
 
     for (;;) {
-#ifdef MAC
+#ifdef MACINTOSH
 	if (!get_comdir(prompt, &command))
 #else
 	if (!get_com(prompt, &command))

@@ -23,16 +23,24 @@
 #include <unistd.h>
 #endif
 
+#ifdef SGI
+# include <sys/types.h>
+# include <sys/time.h>
+#endif
+
 #if defined(Pyramid) || defined(NeXT) || defined(sun) || \
     defined(NCR3K) || defined(linux) || defined(ibm032) || \
     defined (__osf__)
 # include <sys/time.h>
 #endif
 
+#if !defined(MACINTOSH) && !defined(sgi) && !defined(AMIGA)
+# include <sys/timeb.h>
+#endif
 
 #include <time.h>
 
-#if !defined(NeXT)
+#if !defined(NeXT) && !defined(__MWORKS__) && !defined(ATARIST_MWC)
 # include <fcntl.h>
 #endif
 
@@ -40,11 +48,36 @@
 /* #include <ansi.h> */
 
 
+#ifdef MACINTOSH
+# include <unix.h>
+#else
+# ifndef __TURBOC__
+#  include <unistd.h>
+# endif
+# ifndef GEMDOS
+#  ifdef VMS
+#   include <types.h>
+#  else
+#   include <sys/types.h>
+#  endif
+# endif
+#endif
+
+
+
 #if defined(__MINT__)
 # include <support.h>
 #include <string.h>
 #endif
 
+#if !defined(AMIGA)
+# ifdef __TURBOC__
+#  include <mem.h>
+#  include <io.h>
+# else
+#  include <memory.h>
+# endif
+#endif
 
 #ifdef USG
 # ifdef ATARIST_MWC
@@ -65,9 +98,37 @@
 # endif
 #endif
 
-#if !defined(linux)
+#if defined(GEMDOS) && (__STDC__ == 0)
+# include <access.h>
+  char *strcat();
+#endif
+
+
+
+#if !defined(linux) && !defined(__MWERKS__)
   extern long atol();
 #endif
+
+#ifdef SYS_III
+  extern char *index();
+#endif
+
+#if defined(SOLARIS)
+# include <netdb.h>
+# include <sys/stat.h>
+#endif
+
+
+/*
+ * Hack -- trick vms
+ */
+#if vms
+# define getch _getch
+# define unlink delete
+# define lstat stat
+# define exit uexit
+#endif
+
 
 
 #endif

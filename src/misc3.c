@@ -11,20 +11,8 @@
  */
 
 #include "monster.h"
-
-/* include before constant.h because param.h defines NULL incorrectly */
-#ifndef USG
-#include <sys/types.h>
-#include <sys/param.h>
-#endif
-
 #include "angband.h"
 
-#ifdef USG
-#ifdef ATARIST_MWC
-char               *index();
-#endif
-#endif
 
 static cptr stat_names[] = { "STR: ", "INT: ", "WIS: ",
 					"DEX: ", "CON: ", "CHR: "};
@@ -1795,7 +1783,7 @@ void get_name()
     strcpy(tmp, py.misc.name);
     prt("Enter your player's name  [press <RETURN> when finished]", 21, 2);
     put_buffer(&blank_string[BLANK_LENGTH - 15], 2, 15);
-#ifdef MAC
+#ifdef MACINTOSH
 /*
  * Force player to give a name, would be nice to get name from chooser (STR
  * -16096), but that name might be too long 
@@ -1808,7 +1796,7 @@ void get_name()
     }
 #endif
     clear_from(20);
-#ifdef MAC
+#ifdef MACINTOSH
 /* Use the new name to set save file default name. */
     initsavedefaults();
 #endif
@@ -1822,7 +1810,7 @@ void change_name()
     register char c;
     register int  flag;
 
-#ifndef MAC
+#ifndef MACINTOSH
     vtype         temp;
 
 #endif
@@ -1838,7 +1826,7 @@ void change_name()
 	    flag = TRUE;
 	    break;
 	  case 'f':
-#ifdef MAC
+#ifdef MACINTOSH
 	/* On mac, file_character() gets filename with std file dialog. */
 	    if (file_character())
 		flag = TRUE;

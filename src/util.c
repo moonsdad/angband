@@ -12,38 +12,14 @@
 
 #include "angband.h"
 
-/*
- * For those systems that don't have stricmp. -hmj
- */
 
-#if defined(NEEDS_STRICMP)
-int my_stricmp(cptr c1,cptr c2)		/* avoid namespace collision -CWS */
-{
-    char c3;
-    char c4;
-    
-    for(;;) {      
-	c3 = (islower(*c1)?toupper(*c1):*c1);
-	c4 = (islower(*c2)?toupper(*c2):*c2);
-	if (c3 < c4) return(-1);
-	if (c3 > c4) return(1);
-	if (c3 == '\0') return(0);
-	c1++;
-	c2++;
-    };
-}      
-#endif
 
 #if defined(NEEDS_USLEEP)
-#include <stdio.h>
-#include <math.h>
-#include <signal.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/time.h>
 
-/* for those systems that don't have usleep */
-/* grabbed from the inl netrek server -cba  */
+/*
+ * for those systems that don't have usleep
+ * grabbed from the inl netrek server -cba 
+ */
 
 int microsleep(unsigned long microSeconds)
 {
@@ -52,23 +28,32 @@ int microsleep(unsigned long microSeconds)
     struct timeval      Timer;
 
     nfds = readfds = writefds = exceptfds = 0;
-    
+
+
+    /* Paranoia -- No excessive sleeping */
     if (microSeconds > (unsigned long)4000000) {
 	errno = ERANGE;		   /* value out of range */
 	perror("usleep time out of range ( 0 -> 4000000 ) ");
 	return -1;
     }
+
+    /* Wait for it */
     Seconds = microSeconds / (unsigned long)1000000;
     uSec = microSeconds % (unsigned long)1000000;
-
     Timer.tv_sec = Seconds;
     Timer.tv_usec = uSec;
+
+    /* Wait for it */
     if (select(nfds, &readfds, &writefds, &exceptfds, &Timer) < 0) {
+
+	/* Hack -- ignore interrupts */
 	if (errno != EINTR) {
 	    perror("usleep (select) failed");
 	    return -1;
 	}
     }
+    
+    /* Success */
     return 0;
 }
 

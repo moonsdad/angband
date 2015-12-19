@@ -13,19 +13,6 @@
 #include "angband.h"
 #include "monster.h"
 
-#ifdef ibm032
-#include <sys/types.h>
-#endif
-
-#ifdef USG
-#if !defined(ATARIST_MWC)
-#ifndef __TURBOC__
-#include <memory.h>
-#else
-#include <mem.h>
-#endif
-#endif
-#endif
 
 
 typedef struct coords {
@@ -95,7 +82,7 @@ static void blank_cave(void)
 #ifndef USG
     bzero((char *)&cave[0][0], sizeof(cave));
 #else
-#ifdef MAC
+#ifdef MACINTOSH
 /* On the mac, cave is a pointer, so sizeof(cave) = 4! */
     (void)memset((char *)&cave[0][0], 0, sizeof(cave_type) * MAX_HEIGHT * MAX_WIDTH);
 #else

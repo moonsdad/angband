@@ -23,7 +23,7 @@
 /*
  * OPTION: Compile on a Macintosh with MPW C 3.0
  */
-/* #define MAC */
+/* #define MACINTOSH */
 
 /*
  * OPTION: Compile on a SYS V version of UNIX
@@ -37,14 +37,19 @@
 
 /*
  * OPTION: Compile on an ATARI ST with Mark Williams C
+ * Warning: the support for the Atart ST is a total hack
  */
 /* #define ATARIST_MWC */
 
 /*
- * OPTION: Compiling on a HPUX version of UNIX
+ * OPTION: Compile on a HPUX version of UNIX
  */
 /* #define HPUX */
 
+/*
+ * OPTION: Compile on an SGI running IRIX
+ */
+/* #define SGI */
 
 /*
  * OPTION: Compile on Solaris, treat it as System V
@@ -53,6 +58,23 @@
 # define SYS_V
 #include <netdb.h>
 #endif
+
+/*
+ * OPTION: Compile on Pyramid, treat it as Ultrix
+ */
+#if defined(Pyramid)
+# define ultrix
+#endif
+
+/*
+ * Extract the "MSDOS" flag from the compiler
+ */
+#ifdef __MSDOS__
+# ifndef MSDOS
+#  define MSDOS
+# endif
+#endif
+
 
 
 /*
@@ -71,21 +93,51 @@
 #endif
 
 
+/*
+ * L64 is defined if a long is 64-bit
+ * The only such platform that angband is ported to is currently
+ * DEC Alpha AXP running OSF/1 (OpenVMS uses 32-bit longs).
+ */
+#if defined(__alpha) && defined(__osf__)
+# define L64		/* 64 bit longs */
+#endif
 
 
 
 /*
- *  Prevent "lint" messages
- *
- * to prevent <string.h> from including <NLchar.h>, this prevents a bunch of lint errors.
+ * Assume this is a multi-user machine, then cancel if necessary
+ * OPTION: If you are using a personal computer, undef SET_UID.
  */
-if defined(lint)
+#undef SET_UID
+#define SET_UID
+#if defined(MACINTOSH) || defined(MSDOS) || defined(AMIGA) || \
+    defined(__MINT__) || defined(__EMX__)
+# undef SET_UID
+#endif
+
+
+/*
+ * Prevent "lint" messages 
+ * Caused by <string.h> including <NLchar.h>
+ */
+#if defined(lint)
 # if defined(SYS_V)
 #  define RTPC_NO_NLS
 # endif
 #endif
 
 
+
+/*
+ * Lots of systems use USG
+ */
+#if defined(MACINTOSH) || defined(MSDOS) || defined(AMIGA) || \
+    defined(__EMX__) || \
+    defined(SYS_III) || defined(SYS_V) || defined(HPUX) || \
+    defined(ATARIST_MWC) || defined (__MINT__) || defined(SGI)
+# undef USG
+# define USG
+#endif
 
 
 
@@ -94,40 +146,76 @@ if defined(lint)
  * Default to the standard Unix slash, but attempt to change this
  * for various other systems.
  */
-#if defined(ultrix) || defined(SYS_V) || defined(SYS_III) \
- || defined(__MINT__) || defined(HPUX) || defined(unix) \
- || defined(BSD)
-#  define PATH_SEP "/"
-#else
-#  if defined(__EMX__) || defined(MSDOS) || defined(OS2) || defined(WINNT) \
-   || defined(ATARIST_MWC) || defined(ATARI) || defined(ATARIST)
-#    define PATH_SEP "\\"
-#  else
-#    ifdef MAC
-#      define PATH_SEP ":" /* or is it "::"? */
-#    else
-#      ifdef VMS
-#        define PATH_SEP "."
-#      endif /* VMS */
-#    endif /* Mac */
-#  endif /* DOS filesystems */
-#endif /* UNIX filesystems */
+#undef PATH_SEP
+#define PATH_SEP "/"
+#if defined(MSDOS) || defined(OS2) || defined(WINNT) || defined(__EMX__)
+# undef PATH_SEP
+# define PATH_SEP "\\"
+#endif
+#if defined(ATARIST_MWC) || defined(ATARI) || defined(ATARIST)
+# undef PATH_SEP
+# define PATH_SEP "\\"
+#endif
+#ifdef VMS
+# undef PATH_SEP
+# define PATH_SEP "."
+#endif
+#ifdef MACINTOSH
+# undef PATH_SEP
+# define PATH_SEP ":"
+#endif
+#ifdef __GO32__
+# undef PATH_SEP
+# define PATH_SEP "/"
+#endif
+#ifdef AMIGA
+# undef PATH_SEP
+# define PATH_SEP "/"
+#endif
+
 
 
 /*
- * Note that you'll be happier if you have a case-insensitive string
- * comparision routine on your system.  If your system lacks this,
- * you're still in luck, as we now provide one.  -CWS
+ * Make sure "strchr" will work
+ */
+#if !defined(SOLARIS)
+# if defined(SYS_V) || defined(MSDOS)
+#  if !defined(__TURBOC__)
+#   define strchr index
+#  endif
+# endif
+#endif
+
+
+/*
+ * OPTION: Define "HAS_STRICMP" only if stricmp() exists.
  */
 #if defined (NeXT) || defined(HPUX) || defined(ultrix) || \
     defined(NCR3K) || defined(linux) || defined(ibm032) || \
     defined(__386BSD__) || defined(SOLARIS) || defined (__osf__)
 # define stricmp strcasecmp
-#else
-/* Let's make this work on systems lacking a such a routine. */
-#define stricmp my_stricmp
-#define NEEDS_STRICMP
+# define HAS_STRICMP
 #endif
+
+/*
+ * Note that "Amiga" actually has the "stricmp()" function
+ */
+#ifdef AMIGA
+# define HAS_STRICMP
+#endif
+
+/*
+ * Note that "Turbo C" defines "stricmp"
+ */
+#ifdef __TURBOC__
+#define HAS_STRICMP
+#endif
+
+
+/*
+ * OPTION: Define "HAS_MEMSET" only if "memset()" exists.
+ */
+#define HAS_MEMSET
 
 
 

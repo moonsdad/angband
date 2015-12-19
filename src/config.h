@@ -145,7 +145,7 @@ int microsleep();
 
 
 /* substitute strchr for index on USG versions of UNIX */
-#if defined(SYS_V) || defined(MSDOS) || defined(MAC)
+#if defined(SYS_V) || defined(MSDOS) || defined(MACINTOSH)
 #define index strchr
 #endif
 
@@ -153,7 +153,7 @@ int microsleep();
 char *index();
 #endif
 
-#if defined(SYS_III) || defined(SYS_V) || defined(MSDOS) || defined(MAC) || defined(HPUX)
+#if defined(SYS_III) || defined(SYS_V) || defined(MSDOS) || defined(MACINTOSH) || defined(HPUX)
 #ifndef USG
 #define USG
 #endif
@@ -171,7 +171,7 @@ char *index();
 #endif
 
 
-#ifdef MAC
+#ifdef MACINTOSH
 #ifdef RSRC
 #define MACRSRC		/* i.e., we're building the resources */
 #else
@@ -179,7 +179,7 @@ char *index();
 #endif
 #endif
 
-#ifdef MAC
+#ifdef MACINTOSH
 /* Screen dimensions */
 #define SCRN_ROWS	24
 #define SCRN_COLS	80

@@ -12,40 +12,11 @@
 
 #include "angband.h"
 
-#ifndef USG
-#include <sys/types.h>
-#include <sys/param.h>
-#include <sys/resource.h>
-#endif
-
-#ifdef ultrix
-#include <sys/stat.h>
-#endif
-
-#if defined(ultrix) || defined(USG)
-void perror();
-#endif
-
-#ifdef USG
-void exit();
-#endif
-
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static int d_check(char *);
-#else
-static int d_check();
-#endif
-
-static void init_m_level();
-static void init_t_level();
-static void char_inven_init();
-#endif
 
 #if (COST_ADJ != 100)
 static void price_adjust();
 #endif
+
 int unfelt    = TRUE;
 int be_nasty  = FALSE;
 int rating    = 0;
@@ -325,7 +296,7 @@ int main(int argc, char * argv[])
     /* Init the store inventories			*/
     store_init();
 
-#ifndef MAC
+#ifndef MACINTOSH
     /* On Mac, if -n is passed, no savefile is used */
     /* If -n is not passed, the calling routine will know savefile name,
        hence, this code is not necessary */
@@ -527,7 +498,7 @@ int main(int argc, char * argv[])
     {
 	dungeon();		/* Dungeon logic */
 
-#ifndef MAC
+#ifndef MACINTOSH
 	/* check for eof here, see inkey() in io.c */
 	/* eof can occur if the process gets a HANGUP signal */
 	if (eof_flag)

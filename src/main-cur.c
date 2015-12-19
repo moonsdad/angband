@@ -19,100 +19,101 @@
 #include "angband.h"
 #undef bool
 
-#if defined(unix) || defined(__MINT__)
 
-/* defines NULL */
-#include <stdio.h>
-/* defines CTRL */
-#include <sys/ioctl.h>
+# ifdef linux
+#  include <bsd/sgtty.h>
+# endif
 
-/* defines TRUE and FALSE */
-#ifdef linux
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
+# ifdef GEMDOS
+#  define ATARIST_MWC
+#  include "curses.h"
+#  include <osbind.h>
+   char               *getenv();
+# endif
 
-#include <pwd.h>
 
-#if defined(SYS_V) && defined(lint)
-/* for AIX, prevent hundreds of unnecessary lint errors, must define before
- * signal.h is included 
- */
-#define _h_IEEETRAP
-typedef struct {
-    int                 stuff;
-}                   fpvmach;
+# ifdef MSDOS
 
-#endif
+/*** OPEN MSDOS ***/
+#  include <process.h>
+#  if defined(ANSI)
+#   include "ms_ansi.h"
+#  endif
+/*** SHUT MSDOS ***/
 
-#include <signal.h>
+# else /* MSDOS */
+#  ifndef ATARIST_MWC
+
+/*** OPEN NORMAL ***/
+#   include <signal.h>
+#   undef TRUE
+#   undef FALSE
+#   include <curses.h>
+#   ifndef VMS
+#    include <sys/ioctl.h>
+#   endif
+#   ifdef USG
+#    ifndef __MINT__
+#     include <termio.h>
+#    endif
+#   endif
 
 #ifdef M_XENIX
-#include <sys/select.h>
-#endif
-
-#ifndef USG
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/param.h>
+# include <sys/select.h>
 #endif
 
 #ifdef USG
-#ifndef __MINT__
-#include <termio.h>
-#endif
-#include <fcntl.h>
+# ifndef __MINT__
+#  include <termio.h>
+# endif
 #else
-#if defined(atarist) && defined(__GNUC__) && !defined(__MINT__)
-/* doesn't have <sys/wait.h> */
+# if defined(atarist) && defined(__GNUC__) && !defined(__MINT__)
+   /* doesn't have <sys/wait.h> */
+# else
+#  include <sys/wait.h>
+# endif
+# include <sys/resource.h>
+# include <sys/param.h>
+#  include <sys/param.h>
+#  include <sys/file.h>
+#  include <sys/types.h>
+#  ifndef VMS
+#   include <sys/wait.h>
+#  endif /* !VMS */
+
+#endif
+
+/* Hack --  Brute force never hurt... [cjh] */
+# if defined(__MINT__) && !defined(_WAIT_H)
+#  include <wait.h>
+# endif
+
+
+/*** SHUT NORMAL ***/
+
+#  endif
+# endif /* MSDOS */
+
+#ifdef ATARIST_MWC
+extern WINDOW *newwin();
+#endif
+
+
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+#ifdef USG
+static struct termio save_termio;
 #else
-#include <sys/wait.h>
+#ifndef VMS
+static struct ltchars save_special_chars;
+static struct sgttyb save_ttyb;
+static struct tchars save_tchars;
+static int          save_local_chars;
 #endif
 #endif
-
-/* #include <pwd.h> */
-#include <sys/errno.h>
-
-struct passwd      *getpwuid();
-struct passwd      *getpwnam();
-
-#if defined(SYS_V) && defined(lint)
-struct screen {
-    int                 dumb;
-};
-
 #endif
 
-/* Fooling lint. Unfortunately, c defines all the TIO constants to be long,
- * and lint expects them to be int. Also, ioctl is sometimes called with just
- * two arguments. The following definition keeps lint happy. It may need to
- * be reset for different systems. 
- */
-#ifdef lint
-#ifdef Pyramid
-/* Pyramid makes constants greater than 65535 into long! Gakk! -CJS- */
-/* ARGSUSED */
-/* VARARGS2 */
-static 
-    Ioctl(i, l, p) long l;
-    char               *p;
-{
-    return 0;
-}
 
-#else
-/* ARGSUSED */
-/* VARARGS2 */
-static 
-    Ioctl(i, l, p) char *p;
-{
-    return 0;
-}
 
-#endif
-#define ioctl	    Ioctl
-#endif
 
 /*
  * Provides for a timeout on input. Does a non-blocking read, consuming the

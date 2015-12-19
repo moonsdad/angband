@@ -126,7 +126,7 @@ u16b store_choice[MAX_STORES][STORE_CHOICES] = {
  282,277,279,292,164,167,168,153,137,142,326,328,299}
 };
 
-#ifndef MAC
+#ifndef MACINTOSH
 /* MPW doesn't seem to handle this very well, so replace store_buy array
    with a function call on mac */
 /* functions defined in sets.c */

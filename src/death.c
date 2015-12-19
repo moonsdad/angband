@@ -13,77 +13,31 @@
 #include <signal.h>
 #include "angband.h"
 
-#ifdef Pyramid
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-
 #ifndef USG
-/* only needed for Berkeley UNIX */
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/file.h>
-#else
-#ifdef __MINT__        
-#include <sys/types.h>
-#endif
-#include <unistd.h>
+# include <sys/param.h>
+# include <sys/file.h>
 #endif
 
-#ifdef MSDOS
-#include <io.h>
-#else
-#if !defined(ATARIST_MWC) && !defined(MAC)
-#ifndef VMS
-#include <pwd.h>
-#else
-#include <file.h>
-#endif
-#endif
+#if !defined(MACINTOSH) && !defined(ATARIST_MWC) && !defined(AMIGA)
+# ifdef MSDOS
+#  include <io.h>
+# else
+#  ifndef VMS
+#   include <pwd.h>
+#  else
+#   include <file.h>
+#  endif
+# endif
 #endif
 
 #ifdef linux
-#include <sys/file.h>
+# include <sys/file.h>
 #endif
 
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <fcntl.h>
-#endif
-#endif
-
-#if defined(USG) || defined(VMS)
 #ifndef L_SET
-#define L_SET 0
-#endif
-#endif
-
-#ifndef VMS
-#ifndef MAC
-#if defined(ultrix) || defined(USG)
-void                perror();
-void                exit();
-
-#endif
-#endif
+# define L_SET 0
 #endif
 
-#ifndef MAC
-#ifdef SYS_V
-struct passwd      *getpwuid();
-
-#endif
-#endif
-
-
-#ifndef MAC
-char        *getlogin();
-#endif
-
-#if !defined(time_t)
-#define time_t long
-#endif
 
 static void date(char *day)
 {
@@ -1166,7 +1120,7 @@ void exit_game(void)
 {
     register int        i;
 
-#ifdef MAC
+#ifdef MACINTOSH
 /* Prevent strange things from happening */
     enablefilemenu(FALSE);
 #endif

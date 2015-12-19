@@ -163,13 +163,13 @@ u16b target_row;
 u16b target_mon;
 #endif
 
-#ifdef MAC
+#ifdef MACINTOSH
 cave_type (*cave)[MAX_WIDTH];
 #else
 cave_type cave[MAX_HEIGHT][MAX_WIDTH];
 #endif
 
-#ifdef MAC
+#ifdef MACINTOSH
 monster_lore *c_recall;
 #else
 monster_lore c_recall[MAX_CREATURES];	/* Monster memories */

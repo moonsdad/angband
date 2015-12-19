@@ -14,17 +14,9 @@
 
 
 #ifndef FSCALE
-#define FSCALE (1<<8)
+# define FSCALE (1<<8)
 #endif
 
-
-#if !defined(GEMDOS) && !defined(MAC)
-#ifndef VMS
-#include <sys/types.h>
-#else
-#include <types.h>
-#endif
-#endif
 
 #include "monster.h"
 

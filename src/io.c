@@ -26,7 +26,7 @@
 
 #if !defined(GEMDOS)
 
-#ifdef MAC
+#ifdef MACINTOSH
 #include <scrnmgr.h>
 #else
 #ifdef linux
@@ -64,7 +64,7 @@ typedef struct {
 #include "ms_ansi.h"
 #endif
 #else				   /* not msdos */
-#if !defined(ATARIST_MWC) && !defined(MAC)
+#if !defined(ATARIST_MWC) && !defined(MACINTOSH)
 #ifndef VMS
 #include <sys/ioctl.h>
 #endif
@@ -85,7 +85,7 @@ typedef struct {
 #else
 #include "string.h"
 #endif /* !ATARIST_MWC */
-#if !defined(MAC) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+#if !defined(MACINTOSH) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
 #include <termio.h>
 #endif
 #else
@@ -113,7 +113,7 @@ struct screen {
  * with just two arguments. The following definition keeps lint happy. It may
  * need to be reset for different systems.	 
  */
-#ifndef MAC
+#ifndef MACINTOSH
 #ifdef lint
 #ifdef Pyramid
 /* Pyramid makes constants greater than 65535 into long! Gakk! -CJS- */
@@ -167,12 +167,12 @@ int                 Use_value2;
 
 #endif
 
-#ifndef MAC
+#ifndef MACINTOSH
 char *getenv();
 
 #endif
 
-#if !defined(MAC) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+#if !defined(MACINTOSH) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
 #ifdef USG
 static struct termio save_termio;
 
@@ -187,20 +187,20 @@ static int          save_local_chars;
 #endif
 #endif
 
-#ifndef MAC
+#ifndef MACINTOSH
 static int     curses_on = FALSE;
 static WINDOW *savescr;	   /* Spare window for saving the screen.
 				    * -CJS- */
 
 #endif
 
-#ifdef MAC
+#ifdef MACINTOSH
 /* Attributes of normal and hilighted characters */
 #define ATTR_NORMAL	attrNormal
 #define ATTR_HILITED	attrReversed
 #endif
 
-#ifndef MAC
+#ifndef MACINTOSH
 #ifdef SIGTSTP
 /*
  * suspend()							   -CJS-
@@ -247,7 +247,7 @@ int suspend()
 
 /* initializes curses routines */
 void init_curses()
-#ifdef MAC
+#ifdef MACINTOSH
 {
 /* Primary initialization is done in mac.c since game is restartable */
 /* Only need to clear the screen here */
@@ -338,7 +338,7 @@ void init_curses()
 
 /* Set up the terminal into a suitable state for moria.	 -CJS- */
 void moriaterm()
-#ifdef MAC
+#ifdef MACINTOSH
 /* Nothing to do on Mac */
 {
 }
@@ -424,7 +424,7 @@ void moriaterm()
 /* Dump IO to buffer					-RAK-	 */
 void put_buffer(cptr out_str, int row, int col)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
 /* The screen manager handles writes past the edge ok */
     DSetScreenCursor(col, row);
@@ -476,7 +476,7 @@ void put_qio()
 
 /* Put the terminal in the original mode.			   -CJS- */
 void restore_term()
-#ifdef MAC
+#ifdef MACINTOSH
 /* Nothing to do on Mac */
 {
 }
@@ -523,7 +523,7 @@ void restore_term()
 
 
 void shell_out()
-#ifdef MAC
+#ifdef MACINTOSH
 {
     alert_error("This command is not implemented on the Macintosh.");
 }
@@ -698,7 +698,7 @@ void shell_out()
  * returns ^R.	 
  */
 char inkey()
-#ifdef MAC
+#ifdef MACINTOSH
 /* The Mac does not need ^R, so it just consumes it */
 /* This routine does nothing special with direction keys */
 /* Just returns their keypad ascii value (e.g. '0'-'9') */
@@ -770,7 +770,7 @@ char inkey()
 #endif
 
 
-#ifdef MAC
+#ifdef MACINTOSH
 char inkeydir()
 /* The Mac does not need ^R, so it just consumes it */
 /* This routine translates the direction keys in rogue-like mode */
@@ -824,7 +824,7 @@ char inkeydir()
 
 /* Flush the buffer					-RAK-	 */
 void flush()
-#ifdef MAC
+#ifdef MACINTOSH
 {
 /* Removed put_qio() call.  Reduces flashing.  Doesn't seem to hurt. */
     FlushScreenKeys();
@@ -856,7 +856,7 @@ void flush()
 /* Clears given line of text				-RAK-	 */
 void erase_line(int row, int col)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
     Rect line;
 
@@ -883,7 +883,7 @@ void erase_line(int row, int col)
 
 /* Clears screen */
 void clear_screen()
-#ifdef MAC
+#ifdef MACINTOSH
 {
     Rect area;
 
@@ -909,7 +909,7 @@ void clear_screen()
 
 void clear_from(int row)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
     Rect area;
 
@@ -960,7 +960,7 @@ void print(int ch, int row, int col)
 /* Moves the cursor to a given interpolated y, x position	-RAK-	 */
 void move_cursor_relative(int row, int col)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
     row -= panel_row_prt;	   /* Real co-ords convert to screen
 				    * positions */
@@ -1007,7 +1007,7 @@ void count_msg_print(cptr p)
 /* Outputs a line to a given y, x position		-RAK-	 */
 void prt(cptr str_buff, int row, int col)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
     Rect line;
 
@@ -1038,7 +1038,7 @@ void prt(cptr str_buff, int row, int col)
 /* move cursor to a given y, x position */
 void move_cursor(int row, int col)
 
-#ifdef MAC
+#ifdef MACINTOSH
 {
     DSetScreenCursor(col, row);
 }
@@ -1144,7 +1144,7 @@ int get_check(cptr prompt)
     int res, y, x;
 
     prt(prompt, 0, 0);
-#ifdef MAC
+#ifdef MACINTOSH
     GetScreenCursor(&x, &y);
 #else
     getyx(stdscr, y, x);
@@ -1161,7 +1161,7 @@ int get_check(cptr prompt)
 #else
 	(void)move(0, 73);
 #endif
-#ifdef MAC
+#ifdef MACINTOSH
     DWriteScreenStringAttr(" [y/n]", ATTR_NORMAL);
 #else
     (void)addstr(" [y/n]");
@@ -1194,7 +1194,7 @@ int get_com(cptr prompt, char *command)
     return (res);
 }
 
-#ifdef MAC
+#ifdef MACINTOSH
 /* Same as get_com(), but translates direction keys from keypad */
 int get_comdir(char *prompt, char *command)
 {
@@ -1258,7 +1258,7 @@ int get_string(char *in_str, int row, int column, int slen)
 	    if (!isprint(i) || column > end_col)
 		bell();
 	    else {
-#ifdef MAC
+#ifdef MACINTOSH
 		DSetScreenCursor(column, row);
 		DWriteScreenCharAttr((char)i, ATTR_NORMAL);
 #else
@@ -1309,7 +1309,7 @@ void pause_exit(int prt_line, int delay)
     /* prevent message about delay unused */
 	dummy = delay;
 #endif
-#ifdef MAC
+#ifdef MACINTOSH
 	enablefilemenu(FALSE);
 	exit_game();
 	enablefilemenu(TRUE);
@@ -1320,7 +1320,7 @@ void pause_exit(int prt_line, int delay)
     erase_line(prt_line, 0);
 }
 
-#ifdef MAC
+#ifdef MACINTOSH
 void save_screen()
 {
     mac_save_screen();
@@ -1348,7 +1348,7 @@ void restore_screen()
 void bell()
 {
     put_qio();
-#ifdef MAC
+#ifdef MACINTOSH
     mac_beep();
 #else
     (void)write(1, "\007", 1);
@@ -1390,7 +1390,7 @@ void screen_map()
     int   priority[256];
     int   row, orow, col, myrow = 0, mycol = 0;
 
-#ifndef MAC
+#ifndef MACINTOSH
     char  prntscrnbuf[80];
 
 #endif
@@ -1414,7 +1414,7 @@ void screen_map()
 
     save_screen();
     clear_screen();
-#ifdef MAC
+#ifdef MACINTOSH
     DSetScreenCursor(0, 0);
     DWriteScreenCharAttr(CH(TL), ATTR_NORMAL);
     for (i = 0; i < MAX_WIDTH / RATIO; i++)
@@ -1433,7 +1433,7 @@ void screen_map()
 	row = i / RATIO;
 	if (row != orow) {
 	    if (orow >= 0) {
-#ifdef MAC
+#ifdef MACINTOSH
 		DSetScreenCursor(0, orow + 1);
 		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
 		DWriteScreenString(map);
@@ -1465,7 +1465,7 @@ void screen_map()
 	}
     }
     if (orow >= 0) {
-#ifdef MAC
+#ifdef MACINTOSH
 	DSetScreenCursor(0, orow + 1);
 	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
 	DWriteScreenString(map);
@@ -1477,7 +1477,7 @@ void screen_map()
 
 #endif
     }
-#ifdef MAC
+#ifdef MACINTOSH
     DSetScreenCursor(0, orow + 2);
     DWriteScreenCharAttr(CH(BL), ATTR_NORMAL);
     for (i = 0; i < MAX_WIDTH / RATIO; i++)
@@ -1491,7 +1491,7 @@ void screen_map()
     (void)addch(CH(BR));
 #endif
 
-#ifdef MAC
+#ifdef MACINTOSH
     DSetScreenCursor(23, 23);
     DWriteScreenStringAttr("Hit any key to continue", ATTR_NORMAL);
     if (mycol > 0)
