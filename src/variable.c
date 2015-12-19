@@ -16,7 +16,7 @@ cptr copyright[5] = {
 
 /* a horrible hack: needed because compact_monster() can be called from
    creatures() via summon_monster() and place_monster() */
-int hack_monptr = (-1);
+int hack_monptr = (-1);		/* XXX Current monster in "process_monsters()" */
 
 int weapon_heavy = FALSE;
 int pack_heavy = FALSE;
@@ -55,8 +55,9 @@ int death = FALSE;		/* True if player has died */
 int free_turn_flag;		/* Command is "free", do not move creatures */
 int find_flag;			/* Number of turns spent running */
 
-s16b cur_height,cur_width;	/* Cur dungeon size    */
-s16b dun_level = 0;		/* Cur dungeon level   */
+s16b cur_height;		/* Cur dungeon height */
+s16b cur_width;			/* Cur dungeon width */
+s16b dun_level = 0;		/* Cur dungeon level */
 int object_level = 0;		/* level for objects to be created -CWS  */
 
 int command_count;		/* Gives repetition of commands. -CJS- */
@@ -65,7 +66,7 @@ int default_dir = FALSE;	/* Use last direction for repeated command */
 s32b turn = (-1);			/* Cur turn of game    */
 s32b old_turn = (-1);		/* Last feeling message */
 
-int wizard = FALSE;		/* Wizard flag	      */
+int wizard = FALSE;		/* Is the player currently in Wizard mode? */
 int to_be_wizard = FALSE;	/* used during startup, when -w option used */
 
 s16b panic_save = FALSE;	/* this is true if playing from a panic save */
@@ -82,41 +83,65 @@ int opening_chest = 0;          /* Hack -- prevent chest generation */
 
 struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
-int rogue_like_commands;	/* set in config.h/main.c */
-
 
 /*  OPTION: options set via the '=' command */
 /* note that the values set here will be the default settings */
+/* the default keyset can thus be chosen via "rogue_like_commands" */
 
-int find_cut = TRUE;
-int find_examine = TRUE;
-int find_bound = FALSE;
+/* Option set 1 */
+
+int rogue_like_commands = FALSE;	/* Pick initial keyset */
+int quick_messages = FALSE;		/* Quick messages -CWS */
+int prompt_carry_flag = FALSE;		/* Require "g" key to pick up */
+int carry_query_flag = TRUE;		/* Prompt for pickup */
+
+int equippy_chars = FALSE;	/* do equipment characters -CWS */
+int highlight_seams = FALSE;	/* Highlight mineral seams */
+
+/* Option Set 2  */
+
+int find_cut = TRUE;		/* Cut corners */
+int find_examine = TRUE;	/* Examine corners */
 int find_prself = FALSE;
-int prompt_carry_flag = FALSE;
-int show_weight_flag = FALSE;
-int show_equip_weight_flag = FALSE;
-int highlight_seams = FALSE;
-int find_ignore_doors = FALSE;
-int hitpoint_warn = 1;
-int feeling = 0;
-int carry_query_flag = TRUE;
-int delay_spd = 5;
-int plain_descriptions = FALSE;
-int no_haggle_flag = FALSE;	/* does the player not want to haggle? -CWS */
-int quick_messages = FALSE;     /* quick messages -CWS */
-int equippy_chars = FALSE;      /* do equipment characters -CWS */
-char doing_inven = FALSE;	/* Track inventory commands. -CJS- */
-int screen_change = FALSE;	/* Track screen updates for inven_commands. */
-char last_command = ' ';  	/* Memory of previous command. */
+int find_bound = FALSE;		/* Stop on borders */
+int find_ignore_doors = FALSE;	/* Run through doors */
 
-/* these used to be in dungeon.c */
-int new_level_flag;		/* Next level when true	 */
-int teleport_flag;		/* Handle teleport traps  */
+
+/* Option set 3 -- Gameplay */
+
 int player_light;		/* Player carrying light */
-int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
 int light_flag = FALSE;		/* Track if temporary light about player.  */
 
+int no_haggle_flag = FALSE;	/* does the player not want to haggle? -CWS */
+
+int show_weight_flag = FALSE;
+int show_equip_weight_flag = FALSE;	/* Show weights in equip */
+int plain_descriptions = FALSE;	/* Plain descriptions */
+
+
+
+
+int hitpoint_warn = 1;
+int delay_spd = 5;
+
+
+
+char last_command = ' ';  	/* Memory of previous command. */
+
+
+
+int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
+
 int wait_for_more = FALSE;	/* used when ^C hit during -more- prompt */
+
+int feeling = 0;
+
+char doing_inven = FALSE;	/* Track inventory commands. -CJS- */
+int screen_change = FALSE;	/* Track screen updates for inven_commands. */
+
+int new_level_flag;		/* Next level when true	 */
+int teleport_flag;		/* Handle teleport traps  */
+
 int closing_flag = FALSE;	/* Used for closing   */
 
 /*  Following are calculated from max dungeon sizes		*/

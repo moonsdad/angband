@@ -20,6 +20,8 @@
 /* Basic constants */
 #include "h-defines.h"
 
+/* Basic macros */
+#include "h-macros.h"
 
 
 #endif

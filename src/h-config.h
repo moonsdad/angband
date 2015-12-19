@@ -3,72 +3,97 @@
 #ifndef INCLUDED_H_CONFIG_H
 #define INCLUDED_H_CONFIG_H
 
+/*
+ * Choose the hardware, operating system, and compiler.
+ * Also, choose various "system level" compilation options.
+ * A lot of these definitions take effect in "h-system.h"
+ */
 
 
+/*
+ * no system definitions are needed for 4.3BSD, SUN OS, DG/UX
+ */
 
+/*
+ * OPTION: Compile on an ultrix/4.2BSD/Dynix/etc. version of UNIX,
+ * Do not define it if you are on any kind of SUN OS.
+ */
+/* #define ultrix */
 
-/* this allows intelligent compilers to do better, as they know more
- * about how certain functions behave -CWS */
-
-#if !(defined(__GNUC__) || defined(__STDC__))
-#define const
-#endif
-
-
-/* no system definitions are needed for 4.3BSD, SUN OS, DG/UX */
-
-/* if you are compiling on an ultrix/4.2BSD/Dynix/etc. version of UNIX,
-   define this, not needed for SUNs */
-/* #ifndef ultrix
-#define ultrix
-#endif */
-
-#if defined(SOLARIS)
-#define SYS_V
-#include <netdb.h>
-#endif
-
-/* if you are compiling on a SYS V version of UNIX, define this */
-/* #define SYS_V */
-
-/* if you are compiling on a SYS III version of UNIX, define this */
-/* #define SYS_III */
-
-/* if you are compiling on an ATARI ST with Mark Williams C, define this */
-/* #define ATARIST_MWC */
-
-/* if you are compiling on a Macintosh with MPW C 3.0, define this */
+/*
+ * OPTION: Compile on a Macintosh with MPW C 3.0
+ */
 /* #define MAC */
 
-/* if you are compiling on a HPUX version of UNIX, define this */
+/*
+ * OPTION: Compile on a SYS V version of UNIX
+ */
+/* #define SYS_V */
+
+/*
+ * OPTION: Compile on a SYS III version of UNIX
+ */
+/* #define SYS_III */
+
+/*
+ * OPTION: Compile on an ATARI ST with Mark Williams C
+ */
+/* #define ATARIST_MWC */
+
+/*
+ * OPTION: Compiling on a HPUX version of UNIX
+ */
 /* #define HPUX */
 
 
 /*
- *  Prevent "lint" messages
- * to prevent <string.h> from including <NLchar.h>, this prevents a bunch of lint errors.
+ * OPTION: Compile on Solaris, treat it as System V
  */
-#if defined(SYS_V) && defined(lint)
-#define RTPC_NO_NLS
+#if defined(SOLARIS)
+# define SYS_V
+#include <netdb.h>
 #endif
 
-/****************************************************************************
- * System dependent defines follow, you should not need to change anything  *
- * below (if you have a supported system).  If you run into problems during *
- * compilation, you might want to check the defines below.                  *
- ****************************************************************************/
-
-/* For the NEW_FILEPATHS option, we'll use PATH_SEP as the path separator;
- * this will help make at least one section of Angband more portable.  If
- * you don't seem something sensible here, either add a section for your
- * filesystem, or just define PATH_SEP to something useful.          [cjh]
- */
 
 /*
- * NOTE: This is 100% untested on all but Atari, UNIX, and OS/2...  I'm
- *       guessing at the Mac and VMS PATH_SEP values!                [cjh]
+ * Note that most compilers will do better WITHOUT "register" suggestions.
+ * If your compiler is ancient or horrible, comment out the "define" below.
  */
+#define register /* nothing */
 
+
+/*
+ * Note that old compilers do not understand "const".
+ * If you have an good compiler, comment out the "define" below.
+ */
+#if !defined(__GNUC__) && !defined(__STDC__)
+# define const /* nothing */
+#endif
+
+
+
+
+
+/*
+ *  Prevent "lint" messages
+ *
+ * to prevent <string.h> from including <NLchar.h>, this prevents a bunch of lint errors.
+ */
+if defined(lint)
+# if defined(SYS_V)
+#  define RTPC_NO_NLS
+# endif
+#endif
+
+
+
+
+
+/*
+ * Every system seems to use its own symbol as a path separator.
+ * Default to the standard Unix slash, but attempt to change this
+ * for various other systems.
+ */
 #if defined(ultrix) || defined(SYS_V) || defined(SYS_III) \
  || defined(__MINT__) || defined(HPUX) || defined(unix) \
  || defined(BSD)
@@ -89,15 +114,15 @@
 #endif /* UNIX filesystems */
 
 
-/* Note that you'll be happier if you have a case-insensitive string
+/*
+ * Note that you'll be happier if you have a case-insensitive string
  * comparision routine on your system.  If your system lacks this,
  * you're still in luck, as we now provide one.  -CWS
  */
-
-#if defined (NeXT) || defined(HPUX) || defined(ultrix) \
-|| defined(NCR3K) || defined(linux) || defined(ibm032) \
-|| defined(__386BSD__) || defined(SOLARIS) || defined (__osf__)
-#define stricmp strcasecmp
+#if defined (NeXT) || defined(HPUX) || defined(ultrix) || \
+    defined(NCR3K) || defined(linux) || defined(ibm032) || \
+    defined(__386BSD__) || defined(SOLARIS) || defined (__osf__)
+# define stricmp strcasecmp
 #else
 /* Let's make this work on systems lacking a such a routine. */
 #define stricmp my_stricmp

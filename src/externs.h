@@ -52,41 +52,52 @@ extern int errno;
  * result in a smaller executable, and speed things up, to boot. -CWS
  */
 
-#define MY_MAX(a,b) ((a) > (b) ? (a) : (b))
-#define MY_MIN(a,b) ((a) < (b) ? (a) : (b))
+
+/*
+ * Simple integer math functions
+ * Should just use the real ones.
+ */
+#define MY_MAX	MAX
+#define MY_MIN	MIN
+#define MY_ABS	ABS
+#define MY_POM	POM
 
 
-/* Checks a co-ordinate for in bounds status		-RAK-	*/
-
+/*
+ * Checks a co-ordinate for in bounds status		-RAK-	
+ */
 #define in_bounds(y, x) \
    ((((y) > 0) && ((y) < cur_height-1) && ((x) > 0) && ((x) < cur_width-1)) ? \
     (TRUE) : (FALSE))
 
-
-/* Checks if we can see this point (includes map edges) -CWS */
+/*
+ * Checks if we can see this point (includes map edges) -CWS
+ */
 #define in_bounds2(y, x) \
    ((((y) >= 0) && ((y) < cur_height) && ((x) >= 0) && ((x) < cur_width)) ? \
     (TRUE) : (FALSE))
 
 
-/* Tests a given point to see if it is within the screen -RAK-
+    
+/*
+ * Tests a given point to see if it is within the screen -RAK-
  * boundaries.
  */
-
 #define panel_contains(y, x) \
   ((((y) >= panel_row_min) && ((y) <= panel_row_max) && \
     ((x) >= panel_col_min) && ((x) <= panel_col_max)) ? (TRUE) : (FALSE))
 
 
-/* Generates a random integer X where 1<=X<=MAXVAL	-RAK-	*/
+/**** Available macros ****/
 
+/*
+ * Generates a random integer X where 1<=X<=MAXVAL	-RAK-	
+ */
 #define randint(maxval) (((maxval) < 1) ? (1) : ((random() % (maxval)) + 1))
 
-/* You would think that most compilers can do an integral abs() quickly,
- * wouldn't you?  Nope.  [But fabs is a lot worse on most machines!] -CWS
- */
 
-#define MY_ABS(x) (((x)<0) ? (-x) : (x))
+
+
 /*****************************************************************************/
 
 
@@ -97,8 +108,9 @@ extern char *copyright[5];
 
 extern int NO_SAVE;
 
+
 /*
- * horrible hack:
+ * Note that "hack_monptr" is not nearly as horrible a hack as before.
  * Needed because compact_monster() can be called from within
  * creatures() via place_monster() and summon_monster() 
  */
@@ -111,9 +123,9 @@ extern vtype savefile;		/* The save file name */
 
 extern vtype died_from;		/* Cause of death */
 
-extern s16b log_index;		/* Index to log file. -CJS- */
-
 extern char days[7][29];		/* The load check info */
+
+extern s16b log_index;		/* Index to log file. -CJS- */
 
 
 /*
@@ -423,29 +435,33 @@ extern char	moriatop[], moriasav[];
 #endif
 
 
-/* If you use NEW_FILEPATHS, we need these externs; if you use OLD_FILEPATHS */
-/* these are #define'd to something, so they aren't variables.         [cjh] */
-#ifdef NEW_FILEPATHS
-extern char *ANGBAND_TST;		/* was LIBDIR(test)					*/
-extern char *ANGBAND_HOU;		/* was LIBDIR(files/hours)			*/
-extern char *ANGBAND_MOR;		/* was LIBDIR(files/news)			*/
-extern char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+/* 
+ * The FILEPATH's to various files
+ * If you use NEW_FILEPATHS, we need these externs; if you use OLD_FILEPATHS
+ * these are #define'd to something, so they aren't variables.         [cjh]
+ */
 extern char *ANGBAND_BONES;		/* was LIBDIR(bones)				*/
+extern char *ANGBAND_SAV;		/* was LIBDIR(save)					*/
+extern char *ANGBAND_TST;		/* was LIBDIR(test)					*/
+
+extern char *ANGBAND_MOR;		/* was LIBDIR(files/news)			*/
+extern char *ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
+extern char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
+
+extern char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
+extern char *ANGBAND_HOU;		/* was LIBDIR(files/hours)			*/
+extern char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
+extern char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+
 extern char *ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
 extern char *ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
 extern char *ANGBAND_WIZ_HELP;	/* was LIBDIR(files/rwizcmds.hlp)	*/
 extern char *ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
-extern char *ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
-extern char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
-extern char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
-extern char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-extern char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-extern char *ANGBAND_SAV;		/* was LIBDIR(save)					*/
-#endif /* NEW_FILEPATHS */
+
+extern char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
 
 
 /*
- * function return values
  * only extern functions declared here, static functions declared
  * inside the file that defines them.  Duh...
  */
@@ -556,9 +572,7 @@ void print(int, int, int);
 void cast(void);
 
 /* arrays.c */
-#ifdef NEW_FILEPATHS
-void get_file_paths( void );
-#endif
+void get_file_paths(void);
 
 /* main.c */
 int main(int, char **);
@@ -706,8 +720,6 @@ void cut_player(int);
 void stun_player(int);
 void prt_equippy_chars(void);
 void get_coin_type(creature_type *);
-
-/* monsters.c */
 
 /* moria1.c */
 void change_speed(int);
