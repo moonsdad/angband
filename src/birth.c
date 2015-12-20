@@ -17,7 +17,7 @@
 /*
  * Hold the data from the previous "roll"
  */
-struct previous {
+static struct {
 
     u16b age;
     u16b wt;
@@ -37,7 +37,7 @@ struct previous {
 extern int peek;
 
 /*
- * Generates character's stats			-JWT-	 
+ * Generates character's stats			-JWT-
  */
 static void get_stats()
 {
@@ -512,7 +512,9 @@ static void get_prev_ahw()
 }
 
 
-/* Gets a character class				-JWT-	 */
+/*
+ * Gets a character class				-JWT-	
+ */
 static void get_class()
 {
     register int        i;
@@ -619,7 +621,9 @@ void rerate()
     msg_print(buf);
 }
 
-/* Gets a character class				-JWT-	 */
+/* 
+ * Gets a character class				-JWT-	 
+ */
 static void get_class_choice()
 {
     register int i, j;
@@ -713,15 +717,18 @@ void create_character()
 {
     char       c;
 
+    player_class	*cptr;
+    player_race		*rptr;
+
 #ifdef AUTOROLLER
-    u32b       auto_round = 0;
-    register int i;
-    int          stat[6];
-    int          autoroll = 0;
-    int          msstat = 0;/* Max autoroll w/ look for -SAC */
-    player_class   *cptr;
-    player_race    *rptr;
-    char         inp[60];
+
+    register int	i;
+    u32b		auto_round = 0;
+    int			stat[6];
+    int			autoroll = 0;
+    int			msstat = 0; /* Max autoroll w/ look for -SAC */
+
+    char		inp[60];
 
 #endif
     int previous_exists = 0;	/* flag to prevent prev from garbage values */
@@ -730,33 +737,46 @@ void create_character()
     randes_seed = random();
 
     put_character();
+
+    /* Choose a race */
     choose_race();
+
+    /* Choose a sex */
     get_sex();
+
+    /* Choose a class */
     get_class_choice();
 
 #ifdef AUTOROLLER
+
 /*
  * This auto-roller stolen from a post on rec.games.moria, which I belive was
  * taken from druid moria 5.something.  If this intrudes on someone's
  * copyright, take it out, and someone let me know -CFT 
  */
 
+    /* Prompt for it */
     put_buffer("Do you want to use automatic rolling? (? for Help) ", 20, 2);
-    do {   /* allow multiple key entry, so they can ask for help and
-            * still get back to this menu... -CFT */
 
+    /* allow multiple key entry, so they can ask for help and still get back to this menu... -CFT */
+    do {   
 	move_cursor(20, 52);
 	c = inkey();
-	if (c == '?')
-	    helpfile(ANGBAND_WELCOME);
+	if (c == '?') helpfile(ANGBAND_WELCOME);
     } while ((c != 'y') && (c != 'Y') && (c != 'n') && (c != 'N'));
 
+
+    /* Prepare the autoroller */
     if ((c == 'Y') || (c == 'y')) {
+
 	autoroll = 1;
+
 	clear_from(15);
 	cptr = &class[py.misc.pclass];
 	rptr = &race[py.misc.prace];
 	put_buffer("Enter minimum attribute for: ", 15, 2);
+
+	/* Check the stats */
 	for (i = 0; i < 6; i++) {
 	    int                 stat_idx = 0;
 
@@ -804,16 +824,23 @@ void create_character()
 		put_buffer(inp, 16 + i, 5);
 		break;
 	    } /* switch */
+
 	    do {
+
 		inp[0] = '\000';
 		get_string(inp, 16 + i, 32, 3);
-		stat[stat_idx] = atoi(inp); /* have return give a stat of 3 */
+
+		/* Parse the input */
+		stat[stat_idx] = atoi(inp);
+
+		/* have return give a stat of 3 */
 		if (inp[0] == '\015' || inp[0] == '\012' || inp[0] == '\000')
 		    stat[stat_idx] = 3;
+
+		/* Use negative numbers to avoid "max stat" setting */
 		if (stat[stat_idx] < 0) {
 		    stat[stat_idx] = (-stat[stat_idx]);
-		    if (stat[stat_idx] > msstat)
-			msstat = stat[stat_idx];
+		    if (stat[stat_idx] > msstat) msstat = stat[stat_idx];
 		}
 	    } while (stat[stat_idx] > msstat || stat[stat_idx] < 3);
 	} /* for i 0 - 5 */
@@ -831,10 +858,10 @@ void create_character()
 
 #ifdef AUTOROLLER
 
-	if (autoroll)
-	    for (i = 2; i < 6; i++)
-		erase_line(i, 30);
-	do {			   /* Start of AUTOROLLing loop */
+	if (autoroll) for (i = 2; i < 6; i++) erase_line(i, 30);
+
+	/* Start of AUTOROLLing loop */
+	do {
 #endif
 	    get_all_stats();
 	    get_class();
@@ -848,13 +875,20 @@ void create_character()
 
 		sprintf(inp, "auto-rolling round #%lu.", (long)auto_round);
 		put_buffer(inp, 20, 2);
-#if defined(unix) && defined(NICE)
-		usleep((long)100000L);
+
+#if defined(NICE)
+
+	    /* Wait 1/10 second per roll */
+	    delay(10);
+
 #endif
+
 		put_qio();
 	    } else
 		put_stats();
 	} while ((autoroll) &&
+
+	    /* Break if "happy" */
 		 ((stat[A_STR] > py.stats.cur_stat[A_STR]) ||
 		  (stat[A_INT] > py.stats.cur_stat[A_INT]) ||
 		  (stat[A_WIS] > py.stats.cur_stat[A_WIS]) ||
@@ -872,7 +906,9 @@ void create_character()
     );
 #endif				   /* character checks */
 #endif				   /* AUTOROLLER main looping section */
-       get_history();	           /* Common stuff */
+
+	/* Common stuff */
+       get_history();
        get_ahw();
 
 	calc_bonuses();
@@ -880,16 +916,21 @@ void create_character()
 	put_misc1();
 	clear_from(20);
 
-	do {			   /* Input loop */
+	/* Input loop */
+	do {
+
+	    /* Prepare a prompt */
 	    if (previous_exists) {
-		put_buffer("Hit space: Reroll, ^P: Previous or ESC: Accept: ",
-			   20, 2);
+		put_buffer("Hit space: Reroll, ^P: Previous or ESC: Accept: ", 20, 2);
 		move_cursor(20, 50);
 	    } else {
 		put_buffer("Hit space: Reroll, or ESC: Accept: ", 20, 2);
 		move_cursor(20, 37);
 	    }
+
+	    /* Prompt and get a command */
 	    c = inkey();
+
 	    if ((previous_exists) && (c == CTRL('P'))) {
 		previous_exists = FALSE;
 		if (get_prev_stats()) {
@@ -905,16 +946,19 @@ void create_character()
 		bell();
 	} while ((c != ' ') && (c != ESCAPE));
 
-/* Not going to waste space w/ a check here. So ESC takes a little longer. -SAC */
+	/* Not going to waste space w/ a check here. So ESC takes a little longer. -SAC */
 	set_prev_stats();
 	set_prev_history();
 	set_prev_ahw();
 	previous_exists = TRUE;
     } while (c == ' ');
+
     get_money();
     put_stats();
     put_misc2();
     put_misc3();
+    
+    /* Get a name */
     get_name();
     msg_print(NULL);
 

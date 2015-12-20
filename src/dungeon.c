@@ -24,22 +24,27 @@ int good_item_flag = FALSE;
 int create_up_stair = FALSE;
 int create_down_stair = FALSE;
 
-void dungeon()
+/*
+ * Main procedure for dungeon.			-RAK-
+ * Note: There is a lot of preliminary magic going on here at first
+ */
+void dungeon(void)
 {
-    int                    find_count, i;
-    int                    regen_amount; /* Regenerate hp and mana */
-    char                   command;      /* Last command           */
+    int                    i, find_count;
+
     register struct misc  *p_ptr;
     register inven_type   *i_ptr;
     register struct flags *f_ptr;
 
-/* Main procedure for dungeon.			-RAK-	 */
-/* Note: There is a lot of preliminary magic going on here at first */
+    /* Regenerate hp and mana */
+    int                    regen_amount;
 
-/* init pointers. */
+    /* Last command           */
+    char                   command;
+
+    /* init pointers. */
     f_ptr = &py.flags;
     p_ptr = &py.misc;
-
     i_ptr = &inventory[INVEN_LIGHT];
 
 /* Check light status for setup	   */
@@ -58,17 +63,19 @@ void dungeon()
     if ((dun_level >= 0) && ((unsigned) dun_level > p_ptr->max_dlv))
 	p_ptr->max_dlv = dun_level;
 
-/* Reset flags and initialize variables  */
-    command_count  = 0;
-    eof_flag       = FALSE;
-    find_count     = 0;
+    /* Reset flags and initialize variables  (most of it is overkill)  */
     new_level_flag = FALSE;
-    find_flag      = FALSE;
     teleport_flag  = FALSE;
-    mon_tot_mult   = 0;
-    old_rad        = (-1);
-    coin_type      = 0;
+    find_flag      = FALSE;
+    eof_flag       = FALSE;
     opening_chest  = FALSE;
+
+    /* Reset the "command" vars (again, mostly overkill) */
+    command_count  = 0;
+    find_count     = 0;
+    mon_tot_mult   = 0;
+    coin_type      = 0;
+    old_rad        = (-1);
 
 #ifdef TARGET
     /* target code taken from Morgul -CFT */
@@ -138,17 +145,18 @@ void dungeon()
 	/* Advance the turn counter */
 	turn++;
 
-#ifdef CHECKHOURS
-#ifndef MACINTOSH
-    /* The Mac ignores the game hours file		 */
+
+	/*** Check the Load ***/
+
+#ifdef CHECK_HOURS
 	/* Check for game hours			       */
 	if (((turn % 100) == 1) && !check_time()) {
 	    if (closing_flag > 2) {
 		msg_print("The gates to ANGBAND are now closed.");
 		(void)strcpy(died_from, "(closing gate: saved)");
 		if (!save_char()) {
-		    (void)strcpy(died_from, "a slammed gate");
-		    death = TRUE;
+		(void)strcpy(died_from, "a slammed gate");
+		death = TRUE;
 		}
 		exit_game();
 	    }
@@ -159,8 +167,7 @@ void dungeon()
 		msg_print("Please finish up or save your game.");
 	    }
 	}
-#endif
-#endif				   /* CHECKHOURS */
+#endif				   /* CHECK_HOURS */
 
 	/*** Update the Stores ***/
     /* turn over the store contents every, say, 1000 turns */
@@ -1549,8 +1556,8 @@ static void do_command(char com_val)
     switch (com_val) {
       case 'Q':			/* (Q)uit		(^K)ill */
 	flush();
-	if ((!total_winner) ? get_Yn("Do you really want to quit?")
-	    : get_Yn("Do you want to retire?")) {
+	if ((!total_winner) ? get_check("Do you really want to quit?")
+	    : get_check("Do you want to retire?")) {
 	    new_level_flag = TRUE;
 	    death = TRUE;
 	    (void)strcpy(died_from, "Quitting");

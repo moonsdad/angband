@@ -12,9 +12,10 @@
 
 #include "angband.h"
 
-#if defined(CHECKHOURS)
 
-/* 
+#ifdef CHECK_HOURS
+
+/*
  * Operating hours for ANGBAND	-RAK-
  *	 X = Open; . = Closed
  */
@@ -144,18 +145,6 @@ int (*store_buy[MAX_STORES])() = {
 
 /* Following are arrays for descriptive pieces			*/
 
-#ifdef MACGAME
-
-cptr *colors;
-cptr *mushrooms;
-cptr *woods;
-cptr *metals;
-cptr *rocks;
-cptr *amulets;
-cptr *syllables;
-
-#else
-
 cptr colors[MAX_COLORS] = {
 /* Do not move the first three */
   "Icky Green", "Light Brown", "Clear",
@@ -234,7 +223,6 @@ cptr syllables[MAX_SYLLABLES] = {
   "vom","wah","wed","werg","wex","whon","wun","x",
   "yerg","yp","zun","tri","blaa"
 };
-#endif
 
 /*
  * used to calculate the number of blows the player gets in combat
@@ -300,9 +288,6 @@ u16b normal_table[NORMAL_TABLE_SIZE] = {
 /*
  * Class titles for different levels			
  */
-#ifdef MACGAME
-cptr (*player_title)[MAX_PLAYER_LEVEL];
-#else
 cptr player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 
 	/* Warrior	 */
@@ -378,7 +363,7 @@ cptr player_title[MAX_CLASS][MAX_PLAYER_LEVEL] = {
 "Warder (19th)","Guardian","Chevalier","Justiciar","Paladin","High Lord"}
 
 };
-#endif
+
 
 /* Base experience levels, may be adjusted up for race and/or class*/
 u32b player_exp[MAX_PLAYER_LEVEL] = {
@@ -405,9 +390,7 @@ u32b player_exp[MAX_PLAYER_LEVEL] = {
  *	Racial Bases for: dis,srh,stl,fos,bth,bthb,bsav,hitdie,
  *	infra, exp base, choice-classes
  */
-#ifdef MACGAME
-player_race *race;
-#else
+
 player_race race[MAX_RACES] = {
    {"Human",	 0,  0,	 0,  0,	 0,  0,
       14,  6, 72,  6,180, 25, 66,  4,150, 20,
@@ -450,7 +433,6 @@ player_race race[MAX_RACES] = {
       4,   3,  3, -4, 15, 25, 20, 10,  4, 200, 0x1F,
     }
  };
-#endif
 
 /* 5 char race for printing scores. */
 #if 0 /* not used */
@@ -471,9 +453,6 @@ cptr dsp_race[MAX_RACES] = {
 /*
  * Background information				
  */
-#ifdef MACGAME
-player_background *background;
-#else
 player_background background[MAX_BACKGROUND] = {
 
 {"You are the illegitimate and unacknowledged child ",		 10, 1, 2, 25},
@@ -640,7 +619,7 @@ player_background background[MAX_BACKGROUND] = {
 {"leprous skin.",						100,66, 0, 50}
 
 };
-#endif
+
 
 /*
  * Player Classes.
@@ -690,9 +669,6 @@ byte spell_order[64];		/* order spells learned/remembered/forgotten */
  * this means you must always subtract one from the py.misc.pclass before
  * indexing into magic_spell[].
  */
-#ifdef MACGAME
-spell_type (*magic_spell)[63];
-#else
 spell_type magic_spell[MAX_CLASS-1][63] = {
 
   {
@@ -1078,7 +1054,6 @@ spell_type magic_spell[MAX_CLASS-1][63] = {
      { 99, 99,  0,   0}
    }
  };
-#endif
 
 
 cptr spell_names[127] = {

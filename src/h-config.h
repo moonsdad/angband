@@ -61,6 +61,7 @@
 
 /*
  * OPTION: Compile on Pyramid, treat it as Ultrix
+ * Pyramid runs 4.2BSD-like UNIX version
  */
 #if defined(Pyramid)
 # define ultrix

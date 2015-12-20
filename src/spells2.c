@@ -40,8 +40,7 @@ static char bolt_char(int y, int x, int ny, int nx)
  * GF_SHARDS and GF_ICE maybe break things (potions?), and GF_METEOR breaks
  * potions and burns scrolls?  not yet, but it's an idea... -CFT 
  */
-static void 
-ball_destroy(int typ, int (**destroy) ())
+static void ball_destroy(int typ, int (**destroy) ())
 {
     switch (typ) {
       case GF_FIRE:
@@ -947,11 +946,7 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 		print(bolt_char, y, x);
 	    /* show the bolt */
 		put_qio();
-#ifdef MSDOS
 		delay(8 * delay_spd);	/* milliseconds */
-#else
-		usleep(8000 * delay_spd);	/* useconds */
-#endif
 	    }
 	}
 	oldy = y;
@@ -1007,11 +1002,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		if (panel_contains(i, j) && !(py.flags.status & PY_BLIND)) {
 		    print(bolt_char, i, j);
 		    put_qio();
-#ifdef MSDOS
 		    delay(8 * delay_spd);	/* milliseconds */
-#else
-		    usleep(8000 * delay_spd);	/* useconds */
-#endif
 		    lite_spot(i, j);
 		}
 		if (c_ptr->cptr > 1 && c_ptr->cptr != monptr) {
@@ -1530,11 +1521,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 			}
 		if (py.flags.blind < 1) {
 		    put_qio();
-#ifdef MSDOS
 		    delay(25 * delay_spd);	/* milliseconds */
-#else
-		    usleep(25000 * delay_spd);	/* useconds */
-#endif
 		}
 
 	    /* now erase the ball, since effects below may use msg_print, and
@@ -1625,11 +1612,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 		if (!no_color_flag)
 		    textcolor(LIGHTGRAY);
 #endif
-#ifdef MSDOS
 		delay(8 * delay_spd);	/* milliseconds */
-#else
-		usleep(8000 * delay_spd);	/* useconds */
-#endif
 	    }
 	    oldy = y;
 	    oldx = x;
@@ -1694,11 +1677,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 #endif
 		}
 	put_qio();
-#ifdef MSDOS
 	delay(25 * delay_spd);	   /* milliseconds */
-#else
-	usleep(25000 * delay_spd); /* useconds */
-#endif
  
 /* now erase the ball, since effects below may use msg_print, and pause
  * indefinitely, so we want ball gone before then -CFT 
@@ -2957,11 +2936,7 @@ int mass_genocide(int spell)
 		take_hit(randint(3), "the strain of casting Mass Genocide");
 		prt_chp();
 		put_qio();
-#ifdef MSDOS
 		delay(20* delay_spd);	/* milliseconds */
-#else
-		usleep(20000 * delay_spd);	/* useconds */
-#endif
 	    }
 	    result = TRUE;
 	}
@@ -2992,11 +2967,7 @@ int genocide(int spell)
 			take_hit(randint(4), "the strain of casting Genocide");
 			prt_chp();
 			put_qio();
-#ifdef MSDOS
 			delay(20 * delay_spd);	/* milliseconds */
-#else
-			usleep(20000 * delay_spd);	/* useconds */
-#endif
 		    }
 		    killed = TRUE;
 		} else {
@@ -4918,11 +4889,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 #endif
 		    }
 		put_qio();	/* show line */
-#ifdef MSDOS
-		delay(8 * delay_spd);
-#else
-		usleep(8000 * delay_spd);
-#endif      
+		delay(8 * delay_spd);   
 	    } /* if !blind */
 	} /* if hit monster */
     } while (!flag);		/* end of effects loop */
@@ -4943,11 +4910,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 		}
 	    }
 	    put_qio();
-#ifdef MSDOS
 	    delay(8 * delay_spd);
-#else
-	    usleep(8000 * delay_spd);
-#endif      
 	} /* for each piece */
     } /* if !blind */
 }  

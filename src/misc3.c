@@ -3052,7 +3052,7 @@ void insert_lnum(char *object_str, register cptr mtc_str, s32b number, int  show
     mlen = strlen(mtc_str);
     tmp_str = object_str;
     do {
-	string = (char *) index(tmp_str, mtc_str[0]);
+	string = (char *) strcmp(tmp_str, mtc_str[0]);
 	if (string == 0)
 	    flag = 0;
 	else {
@@ -3084,7 +3084,7 @@ int enter_wiz_mode()
 	return FALSE;
     if (!noscore) {
 	msg_print("Wizard mode is for debugging and experimenting.");
-	answer = get_Yn(
+	answer = get_check(
 			"The game will not be scored if you enter wizard mode. Are you sure?");
     }
     if (noscore || answer) {

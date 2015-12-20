@@ -111,7 +111,7 @@ void reset_seed(void)
 int check_time(void)
 {
 
-#ifdef CHECKHOURS
+#ifdef CHECK_HOURS
 
 # if !defined(time_t)
 #  define time_t long
@@ -143,7 +143,7 @@ int check_time(void)
 
 #endif /* MINT, etc */
 
-#endif /* CHECKHOURS - [cjh] */
+#endif /* CHECK_HOURS - [cjh] */
 
     return TRUE;
 }

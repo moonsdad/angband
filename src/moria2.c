@@ -2682,11 +2682,7 @@ void throw_object()
 				&& (c_ptr->tl || c_ptr->pl)) {
 				print(tchar, y, x);
 				put_qio();	/* show object moving */
-#ifdef MSDOS
 				delay(8 * delay_spd);	/* milliseconds */
-#else
-				usleep(8000 * delay_spd);	/* useconds */
-#endif
 			    }
 			}
 		    } else {

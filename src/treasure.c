@@ -66,9 +66,6 @@
 	Traps are added randomly by magic_init() in misc.c.	*/
 
 /* Object list (All objects must be defined here)		 */
-#ifdef MACGAME
-treasure_type *object_list;
-#else
 treasure_type object_list[MAX_OBJECTS] = {
 /* Dungeon items from 0 to MAX_DUNGEON_OBJ */
 {"Poison"			,0x00000001L,	TV_FOOD, ',',	/*  0*/
@@ -1133,7 +1130,6 @@ treasure_type object_list[MAX_OBJECTS] = {
 {"Barahir"			 ,0x1000003FL,  TV_RING,   '=',   /*477*/
     1,  65000,  36,   1,   2,   0,   0,  0,   0, {0,0},    50, 0,0x02000000L}
 };
-#endif
 
 cptr special_names[SN_ARRAY_SIZE] = {
 	NULL,			"of Resistance",	"of Resist Acid",

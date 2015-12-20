@@ -15,52 +15,37 @@
  * Completely rewritten by				-CJS-
  */
 
+/* must include before externs.h, because that uses SIGTSTP */
+#include <signal.h>
+
 #include "angband.h"
 
 /* Signals have no significance on the Mac */
 
 #ifdef MACINTOSH
 
-void 
-nosignals()
+void nosignals()
 {
 }
 
-void 
-signals()
+void signals()
 {
 }
 
-void 
-init_signals()
+void init_signals()
 {
 }
 
 #else				   /* a non-Mac system */
 
-#include <stdio.h>
 
 #ifdef linux
 #define SIGBUS SIGUSR1
 #endif
 
 
-#ifdef ATARIST_MWC
-/*
- * need these for atari st, but for unix, must include signals.h first, or
- * else suspend won't be properly declared 
- */
-#include "constant.h"
-#include "config.h"
-#include "types.h"
-#include "externs.h"
-#endif
-
 /* skip most of the file on an ATARI ST */
 #ifndef ATARIST_MWC
-
-/* to get the SYS_V def if needed */
-#include "config.h"
 
 #if defined(SYS_V) && defined(lint)
 /*
@@ -74,8 +59,7 @@ typedef struct {
 
 #endif
 
-/* must include before externs.h, because that uses SIGTSTP */
-#include <signal.h>
+
 
 
 #ifdef USG
@@ -101,11 +85,7 @@ static void signal_handler(int sig, int code, struct sigcontext  *scp)
 
     smask = sigsetmask(0) | (1 << sig);
 #else
-#ifdef __TURBOC__
 static void signal_handler(int sig)
-#else
-static void signal_handler(int sig)
-#endif
 {
 
 #endif
@@ -126,8 +106,8 @@ static void signal_handler(int sig)
 	if (death)
 	    (void)signal(sig, SIG_IGN);	/* Can't quit after death. */
 	else if (!character_saved && character_generated) {
-	    if ((!total_winner) ? (!get_Yn("Really commit *Suicide*?"))
-		: (!get_Yn("Do you want to retire?"))) {
+	    if ((!total_winner) ? (!get_check("Really commit *Suicide*?"))
+		: (!get_check("Do you want to retire?"))) {
 		if (turn > 0)
 		    disturb(1, 0);
 		erase_line(0, 0);

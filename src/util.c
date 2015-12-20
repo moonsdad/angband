@@ -14,18 +14,19 @@
 
 
 
-#if defined(NEEDS_USLEEP)
+#ifndef HAS_USLEEP
 
 /*
  * for those systems that don't have usleep
  * grabbed from the inl netrek server -cba 
+ * I think we include too many files above!
  */
-
-int microsleep(unsigned long microSeconds)
+int usleep(huge microSeconds)
 {
-    unsigned int        Seconds, uSec;
-    int                 nfds, readfds, writefds, exceptfds;
     struct timeval      Timer;
+
+    int                 nfds, readfds, writefds, exceptfds;
+    unsigned int        Seconds, uSec;
 
     nfds = readfds = writefds = exceptfds = 0;
 
@@ -58,3 +59,68 @@ int microsleep(unsigned long microSeconds)
 }
 
 #endif
+
+
+#ifdef MACINTOSH
+
+/* See "main-mac.c" */
+
+#else
+
+#ifdef AMIGA
+
+void delay(int t)
+{
+    if (t >= 20) Delay(t / 20);
+}
+
+#else
+
+#ifdef __EMX__
+
+void delay(int x)
+{
+    _sleep2(x);
+}
+
+#else
+
+#ifndef MSDOS
+
+/*
+ * Unix port for "delay"
+ */
+void delay(int x)
+{
+    /* Do it in micro-seconds */
+    usleep(1000 * x);
+}
+
+#endif	/* MSDOS */
+
+#endif	/* __EMX__ */
+
+#endif	/* AMIGA */
+
+#endif	/* MACINTOSH */
+
+
+#ifdef AMIGA
+
+/*
+ * Is this actually used?
+ */
+int getuid()
+{
+  return 0;
+}
+
+/*
+ * Is this actually used?
+ */
+void umask(int x)
+{
+}
+
+#endif /* AMIGA */
+

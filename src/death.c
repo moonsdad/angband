@@ -157,11 +157,11 @@ int look_line(int prt_line)
 
 /* Not touched for Mac port */
 /*
- * init_scorefile Open the score file while we still have the setuid
- * privileges.  Later when the score is being written out, you must be sure
- * to flock the file so we don't have multiple people trying to write to it
- * at the same time. Craig Norborg (doc)		Mon Aug 10 16:41:59
- * EST 1987 
+ *  Open the score file while we still have the setuid privileges.
+ * Later when the score is being written out, you must be sure
+ * to flock the file so we don't have multiple people trying to
+ * write to it at the same time.
+ * Craig Norborg (doc)		Mon Aug 10 16:41:59 EST 1987 
  */
 void init_scorefile()
 {
@@ -177,17 +177,18 @@ void init_scorefile()
 }
 
 
-/* Attempt to open the intro file			-RAK-	 */
 /*
  * Hack -- Check the hours file vs. what time it is	-Doc
  */
 void read_times(void)
 {
+
+#ifdef CHECK_HOURS
+
     register int i;
     vtype        in_line;
     FILE        *file1;
 
-#ifdef CHECKHOURS
 /* Attempt to read hours.dat.	 If it does not exist,	   */
 /* inform the user so he can tell the wizard about it	 */
 
@@ -236,6 +237,7 @@ void read_times(void)
 #endif				   /* CHECK_HOURS */
 
 /* Print the introduction message, news, etc.		 */
+/* Attempt to open the intro file			-RAK-	 */
     if ((file1 = my_tfopen(ANGBAND_MOR, "r")) != NULL) {
 	clear_screen();
 	for (i = 0; fgets(in_line, 80, file1) != NULL; i++)
@@ -269,7 +271,7 @@ void helpfile(cptr filename)
     {
 	clear_screen();
 	for (i = 0; i < 23; i++) {
-	    if (fgets(tmp_str, BIGVTYPESIZ - 1, file) != NULL) {
+	    if (fgets(tmp_str, BIGVTYPESIZ - 1, file)) {
 		put_buffer(tmp_str, i, 0);
 	    }
 	}
@@ -497,7 +499,7 @@ int file_character(cptr filename1)
     fd = my_topen(filename1, O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd < 0 && errno == EEXIST) {
 	(void)sprintf(out_val, "Replace existing file %s?", filename1);
-	if (get_Yn(out_val)) {
+	if (get_check(out_val)) {
 	    fd = my_topen(filename1, O_WRONLY, 0644);
 	}
     }

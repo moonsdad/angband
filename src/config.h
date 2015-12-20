@@ -108,7 +108,7 @@
 /*
  * OPTION: Check the "hours" file
  */
-#undef CHECKHOURS
+#undef CHECK_HOURS
 
 /*
  * this sets the default user interface
@@ -122,62 +122,7 @@
 
 
 
-/* fix systems lacking usleep() -CWS 
- *
- * Note that Solaris 2.x users without the BSD compatibilty kit need to
- * define this as well.
- */
 
-#if defined(HPUX) || defined(ultrix)
-#define NEEDS_USLEEP
-#endif
-
-#ifdef NEEDS_USLEEP
-#define usleep microsleep
-
-#ifdef __STDC__
-int microsleep(unsigned long);
-#else
-int microsleep();
-#endif /* __STDC__ */
-
-#endif
-
-
-/* substitute strchr for index on USG versions of UNIX */
-#if defined(SYS_V) || defined(MSDOS) || defined(MACINTOSH)
-#define index strchr
-#endif
-
-#ifdef SYS_III
-char *index();
-#endif
-
-#if defined(SYS_III) || defined(SYS_V) || defined(MSDOS) || defined(MACINTOSH) || defined(HPUX)
-#ifndef USG
-#define USG
-#endif
-#endif
-
-#if defined(ATARIST_MWC) || defined (__MINT__)
-#ifndef USG
-#define USG
-#endif
-#endif
-
-/* Pyramid runs 4.2BSD-like UNIX version */
-#if defined(Pyramid)
-#define ultrix
-#endif
-
-
-#ifdef MACINTOSH
-#ifdef RSRC
-#define MACRSRC		/* i.e., we're building the resources */
-#else
-#define MACGAME		/* i.e., we're building the game */
-#endif
-#endif
 
 #ifdef MACINTOSH
 /* Screen dimensions */
@@ -185,13 +130,7 @@ char *index();
 #define SCRN_COLS	80
 #endif
 
-#if vms
-#define getch _getch
-#define unlink delete
-#define index strchr
-#define lstat stat
-#define exit uexit
-#endif
+
 
 
 /*
@@ -201,6 +140,17 @@ char *index();
   extern int PlayerUID;
 # define getuid() PlayerUID
 # define geteuid() PlayerUID
+#endif
+
+
+/*
+ * fix systems lacking usleep() -CWS 
+ *
+ * Note that Solaris 2.x users without the BSD compatibilty kit need to
+ * define this as well.
+ */
+#if !defined(HPUX) && !defined(ultrix) && !defined(SOLARIS) && !defined(SGI)
+# define HAS_USLEEP
 #endif
 
 
