@@ -106,7 +106,7 @@ void update_mon(int monptr)
 
 	    /* Check for "illumination" of the monster grid */
 	    if (c_ptr->pl || c_ptr->tl ||
-		(find_flag && m_ptr->cdis <= light_rad && player_light)) {
+		(find_flag && m_ptr->cdis <= cur_lite && player_light)) {
 
 #ifdef ATARIST_MWC
 		holder = CM_INVISIBLE;
@@ -1972,9 +1972,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    y = char_row;
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    (void)summon_monster(&y, &x, FALSE);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
 
@@ -1985,9 +1985,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    y = char_row;
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    (void)summon_undead(&y, &x);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
 
@@ -2038,9 +2038,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    y = char_row;
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    (void)summon_demon(c_list[m_ptr->mptr].level, &y, &x);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
 
@@ -2051,9 +2051,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    y = char_row;
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    (void)summon_dragon(&y, &x);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
 
@@ -2421,9 +2421,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
 	    for (k = 0; k < 8; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_monster(&y, &x, FALSE);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2585,9 +2585,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    y = char_row;
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    (void)summon_angel(&y, &x);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
 
@@ -2599,9 +2599,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
 	    for (k = 0; k < 6; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_spider(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2614,9 +2614,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called,it needs monptr */
 	    for (k = 0; k < 8; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_hound(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2714,15 +2714,15 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 10; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_wraith(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    for (k = 0; k < 7; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_gundead(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2752,9 +2752,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 8; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_reptile(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2767,9 +2767,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 7; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_ant(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2782,15 +2782,15 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 5; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_unique(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    for (k = 0; k < 4; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_jabberwock(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2803,9 +2803,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 8; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_gundead(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2818,9 +2818,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called, it needs monptr */
 	    for (k = 0; k < 5; k++) {
-		hack_monptr = monptr;
+		hack_m_idx = monptr;
 		(void)summon_ancientd(&y, &x);
-		hack_monptr = (-1);
+		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    break;
@@ -2904,9 +2904,9 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 			    fix1_delete_monster((int)c_ptr->cptr);
 
 		    /* in case compact_monster() is called,it needs monptr */
-			hack_monptr = monptr;
+			hack_m_idx = monptr;
 			result = place_monster(j, k, cr_index, FALSE);
-			hack_monptr = (-1);
+			hack_m_idx = (-1);
 			if (!result)
 			    return FALSE;
 			mon_tot_mult++;
@@ -2916,9 +2916,9 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 		/* All clear,  place a monster	  */
 		{
 		/* in case compact_monster() is called,it needs monptr */
-		    hack_monptr = monptr;
+		    hack_m_idx = monptr;
 		    result = place_monster(j, k, cr_index, FALSE);
-		    hack_monptr = (-1);
+		    hack_m_idx = (-1);
 		    if (!result)
 			return FALSE;
 		    mon_tot_mult++;
@@ -3021,9 +3021,9 @@ static void mon_move(int monptr, u32b *rcmove)
 /* in case the monster dies, may need to call fix1_delete_monster()
  * instead of delete_monsters() 
  */
-	    hack_monptr = monptr;
+	    hack_m_idx = monptr;
 	    i = mon_take_hit(monptr, damroll(8, 8), FALSE);
-	    hack_monptr = (-1);
+	    hack_m_idx = (-1);
 	    if (i >= 0)
 		msg_print("You hear a scream muffled by rock!");
 	    else

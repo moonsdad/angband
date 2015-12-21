@@ -13,10 +13,13 @@
 #include "angband.h"
 
 
-#if (COST_ADJ != 100)
-static void price_adjust();
-#endif
-
+/*
+ * Hack -- Local "game mode" vars
+ */
+int new_game = FALSE;
+int fiddle = FALSE;
+int force_rogue_like = FALSE;
+int force_keys_to = FALSE;
 int unfelt    = TRUE;
 int be_nasty  = FALSE;
 int rating    = 0;
@@ -24,6 +27,10 @@ int peek      = FALSE;
 int player_uid;
 int quests[MAX_QUESTS];
 creature_type ghost;
+
+#if (COST_ADJ != 100)
+static void price_adjust();
+#endif
 
 
 /* Unique artifact weapon flags, even though some are in the wrong place!*/
@@ -45,23 +52,26 @@ NIMLOTH, NAR, BERUTHIEL, GORLIM, ELENDIL, THORIN, CELEGORM, THRAIN,
 GONDOR, THINGOL, THORONGIL, LUTHIEN, TUOR, ROHAN, TULKAS, NECKLACE, BARAHIR,
 CASPANION, RAZORBACK, BLADETURNER;
 
-/* Initialize, restore, and get the ball rolling.	-RAK-	*/
+/*
+ * Initialize, restore, and get the ball rolling.	-RAK-	
+ */
 int main(int argc, char * argv[])
 {
     int generate, i;
-    int result=FALSE, FIDDLE=FALSE;
+    int result=FALSE;
 #ifndef __MINT__
     FILE *fp;
-#endif
-    int new_game = FALSE;
-    int force_rogue_like = FALSE;
-    int force_keys_to = FALSE;
-#ifndef __MINT__
-    char temphost[MAXHOSTNAMELEN+1], thishost[MAXHOSTNAMELEN+1], discard[120];
+    char temphost[MAXHOSTNAMELEN+1];
+    char thishost[MAXHOSTNAMELEN+1];
+    char discard[120];
 #endif
     char string[80];
     struct rlimit rlp;
+
+    /* Save the "program name" */
+    argv0 = argv[0];
     
+
 #if !defined(MSDOS) && !defined(HPUX)
     /* Disable core dumps */
     getrlimit(RLIMIT_CORE,&rlp);
@@ -74,6 +84,8 @@ int main(int argc, char * argv[])
     
     strcpy(py.misc.name, "\0");
     
+
+
 #ifndef MSDOS
 #ifndef SET_UID
     (void) umask(0);
@@ -88,22 +100,22 @@ int main(int argc, char * argv[])
     msdos_init();		/* set up some screen stuff + get cnf file */
 #endif
     
-#ifdef NEW_FILEPATHS
-    /* This looks like a good spot to check for our files. - [cjh] */
+
+    /* Get the file paths */
     get_file_paths();
-#endif
-    
-    /* call this routine to grab a file pointer to the highscore file */
-    /* and prepare things to relinquish setuid privileges */
+
+    /* call this routine to grab a file pointer to the highscore file
+     * and prepare things to relinquish setuid privileges */
     init_scorefile();
-    
+
     /* Call this routine to grab a file pointer to the log files and
-       start the backup process before relinquishing setuid privileges */
-    
+     * start the backup process before relinquishing setuid privileges */
     init_files();
-    
+
 #ifndef MSDOS
-    if ((player_uid = getuid()) < 0) {
+    /* Get the user id (?) */
+    player_uid = getuid();
+    if (player_uid < 0) {
 	perror("Can't set permissions correctly!  Getuid call failed.\n");
 	exit(0);
     }
@@ -111,7 +123,7 @@ int main(int argc, char * argv[])
 #else
     user_name(py.misc.name);
 #endif
-    
+
 #if defined(SET_UID) && !defined(SECURE)
     /* Set the user id or quit */
     if (setuid(geteuid()) != 0) {
@@ -128,16 +140,17 @@ int main(int argc, char * argv[])
 #else
     be_nasty=FALSE;
 #endif
-    
+
 #if !defined(MSDOS) && !defined(__MINT__)
     (void)gethostname(thishost, (sizeof thishost) - 1);	/* get host */
-    if ((fp=my_tfopen(ANGBAND_LOAD, "r")) == NULL) {
+    fp = my_tfopen(ANGBAND_LOAD, "r");
+    if (!fp) {
 	perror("Can't get load-check.\n");
 	exit(0);
     }
 
     /* Find ourself */
-    do {
+    while (1) {
 	if (fscanf(fp, "%s%d", temphost, &LOAD) == EOF) {
 	    LOAD=100;
 	    break;
@@ -146,10 +159,12 @@ int main(int argc, char * argv[])
 	/* Hack -- Discard comments */
 	if (temphost[0]=='#') {
 	    (void)fgets(discard, (sizeof discard)-1, fp);
+	    continue;
 	}
 
-    } while (strcmp(temphost,thishost) && strcmp(temphost,"localhost"));
     /* Until we've found ourselves */
+	if (!strcmp(temphost,thishost) || !strcmp(temphost,"localhost")) break;
+    }
 
     fclose(fp);
 #endif
@@ -158,7 +173,7 @@ int main(int argc, char * argv[])
     init_curses();
 
     /* check for user interface option */
-    for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv)
+    for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv) {
 	switch (argv[0][1]) {
 	  case 'A':
 	  case 'a':
@@ -185,47 +200,34 @@ int main(int argc, char * argv[])
 	  case 'S':
 	  case 's':
 	    init_curses();
-	    if (isdigit((int)argv[0][2]))
-		display_scores(0, atoi(&argv[0][2]));
-	    else
-		display_scores(0, 10);
+	    if (isdigit((int)argv[0][2])) display_scores(0, atoi(&argv[0][2]));
+	    else display_scores(0, 10);
 	    exit_game();
 	  case 'D':
 	  case 'd':
-	    if (!is_wizard(player_uid))
-		goto usage;
-	    if (isdigit((int)argv[0][2]))
-		delete_entry(atoi(&argv[0][2]));
-	    else
-		display_scores(0, 10);
+	    if (!is_wizard(player_uid)) goto usage;
+	    if (isdigit((int)argv[0][2])) delete_entry(atoi(&argv[0][2]));
+	    else display_scores(0, 10);
 	    exit_game();
 	  case 'F':
 	  case 'f':
-	    if (is_wizard(player_uid) || to_be_wizard)
-		FIDDLE=TRUE;
-	    else
-		goto usage;
+	    if (is_wizard(player_uid) || to_be_wizard) FIDDLE=TRUE;
+	    else goto usage;
 	    break;
 	  case 'W':
 	  case 'w':
-	    if (is_wizard(player_uid))
-		to_be_wizard = TRUE;
-	    else
-		goto usage;
+	    if (is_wizard(player_uid)) to_be_wizard = TRUE;
+	    else goto usage;
 #ifndef MSDOS
-	    if (isdigit((int)argv[0][2]))
-		player_uid = atoi(&argv[0][2]);
+	    if (isdigit((int)argv[0][2])) player_uid = atoi(&argv[0][2]);
 #endif
 	    break;
 	  case 'u':
 	  case 'U':
-	    if (argv[0][2]) {
-		strcpy(py.misc.name, &argv[0][2]);
+	    if (!argv[0][2]) goto usage;
+	    strcpy(py.misc.name, &argv[0][2]);
 		d_check(py.misc.name);
 		NO_SAVE=TRUE;
-	    } else {
-		goto usage;
-	    }
 	    break;
 	  default:
 	  usage:
@@ -270,10 +272,11 @@ int main(int argc, char * argv[])
 	    }
 	    exit(1);
 	}
+    }
 
     /* catch those nasty signals */
     /* must come after init_curses as some of the signal handlers use curses */
-    init_signals();
+    signals_init();
 
     /* Check operating hours			*/
     /* If not wizard  No_Control_Y	        */
@@ -482,21 +485,25 @@ int main(int argc, char * argv[])
 	generate = TRUE;
     }
 
-    if (force_rogue_like)
+    /* Reset "rogue_like_commands" */
+    if (force_rogue_like) {
 	rogue_like_commands = force_keys_to;
+    }
 
     magic_init();
 
-    /* Begin the game				*/
+    /* Begin the game */
     clear_screen();
     prt_stat_block();
-    if (generate)
-	generate_cave();
 
-    /* Loop till dead, or exit			*/
-    while(!death)
-    {
-	dungeon();		/* Dungeon logic */
+    /* Make a level */
+    if (generate) generate_cave();
+
+    /* Loop till dead, or exit */
+    while(!death) {
+
+	/* Dungeon logic */
+	dungeon();
 
 #ifndef MACINTOSH
 	/* check for eof here, see inkey() in io.c */
@@ -513,16 +520,24 @@ int main(int argc, char * argv[])
 	}
 #endif
 	good_item_flag = FALSE;
-	if (!death) generate_cave(); /* New level	*/
+
+	/* Make the New level */
+	if (!death) generate_cave();
     }
 
-    exit_game();		/* Character gets buried. */
+	/* Character gets buried. */
+    exit_game();
     /* should never reach here, but just in case */
     return (0);
 }
 
 
-/* Init players with some belongings			-RAK-	*/
+
+
+
+/*
+ * Init players with some belongings			-RAK-	
+ */
 static void char_inven_init()
 {
     register int i, j;
@@ -532,8 +547,8 @@ static void char_inven_init()
     for (i = 0; i < INVEN_ARRAY_SIZE; i++)
 	invcopy(&inventory[i], OBJ_NOTHING);
 
-    for (i = 0; i < 5; i++)
-    {
+    /* Give the player useful objects */
+    for (i = 0; i < 5; i++) {
 	j = player_init[py.misc.pclass][i];
 	invcopy(&inven_init, j);
 	store_bought(&inven_init);
@@ -549,7 +564,9 @@ static void char_inven_init()
 }
 
 
-/* Initializes M_LEVEL array for use with PLACE_MONSTER	-RAK-	*/
+/*
+ * Initializes M_LEVEL array for use with PLACE_MONSTER	-RAK-	
+ */
 static void init_m_level()
 {
     register int i, k;
@@ -566,7 +583,9 @@ static void init_m_level()
 }
 
 
-/* Initializes T_LEVEL array for use with PLACE_OBJECT	-RAK-	*/
+/*
+ * Initializes T_LEVEL array for use with PLACE_OBJECT	-RAK-	
+ */
 static void init_t_level()
 {
     register int i, l;
@@ -594,7 +613,9 @@ static void init_t_level()
 
 
 #if (COST_ADJ != 100)
-/* Adjust prices of objects				-RAK-	*/
+/*
+ * Adjust prices of objects				-RAK-	
+ */
 static void price_adjust()
 {
     register int i;

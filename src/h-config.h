@@ -56,7 +56,6 @@
  */
 #if defined(SOLARIS)
 # define SYS_V
-#include <netdb.h>
 #endif
 
 /*

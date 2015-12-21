@@ -20,6 +20,11 @@
 #undef bool
 
 
+#ifdef USE_CUR
+
+
+
+
 # ifdef linux
 #  include <bsd/sgtty.h>
 # endif
@@ -280,79 +285,9 @@ int system_cmd(char *p)
 
 #endif
 
-
-/* Find a default user name from the system. */
-void user_name(char *buf, int id)
-{
-    struct passwd      *pwd;
-
-    pwd = getpwuid(id);
-    (void)strcpy(buf, pwd->pw_name);
-    if (*buf >= 'a' && *buf <= 'z')
-	*buf = (*buf - 'a') + 'A';
-}
-
-/* expands a tilde at the beginning of a file name to a users home directory */
-int tilde(cptr file, char *exp)
-{
-    *exp = '\0';
-    if (file) {
-	if (*file == '~') {
-	    char                user[128];
-	    struct passwd      *pw = NULL;
-	    int                 i = 0;
-
-	    user[0] = '\0';
-	    file++;
-	    while (*file != '/' && i < sizeof(user))
-		user[i++] = *file++;
-	    user[i] = '\0';
-	    if (i == 0) {
-		char               *login = (char *)getlogin();
-
-		if (login != NULL)
-		    (void)strcpy(user, login);
-		else if ((pw = getpwuid(getuid())) == NULL)
-		    return 0;
-	    }
-	    if (pw == NULL && (pw = getpwnam(user)) == NULL)
-		return 0;
-	    (void)strcpy(exp, pw->pw_dir);
-	}
-	(void)strcat(exp, file);
-	return 1;
-    }
-    return 0;
-}
-
-/*
- * open a file just as does fopen, but allow a leading ~ to specify a home
- * directory 
- */
-FILE *my_tfopen(cptr ffile, cptr fmode)
-{
-    char                buf[1024];
-    extern int          errno;
-
-    if (tilde(file, buf))
-	return (fopen(buf, mode));
-    errno = ENOENT;
-    return NULL;
-}
-
-/*
- * open a file just as does open, but expand a leading ~ into a home
- * directory name 
- */
-int my_topen(cptr file, int flags, int mode)
-{
-    char                buf[1024];
-    extern int          errno;
-
-    if (tilde(file, buf))
-	return (open(buf, flags, mode));
-    errno = ENOENT;
-    return -1;
-}
-
 #endif
+
+
+#endif /* USE_CUR */
+
+

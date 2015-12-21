@@ -32,7 +32,7 @@ void signals()
 {
 }
 
-void init_signals()
+void signals_init()
 {
 }
 
@@ -235,7 +235,7 @@ void signals()
 #endif
 }
 
-void init_signals()
+void signals_init()
 {
 #ifndef ATARIST_MWC
 #ifdef linux

@@ -13,6 +13,29 @@
  */
 
 
+/**** Assertions and Preventions ****/
+
+#ifdef CHECK_ASSERTIONS
+
+/* Note that the following functions require "z-form.h" */
+
+/* Allow Certain Conditions 'C' to be ABSOLUTELY ILLEGAL */
+#define PREVENT(C) \
+	if (C) core_fmt("PREVENT(Line %d in file %s)", __LINE__, __FILE__);
+
+/* Allow Certain Conditions 'C' to be ABSOLUTELY NECESSARY */
+#define ASSERT(C) \
+	if (!(C)) core_fmt("ASSERT(Line %d in file %s)", __LINE__, __FILE__);
+
+#else
+
+/* Ignore Preventions */
+#define PREVENT(C)
+
+/* Ignore Assertions */
+#define ASSERT(C)
+
+#endif
 
 
 
@@ -51,6 +74,29 @@
 #endif
 
 
+/**** 32 bit (uint) Flag Macros ****/
+
+#if 0
+
+#define flags_none()		(0)
+#define flags_all()		(~(flags_none()))
+#define flags_index(X)		(1<<(X))
+#define flags_except(X)		(~(Flags_index(X))
+
+#define flags_and(F,G)		((F)&(G))
+#define flags_ior(F,G)		((F)|(G))
+#define flags_xor(F,G)		((F)^(G))
+
+#define flags_is_set(F,X)	(((F)&(flags_index(X)))?1:0)
+#define flags_is_off(F,X)	(((F)&(flags_index(X)))?0:1)
+
+#define flags_set(F,X)		((F)|=(flags_index(X)))
+#define flags_off(F,X)		((F)&=(flags_except(X)))
+
+#define flags_toggle(F,X) \
+	((Flags_is_set(F,X)) ? (Flags_off(F,X)) : (Flags_set(F,X)))
+
+#endif
 
 
 

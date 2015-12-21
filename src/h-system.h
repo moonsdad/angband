@@ -20,7 +20,6 @@
 # include <libc.h>
 #else
 # include <stdlib.h>
-#include <unistd.h>
 #endif
 
 #ifdef SGI
@@ -67,7 +66,6 @@
 
 #if defined(__MINT__)
 # include <support.h>
-#include <string.h>
 #endif
 
 #if !defined(AMIGA)

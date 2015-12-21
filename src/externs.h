@@ -70,9 +70,32 @@
 /**** Available macros ****/
 
 /*
- * Generates a random integer X where 1<=X<=MAXVAL	-RAK-	
+ * Generates a random long integer X where O<=X<M.
+ * The integer X falls along a uniform distribution.
+ * For example, if M is 100, you get "percentile dice"
  */
-#define randint(maxval) (((maxval) < 1) ? (1) : ((random() % (maxval)) + 1))
+#define rand_int(M) (random() % (M))
+
+/*
+ * Generates a random long integer X where A<=X<=B
+ * The integer X falls along a uniform distribution.
+ * Note: rand_range(0,N-1) == rand_int(N)
+ */
+#define rand_range(A,B) ((A) + (rand_int(1+(B)-(A))))
+
+/*
+ * Generate a random long integer X where A-D<=X<=A+D
+ * The integer X falls along a uniform distribution.
+ * Note: rand_spread(A,D) == rand_range(A-D,A+D)
+ */
+#define rand_spread(A,D) ((A) + (rand_int(1+(D)+(D))) - (D))
+
+
+/*
+ * Generate a random long integer X where 1<=X<=M
+ * Also, "correctly" handle the case of M<=1
+ */
+#define randint(M) (((M) <= 1) ? (1) : (rand_int(M) + 1))
 
 
 
@@ -89,12 +112,12 @@ extern int NO_SAVE;
 
 
 /*
- * Note that "hack_monptr" is not nearly as horrible a hack as before.
+ * Note that "hack_m_idx" is not nearly as horrible a hack as before.
  * Needed because compact_monster() can be called from within
  * creatures() via place_monster() and summon_monster() 
  */
 
-extern int hack_monptr;			/* The "current" monster, if any */
+extern int hack_m_idx;			/* The "current" monster, if any */
 
 extern int player_uid;			/* The player's uid, or zero */
 
@@ -197,7 +220,7 @@ extern int new_level_flag;		/* Next level when true  */
 extern int teleport_flag;		/* Handle teleport traps  */
 extern int eof_flag;			/* Used to handle eof/HANGUP */
 extern int player_light;		/* Player carrying light */
-extern int light_rad, old_rad;           /* Light radius */
+extern int cur_lite, old_lite;           /* Light radius */
 extern int find_flag;			/* Are we running */
 extern int free_turn_flag;		/* Is this turn free */
 
@@ -253,9 +276,9 @@ extern int panel_col_prt, panel_row_prt;
 #ifdef TARGET
 /* Targetting code, stolen from Morgul -CFT */
 extern int target_mode;
-extern u16b target_col;
-extern u16b target_row;
 extern u16b target_mon;
+extern u16b target_row;
+extern u16b target_col;
 #endif
 
 /*  Following are all floor definitions				*/
@@ -325,32 +348,56 @@ extern int (*store_buy[MAX_STORES])();
 
 /*** Miscellaneous Information ***/
 
-/* Following are treasure arrays	and variables			*/
-extern treasure_type object_list[MAX_OBJECTS];
-extern byte object_ident[OBJECT_IDENT_SIZE];
-extern s16b t_level[MAX_OBJ_LEVEL+1];
-extern inven_type t_list[MAX_TALLOC];
-extern inven_type inventory[INVEN_ARRAY_SIZE];
-extern cptr special_names[SN_ARRAY_SIZE];
-extern s16b sorted_objects[MAX_DUNGEON_OBJ];
-extern s16b inven_ctr;			/* Total different obj's	*/
-extern s16b inven_weight;		/* Cur carried weight	*/
-extern s16b equip_ctr;			/* Cur equipment ctr	*/
-extern s16b tcptr;				/* Cur treasure heap ptr	*/
 
+/*** Inventory ***/
+/* Following are treasure arrays	and variables			*/
+
+/* Inventory information */
+extern s16b inven_weight;		/* Total carried weight */
+extern s16b inven_ctr;			/* Total different obj's */
+extern s16b equip_ctr;			/* Cur equipment ctr */
+
+/* Player inventory */
+extern inven_type inventory[INVEN_ARRAY_SIZE];
+
+/*** Item Information ***/
+
+/* Treasure heap pointer */
+extern s16b tcptr;
+
+extern treasure_type object_list[MAX_OBJECTS];
+
+extern byte object_ident[OBJECT_IDENT_SIZE];
+
+extern s16b t_level[MAX_OBJ_LEVEL+1];
+
+extern inven_type t_list[MAX_TALLOC];
+
+extern cptr special_names[SN_ARRAY_SIZE];
+
+extern s16b sorted_objects[MAX_DUNGEON_OBJ];
+
+
+/*** Monster Information ***/
 /* Following are creature arrays and variables			*/
+
+/* Cur free monster ptr	*/
+extern s16b mfptr;
+
 extern creature_type c_list[MAX_CREATURES];
-extern describe_mon_type desc_list[MAX_CREATURES];
 extern monster_type m_list[MAX_MALLOC];
+extern describe_mon_type desc_list[MAX_CREATURES];
 extern s16b m_level[MAX_MONS_LEVEL+1];
 extern monster_attack monster_attacks[N_MONS_ATTS];
+
+/* Monster memories. -CJS- */
 #ifdef MACINTOSH
 extern monster_lore *c_recall;
 #else
-extern monster_lore c_recall[MAX_CREATURES];	/* Monster memories. -CJS- */
+extern monster_lore c_recall[MAX_CREATURES];
 #endif
+
 extern monster_type blank_monster; /* Blank monster values	*/
-extern s16b mfptr;				   /* Cur free monster ptr	*/
 extern s16b mon_tot_mult;		   /* # of repro's of creature	*/
 
 /* Following are arrays for descriptive pieces			*/
@@ -533,8 +580,6 @@ int randnor(int, int);
 int bit_pos(u32b *);
 void panel_bounds(void);
 int get_panel(int, int, int);
-int next_to_wall(int, int);
-int next_to_corr(int, int);
 int damroll(int, int);
 int pdamroll(byte *);
 int los(int, int, int, int);
@@ -817,7 +862,7 @@ int store_buy(int, int);
 /* signals.c */
 void nosignals(void);
 void signals(void);
-void init_signals(void);
+void signals_init(void);
 void ignore_signals(void);
 void default_signals(void);
 void restore_signals(void);
@@ -914,7 +959,7 @@ void line_spell(int, int, int, int, int);
 /* staffs.c */
 void use(void);
 
-/* store1.c */
+/* store.c */
 s32b item_value(struct inven_type *);
 s32b sell_price(int, s32b *, s32b *, struct inven_type *);
 int store_check_num(inven_type *, int);
@@ -924,8 +969,6 @@ void store_init(void);
 void store_maint(void);
 int noneedtobargain(int, s32b);
 void updatebargain(int, s32b, s32b);
-
-/* store2.c */
 void enter_store(int);
 
 /* treasur1.c */
@@ -942,16 +985,17 @@ int check_input(int);
 #if 0
 int system_cmd(char *);
 #endif
-void user_name(char *, int);
-int tilde(cptr, char *);
-FILE *my_tfopen(cptr, cptr);
-int my_topen(cptr, int, int);
 #endif
 
 /* util.c */
 #ifndef HAS_USLEEP
 int usleep(unsigned long);
 #endif
+void delay(int);
+void user_name(char *buf, int id);
+int tilde(cptr, char *);
+int my_topen(cptr, int, int);
+FILE *my_tfopen(cptr, cptr);
 
 /* variable.c */
 

@@ -25,7 +25,7 @@ static void hit_trap(int y, int x)
     int                   i, ty, tx, num, dam;
     register cave_type   *c_ptr;
     register struct misc *p_ptr;
-    register inven_type  *t_ptr;
+    register inven_type  *i_ptr;
     bigvtype              tmp;
 
     end_find();
@@ -34,14 +34,15 @@ static void hit_trap(int y, int x)
     /* Get the cave grid */
     c_ptr = &cave[y][x];
     p_ptr = &py.misc;
-    t_ptr = &t_list[c_ptr->tptr];
+
+    /* Get the trap */
+    i_ptr = &t_list[c_ptr->tptr];
 
     /* Roll for damage */
-    dam = pdamroll(t_ptr->damage);
-
+    dam = pdamroll(i_ptr->damage);
 
     /* Examine the trap sub-val */
-    switch (t_ptr->subval) {
+    switch (i_ptr->subval) {
 
       case 1:			   /* Open pit */
 	msg_print("You fell into a pit!");
@@ -49,14 +50,14 @@ static void hit_trap(int y, int x)
 	    msg_print("You gently float down.");
 	}
 	else {
-	    objdes(tmp, t_ptr, TRUE);
+	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	}
 	break;
 
       case 2:			   /* Arrow trap */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
-	    objdes(tmp, t_ptr, TRUE);
+	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("An arrow hits you.");
 	}
@@ -66,12 +67,15 @@ static void hit_trap(int y, int x)
 	break;
 
       case 3:			   /* Covered pit */
+
 	msg_print("You fell into a covered pit.");
+
 	if (py.flags.ffall) {
 	    msg_print("You gently float down.");
 	}
+
 	else {
-	    objdes(tmp, t_ptr, TRUE);
+	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	}
 	place_trap(y, x, 0);
@@ -83,10 +87,10 @@ static void hit_trap(int y, int x)
 	new_level_flag = TRUE;
 	dun_level++;
 	if (py.flags.ffall) {
-	msg_print("You gently float down.");
+	    msg_print("You gently float down.");
 	}
 	else {
-	    objdes(tmp, t_ptr, TRUE);
+	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	}
 	/* make sure can see the message before new level */
@@ -110,6 +114,7 @@ static void hit_trap(int y, int x)
 	    } /* no ffall */
 	}
 	break;
+
       case 5:			   /* Sleep gas */
 	if (py.flags.paralysis == 0) {
 	    msg_print("A strange white mist surrounds you!");
@@ -122,8 +127,9 @@ static void hit_trap(int y, int x)
 	    }
 	}
 	break;
+
       case 6:			   /* Hid Obj */
-	(void)delete_object(y, x);
+	delete_object(y, x);
 	place_object(y, x);
 	msg_print("Hmmm, there was something under this rock.");
 	break;
@@ -132,7 +138,7 @@ static void hit_trap(int y, int x)
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    if (!py.flags.sustain_str) {
 		(void)dec_stat(A_STR);
-		objdes(tmp, t_ptr, TRUE);
+		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
 		msg_print("A small dart weakens you!");
 	    }
@@ -154,7 +160,7 @@ static void hit_trap(int y, int x)
 
       case 9:			   /* Rockfall */
 	take_hit(dam, "a falling rock");
-	(void)delete_object(y, x);
+	delete_object(y, x);
 	place_rubble(y, x);
 	msg_print("You are hit by falling rock.");
 	break;
@@ -165,7 +171,7 @@ static void hit_trap(int y, int x)
 	break;
 
       case 11:			   /* Summon mon */
-	(void)delete_object(y, x); /* Rune disappears.    */
+	delete_object(y, x); /* Rune disappears.    */
 	num = 2 + randint(3);
 	for (i = 0; i < num; i++) {
 	    ty = y;
@@ -206,7 +212,7 @@ static void hit_trap(int y, int x)
 
       case 17:			   /* Slow Dart */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
-	    objdes(tmp, t_ptr, TRUE);
+	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("A small dart hits you!");
 	    if (py.flags.free_act) {
@@ -223,7 +229,7 @@ static void hit_trap(int y, int x)
 
       case 18:			   /* CON Dart */
 	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
-		objdes(tmp, t_ptr, TRUE);
+		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
 	    if (!py.flags.sustain_con) {
 		(void)dec_stat(A_CON);
@@ -251,7 +257,7 @@ static void hit_trap(int y, int x)
       case 106:
       case 107:
       case 108:
-	enter_store(t_ptr->subval - 101);
+	enter_store(i_ptr->subval - 101);
 	break;
 
       default:
@@ -288,7 +294,7 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
     j2 = inventory[item_val].flags2;
 
     first_spell = bit_pos(&j1);
-/* set j1 again, since bit_pos modified it */
+    /* set j1 again, since bit_pos modified it */
     j1 = inventory[item_val].flags & spell_learned;
     s_ptr = magic_spell[py.misc.pclass - 1];
 
@@ -953,7 +959,7 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	/* in case this is called from within creatures(), this is a horrible
 	 * hack, the m_list/creatures() code needs to be rewritten 
 	 */
-	if (hack_monptr < monptr)
+	if (hack_m_idx < monptr)
 	    delete_monster(monptr);
 	else
 	    fix1_delete_monster(monptr);

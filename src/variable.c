@@ -14,28 +14,21 @@ cptr copyright[5] = {
     "are included in all such copies."
 };
 
+
+
 /* a horrible hack: needed because compact_monster() can be called from
    creatures() via summon_monster() and place_monster() */
-int hack_monptr = (-1);		/* XXX Current monster in "process_monsters()" */
+int hack_m_idx = (-1);		/* XXX Current monster in "process_monsters()" */
 
-int weapon_heavy = FALSE;
-int pack_heavy = FALSE;
-s16b log_index = (-1);		/* Index to log file. (<= 0 means no log) */
-vtype died_from;
 
-vtype savefile;			/* The savefile to use. */
-
-int light_rad = 0;		/* Current light radius (zero for none) */
-int old_rad;		/* Previous light radius (assume lite) */
+int cur_lite = 0;		/* Current light radius (zero for none) */
+int old_lite = 1;		/* Previous light radius (assume lite) */
 
 s16b total_winner = FALSE;	/* Semi-Hack -- Game has been won */
-
-int NO_SAVE=FALSE;
 
 int character_generated = 0;	/* A character has been generated */
 int character_saved = 0;	/* The character has been saved */
 
-int highscore_fd;		/* File descriptor to high score file */
 
 int LOAD = 0;			/* Hack -- used for CHECK_LOAD */
 
@@ -43,25 +36,28 @@ int LOAD = 0;			/* Hack -- used for CHECK_LOAD */
 u32b randes_seed;		/* Hack -- consistent object colors */
 u32b town_seed;		/* Hack -- consistent town layout */
 
+int command_count;		/* Gives repetition of commands. -CJS- */
+char last_command = ' ';  	/* Memory of previous command. */
+int default_dir = FALSE;	/* Use last direction for repeated command */
+
 char *old_state = NULL;         /* state array initialized by time -CWS */
 char *dummy_state = NULL;       /* dummy state array -CWS */
 
-s16b missile_ctr = 0;		/* Counter for missiles */
-int msg_flag;			/* Set with first msg  */
-vtype old_msg[MAX_SAVE_MSG];	/* Last message	      */
-s16b last_msg = 0;		/* Where last is held */
+s16b log_index = (-1);		/* Index to log file. (<= 0 means no log) */
+int highscore_fd;		/* File descriptor to high score file */
 
 int death = FALSE;		/* True if player has died */
 int free_turn_flag;		/* Command is "free", do not move creatures */
 int find_flag;			/* Number of turns spent running */
 
+int msg_flag;			/* Set with first msg */
+vtype old_msg[MAX_SAVE_MSG];	/* Last message */
+s16b last_msg = 0;		/* Where last is held */
+
 s16b cur_height;		/* Cur dungeon height */
 s16b cur_width;			/* Cur dungeon width */
 s16b dun_level = 0;		/* Cur dungeon level */
 int object_level = 0;		/* level for objects to be created -CWS  */
-
-int command_count;		/* Gives repetition of commands. -CJS- */
-int default_dir = FALSE;	/* Use last direction for repeated command */
 
 s32b turn = (-1);			/* Cur turn of game    */
 s32b old_turn = (-1);		/* Last feeling message */
@@ -75,13 +71,14 @@ s16b noscore = FALSE;		/* Don't log the game. -CJS- */
 int is_home = FALSE;		/* Are we in our home? */
 int in_store_flag = FALSE;	/* Don't redisplay light in stores -DGK */
 
-int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
-
-int coin_type;			/* Hack -- force coin type */
+int coin_type = 0;		/* Hack -- force coin type */
 int opening_chest = 0;          /* Hack -- prevent chest generation */
 
 
-struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
+/* Inventory info */
+s16b missile_ctr = 0;		/* Counter for missiles */
+int weapon_heavy = FALSE;
+int pack_heavy = FALSE;
 
 
 /*  OPTION: options set via the '=' command */
@@ -106,6 +103,9 @@ int find_prself = FALSE;
 int find_bound = FALSE;		/* Stop on borders */
 int find_ignore_doors = FALSE;	/* Run through doors */
 
+int wait_for_more = FALSE;	/* used when ^C hit during -more- prompt */
+int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
+
 
 /* Option set 3 -- Gameplay */
 
@@ -118,31 +118,20 @@ int show_weight_flag = FALSE;
 int show_equip_weight_flag = FALSE;	/* Show weights in equip */
 int plain_descriptions = FALSE;	/* Plain descriptions */
 
+int hitpoint_warn = 1;		/* Hitpoint warning (0 to 9) */
+int delay_spd = 5;		/* Delay factor (0 to 9) */
 
 
+int feeling = 0;		/* Most recent feeling */
 
-int hitpoint_warn = 1;
-int delay_spd = 5;
+int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
+char doing_inven = 0;		/* Hack -- track inventory commands */
+int screen_change = FALSE;	/* Hack -- disturb inventory commands */
 
+int new_level_flag;		/* Start a new level */
+int teleport_flag;		/* Hack -- handle teleport traps */
 
-
-char last_command = ' ';  	/* Memory of previous command. */
-
-
-
-int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
-
-int wait_for_more = FALSE;	/* used when ^C hit during -more- prompt */
-
-int feeling = 0;
-
-char doing_inven = FALSE;	/* Track inventory commands. -CJS- */
-int screen_change = FALSE;	/* Track screen updates for inven_commands. */
-
-int new_level_flag;		/* Next level when true	 */
-int teleport_flag;		/* Handle teleport traps  */
-
-int closing_flag = FALSE;	/* Used for closing   */
+int closing_flag = FALSE;	/* Dungeon is closing */
 
 /*  Following are calculated from max dungeon sizes		*/
 s16b max_panel_rows, max_panel_cols;
@@ -163,6 +152,14 @@ u16b target_row;
 u16b target_mon;
 #endif
 
+
+/* What killed the player */
+vtype died_from;
+
+/* The savefile to use. */
+vtype savefile;
+int NO_SAVE=FALSE;
+
 #ifdef MACINTOSH
 cave_type (*cave)[MAX_WIDTH];
 #else
@@ -174,6 +171,9 @@ monster_lore *c_recall;
 #else
 monster_lore c_recall[MAX_CREATURES];	/* Monster memories */
 #endif
+
+
+struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
 /* Player record for most player related info */
 player_type py;	/* player info record */

@@ -19,6 +19,7 @@
 
 
 #include "monster.h"
+#ifdef CHECK_HOURS
 
 typedef struct statstime {
     int                 cp_time[4];
@@ -40,6 +41,7 @@ typedef struct statstime {
 
 } statstime;
 
+#endif
 
 
 extern int peek;
@@ -184,7 +186,7 @@ int randnor(int mean, int stand)
 	offset = 4 * stand + randint(stand);
 
 	/* one half are negative */
-	if (randint(2) == 1) offset = (-offset);
+	if (rand_int(2)) offset = (-offset);
 
 	return (mean + offset);
     }
@@ -221,7 +223,7 @@ int randnor(int mean, int stand)
 
 
     /* one half should be negative */
-    if (randint(2) == 1) offset = (-offset);
+    if (rand_int(2)) offset = (-offset);
 
     return (mean + offset);
 }
@@ -294,16 +296,16 @@ int get_panel(int y, int x, int update)
     if ((prow != panel_row) || (pcol != panel_col)) {
 
     /* Save the new panel info */
-	panel_row = prow;
-	panel_col = pcol;
+    panel_row = prow;
+    panel_col = pcol;
 
     /* Recalculate the boundaries */
-	panel_bounds();
+    panel_bounds();
 
 	panel = TRUE;
 
     /* stop movement if any */
-	if (find_bound) end_find();
+    if (find_bound) end_find();
 
     } else panel = FALSE;
 
@@ -312,70 +314,25 @@ int get_panel(int y, int x, int update)
 
 
 /*
- * Approximate Distance between two points
+ * Approximate Distance between two points.
+ *
+ * When either the X or Y component dwarfs the other component,
+ * this function is almost perfect, and otherwise, it tends to
+ * over-estimate about one grid per fifteen grids of distance.
  */
 int distance(int y1, int x1, int y2, int x2)
 {
-    register int dy, dx;
+    register int dy, dx, d;
 
-    dy = y1 - y2;
-    if (dy < 0) dy = (-dy);
-    dx = x1 - x2;
-    if (dx < 0) dx = (-dx);
+    /* Find the absolute y/x distance components */
+    dy = (y1 > y2) ? (y1 - y2) : (y2 - y1);
+    dx = (x1 > x2) ? (x1 - x2) : (x2 - x1);
 
     /* Hack -- approximate the distance */
-    return ((((dy + dx) << 1) - (dy > dx ? dx : dy)) >> 1);
-}
+    d = (dy + dx + ((dy > dx) ? dy : dx)) >> 1;
 
-
-/* Checks points north, south, east, and west for a wall -RAK-	 */
-/*
- * note that y,x is always in_bounds(), i.e. 0 < y < cur_height-1, and 0 < x
- * < cur_width-1	 
- */
-int next_to_walls(int y, int x)
-{
-    register int        i;
-    register cave_type *c_ptr;
-
-    i = 0;
-    c_ptr = &cave[y - 1][x];
-    if (c_ptr->fval >= MIN_CAVE_WALL)
-	i++;
-    c_ptr = &cave[y + 1][x];
-    if (c_ptr->fval >= MIN_CAVE_WALL)
-	i++;
-    c_ptr = &cave[y][x - 1];
-    if (c_ptr->fval >= MIN_CAVE_WALL)
-	i++;
-    c_ptr = &cave[y][x + 1];
-    if (c_ptr->fval >= MIN_CAVE_WALL)
-	i++;
-
-    return (i);
-}
-
-
-/* Checks all adjacent spots for corridors		-RAK-	 */
-/*
- * note that y, x is always in_bounds(), hence no need to check that j, k are
- * in_bounds(), even if they are 0 or cur_x-1 is still works 
- */
-int next_to_corr(int y, int x)
-{
-    register int        k, j, i;
-    register cave_type *c_ptr;
-
-    i = 0;
-    for (j = y - 1; j <= (y + 1); j++)
-	for (k = x - 1; k <= (x + 1); k++) {
-	    c_ptr = &cave[j][k];
-	/* should fail if there is already a door present */
-	    if (c_ptr->fval == CORR_FLOOR
-	    && (c_ptr->tptr == 0 || t_list[c_ptr->tptr].tval < TV_MIN_DOORS))
-		i++;
-	}
-    return (i);
+    /* Return the distance */
+    return (d);
 }
 
 
@@ -694,7 +651,7 @@ int compact_monsters()
 	     * horrible hack, the m_list/creatures() code needs to be
 	     * rewritten 
 	     */
-		else if (hack_monptr < i) {
+		else if (hack_m_idx < i) {
 		    delete_monster(i);
 		    delete_any = TRUE;
 		} else
