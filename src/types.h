@@ -37,17 +37,17 @@ typedef char bigvtype[BIGVTYPESIZ];
 typedef char stat_type[8];
 
 /*
- * Many of the character fields used to be fixed length, which greatly
- *  increased the size of the executable.  I have replaced many fixed
- *  length fields with variable length ones.
+ * Note that fixed length character fields allow pure "structure copy",
+ * (which is technically bad anyway), but take up a LOT of space.
+ *  I have replaced many fixed length fields with variable length ones.
  *
- * all fields are given the smallest possbile type, and all fields are
+ * all fields are given the smallest possible type, and all fields are
  * aligned within the structure to their natural size boundary, so that
- * the structures contain no padding and are minimum size
+ * the structures contain no padding and are minimum size.  In theory...
  *
- * bit fields are only used where they would cause a large reduction in
- *  data size, they should not be used otherwise because their use
- *  results in larger and slower code
+ * Note that bit fields are extremely inefficient, and are only used
+ * where they would provide a major savings in space.
+ * Actually, this is not really true, perhaps we should eliminate them.
  */
 
 
@@ -64,7 +64,10 @@ struct _monster_attack {
     byte attack_sides;
 };
 
-
+/*
+ * Monster "variety"
+ *
+ */
 typedef struct _creature_type creature_type;
 
 struct _creature_type {
@@ -145,7 +148,7 @@ typedef struct _monster_type monster_type;
 
 struct _monster_type {
 
-  u16b mptr;			/* Pointer into creature was u16b	   */
+  u16b mptr;			/* Monster race index		*/
 
   byte fy;			/* Y location on map		*/
   byte fx;			/* X location on map		*/
@@ -155,7 +158,7 @@ struct _monster_type {
 
   s16b csleep;			/* Inactive counter		*/
 
-  s16b cspeed;			/* Movement speed		*/
+  s16b cspeed;			/* Monster "speed"		*/
   
   byte stunned;		/* Monster is stunned		*/
   byte confused;		/* Monster is confused		*/
@@ -180,13 +183,13 @@ typedef struct _treasure_type {
 
   cptr name;			/* Object Name				*/
 
-  byte tval;			/* Category number			*/
-  byte subval;			/* Sub-category number		*/
-  s16b p1;			/* Misc. use variable		*/
+  byte tval;			/* Object type Category number			*/
+  byte subval;			/* Object Sub-type Category number		*/
+  s16b p1;			/* Object extra info		*/
 
-  byte level;			/* Level item first found			*/
-  byte number;			/* Number of items	*/
-  byte tchar;			/* Character representation		*/
+  byte level;			/* Object level			*/
+  byte number;			/* Number of items: Always "one", for now	*/
+  byte tchar;			/* Object "symbol"		*/
 
   s16b tohit;			/* Plusses to hit		*/
   s16b todam;			/* Plusses to damage		*/
@@ -195,7 +198,7 @@ typedef struct _treasure_type {
   byte damage[2];			/* Damage when hits		*/
   u16b weight;			/* Weight			*/
 
-  s32b cost;			/* Cost of item		*/
+  s32b cost;			/* Object "base cost"		*/
 
   byte rare;		/* True if Rare		*/
   u32b flags;		/* Special flags		*/
@@ -217,7 +220,7 @@ typedef struct _treasure_type {
  * attempt to remove this dependency on copying structures... :-)
  */
 
-#define INSCRIP_SIZE 13	 /* notice alignment, must be 4*x + 1 */
+#define INSCRIP_SIZE 12	 /* notice alignment, must be 4*x */
 
 typedef struct _inven_type inven_type;
 
@@ -231,12 +234,11 @@ struct _inven_type {
   byte subval;			/* Sub-category number		*/
   s16b p1;			/* Misc. use variable		*/
 
-  char inscrip[INSCRIP_SIZE];	    /* Object inscription	*/
 
-  u16b timeout;		/* Timeout counter How long to wait before reactivating an Artifact		*/
+  u16b timeout;		/* Timeout counter: wait before reactivating an Artifact		*/
   byte tchar;			/* Character representation */
-  byte name2;			/* Object special name	*/
-  byte ident;			/* Identify information	*/
+  byte name2;			/* Object Special name, if any	*/
+  byte ident;			/* Identification info		*/
   byte number;			/* Number of items		*/
   u16b weight;			/* Weight			*/
 
@@ -250,6 +252,8 @@ struct _inven_type {
 
   u32b flags;		/* Special flags		*/
   u32b flags2;		/* Yes! even more froggin' flags!		*/
+
+  char inscrip[INSCRIP_SIZE];	/* Object inscription		*/
 };
 
 
@@ -257,7 +261,10 @@ struct _inven_type {
 
 /* 
  * spell name is stored in spell_names[] array
- * at index i, +31 if priest
+ * at index i if "mage", Or at index i +31 if "priest"
+ *
+ * We should probably change the whole "sexp" method, so that
+ * the "spell experience" is taken from slevel, smana, and sfail.
  */
 
 typedef struct _spell_type spell_type;
@@ -269,19 +276,31 @@ struct _spell_type {
   u16b sexp;		/* 1/4 of exp gained for learning spell */
 };
 
-typedef struct cave_type {
+
+
+/*
+ * A single "grid" in a Cave
+ *
+ */
+
+typedef struct _cave_type cave_type;
+
+struct _cave_type {
+
   u16b cptr;
   u16b tptr;
-  byte fval;
-  unsigned int lr : 1;		    /* room should be lit with perm light, walls with
+
+  byte fval;		/* Grid type (0-15) */
+
+  unsigned int lr : 1;		/* room should be lit with perm light, walls with
 				       this set should be perm lit after tunneled out	 */
 
-  unsigned int fm : 1;		    /* field mark, used for traps/doors/stairs, object is
+  unsigned int fm : 1;		/* field mark, used for traps/doors/stairs, object is
 				       hidden if fm is FALSE				 */
 
-  unsigned int pl : 1;		    /* permanent light, used for walls and lighted rooms */
-  unsigned int tl : 1;		    /* temporary light, used for player's lamp light,etc.*/
-} cave_type;
+  unsigned int pl : 1;		/* permanent light, used for walls and lighted rooms */
+  unsigned int tl : 1;		/* temporary light, used for player's lamp light,etc.*/
+};
 
 
 /*
@@ -429,6 +448,8 @@ struct _player_background {
 /*
  * Most of the "player" information goes here.
  *
+ * Basically, this stucture gives us a large collection of global
+ * variables, which can all be wiped to zero at creation time.
  */
 
 typedef struct _player_type player_type;

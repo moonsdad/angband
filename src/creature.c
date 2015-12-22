@@ -10,7 +10,6 @@
  * included in all such copies. 
  */
 
-#include "monster.h"
 #include "angband.h"
 
 
@@ -237,14 +236,17 @@ static int check_mon_lite(int y, int x)
 
 /*
  * Choose correct directions for monster movement	-RAK-	 
+ *
+ * Perhaps monster fear should only work when player can be seen?
  */
-static void get_moves(int monptr, int *mm)
+static void get_moves(int m_idx, int *mm)
 {
-    int y, ay, x, ax, move_val;
+    int y2 = char_row, x2 = char_col;
+    int y, ay, x, ax, move_val = 0;
 
     /* Extract the "pseudo-direction" */
-    y = m_list[monptr].fy - char_row;
-    x = m_list[monptr].fx - char_col;
+    y = m_list[m_idx].fy - y2;
+    x = m_list[m_idx].fx - x2;
 
 /* lvl  1..15 always afraid, 16..22 some, based on maxhp %8 :
  * lvl  16    7 of 8 monsters afraid  [  this is for a 50th  ]
@@ -262,19 +264,13 @@ static void get_moves(int monptr, int *mm)
 	x = (-x);
     }
 
+    /* Extract the "absolute distances" */
+    ax = ABS(x);
+    ay = ABS(y);
 
-    if (y < 0) {
-	move_val = 8;
-	ay = (-y);
-    } else {
-	move_val = 0;
-	ay = y;
-    }
-    if (x > 0) {
-	move_val += 4;
-	ax = x;
-    } else
-	ax = (-x);
+    /* Do something weird */
+    if (y < 0) move_val += 8;
+    if (x > 0) move_val += 4;
 
     /* Prevent the diamond maneuvre */
     if (ay > (ax << 1)) {
@@ -418,13 +414,12 @@ static int monster_critical(int dice, int sides, int dam)
 {
     int total = dice * sides;
 
-    if ((dam > total * 19 / 20) && ((dam < 20) ? randint(20) == 1 : TRUE)) {
+    if ((dam > total * 19 / 20) && ((dam >= 20) || (randint(20) == 1))) {
 
 	int max = 0;
 	
-    if (dam == total && dam > 20) max = 1;
-
 	if (dam > 20) {
+	    if (dam == total) max++;
 	    while (randint(50) == 1) max++;
 	}
 
@@ -481,14 +476,14 @@ static void make_attack(int monptr)
 	    (void)sprintf(cdesc, "The %s ", r_ptr->name);
     }
 
-/* For "DIED_FROM" string	   */
+    /* For "DIED_FROM" string	   */
     if (r_ptr->cdefense & UNIQUE)
 	(void)sprintf(ddesc, "%s", r_ptr->name);
     else if (is_a_vowel(r_ptr->name[0]))
 	(void)sprintf(ddesc, "an %s", r_ptr->name);
     else
 	(void)sprintf(ddesc, "a %s", r_ptr->name);
-/* End DIED_FROM		   */
+    /* End DIED_FROM		   */
 
     attackn = 0;
     attstr = r_ptr->damage;

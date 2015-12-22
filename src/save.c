@@ -127,7 +127,7 @@ static int sv_write()
 	l |= 32;
     if (show_weight_flag)
 	l |= 64;
-    if (highlight_seams)
+    if (notice_seams)
 	l |= 128;
     if (find_ignore_doors)
 	l |= 0x100L;
@@ -670,6 +670,7 @@ int _save_char(char *fnam)
 #endif
 
     }
+
     if (fd >= 0) {
 
 	/* Close the "fd" */
@@ -727,11 +728,12 @@ int _save_char(char *fnam)
     }
 
     /* Successful save */
-	else character_saved = 1;
+    character_saved = 1;
 
     turn = (-1);
     log_index = (-1);
 
+    /* Allow suspend again */
     signals();
 
     /* Successful save */
@@ -756,34 +758,64 @@ int get_char(int *generate)
     byte char_tmp, ychar, xchar, count;
 
     free_turn_flag = TRUE;	   /* So a feeling isn't generated upon reloading -DGK */
+
+    /* Forbid suspend */
     nosignals();
+
+    /* Assume a cave must be generated */
     *generate = TRUE;
+
+    /* Assume no file (used to catch errors below) */
     fd = (-1);
 
+
+    /* Hack -- Cannot restore a game while still playing */
+    if (turn >= 0) {
+	msg_print("IMPOSSIBLE! Attempt to restore while still alive!");
+	return (FALSE);
+    }
+
+
+
+#ifndef MACINTOSH
+
     if (access(savefile, 0) < 0) {
+
+	/* Allow suspend again */
 	signals();
+
 	msg_print("Savefile does not exist.");
 	return FALSE;
     }
-    clear_screen();
-
-    (void)sprintf(temp, "Restoring Character.");
-    put_buffer(temp, 23, 0);
-    sleep(1);
-
-    if (turn >= 0)
-	msg_print("IMPOSSIBLE! Attempt to restore while still alive!");
-
-/* Allow restoring a file belonging to someone else - if we can delete it. */
-/* Hence first try to read without doing a chmod. */
-
-    else if ((fd = my_topen(savefile, O_RDONLY, 0)) < 0)
-	msg_print("Can't open file for reading.");
-    else {
-#ifndef SET_UID
-	struct stat         statbuf;
 
 #endif
+
+
+    /* Notify the player */
+    clear_screen();
+    (void)sprintf(temp, "Restoring Character.");
+    put_buffer(temp, 23, 0);
+
+    /* Hack -- let the message get read */
+    delay(1000);
+
+    /* Allow restoring a file belonging to someone else, */
+    /* but only if we can delete it. */
+    /* Hence first try to read without doing a chmod. */
+
+    /* Open the savefile */
+    fd = my_topen(savefile, O_RDONLY, 0);
+
+    if (fd < 0) {
+	msg_print("Can't open file for reading.");
+    }
+
+    else {
+
+#if !defined(SET_UID)
+	struct stat         statbuf;
+#endif
+
 	turn = (-1);
 	log_index = (-1);
 	ok = TRUE;
@@ -791,15 +823,17 @@ int get_char(int *generate)
 #ifndef SET_UID
 	(void)fstat(fd, &statbuf);
 #endif
+
 	(void)close(fd);
+
+
     /* GCC for atari st defines atarist */
 #if defined(__MINT__) || defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS)
 	fileptr = my_tfopen(savefile, "rb");
 #else
 	fileptr = my_tfopen(savefile, "r");
 #endif
-	if (fileptr == NULL)
-	    goto error;
+	if (fileptr == NULL) goto error;
 
 	prt("Restoring Memory...", 0, 0);
 	put_qio();
@@ -1024,9 +1058,9 @@ int get_char(int *generate)
 	else
 	    show_weight_flag = FALSE;
 	if (l & 128)
-	    highlight_seams = TRUE;
+	    notice_seams = TRUE;
 	else
-	    highlight_seams = FALSE;
+	    notice_seams = FALSE;
 	if (l & 0x100L)
 	    find_ignore_doors = TRUE;
 	else
@@ -1290,10 +1324,9 @@ int get_char(int *generate)
 		cure_blindness();
 		cure_confusion();
 		remove_fear();
-		if (py.flags.image > 0)
-		    py.flags.image = 0;
-		if (py.flags.cut > 0)
-		    py.flags.cut = 0;
+
+		if (py.flags.image > 0) py.flags.image = 0;
+		if (py.flags.cut > 0) py.flags.cut = 0;
 		if (py.flags.stun > 0) {
 		    if (py.flags.stun > 50) {
 			py.misc.ptohit += 20;
@@ -1304,16 +1337,29 @@ int get_char(int *generate)
 		    }
 		    py.flags.stun = 0;
 		}
-		if (py.flags.word_recall > 0)
-		    py.flags.word_recall = 0;
-		dun_level = 0;	   /* Resurrect on the town level. */
+		if (py.flags.word_recall > 0) py.flags.word_recall = 0;
+
+		/* Resurrect on the town level. */
+		dun_level = 0;
+
+		/* Set character_generated */
 		character_generated = 1;
 
-	    /* set noscore to indicate a resurrection, and don't enter wizard mode */
-		to_be_wizard = FALSE;
+		/* set noscore to indicate a resurrection */
 		noscore |= 0x1;
-	    } else {
+
+		/* XXX Don't enter wizard mode */
+		to_be_wizard = FALSE;
+
+
+	    }
+
+	    /* Normal "restoration" */
+	    else {
+
 		prt("Restoring Memory of a departed spirit...", 0, 0);
+
+		/* Forget the turn, and old_turn */
 		turn = (-1);
 		old_turn = (-1);
 	    }
@@ -1500,56 +1546,75 @@ int get_char(int *generate)
 	    prt("FILE ERROR", 17, 0);
 	    goto error;
 	}
+
 	if (turn < 0) {
+
 	    prt("Error = turn < 0", 7, 0);
-    error:
-	    ok = FALSE;		   /* Assume bad data. */
-	} else {
-	/* don't overwrite the killed by string if character is dead */
-	    if (py.misc.chp >= 0)
+
+error:
+
+	    /* Assume bad data. */
+	    ok = FALSE;
+	}
+
+	else {
+
+	    /* don't overwrite the "killed by" string if character is dead */
+	    if (py.misc.chp >= 0) {
 		(void)strcpy(died_from, "(alive and well)");
+	    }
+
 	    character_generated = 1;
 	}
 
 closefiles:
 
 	if (fileptr != NULL) {
-	    if (fclose(fileptr) < 0)
-		ok = FALSE;
+	    if (fclose(fileptr) < 0) ok = FALSE;
 	}
-	if (fd >= 0)
-	    (void)close(fd);
+	if (fd >= 0) (void)close(fd);
 
-	if (!ok)
+	if (!ok) {
 	    msg_print("Error during reading of file.");
+	}
+
 	else if (turn >= 0 && !_new_log())
 	    msg_print("Can't log player in the log file.");
+
 	else {
-	/* let the user overwrite the old savefile when save/quit */
+
+	    /* Hack -- Let the user overwrite the old savefile when save/quit */
 	    from_savefile = 1;
 
+	    /* Allow suspend again */
 	    signals();
 
-	    if (turn >= 0) {	   /* Only if a full restoration. */
+	    /* Only if a full restoration. */
+	    if (turn >= 0) {
+
 		weapon_heavy = FALSE;
 		pack_heavy = 0;
+
+		/* Re-calculate bonuses */
 		check_strength();
+		
 
-	    /* rotate store inventory, depending on how old the save file */
-	    /* is foreach day old (rounded up), call store_maint */
-	    /* calculate age in seconds */
+		/* rotate store inventory, depending on how old the save file */
+		/* is foreach day old (rounded up), call store_maint */
+
+		/* calculate age in seconds */
 		start_time = time((long *)0);
-	    /* check for reasonable values of time here ... */
-		if (start_time < time_saved)
-		    age = 0;
-		else
-		    age = start_time - time_saved;
 
+		/* check for reasonable values of time here ... */
+		if (start_time < time_saved) age = 0;
+		elseage = start_time - time_saved;
+
+		/* Convert age to "real time" in days */
 		age = (age + 43200L) / 86400L;	/* age in days */
-		if (age > 10)
-		    age = 10;	   /* in case savefile is very old */
-		for (i = 0; i < age; i++)
-		    store_maint();
+
+		/* in case savefile is very old */
+		if (age > 10) age = 10;
+		for (i = 0; i < age; i++) store_maint();
 	    }
 
 /* if (noscore) msg_print("This save file cannot be used to get on the score board."); */

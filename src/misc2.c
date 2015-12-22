@@ -36,11 +36,180 @@ static int test_place(int y, int x)
 
 
 
+/*
+ * Deletes a monster entry from the level		-RAK-	 
+ */
+void delete_monster(int j)
+{
+    register monster_type *m_ptr;
+
+    if (j < 2)
+	return;			   /* trouble? abort! -CFT */
+    m_ptr = &m_list[j];
+    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
+	check_unique(m_ptr);
+    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
+    if (m_ptr->ml)
+	lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
+    if (j != mfptr - 1) {
+#ifdef TARGET
+	/* This targetting code stolen from Morgul -CFT */
+	/* Targetted monster dead or compacted.      CDW */
+	if (j==target_mon)
+	    target_mode = FALSE;
+
+	/* Targetted monster moved to replace dead or compacted monster   CDW */
+	if (target_mon==mfptr-1)
+	    target_mon = j;
+#endif
+	m_ptr = &m_list[mfptr - 1];
+	cave[m_ptr->fy][m_ptr->fx].cptr = j;
+	m_list[j] = m_list[mfptr - 1];
+    }
+    mfptr--;
+    m_list[mfptr] = blank_monster;
+    if (mon_tot_mult > 0)
+	mon_tot_mult--;
+}
+
+/*
+ * The following two procedures implement the same function as delete
+ * monster. However, they are used within creatures(), because deleting a
+ * monster while scanning the m_list causes two problems, monsters might get
+ * two turns, and m_ptr/monptr might be invalid after the delete_monster.
+ * Hence the delete is done in two steps. 
+ */
+/*
+ * fix1_delete_monster does everything delete_monster does except delete the
+ * monster record and reduce mfptr, this is called in breathe, and a couple
+ * of places in creatures.c 
+ */
+void fix1_delete_monster(int j)
+{
+    register monster_type *m_ptr;
+
+    if (j < 2)
+	return;			   /* trouble? abort! -CFT */
+#ifdef TARGET
+    /* Targetted monster dead or compacted.      CDW */
+    if (j==target_mon)
+	target_mode = FALSE;
+
+    /* Targetted monster moved to replace dead or compacted monster   CDW */
+    if (target_mon==mfptr-1)
+	target_mon = j;
+#endif
+    m_ptr = &m_list[j];
+    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
+	check_unique(m_ptr);
+/* force the hp negative to ensure that the monster is dead, for example, if
+ * the monster was just eaten by another, it will still have positive hit
+ * points 
+ */
+    m_ptr->hp = (-1);
+    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
+    if (m_ptr->ml)
+	lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
+    if (mon_tot_mult > 0)
+	mon_tot_mult--;
+}
+
+/* fix2_delete_monster does everything in delete_monster that wasn't done by
+ * fix1_monster_delete above, this is only called in creatures() 
+ */
+void fix2_delete_monster(int j)
+{
+    register monster_type *m_ptr;
+
+    if (j < 2)
+	return;			   /* trouble? abort! -CFT */
+    
+#ifdef TARGET
+    /* Targetted monster dead or compacted. CDW */
+    if (j==target_mon)
+	target_mode = FALSE;
+
+    /* Targetted monster moved to replace dead or compacted monster   CDW */
+    if (target_mon==mfptr-1)
+	target_mon = j; 
+#endif
+
+    m_ptr = &m_list[j];		   /* Fixed from a c_list ptr to a m_list ptr. -CFT */
+    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
+	check_unique(m_ptr);
+    if (j != mfptr - 1) {
+	m_ptr = &m_list[mfptr - 1];
+	cave[m_ptr->fy][m_ptr->fx].cptr = j;
+	m_list[j] = m_list[mfptr - 1];
+    }
+    m_list[mfptr - 1] = blank_monster;
+    mfptr--;
+}
+
+
+
+
+/*
+ * Compact monsters					-RAK-	 
+ *
+ * Return TRUE if any monsters were deleted, FALSE if could not delete any
+ * monsters. 
+ */
+int compact_monsters(void)
+{
+    register int           i;
+    int                    cur_dis, delete_any;
+    monster_type	*mon_ptr;
+
+    msg_print("Compacting monsters...");
+
+
+    /* Start 66 units away */
+    cur_dis = 66;
+
+    delete_any = FALSE;
+
+    do {
+	for (i = mfptr - 1; i >= MIN_MONIX; i--) {
+	    mon_ptr = &m_list[i];
+	    if ((cur_dis < mon_ptr->cdis) && (randint(3) == 1)) {
+	    /* Don't compact Melkor! */
+		if (c_list[mon_ptr->mptr].cmove & CM_WIN)
+		/* do nothing */
+		    ;
+
+	    /* in case this is called from within creatures(), this is a
+	     * horrible hack, the m_list/creatures() code needs to be
+	     * rewritten 
+	     */
+		else if (hack_m_idx < i) {
+		    delete_monster(i);
+		    delete_any = TRUE;
+		} else
+
+		/* fix1_delete_monster() does not decrement mfptr, so don't
+		 * set delete_any if this was called 
+		 */
+		    fix1_delete_monster(i);
+	    }
+	}
+	if (!delete_any) {
+	    cur_dis -= 6;
+	/* can't do anything else but abort, if can't delete any monsters */
+	    if (cur_dis < 0)
+		return FALSE;
+	}
+    }
+    while (!delete_any);
+    return TRUE;
+}
+
+
 
 /*
  * Returns a pointer to next free space			-RAK-
  */
-int popm(void)
+int m_pop(void)
 {
     /* Out of space?  Compact. */
     if (mfptr == MAX_MALLOC) if (!compact_monsters())
@@ -108,7 +277,7 @@ int place_monster(int y, int x, int z, int slp)
     }
 
     /* from um55, paranoia error check... */
-    cur_pos = popm();
+    cur_pos = m_pop();
 
     /* Mega-Paranoia */
     if (cur_pos == -1) return FALSE;
@@ -260,7 +429,7 @@ int place_win_monster()
     register monster_type *mon_ptr;
 
     if (!total_winner) {
-	cur_pos = popm();
+	cur_pos = m_pop();
     /* paranoia error check, from um55 -CFT */
 	if (cur_pos == -1) return FALSE;
 
@@ -812,18 +981,17 @@ int place_ghost()
     /* Break up the hitpoints */
 		j = 1;
 		if (i > 255) {	   /* avoid wrap-around of byte hitdice, by factoring */
-		    j = i / 32;
-		    i = 32;
+		j = i / 32;
+		i = 32;
 		}
-		ghost->hd[0] = i;  /* set_ghost may adj for race/class/lv */
+
+    /* set_ghost may adj for race/class/lv */
+		ghost->hd[0] = i;
 		ghost->hd[1] = j;
+
 		level = dun_level;
-	    } else {
-		return 0;
-	    }
-	} else {
-	    return 0;
-	}
+	    } else return 0;
+	} else return 0;
     }
 
     /* Set up the ghost */
@@ -832,7 +1000,7 @@ int place_ghost()
     /* Note for wizard (special ghost name) */
     if (wizard || peek) msg_print(ghost->name);
 
-    cur_pos = popm();
+    cur_pos = m_pop();
     mon_ptr = &m_list[cur_pos];
 
     /* Hack -- pick a nice (far away) location */
@@ -865,6 +1033,8 @@ int place_ghost()
 }
 
 
+
+
 /*
  * Return a monster suitable to be placed at a given level.  This makes high
  * level monsters (up to the given level) slightly more common than low level
@@ -873,11 +1043,12 @@ int place_ghost()
 int get_mons_num(int level)
 {
     register int i, j, num;
+
     int          old = level;
 
 again:
     if (level == 0) {
-	i = randint(m_level[0]) - 1;
+	    i = randint(m_level[0]) - 1;
 	}
 
 	else {

@@ -11,14 +11,27 @@
  */
 
 #include "angband.h"
-#include "monster.h"
 
 
+
+
+/*
+ * Moves creature record from one space to another	-RAK-	
+ */
+void move_rec(int y1, int x1, int y2, int x2)
+{
+    int tmp;
+
+    /* this always works correctly, even if y1==y2 and x1==x2 */
+    tmp = cave[y1][x1].cptr;
+    cave[y1][x1].cptr = 0;
+    cave[y2][x2].cptr = tmp;
+}
 
 
 
 /* 
- *Player hit a trap. (Chuckle) -RAK-
+ *Player hit a real trap. (Chuckle) -RAK-
  */
 static void hit_trap(int y, int x)
 {
@@ -328,69 +341,6 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
 }
 
 
-/*
- * Player is on an object.  Many things can happen based -RAK-	 
- * on the TVAL of the object.  Traps are set off, money and most 
- * objects are picked up.  Some objects, such as open doors, just 
- * sit there.						      
- */
-void carry(int y, int x, int pickup)
-{
-    register int         locn, i;
-    bigvtype             out_val, tmp_str;
-    register cave_type  *c_ptr;
-    register inven_type *i_ptr;
-
-    c_ptr = &cave[y][x];
-    i_ptr = &t_list[c_ptr->tptr];
-    i = t_list[c_ptr->tptr].tval;
-    if (i <= TV_MAX_PICK_UP) {
-	end_find();
-    /* There's GOLD in them thar hills!      */
-	if (i == TV_GOLD) {
-	    py.misc.au += i_ptr->cost;
-	    objdes(tmp_str, i_ptr, TRUE);
-	    (void)sprintf(out_val,
-			  "You have found %ld gold pieces worth of %s.",
-			  (long)i_ptr->cost, tmp_str);
-	    prt_gold();
-	    (void)delete_object(y, x);
-	    msg_print(out_val);
-	} else {
-	    if (pickup && inven_check_num(i_ptr)) { /* Too many objects? */
-		if (carry_query_flag) {	/* Okay,  pick it up  */
-		    objdes(tmp_str, i_ptr, TRUE);
-		    (void)sprintf(out_val, "Pick up %s? ", tmp_str);
-		    pickup = get_check(out_val);
-		}
-	    /* Check to see if it will change the players speed. */
-		if (pickup && !inven_check_weight(i_ptr)) {
-		    objdes(tmp_str, i_ptr, TRUE);
-		    (void)sprintf(out_val,
-				  "Exceed your weight limit to pick up %s? ",
-				  tmp_str);
-		    pickup = get_check(out_val);
-		}
-	    /* Attempt to pick up an object.	       */
-		if (pickup) {
-		    locn = inven_carry(i_ptr);
-		    objdes(tmp_str, &inventory[locn], TRUE);
-		    (void)sprintf(out_val, "You have %s. (%c)", tmp_str, locn + 'a');
-		    msg_print(out_val);
-		    (void)delete_object(y, x);
-		}
-	    } else if (pickup) {   /* only if was trying to pick it up...
-				    * -CFT */
-		objdes(tmp_str, i_ptr, TRUE);
-		(void)sprintf(out_val, "You can't carry %s.", tmp_str);
-		msg_print(out_val);
-	    }
-	}
-    }
-/* OOPS!				   */
-    else if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP || i == TV_STORE_DOOR)
-	hit_trap(y, x);
-}
 
 void check_unique(monster_type *m_ptr)
 {
@@ -406,116 +356,6 @@ void delete_unique()
     for (i = 0; i < MAX_CREATURES; i++)
 	if (c_list[i].cdefense & UNIQUE)
 	    u_list[i].exist = 0;
-}
-
-/*
- * Deletes a monster entry from the level		-RAK-	 
- */
-void delete_monster(int j)
-{
-    register monster_type *m_ptr;
-
-    if (j < 2)
-	return;			   /* trouble? abort! -CFT */
-    m_ptr = &m_list[j];
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-	check_unique(m_ptr);
-    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
-    if (m_ptr->ml)
-	lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
-    if (j != mfptr - 1) {
-#ifdef TARGET
-	/* This targetting code stolen from Morgul -CFT */
-	/* Targetted monster dead or compacted.      CDW */
-	if (j==target_mon)
-	    target_mode = FALSE;
-
-	/* Targetted monster moved to replace dead or compacted monster   CDW */
-	if (target_mon==mfptr-1)
-	    target_mon = j;
-#endif
-	m_ptr = &m_list[mfptr - 1];
-	cave[m_ptr->fy][m_ptr->fx].cptr = j;
-	m_list[j] = m_list[mfptr - 1];
-    }
-    mfptr--;
-    m_list[mfptr] = blank_monster;
-    if (mon_tot_mult > 0)
-	mon_tot_mult--;
-}
-
-/*
- * The following two procedures implement the same function as delete
- * monster. However, they are used within creatures(), because deleting a
- * monster while scanning the m_list causes two problems, monsters might get
- * two turns, and m_ptr/monptr might be invalid after the delete_monster.
- * Hence the delete is done in two steps. 
- */
-/*
- * fix1_delete_monster does everything delete_monster does except delete the
- * monster record and reduce mfptr, this is called in breathe, and a couple
- * of places in creatures.c 
- */
-void fix1_delete_monster(int j)
-{
-    register monster_type *m_ptr;
-
-    if (j < 2)
-	return;			   /* trouble? abort! -CFT */
-#ifdef TARGET
-    /* Targetted monster dead or compacted.      CDW */
-    if (j==target_mon)
-	target_mode = FALSE;
-
-    /* Targetted monster moved to replace dead or compacted monster   CDW */
-    if (target_mon==mfptr-1)
-	target_mon = j;
-#endif
-    m_ptr = &m_list[j];
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-	check_unique(m_ptr);
-/* force the hp negative to ensure that the monster is dead, for example, if
- * the monster was just eaten by another, it will still have positive hit
- * points 
- */
-    m_ptr->hp = (-1);
-    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
-    if (m_ptr->ml)
-	lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
-    if (mon_tot_mult > 0)
-	mon_tot_mult--;
-}
-
-/* fix2_delete_monster does everything in delete_monster that wasn't done by
- * fix1_monster_delete above, this is only called in creatures() 
- */
-void fix2_delete_monster(int j)
-{
-    register monster_type *m_ptr;
-
-    if (j < 2)
-	return;			   /* trouble? abort! -CFT */
-    
-#ifdef TARGET
-    /* Targetted monster dead or compacted. CDW */
-    if (j==target_mon)
-	target_mode = FALSE;
-
-    /* Targetted monster moved to replace dead or compacted monster   CDW */
-    if (target_mon==mfptr-1)
-	target_mon = j; 
-#endif
-
-    m_ptr = &m_list[j];		   /* Fixed from a c_list ptr to a m_list ptr. -CFT */
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-	check_unique(m_ptr);
-    if (j != mfptr - 1) {
-	m_ptr = &m_list[mfptr - 1];
-	cave[m_ptr->fy][m_ptr->fx].cptr = j;
-	m_list[j] = m_list[mfptr - 1];
-    }
-    m_list[mfptr - 1] = blank_monster;
-    mfptr--;
 }
 
 
@@ -569,27 +409,6 @@ static int summon_object(int y, int x, int num, int typ, s32b  ood)
     }
     while (num != 0);
     return res;
-}
-
-
-/* Deletes object from given location			-RAK-	 */
-int delete_object(int y, int x)
-{
-    register int        delete;
-    register cave_type *c_ptr;
-
-    c_ptr = &cave[y][x];
-    if (c_ptr->fval == BLOCKED_FLOOR)
-	c_ptr->fval = CORR_FLOOR;
-    pusht(c_ptr->tptr);		   /* then eliminate it */
-    c_ptr->tptr = 0;
-    c_ptr->fm = FALSE;
-    lite_spot(y, x);
-    if (test_light(y, x))
-	delete = TRUE;
-    else
-	delete = FALSE;
-    return (delete);
 }
 
 
@@ -822,7 +641,7 @@ static int fearless(creature_type *c_ptr)
  */
 int mon_take_hit(int monptr, int dam, int print_fear)
 {
-    register s32b         i;
+    s32b         i;
     int                     found = FALSE;
     s32b                   new_exp, new_exp_frac;
     register monster_type  *m_ptr;
@@ -1029,7 +848,7 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 /*
  * Player attacks a (poor, defenseless) creature	-RAK-	 
  */
-static void py_attack(int y, int x)
+void py_attack(int y, int x)
 {
     register int        k, blows;
     int                 crptr, monptr, tot_tohit, base_tohit;
@@ -1044,14 +863,14 @@ static void py_attack(int y, int x)
     i_ptr = &inventory[INVEN_WIELD];
 
     /* Does the player know what he's fighting?	   */
-    if (!m_list[crptr].ml)
-	(void)strcpy(m_name, "it");
+    if (!m_list[crptr].ml) (void)strcpy(m_name, "it");
     else {
 	if (c_list[monptr].cdefense & UNIQUE)
 	    (void)sprintf(m_name, "%s", c_list[monptr].name);
 	else
 	    (void)sprintf(m_name, "the %s", c_list[monptr].name);
     }
+
     /* Proper weapon */
     if (i_ptr->tval != TV_NOTHING) {
 
@@ -1089,6 +908,7 @@ static void py_attack(int y, int x)
 
     /* Loop for number of blows, trying to hit the critter. */
     do {
+
 	/* We hit it! */
 	if (test_hit(base_tohit, (int)p_ptr->lev, tot_tohit,
 		     (int)c_list[monptr].ac, CLA_BTH)) {
@@ -1188,7 +1008,7 @@ static void py_attack(int y, int x)
     }
     while (blows > 0);
 
-/* redo fear messages to only print at the end -CWS */
+    /* redo fear messages to only print at the end -CWS */
 
     if (!m_list[crptr].ml)
 	(void)strcpy(m_name, "It");
@@ -1214,1063 +1034,6 @@ static void py_attack(int y, int x)
 }
 
 
-/*
- * Moves player from one space to another.		-RAK-	 
- * Note: This routine has been pre-declared; see that for argument
- */
-void move_char(int dir, int do_pickup)
-{
-    int                 old_row, old_col, old_find_flag;
-    int                 y, x;
-    register int        i, j;
-    register cave_type *c_ptr, *d_ptr;
-
-    if (((py.flags.confused > 0) || (py.flags.stun > 0)) &&	/* Confused/Stunned?  */
-	(randint(4) > 1) &&	   /* 75% random movement */
-	(dir != 5)) {		   /* Never random if sitting */
-	dir = randint(9);
-	end_find();
-    }
-    y = char_row;
-    x = char_col;
-    if (mmove(dir, &y, &x)) {	   /* Legal move?	      */
-	c_ptr = &cave[y][x];
-    /* if there is no creature, or an unlit creature in the walls then... */
-    /* disallow attacks against unlit creatures in walls because moving into
-     * a wall is a free turn normally, hence don't give player free turns
-     * attacking each wall in an attempt to locate the invisible creature,
-     * instead force player to tunnel into walls which always takes a turn 
-     */
-	if ((c_ptr->cptr < 2)
-	  || (!m_list[c_ptr->cptr].ml && c_ptr->fval >= MIN_CLOSED_SPACE)) {
-	    if (c_ptr->fval <= MAX_OPEN_SPACE) {	/* Open floor spot	 */
-	    /* Make final assignments of char co-ords */
-		old_row = char_row;
-		old_col = char_col;
-		char_row = y;
-		char_col = x;
-	    /* Move character record (-1)	       */
-		move_rec(old_row, old_col, char_row, char_col);
-	    /* Check for new panel		       */
-		if (get_panel(char_row, char_col, FALSE))
-		    prt_map();
-	    /* Check to see if he should stop	       */
-		if (find_flag)
-		    area_affect(dir, char_row, char_col);
-	    /* Check to see if he notices something  */
-	    /* fos may be negative if have good rings of searching */
-		if ((py.misc.fos <= 1) || (randint(py.misc.fos) == 1) ||
-		    (py.flags.status & PY_SEARCH))
-		    search(char_row, char_col, py.misc.srh);
-	    /* A room of light should be lit.	     */
-		if ((c_ptr->fval == LIGHT_FLOOR) ||
-		    (c_ptr->fval == NT_LIGHT_FLOOR)) {
-		    if (!c_ptr->pl && !py.flags.blind)
-			light_room(char_row, char_col);
-		}
-	    /* In doorway of light-room?	       */
-		else if (c_ptr->lr && (py.flags.blind < 1)) {
-		    byte lit = FALSE;	/* only call light_room once... -CFT */
-
-		    for (i = (char_row - 1); !lit && i <= (char_row + 1); i++)
-			for (j = (char_col - 1); !lit && j <= (char_col + 1); j++) {
-			    d_ptr = &cave[i][j];
-			    if (((d_ptr->fval == LIGHT_FLOOR) ||
-				 (d_ptr->fval == NT_LIGHT_FLOOR)) &&
-				(!d_ptr->pl)) {
-			    /* move light 1st, or corridor may be perm lit */
-				move_light(old_row, old_col, char_row, char_col);
-				light_room(char_row, char_col);
-				lit = TRUE;	/* okay, we can stop now... -CFT */
-			    }
-			}
-		}
-	    /* Move the light source		       */
-		move_light(old_row, old_col, char_row, char_col);
-	    /* An object is beneath him.	     */
-		if (c_ptr->tptr != 0) {
-		    i = t_list[c_ptr->tptr].tval;
-		    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
-			|| i == TV_STORE_DOOR || !prompt_carry_flag
-			|| i == TV_GOLD)
-			carry(char_row, char_col, do_pickup);
-		    else if (prompt_carry_flag && i != TV_OPEN_DOOR
-			     && i != TV_UP_STAIR && i != TV_DOWN_STAIR) {
-			inven_type         *i_ptr;
-			bigvtype            tmp_str, tmp2_str;
-
-			i_ptr = &t_list[cave[char_row][char_col].tptr];
-			objdes(tmp_str, i_ptr, TRUE);
-			sprintf(tmp2_str, "You see %s.", tmp_str);
-			msg_print(tmp2_str);
-		    }
-		/* if stepped on falling rock trap, and space contains
-		 * rubble, then step back into a clear area 
-		 */
-		    if (t_list[c_ptr->tptr].tval == TV_RUBBLE) {
-			move_rec(char_row, char_col, old_row, old_col);
-			move_light(char_row, char_col, old_row, old_col);
-			char_row = old_row;
-			char_col = old_col;
-	/* check to see if we have stepped back onto another trap, if so, set it off */
-			c_ptr = &cave[char_row][char_col];
-			if (c_ptr->tptr != 0) {
-			    i = t_list[c_ptr->tptr].tval;
-			    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
-				|| i == TV_STORE_DOOR)
-				hit_trap(char_row, char_col);
-			}
-		    }
-		}
-	    } else {		   /* Can't move onto floor space */
-		if (!find_flag && (c_ptr->tptr != 0)) {
-		    if (t_list[c_ptr->tptr].tval == TV_RUBBLE)
-			msg_print("There is rubble blocking your way.");
-		    else if (t_list[c_ptr->tptr].tval == TV_CLOSED_DOOR)
-			msg_print("There is a closed door blocking your way.");
-		} else
-		    end_find();
-		free_turn_flag = TRUE;
-	    }
-	} else {		   /* Attacking a creature! */
-	    old_find_flag = find_flag;
-	    end_find();
-	/* if player can see monster, and was in find mode, then nothing */
-	    if (m_list[c_ptr->cptr].ml && old_find_flag) {
-	    /* did not do anything this turn */
-		free_turn_flag = TRUE;
-	    } else {
-		if (py.flags.afraid < 1)	/* Coward?	 */
-		    py_attack(y, x);
-		else		   /* Coward!	 */
-		    msg_print("You are too afraid!");
-	    }
-	}
-    }
-}
-
-
-/*
- * Chests have traps too.				-RAK-	 
- * Note: Chest traps are based on the FLAGS value		
- */
-static void chest_trap(int y, int x)
-{
-    register int        i;
-    int                 j, k;
-    register inven_type *t_ptr;
-
-    t_ptr = &t_list[cave[y][x].tptr];
-    if (CH_LOSE_STR & t_ptr->flags) {
-	msg_print("A small needle has pricked you!");
-	if (!py.flags.sustain_str) {
-	    (void)dec_stat(A_STR);
-	    take_hit(damroll(1, 4), "a poison needle");
-	    msg_print("You feel weakened!");
-	} else
-	    msg_print("You are unaffected.");
-    }
-    if (CH_POISON & t_ptr->flags) {
-	msg_print("A small needle has pricked you!");
-	take_hit(damroll(1, 6), "a poison needle");
-	if (!(py.flags.poison_resist || py.flags.resist_poison ||
-	      py.flags.poison_im))
-	    py.flags.poisoned += 10 + randint(20);
-    }
-    if (CH_PARALYSED & t_ptr->flags) {
-	msg_print("A puff of yellow gas surrounds you!");
-	if (py.flags.free_act)
-	    msg_print("You are unaffected.");
-	else {
-	    msg_print("You choke and pass out.");
-	    py.flags.paralysis = 10 + randint(20);
-	}
-    }
-    if (CH_SUMMON & t_ptr->flags) {
-	for (i = 0; i < 3; i++) {
-	    j = y;
-	    k = x;
-	    (void)summon_monster(&j, &k, FALSE);
-	}
-    }
-    if (CH_EXPLODE & t_ptr->flags) {
-	msg_print("There is a sudden explosion!");
-	(void)delete_object(y, x);
-	take_hit(damroll(5, 8), "an exploding chest");
-    }
-}
-
-
-/*
- * Opens a closed door or closed chest.		-RAK-	 
- */
-void openobject()
-{
-    int                    y, x, i, dir;
-    int                    flag, no_object;
-    register cave_type    *c_ptr;
-    register inven_type   *t_ptr;
-    register struct misc  *p_ptr;
-    register monster_type *m_ptr;
-    vtype                  m_name, out_val;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
-    target_mode = FALSE;
-#endif
-    if (get_dir(NULL, &dir)) {
-	(void)mmove(dir, &y, &x);
-	c_ptr = &cave[y][x];
-	no_object = FALSE;
-	if (c_ptr->cptr > 1 && c_ptr->tptr != 0 &&
-	    (t_list[c_ptr->tptr].tval == TV_CLOSED_DOOR
-	     || t_list[c_ptr->tptr].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->cptr];
-	    if (m_ptr->ml) {
-		if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-		    (void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
-		else
-		    (void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
-	    } else
-		(void)strcpy(m_name, "Something");
-	    (void)sprintf(out_val, "%s is in your way!", m_name);
-	    msg_print(out_val);
-	} else if (c_ptr->tptr != 0)
-	/* Closed door		 */
-	    if (t_list[c_ptr->tptr].tval == TV_CLOSED_DOOR) {
-		t_ptr = &t_list[c_ptr->tptr];
-		if (t_ptr->p1 > 0) {
-		    p_ptr = &py.misc;
-		    i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-			+ (class_level_adj[p_ptr->pclass][CLA_DISARM]
-			   * p_ptr->lev / 3);
-	/* give a 1/50 chance of opening anything, anyway -CWS */
-		    if ((i - t_ptr->p1) < 2)
-			i = t_ptr->p1 + 2;
-		    if (py.flags.confused > 0)
-			msg_print("You are too confused to pick the lock.");
-		    else if ((i - t_ptr->p1) > randint(100)) {
-			msg_print("You have picked the lock.");
-			py.misc.exp++;
-			prt_experience();
-			t_ptr->p1 = 0;
-		    } else
-			count_msg_print("You failed to pick the lock.");
-		} else if (t_ptr->p1 < 0)	/* It's stuck	  */
-		    msg_print("It appears to be stuck.");
-		if (t_ptr->p1 == 0) {
-		    invcopy(&t_list[c_ptr->tptr], OBJ_OPEN_DOOR);
-		    c_ptr->fval = CORR_FLOOR;
-		    lite_spot(y, x);
-		    check_view();
-		    command_count = 0;
-		}
-	    }
-    /* Open a closed chest.		     */
-	    else if (t_list[c_ptr->tptr].tval == TV_CHEST) {
-		p_ptr = &py.misc;
-		i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-		    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
-		t_ptr = &t_list[c_ptr->tptr];
-		flag = FALSE;
-		if (CH_LOCKED & t_ptr->flags)
-		    if (py.flags.confused > 0)
-			msg_print("You are too confused to pick the lock.");
-		    else if ((i - (int)t_ptr->level) > randint(100)) {
-			msg_print("You have picked the lock.");
-			flag = TRUE;
-			py.misc.exp += t_ptr->level;
-			prt_experience();
-		    } else
-			count_msg_print("You failed to pick the lock.");
-		else
-		    flag = TRUE;
-		if (flag) {
-		    t_ptr->flags &= ~CH_LOCKED;
-		    t_ptr->name2 = SN_EMPTY;
-		    known2(t_ptr);
-		    t_ptr->cost = 0;
-		}
-		flag = FALSE;
-	    /* Was chest still trapped?	 (Snicker)   */
-		if ((CH_LOCKED & t_ptr->flags) == 0) {
-		    chest_trap(y, x);
-		    if (c_ptr->tptr != 0)
-			flag = TRUE;
-		}
-	    /* Chest treasure is allocated as if a creature   */
-	    /* had been killed.				   */
-		if (flag) {
-		/*
-		 * clear the cursed chest/monster win flag, so that people
-		 * can not win by opening a cursed chest 
-		 */
-		    t_ptr->flags &= ~TR_CURSED;
-
-		/* generate based on level chest was found on - dbd */
-		    object_level = t_ptr->p1;
-
-	        /* but let's not get too crazy with storebought chests -CWS */
-		    if (t_ptr->ident & ID_STOREBOUGHT) {
-			if (object_level > 20)
-			    object_level = 20;
-		    }
-
-		    if (object_level < 0) /* perform some sanity checking -CWS */
-			object_level = 0;
-		    if (object_level > MAX_OBJ_LEVEL)
-			object_level = MAX_OBJ_LEVEL;
-
-		    coin_type = 0;
-		    opening_chest = TRUE; /* don't generate another chest -CWS */
-		    (void)monster_death(y, x, t_list[c_ptr->tptr].flags, 0, 0);
-		    t_list[c_ptr->tptr].flags = 0;
-		    opening_chest = FALSE;
-		}
-	    } else
-		no_object = TRUE;
-	else
-	    no_object = TRUE;
-
-	if (no_object) {
-	    msg_print("I do not see anything you can open there.");
-	    free_turn_flag = TRUE;
-	}
-    }
-#ifdef TARGET
-    target_mode = temp;
-#endif
-}
-
-
-/* Closes an open door.				-RAK-	 */
-void closeobject()
-{
-    int                    y, x, dir, no_object;
-    vtype                  out_val, m_name;
-    register cave_type    *c_ptr;
-    register monster_type *m_ptr;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
-    target_mode = FALSE;
-#endif
-    if (get_dir(NULL, &dir)) {
-	(void)mmove(dir, &y, &x);
-	c_ptr = &cave[y][x];
-	no_object = FALSE;
-	if (c_ptr->tptr != 0)
-	    if (t_list[c_ptr->tptr].tval == TV_OPEN_DOOR)
-		if (c_ptr->cptr == 0)
-		    if (t_list[c_ptr->tptr].p1 == 0) {
-			invcopy(&t_list[c_ptr->tptr], OBJ_CLOSED_DOOR);
-			c_ptr->fval = BLOCKED_FLOOR;
-			lite_spot(y, x);
-		    } else
-			msg_print("The door appears to be broken.");
-		else {
-		    m_ptr = &m_list[c_ptr->cptr];
-		    if (m_ptr->ml) {
-			if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-			    (void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
-			else
-			    (void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
-		    } else
-			(void)strcpy(m_name, "Something");
-		    (void)sprintf(out_val, "%s is in your way!", m_name);
-		    msg_print(out_val);
-		}
-	    else
-		no_object = TRUE;
-	else
-	    no_object = TRUE;
-
-	if (no_object) {
-	    msg_print("I do not see anything you can close there.");
-	    free_turn_flag = TRUE;
-	}
-    }
-#ifdef TARGET
-    target_mode = temp;
-#endif
-}
-
-
-/* Tunneling through real wall: 10, 11, 12		-RAK-	 */
-/* Used by TUNNEL and WALL_TO_MUD				 */
-int twall(int y, int x, int t1, int t2)
-{
-    register int        i, j;
-    register cave_type *c_ptr;
-    int                 res, found;
-
-    res = FALSE;
-    if (t1 > t2) {
-	c_ptr = &cave[y][x];
-	if (c_ptr->tptr) { /* secret door or rubble or gold -CFT */
-	    if (t_list[c_ptr->tptr].tval == TV_RUBBLE) {
-		delete_object(y,x); /* blow it away... */
-		if (randint(10)==1){
-		    place_object(y,x); /* and drop a goodie! */
-		}
-	    }
-	    else if (t_list[c_ptr->tptr].tval >= TV_MIN_DOORS)
-		delete_object(y,x); /* no more door... */
-	} /* if object there.... */
-	
-	c_ptr->fm = FALSE;
-	if (panel_contains(y, x))
-	    if ((c_ptr->tl || c_ptr->pl) && c_ptr->tptr != 0) {
-		msg_print("You have found something!");
-		c_ptr->fm = TRUE;
-	    }		
-	
-/* should become a room space, check to see whether it should be
- * LIGHT_FLOOR or DARK_FLOOR
- */
-	if (c_ptr->lr) {
-	    found = FALSE;
-	    for (i = y - 1; i <= y + 1; i++)
-		for (j = x - 1; j <= x + 1; j++)
-		    if (cave[i][j].fval <= MAX_CAVE_ROOM) {
-			c_ptr->fval = cave[i][j].fval;
-			c_ptr->pl = cave[i][j].pl;
-			found = TRUE;
-			break;
-		    }
-	    if (!found) {
-		c_ptr->fval = CORR_FLOOR;
-		c_ptr->pl = FALSE;
-	    }
-	} else {
-	    /* should become a corridor space */
-	    c_ptr->fval = CORR_FLOOR;
-	    c_ptr->pl = FALSE;
-	}
-	lite_spot(y, x);
-	res = TRUE;
-    }
-    return (res);
-}
-
-
-/* Tunnels through rubble and walls			-RAK-	 */
-/* Must take into account: secret doors,  special tools		  */
-void tunnel(int dir)
-{
-    register int        i, tabil;
-    register cave_type *c_ptr;
-    register inven_type *i_ptr;
-    int                 y, x;
-    monster_type       *m_ptr;
-    vtype               out_val, m_name;
-
-    if ((py.flags.confused > 0) && /* Confused?	     */
-	(randint(4) > 1))	   /* 75% random movement   */
-	dir = randint(9);
-    y = char_row;
-    x = char_col;
-    (void)mmove(dir, &y, &x);
-
-    c_ptr = &cave[y][x];
-/* Compute the digging ability of player; based on	   */
-/* strength, and type of tool used			   */
-    tabil = py.stats.use_stat[A_STR];
-    i_ptr = &inventory[INVEN_WIELD];
-
-/* Don't let the player tunnel somewhere illegal, this is necessary to
- * prevent the player from getting a free attack by trying to tunnel
- * somewhere where it has no effect.  
- */
-    if (c_ptr->fval < MIN_CAVE_WALL
-	&& (c_ptr->tptr == 0 || (t_list[c_ptr->tptr].tval != TV_RUBBLE
-			  && t_list[c_ptr->tptr].tval != TV_SECRET_DOOR))) {
-	if (c_ptr->tptr == 0) {
-	    msg_print("Tunnel through what?  Empty air?!?");
-	    free_turn_flag = TRUE;
-	} else {
-	    msg_print("You can't tunnel through that.");
-	    free_turn_flag = TRUE;
-	}
-	return;
-    }
-    if (c_ptr->cptr > 1) {
-	m_ptr = &m_list[c_ptr->cptr];
-	if (m_ptr->ml) {
-	    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-		(void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
-	    else
-		(void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
-	} else
-	    (void)strcpy(m_name, "Something");
-	(void)sprintf(out_val, "%s is in your way!", m_name);
-	msg_print(out_val);
-
-    /* let the player attack the creature */
-	if (py.flags.afraid < 1)
-	    py_attack(y, x);
-	else
-	    msg_print("You are too afraid!");
-    } else if (i_ptr->tval != TV_NOTHING) {
-	if (TR_TUNNEL & i_ptr->flags)
-	    tabil += 25 + i_ptr->p1 * 50;
-	else {
-	    tabil += (i_ptr->damage[0] * i_ptr->damage[1]) + i_ptr->tohit
-		+ i_ptr->todam;
-	/* divide by two so that digging without shovel isn't too easy */
-	    tabil >>= 1;
-	}
-
-	if (weapon_heavy) {
-	    tabil += (py.stats.use_stat[A_STR] * 15) - i_ptr->weight;
-	    if (tabil < 0)
-		tabil = 0;
-	}
-    /* Regular walls; Granite, magma intrusion, quartz vein  */
-    /* Don't forget the boundary walls, made of titanium (255) */
-	switch (c_ptr->fval) {
-	  case GRANITE_WALL:
-	    i = randint(1200) + 80;
-	    if (twall(y, x, tabil, i)) {
-		msg_print("You have finished the tunnel.");
-		check_view();
-	    } else
-		count_msg_print("You tunnel into the granite wall.");
-	    break;
-	  case MAGMA_WALL:
-	    i = randint(600) + 10;
-	    if (twall(y, x, tabil, i)) {
-		msg_print("You have finished the tunnel.");
-		check_view();
-	    } else
-		count_msg_print("You tunnel into the magma intrusion.");
-	    break;
-	  case QUARTZ_WALL:
-	    i = randint(400) + 10;
-	    if (twall(y, x, tabil, i)) {
-		msg_print("You have finished the tunnel.");
-		check_view();
-	    } else
-		count_msg_print("You tunnel into the quartz vein.");
-	    break;
-	  case BOUNDARY_WALL:
-	    msg_print("This seems to be permanent rock.");
-	    break;
-	  default:
-	/* Is there an object in the way?  (Rubble and secret doors) */
-	    if (c_ptr->tptr != 0) {
-	    /* Rubble.     */
-		if (t_list[c_ptr->tptr].tval == TV_RUBBLE) {
-		    if (tabil > randint(180)) {
-			(void)delete_object(y, x);
-			msg_print("You have removed the rubble.");
-			if (randint(10) == 1) {
-			    place_object(y, x);
-			    if (test_light(y, x))
-				msg_print("You have found something!");
-			}
-			lite_spot(y, x);
-			check_view();
-		    } else
-			count_msg_print("You dig in the rubble.");
-		}
-	    /* Secret doors. */
-		else if (t_list[c_ptr->tptr].tval == TV_SECRET_DOOR) {
-		    count_msg_print("You tunnel into the granite wall.");
-		    search(char_row, char_col, py.misc.srh);
-		} else {
-		    msg_print("You can't tunnel through that.");
-		    free_turn_flag = TRUE;
-		}
-	    } else {
-		msg_print("Tunnel through what?  Empty air?!?");
-		free_turn_flag = TRUE;
-	    }
-	    break;
-	}
-    } else
-	msg_print("You dig with your hands, making no progress.");
-}
-
-
-/*
- * Disarms a trap					-RAK-	
- */
-void disarm_trap()
-{
-    int                 y, x, level, tmp, dir, no_disarm;
-    register int        tot, i;
-    register cave_type *c_ptr;
-    register inven_type *i_ptr;
-    monster_type       *m_ptr;
-    vtype               m_name, out_val;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
-    target_mode = FALSE;
-#endif
-    if (get_dir(NULL, &dir)) {
-	(void)mmove(dir, &y, &x);
-	c_ptr = &cave[y][x];
-	no_disarm = FALSE;
-	if (c_ptr->cptr > 1 && c_ptr->tptr != 0 &&
-	    (t_list[c_ptr->tptr].tval == TV_VIS_TRAP
-	     || t_list[c_ptr->tptr].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->cptr];
-	    if (m_ptr->ml)
-		(void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
-	    else
-		(void)strcpy(m_name, "Something");
-	    (void)sprintf(out_val, "%s is in your way!", m_name);
-	    msg_print(out_val);
-	} else if (c_ptr->tptr != 0) {
-	    tot = py.misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-		+ (class_level_adj[py.misc.pclass][CLA_DISARM] * py.misc.lev / 3);
-	    if ((py.flags.blind > 0) || (no_light()))
-		tot = tot / 10;
-	    if (py.flags.confused > 0)
-		tot = tot / 10;
-	    if (py.flags.image > 0)
-		tot = tot / 10;
-	    i_ptr = &t_list[c_ptr->tptr];
-	    i = i_ptr->tval;
-	    level = i_ptr->level;
-	    if (i == TV_VIS_TRAP) {/* Floor trap    */
-		if ((tot + 100 - level) > randint(100)) {
-		    msg_print("You have disarmed the trap.");
-		    py.misc.exp += i_ptr->p1;
-		    (void)delete_object(y, x);
-		/* make sure we move onto the trap even if confused */
-		    tmp = py.flags.confused;
-		    py.flags.confused = 0;
-		    move_char(dir, FALSE);
-		    py.flags.confused = tmp;
-		    prt_experience();
-		}
-	    /* avoid randint(0) call */
-		else if ((tot > 5) && (randint(tot) > 5))
-		    count_msg_print("You failed to disarm the trap.");
-		else {
-		    msg_print("You set the trap off!");
-		/* make sure we move onto the trap even if confused */
-		    tmp = py.flags.confused;
-		    py.flags.confused = 0;
-		    move_char(dir, FALSE);
-		    py.flags.confused += tmp;
-		}
-	    } else if (i == TV_CHEST) {
-		if (!known2_p(i_ptr)) {
-		    msg_print("I don't see a trap.");
-		    free_turn_flag = TRUE;
-		} else if (CH_TRAPPED & i_ptr->flags) {
-		    if ((tot - level) > randint(100)) {
-			i_ptr->flags &= ~CH_TRAPPED;
-			if (CH_LOCKED & i_ptr->flags)
-			    i_ptr->name2 = SN_LOCKED;
-			else
-			    i_ptr->name2 = SN_DISARMED;
-			msg_print("You have disarmed the chest.");
-			known2(i_ptr);
-			py.misc.exp += level;
-			prt_experience();
-		    } else if ((tot > 5) && (randint(tot) > 5))
-			count_msg_print("You failed to disarm the chest.");
-		    else {
-			msg_print("You set a trap off!");
-			known2(i_ptr);
-			chest_trap(y, x);
-		    }
-		} else {
-		    msg_print("The chest was not trapped.");
-		    free_turn_flag = TRUE;
-		}
-	    } else
-		no_disarm = TRUE;
-	} else
-	    no_disarm = TRUE;
-
-	if (no_disarm) {
-	    msg_print("I do not see anything to disarm there.");
-	    free_turn_flag = TRUE;
-	}
-    }
-#ifdef TARGET
-    target_mode = temp;
-#endif
-}
-
-
-/* An enhanced look, with peripheral vision. Looking all 8	-CJS-
- * directions will see everything which ought to be visible. Can specify
- * direction 5, which looks in all directions. 
- *
- * For the purpose of hindering vision, each place is regarded as a diamond just
- * touching its four immediate neighbours. A diamond is opaque if it is a
- * wall, or shut door, or something like that. A place is visible if any part
- * of its diamond is visible: i.e. there is a line from the view point to
- * part of the diamond which does not pass through any opaque diamonds. 
- *
- * Consider the following situation: 
- *
- * @....			    X	X   X	X   X .##..			   /
- * \ / \ / \ / \ / \ .....			  X @ X . X . X 1 X . X \ / \
- * / \ / \ / \ / X	X   X	X   X Expanded view, with	   / \ / \ /
- * \ / \ / \ diamonds inscribed	  X . X # X # X 2 X . X about each point,	  
- * \ / \ / \ / \ / \ / and some locations	    X	X   X	X   X
- * numbered.		   / \ / \ / \ / \ / \ X . X . X . X 3 X 4 X \ / \ /
- * \ / \ / \ / X	X   X	X   X - Location 1 is fully visible. -
- * Location 2 is visible, even though partially obscured. - Location 3 is
- * invisible, but if either # were transparent, it would be visible. -
- * Location 4 is completely obscured by a single #. 
- *
- * The function which does the work is look_ray. It sets up its own co-ordinate
- * frame (global variables map back to the dungeon frame) and looks for
- * everything between two angles specified from a central line. It is
- * recursive, and each call looks at stuff visible along a line parallel to
- * the center line, and a set distance away from it. A diagonal look uses
- * more extreme peripheral vision from the closest horizontal and vertical
- * directions; horizontal or vertical looks take a call for each side of the
- * central line. 
- */
-
-/*
- * Globally accessed variables: gl_nseen counts the number of places where
- * something is seen. gl_rock indicates a look for rock or objects. 
- *
- * The others map co-ords in the ray frame to dungeon co-ords. 
- *
- * dungeon y = char_row	 + gl_fyx * (ray x)  + gl_fyy * (ray y) dungeon x =
- * char_col	 + gl_fxx * (ray x)  + gl_fxy * (ray y) 
- */
-static int gl_fxx, gl_fxy, gl_fyx, gl_fyy;
-static int gl_nseen, gl_noquery;
-static int gl_rock;
-
-/*
- * Intended to be indexed by dir/2, since is only relevant to horizontal or
- * vertical directions. 
- */
-static int set_fxy[] = {0, 1, 0, 0, -1};
-static int set_fxx[] = {0, 0, -1, 1, 0};
-static int set_fyy[] = {0, 0, 1, -1, 0};
-static int set_fyx[] = {0, 1, 0, 0, -1};
-
-/* Map diagonal-dir/2 to a normal-dir/2. */
-static int map_diag1[] = {1, 3, 0, 2, 4};
-static int map_diag2[] = {2, 1, 0, 4, 3};
-
-#define GRADF	10000		   /* Any sufficiently big number will do */
-
-/*
- * Look at what we can see. This is a free move. 
- *
- * Prompts for a direction, and then looks at every object in turn within a cone
- * of vision in that direction. For each object, the cursor is moved over the
- * object, a description is given, and we wait for the user to type
- * something. Typing ESCAPE will abort the entire look. 
- *
- * Looks first at real objects and monsters, and looks at rock types only after
- * all other things have been seen.  Only looks at rock types if the
- * highlight_seams option is set. 
- */
-
-void look()
-{
-    register int        i, abort;
-    int                 dir, dummy;
-
-    if (py.flags.blind > 0)
-	msg_print("You can't see a damn thing!");
-    else if (py.flags.image > 0)
-	msg_print("You can't believe what you are seeing! It's like a dream!");
-    else if (get_alldir("Look which direction? ", &dir)) {
-	abort = FALSE;
-	gl_nseen = 0;
-	gl_rock = 0;
-	gl_noquery = FALSE;	   /* Have to set this up for the look_see */
-	if (look_see(0, 0, &dummy))
-	    abort = TRUE;
-	else {
-	    do {
-		abort = FALSE;
-		if (dir == 5) {
-		    for (i = 1; i <= 4; i++) {
-			gl_fxx = set_fxx[i];
-			gl_fyx = set_fyx[i];
-			gl_fxy = set_fxy[i];
-			gl_fyy = set_fyy[i];
-			if (look_ray(0, 2 * GRADF - 1, 1)) {
-			    abort = TRUE;
-			    break;
-			}
-			gl_fxy = (-gl_fxy);
-			gl_fyy = (-gl_fyy);
-			if (look_ray(0, 2 * GRADF, 2)) {
-			    abort = TRUE;
-			    break;
-			}
-		    }
-		} else if ((dir & 1) == 0) {	/* Straight directions */
-		    i = dir >> 1;
-		    gl_fxx = set_fxx[i];
-		    gl_fyx = set_fyx[i];
-		    gl_fxy = set_fxy[i];
-		    gl_fyy = set_fyy[i];
-		    if (look_ray(0, GRADF, 1))
-			abort = TRUE;
-		    else {
-			gl_fxy = (-gl_fxy);
-			gl_fyy = (-gl_fyy);
-			abort = look_ray(0, GRADF, 2);
-		    }
-		} else {
-		    i = map_diag1[dir >> 1];
-		    gl_fxx = set_fxx[i];
-		    gl_fyx = set_fyx[i];
-		    gl_fxy = (-set_fxy[i]);
-		    gl_fyy = (-set_fyy[i]);
-		    if (look_ray(1, 2 * GRADF, GRADF))
-			abort = TRUE;
-		    else {
-			i = map_diag2[dir >> 1];
-			gl_fxx = set_fxx[i];
-			gl_fyx = set_fyx[i];
-			gl_fxy = set_fxy[i];
-			gl_fyy = set_fyy[i];
-			abort = look_ray(1, 2 * GRADF - 1, GRADF);
-		    }
-		}
-	    }
-	    while (abort == FALSE && highlight_seams && (++gl_rock < 2));
-	    if (abort)
-		msg_print("--Aborting look--");
-	    else {
-		if (gl_nseen) {
-		    if (dir == 5)
-			msg_print("That's all you see.");
-		    else
-			msg_print("That's all you see in that direction.");
-		} else if (dir == 5)
-		    msg_print("You see nothing of interest.");
-		else
-		    msg_print("You see nothing of interest in that direction.");
-	    }
-	}
-    }
-}
-
-/* Look at everything within a cone of vision between two ray
-   lines emanating from the player, and y or more places away
-   from the direct line of view. This is recursive.
-
-   Rays are specified by gradients, y over x, multiplied by
-   2*GRADF. This is ONLY called with gradients between 2*GRADF
-   (45 degrees) and 1 (almost horizontal).
-
-   (y axis)/ angle from
-     ^	  /	    ___ angle to
-     |	 /	 ___
-  ...|../.....___.................... parameter y (look at things in the
-     | /   ___			      cone, and on or above this line)
-     |/ ___
-     @-------------------->   direction in which you are looking. (x axis)
-     |
-     | */
-
-static int look_ray(int y, int from, int to)
-{
-    register int        max_x, x;
-    int                 transparent;
-
-/* from is the larger angle of the ray, since we scan towards the center
- * line. If from is smaller, then the ray does not exist. 
- */
-    if (from <= to || y > MAX_SIGHT)
-	return FALSE;
-/* Find first visible location along this line. Minimum x such that (2x-1)/x
- * < from/GRADF <=> x > GRADF(2x-1)/from. This may be called with y=0 whence
- * x will be set to 0. Thus we need a special fix. 
- */
-    x = (long)GRADF    *(2 * y - 1) / from + 1;
-
-    if (x <= 0)
-	x = 1;
-
-/* Find last visible location along this line. Maximum x such that (2x+1)/x >
- * to/GRADF <=> x < GRADF(2x+1)/to 
- */
-    max_x = ((long)GRADF * (2 * y + 1) - 1) / to;
-    if (max_x > MAX_SIGHT)
-	max_x = MAX_SIGHT;
-    if (max_x < x)
-	return FALSE;
-
-/* gl_noquery is a HACK to prevent doubling up on direct lines of sight. If
- * 'to' is	greater than 1, we do not really look at stuff along the
- * direct line of sight, but we do have to see what is opaque for the
- * purposes of obscuring other objects. 
- */
-    if ((y == 0 && to > 1) || (y == x && from < GRADF * 2))
-	gl_noquery = TRUE;
-    else
-	gl_noquery = FALSE;
-    if (look_see(x, y, &transparent))
-	return TRUE;
-    if (y == x)
-	gl_noquery = FALSE;
-    if (transparent)
-	goto init_transparent;
-
-    for (;;) {
-    /* Look down the window we've found. */
-	if (look_ray(y + 1, from, (int)((2 * y + 1) * (long)GRADF / x)))
-	    return TRUE;
-    /* Find the start of next window. */
-	do {
-	    if (x == max_x)
-		return FALSE;
-	/* See if this seals off the scan. (If y is zero, then it will.) */
-	    from = (2 * y - 1) * (long)GRADF / x;
-	    if (from <= to)
-		return FALSE;
-	    x++;
-	    if (look_see(x, y, &transparent))
-		return TRUE;
-	}
-	while (!transparent);
-init_transparent:
-    /* Find the end of this window of visibility. */
-	do {
-	    if (x == max_x)
-	    /* The window is trimmed by an earlier limit. */
-		return look_ray(y + 1, from, to);
-	    x++;
-	    if (look_see(x, y, &transparent))
-		return TRUE;
-	}
-	while (transparent);
-    }
-}
-
-
-static int look_see(register int x, register int y, int *transparent)
-{
-    const char         *dstring,*string;
-    char               query = 'a';
-    register cave_type *c_ptr;
-    register int        j;
-    bigvtype            out_val, tmp_str;
-
-    if (x < 0 || y < 0 || y > x) {
-	(void)sprintf(tmp_str, "Illegal call to look_see(%d, %d)", x, y);
-	msg_print(tmp_str);
-    }
-    if (x == 0 && y == 0)
-	dstring = "You are on";
-    else
-	dstring = "You see";
-    j = char_col + gl_fxx * x + gl_fxy * y;
-    y = char_row + gl_fyx * x + gl_fyy * y;
-    x = j;
-    if (!panel_contains(y, x)) {
-	*transparent = FALSE;
-	return FALSE;
-    }
-    c_ptr = &cave[y][x];
-    *transparent = c_ptr->fval <= MAX_OPEN_SPACE;
-    if (gl_noquery)
-	return FALSE;		   /* Don't look at a direct line of sight. A
-				    * hack. */
-    out_val[0] = 0;
-    if (gl_rock == 0 && c_ptr->cptr > 1 && m_list[c_ptr->cptr].ml) {
-	j = m_list[c_ptr->cptr].mptr;
-	if (c_list[j].cdefense & UNIQUE)
-	    (void)sprintf(out_val, "%s %s (%s).  [(r)ecall]",
-			  dstring,
-			  c_list[j].name,
-			  look_mon_desc((int)c_ptr->cptr));
-	else
-	    (void)sprintf(out_val, "%s %s %s (%s).  [(r)ecall]",
-			  dstring,
-			  (is_a_vowel(c_list[j].name[0]) ? "an" : "a"),
-			  c_list[j].name,
-			  look_mon_desc((int)c_ptr->cptr));
-	dstring = "It is on";
-	prt(out_val, 0, 0);
-	move_cursor_relative(y, x);
-	query = inkey();
-	if (query == 'r' || query == 'R') {
-	    save_screen();
-	    query = roff_recall(j);
-	    restore_screen();
-	}
-    }
-    if (c_ptr->tl || c_ptr->pl || c_ptr->fm) {
-	if (c_ptr->tptr != 0) {
-	    if (t_list[c_ptr->tptr].tval == TV_SECRET_DOOR)
-		goto granite;
-	    if (gl_rock == 0 && t_list[c_ptr->tptr].tval != TV_INVIS_TRAP) {
-		objdes(tmp_str, &t_list[c_ptr->tptr], TRUE);
-		(void)sprintf(out_val, "%s %s.  ---pause---", dstring, tmp_str);
-		dstring = "It is in";
-		prt(out_val, 0, 0);
-		move_cursor_relative(y, x);
-		query = inkey();
-	    }
-	}
-	if ((gl_rock || out_val[0]) && c_ptr->fval >= MIN_CLOSED_SPACE) {
-	    switch (c_ptr->fval) {
-	      case BOUNDARY_WALL:
-	      case GRANITE_WALL:
-	granite:
-	    /* Granite is only interesting if it contains something. */
-		if (out_val[0])
-		    string = "a granite wall";
-		else
-		    string = NULL; /* In case we jump here */
-		break;
-	      case MAGMA_WALL:
-		string = "some dark rock";
-		break;
-	      case QUARTZ_WALL:
-		string = "a quartz vein";
-		break;
-	      default:
-		string = NULL;
-		break;
-	    }
-	    if (string) {
-		(void)sprintf(out_val, "%s %s.  ---pause---", dstring, string);
-		prt(out_val, 0, 0);
-		move_cursor_relative(y, x);
-		query = inkey();
-	    }
-	}
-    }
-    if (out_val[0]) {
-	gl_nseen++;
-	if (query == ESCAPE)
-	    return TRUE;
-    }
-    return FALSE;
-}
-
-
 static void inven_throw(int item_val, inven_type *t_ptr)
 {
     register inven_type *i_ptr;
@@ -2291,38 +1054,38 @@ static void inven_throw(int item_val, inven_type *t_ptr)
  * Obtain the hit and damage bonuses and the maximum distance for a thrown
  * missile. 
  */
-static void facts(register inven_type *i_ptr, int *tbth, int *tpth, int *tdam, int *tdis, int *thits)
+static void facts(inven_type *i_ptr, \
+		  int *tbth, int *tpth, int *tdam, int *tdis, int *thits)
 {
     register int        tmp_weight;
 
-    if (i_ptr->weight < 1)
-	tmp_weight = 1;
-    else
-	tmp_weight = i_ptr->weight;
+    if (i_ptr->weight < 1) tmp_weight = 1;
+    else tmp_weight = i_ptr->weight;
 
-/* Throwing objects			 */
+    /* Throwing objects			 */
     *tdam = pdamroll(i_ptr->damage) + i_ptr->todam;
     *tbth = py.misc.bthb * 75 / 100;
     *tpth = py.misc.ptohit + i_ptr->tohit;
 
-/* Add this back later if the correct throwing device. -CJS- */
+    /* Add this back later if the correct throwing device. -CJS- */
     if (inventory[INVEN_WIELD].tval != TV_NOTHING)
 	*tpth -= inventory[INVEN_WIELD].tohit;
 
+    /* Distance based on strength */
     *tdis = (((py.stats.use_stat[A_STR] + 20) * 10) / tmp_weight);
-    if (*tdis > 10)
-	*tdis = 10;
 
-/* EAM - Default to single shot or throw but rangers do better with any kind
- * of bow 
- */
+    /* Max distance of 10, no matter how strong */
+    if (*tdis > 10) *tdis = 10;
+
+    /* EAM - Default to single shot or throw */
+    /* but rangers do better with any kind of bow */
     *thits = 1;
 
-/* multiply damage bonuses instead of adding, when have proper missile/weapon
- * combo, this makes them much more useful 
- */
+    /* multiply damage bonuses instead of adding, when have proper missile/weapon
+     * combo, this makes them much more useful 
+     */
 
-/* Using Bows,  slings,  or crossbows	 */
+    /* Using Bows,  slings,  or crossbows	 */
     if (inventory[INVEN_WIELD].tval == TV_BOW)
 	switch (inventory[INVEN_WIELD].subval) {
 	  case 20:
@@ -2505,11 +1268,15 @@ static int stays_when_throw(inven_type *i_ptr)
 
 
 
-/* Throw an object across the dungeon.		-RAK-	 */
-/* Note: Flasks of oil do fire damage				 */
-/* Note: Extra damage and chance of hitting when missiles are used */
-/* with correct weapon.  I.E.  wield bow and throw arrow.	 */
-/* Note: Some characters will now get multiple shots per turn -EAM */
+
+
+/*
+ * Throw an object across the dungeon.		-RAK-	 
+ * Note: Flasks of oil do fire damage				 
+ * Note: Extra damage and chance of hitting when missiles are used 
+ * with correct weapon.  I.E.  wield bow and throw arrow.	 
+ * Note: Some characters will now get multiple shots per turn -EAM
+ */
 void throw_object()
 {
     int item_val, tbth, tpth, tdam, tdis;
@@ -2732,7 +1499,8 @@ void throw_object()
 
 /*
  * Make a bash attack on someone.  -CJS-
- * Used to be part of bash above. 
+ * Used to be part of bash (below). 
+ * [Said above, was below, now in moria3. rmhv]
  */
 static void py_bash(int y, int x)
 {
@@ -2832,363 +1600,82 @@ static void py_bash(int y, int x)
     /* Stumble */
     if (randint(150) > py.stats.use_stat[A_DEX]) {
 	msg_print("You are off balance.");
-	py.flags.paralysis = 1 + randint(2);
+	py.flags.paralysis = (1 + randint(2));
     }
 }
 
 
-/* Bash open a door or chest				-RAK-	 */
+
+
 /*
- * Note: Affected by strength and weight of character 
- *
- * For a closed door, p1 is positive if locked; negative if stuck. A disarm
- * spell unlocks and unjams doors! 
- *
- * For an open door, p1 is positive for a broken door. 
- *
- * A closed door can be opened - harder if locked. Any door might be bashed open
- * (and thereby broken). Bashing a door is (potentially) faster! You move
- * into the door way. To open a stuck door, it must be bashed. A closed door
- * can be jammed (which makes it stuck if previously locked). 
- *
- * Creatures can also open doors. A creature with open door ability will (if not
- * in the line of sight) move though a closed or secret door with no changes.
- * If in the line of sight, closed door are openned, & secret door revealed.
- * Whether in the line of sight or not, such a creature may unlock or unstick
- * a door. 
- *
- * A creature with no such ability will attempt to bash a non-secret door. 
+ * Attacker's level and plusses,  defender's AC 
  */
-void bash()
+int test_hit(int bth, int level, int pth, int ac, int attack_type)
 {
-    int                  y, x, dir, tmp;
-    register cave_type  *c_ptr;
-    register inven_type *t_ptr;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-#endif
+    register int i, die;
 
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
-    target_mode = FALSE;
-#endif
-    if (get_dir(NULL, &dir)) {
-	if (py.flags.confused > 0) {
-	    msg_print("You are confused.");
-	    do {
-		dir = randint(9);
-	    }
-	    while (dir == 5);
-	}
-	(void)mmove(dir, &y, &x);
-	c_ptr = &cave[y][x];
-	if (c_ptr->cptr > 1) {
-	    if (py.flags.afraid > 0)
-		msg_print("You are too afraid!");
-	    else
-		py_bash(y, x);
-	} else if (c_ptr->tptr != 0) {
-	    t_ptr = &t_list[c_ptr->tptr];
-	    if (t_ptr->tval == TV_CLOSED_DOOR) {
-		count_msg_print("You smash into the door!");
-		tmp = py.stats.use_stat[A_STR] + py.misc.wt / 2;
-	    /* Use (roughly) similar method as for monsters. */
-		if (randint(tmp * (20 + MY_ABS(t_ptr->p1))) <
-			10 * (tmp - MY_ABS(t_ptr->p1))) {
-		    msg_print("The door crashes open!");
-		    invcopy(&t_list[c_ptr->tptr], OBJ_OPEN_DOOR);
-		    t_ptr->p1 = 1 - randint(2);	/* 50% chance of breaking door */
-		    c_ptr->fval = CORR_FLOOR;
-		    if (py.flags.confused == 0)
-			move_char(dir, FALSE);
-		    else
-			lite_spot(y, x);
-		    check_view();
-		} else if (randint(150) > py.stats.use_stat[A_DEX]) {
-		    msg_print("You are off-balance.");
-		    py.flags.paralysis = 1 + randint(2);
-		} else if (command_count == 0)
-		    msg_print("The door holds firm.");
-	    } else if (t_ptr->tval == TV_CHEST) {
-		if (randint(10) == 1) {
-		    msg_print("You have destroyed the chest and its contents!");
-		    t_ptr->index = OBJ_RUINED_CHEST;
-		    t_ptr->flags = 0;
-		} else if ((CH_LOCKED & t_ptr->flags) && (randint(10) == 1)) {
-		    msg_print("The lock breaks open!");
-		    t_ptr->flags &= ~CH_LOCKED;
-		} else
-		    count_msg_print("The chest holds firm.");
-	    } else
-	    /*
-	     * Can't give free turn, or else player could try directions
-	     * until he found invisible creature 
-	     */
-		msg_print("You bash it, but nothing interesting happens.");
-	} else {
-	    if (c_ptr->fval < MIN_CAVE_WALL)
-		msg_print("You bash at empty space.");
-	    else
-	    /* same message for wall as for secret door */
-		msg_print("You bash it, but nothing interesting happens.");
-	}
+    /* Hack -- disturb the player */
+    disturb(1, 0);
+
+    i = bth + pth * BTH_PLUS_ADJ
+	+ (level * class_level_adj[py.misc.pclass][attack_type]);
+
+	/* pth could be less than 0 if player wielding weapon too heavy for him */
+	/* always miss 1 out of 20, always hit 1 out of 20 */
+    die = randint(20);
+
+    if ((die != 1) && ((die == 20)
+    || ((i > 0) && (randint(i) > ((3 * ac) / 4))))) {
+	return TRUE;
     }
-#ifdef TARGET
-    target_mode = temp;
-#endif
+
+    /* Assume miss */    
+    else return FALSE;
 }
 
 
-static cptr look_mon_desc(int mnum)
+/*
+ * Decreases players hit points and sets death flag if necessary
+ */
+void take_hit(int damage, cptr hit_from)
 {
-    monster_type *m = &m_list[mnum];
-    s32b         thp, tmax, perc;
-    byte         living;
-
-    living = !((c_list[m->mptr].cdefense & (UNDEAD|DEMON)) ||
-	       ((c_list[m->mptr].cchar == 'E') ||
-		(c_list[m->mptr].cchar == 'g') ||
-		(c_list[m->mptr].cchar == 'v') ||
-		(c_list[m->mptr].cchar == 'X')));
-    
-    if (m->maxhp == 0) {	   /* then we're just going to fix it! -CFT */
-	if ((c_list[m->mptr].cdefense & MAX_HP) || be_nasty)
-	    m->maxhp = max_hp(c_list[m->mptr].hd);
-	else
-	    m->maxhp = pdamroll(c_list[m->mptr].hd);
+    if (py.flags.invuln > 0 && damage < 9000) {
+	damage = 0;
     }
-    if (m->hp > m->maxhp)
-	m->hp = m->maxhp;
 
-    if ((m->maxhp == 0) || (m->hp >= m->maxhp))	/* shouldn't ever need > -CFT */
-	return (living ? "unhurt" : "undamaged");
-    thp = (s32b) m->hp;
-    tmax = (s32b) m->maxhp;
-    perc = (s32b) (thp * 100L) / tmax;
-    if (perc > 60)
-	return (living ? "somewhat wounded" : "somewhat damaged");
-    if (perc > 25)
-	return (living ? "wounded" : "damaged");
-    if (perc > 10)
-	return (living ? "badly wounded" : "badly damaged");
-    return (living ? "almost dead" : "almost destroyed");
-}
+    /* Hurt the player */
+    py.misc.chp -= damage;
 
-#ifdef TARGET
-/* This targetting code stolen from Morgul -CFT */
-/* Targetting routine 					CDW */
-void target()
-{
-    int monptr,exit,exit2;
-    char query;
-    vtype desc;
+    /* Dead player */
+    if (py.misc.chp < 0) {
 
-    exit = FALSE;
-    exit2 = FALSE;
-    if (py.flags.blind > 0)
-	msg_print("You can't see anything to target!");
-    /* Check monsters first */
-    else {
-	target_mode = FALSE;
-	for (monptr = 0; (monptr<mfptr) && (!exit); monptr++) {
-	    if (m_list[monptr].cdis<MAX_SIGHT) {
-		if ((m_list[monptr].ml)&&
-		    (los(char_row,char_col,m_list[monptr].fy,m_list[monptr].fx))) {
-		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
-		    (void) sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
-				   c_list[m_list[monptr].mptr].name);
-		    prt(desc,0,0);
-		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
-		    query = inkey();
-		    while ((query == 'r')||(query == 'R')) {
-			save_screen();
-			query = roff_recall(m_list[monptr].mptr);
-			restore_screen();
-			move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
-			query = inkey();
-		    }
-		    switch (query) {
-		    case ESCAPE:
-			exit = TRUE;
-			exit2 = TRUE;
-			break;
-		    case '.':	/* for NetHack players, '.' is used to select a target,
-				   so I'm changing this... -CFT */
-		    case 't': case 'T':
-			target_mode = TRUE;
-			target_mon  = monptr;
-			target_row  = m_list[monptr].fy;
-			target_col  = m_list[monptr].fx;
-			exit2 = TRUE;
-		    case 'l': case'L':
-			exit = TRUE;
-		    default:
-			break;
-		    }
-		}
-	    }
+	/* Hack -- allow wizard to abort death */
+	if ((wizard) && !(get_check("Die?"))) {
+	    py.misc.chp=py.misc.mhp;
+	    death=FALSE;
+	    prt_chp();
+	    msg_print("OK, so you don't die.");
 	}
-	if (exit2 == FALSE) {
-	    prt("Use cursor to designate target. [(t)arget]",0,0);
-	    target_row = char_row;
-	    target_col = char_col;
-	    for (exit = FALSE; exit==FALSE ;) {
-		move_cursor_relative(target_row, target_col);
-		query=inkey();
-		if (rogue_like_commands==FALSE) {
-		    switch (query) {
-		    case '1':
-			query = 'b';
-			break;
-		    case '2':
-			query = 'j';
-			break;
-		    case '3':
-			query = 'n';
-			break;
-		    case '4':
-			query = 'h';
-			break;
-		    case '5':
-			query = '.';
-		    case '6':
-			query = 'l';
-			break;
-		    case '7':
-			query = 'y';
-			break;
-		    case '8':
-			query = 'k';
-			break;
-		    case '9':
-			query = 'u';
-			break;
-		    default:
-			break;
-		    }
-		}
-		switch (query) {
-		case ESCAPE:
-		    case'q':
-		case 'Q':
-		    exit = TRUE;
-		    break;
-		case '.':	/* for NetHack players, '.' is used to select a target,
-				   so I'm changing this... -CFT */
-		case 't':
-		case 'T':
-		    if (distance(char_row,char_col,target_row,target_col)>MAX_SIGHT)
-			prt(
-			    "Target beyond range. Use cursor to designate target. [(t)arget].",
-			    0,0);
-		    else if (cave[target_row][target_col].fval>CORR_FLOOR)
-			prt(
-			    "Invalid target. Use cursor to designate target. [(t)arget].",
-			    0,0);
-		    else {
-			target_mode = TRUE;
-			target_mon  = MAX_MALLOC;
-			exit = TRUE;
-		    }
-		    break;
-		case 'b':
-		    target_col--;
-		case 'j':
-		    target_row++;
-		    break;
-		case 'n':
-		    target_row++;
-		case 'l':
-		    target_col++;
-		    break;
-		case 'y':
-		    target_row--;
-		case 'h':
-		    target_col--;
-		    break;
-		case 'u':
-		    target_col++;
-		case 'k':
-		    target_row--;
-		    break;
-		default:
-		    break;
-		}
-		if ((target_col>MAX_WIDTH-2)||(target_col>panel_col_max))
-		    target_col--;
-		else if ((target_col<1)||(target_col<panel_col_min))
-		    target_col++;
-		if ((target_row>MAX_HEIGHT-2)||(target_row>panel_row_max))
-		    target_row--;
-		else if ((target_row<1)||(target_row<panel_row_min))
-		    target_row++;
-		
-	    }
+
+	else {   
+
+	if (!death) {
+	    death = TRUE;
+	    (void)strcpy(died_from, hit_from);
+	    total_winner = FALSE;
 	}
-	if (target_mode==TRUE)
-	    msg_print("Target selected.");
-	else
-	    msg_print("Aborting Target.");
-    }
-}
-
-/* This targetting code stolen from Morgul -CFT */
-/* Assuming target_mode == TRUE, returns if the position is the target.
-						CDW */
-int at_target(int row,int col)
-{
-/* don't ever assume a condition holds, especially when it's so easy to test for. -CFT */
-    if (target_mode == FALSE)
-	return FALSE;
-
-    if ((row==target_row)&&(col==target_col))
-	return(TRUE);
-    else
-	return(FALSE);
-}
-#endif /* TARGET */
-
-void 
-mmove2(register int *y, register int *x, int sourcey, int sourcex, int desty, int destx)
-{
-    int d_y, d_x, k, dist, max_dist, min_dist, shift;
-
-    d_y = (*y < sourcey) ? sourcey - *y : *y - sourcey;
-    d_x = (*x < sourcex) ? sourcex - *x : *x - sourcex;
-    dist = (d_y > d_x) ? d_y : d_x;
-    dist++;
-    d_y = (desty < sourcey) ? sourcey - desty : desty - sourcey;
-    d_x = (destx < sourcex) ? sourcex - destx : destx - sourcex;
-    if (d_y > d_x) {
-	max_dist = d_y;
-	min_dist = d_x;
-    } else {
-	max_dist = d_x;
-	min_dist = d_y;
+	    new_level_flag = TRUE;
+	}
     }
 
-    for (k = 0, shift = max_dist >> 1; k < dist; k++, shift -= min_dist)
-	shift = (shift > 0) ? shift : shift + max_dist;
-    if (shift < 0)
-	shift = 0;
+    /* Display the hitpoints */
+	else prt_chp();
 
-    if (d_y > d_x) {
-	d_y = (desty < sourcey) ? *y - 1 : *y + 1;
-	if (shift)
-	    d_x = *x;
-	else
-	    d_x = (destx < sourcex) ? *x - 1 : *x + 1;
-    } else {
-	d_x = (destx < sourcex) ? *x - 1 : *x + 1;
-	if (shift)
-	    d_y = *y;
-	else
-	    d_y = (desty < sourcey) ? *y - 1 : *y + 1;
+    /* Hack -- hitpoint warning */    
+    if (py.misc.chp <= py.misc.mhp * hitpoint_warn / 10) {
+	msg_print("*** LOW HITPOINT WARNING! ***");
+	msg_print(NULL);	/* make sure they see it -CWS */
     }
-    *y = d_y;
-    *x = d_x;
 }
 
 

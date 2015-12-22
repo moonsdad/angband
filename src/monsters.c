@@ -9,7 +9,7 @@
 #include "constant.h"
 #include "config.h"
 #include "types.h"
-#include "monster.h"
+#include "defines.h"
 
 /*
 		Attack types:

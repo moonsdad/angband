@@ -11,7 +11,6 @@
  */
 
 #include "angband.h"
-#include "monster.h"
 
 
 /* ANGBAND game module					-RAK-	 */
@@ -1947,7 +1946,7 @@ static void do_command(char com_val)
       case 'X':			/* e(X)change weapons	e(x)change */
 	inven_command('x');
 	break;
-#ifdef ALLOW_ARTIFACT_CHECK /* -CWS */
+#ifdef ALLOW_CHECK_ARTIFACTS /* -CWS */
       case '~':
 	if ((!wizard) && (dun_level != 0)) {
 	    msg_print("You need to be on the town level to check artifacts!");

@@ -18,7 +18,6 @@
 #endif
 
 
-#include "monster.h"
 #ifdef CHECK_HOURS
 
 typedef struct statstime {
@@ -47,6 +46,17 @@ typedef struct statstime {
 extern int peek;
 extern int rating;
 
+/*
+ * The standard R.N.G. state array (used below)
+ */
+static char *old_state = NULL;
+
+/*
+ * Hack -- The dummy R.N.G. state array
+ * Used to keep consistent object colors and town layout
+ */
+static char *dummy_state = NULL;
+
 
 /*
  * Gets a new random seed for the random number generator 
@@ -54,32 +64,30 @@ extern int rating;
  */
 void init_seeds(void)
 {
+    static u32b old_buf[256/4];
+    static u32b dummy_buf[8/4];
+
     /* Allocate some RNG arrays */
-    old_state = (char *) malloc(256); /* excellent R.N.G. */
-    dummy_state = (char *) malloc(8); /* simple R.N.G. */
+    old_state = (char*)old_buf; /* excellent R.N.G. */
+    dummy_state = (char*)dummy_buf; /* simple R.N.G. */
 
-    /* if malloc choked on 264 bytes, we're dead anyways */
-    if (!old_state || !dummy_state) {
-	puts("\nError initializing; unable to malloc space for RNG arrays...\n");
-	exit(2);
-    }
+    /* Grab a random seed from the clock -- is this ignored by unix? */
+    (void)initstate(time(NULL), dummy_state, 8);
 
-    /* is 'unix' a std define for unix system?  I thought UNIX is more common? */
+    /* Note that "getpid()" is less than informative except on Unix */
     /* This may need to be changed.  It's fine for PCs, anyways... -CFT */
 
-#ifdef unix
+#ifdef SET_UID
 
     /* Grab a random seed from the clock & PID... */
-    (void) initstate(time(NULL), dummy_state, 8);
-    (void) initstate(((getpid() << 1) * (time(NULL) >> 3)), old_state, 256);
+    (void)initstate(((getpid() << 1) * (time(NULL) >> 3)), old_state, 256);
 
-#else
+#else /* SET_UID */
 
-    /* ...else just grab a random seed from the clock. -CWS */
-    (void) initstate(time(NULL), dummy_state, 8);
+    /* Use the seed we got above to re-seed */
     (void)initstate(random(), old_state, 256);
 
-#endif /* unix */
+#endif /* SET_UID */
 
     /* Hack -- Extract seeds for the town layout and object colors */
     town_seed = random();
@@ -150,21 +158,7 @@ int check_time(void)
     return TRUE;
 }
 
-#ifdef RI
-/*
- * Generates a random integer x where 1<=X<=MAXVAL	-RAK-	 
- */
-int randint(int maxval)
-{
-    register long randval;
 
-    if (maxval < 1)
-	return 1;
-    randval = random();
-    return ((randval % maxval) + 1);
-}
-
-#endif
 
 /*
  * Generates a random integer number of NORMAL distribution -RAK- 
@@ -273,27 +267,27 @@ void panel_bounds()
  * Given an row (y) and col (x), this routine detects when a move
  * off the screen has occurred and figures new borders. -RAK-
  *
- * Force forcses the panel bounds to be recalculated, useful for 'W'here. 
+ * "Update" forces the panel bounds to be recalculated, useful for 'W'here. 
  */
 int get_panel(int y, int x, int update)
 {
     int prow = panel_row;
     int pcol = panel_col;
-    int panel;
 
-    if (force || (y < panel_row_min + 2) || (y > panel_row_max - 2)) {
+    if (update || (y < panel_row_min + 2) || (y > panel_row_max - 2)) {
 	prow = ((y - SCREEN_HEIGHT / 4) / (SCREEN_HEIGHT / 2));
 	if (prow > max_panel_rows) prow = max_panel_rows;
 	else if (prow < 0) prow = 0;
     }
 
-    if (force || (x < panel_col_min + 3) || (x > panel_col_max - 3)) {
+    if (update || (x < panel_col_min + 3) || (x > panel_col_max - 3)) {
 	pcol = ((x - SCREEN_WIDTH / 4) / (SCREEN_WIDTH / 2));
 	if (pcol > max_panel_cols) pcol = max_panel_cols;
 	else if (pcol < 0) pcol = 0;
     }
 
-    if ((prow != panel_row) || (pcol != panel_col)) {
+    /* Check for "no change" */
+    if ((prow == panel_row) && (pcol == panel_col)) return (FALSE);
 
     /* Save the new panel info */
     panel_row = prow;
@@ -302,14 +296,12 @@ int get_panel(int y, int x, int update)
     /* Recalculate the boundaries */
     panel_bounds();
 
-	panel = TRUE;
 
     /* stop movement if any */
     if (find_bound) end_find();
 
-    } else panel = FALSE;
-
-    return (panel);
+    /* The map was redrawn */
+    return (TRUE);
 }
 
 
@@ -358,191 +350,6 @@ int pdamroll(byte *array)
 
 
 /*
- * A simple, fast, integer-based line-of-sight algorithm.  By Joseph Hall,
- * 4116 Brewster Drive, Raleigh NC 27606.  Email to jnh@ecemwl.ncsu.edu. 
- *
- * Returns TRUE if a line of sight can be traced from x0, y0 to x1, y1. 
- *
- * The LOS begins at the center of the tile [x0, y0] and ends at the center of
- * the tile [x1, y1].  If los() is to return TRUE, all of the tiles this line
- * passes through must be transparent, WITH THE EXCEPTIONS of the starting
- * and ending tiles. 
- *
- * We don't consider the line to be "passing through" a tile if it only passes
- * across one corner of that tile. 
- */
-
-/*
- * Because this function uses (short) ints for all calculations, overflow may
- * occur if deltaX and deltaY exceed 90. 
- */
-
-int los(int fromY, int fromX, int toY, int toX)
-{
-    register int tmp, deltaX, deltaY;
-
-    deltaX = toX - fromX;
-    deltaY = toY - fromY;
-
-/* Adjacent? */
-    if ((deltaX < 2) && (deltaX > -2) && (deltaY < 2) && (deltaY > -2))
-	return TRUE;
-
-/* Handle the cases where deltaX or deltaY == 0. */
-    if (deltaX == 0) {
-	register int        p_y;   /* y position -- loop variable	 */
-
-	if (deltaY < 0) {
-	    tmp = fromY;
-	    fromY = toY;
-	    toY = tmp;
-	}
-	for (p_y = fromY + 1; p_y < toY; p_y++)
-	    if (cave[p_y][fromX].fval >= MIN_CLOSED_SPACE)
-		return FALSE;
-	return TRUE;
-    } else if (deltaY == 0) {
-	register int        px;	   /* x position -- loop variable	 */
-
-	if (deltaX < 0) {
-	    tmp = fromX;
-	    fromX = toX;
-	    toX = tmp;
-	}
-	for (px = fromX + 1; px < toX; px++)
-	    if (cave[fromY][px].fval >= MIN_CLOSED_SPACE)
-		return FALSE;
-	return TRUE;
-    }
-
-/* handle Knightlike shapes -CWS */
-
-    if (MY_ABS(deltaX) == 1) {
-	if (deltaY == 2) {
-	    if (cave[fromY + 1][fromX].fval <= MAX_OPEN_SPACE)
-		return TRUE;
-	} else if (deltaY == (-2)) {
-	    if (cave[fromY - 1][fromX].fval <= MAX_OPEN_SPACE)
-		return TRUE;
-	}
-    } else if (MY_ABS(deltaY) == 1) {
-	if (deltaX == 2) {
-	    if (cave[fromY][fromX + 1].fval <= MAX_OPEN_SPACE)
-		return TRUE;
-	} else if (deltaX == (-2)) {
-	    if (cave[fromY][fromX - 1].fval <= MAX_OPEN_SPACE)
-		return TRUE;
-	}
-    }
-
-/*
- * Now, we've eliminated all the degenerate cases. In the computations below,
- * dy (or dx) and m are multiplied by a scale factor, scale = abs(deltaX *
- * deltaY * 2), so that we can use integer arithmetic. 
- */
-
-    {
-	register int        px,	   /* x position			 */
-	                    p_y,   /* y position			 */
-	                    scale2;/* above scale factor / 2		 */
-	int                 scale, /* above scale factor		 */
-	                    xSign, /* sign of deltaX			 */
-	                    ySign, /* sign of deltaY			 */
-	                    m;	   /* slope or 1/slope of LOS		 */
-
-	scale2 = MY_ABS(deltaX * deltaY);
-	scale = scale2 << 1;
-	xSign = (deltaX < 0) ? -1 : 1;
-	ySign = (deltaY < 0) ? -1 : 1;
-
-    /*
-     * Travel from one end of the line to the other, oriented along the
-     * longer axis. 
-     */
-
-	if (MY_ABS(deltaX) >= MY_ABS(deltaY)) {
-	    register int        dy;/* "fractional" y position	 */
-
-	/*
-	 * We start at the border between the first and second tiles, where
-	 * the y offset = .5 * slope.  Remember the scale factor.  We have: 
-	 *
-	 * m = deltaY / deltaX * 2 * (deltaY * deltaX) = 2 * deltaY * deltaY. 
-	 */
-
-	    dy = deltaY * deltaY;
-	    m = dy << 1;
-	    px = fromX + xSign;
-
-	/* Consider the special case where slope == 1. */
-	    if (dy == scale2) {
-		p_y = fromY + ySign;
-		dy -= scale;
-	    } else
-		p_y = fromY;
-
-	    while (toX - px) {
-		if (cave[p_y][px].fval >= MIN_CLOSED_SPACE)
-		    return FALSE;
-
-		dy += m;
-		if (dy < scale2)
-		    px += xSign;
-		else if (dy > scale2) {
-		    p_y += ySign;
-		    if (cave[p_y][px].fval >= MIN_CLOSED_SPACE)
-			return FALSE;
-		    px += xSign;
-		    dy -= scale;
-		} else {
-		/*
-		 * This is the case, dy == scale2, where the LOS exactly
-		 * meets the corner of a tile. 
-		 */
-		    px += xSign;
-		    p_y += ySign;
-		    dy -= scale;
-		}
-	    }
-	    return TRUE;
-	} else {
-	    register int        dx;/* "fractional" x position	 */
-
-	    dx = deltaX * deltaX;
-	    m = dx << 1;
-
-	    p_y = fromY + ySign;
-	    if (dx == scale2) {
-		px = fromX + xSign;
-		dx -= scale;
-	    } else
-		px = fromX;
-
-	    while (toY - p_y) {
-		if (cave[p_y][px].fval >= MIN_CLOSED_SPACE)
-		    return FALSE;
-		dx += m;
-		if (dx < scale2)
-		    p_y += ySign;
-		else if (dx > scale2) {
-		    px += xSign;
-		    if (cave[p_y][px].fval >= MIN_CLOSED_SPACE)
-			return FALSE;
-		    p_y += ySign;
-		    dx -= scale;
-		} else {
-		    px += xSign;
-		    p_y += ySign;
-		    dx -= scale;
-		}
-	    }
-	    return TRUE;
-	}
-    }
-}
-
-
-/*
  * Returns symbol for given row, column			-RAK-	 
  */
 unsigned char loc_symbol(int y, int x)
@@ -569,7 +376,7 @@ unsigned char loc_symbol(int y, int x)
     if (cave_ptr->fval <= MAX_CAVE_FLOOR)
 	return '.';
     if (cave_ptr->fval == GRANITE_WALL || cave_ptr->fval == BOUNDARY_WALL
-	|| highlight_seams == FALSE) {
+	|| notice_seams == FALSE) {
 #ifdef MSDOS
 	return wallsym;
 #else
@@ -584,94 +391,6 @@ unsigned char loc_symbol(int y, int x)
 	return '%';
 }
 
-
-/*
- * Tests a spot for light or field mark status		-RAK-	 
- */
-int test_light(int y, int x)
-{
-    register cave_type *cave_ptr;
-
-    cave_ptr = &cave[y][x];
-    if (cave_ptr->pl || cave_ptr->tl || cave_ptr->fm)
-	return (TRUE);
-    else
-	return (FALSE);
-}
-
-
-/*
- * Prints the map of the dungeon			-RAK-	 
- */
-void prt_map()
-{
-    register int           i, j, k;
-    register unsigned char tmp_char;
-
-    k = 0;
-    for (i = panel_row_min; i <= panel_row_max; i++) {	/* Top to bottom */
-	k++;
-	erase_line(k, 13);
-
-	for (j = panel_col_min; j <= panel_col_max; j++) {	/* Left to right */
-	    tmp_char = loc_symbol(i, j);
-	    if (tmp_char != ' ')
-		print(tmp_char, i, j);
-	}
-    }
-}
-
-
-/*
- * Compact monsters					-RAK-	 
- *
- * Return TRUE if any monsters were deleted, FALSE if could not delete any
- * monsters. 
- */
-int compact_monsters()
-{
-    register int           i;
-    int                    cur_dis, delete_any;
-    register monster_type *mon_ptr;
-
-    msg_print("Compacting monsters...");
-
-    cur_dis = 66;
-    delete_any = FALSE;
-    do {
-	for (i = mfptr - 1; i >= MIN_MONIX; i--) {
-	    mon_ptr = &m_list[i];
-	    if ((cur_dis < mon_ptr->cdis) && (randint(3) == 1)) {
-	    /* Don't compact Melkor! */
-		if (c_list[mon_ptr->mptr].cmove & CM_WIN)
-		/* do nothing */
-		    ;
-
-	    /* in case this is called from within creatures(), this is a
-	     * horrible hack, the m_list/creatures() code needs to be
-	     * rewritten 
-	     */
-		else if (hack_m_idx < i) {
-		    delete_monster(i);
-		    delete_any = TRUE;
-		} else
-
-		/* fix1_delete_monster() does not decrement mfptr, so don't
-		 * set delete_any if this was called 
-		 */
-		    fix1_delete_monster(i);
-	    }
-	}
-	if (!delete_any) {
-	    cur_dis -= 6;
-	/* can't do anything else but abort, if can't delete any monsters */
-	    if (cur_dis < 0)
-		return FALSE;
-	}
-    }
-    while (!delete_any);
-    return TRUE;
-}
 
 
 /*

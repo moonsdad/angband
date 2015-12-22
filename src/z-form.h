@@ -37,6 +37,14 @@ extern uint strfmt(char *buf, cptr fmt, ...);
 /* Do sprintf() into a static resizing buffer */
 extern char *format(cptr fmt, ...);
 
+/* Vararg interface to plog() */
+extern void plog_fmt(cptr fmt, ...);
+
+/* Vararg interface to quit() */
+extern void quit_fmt(cptr fmt, ...);
+
+/* Vararg interface to core() */
+extern void core_fmt(cptr fmt, ...);
 
 
 #endif

@@ -58,7 +58,7 @@
 /*
  * OPTION: Allow checking of artifacts (in town)
  */
-#define ALLOW_ARTIFACT_CHECK
+#define ALLOW_CHECK_ARTIFACTS
  
 /*
  * OPTION: Allow checking of dead uniques
@@ -98,12 +98,17 @@
 /*
  * OPTION: On multiuser systems, be "nice" when autorolling.
  */
-#undef NICE
+#ifdef SET_UID
+# define NICE
+#endif
 
 /*
  * OPTION: On multiuser systems, add the "uid" to savefile names
  */
-#define SET_UID
+#ifdef SET_UID
+# define SAVEFILE_USE_UID
+#endif
+
 
 /*
  * OPTION: Check the "hours" file
@@ -122,6 +127,10 @@
 
 
 
+/*
+ * OPTION: Capitalize the "user_name" (used as the "default" player name)
+ */
+#define CAPITALIZE_USER_NAME
 
 
 #ifdef MACINTOSH
@@ -144,7 +153,7 @@
 
 
 /*
- * fix systems lacking usleep() -CWS 
+ * Make sure that "usleep()" works.
  *
  * Note that Solaris 2.x users without the BSD compatibilty kit need to
  * define this as well.

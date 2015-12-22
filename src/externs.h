@@ -142,7 +142,7 @@ extern int prompt_carry_flag;		/* Require "g" key to pick up */
 extern int carry_query_flag;		/* Prompt for pickup */
 
 extern int equippy_chars;	/* do equipment characters -CWS */
-extern int highlight_seams;	/* Highlight magma and quartz */
+extern int notice_seams;	/* Highlight magma and quartz */
 
 /* Option Set 2  */
 
@@ -527,6 +527,11 @@ int file_character(char *);
 /* generate.c */
 void generate_cave(void);
 
+/* cave.c */
+
+int los(int, int, int, int);
+int test_lite(int, int);
+
 /* help.c */
 void ident_char(void);
 
@@ -582,14 +587,13 @@ void panel_bounds(void);
 int get_panel(int, int, int);
 int damroll(int, int);
 int pdamroll(byte *);
-int los(int, int, int, int);
 unsigned char loc_symbol(int, int);
-int test_light(int, int);
+int compact_monsters(void);
 void prt_map(void);
 void add_food(int);
 
 /* misc2.c */
-int popm(void);
+int m_pop(void);
 int max_hp(byte *);
 int place_monster(int, int, int, int);
 int place_win_monster(void);
@@ -617,7 +621,6 @@ int magik(int);
 int m_bonus(int, int, int);
 void magic_treasure(int, int, int, int);
 void set_options(void);
-int compact_monsters(void);
 int next_to_walls(int, int);
 int get_nmons_num(int);
 int distance(int, int, int, int);
@@ -716,32 +719,20 @@ void get_coin_type(creature_type *);
 /* moria1.c */
 void change_speed(int);
 void py_bonuses(struct inven_type *, int);
+cptr describe_use(int);
 void calc_bonuses(void);
 int show_inven(int, int, int, int, int ());
-cptr describe_use(int);
 int show_equip(int, int);
 void takeoff(int, int);
 int verify(cptr, int);
 void inven_command(int);
 int get_item(int *, cptr, int, int, int ());
 int no_light(void);
-int get_dir(cptr, int *);
-int get_alldir(cptr, int *);
-void move_rec(int, int, int, int);
 void light_room(int, int);
 void move_light(int, int, int, int);
-void disturb(int, int);
-void search_on(void);
-void search_off(void);
-void rest(void);
-void rest_off(void);
 int test_hit(int, int, int, int, int);
 void take_hit(int, cptr);
 void change_trap(int, int);
-void search(int, int, int);
-void find_init(int);
-void find_run(void);
-void end_find(void);
 void area_affect(int, int, int);
 int minus_ac(u32b);
 void corrode_gas(cptr);
@@ -753,28 +744,46 @@ void acid_dam(int, cptr);
 void darken_player(int, int);
 
 /* moria2.c */
+void move_rec(int, int, int, int);
 int cast_spell(cptr ,int, int *, int *);
+void check_unique(monster_type *);
+void delete_unique(void);
 void delete_monster(int);
 void fix1_delete_monster(int);
 void fix2_delete_monster(int);
 int delete_object(int, int);
 u32b monster_death(int, int, u32b, u32b, u32b);
 int mon_take_hit(int, int, int);
-void move_char(int, int);
+
+
+/* moria3.c */
+void look(void);
 void openobject(void);
 void closeobject(void);
 int twall(int, int, int, int);
 void tunnel(int);
 void disarm_trap(void);
-void look(void);
 void throw_object(void);
 void bash(void);
-void delete_unique(void);
-void carry(int, int, int);
-void check_unique(monster_type *);
-void target(void); /* target fns stolen from Morgul -CFT */
+void rest(void);
+
+
+/* moria4.c */
 int at_target(int, int); /* target fns stolen from Morgul -CFT */
+void target(void); /* target fns stolen from Morgul -CFT */
 void mmove2(int *, int *, int, int, int, int);
+int get_alldir(cptr, int *);
+int get_dir(cptr, int *);
+void search_on(void);
+void search_off(void);
+void disturb(int, int);
+void search(int, int, int);
+void rest_off(void);
+void carry(int, int, int);
+void move_char(int, int);
+void find_run(void);
+void find_init(int);
+void end_find(void);
 
 #ifdef MSDOS
 /* ms_misc.c */
@@ -803,8 +812,8 @@ void quaff(void);
 void pray(void);
 
 /* recall.c */
-int bool_roff_recall(int);
 int roff_recall(int);
+int bool_roff_recall(int);
 
 /* rnd.c is unused now -CWS */
 /* random.c */
@@ -993,7 +1002,6 @@ int usleep(unsigned long);
 #endif
 void delay(int);
 void user_name(char *buf, int id);
-int tilde(cptr, char *);
 int my_topen(cptr, int, int);
 FILE *my_tfopen(cptr, cptr);
 

@@ -11,7 +11,6 @@
  */
 
 #include "angband.h"
-#include "monster.h"
 
 
 
@@ -112,20 +111,18 @@ int next_to_corr(int y, int x)
 
 
 /*
- * Blanks out entire cave -RAK-	
+ * Blank a cave -- note new definition
  */
 static void blank_cave(void)
 {
-#ifndef USG
-    bzero((char *)&cave[0][0], sizeof(cave));
-#else
-#ifdef MACINTOSH
-    /* On the mac, cave is a pointer, so sizeof(cave) = 4! */
-    (void)memset((char *)&cave[0][0], 0, sizeof(cave_type) * MAX_HEIGHT * MAX_WIDTH);
-#else
-    (void)memset((char *)&cave[0][0], 0, sizeof(cave));
-#endif
-#endif
+    register int y;
+
+    /* Clear each row */
+    for (y = 0; y < MAX_HEIGHT; ++y) {
+
+	/* Efficiency -- wipe a whole row at a time */
+	C_WIPE(cave[y], MAX_WIDTH, cave_type);
+    }
 }
 
 
@@ -140,8 +137,8 @@ static void fill_cave(int fval)
     register cave_type *c_ptr;
 
     /* Scan the cave (skip the outer walls) */
-    for (y = cur_height - 2; y > 0; y--) {
-	for (x = cur_width - 2; x > 0; x--) {
+    for (y = 1; y < cur_height - 1; y++) {
+	for (x = 1; x < cur_width - 1; x++) {
 	    c_ptr = &cave[y][x];
 	    if ((c_ptr->fval == NULL_WALL) ||
 		(c_ptr->fval == TMP1_WALL) ||
@@ -158,32 +155,23 @@ static void fill_cave(int fval)
  */
 static void place_boundary(void)
 {
-    register int        i;
-    register cave_type *top_ptr, *bottom_ptr;
+    register int        y, x;
+    register cave_type *c_ptr;
 
-    cave_type(*left_ptr)[MAX_WIDTH];
-    cave_type(*right_ptr)[MAX_WIDTH];
-
-    /* put permanent wall on leftmost row and rightmost row */
-    left_ptr = (cave_type(*)[MAX_WIDTH]) & cave[0][0];
-    right_ptr = (cave_type(*)[MAX_WIDTH]) & cave[0][cur_width - 1];
-
-    for (i = 0; i < cur_height; i++) {
-	((cave_type *) left_ptr)->fval = BOUNDARY_WALL;
-	left_ptr++;
-	((cave_type *) right_ptr)->fval = BOUNDARY_WALL;
-	right_ptr++;
+    /* Top and bottom */
+    for (x = 0; x < cur_width; x++) {
+	c_ptr = &cave[0][x];
+	c_ptr->fval = BOUNDARY_WALL;
+	c_ptr = &cave[cur_height-1][x];
+	c_ptr->fval = BOUNDARY_WALL;
     }
 
-    /* put permanent wall on top row and bottom row */
-    top_ptr = &cave[0][0];
-    bottom_ptr = &cave[cur_height - 1][0];
-
-    for (i = 0; i < cur_width; i++) {
-	top_ptr->fval = BOUNDARY_WALL;
-	top_ptr++;
-	bottom_ptr->fval = BOUNDARY_WALL;
-	bottom_ptr++;
+    /* Left and right */            
+    for (y = 0; y < cur_height; y++) {
+	c_ptr = &cave[y][0];
+	c_ptr->fval = BOUNDARY_WALL;
+	c_ptr = &cave[y][cur_width-1];
+	c_ptr->fval = BOUNDARY_WALL;
     }
 }
 
@@ -194,28 +182,26 @@ static void place_boundary(void)
 static void place_streamer(int fval, int treas_chance)
 {
     int		i, tx, ty;
-    int		y, x, t1, t2, dir;
+    int		y, x, dir;
     cave_type	*c_ptr;
 
-    /* Choose starting point */
-    y = (cur_height / 2) + 11 - randint(23);
-    x = (cur_width / 2) + 16 - randint(33);
+    /* Hack -- Choose starting point */
+    y = (cur_height / 2) + 10 - randint(21);
+    x = (cur_width / 2) + 15 - randint(31);
 
     /* Choose a direction (not including "5") */
     dir = randint(8);
     if (dir > 4) dir++;
 
     /* Place streamer into dungeon */
-    t1 = 2 * DUN_STR_RNG + 1;	   /* Constants	 */
-    t2 = DUN_STR_RNG + 1;
-    do {
+    while (mmove(dir, &y, &x)) {
 
 	/* One grid per density */
 	for (i = 0; i < DUN_STR_DEN; i++) {
 	
 	    /* Pick a nearby grid */
-	    ty = y + randint(t1) - t2;
-	    tx = x + randint(t1) - t2;
+	    ty = rand_range(y - DUN_STR_RNG, y + DUN_STR_RNG);
+	    tx = rand_range(x - DUN_STR_RNG, x + DUN_STR_RNG);
 
 	    /* Turn granite into streamers */
 	    if (in_bounds(ty, tx)) {
@@ -229,15 +215,14 @@ static void place_streamer(int fval, int treas_chance)
 	    }
 	}
     }
-    while (mmove(dir, &y, &x));
 }
 
 
 /*
- * copied verbatim from spells.c - damn
- * thing won't find it. :( :( -DGK
+ * Similar to use in "spells1.c" but here we do not have to
+ * update the view or anything.
  */
-void repl_spot(int y, int x, int typ)
+static void repl_spot(int y, int x, int typ)
 {
     register cave_type *c_ptr;
 
@@ -271,12 +256,11 @@ void repl_spot(int y, int x, int typ)
     c_ptr->fm = FALSE;
     c_ptr->lr = FALSE;
 
-    if (c_ptr->tptr != 0)
-    delete_object(y, x);
+    /* Delete any object at that location */
+    if (c_ptr->tptr != 0) delete_object(y, x);
 
     /* Delete any monster at that location */
-    if (c_ptr->cptr > 1)
-    delete_monster((int)c_ptr->cptr);
+    if (c_ptr->cptr > 1) delete_monster((int)c_ptr->cptr);
 }
 
 
@@ -539,44 +523,48 @@ static void place_stairs(int typ, int num, int walls)
     for (i = 0; i < num; i++) {
 
 	/* Place some stairs */
-	flag = FALSE;
-	do {
-	    j = 0;
-	    do {
+	for (flag = FALSE; !flag; ) {
+
+	    /* Try several times, then decrease "walls" */
+	    for (j = 0; !flag && j <= 30; j++) {
 	    /* Note: don't let y1/x1 be zero, and don't let y2/x2 be equal to
 	     * cur_height-1/cur_width-1, these values are always
 	     * BOUNDARY_ROCK. 
 	     */
 
-		y1 = randint(cur_height - 14);
-		x1 = randint(cur_width - 14);
+		/* Pick a random grid */
+		y1 = rand_int(cur_height);
+		x1 = rand_int(cur_width);
+
 		y2 = y1 + 12;
 		x2 = x1 + 12;
 		do {
 		    do {
 			cave_ptr = &cave[y1][x1];
-			if (cave_ptr->fval <= MAX_OPEN_SPACE
-			    && (cave_ptr->tptr == 0)
-			    && (next_to_walls(y1, x1) >= walls)) {
-			    flag = TRUE;
-			    if (typ == 1)
-				place_up_stairs(y1, x1);
-			    else
-				place_down_stairs(y1, x1);
+			if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->tptr == 0)
+			&& (next_to_walls(y1, x1) >= walls)) {
+
+				/* Put the stairs here */
+				if (typ == 1) {
+					place_up_stairs(y, x);
+				}
+				else {
+					place_down_stairs(y, x);
+				}
+
+				/* All done */
+				flag = TRUE;
 			}
 			x1++;
-		    }
-		    while ((x1 != x2) && (!flag));
+			} while ((x1 != x2) && (!flag));
 		    x1 = x2 - 12;
 		    y1++;
-		}
-		while ((y1 != y2) && (!flag));
-		j++;
+		} while ((y1 != y2) && (!flag));
 	    }
-	    while ((!flag) && (j <= 30));
-	    walls--;
+
+	    /* Require fewer walls */
+	    if (walls) walls--;
 	}
-	while (!flag);
     }
 }
 
@@ -631,19 +619,15 @@ static void vault_monster(int y1, int x1, int num)
  */
 static void vault_jelly(int y, int x)
 {
-    int l, m, summon;
-
-    summon = FALSE;
-    l = m_level[MAX_MONS_LEVEL];
-    do {
-	m = randint(l) - 1;
-	if (((c_list[m].cchar == 'j') || (c_list[m].cchar == ',')
-	|| (c_list[m].cchar == 'i') || (c_list[m].cchar == 'm'))
-	&& !(c_list[m].cdefense & EVIL)) {
-	    summon = TRUE;
-	    place_monster(y, x, m, TRUE);
-	}
-    } while (!summon);
+    int l = m_level[MAX_MONS_LEVEL];
+    /* Hack -- allocate a simple sleeping jelly */
+    while (1) {
+	int m = rand_int(l-1);
+	if (!strchr("jmi,", c_list[m].cchar)) continue;
+	if (c_list[m].cdefense & EVIL) continue;
+	place_monster(y, x, m, TRUE);
+	break;
+    }
 }
 
 /*
@@ -651,17 +635,16 @@ static void vault_jelly(int y, int x)
  */
 static void vault_undead(int y, int x)
 {
-    int l, m, summon;
-    
-    summon = FALSE;
-    l = m_level[MAX_MONS_LEVEL];
-    do {
-	m = randint(l) - 1;
-	if ((c_list[m].cdefense & UNDEAD) && !(c_list[m].cdefense & UNIQUE)) {
-	    summon = TRUE;
-	    place_monster(y, x, m, TRUE);
-	}
-    } while (!summon);
+    int l = m_level[MAX_MONS_LEVEL];
+    /* Hack -- allocate a sleeping non-unique undead */
+    while (1) {
+	int m = rand_int(l-1);
+	if (!(c_list[m].cdefense & UNDEAD)) continue;
+	if (c_list[m].cdefense & UNIQUE) continue;
+
+	place_monster(y, x, m, TRUE);
+	break;
+    }
 }
 
 static void vault_orc(int y, int x, int rank)
@@ -1052,15 +1035,15 @@ static void build_room(int yval, int xval)
     /* the x dim of rooms tends to be much larger than the y dim, so don't bother
      * rewriting the y loop */
     for (y = y1; y <= y2; y++) {
-	c_ptr = &cave[y][x1];
 	for (x = x1; x <= x2; x++) {
+	c_ptr = &cave[y][x];
 	    c_ptr->fval = floor;
 	    c_ptr->lr = TRUE;
-	    c_ptr++;
 	}
     }
 
-    for (y = (y1 - 1); y <= (y2 + 1); y++) {
+    /* Walls around the room */
+    for (y = y1 - 1; y <= y2 + 1; y++) {
 	c_ptr = &cave[y][x1 - 1];
 	c_ptr->fval = GRANITE_WALL;
 	c_ptr->lr = TRUE;
@@ -1128,11 +1111,10 @@ static void build_type1(int yval, int xval)
 	/* the x dim of rooms tends to be much larger than the y dim, so don't
 	 * bother rewriting the y loop  */
 	for (i = y1; i <= y2; i++) {
-	    c_ptr = &cave[i][x1];
 	    for (j = x1; j <= x2; j++) {
+	    c_ptr = &cave[i][j];
 		c_ptr->fval = floor;
 		c_ptr->lr = TRUE;
-		c_ptr++;
 	    }
 	}
 
@@ -1205,11 +1187,10 @@ static void build_type2(int yval, int xval)
    
     /* Place a full floor under the room */
     for (i = y1; i <= y2; i++) {
-	c_ptr = &cave[i][x1r];
 	for (j = x1; j <= x2; j++) {
+	    c_ptr = &cave[i][j];
 	    c_ptr->fval = floor;
 	    c_ptr->lr = TRUE;
-	    c_ptr++;
 	}
     }
 
@@ -1261,9 +1242,8 @@ static void build_type2(int yval, int xval)
       /* Just an inner room with a monster */
       case 1:
       
-	/* Place a door */
-	tmp = randint(4);
-	switch (tmp) {
+	/* Place a secret door */
+	switch (randint(4)) {
 	    case 1: place_secret_door(y1 - 1, xval); break;
 	    case 2: place_secret_door(y2 + 1, xval); break;
 	    case 3: place_secret_door(yval, x1 - 1); break;
@@ -1279,9 +1259,8 @@ static void build_type2(int yval, int xval)
       /* Treasure Vault (with a door) */
       case 2:
 
-	/* Place a door */
-	tmp = randint(4);
-	switch (tmp) {
+	/* Place a secret door */
+	switch (randint(4)) {
 	    case 1: place_secret_door(y1 - 1, xval); break;
 	    case 2: place_secret_door(y2 + 1, xval); break;
 	    case 3: place_secret_door(yval, x1 - 1); break;
@@ -1329,8 +1308,7 @@ static void build_type2(int yval, int xval)
       case 3:
 
 	/* Place a secret door */
-	tmp = randint(4);
-	switch (tmp) {
+	switch (randint(4)) {
 	    case 1: place_secret_door(y1 - 1, xval); break;
 	    case 2: place_secret_door(y2 + 1, xval); break;
 	    case 3: place_secret_door(yval, x1 - 1); break;
@@ -1339,10 +1317,9 @@ static void build_type2(int yval, int xval)
 
 	/* Large Inner Pillar */
 	for (i = yval - 1; i <= yval + 1; i++) {
-	    c_ptr = &cave[i][xval - 1];
 	    for (j = xval - 1; j <= xval + 1; j++) {
+		c_ptr = &cave[i][j];
 		c_ptr->fval = TMP1_WALL;
-		c_ptr++;
 	    }
 	}
 
@@ -1350,17 +1327,13 @@ static void build_type2(int yval, int xval)
 	if (randint(2) == 1) {
 	    tmp = randint(2);
 	    for (i = yval - 1; i <= yval + 1; i++) {
-		c_ptr = &cave[i][xval - 5 - tmp];
 		for (j = xval - 5 - tmp; j <= xval - 3 - tmp; j++) {
+		    c_ptr = &cave[i][j];
 		    c_ptr->fval = TMP1_WALL;
-		    c_ptr++;
 		}
-	    }
-	    for (i = yval - 1; i <= yval + 1; i++) {
-		c_ptr = &cave[i][xval + 3 + tmp];
 		for (j = xval + 3 + tmp; j <= xval + 5 + tmp; j++) {
+		    c_ptr = &cave[i][j];
 		    c_ptr->fval = TMP1_WALL;
-		    c_ptr++;
 		}
 	    }
 	}
@@ -1368,15 +1341,13 @@ static void build_type2(int yval, int xval)
 	/* Occasionally, some Inner rooms */
 	if (randint(3) == 1) {
 	
-	    c_ptr = &cave[yval - 1][xval - 5];
-	    d_ptr = &cave[yval + 1][xval - 5];
 	
 	    /* Long horizontal walls */
 	    for (i = xval - 5; i <= xval + 5; i++) {
+		c_ptr = &cave[yval - 1][i];
 		c_ptr->fval = TMP1_WALL;
-		c_ptr++;
+	    d_ptr = &cave[yval + 1][i];
 		d_ptr->fval = TMP1_WALL;
-		d_ptr++;
 	    }
 
 	    /* Close off the left/right edges */
@@ -1403,9 +1374,8 @@ static void build_type2(int yval, int xval)
       /* Maze inside. */
       case 4:
 
-	/* Place a door */
-	tmp = randint(4);
-	switch (tmp) {
+	/* Place a secret door */
+	switch (randint(4)) {
 	    case 1: place_secret_door(y1 - 1, xval); break;
 	    case 2: place_secret_door(y2 + 1, xval); break;
 	    case 3: place_secret_door(yval, x1 - 1); break;
@@ -1442,22 +1412,20 @@ static void build_type2(int yval, int xval)
 	for (i = y1; i <= y2; i++) {
 	    cave[i][xval].fval = TMP1_WALL;
 	}
-	c_ptr = &cave[yval][x1];
 	for (i = x1; i <= x2; i++) {
-	    c_ptr->fval = TMP1_WALL;
-	    c_ptr++;
+	    cave[yval][i].fval = TMP1_WALL;
 	}
 
 	/* Doors into the rooms */
 	if (randint(2) == 1) {
-	    i = randint(10);
+	    int i = randint(10);
 	    place_secret_door(y1 - 1, xval - i);
 	    place_secret_door(y1 - 1, xval + i);
 	    place_secret_door(y2 + 1, xval - i);
 	    place_secret_door(y2 + 1, xval + i);
 	}
 	else {
-	    i = randint(3);
+	    int i = randint(3);
 	    place_secret_door(yval + i, x1 - 1);
 	    place_secret_door(yval - i, x1 - 1);
 	    place_secret_door(yval + i, x2 + 1);
@@ -1635,6 +1603,7 @@ static void build_type3(int yval, int xval)
 
 	/* Occasionally pinch the center shut */
 	if (randint(3) == 1) {
+	
 	    cave[yval - 1][xval - 2].fval = TMP1_WALL;
 	    cave[yval + 1][xval - 2].fval = TMP1_WALL;
 	    cave[yval - 1][xval + 2].fval = TMP1_WALL;
@@ -1677,7 +1646,11 @@ static void build_type3(int yval, int xval)
 
 
 /*
- * Wish me LUCK! - Decado
+ * Build various complicated vaults - Decado
+ * This might be a good function to use external files.
+ *
+ * Vault char codes:
+ *   Note that "space" means "not part of the room"
  */
 static void build_type5(int yval, int xval)
 {
@@ -1700,8 +1673,7 @@ static void build_type5(int yval, int xval)
 
     if (dun_level <= randint(25))
 	floor = LIGHT_FLOOR;	   /* Floor with light */
-    else
-	floor = DARK_FLOOR;	   /* Dark floor       */
+    else floor = DARK_FLOOR;	   /* Dark floor       */
 
     /* Assume Not a vault */
     vault = 0;
@@ -1965,8 +1937,6 @@ static void build_type5(int yval, int xval)
 
     wall = TMP1_WALL;
     if (vault) {
-	xval += 4;		   /* neat kludge deccy... */
-	yval += 4;
 	wall = BOUNDARY_WALL;
 	if (floor == LIGHT_FLOOR)
 	    floor = NT_LIGHT_FLOOR;
@@ -1974,11 +1944,14 @@ static void build_type5(int yval, int xval)
 	    floor = NT_DARK_FLOOR;
     }
 
+    /* XXX XXX XXX XXX XXX XXX */
+    /* Mega-Hack -- what the hell is this for? */
+    if (vault) { xval += 4; yval += 4; }
+
 
     /* Tight fit?  Use a simpler room */
-    if (!(in_bounds(yval - (height / 2), xval - (width / 2)) &&
-	  in_bounds(yval + (height / 2), xval + (width / 2)))) {
-	free(template);
+    if (!in_bounds(yval - (height / 2), xval - (width / 2)) ||
+	!in_bounds(yval + (height / 2), xval + (width / 2))) {
 	build_type2(yval, xval);
 	return;
     }
@@ -1996,7 +1969,7 @@ static void build_type5(int yval, int xval)
 
     /* Scan the vault, grid by grid, symbol by symbol */
     for (t = template, y = 0; y < height; y++) {
-	for (x = 0; x < width; x++) {
+	for (x = 0; x < width; x++, t++) {
 
 	    /* Do something */
 	    x1 = xval - (width / 2) + x;
@@ -2004,7 +1977,7 @@ static void build_type5(int yval, int xval)
 	    c_ptr = &cave[y1][x1];
 
 	    /* Analyze the grid */
-	    switch (*t++) {
+	    switch (*t) {
 
 		/* Solid wall */	    
 	      case '#':
@@ -2986,10 +2959,13 @@ void generate_cave()
     panel_row_max = 0;
     panel_col_min = 0;
     panel_col_max = 0;
+
+    /* No player yet (will be set before monster generation) */
     char_row = (-1);
     char_col = (-1);
 
     tlink();
+
     mlink();
 
     /* Start with a blank cave */

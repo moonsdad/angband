@@ -43,6 +43,12 @@ extern vptr vptr_self;
 extern cptr argv0;
 
 
+/* Aux functions */
+extern func_void plog_aux;
+extern func_void quit_aux;
+extern func_void core_aux;
+
+
 /**** Available Functions ****/
 
 /* Function that does nothing */
@@ -69,6 +75,15 @@ extern bool suffix(cptr big, cptr small);
 #ifndef HAS_STRICMP
 extern int stricmp(cptr a, cptr b);
 #endif
+
+/* Print an error message */
+extern void plog(cptr str);
+
+/* Exit, perhaps with a message */
+extern void quit(cptr str);
+
+/* Dump core, with optional message */
+extern void core(cptr str);
 
 
 

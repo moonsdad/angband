@@ -90,10 +90,10 @@ int pack_heavy = FALSE;
 int rogue_like_commands = FALSE;	/* Pick initial keyset */
 int quick_messages = FALSE;		/* Quick messages -CWS */
 int prompt_carry_flag = FALSE;		/* Require "g" key to pick up */
-int carry_query_flag = TRUE;		/* Prompt for pickup */
+int carry_query_flag = FALSE;		/* Prompt for pickup */
 
-int equippy_chars = FALSE;	/* do equipment characters -CWS */
-int highlight_seams = FALSE;	/* Highlight mineral seams */
+int equippy_chars = TRUE;	/* do equipment characters -CWS */
+int notice_seams = TRUE;	/* Highlight mineral seams */
 
 /* Option Set 2  */
 
@@ -119,7 +119,7 @@ int show_equip_weight_flag = FALSE;	/* Show weights in equip */
 int plain_descriptions = FALSE;	/* Plain descriptions */
 
 int hitpoint_warn = 1;		/* Hitpoint warning (0 to 9) */
-int delay_spd = 5;		/* Delay factor (0 to 9) */
+int delay_spd = 1;		/* Delay factor (0 to 9) */
 
 
 int feeling = 0;		/* Most recent feeling */
@@ -160,28 +160,28 @@ vtype died_from;
 vtype savefile;
 int NO_SAVE=FALSE;
 
-#ifdef MACINTOSH
-cave_type (*cave)[MAX_WIDTH];
-#else
-cave_type cave[MAX_HEIGHT][MAX_WIDTH];
-#endif
+/* Was: cave_type cave[MAX_HEIGHT][MAX_WIDTH]; */
+cave_type *cave[MAX_HEIGHT];
 
+
+/* Monster memories */
 #ifdef MACINTOSH
 monster_lore *c_recall;
 #else
-monster_lore c_recall[MAX_CREATURES];	/* Monster memories */
+monster_lore c_recall[MAX_CREATURES];
 #endif
-
 
 struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
 /* Player record for most player related info */
-player_type py;	/* player info record */
+static player_type py;	/* static player info record */
+player_type *p_ptr = &py;	/* Pointer to the player info */
 
 /* 
  * Calculated base hp values for player at each level,
  * store them so that drain life + restore life does not
- * affect hit points.
+ * affect hit points.  Also prevents shameless use of backup
+ * savefiles for hitpoint acquirement.
  */
 u16b player_hp[MAX_PLAYER_LEVEL];
 
