@@ -16,31 +16,3680 @@
 
 
 /*
- * Deletes object from given location			-RAK-	 
+ * Deletes object from given location			-RAK-	
  */
 int delete_object(int y, int x)
 {
     register int        delete;
     register cave_type *c_ptr;
 
+    /* Find where it was */
     c_ptr = &cave[y][x];
-    if (c_ptr->fval == BLOCKED_FLOOR)
-	c_ptr->fval = CORR_FLOOR;
-    pusht(c_ptr->tptr);		   /* then eliminate it */
+
+    if (c_ptr->fval == BLOCKED_FLOOR) c_ptr->fval = CORR_FLOOR;
+
+    /* then eliminate it */
+    pusht(c_ptr->tptr);
+
+    /* There is nothing here */
     c_ptr->tptr = 0;
+
     c_ptr->fm = FALSE;
+
     lite_spot(y, x);
-    if (test_light(y, x))
-	delete = TRUE;
-    else
-	delete = FALSE;
+
+    if (test_light(y, x)) delete = TRUE;
+    else delete = FALSE;
+
     return (delete);
 }
 
 
 
-static cptr stat_names[] = { "STR: ", "INT: ", "WIS: ",
-					"DEX: ", "CON: ", "CHR: "};
+
+/*
+ * If too many objects on floor level, delete some of them
+ */
+static void compact_objects()
+{
+    register int        i, j;
+    int                 ctr, cur_dis, chance;
+    register cave_type *cave_ptr;
+
+
+    /* Debugging message */
+    msg_print("Compacting objects...");
+
+    ctr = 0;
+    cur_dis = 66;
+    do {
+
+	/* Examine the dungeon */
+	for (i = 0; i < cur_height; i++)
+	    for (j = 0; j < cur_width; j++) {
+
+		/* Get the location */
+		cave_ptr = &cave[i][j];
+
+		if ((cave_ptr->tptr != 0)
+		    && (distance(i, j, char_row, char_col) > cur_dis)) {
+
+		/* Every object gets a "saving throw" */
+		    switch (t_list[cave_ptr->tptr].tval) {
+		      case TV_VIS_TRAP:
+			chance = 15;
+			break;
+		      case TV_INVIS_TRAP:
+		      case TV_RUBBLE:
+		      case TV_OPEN_DOOR:
+		      case TV_CLOSED_DOOR:
+			chance = 5;
+			break;
+		      case TV_UP_STAIR:
+		      case TV_DOWN_STAIR:
+		      case TV_STORE_DOOR:
+			chance = 0;
+			break;
+		      case TV_SECRET_DOOR:	/* secret doors */
+			chance = 3;
+			break;
+		      default:
+			if ((t_list[cave_ptr->tptr].tval >= TV_MIN_WEAR) &&
+			    (t_list[cave_ptr->tptr].tval <= TV_MAX_WEAR) &&
+			    (t_list[cave_ptr->tptr].flags2 & TR_ARTIFACT))
+			    chance = 0;	/* don't compact artifacts -CFT */
+			else
+			    chance = 10;
+		    }
+		    if (randint(100) <= chance) {
+			(void)delete_object(i, j);
+			ctr++;
+		    }
+		}
+	    }
+	if (ctr == 0) cur_dis -= 6;
+    }
+    while (ctr <= 0);
+
+    /* Redraw */
+    if (cur_dis < 66) prt_map();
+}
+
+
+/*
+ * Gives pointer to next free space			-RAK-
+ */
+int popt(void)
+{
+    /* Compact if needed */
+    if (tcptr == MAX_TALLOC) compact_objects();
+
+    /* Return the next free space */
+    return (tcptr++);
+}
+
+/*
+ * Pushs a record back onto free space list		-RAK-	 
+ *
+ * Delete_object() should always be called instead, unless the object in
+ * question is not in the dungeon, e.g. in store1.c and files.c 
+ */
+void pusht(int my_x)
+{
+    s16b        x = (s16b) my_x;
+    register int i, j;
+
+    if (x != tcptr - 1) {
+	t_list[x] = t_list[tcptr - 1];
+
+    /* must change the tptr in the cave of the object just moved */
+	for (i = 0; i < cur_height; i++)
+	    for (j = 0; j < cur_width; j++)
+		if (cave[i][j].tptr == tcptr - 1)
+		    cave[i][j].tptr = x;
+    }
+    tcptr--;
+    invcopy(&t_list[tcptr], OBJ_NOTHING);
+}
+
+
+/*
+ * Boolean : is object enchanted	  -RAK- 
+ */
+int magik(int chance)
+{
+    if (randint(100) <= chance) return (TRUE);
+
+    return (FALSE);
+}
+
+
+/*
+ * Enchant a bonus based on degree desired -RAK-
+ *
+ * Lets just change this to make sense.  Now it goes from base to limit,
+ * roughly proportional to the level.... -CWS
+ */
+int m_bonus(int base, int limit, int level)
+{
+    register int x, stand_dev, tmp, diff = limit - base;
+
+    /* standard deviation twice as wide at bottom of Angband as top */
+    stand_dev = (OBJ_STD_ADJ * (1 + level / 100)) + OBJ_STD_MIN;
+
+    /* check for level > max_std to check for overflow... */
+    if (stand_dev > 40) stand_dev = 40;
+
+    /* abs may be a macro, don't call it with randnor as a parameter */
+    tmp = randnor(0, stand_dev);
+
+    /* Extract a weird value */
+    x = (tmp * diff / 150) + (level * limit / 200) + base;
+
+    /* Enforce minimum value */
+    if (x < base) return (base);
+
+    /* Return the extracted value */
+    return (x);
+}
+
+
+
+
+int unique_weapon(inven_type *t_ptr)
+{
+    cptr name;
+
+    if (be_nasty)
+	return 0;
+    name = object_list[t_ptr->index].name;
+    if (!stricmp("& Longsword", name)) {
+	switch (randint(15)) {
+	  case 1:
+	    if (RINGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Ringil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_RINGIL;
+	    t_ptr->tohit = 22;
+	    t_ptr->todam = 25;
+	    t_ptr->damage[0] = 4;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_UNDEAD | TR_SLAY_EVIL | TR_REGEN |
+		     TR_SPEED | TR_RES_COLD | TR_FROST_BRAND | TR_FREE_ACT |
+			    TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_LIGHT | TR_ACTIVATE
+			      | TR_RES_LT | TR_ARTIFACT);
+	    t_ptr->p1 = 1;
+	    t_ptr->cost = 300000L;
+	    RINGIL = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	  case 4:
+	    if (ANDURIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Anduril");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANDURIL;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_EVIL | TR_FREE_ACT |
+		     TR_SUST_STAT | TR_STR | TR_RES_FIRE | TR_FLAME_TONGUE);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_ACTIVATE | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->toac = 5;
+	    t_ptr->cost = 80000L;
+	    ANDURIL = 1;
+	    return 1;
+	  case 5:
+	  case 6:
+	  case 7:
+	  case 8:
+	    if (ANGUIREL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Anguirel");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANGUIREL;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 12;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_EVIL | TR_FREE_ACT | TR_RES_LIGHT
+			    | TR_STR | TR_CON);
+	    t_ptr->flags2 |= (TR_ARTIFACT |
+		       TR_LIGHTNING | TR_LIGHT | TR_SLAY_DEMON | TR_RES_LT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 40000L;
+	    ANGUIREL = 1;
+	    return 1;
+	  default:
+	    if (ELVAGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Elvagil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ELVAGIL;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 2;
+	    t_ptr->todam = 7;
+	    t_ptr->flags |= (TR_SEE_INVIS | TR_CHR | TR_DEX | TR_STEALTH | TR_FFALL);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 30000L;
+	    ELVAGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Two-Handed Sword", name)) {
+	switch (randint(8)) {
+	  case 1:
+	  case 2:
+	    if (GURTHANG)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Gurthang");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_GURTHANG;
+	    t_ptr->tohit = 13;
+	    t_ptr->todam = 17;
+	    t_ptr->flags = (TR_REGEN | TR_SLAY_X_DRAGON | TR_STR |
+			    TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 100000L;
+	    GURTHANG = 1;
+	    return 1;
+	  case 3:
+	    if (ZARCUTHRA)
+		return 0;
+	    if (randint(3) > 1)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Zarcuthra");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ZARCUTHRA;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 19;
+	    t_ptr->todam = 21;
+	    t_ptr->flags = (TR_SLAY_X_DRAGON | TR_STR | TR_SLAY_EVIL | TR_SLAY_ANIMAL |
+		  TR_SLAY_UNDEAD | TR_AGGRAVATE | TR_CHR | TR_FLAME_TONGUE |
+		  TR_SEE_INVIS | TR_RES_FIRE | TR_FREE_ACT | TR_INFRA);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC | TR_SLAY_GIANT
+			      | TR_SLAY_DEMON | TR_RES_CHAOS);
+	    t_ptr->p1 = 4;
+	    t_ptr->damage[0] = 6;
+	    t_ptr->damage[1] = 4;
+	    t_ptr->cost = 200000L;
+	    ZARCUTHRA = 1;
+	    return 1;
+	  default:
+	    if (MORMEGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Mormegil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_MORMEGIL;
+	    t_ptr->tohit = -40;
+	    t_ptr->todam = -60;
+	    t_ptr->flags = (TR_SPEED | TR_AGGRAVATE | TR_CURSED);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = -1;
+	    t_ptr->toac = -50;
+	    t_ptr->cost = 10000L;
+	    MORMEGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Broadsword", name)) {
+	switch (randint(12)) {
+	  case 1:
+	  case 2:
+	    if (ARUNRUTH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Arunruth");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ARUNRUTH;
+	    t_ptr->tohit = 20;
+	    t_ptr->todam = 12;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->flags = (TR_FFALL | TR_DEX |
+			    TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 50000L;
+	    ARUNRUTH = 1;
+	    return 1;
+	  case 3:
+	  case 4:
+	  case 5:
+	  case 6:
+	    if (GLAMDRING)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Glamdring");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_GLAMDRING;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SLOW_DIGEST | TR_SEARCH | TR_FLAME_TONGUE |
+			    TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_RES_LT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 40000L;
+	    GLAMDRING = 1;
+	    return 1;
+	  case 7:
+	    if (AEGLIN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Aeglin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_AEGLIN;
+	    t_ptr->tohit = 12;
+	    t_ptr->todam = 16;
+	    t_ptr->flags = (TR_SLOW_DIGEST | TR_SEARCH | TR_RES_LIGHT);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_LIGHTNING);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 45000L;
+	    AEGLIN = 1;
+	    return 1;
+	  default:
+	    if (ORCRIST)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Orcrist");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ORCRIST;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SLOW_DIGEST | TR_STEALTH | TR_FROST_BRAND |
+			    TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 40000L;
+	    ORCRIST = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Bastard Sword", name)) {
+	if (CALRIS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Calris");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CALRIS;
+	t_ptr->tohit = -20;
+	t_ptr->todam = 20;
+	t_ptr->damage[0] = 3;
+	t_ptr->damage[1] = 7;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_CON | TR_AGGRAVATE |
+			TR_CURSED | TR_SLAY_EVIL);
+	t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_RES_DISENCHANT
+			  | TR_ARTIFACT);
+	t_ptr->p1 = 5;
+	t_ptr->cost = 100000L;
+	CALRIS = 1;
+	return 1;
+    } else if (!stricmp("& Main Gauche", name)) {
+	if (randint(4) > 1)
+	    return 0;
+	if (MAEDHROS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Maedhros");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_MAEDHROS;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 15;
+	t_ptr->damage[0] = 2;
+	t_ptr->damage[1] = 6;
+	t_ptr->flags = (TR_DEX | TR_INT | TR_FREE_ACT | TR_SEE_INVIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_GIANT | TR_SLAY_TROLL);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 20000L;
+	MAEDHROS = 1;
+	return 1;
+    } else if (!stricmp("& Glaive", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (PAIN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Pain!");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_PAIN;
+	t_ptr->tohit = 0;
+	t_ptr->todam = 30;
+	t_ptr->damage[0] = 10;
+	t_ptr->damage[1] = 6;
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->cost = 50000L;
+	PAIN = 1;
+	return 1;
+    } else if (!stricmp("& Halberd", name)) {
+	if (OSONDIR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Osondir");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_OSONDIR;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 9;
+	t_ptr->flags = (TR_FLAME_TONGUE | TR_SLAY_UNDEAD | TR_RES_FIRE |
+			TR_FFALL | TR_CHR | TR_SEE_INVIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_SOUND | TR_SLAY_GIANT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 22000L;
+	OSONDIR = 1;
+	return 1;
+    } else if (!stricmp("& Lucerne Hammer", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TURMIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Turmil");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TURMIL;
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 6;
+	t_ptr->flags = (TR_WIS | TR_REGEN | TR_FROST_BRAND | TR_RES_COLD | TR_INFRA);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT |
+			  TR_ACTIVATE | TR_RES_LT);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 30000L;
+	t_ptr->toac = 8;
+	TURMIL = 1;
+	return 1;
+    } else if (!stricmp("& Pike", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Til-i-arc");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TIL;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 12;
+	t_ptr->toac = 10;
+	t_ptr->flags = (TR_FROST_BRAND | TR_FLAME_TONGUE | TR_RES_FIRE | TR_RES_COLD |
+			TR_SLOW_DIGEST | TR_INT | TR_SUST_STAT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_DEMON | TR_SLAY_GIANT | TR_SLAY_TROLL);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 32000L;
+	TIL = 1;
+	return 1;
+    } else if (!stricmp("& Mace of Disruption", name)) {
+	if (randint(5) > 1)
+	    return 0;
+	if (DEATHWREAKER)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Deathwreaker");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_DEATHWREAKER;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 18;
+	t_ptr->damage[1] = 12;
+	t_ptr->flags = (TR_STR | TR_FLAME_TONGUE | TR_SLAY_EVIL | TR_SLAY_DRAGON |
+		   TR_SLAY_ANIMAL | TR_TUNNEL | TR_AGGRAVATE | TR_RES_FIRE);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_IM_FIRE | TR_RES_CHAOS
+			  | TR_RES_DISENCHANT | TR_RES_DARK);
+	t_ptr->p1 = 6;
+	t_ptr->cost = 400000L;
+	DEATHWREAKER = 1;
+	return 1;
+    } else if (!stricmp("& Scythe", name)) {
+	if (AVAVIR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Avavir");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AVAVIR;
+	t_ptr->tohit = 8;
+	t_ptr->todam = 8;
+	t_ptr->toac = 10;
+	t_ptr->flags = (TR_DEX | TR_CHR | TR_FREE_ACT | TR_RES_FIRE | TR_RES_COLD |
+			TR_SEE_INVIS | TR_FLAME_TONGUE | TR_FROST_BRAND);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_LIGHT | TR_ACTIVATE | TR_RES_LT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 18000L;
+	AVAVIR = 1;
+	return 1;
+    } else if (!stricmp("& Mace", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TARATOL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Taratol");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TARATOL;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 12;
+	t_ptr->weight = 200;
+	t_ptr->damage[1] = 7;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_LIGHTNING | TR_ACTIVATE | TR_RES_DARK);
+	t_ptr->cost = 20000L;
+	TARATOL = 1;
+	return 1;
+    } else if (!stricmp("& Lance", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (EORLINGAS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Lance of Eorlingas");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_EORLINGAS;
+	t_ptr->tohit = 3;
+	t_ptr->todam = 21;
+	t_ptr->weight = 360;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_DEX);
+	t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	t_ptr->p1 = 2;
+	t_ptr->damage[1] = 12;
+	t_ptr->cost = 55000L;
+	EORLINGAS = 1;
+	return 1;
+    } else if (!stricmp("& Broad Axe", name)) {
+	if (BARUKKHELED)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Barukkheled");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_BARUKKHELED;
+	t_ptr->tohit = 13;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_CON);
+	t_ptr->flags2 |= (TR_SLAY_ORC | TR_SLAY_TROLL | TR_SLAY_GIANT | TR_ARTIFACT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 50000L;
+	BARUKKHELED = 1;
+	return 1;
+    } else if (!stricmp("& Trident", name)) {
+	switch (randint(3)) {
+	  case 1:
+	  case 2:
+	    if (randint(3) > 1)
+		return 0;
+	    if (WRATH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Wrath");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_WRATH;
+	    t_ptr->tohit = 16;
+	    t_ptr->todam = 18;
+	    t_ptr->weight = 300;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 9;
+	    t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_STR | TR_DEX |
+			     TR_SLAY_UNDEAD);
+	    t_ptr->flags2 |= (TR_RES_DARK | TR_RES_LT | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 90000L;
+	    WRATH = 1;
+	    return 1;
+	  case 3:
+	    if (randint(4) > 1)
+		return 0;
+	    if (ULMO)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Ulmo");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ULMO;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 19;
+	    t_ptr->damage[0] = 4;
+	    t_ptr->damage[1] = 10;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_FREE_ACT | TR_DEX | TR_REGEN |
+			    TR_SLOW_DIGEST | TR_SLAY_ANIMAL | TR_SLAY_DRAGON |
+			    TR_RES_ACID);
+	    t_ptr->flags2 |= (TR_IM_ACID | TR_HOLD_LIFE | TR_ACTIVATE
+			    | TR_RES_NETHER | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 120000L;
+	    ULMO = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Scimitar", name)) {
+	if (HARADEKKET)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Haradekket");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_HARADEKKET;
+	t_ptr->tohit = 9;
+	t_ptr->todam = 11;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_DEX | TR_SLAY_UNDEAD
+			 | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 30000L;
+	HARADEKKET = 1;
+	return 1;
+    } else if (!stricmp("& Lochaber Axe", name)) {
+	if (MUNDWINE)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Mundwine");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_MUNDWINE;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 17;
+	t_ptr->flags |= (TR_SLAY_EVIL | TR_RES_FIRE | TR_RES_COLD
+			 | TR_RES_LIGHT | TR_RES_ACID);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->cost = 30000L;
+	MUNDWINE = 1;
+	return 1;
+    } else if (!stricmp("& Cutlass", name)) {
+	if (GONDRICAM)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Gondricam");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_GONDRICAM;
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 11;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_FFALL | TR_REGEN | TR_STEALTH | TR_RES_FIRE |
+			 TR_RES_COLD | TR_RES_ACID | TR_RES_LIGHT | TR_DEX);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 28000L;
+	GONDRICAM = 1;
+	return 1;
+    } else if (!stricmp("& Sabre", name)) {
+	if (CARETH)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Careth Asdriag");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CARETH;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 8;
+	t_ptr->flags |= (TR_SLAY_DRAGON | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_SLAY_GIANT | TR_SLAY_ORC | TR_SLAY_TROLL | TR_ARTIFACT |
+			  TR_ATTACK_SPD);
+	t_ptr->p1 = 1;
+	t_ptr->cost = 25000L;
+	CARETH = 1;
+	return 1;
+    } else if (!stricmp("& Rapier", name)) {
+	if (FORASGIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Forasgil");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_FORASGIL;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_RES_COLD | TR_FROST_BRAND | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_LIGHT | TR_RES_LT | TR_ARTIFACT);
+	t_ptr->cost = 15000L;
+	FORASGIL = 1;
+	return 1;
+    } else if (!stricmp("& Executioner's Sword", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (CRISDURIAN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Crisdurian");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CRISDURIAN;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_SLAY_UNDEAD | TR_SLAY_DRAGON);
+	t_ptr->flags2 |= (TR_SLAY_GIANT | TR_SLAY_ORC | TR_SLAY_TROLL | TR_ARTIFACT);
+	t_ptr->cost = 100000L;
+	CRISDURIAN = 1;
+	return 1;
+    } else if (!stricmp("& Flail", name)) {
+	if (TOTILA)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Totila");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TOTILA;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 8;
+	t_ptr->damage[1] = 9;
+	t_ptr->flags = (TR_STEALTH | TR_RES_FIRE | TR_FLAME_TONGUE | TR_SLAY_EVIL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ACTIVATE | TR_RES_CONF);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 55000L;
+	TOTILA = 1;
+	return 1;
+    } else if (!stricmp("& Short sword", name)) {
+	if (GILETTAR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Gilettar");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_GILETTAR;
+	t_ptr->tohit = 3;
+	t_ptr->todam = 7;
+	t_ptr->flags = (TR_REGEN | TR_SLOW_DIGEST | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 15000L;
+	GILETTAR = 1;
+	return 1;
+    } else if (!stricmp("& Katana", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (AGLARANG)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Aglarang");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AGLARANG;
+	t_ptr->tohit = 0;
+	t_ptr->todam = 0;
+	t_ptr->damage[0] = 6;
+	t_ptr->damage[1] = 8;
+	t_ptr->weight = 50;
+	t_ptr->flags = (TR_DEX | TR_SUST_STAT);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->p1 = 5;
+	t_ptr->cost = 40000L;
+	AGLARANG = 1;
+	return 1;
+    } else if (!stricmp("& Spear", name)) {
+	switch (randint(6)) {
+	  case 1:
+	    if (AEGLOS)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Aeglos");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_AEGLOS;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 25;
+	    t_ptr->damage[0] = 1;
+	    t_ptr->damage[1] = 20;
+	    t_ptr->flags = (TR_WIS | TR_FROST_BRAND |
+			    TR_RES_COLD | TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT |
+			      TR_BLESS_BLADE);
+	    t_ptr->toac = 5;
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 140000L;
+	    AEGLOS = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	  case 4:
+	  case 5:
+	    if (NIMLOTH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nimloth");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NIMLOTH;
+	    t_ptr->tohit = 11;
+	    t_ptr->todam = 13;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD | TR_SLAY_UNDEAD |
+			    TR_SEE_INVIS | TR_STEALTH);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 30000L;
+	    NIMLOTH = 1;
+	    return 1;
+	  case 6:
+	    if (OROME)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Orome");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_OROME;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_SEE_INVIS | TR_SEARCH | TR_INT |
+			    TR_RES_FIRE | TR_FFALL | TR_INFRA);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR_SLAY_GIANT | TR_RES_LT
+			      | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 60000L;
+	    OROME = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Dagger", name)) {
+	switch (randint(11)) {
+	  case 1:
+	    if (ANGRIST)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Angrist");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANGRIST;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 5;
+	    t_ptr->flags = (TR_DEX | TR_SLAY_EVIL | TR_SUST_STAT |
+			    TR_FREE_ACT);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_DARK | TR_ARTIFACT);
+	    t_ptr->toac = 5;
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 100000L;
+	    ANGRIST = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	    if (NARTHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Narthanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NARTHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->cost = 12000;
+	    NARTHANC = 1;
+	    return 1;
+	  case 4:
+	  case 5:
+	    if (NIMTHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nimthanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NIMTHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->cost = 11000L;
+	    NIMTHANC = 1;
+	    return 1;
+	  case 6:
+	  case 7:
+	    if (DETHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Dethanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_DETHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_RES_LIGHT);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHTNING | TR_ARTIFACT);
+	    t_ptr->cost = 13000L;
+	    DETHANC = 1;
+	    return 1;
+	  case 8:
+	  case 9:
+	    if (RILIA)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Rilia");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_RILIA;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 3;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 4;
+	    t_ptr->flags = TR_POISON;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_RES_DISENCHANT | TR_ARTIFACT);
+	    t_ptr->cost = 15000L;
+	    RILIA = 1;
+	    return 1;
+	  case 10:
+	  case 11:
+	    if (BELANGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Belangil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BELANGIL;
+	    t_ptr->tohit = 6;
+	    t_ptr->todam = 9;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 2;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD | TR_REGEN | TR_SLOW_DIGEST |
+			    TR_DEX | TR_SEE_INVIS);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 40000L;
+	    BELANGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Small sword", name)) {
+	if (STING)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Sting");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_STING;
+	t_ptr->tohit = 7;
+	t_ptr->todam = 8;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL |
+			 TR_SLAY_UNDEAD | TR_DEX | TR_CON | TR_STR |
+			 TR_FREE_ACT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_RES_LT |
+			  TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 100000L;
+	STING = 1;
+	return 1;
+    } else if (!stricmp("& Great Axe", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (randint(6) > 1)
+		return 0;
+	    if (DURIN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Durin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_DURIN;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 20;
+	    t_ptr->toac = 15;
+	    t_ptr->flags = (TR_SLAY_X_DRAGON | TR_CON | TR_FREE_ACT |
+			    TR_RES_FIRE | TR_RES_ACID);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_DARK
+			      | TR_RES_LT | TR_RES_CHAOS | TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 150000L;
+	    DURIN = 1;
+	    return 1;
+	  case 2:
+	    if (randint(8) > 1)
+		return 0;
+	    if (EONWE)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Eonwe");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_EONWE;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 18;
+	    t_ptr->toac = 8;
+	    t_ptr->flags = (TR_STATS | TR_SLAY_EVIL | TR_SLAY_UNDEAD | TR_FROST_BRAND |
+			    TR_FREE_ACT | TR_SEE_INVIS | TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_IM_COLD | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT |
+			      TR_BLESS_BLADE);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 200000L;
+	    EONWE = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Battle Axe", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (BALLI)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Balli Stonehand");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BALLI;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 11;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 6;
+	    t_ptr->toac = 5;
+	    t_ptr->flags = (TR_FFALL | TR_RES_LIGHT | TR_SEE_INVIS | TR_STR | TR_CON
+			    | TR_FREE_ACT | TR_RES_COLD | TR_RES_ACID
+			    | TR_RES_FIRE | TR_REGEN | TR_STEALTH);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_BLIND
+			      | TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 90000L;
+	    BALLI = 1;
+	    return 1;
+	  case 2:
+	    if (LOTHARANG)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Lotharang");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_LOTHARANG;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 3;
+	    t_ptr->flags = (TR_STR | TR_DEX);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 1;
+	    t_ptr->cost = 21000L;
+	    LOTHARANG = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& War Hammer", name)) {
+	if (randint(10) > 1)
+	    return 0;
+	if (AULE)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Aule");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AULE;
+	t_ptr->damage[0] = 5;
+	t_ptr->damage[1] = 5;
+	t_ptr->tohit = 19;
+	t_ptr->todam = 21;
+	t_ptr->toac = 5;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_SLAY_EVIL | TR_SLAY_UNDEAD |
+		    TR_RES_FIRE | TR_RES_ACID | TR_RES_COLD | TR_RES_LIGHT |
+			TR_FREE_ACT | TR_SEE_INVIS | TR_WIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_DEMON | TR_LIGHTNING | TR_RES_NEXUS);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 250000L;
+	AULE = 1;
+	return 1;
+    } else if (!stricmp("& Beaked Axe", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (THEODEN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Theoden");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_THEODEN;
+	t_ptr->tohit = 8;
+	t_ptr->todam = 10;
+	t_ptr->flags = (TR_WIS | TR_CON | TR_SEARCH | TR_SLOW_DIGEST | TR_SLAY_DRAGON);
+	t_ptr->flags2 |= (TR_TELEPATHY | TR_ACTIVATE | TR_ARTIFACT);
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->p1 = 3;
+	t_ptr->cost = 40000L;
+	THEODEN = 1;
+	return 1;
+    } else if (!stricmp("& Two-Handed Great Flail", name)) {
+	if (randint(5) > 1)
+	    return 0;
+	if (THUNDERFIST)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thunderfist");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_THUNDERFIST;
+	t_ptr->tohit = 5;
+	t_ptr->todam = 18;
+	t_ptr->flags = (TR_SLAY_ANIMAL | TR_STR | TR_FLAME_TONGUE |
+			TR_RES_FIRE | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC
+			  | TR_LIGHTNING | TR_RES_DARK);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 160000L;
+	THUNDERFIST = 1;
+	return 1;
+    } else if (!stricmp("& Morningstar", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (randint(2) > 1)
+		return 0;
+	    if (BLOODSPIKE)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Bloodspike");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BLOODSPIKE;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 22;
+	    t_ptr->flags = (TR_SLAY_ANIMAL | TR_STR | TR_SEE_INVIS);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_NEXUS);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 30000L;
+	    BLOODSPIKE = 1;
+	    return 1;
+	  case 2:
+	    if (FIRESTAR)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Firestar");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_FIRESTAR;
+	    t_ptr->tohit = 5;
+	    t_ptr->todam = 7;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->toac = 2;
+	    t_ptr->cost = 35000L;
+	    FIRESTAR = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Blade of Chaos", name)) {
+	if (DOOMCALLER)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Doomcaller");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_DOOMCALLER;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 28;
+	t_ptr->flags = (TR_CON | TR_SLAY_ANIMAL | TR_SLAY_X_DRAGON |
+		TR_FROST_BRAND | TR_SLAY_EVIL | TR_FREE_ACT | TR_SEE_INVIS |
+		    TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT | TR_RES_ACID |
+			TR_AGGRAVATE);
+	t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_TELEPATHY | TR_ARTIFACT);
+	t_ptr->p1 = -5;
+	t_ptr->cost = 200000L;
+	DOOMCALLER = 1;
+	return 1;
+    } else if (!stricmp("& Quarterstaff", name)) {
+	switch (randint(7)) {
+	  case 1:
+	  case 2:
+	  case 3:
+	    if (NAR)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nar-i-vagil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NAR;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 20;
+	    t_ptr->flags = (TR_INT | TR_SLAY_ANIMAL | TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 70000L;
+	    NAR = 1;
+	    return 1;
+	  case 4:
+	  case 5:
+	  case 6:
+	    if (ERIRIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Eriril");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ERIRIL;
+	    t_ptr->tohit = 3;
+	    t_ptr->todam = 5;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SEE_INVIS | TR_INT | TR_WIS);
+	    t_ptr->flags2 |= (TR_LIGHT | TR_ACTIVATE | TR_RES_LT | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 20000L;
+	    ERIRIL = 1;
+	    return 1;
+	  case 7:
+	    if (OLORIN)
+		return 0;
+	    if (randint(2) > 1)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Olorin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_OLORIN;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 13;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 10;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SEE_INVIS | TR_WIS | TR_INT | TR_CHR
+			    | TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_HOLD_LIFE | TR_SLAY_ORC | TR_SLAY_TROLL
+			      | TR_ACTIVATE | TR_RES_NETHER);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 130000L;
+	    OLORIN = 1;
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+int unique_armour(inven_type *t_ptr)
+{
+    cptr name;
+
+    if (be_nasty)
+	return 0;
+    name = object_list[t_ptr->index].name;
+    if (!strncmp("Adamantite", name, 10)) {
+	if (SOULKEEPER)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Soulkeeper");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_COLD);
+	t_ptr->flags2 |= (TR_HOLD_LIFE | TR_ACTIVATE | TR_RES_CHAOS | TR_RES_DARK |
+			  TR_RES_NEXUS | TR_RES_NETHER | TR_ARTIFACT);
+	t_ptr->name2 = SN_SOULKEEPER;
+	t_ptr->toac = 20;
+	t_ptr->cost = 300000L;
+	SOULKEEPER = 1;
+	return 1;
+    }
+     /* etc..... */ 
+    else if (!strncmp("Multi-Hued", name, 10)) {
+	if (RAZORBACK)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Razorback");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_FIRE | TR_RES_COLD | TR_RES_ACID | TR_POISON |
+			 TR_RES_LIGHT | TR_FREE_ACT | TR_SEE_INVIS | TR_INT |
+			 TR_WIS | TR_STEALTH | TR_AGGRAVATE);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR_IM_LIGHT | TR_RES_LT |
+			  TR_ARTIFACT);
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->toac = 25;
+	t_ptr->p1 = -2;
+	t_ptr->weight = 400;
+	t_ptr->ac = 30;
+	t_ptr->tohit = -3;
+	t_ptr->cost = 400000L;
+	t_ptr->name2 = SN_RAZORBACK;
+	RAZORBACK = 1;
+	return 1;
+    } else if (!strncmp("Power Drag", name, 10)) {
+	if (BLADETURNER)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Bladeturner");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_FIRE | TR_RES_COLD | TR_RES_ACID | TR_POISON |
+			 TR_RES_LIGHT | TR_DEX | TR_SEARCH | TR_REGEN);
+	t_ptr->flags2 |= (TR_HOLD_LIFE | TR_RES_CONF | TR_RES_SOUND | TR_RES_LT
+	      | TR_RES_DARK | TR_RES_CHAOS | TR_RES_DISENCHANT | TR_ARTIFACT
+	       | TR_RES_SHARDS | TR_RES_BLIND | TR_RES_NEXUS | TR_RES_NETHER
+			  | TR_ACTIVATE);
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->toac = 35;
+	t_ptr->p1 = -3;
+	t_ptr->ac = 50;
+	t_ptr->tohit = -4;
+	t_ptr->weight = 500;
+	t_ptr->cost = 500000L;
+	t_ptr->name2 = SN_BLADETURNER;
+	BLADETURNER = 1;
+	return 1;
+    } else if (!stricmp("& Pair of Hard Leather Boots", name)) {
+	if (FEANOR)
+	    return 0;
+	if (randint(5) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Feanor");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_SPEED | TR_STEALTH);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_RES_NEXUS | TR_ARTIFACT);
+	t_ptr->name2 = SN_FEANOR;
+	t_ptr->p1 = 1;
+	t_ptr->toac = 20;
+	t_ptr->cost = 130000L;
+	FEANOR = 1;
+	return 1;
+    } else if (!stricmp("& Pair of Soft Leather Boots", name)) {
+	if (DAL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Dal-i-thalion");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_FREE_ACT | TR_DEX | TR_SUST_STAT | TR_RES_ACID);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT | TR_RES_NETHER | TR_RES_CHAOS);
+	t_ptr->name2 = SN_DAL;
+	t_ptr->p1 = 5;
+	t_ptr->toac = 15;
+	t_ptr->cost = 40000L;
+	DAL = 1;
+	return 1;
+    } else if (!stricmp("& Small Metal Shield", name)) {
+	if (THORIN)
+	    return 0;
+	if (randint(2) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thorin");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_CON | TR_FREE_ACT | TR_STR |
+			 TR_RES_ACID | TR_SEARCH);
+	t_ptr->flags2 |= (TR_RES_SOUND | TR_RES_CHAOS | TR_ARTIFACT | TR_IM_ACID);
+	t_ptr->name2 = SN_THORIN;
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->tohit = 0;
+	t_ptr->p1 = 4;
+	t_ptr->toac = 25;
+	t_ptr->cost = 60000L;
+	THORIN = 1;
+	return 1;
+    } else if (!stricmp("Full Plate Armour", name)) {
+	if (ISILDUR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Isildur");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->weight = 300;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_RES_SOUND | TR_ARTIFACT | TR_RES_NEXUS);
+	t_ptr->name2 = SN_ISILDUR;
+	t_ptr->tohit = 0;
+	t_ptr->toac = 25;
+	t_ptr->cost = 40000L;
+	ISILDUR = 1;
+	return 1;
+    } else if (!stricmp("Metal Brigandine Armour", name)) {
+	if (ROHAN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Rohirrim");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->weight = 200;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			 TR_STR | TR_DEX);
+	t_ptr->flags2 |= (TR_RES_SOUND | TR_RES_CONF | TR_ARTIFACT);
+	t_ptr->name2 = SN_ROHAN;
+	t_ptr->tohit = 0;
+	t_ptr->p1 = 2;
+	t_ptr->toac = 15;
+	t_ptr->cost = 30000L;
+	ROHAN = 1;
+	return 1;
+    } else if (!stricmp("& Large Metal Shield", name)) {
+	if (ANARION)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	else
+	    good_item_flag = TRUE;
+	if (wizard || peek)
+	    msg_print("Anarion");
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			 TR_SUST_STAT);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->name2 = SN_ANARION;
+	t_ptr->p1 = 10;
+	t_ptr->ident |= ID_NOSHOW_P1;
+	t_ptr->tohit = 0;
+	t_ptr->toac = 20;
+	t_ptr->cost = 160000L;
+	ANARION = 1;
+	return 1;
+    } else if (!stricmp("& Set of Cesti", name)) {
+	if (FINGOLFIN)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Fingolfin");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_DEX | TR_FREE_ACT);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	t_ptr->name2 = SN_FINGOLFIN;
+	t_ptr->ident |= ID_SHOW_HITDAM;
+	t_ptr->p1 = 4;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 10;
+	t_ptr->toac = 20;
+	t_ptr->cost = 110000L;
+	FINGOLFIN = 1;
+	return 1;
+    } else if (!stricmp("& Set of Leather Gloves", name)) {
+	if (randint(3) == 1) {
+	    if (CAMBELEG)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Cambeleg");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_STR | TR_CON | TR_FREE_ACT);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->name2 = SN_CAMBELEG;
+	    t_ptr->ident |= ID_SHOW_HITDAM;
+	    t_ptr->p1 = 2;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 8;
+	    t_ptr->toac = 15;
+	    t_ptr->cost = 36000L;
+	    CAMBELEG = 1;
+	    return 1;
+	} else {
+	    if (CAMMITHRIM)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Cammithrim");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_SUST_STAT | TR_FREE_ACT);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR_RES_LT | TR_ARTIFACT);
+	    t_ptr->name2 = SN_CAMMITHRIM;
+	    t_ptr->ident |= ID_NOSHOW_P1;
+	    t_ptr->p1 = 5;
+	    t_ptr->toac = 10;
+	    t_ptr->cost = 30000L;
+	    CAMMITHRIM = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Set of Gauntlets", name)) {
+	switch (randint(6)) {
+	  case 1:
+	    if (PAURHACH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Paurhach");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= TR_RES_FIRE;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->name2 = SN_PAURHACH;
+	    t_ptr->toac = 15;
+	    t_ptr->cost = 15000L;
+	    PAURHACH = 1;
+	    return 1;
+	  case 2:
+	    if (PAURNIMMEN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Paurnimmen");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= TR_RES_COLD;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->name2 = SN_PAURNIMMEN;
+	    t_ptr->toac = 15;
+	    t_ptr->cost = 13000L;
+	    PAURNIMMEN = 1;
+	    return 1;
+	  case 3:
+	    if (PAURAEGEN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Pauraegen");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= TR_RES_LIGHT;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->name2 = SN_PAURAEGEN;
+	    t_ptr->toac = 15;
+	    t_ptr->cost = 11000L;
+	    PAURAEGEN = 1;
+	    return 1;
+	  case 4:
+	    if (PAURNEN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Paurnen");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= TR_RES_ACID;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->name2 = SN_PAURNEN;
+	    t_ptr->toac = 15;
+	    t_ptr->cost = 12000L;
+	    PAURNEN = 1;
+	    return 1;
+	  default:
+	    if (CAMLOST)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Camlost");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_STR | TR_DEX | TR_AGGRAVATE | TR_CURSED);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->name2 = SN_CAMLOST;
+	    t_ptr->toac = 0;
+	    t_ptr->p1 = -5;
+	    t_ptr->tohit = -11;
+	    t_ptr->todam = -12;
+	    t_ptr->ident |= (ID_SHOW_HITDAM/* | ID_SHOW_P1*/);
+	    t_ptr->cost = 0L;
+	    CAMLOST = 1;
+	    return 1;
+	}
+    } else if (!stricmp("Mithril Chain Mail", name)) {
+	if (BELEGENNON)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Belegennon");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD |
+			 TR_RES_LIGHT | TR_STEALTH);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	t_ptr->name2 = SN_BELEGENNON;
+	t_ptr->p1 = 4;
+	t_ptr->toac = 20;
+	t_ptr->cost = 105000L;
+	BELEGENNON = 1;
+	return 1;
+    } else if (!stricmp("Mithril Plate Mail", name)) {
+	if (CELEBORN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Celeborn");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->weight = 250;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			 TR_STR | TR_CHR);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_RES_DISENCHANT | TR_RES_DARK | TR_ARTIFACT);
+	t_ptr->name2 = SN_CELEBORN;
+	t_ptr->p1 = 4;
+	t_ptr->toac = 25;
+	t_ptr->cost = 150000L;
+	CELEBORN = 1;
+	return 1;
+    } else if (!stricmp("Augmented Chain Mail", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (CASPANION)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Caspanion");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_POISON | TR_CON | TR_WIS | TR_INT);
+	t_ptr->flags2 |= (TR_RES_CONF | TR_ACTIVATE | TR_ARTIFACT);
+	t_ptr->name2 = SN_CASPANION;
+	t_ptr->p1 = 3;
+	t_ptr->toac = 20;
+	t_ptr->cost = 40000L;
+	CASPANION = 1;
+	return 1;
+    } else if (!stricmp("Soft Leather Armour", name)) {
+	if (HITHLOMIR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Hithlomir");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			 TR_STEALTH);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_DARK);
+	t_ptr->name2 = SN_HITHLOMIR;
+	t_ptr->p1 = 4;
+	t_ptr->toac = 20;
+	t_ptr->cost = 45000L;
+	HITHLOMIR = 1;
+	return 1;
+    } else if (!stricmp("Leather Scale Mail", name)) {
+	if (THALKETTOTH)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thalkettoth");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->weight = 60;
+	t_ptr->flags |= (TR_RES_ACID | TR_DEX);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_SHARDS);
+	t_ptr->name2 = SN_THALKETTOTH;
+	t_ptr->toac = 25;
+	t_ptr->p1 = 3;
+	t_ptr->cost = 25000L;
+	THALKETTOTH = 1;
+	return 1;
+    } else if (!stricmp("Chain Mail", name)) {
+	if (ARVEDUI)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Arvedui");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			 TR_STR | TR_CHR);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_NEXUS | TR_RES_SHARDS);
+	t_ptr->name2 = SN_ARVEDUI;
+	t_ptr->p1 = 2;
+	t_ptr->toac = 15;
+	t_ptr->cost = 32000L;
+	ARVEDUI = 1;
+	return 1;
+    } else if (!stricmp("& Hard Leather Cap", name)) {
+	if (THRANDUIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thranduil");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_INT | TR_WIS);
+	t_ptr->flags2 |= (TR_TELEPATHY | TR_RES_BLIND | TR_ARTIFACT);
+	t_ptr->name2 = SN_THRANDUIL;
+	t_ptr->p1 = 2;
+	t_ptr->toac = 10;
+	t_ptr->cost = 50000L;
+	THRANDUIL = 1;
+	return 1;
+    } else if (!stricmp("& Metal Cap", name)) {
+	if (THENGEL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thengel");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_RES_ACID | TR_WIS | TR_CHR);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->name2 = SN_THENGEL;
+	t_ptr->p1 = 3;
+	t_ptr->toac = 12;
+	t_ptr->cost = 22000L;
+	THENGEL = 1;
+	return 1;
+    } else if (!stricmp("& Steel Helm", name)) {
+	if (HAMMERHAND)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Hammerhand");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_STR | TR_CON | TR_DEX | TR_RES_ACID);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_NEXUS);
+	t_ptr->name2 = SN_HAMMERHAND;
+	t_ptr->p1 = 3;
+	t_ptr->toac = 20;
+	t_ptr->cost = 45000L;
+	HAMMERHAND = 1;
+	return 1;
+    } else if (!stricmp("& Large Leather Shield", name)) {
+	if (CELEGORM)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Celegorm");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->weight = 60;
+	t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_RES_LT | TR_RES_DARK | TR_ARTIFACT);
+	t_ptr->name2 = SN_CELEGORM;
+	t_ptr->toac = 20;
+	t_ptr->cost = 12000L;
+	CELEGORM = 1;
+	return 1;
+    } else if (!stricmp("& Pair of Metal Shod Boots", name)) {
+	if (THROR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thror");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_CON | TR_STR | TR_RES_ACID);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->name2 = SN_THROR;
+	t_ptr->p1 = 3;
+	t_ptr->toac = 20;
+	t_ptr->cost = 12000L;
+	THROR = 1;
+	return 1;
+    } else if (!stricmp("& Iron Helm", name)) {
+	if (randint(6) == 1) {
+	    if (DOR_LOMIN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Dor-Lomin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_RES_ACID | TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+			     TR_CON | TR_DEX | TR_STR | TR_SEE_INVIS);
+	    t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR_RES_LT | TR_RES_BLIND
+			      | TR_ARTIFACT);
+	    t_ptr->name2 = SN_DOR_LOMIN;
+	    t_ptr->p1 = 4;
+	    t_ptr->toac = 20;
+	    t_ptr->cost = 300000L;
+	    DOR_LOMIN = 1;
+	    return 1;
+	} else if (randint(2) == 1) {
+	    if (HOLHENNETH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Holhenneth");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_INT | TR_WIS | TR_SEE_INVIS | TR_SEARCH | TR_RES_ACID);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_RES_BLIND | TR_ARTIFACT);
+	    t_ptr->name2 = SN_HOLHENNETH;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->p1 = 2;
+	    t_ptr->toac = 10;
+	    t_ptr->cost = 100000L;
+	    HOLHENNETH = 1;
+	    return 1;
+	} else {
+	    if (GORLIM)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Gorlim");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->flags |= (TR_INT | TR_WIS | TR_SEE_INVIS | TR_SEARCH | TR_CURSED
+			     | TR_AGGRAVATE);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->name2 = SN_GORLIM;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->p1 = -125;
+	    t_ptr->toac = 10;
+	    t_ptr->cost = 0L;
+	    GORLIM = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Golden Crown", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (GONDOR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Gondor");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_GONDOR;
+	t_ptr->flags = (TR_STR | TR_CON | TR_WIS | TR_SEE_INVIS | TR_REGEN
+			| TR_RES_ACID | TR_RES_FIRE);
+	t_ptr->flags2 = (TR_ACTIVATE | TR_LIGHT | TR_RES_LT | TR_RES_BLIND |
+			 TR_ARTIFACT);
+	t_ptr->p1 = 3;
+	t_ptr->toac = 15;
+	t_ptr->cost = 100000L;
+	GONDOR = 1;
+	return 1;
+    } else if (!stricmp("& Iron Crown", name)) {
+	if (BERUTHIEL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Beruthiel");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->flags |= (TR_STR | TR_DEX | TR_CON |
+		      TR_RES_ACID | TR_SEE_INVIS | TR_FREE_ACT | TR_CURSED);
+	t_ptr->flags2 |= (TR_TELEPATHY | TR_ARTIFACT);
+	t_ptr->name2 = SN_BERUTHIEL;
+	t_ptr->p1 = -125;
+	t_ptr->toac = 20;
+	t_ptr->cost = 10000L;
+	BERUTHIEL = 1;
+	return 1;
+    }
+    return 0;
+}
+
+
+/*
+ * JLS: gives one of the "new" resistances to
+ */
+void give_1_hi_resist(inven_type *t)
+{
+    switch (randint(10)) {
+	case 1: t->flags2 |= TR_RES_CONF; break;
+	case 2: t->flags2 |= TR_RES_SOUND; break;
+	case 3: t->flags2 |= TR_RES_LT; break;
+	case 4: t->flags2 |= TR_RES_DARK; break;
+	case 5: t->flags2 |= TR_RES_CHAOS; break;
+	case 6: t->flags2 |= TR_RES_DISENCHANT; break;
+	case 7: t->flags2 |= TR_RES_SHARDS; break;
+	case 8: t->flags2 |= TR_RES_NEXUS; break;
+	case 9: t->flags2 |= TR_RES_BLIND; break;
+	case 10: t->flags2 |= TR_RES_NETHER; break;
+    }
+}
+
+/*
+ * Chance of treasure having magic abilities		-RAK-
+ * Chance increases with each dungeon level			 
+ *
+ * some objects appear multiple times in the object_list with different
+ * levels, this is to make the object occur more often, however, for
+ * consistency, must set the level of these duplicates to be the same as the
+ * object with the lowest level 
+ */
+void magic_treasure(int x, int level, int good, int not_unique)
+{
+    register inven_type *t_ptr;
+    register u32b      chance, special, cursed, i;
+    u32b               tmp;
+
+    /* Extract the "chance" of "goodness" */
+    chance = OBJ_BASE_MAGIC + level;
+    if (chance > OBJ_BASE_MAX) chance = OBJ_BASE_MAX;
+
+    special = chance / OBJ_DIV_SPECIAL;
+
+    cursed = (10 * chance) / OBJ_DIV_CURSED;
+
+    t_ptr = &t_list[x];
+
+    /* Depending on treasure type, it can have certain magical properties */
+    switch (t_ptr->tval) {
+
+      case TV_SHIELD:
+      case TV_HARD_ARMOR:
+      case TV_SOFT_ARMOR:
+
+	if ((t_ptr->index >= 389 && t_ptr->index <= 394)
+	    || (t_ptr->index >= 408 && t_ptr->index <= 409)
+	    || (t_ptr->index >= 415 && t_ptr->index <= 419)) {
+
+	    byte               artifact = FALSE;
+
+	/* all DSM are enchanted, I guess -CFT */
+	    t_ptr->toac += m_bonus(0, 5, level) + randint(5);
+	    rating += 30;
+	    if ((magik(chance) && magik(special)) || (good == 666)) {
+		t_ptr->toac += randint(5);	/* even better... */
+		if ((randint(3) == 1 || good == 666) && !not_unique
+		    && unique_armour(t_ptr))	/* ...but is it an artifact? */
+		    artifact = TRUE;
+	    }
+	    if (!artifact) {	   /* assume cost&mesg done if it was an artifact */
+		if (wizard || peek)
+		    msg_print("Dragon Scale Mail");
+		t_ptr->cost += ((s32b) t_ptr->toac * 500L);
+	    }
+	} /* end if is a DSM */ 
+
+	else if (magik(chance) || good) {
+
+	    t_ptr->toac += randint(3) + m_bonus(0, 5, level);
+	    if (!stricmp(object_list[t_ptr->index].name, "& Robe") &&
+		((magik(special) && randint(30) == 1)
+		 || (good == 666 && magik(special)))) {
+		t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD | TR_RES_ACID |
+				 TR_RES_FIRE | TR_SUST_STAT);
+		if (wizard || peek)
+		    msg_print("Robe of the Magi");
+		rating += 30;
+		t_ptr->flags2 |= TR_HOLD_LIFE;
+		t_ptr->ident |= ID_NOSHOW_P1;
+		give_1_hi_resist(t_ptr);	/* JLS */
+		t_ptr->p1 = 10;
+		t_ptr->toac += 10 + randint(5);
+		t_ptr->name2 = SN_MAGI;
+		t_ptr->cost = 10000L + (t_ptr->toac * 100);
+	    } else if (magik(special) || good == 666)
+
+		switch (randint(9)) {
+
+		  case 1:
+		    if ((randint(3) == 1 || good == 666) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD | TR_RES_ACID |
+				     TR_RES_FIRE);
+		    if (randint(3) == 1) {
+			if (peek) msg_print("Elvenkind");
+			rating += 25;
+			give_1_hi_resist(t_ptr);	/* JLS */
+			t_ptr->flags |= TR_STEALTH;
+			t_ptr->p1 = randint(3);
+			t_ptr->name2 = SN_ELVENKIND;
+			t_ptr->toac += 15;
+			t_ptr->cost += 15000L;
+		    }
+		    else {
+			if (peek) msg_print("Resist");
+			rating += 20;
+			t_ptr->name2 = SN_R;
+			t_ptr->toac += 8;
+			t_ptr->cost += 12500L;
+		    }
+		    break;
+
+		  case 2:	   /* Resist Acid	  */
+		    if ((randint(3) == 1 || good == 666) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    if (!strncmp(object_list[t_ptr->index].name,
+				 "Mithril", 7) ||
+			!strncmp(object_list[t_ptr->index].name,
+				 "Adamantite", 10))
+			break;
+		    if (peek) msg_print("Resist Acid");
+		    rating += 15;
+		    t_ptr->flags |= TR_RES_ACID;
+		    t_ptr->name2 = SN_RA;
+		    t_ptr->cost += 1000L;
+		    break;
+
+		  case 3: case 4:	   /* Resist Fire	  */
+		    if ((randint(3) == 1 || good == 666) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    if (peek) msg_print("Resist Fire");
+		    rating += 17;
+		    t_ptr->flags |= TR_RES_FIRE;
+		    t_ptr->name2 = SN_RF;
+		    t_ptr->cost += 600L;
+		    break;
+
+		  case 5:  case :	   /* Resist Cold	 */
+		    if ((randint(3) == 1 || good == 666) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    if (peek) msg_print("Resist Cold");
+		    rating += 16;
+		    t_ptr->flags |= TR_RES_COLD;
+		    t_ptr->name2 = SN_RC;
+		    t_ptr->cost += 600L;
+		    break;
+
+		  case 7: case 8: case 9:	   /* Resist Lightning */
+		    if ((randint(3) == 1 || good == 666) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    if (peek) msg_print("Resist Lightning");
+		    rating += 15;
+		    t_ptr->flags |= TR_RES_LIGHT;
+		    t_ptr->name2 = SN_RL;
+		    t_ptr->cost += 500L;
+		    break;
+		}
+	}
+
+	/* Cursed armor */
+	else if (magik(cursed)) {
+	    t_ptr->toac = -randint(3) - m_bonus(0, 10, level);
+	    t_ptr->cost = 0L;
+	    t_ptr->flags |= TR_CURSED;
+	}
+
+	break;
+
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_SWORD:
+
+    /* always show tohit/todam values if identified */
+	t_ptr->ident |= ID_SHOW_HITDAM;
+	if (magik(chance) || good) {
+	    t_ptr->tohit += randint(3) + m_bonus(0, 10, level);
+	    t_ptr->todam += randint(3) + m_bonus(0, 10, level);
+	/*
+	 * the 3*special/2 is needed because weapons are not as common as
+	 * before change to treasure distribution, this helps keep same
+	 * number of ego weapons same as before, see also missiles 
+	 */
+	    if (magik(3*special/2)||good==666) { /* was 2 */
+		if (!stricmp("& Whip", object_list[t_ptr->index].name)
+		    && randint(2)==1) {
+		    if (peek) msg_print("Whip of Fire");
+		    rating += 20;
+		    t_ptr->name2 = SN_FIRE;
+		    t_ptr->flags |= (TR_FLAME_TONGUE | TR_RES_FIRE);
+		    /* this should allow some WICKED whips -CFT */
+		    while (randint(5*(int)t_ptr->damage[0])==1) {
+			t_ptr->damage[0]++;
+			t_ptr->cost += 2500;
+			t_ptr->cost *= 2;
+		    }
+		    t_ptr->tohit += 5;
+		    t_ptr->todam += 5;
+		} else {
+		    switch (randint(30)) {	/* was 16 */
+		      case 1:	   /* Holy Avenger	 */
+			if (((randint(2) == 1) || (good == 666))
+			    && !not_unique &&
+			    unique_weapon(t_ptr))
+			    break;
+			if (peek)
+			    msg_print("Holy Avenger");
+			rating += 30;
+			t_ptr->flags |= (TR_SEE_INVIS | TR_SUST_STAT |
+				      TR_SLAY_UNDEAD | TR_SLAY_EVIL | TR_WIS);
+			t_ptr->flags2 |= (TR_SLAY_DEMON | TR_BLESS_BLADE);
+			t_ptr->tohit += 5;
+			t_ptr->todam += 5;
+			t_ptr->toac += randint(4);
+		    /* the value in p1 is used for strength increase */
+		    /* p1 is also used for sustain stat */
+			t_ptr->p1 = randint(4);
+			t_ptr->name2 = SN_HA;
+			t_ptr->cost += t_ptr->p1 * 500;
+			t_ptr->cost += 10000L;
+			t_ptr->cost *= 2;
+			break;
+		      case 2:	   /* Defender	 */
+			if (((randint(2) == 1) || (good == 666)) && !not_unique &&
+			    unique_weapon(t_ptr))
+			    break;
+			if (peek)
+			    msg_print("Defender");
+			rating += 23;
+			t_ptr->flags |= (TR_FFALL | TR_RES_LIGHT | TR_SEE_INVIS
+				   | TR_FREE_ACT | TR_RES_COLD | TR_RES_ACID
+				     | TR_RES_FIRE | TR_REGEN | TR_STEALTH);
+			t_ptr->tohit += 3;
+			t_ptr->todam += 3;
+			t_ptr->toac += 5 + randint(5);
+			t_ptr->name2 = SN_DF;
+		    /* the value in p1 is used for stealth */
+			t_ptr->p1 = randint(3);
+			t_ptr->cost += t_ptr->p1 * 500;
+			t_ptr->cost += 7500L;
+			t_ptr->cost *= 2;
+			break;
+		      case 3:
+		      case 4:	   /* Flame Tongue  */
+			if (((randint(2) == 1) || (good == 666)) && !not_unique &&
+			    unique_weapon(t_ptr))
+			    break;
+			rating += 20;
+			t_ptr->flags |= (TR_FLAME_TONGUE | TR_RES_FIRE);
+			if (peek)
+			    msg_print("Flame");
+			t_ptr->tohit += 2;
+			t_ptr->todam += 3;
+			t_ptr->name2 = SN_FT;
+			t_ptr->cost += 3000L;
+			break;
+		      case 5:
+		      case 6:	   /* Frost Brand   */
+			if (((randint(2) == 1) || (good == 666)) && !not_unique &&
+			    unique_weapon(t_ptr))
+			    break;
+			if (peek)
+			    msg_print("Frost");
+			rating += 20;
+			t_ptr->flags |= (TR_FROST_BRAND | TR_RES_COLD);
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_FB;
+			t_ptr->cost += 2200L;
+			break;
+		      case 7:
+		      case 8:	   /* Slay Animal  */
+			t_ptr->flags |= TR_SLAY_ANIMAL;
+			rating += 15;
+			if (peek)
+			    msg_print("Slay Animal");
+			t_ptr->tohit += 3;
+			t_ptr->todam += 3;
+			t_ptr->name2 = SN_SA;
+			t_ptr->cost += 2000L;
+			break;
+		      case 9:
+		      case 10:	   /* Slay Dragon	 */
+			t_ptr->flags |= TR_SLAY_DRAGON;
+			if (peek)
+			    msg_print("Slay Dragon");
+			rating += 18;
+			t_ptr->tohit += 3;
+			t_ptr->todam += 3;
+			t_ptr->name2 = SN_SD;
+			t_ptr->cost += 4000L;
+			break;
+		      case 11:
+		      case 12:	   /* Slay Evil   */
+			t_ptr->flags |= TR_SLAY_EVIL;
+			if (randint(3) == 1) {
+			    t_ptr->flags |= (TR_WIS);
+			    t_ptr->flags2 |= (TR_BLESS_BLADE);
+			    t_ptr->p1 = m_bonus(0, 3, level);
+			    t_ptr->cost += (200 * t_ptr->p1);
+			}
+			if (peek)
+			    msg_print("Slay Evil");
+			rating += 18;
+			t_ptr->tohit += 3;
+			t_ptr->todam += 3;
+			t_ptr->name2 = SN_SE;
+			t_ptr->cost += 4000L;
+			break;
+		      case 13:
+		      case 14:	   /* Slay Undead	  */
+			t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_UNDEAD);
+			if (randint(3) == 1) {
+			    t_ptr->flags2 |= (TR_HOLD_LIFE);
+			    t_ptr->cost += 1000;
+			}
+			if (peek)
+			    msg_print("Slay Undead");
+			rating += 18;
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_SU;
+			t_ptr->cost += 3000L;
+			break;
+		      case 15:
+		      case 16:
+		      case 17:	   /* Slay Orc */
+			t_ptr->flags2 |= TR_SLAY_ORC;
+			if (peek)
+			    msg_print("Slay Orc");
+			rating += 13;
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_SO;
+			t_ptr->cost += 1200L;
+			break;
+		      case 18:
+		      case 19:
+		      case 20:	   /* Slay Troll */
+			t_ptr->flags2 |= TR_SLAY_TROLL;
+			if (peek)
+			    msg_print("Slay Troll");
+			rating += 13;
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_ST;
+			t_ptr->cost += 1200L;
+			break;
+		      case 21:
+		      case 22:
+		      case 23:
+			t_ptr->flags2 |= TR_SLAY_GIANT;
+			if (peek)
+			    msg_print("Slay Giant");
+			rating += 14;
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_SG;
+			t_ptr->cost += 1200L;
+			break;
+		      case 24:
+		      case 25:
+		      case 26:
+			t_ptr->flags2 |= TR_SLAY_DEMON;
+			if (peek)
+			    msg_print("Slay Demon");
+			rating += 16;
+			t_ptr->tohit += 2;
+			t_ptr->todam += 2;
+			t_ptr->name2 = SN_SDEM;
+			t_ptr->cost += 1200L;
+			break;
+		      case 27:	   /* of Westernesse */
+			if (((randint(2) == 1) || (good == 666)) && !not_unique &&
+			    unique_weapon(t_ptr))
+			    break;
+			if (peek)
+			    msg_print("Westernesse");
+			rating += 20;
+			t_ptr->flags |= (TR_SEE_INVIS | TR_DEX | TR_CON | TR_STR |
+					 TR_FREE_ACT);
+			t_ptr->flags2 |= TR_SLAY_ORC;
+			t_ptr->tohit += randint(5) + 3;
+			t_ptr->todam += randint(5) + 3;
+			t_ptr->p1 = 1;
+			t_ptr->cost += 10000L;
+			t_ptr->cost *= 2;
+			t_ptr->name2 = SN_WEST;
+			break;
+		      case 28:
+		      case 29:	   /* Blessed Blade -DGK */
+			if ((t_ptr->tval != TV_SWORD) &&
+			    (t_ptr->tval != TV_POLEARM))
+			    break;
+			if (peek)
+			    msg_print("Blessed");
+			rating += 20;
+			t_ptr->flags = TR_WIS;
+			t_ptr->flags2 = TR_BLESS_BLADE;
+			t_ptr->tohit += 3;
+			t_ptr->todam += 3;
+			t_ptr->p1 = randint(3);
+			t_ptr->name2 = SN_BLESS_BLADE;
+			t_ptr->cost += t_ptr->p1 * 1000;
+			t_ptr->cost += 3000L;
+			break;
+		      case 30:	   /* of Speed -DGK */
+			if (((randint(2) == 1) || (good == 666))
+			    && !not_unique && unique_weapon(t_ptr))
+			    break;
+			if (wizard || peek)
+			    msg_print("Weapon of Extra Attacks");
+			rating += 20;
+			t_ptr->tohit += randint(5);
+			t_ptr->todam += randint(3);
+			t_ptr->flags2 = TR_ATTACK_SPD;
+			if (t_ptr->weight <= 80)
+			    t_ptr->p1 = randint(3);
+			else if (t_ptr->weight <= 130)
+			    t_ptr->p1 = randint(2);
+			else
+			    t_ptr->p1 = 1;
+			t_ptr->name2 = SN_ATTACKS;
+			t_ptr->cost += (t_ptr->p1 * 2000);
+			t_ptr->cost *= 2;
+			break;
+		    }
+		}
+	    }
+	} else if (magik(cursed)) {
+	    t_ptr->tohit = (-randint(3) - m_bonus(1, 20, level));
+	    t_ptr->todam = (-randint(3) - m_bonus(1, 20, level));
+	    t_ptr->flags |= TR_CURSED;
+	    if (level > (20 + randint(15)) && randint(10) == 1) {
+		t_ptr->name2 = SN_MORGUL;
+		t_ptr->flags |= (TR_SEE_INVIS | TR_AGGRAVATE);
+		t_ptr->tohit -= 15;
+		t_ptr->todam -= 15;
+		t_ptr->toac = -10;
+		t_ptr->weight += 100;
+	    }
+	    t_ptr->cost = 0L;
+	}
+	break;
+      case TV_BOW:
+    /* always show tohit/todam values if identified */
+	t_ptr->ident |= ID_SHOW_HITDAM;
+	if (magik(chance) || good) {
+	    t_ptr->tohit = randint(3) + m_bonus(0, 10, level);
+	    t_ptr->todam = randint(3) + m_bonus(0, 10, level);
+	    switch (randint(15)) {
+	      case 1: case 2: case 3:
+		if (((randint(3)==1)||(good==666)) && !not_unique &&
+		    !stricmp(object_list[t_ptr->index].name, "& Long Bow") &&
+		    (((i=randint(2))==1 && !BELEG) || (i==2 && !BARD))) {
+		    switch (i) {
+		    case 1:
+			  if (BELEG)
+			    break;
+			if (wizard || peek)
+			    msg_print("Belthronding");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_BELEG;
+			t_ptr->ident |= ID_NOSHOW_TYPE;
+			t_ptr->subval = 4; /* make do x5 damage!! -CFT */
+			t_ptr->tohit = 20;
+			t_ptr->todam = 22;
+			t_ptr->p1 = 3;
+			t_ptr->flags |= (TR_STEALTH | TR_DEX);
+			t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_DISENCHANT);
+			t_ptr->cost = 35000L;
+			BELEG = 1;
+			break;
+		      case 2:
+			if (BARD)
+			    break;
+			if (wizard || peek)
+			    msg_print("Bard");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_BARD;
+			t_ptr->subval = 3; /* make do x4 damage!! -CFT */
+			t_ptr->tohit = 17;
+			t_ptr->todam = 19;
+			t_ptr->p1 = 3;
+			t_ptr->flags |= (TR_FREE_ACT | TR_DEX);
+			t_ptr->flags2 |= (TR_ARTIFACT);
+			t_ptr->cost = 20000L;
+			BARD = 1;
+			break;
+		    }
+		    break;
+		}
+		if (((randint(5) == 1) || (good == 666)) && !not_unique &&
+		    !stricmp(object_list[t_ptr->index].name, "& Light Crossbow")
+		    && !CUBRAGOL) {
+		    if (CUBRAGOL)
+			break;
+		    if (wizard || peek)
+			msg_print("Cubragol");
+		    t_ptr->name2 = SN_CUBRAGOL;
+		    t_ptr->subval = 11;
+		    t_ptr->tohit = 10;
+		    t_ptr->todam = 14;
+		    t_ptr->p1 = 1;
+		    t_ptr->flags |= (TR_SPEED | TR_RES_FIRE);
+		    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+		    t_ptr->cost = 38000L;
+		    CUBRAGOL = 1;
+		    break;
+		}
+		t_ptr->name2 = SN_MIGHT;
+		if (peek)
+		    msg_print("Bow of Might");
+		rating += 15;
+		t_ptr->subval++; /* make it do an extra multiple of damage */
+		t_ptr->tohit += 5;
+		t_ptr->todam += 10;
+		break;
+	      case 4: case 5: case 6: case 7: case 8:
+		t_ptr->name2 = SN_MIGHT;
+		if (peek) msg_print("Bow of Might");
+		rating += 11;
+		t_ptr->tohit += 5;
+		t_ptr->todam += 12;
+		break;
+
+	      case 9: case 10: case 11: case 12:
+	      case 13: case 14: case 15:
+		t_ptr->name2 = SN_ACCURACY;
+		rating += 11;
+		if (peek)
+		    msg_print("Accuracy");
+		t_ptr->tohit += 12;
+		t_ptr->todam += 5;
+		break;
+	    }
+	} else if (magik(cursed)) {
+	    t_ptr->tohit = (-m_bonus(5, 30, level));
+	    t_ptr->todam = (-m_bonus(5, 20, level));	/* add damage. -CJS- */
+	    t_ptr->flags |= TR_CURSED;
+	    t_ptr->cost = 0L;
+	}
+	break;
+
+      case TV_DIGGING:
+    /* always show tohit/todam values if identified */
+	t_ptr->ident |= ID_SHOW_HITDAM;
+	if (magik(chance) || (good == 666)) {
+	    tmp = randint(3);
+	    if (tmp == 1) {
+		t_ptr->p1 += m_bonus(0, 5, level);
+	    }
+	    if (tmp == 2)	/* do not give additional plusses -CWS */
+		;
+	    else {
+	    /* a cursed digging tool */
+		t_ptr->p1 = (-m_bonus(1, 15, level));
+		t_ptr->cost = 0L;
+		t_ptr->flags |= TR_CURSED;
+	    }
+	}
+	break;
+
+      case TV_GLOVES:
+	if (magik(chance) || good) {
+	    t_ptr->toac = randint(3) + m_bonus(0, 10, level);
+	    if ((((randint(2) == 1) && magik(5 * special / 2)) || (good == 666)) &&
+		!stricmp(object_list[t_ptr->index].name,
+			 "& Set of Leather Gloves") &&
+		!not_unique && unique_armour(t_ptr));
+	    else if ((((randint(4) == 1) && magik(special)) || (good == 666))
+		     && !stricmp(object_list[t_ptr->index].name,
+				 "& Set of Gauntlets") &&
+		     !not_unique && unique_armour(t_ptr));
+	    else if ((((randint(5) == 1) && magik(special)) || (good == 666))
+		     && !stricmp(object_list[t_ptr->index].name,
+				 "& Set of Cesti") &&
+		     !not_unique && unique_armour(t_ptr));
+
+	/* don't forget cesti -CFT */
+	    else if (magik(special) || (good == 666)) {
+		switch (randint(10)) {
+
+		  case 1: case 2: case 3:
+		    if (peek)	msg_print("Free action");
+		    rating += 11;
+		    t_ptr->flags |= TR_FREE_ACT;
+		    t_ptr->name2 = SN_FREE_ACTION;
+		    t_ptr->cost += 1000L;
+		    break;
+
+		  case 4: case 5: case 6:
+		    t_ptr->ident |= ID_SHOW_HITDAM;
+		    rating += 17;
+		    if (peek)
+			msg_print("Slaying");
+		    t_ptr->tohit += 1 + randint(4);
+		    t_ptr->todam += 1 + randint(4);
+		    t_ptr->name2 = SN_SLAYING;
+		    t_ptr->cost += (t_ptr->tohit + t_ptr->todam) * 250;
+		    break;
+
+		  case 7: case 8: case 9:
+		    t_ptr->name2 = SN_AGILITY;
+		    if (peek)
+			msg_print("Agility");
+		    rating += 14;
+		    t_ptr->p1 = 2 + randint(2);
+		    t_ptr->flags |= TR_DEX;
+		    t_ptr->cost += (t_ptr->p1) * 400;
+		    break;
+
+		  case 10:
+		    if (((randint(3) == 1) || (good == 666)) && !not_unique &&
+			unique_armour(t_ptr))
+			break;
+		    if (peek)
+			msg_print("Power");
+		    rating += 22;
+		    t_ptr->name2 = SN_POWER;
+		    t_ptr->p1 = 1 + randint(4);
+		    t_ptr->tohit += 1 + randint(4);
+		    t_ptr->todam += 1 + randint(4);
+		    t_ptr->flags |= TR_STR;
+		    t_ptr->ident |= ID_SHOW_HITDAM;
+		    t_ptr->ident |= ID_NOSHOW_TYPE;
+		    t_ptr->cost += (t_ptr->tohit + t_ptr->todam + t_ptr->p1) * 300;
+		    break;
+		}
+	    }
+	}
+
+	else if (magik(cursed)) {
+	    if (magik(special)) {
+		if (randint(2) == 1) {
+		    t_ptr->flags |= TR_DEX;
+		    t_ptr->name2 = SN_CLUMSINESS;
+		}
+		else {
+		    t_ptr->flags |= TR_STR;
+		    t_ptr->name2 = SN_WEAKNESS;
+		}
+		t_ptr->p1 = (randint(3) - m_bonus(0, 10, level));
+	    }
+	    t_ptr->toac = (-m_bonus(1, 20, level));
+	    t_ptr->flags |= TR_CURSED;
+	    t_ptr->cost = 0;
+	}
+
+	break;
+
+
+      case TV_BOOTS:
+	if (magik(chance) || good) {
+
+	    t_ptr->toac = randint(3) + m_bonus(1, 10, level);
+
+	    if (magik(special) || (good == 666)) {
+		tmp = randint(12);
+		if (tmp == 1) {
+		    if (!((randint(2) == 1) && !not_unique
+			  && unique_armour(t_ptr))) {
+			t_ptr->flags |= TR_SPEED;
+			if (wizard || peek)
+			    msg_print("Boots of Speed");
+			t_ptr->name2 = SN_SPEED;
+			rating += 30;
+			t_ptr->p1 = 1;
+			t_ptr->cost += 300000L;
+		    }
+		} else if (stricmp("& Pair of Metal Shod Boots",
+				   object_list[t_ptr->index].name))	/* not metal */
+		    if (tmp > 6) {
+			t_ptr->flags |= TR_FFALL;
+			rating += 7;
+			t_ptr->name2 = SN_SLOW_DESCENT;
+			t_ptr->cost += 250;
+		    } else if (tmp < 5) {
+			t_ptr->flags |= TR_STEALTH;
+			rating += 16;
+			t_ptr->p1 = randint(3);
+			t_ptr->name2 = SN_STEALTH;
+			t_ptr->cost += 500;
+		    } else {	   /* 5,6 */
+			t_ptr->flags |= TR_FREE_ACT;
+			rating += 15;
+			t_ptr->name2 = SN_FREE_ACTION;
+			t_ptr->cost += 500;
+			t_ptr->cost *= 2;
+		    }
+		else
+		 /* is metal boots, different odds since no stealth */
+		    if (tmp < 5) {
+			t_ptr->flags |= TR_FREE_ACT;
+			rating += 15;
+			t_ptr->name2 = SN_FREE_ACTION;
+			t_ptr->cost += 500;
+			t_ptr->cost *= 2;
+		    } else {	   /* tmp > 4 */
+			t_ptr->flags |= TR_FFALL;
+			rating += 7;
+			t_ptr->name2 = SN_SLOW_DESCENT;
+			t_ptr->cost += 250;
+		    }
+	    }
+	} else if (magik(cursed)) {
+	    tmp = randint(3);
+	    if (tmp == 1) {
+		t_ptr->flags |= TR_SPEED;
+		t_ptr->name2 = SN_SLOWNESS;
+		t_ptr->p1 = -1;
+	    } else if (tmp == 2) {
+		t_ptr->flags |= TR_AGGRAVATE;
+		t_ptr->name2 = SN_NOISE;
+	    } else {
+		t_ptr->name2 = SN_GREAT_MASS;
+		t_ptr->weight = t_ptr->weight * 5;
+	    }
+	    t_ptr->cost = 0;
+	    t_ptr->toac = (-m_bonus(2, 20, level));
+	    t_ptr->flags |= TR_CURSED;
+	}
+	break;
+
+      case TV_HELM:		   /* Helms */
+
+	if ((t_ptr->subval >= 6) && (t_ptr->subval <= 8)) {
+	/* give crowns a higher chance for magic */
+	    chance += t_ptr->cost / 100;
+	    special += special;
+	}
+	if (magik(chance) || good) {
+	    t_ptr->toac = randint(3) + m_bonus(0, 10, level);
+	    if (magik(special) || (good == 666)) {
+		if (t_ptr->subval < 6) {
+		    tmp = randint(14);
+		    if (tmp < 3) {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Intelligence");
+			    t_ptr->p1 = randint(2);
+			    rating += 13;
+			    t_ptr->flags |= TR_INT;
+			    t_ptr->name2 = SN_INTELLIGENCE;
+			    t_ptr->cost += t_ptr->p1 * 500;
+			}
+		    } else if (tmp < 6) {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Wisdom");
+			    rating += 13;
+			    t_ptr->p1 = randint(2);
+			    t_ptr->flags |= TR_WIS;
+			    t_ptr->name2 = SN_WISDOM;
+			    t_ptr->cost += t_ptr->p1 * 500;
+			}
+		    } else if (tmp < 10) {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    t_ptr->p1 = 1 + randint(4);
+			    rating += 11;
+			    t_ptr->flags |= TR_INFRA;
+			    t_ptr->name2 = SN_INFRAVISION;
+			    t_ptr->cost += t_ptr->p1 * 250;
+			}
+		    } else if (tmp < 12) {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Light");
+			    t_ptr->flags2 |= (TR_RES_LT | TR_LIGHT);
+			    rating += 6;
+			    t_ptr->name2 = SN_LIGHT;
+			    t_ptr->cost += 500;
+			}
+		    } else if (tmp < 14) {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Helm of Seeing");
+			    t_ptr->flags |= TR_SEE_INVIS;
+			    t_ptr->flags2 |= TR_RES_BLIND;
+			    rating += 8;
+			    t_ptr->name2 = SN_SEEING;
+			    t_ptr->cost += 1000;
+			}
+		    } else {
+			if (!((randint(2) == 1) && !not_unique &&
+			      unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Telepathy");
+			    rating += 20;
+			    t_ptr->flags2 |= TR_TELEPATHY;
+			    t_ptr->name2 = SN_TELEPATHY;
+			    t_ptr->cost += 50000L;
+			}
+		    }
+		} else {
+		    switch (randint(6)) {
+		      case 1:
+			if (!(((randint(2) == 1) || (good == 666)) &&
+			      !not_unique && unique_armour(t_ptr))) {
+			    if (peek)
+				msg_print("Crown of Might");
+			    rating += 19;
+			    t_ptr->p1 = randint(3);
+			    t_ptr->flags |= (TR_FREE_ACT | TR_CON |
+					     TR_DEX | TR_STR);
+			    t_ptr->name2 = SN_MIGHT;
+			    t_ptr->cost += 1000 + t_ptr->p1 * 500;
+			}
+			break;
+		      case 2:
+			if (peek)
+			    msg_print("Lordliness");
+			t_ptr->p1 = randint(3);
+			rating += 17;
+			t_ptr->flags |= (TR_CHR | TR_WIS);
+			t_ptr->name2 = SN_LORDLINESS;
+			t_ptr->cost += 1000 + t_ptr->p1 * 500;
+			break;
+		      case 3:
+			if (peek)
+			    msg_print("Crown of the Magi");
+			rating += 15;
+			t_ptr->p1 = randint(3);
+			t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD
+				      | TR_RES_ACID | TR_RES_FIRE | TR_INT);
+			t_ptr->name2 = SN_MAGI;
+			t_ptr->cost += 3000 + t_ptr->p1 * 500;
+			break;
+		      case 4:
+			rating += 8;
+			if (peek)
+			    msg_print("Beauty");
+			t_ptr->p1 = randint(4);
+			t_ptr->flags |= TR_CHR;
+			t_ptr->name2 = SN_BEAUTY;
+			t_ptr->cost += 750;
+			break;
+		      case 5:
+			if (peek)
+			    msg_print("Seeing");
+			rating += 8;
+			t_ptr->p1 = 5 * (1 + randint(4));
+			t_ptr->flags |= (TR_SEE_INVIS | TR_SEARCH);
+			t_ptr->name2 = SN_SEEING;
+			t_ptr->cost += 1000 + t_ptr->p1 * 100;
+			break;
+		      case 6:
+			t_ptr->flags |= TR_REGEN;
+			rating += 10;
+			if (peek)
+			    msg_print("Regeneration");
+			t_ptr->name2 = SN_REGENERATION;
+			t_ptr->cost += 1500;
+			break;
+
+		    }
+		}
+	    }
+	}
+
+	/* Cursed */
+	else if (magik(cursed)) {
+	    t_ptr->toac -= m_bonus(1, 20, level);
+	    t_ptr->flags |= TR_CURSED;
+	    t_ptr->cost = 0;
+	    if (magik(special))
+		switch (randint(7)) {
+		  case 1:
+		    t_ptr->p1 = -randint(5);
+		    t_ptr->flags |= TR_INT;
+		    t_ptr->name2 = SN_STUPIDITY;
+		    break;
+		  case 2:
+		  case 3:
+		    t_ptr->p1 = -randint(5);
+		    t_ptr->flags |= TR_WIS;
+		    t_ptr->name2 = SN_DULLNESS;
+		    break;
+		  case 4:
+		  case 5:
+		    t_ptr->p1 = -randint(5);
+		    t_ptr->flags |= TR_STR;
+		    t_ptr->name2 = SN_WEAKNESS;
+		    break;
+		  case 6:
+		    t_ptr->flags |= TR_TELEPORT;
+		    t_ptr->name2 = SN_TELEPORTATION;
+		    break;
+		  case 7:
+		    t_ptr->p1 = -randint(5);
+		    t_ptr->flags |= TR_CHR;
+		    t_ptr->name2 = SN_UGLINESS;
+		    break;
+		}
+	}
+	break;
+
+      case TV_RING:		   /* Rings	      */
+	if (!((randint(10) == 1) && !not_unique && unique_armour(t_ptr))) {
+	    switch (t_ptr->subval) {
+	      case 0:
+	      case 1:
+	      case 2:
+	      case 3:		   /* 132-135 */
+		if (magik(cursed)) {
+		    t_ptr->p1 = -m_bonus(1, 10, level);
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		} else {
+		    t_ptr->p1 = m_bonus(1, 6, level);
+		    t_ptr->cost += t_ptr->p1 * 100;
+		}
+		break;
+	      case 4:		   /* 136 */
+		if (magik(cursed)) {
+		    t_ptr->p1 = -randint(3);
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		} else {
+		    if (peek)
+			msg_print("Ring of Speed");
+		    rating += 35;
+		    if (randint(888) == 1)
+			t_ptr->p1 = 2;
+		    else
+			t_ptr->p1 = 1;
+		}
+		break;
+	      case 5:
+		t_ptr->p1 = 5 * m_bonus(1, 10, level);
+		t_ptr->cost += t_ptr->p1 * 30;
+		if (magik(cursed)) {
+		    t_ptr->p1 = -t_ptr->p1;
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		}
+		break;
+	      case 14:
+	      case 15:
+	      case 16:		   /* Flames, Acid, Ice */
+		t_ptr->toac = m_bonus(1, 10, level);
+		t_ptr->toac += 5 + randint(7);
+		t_ptr->cost += t_ptr->toac * 100;
+		break;
+              case 17:
+              case 18:		   /* WOE, Stupidity */
+		t_ptr->toac = (-5) - m_bonus(1,10,level);
+		t_ptr->p1 = (-randint(4));
+		break;
+	      case 19:		   /* Increase damage	      */
+		t_ptr->todam = m_bonus(1, 10, level);
+		t_ptr->todam += 3 + randint(10);
+		t_ptr->cost += t_ptr->todam * 100;
+		if (magik(cursed)) {
+		    t_ptr->todam = -t_ptr->todam;
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		}
+		break;
+	      case 20:		   /* Increase To-Hit	      */
+		t_ptr->tohit = m_bonus(1, 10, level);
+		t_ptr->tohit += 3 + randint(10);
+		t_ptr->cost += t_ptr->tohit * 100;
+		if (magik(cursed)) {
+		    t_ptr->tohit = -t_ptr->tohit;
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		}
+		break;
+	      case 21:		   /* Protection	      */
+		t_ptr->toac = m_bonus(0, 10, level);
+		t_ptr->toac += 4 + randint(5);
+		t_ptr->cost += t_ptr->toac * 100;
+		if (magik(cursed)) {
+		    t_ptr->toac = -t_ptr->toac;
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		}
+		break;
+	      case 24:
+	      case 25:
+	      case 26:
+	      case 27:
+	      case 28:
+	      case 29:
+		t_ptr->ident |= ID_NOSHOW_P1;
+		break;
+	      case 30:		   /* Slaying	      */
+		t_ptr->ident |= ID_SHOW_HITDAM;
+		t_ptr->todam = m_bonus(1, 10, level);
+		t_ptr->todam += 2 + randint(3);
+		t_ptr->tohit = m_bonus(1, 10, level);
+		t_ptr->tohit += 2 + randint(3);
+		t_ptr->cost += (t_ptr->tohit + t_ptr->todam) * 100;
+		if (magik(cursed)) {
+		    t_ptr->tohit = -t_ptr->tohit;
+		    t_ptr->todam = -t_ptr->todam;
+		    t_ptr->flags |= TR_CURSED;
+		    t_ptr->cost = -t_ptr->cost;
+		}
+		break;
+	      default:
+		break;
+	    }
+	}
+	break;
+
+      case TV_AMULET:		   /* Amulets	      */
+	if (t_ptr->subval < 2) {
+	    if (magik(cursed)) {
+		t_ptr->p1 = -m_bonus(1, 5, level);
+		t_ptr->flags |= TR_CURSED;
+		t_ptr->cost = -t_ptr->cost;
+	    } else {
+		t_ptr->p1 = m_bonus(1, 5, level);
+		t_ptr->cost += t_ptr->p1 * 100;
+	    }
+	} else if (t_ptr->subval == 2) { /* searching */
+	    t_ptr->p1 = 5 * (randint(3) + m_bonus(0, 8, level));
+	    if (magik(cursed)) {
+		t_ptr->p1 = -t_ptr->p1;
+		t_ptr->cost = -t_ptr->cost;
+		t_ptr->flags |= TR_CURSED;
+	    } else
+		t_ptr->cost += 20 * t_ptr->p1;
+	} else if (t_ptr->subval == 8) {
+	    rating += 25;
+	    t_ptr->p1 = 5 * (randint(2) + m_bonus(0, 10, level));
+	    t_ptr->toac = randint(4) + m_bonus(0, 8, level) - 2;
+	    t_ptr->cost += 20 * t_ptr->p1 + 50 * t_ptr->toac;
+	    if (t_ptr->toac < 0) /* sort-of cursed...just to be annoying -CWS */
+		t_ptr->flags |= TR_CURSED;
+	} else if (t_ptr->subval == 9) {
+	/* amulet of DOOM */
+	    t_ptr->p1 = (-randint(5) - m_bonus(2, 10, level));
+	    t_ptr->toac = (-randint(3) - m_bonus(0, 6, level));
+	    t_ptr->flags |= TR_CURSED;
+	}
+	break;
+
+    /* Subval should be even for store, odd for dungeon */
+    /* Dungeon found ones will be partially charged	 */
+      case TV_LIGHT:
+	if ((t_ptr->subval % 2) == 1) {
+	    t_ptr->p1 = randint(t_ptr->p1);
+	    t_ptr->subval -= 1;
+	}
+	break;
+
+      case TV_WAND:
+	switch (t_ptr->subval) {
+	  case 0:
+	    t_ptr->p1 = randint(10) + 6;
+	    break;
+	  case 1:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 2:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 3:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 4:
+	    t_ptr->p1 = randint(4) + 3;
+	    break;
+	  case 5:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 6:
+	    t_ptr->p1 = randint(20) + 12;
+	    break;
+	  case 7:
+	    t_ptr->p1 = randint(20) + 12;
+	    break;
+	  case 8:
+	    t_ptr->p1 = randint(10) + 6;
+	    break;
+	  case 9:
+	    t_ptr->p1 = randint(12) + 6;
+	    break;
+	  case 10:
+	    t_ptr->p1 = randint(10) + 12;
+	    break;
+	  case 11:
+	    t_ptr->p1 = randint(3) + 3;
+	    break;
+	  case 12:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 13:
+	    t_ptr->p1 = randint(10) + 6;
+	    break;
+	  case 14:
+	    t_ptr->p1 = randint(5) + 3;
+	    break;
+	  case 15:
+	    t_ptr->p1 = randint(5) + 3;
+	    break;
+	  case 16:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 17:
+	    t_ptr->p1 = randint(5) + 4;
+	    break;
+	  case 18:
+	    t_ptr->p1 = randint(8) + 4;
+	    break;
+	  case 19:
+	    t_ptr->p1 = randint(6) + 2;
+	    break;
+	  case 20:
+	    t_ptr->p1 = randint(4) + 2;
+	    break;
+	  case 21:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 22:
+	    t_ptr->p1 = randint(5) + 2;
+	    break;
+	  case 23:
+	    t_ptr->p1 = randint(12) + 12;
+	    break;
+	  case 24:
+	    t_ptr->p1 = randint(3) + 1;
+	    break;
+	  case 25:
+	    t_ptr->p1 = randint(3) + 1;
+	    break;
+	  case 26:
+	    t_ptr->p1 = randint(3) + 1;
+	    break;
+	  case 27:
+	    t_ptr->p1 = randint(2) + 1;
+	    break;
+	  case 28:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  default:
+	    break;
+	}
+	break;
+
+      case TV_STAFF:
+	switch (t_ptr->subval) {
+	  case 0:
+	    t_ptr->p1 = randint(20) + 12;
+	    break;
+	  case 1:
+	    t_ptr->p1 = randint(8) + 6;
+	    break;
+	  case 2:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 3:
+	    t_ptr->p1 = randint(20) + 12;
+	    break;
+	  case 4:
+	    t_ptr->p1 = randint(15) + 6;
+	    break;
+	  case 5:
+	    t_ptr->p1 = randint(4) + 5;
+	    break;
+	  case 6:
+	    t_ptr->p1 = randint(5) + 3;
+	    break;
+	  case 7:
+	    t_ptr->p1 = randint(3) + 1;
+	    t_ptr->level = 10;
+	    break;
+	  case 8:
+	    t_ptr->p1 = randint(3) + 1;
+	    break;
+	  case 9:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 10:
+	    t_ptr->p1 = randint(10) + 12;
+	    break;
+	  case 11:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 12:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 13:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 14:
+	    t_ptr->p1 = randint(10) + 12;
+	    break;
+	  case 15:
+	    t_ptr->p1 = randint(3) + 4;
+	    break;
+	  case 16:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 17:
+	    t_ptr->p1 = randint(5) + 6;
+	    break;
+	  case 18:
+	    t_ptr->p1 = randint(3) + 4;
+	    break;
+	  case 19:
+	    t_ptr->p1 = randint(10) + 12;
+	    break;
+	  case 20:
+	    t_ptr->p1 = randint(3) + 4;
+	    break;
+	  case 21:
+	    t_ptr->p1 = randint(3) + 4;
+	    break;
+	  case 22:
+	    t_ptr->p1 = randint(10) + 6;
+	    t_ptr->level = 5;
+	    break;
+	  case 23:
+	    t_ptr->p1 = randint(2) + 1;
+	    break;
+	  case 24:
+	    t_ptr->p1 = randint(3) + 1;
+	    break;
+	  case 25:
+	    t_ptr->p1 = randint(2) + 2;
+	    break;
+	  case 26:
+	    t_ptr->p1 = randint(15) + 5;
+	    break;
+	  case 27:
+	    t_ptr->p1 = randint(2) + 2;
+	    break;
+	  case 28:
+	    t_ptr->p1 = randint(5) + 5;
+	    break;
+	  case 29:
+	    t_ptr->p1 = randint(2) + 1;
+	    break;
+	  case 30:
+	    t_ptr->p1 = randint(6) + 2;
+	    break;
+	  default:
+	    break;
+	}
+	break;
+
+      case TV_CLOAK:
+	if (magik(chance) || good) {
+	    int                 made_art_cloak;
+
+	    made_art_cloak = 0;
+	    t_ptr->toac += 1 + m_bonus(0, 20, level);
+	    if (magik(special) || (good == 666)) {
+		if (!not_unique &&
+		    !stricmp(object_list[t_ptr->index].name, "& Cloak")
+		    && randint(10) == 1) {
+		    switch (randint(9)) {
+		      case 1:
+		      case 2:
+			if (COLLUIN)
+			    break;
+			if (wizard || peek)
+			    msg_print("Colluin");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_COLLUIN;
+			t_ptr->toac = 15;
+			t_ptr->flags |= (TR_RES_FIRE | TR_RES_COLD | TR_POISON |
+					 TR_RES_LIGHT | TR_RES_ACID);
+			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+			t_ptr->cost = 10000L;
+			made_art_cloak = 1;
+			COLLUIN = 1;
+			break;
+		      case 3:
+		      case 4:
+			if (HOLCOLLETH)
+			    break;
+			if (wizard || peek)
+			    msg_print("Holcolleth");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_HOLCOLLETH;
+			t_ptr->toac = 4;
+			t_ptr->p1 = 2;
+			t_ptr->flags |= (TR_INT | TR_WIS | TR_STEALTH |
+					 TR_RES_ACID);
+			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+			t_ptr->ident |= ID_NOSHOW_TYPE;
+			t_ptr->cost = 13000L;
+			made_art_cloak = 1;
+			HOLCOLLETH = 1;
+			break;
+		      case 5:
+			if (THINGOL)
+			    break;
+			if (wizard || peek)
+			    msg_print("Thingol");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_THINGOL;
+			t_ptr->toac = 18;
+			t_ptr->flags = (TR_DEX | TR_CHR | TR_RES_FIRE |
+				   TR_RES_ACID | TR_RES_COLD | TR_FREE_ACT);
+			t_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
+			t_ptr->p1 = 3;
+			t_ptr->cost = 35000L;
+			made_art_cloak = 1;
+			THINGOL = 1;
+			break;
+		      case 6:
+		      case 7:
+			if (THORONGIL)
+			    break;
+			if (wizard || peek)
+			    msg_print("Thorongil");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_THORONGIL;
+			t_ptr->toac = 10;
+			t_ptr->flags = (TR_SEE_INVIS | TR_FREE_ACT |
+					TR_RES_ACID);
+			t_ptr->flags2 |= (TR_ARTIFACT);
+			t_ptr->cost = 8000L;
+			made_art_cloak = 1;
+			THORONGIL = 1;
+			break;
+		      case 8:
+		      case 9:
+			if (COLANNON)
+			    break;
+			if (wizard || peek)
+			    msg_print("Colannon");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_COLANNON;
+			t_ptr->toac = 15;
+			t_ptr->flags |= (TR_STEALTH | TR_RES_ACID);
+			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+			t_ptr->p1 = 3;
+			t_ptr->cost = 11000L;
+			made_art_cloak = 1;
+			COLANNON = 1;
+			break;
+		    }
+
+		} else if (!not_unique &&
+			   !stricmp(object_list[t_ptr->index].name,
+				    "& Shadow Cloak")
+			   && randint(20) == 1) {
+		    switch (randint(2)) {
+		      case 1:
+			if (LUTHIEN)
+			    break;
+			if (wizard || peek)
+			    msg_print("Luthien");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_LUTHIEN;
+			t_ptr->toac = 20;
+			t_ptr->flags = (TR_RES_FIRE | TR_RES_COLD |
+				    TR_INT | TR_WIS | TR_CHR | TR_RES_ACID);
+			t_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
+			t_ptr->p1 = 2;
+			t_ptr->cost = 45000L;
+			made_art_cloak = 1;
+			LUTHIEN = 1;
+			break;
+		      case 2:
+			if (TUOR)
+			    break;
+			if (wizard || peek)
+			    msg_print("Tuor");
+			else
+			    good_item_flag = TRUE;
+			t_ptr->name2 = SN_TUOR;
+			t_ptr->toac = 12;
+			t_ptr->flags = (TR_STEALTH |
+				  TR_FREE_ACT | TR_SEE_INVIS | TR_RES_ACID);
+			t_ptr->flags2 |= (TR_IM_ACID | TR_ARTIFACT);
+			t_ptr->p1 = 4;
+			t_ptr->cost = 35000L;
+			made_art_cloak = 1;
+			TUOR = 1;
+			break;
+		    }
+		}
+		if (!made_art_cloak) {
+		    if (randint(2) == 1) {
+			t_ptr->name2 = SN_PROTECTION;
+			t_ptr->toac += m_bonus(0, 10, level) + (5 + randint(3));
+			t_ptr->cost += 250L;
+			rating += 8;
+		    } else if (randint(10) < 10) {
+			t_ptr->toac += m_bonus(3, 10, level);
+			t_ptr->p1 = randint(3);
+			t_ptr->flags |= TR_STEALTH;
+			t_ptr->name2 = SN_STEALTH;
+			t_ptr->cost += 500 + (50 * t_ptr->p1);
+			rating += 9;
+		    } else {
+			t_ptr->toac += 10 + randint(10);
+			t_ptr->p1 = randint(3);
+			t_ptr->flags |= (TR_STEALTH | TR_RES_ACID);
+			t_ptr->name2 = SN_AMAN;
+			t_ptr->cost += 4000 + (100 * t_ptr->toac);
+			rating += 16;
+		    }
+		}
+	    }
+	} else if (magik(cursed)) {
+	    tmp = randint(3);
+	    if (tmp == 1) {
+		t_ptr->flags |= TR_AGGRAVATE;
+		t_ptr->name2 = SN_IRRITATION;
+		t_ptr->toac -= m_bonus(1, 10, level);
+		t_ptr->ident |= ID_SHOW_HITDAM;
+		t_ptr->tohit -= m_bonus(1, 10, level);
+		t_ptr->todam -= m_bonus(1, 10, level);
+		t_ptr->cost = 0;
+	    } else if (tmp == 2) {
+		t_ptr->name2 = SN_VULNERABILITY;
+		t_ptr->toac -= m_bonus(10, 20, level + 50);
+		t_ptr->cost = 0;
+	    } else {
+		t_ptr->name2 = SN_ENVELOPING;
+		t_ptr->toac -= m_bonus(1, 10, level);
+		t_ptr->ident |= ID_SHOW_HITDAM;
+		t_ptr->tohit -= m_bonus(2, 15, level + 10);
+		t_ptr->todam -= m_bonus(2, 15, level + 10);
+		t_ptr->cost = 0;
+	    }
+	    t_ptr->flags |= TR_CURSED;
+	}
+	break;
+
+      case TV_CHEST:
+	switch (randint(level + 4)) {
+	  case 1:
+	    t_ptr->flags = 0;
+	    t_ptr->name2 = SN_EMPTY;
+	    break;
+	  case 2:
+	    t_ptr->flags |= CH_LOCKED;
+	    t_ptr->name2 = SN_LOCKED;
+	    break;
+	  case 3:
+	  case 4:
+	    t_ptr->flags |= (CH_LOSE_STR | CH_LOCKED);
+	    t_ptr->name2 = SN_POISON_NEEDLE;
+	    break;
+	  case 5:
+	  case 6:
+	    t_ptr->flags |= (CH_POISON | CH_LOCKED);
+	    t_ptr->name2 = SN_POISON_NEEDLE;
+	    break;
+	  case 7:
+	  case 8:
+	  case 9:
+	    t_ptr->flags |= (CH_PARALYSED | CH_LOCKED);
+	    t_ptr->name2 = SN_GAS_TRAP;
+	    break;
+	  case 10:
+	  case 11:
+	    t_ptr->flags |= (CH_EXPLODE | CH_LOCKED);
+	    t_ptr->name2 = SN_EXPLOSION_DEVICE;
+	    break;
+	  case 12:
+	  case 13:
+	  case 14:
+	    t_ptr->flags |= (CH_SUMMON | CH_LOCKED);
+	    t_ptr->name2 = SN_SUMMONING_RUNES;
+	    break;
+	  case 15:
+	  case 16:
+	  case 17:
+	    t_ptr->flags |= (CH_PARALYSED | CH_POISON | CH_LOSE_STR |
+			     CH_LOCKED);
+	    t_ptr->name2 = SN_MULTIPLE_TRAPS;
+	    break;
+	  default:
+	    t_ptr->flags |= (CH_SUMMON | CH_EXPLODE | CH_LOCKED);
+	    t_ptr->name2 = SN_MULTIPLE_TRAPS;
+	    break;
+	}
+	if (not_unique)		/* if bought from store - dbd */
+	    t_ptr->p1 = randint(t_ptr->level);
+	else			/* store the level chest's found on - dbd */
+	    t_ptr->p1 = dun_level;
+	break;
+
+      case TV_SPIKE:
+	t_ptr->number = 0;
+	for (i = 0; i < 7; i++)
+	    t_ptr->number += randint(6);
+	if (missile_ctr == MAX_SHORT)
+	    missile_ctr = -MAX_SHORT - 1;
+	else
+	    missile_ctr++;
+	t_ptr->p1 = missile_ctr;
+	break;
+
+    case TV_BOLT: case TV_ARROW: case TV_SLING_AMMO:
+     /* this fn makes ammo for player's missile weapon more common -CFT */
+      magic_ammo(t_ptr, good, chance, special, cursed, level);
+      break;
+
+      case TV_FOOD:
+    /* make sure all food rations have the same level */
+	if (t_ptr->subval == 90)
+	    t_ptr->level = 0;
+    /* give all elvish waybread the same level */
+	else if (t_ptr->subval == 92)
+	    t_ptr->level = 6;
+	break;
+
+      case TV_SCROLL1:
+    /* give all identify scrolls the same level */
+	if (t_ptr->subval == 67)
+	    t_ptr->level = 1;
+    /* scroll of light */
+	else if (t_ptr->subval == 69)
+	    t_ptr->level = 0;
+    /* scroll of trap detection */
+	else if (t_ptr->subval == 80)
+	    t_ptr->level = 5;
+    /* scroll of door/stair location */
+	else if (t_ptr->subval == 81)
+	    t_ptr->level = 5;
+	break;
+
+      case TV_POTION1:		   /* potions */
+    /* cure light */
+	if (t_ptr->subval == 76)
+	    t_ptr->level = 0;
+	break;
+
+      default:
+	break;
+    }
+}
+
+
+static struct opt_desc {
+    cptr                o_prompt;
+    int                *o_var;
+} options[] = {
+
+    { "Running: cut known corners",	 	&find_cut },
+    { "Running: examine potential corners",	&find_examine },
+    { "Running: print self during run", 	&find_prself },
+    { "Running: stop when map sector changes",  &find_bound},
+    { "Running: run through open doors", 	&find_ignore_doors},
+    { "(g)et-key to pickup objects", 		&prompt_carry_flag},
+    { "Prompt before pickup", 			&carry_query_flag},
+    { "Rogue like commands", 			&rogue_like_commands},
+    { "Show weights in inventory", 		&show_weight_flag},
+    { "Show weights in equipment list",		&show_equip_weight_flag},
+    { "Highlight and notice mineral seams", 	&highlight_seams},
+    { "Disable haggling in stores",		&no_haggle_flag},
+    { "Plain object descriptions",		&plain_descriptions},
+    { "Quick messages",		                &quick_messages},
+    { "Equippy chars",		                &equippy_chars},
+    { "Low hitpoint warning",			&hitpoint_warn},
+    { "Delay speed", 				&delay_spd},
+    { (char *)0, 				(int *)0}
+};
+
+
+/*
+ * Set or unset various boolean options.		-CJS-
+ */
+void set_options()
+{
+    register int i, max, ch;
+    vtype        string;
+
+    prt("  ESC when finished, y/n or 0-9 to set options, <return> or - to move cursor",
+	0, 0);
+    for (max = 0; options[max].o_prompt != 0; max++) {
+	if (options[max].o_var == &hitpoint_warn)
+	    (void)sprintf(string, "%-38s: %d0%% ", options[max].o_prompt,
+			  *options[max].o_var);
+	else if (options[max].o_var == &delay_spd)
+	    (void)sprintf(string, "%-38s: %d ", options[max].o_prompt,
+			  *options[max].o_var);
+	else
+	    (void)sprintf(string, "%-38s: %s ", options[max].o_prompt,
+			  (*options[max].o_var ? "yes" : "no "));
+	prt(string, max + 1, 0);
+    }
+    erase_line(max + 1, 0);
+    i = 0;
+    for (;;) {
+	move_cursor(i + 1, 40);
+	ch = inkey();
+	switch (ch) {
+	  case ESCAPE:	  
+	    draw_cave();
+	    creatures(FALSE);	 /* draw monsters */
+	    prt_equippy_chars(); /* redraw equippy chars */
+	    return;
+	  case '-':
+	    if (i > 0)
+		i--;
+	    else
+		i = max - 1;
+	    break;
+	  case ' ':
+	  case '\n':
+	  case '\r':
+	    if (i + 1 < max)
+		i++;
+	    else
+		i = 0;
+	    break;
+	  case 'y':
+	  case 'Y':
+	    if ((options[i].o_var == &hitpoint_warn) ||
+		(options[i].o_var == &delay_spd))
+		bell();
+	    else {
+		put_buffer("yes ", i + 1, 40);
+		*options[i].o_var = TRUE;
+		if (i + 1 < max)
+		    i++;
+		else
+		    i = 0;
+	    }
+	    break;
+	  case 'n':
+	  case 'N':
+	    if (options[i].o_var == &delay_spd)
+		bell();
+	    else if (options[i].o_var == &hitpoint_warn) {
+		put_buffer("00%", i + 1, 40);
+		*options[i].o_var = 0;
+	    } else {
+		put_buffer("no  ", i + 1, 40);
+		*options[i].o_var = FALSE;
+		if (i + 1 < max)
+		    i++;
+		else
+		    i = 0;
+	    }
+	    break;
+	  case '1':
+	  case '2':
+	  case '3':
+	  case '4':
+	  case '5':
+	  case '6':
+	  case '7':
+	  case '8':
+	  case '9':
+	  case '0':
+	    if ((options[i].o_var != &delay_spd) &&
+		(options[i].o_var != &hitpoint_warn))
+		bell();
+	    else {
+		ch = ch - '0';
+		*options[i].o_var = ch;
+		if (options[i].o_var == &hitpoint_warn)
+		    sprintf(string, "%d0%%  ", ch);
+		else
+		    sprintf(string, "%d   ", ch);
+		put_buffer(string, i + 1, 40);
+		if (i + 1 < max)
+		    i++;
+		else
+		    i = 0;
+	    }
+	    break;
+	  default:
+	    bell();
+	    break;
+	}
+    }
+}
+
+static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int cursed, int level)
+{
+    register inven_type *i_ptr = NULL;
+    register int         i;
+
+    /* if wielding a bow as main/aux weapon, then ammo will be "right" ammo
+     * more often than not of the time -CFT */
+    if (inventory[INVEN_WIELD].tval == TV_BOW) i_ptr=&inventory[INVEN_WIELD];
+    else if (inventory[INVEN_AUX].tval == TV_BOW) i_ptr=&inventory[INVEN_AUX];
+
+    if (i_ptr && (randint(2)==1)){
+	if ((t_ptr->tval == TV_SLING_AMMO) &&
+	    (i_ptr->subval >= 20) && (i_ptr->subval <= 21));
+	/* right type, do nothing */
+	else if ((t_ptr->tval == TV_ARROW) &&
+		 (i_ptr->subval >= 1) && (i_ptr->subval <= 4));
+	/* right type, do nothing */
+	else if ((t_ptr->tval == TV_BOLT) &&
+		 (i_ptr->subval >= 10) && (i_ptr->subval <= 12));
+	/* right type, do nothing */
+	else if ((i_ptr->subval >= 20) && (i_ptr->subval <= 21))
+	    invcopy(t_ptr, 83); /* this should be treasure list index of shots -CFT */
+	else if ((i_ptr->subval >= 1) && (i_ptr->subval <= 4))
+	    invcopy(t_ptr, 78); /* this should be index of arrows -CFT */
+	else			/* xbow */
+	    invcopy(t_ptr, 80); /* this should be index of bolts -CFT */
+    }
+
+    t_ptr->number = 0;
+    for (i = 0; i < 7; i++)
+	t_ptr->number += randint(6);
+    if (missile_ctr == MAX_SHORT)
+	missile_ctr = -MAX_SHORT - 1;
+    else
+	missile_ctr++;
+    t_ptr->p1 = missile_ctr;
+
+    /* always show tohit/todam values if identified */
+    t_ptr->ident |= ID_SHOW_HITDAM;
+    if (magik(chance)||good) {
+	t_ptr->tohit = randint(5) + m_bonus(1, 15, level);
+	t_ptr->todam = randint(5) + m_bonus(1, 15, level);
+	/* see comment for weapons */
+	if (magik(5*special/2)||(good==666))
+	    switch(randint(11)) {
+	      case 1: case 2: case 3:
+		t_ptr->name2 = SN_WOUNDING; /* swapped with slaying -CFT */
+		t_ptr->tohit += 5;
+		t_ptr->todam += 5;
+		t_ptr->damage[0] ++; /* added -CFT */
+		t_ptr->cost += 30;
+		rating += 5;
+		break;
+	      case 4: case 5:
+		t_ptr->flags |= (TR_FLAME_TONGUE|TR_RES_FIRE); /* RF so won't burn */
+		t_ptr->tohit += 2;
+		t_ptr->todam += 4;
+		t_ptr->name2 = SN_FIRE;
+		t_ptr->cost += 25;
+		rating += 6;
+		break;
+	      case 6: case 7:
+		t_ptr->flags |= TR_SLAY_EVIL;
+		t_ptr->tohit += 3;
+		t_ptr->todam += 3;
+		t_ptr->name2 = SN_SLAY_EVIL;
+		t_ptr->cost += 25;
+		rating += 7;
+		break;
+	      case 8: case 9:
+		t_ptr->flags |= TR_SLAY_ANIMAL;
+		t_ptr->tohit += 2;
+		t_ptr->todam += 2;
+		t_ptr->name2 = SN_SLAY_ANIMAL;
+		t_ptr->cost += 30;
+		rating += 5;
+		break;
+	      case 10:
+		t_ptr->flags |= TR_SLAY_DRAGON;
+		t_ptr->tohit += 3;
+		t_ptr->todam += 3;
+		t_ptr->name2 = SN_DRAGON_SLAYING;
+		t_ptr->cost += 35;
+		rating += 9;
+		break;
+	      case 11:
+		t_ptr->tohit += 10; /* reduced because of dice bonus -CFT */
+		t_ptr->todam += 10;
+		t_ptr->name2 = SN_SLAYING; /* swapped w/ wounding -CFT */
+		t_ptr->damage[0] += 2; /* added -CFT */
+		t_ptr->cost += 45;
+		rating += 10;
+		break;
+	    }
+	while (magik(special)) { /* added -CFT */
+	    t_ptr->damage[0]++;
+	    t_ptr->cost += t_ptr->damage[0]*5;
+	}
+    }
+    else if (magik(cursed)) {
+	t_ptr->tohit = (-randint(10)) - m_bonus(5, 25, level);
+	t_ptr->todam = (-randint(10)) - m_bonus(5, 25, level);
+	t_ptr->flags |= TR_CURSED;
+	t_ptr->cost = 0;
+	if (randint(5)==1) {
+	    t_ptr->name2 = SN_BACKBITING;
+	    t_ptr->tohit -= 20;
+	    t_ptr->todam -= 20;
+	}
+    }
+}
+
+
+
+
+
+
+
+
 
 #define BLANK_LENGTH	24
 static char blank_string[] = "                        ";
@@ -670,700 +4319,16 @@ void special_random_object(int y, int x, int num)
     while (num != 0);
 }
 
-/* 
- * Converts stat num into string			-RAK-	
- */
-void cnv_stat(int my_stat, char *out_val)
-{
-    register u16b stat = my_stat;
-    register int    part1, part2;
 
-    if (stat > 18) {
-	part1 = 18;
-	part2 = stat - 18;
-	if (part2 >= 220)
-	    (void)sprintf(out_val, "%2d/*** ", part1);
-	else if (part2 >= 100)
-	    (void)sprintf(out_val, "%2d/%03d ", part1, part2);
-	else
-	    (void)sprintf(out_val, " %2d/%02d ", part1, part2);
-    } else
-	(void)sprintf(out_val, "%6d ", stat);
-}
 
 
-/* 
- * Print character stat in given row, column		-RAK-	 
- */
-void prt_stat(int stat)
-{
-    vtype out_val1;
 
-    cnv_stat(py.stats.use_stat[stat], out_val1);
-    put_buffer(stat_names[stat], 5 + stat, STAT_COLUMN);
-    put_buffer(out_val1, 5 + stat, STAT_COLUMN + 6);
-}
 
 
-/* 
- * Print character info in given row, column		-RAK-	 
- *
- * the longest title is 13 characters, so only pad to 13
- */
-void prt_field(cptr info, int row, int column)
-{
-    put_buffer(&blank_string[BLANK_LENGTH - 13], row, column);
-    put_buffer(info, row, column);
-}
 
-/*
- * Print long number with header at given row, column */
-static void prt_lnum(cptr header, s32b num, int row, int column)
-{
-    vtype out_val;
 
-    (void)sprintf(out_val, "%s%9ld", header, (long)num);
-    put_buffer(out_val, row, column);
-}
 
-/*
- * Print number with header at given row, column	-RAK-	 */
-static void prt_num(cptr header, int num, int row, int column)
-{
-    vtype out_val;
 
-    (void)sprintf(out_val, "%s   %6d", header, num);
-    put_buffer(out_val, row, column);
-}
-
-/*
- * Print long number at given row, column */
-static void prt_long(s32b num, int row, int column)
-{
-    vtype out_val;
-
-    (void)sprintf(out_val, "%9ld", (long)num);
-    put_buffer(out_val, row, column);
-}
-
-/*
- * Print number at given row, column	-RAK-	 */
-static void prt_int(int num, int row, int column)
-{
-    vtype out_val;
-
-    (void)sprintf(out_val, "%6d", num);
-    put_buffer(out_val, row, column);
-}
-
-
-/*
- * Adjustment for wisdom/intelligence				-JWT-	 */
-int stat_adj(int stat)
-{
-    register int value;
-
-    value = py.stats.use_stat[stat];
-    if (value > 228)
-	return (20);
-    else if (value > 218)
-	return (18);
-    else if (value > 198)
-	return (16);
-    else if (value > 188)
-	return (15);
-    else if (value > 178)
-	return (14);
-    else if (value > 168)
-	return (13);
-    else if (value > 158)
-	return (12);
-    else if (value > 148)
-	return (11);
-    else if (value > 138)
-	return (10);
-    else if (value > 128)
-	return (9);
-    else if (value > 118)
-	return (8);
-    else if (value == 118)
-	return (7);
-    else if (value > 107)
-	return (6);
-    else if (value > 87)
-	return (5);
-    else if (value > 67)
-	return (4);
-    else if (value > 17)
-	return (3);
-    else if (value > 14)
-	return (2);
-    else if (value > 7)
-	return (1);
-    else
-	return (0);
-}
-
-
-/*
- * Adjustment for charisma				-RAK-	 */
-/* Percent decrease or increase in price of goods		 */
-int chr_adj()
-{
-    register int charisma;
-
-    charisma = py.stats.use_stat[A_CHR];
-    if (charisma > 217)
-	return (80);
-    else if (charisma > 187)
-	return (86);
-    else if (charisma > 147)
-	return (88);
-    else if (charisma > 117)
-	return (90);
-    else if (charisma > 107)
-	return (92);
-    else if (charisma > 87)
-	return (94);
-    else if (charisma > 67)
-	return (96);
-    else if (charisma > 18)
-	return (98);
-    else
-	switch (charisma) {
-	  case 18:
-	    return (100);
-	  case 17:
-	    return (101);
-	  case 16:
-	    return (102);
-	  case 15:
-	    return (103);
-	  case 14:
-	    return (104);
-	  case 13:
-	    return (106);
-	  case 12:
-	    return (108);
-	  case 11:
-	    return (110);
-	  case 10:
-	    return (112);
-	  case 9:
-	    return (114);
-	  case 8:
-	    return (116);
-	  case 7:
-	    return (118);
-	  case 6:
-	    return (120);
-	  case 5:
-	    return (122);
-	  case 4:
-	    return (125);
-	  case 3:
-	    return (130);
-	  default:
-	    return (140);
-	}
-}
-
-
-/*
- * Returns a character's adjustment to hit points	 -JWT-	 */
-int con_adj()
-{
-    register int con;
-
-    con = py.stats.use_stat[A_CON];
-    if (con < 7)
-	return (con - 7);
-    else if (con < 17)
-	return (0);
-    else if (con == 17)
-	return (1);
-    else if (con < 94)
-	return (2);
-    else if (con < 117)
-	return (3);
-    else if (con < 119)
-	return (4);
-    else if (con < 128)
-	return (5);
-    else if (con < 138)
-	return (6);
-    else if (con < 158)
-	return (7);
-    else if (con < 168)
-	return (8);
-    else if (con < 178)
-	return (9);
-    else if (con < 188)
-	return (10);
-    else if (con < 198)
-	return (11);
-    else if (con < 208)
-	return (12);
-    else if (con < 228)
-	return (13);
-    else
-	return (14);
-}
-
-
-cptr title_string()
-{
-    cptr p;
-
-    if (py.misc.lev < 1)
-	p = "Babe in arms";
-    else if (py.misc.lev <= MAX_PLAYER_LEVEL)
-	p = player_title[py.misc.pclass][py.misc.lev - 1];
-    else if (py.misc.male)
-	p = "**KING**";
-    else
-	p = "**QUEEN**";
-    return p;
-}
-
-
-/*
- * Prints title of character				-RAK-	 */
-void prt_title()
-{
-    prt_field(title_string(), 3, STAT_COLUMN);
-}
-
-
-/*
- * Prints level						-RAK-	 */
-void prt_level()
-{
-    prt_int((int)py.misc.lev, 12, STAT_COLUMN + 6);
-}
-
-
-/*
- * Prints players current mana points.		 -RAK-	 */
-void prt_cmana()
-{
-    prt_int(py.misc.cmana, 14, STAT_COLUMN + 6);
-}
-
-
-/*
- * Prints Max hit points				-RAK-	 */
-void prt_mhp()
-{
-    prt_int(py.misc.mhp, 15, STAT_COLUMN + 6);
-}
-
-
-/*
- * Prints players current hit points			-RAK-	 */
-void prt_chp()
-{
-    prt_int(py.misc.chp, 16, STAT_COLUMN + 6);
-}
-
-
-/*
- * prints current AC					-RAK-	 */
-void prt_pac()
-{
-    prt_int(py.misc.dis_ac, 18, STAT_COLUMN + 6);
-}
-
-
-/*
- * Prints current gold					-RAK-	 */
-void prt_gold()
-{
-    prt_long(py.misc.au, 19, STAT_COLUMN + 3);
-}
-
-
-/*
- * Prints depth in stat area				-RAK-	 */
-void prt_depth()
-{
-    vtype               depths;
-    register int        depth;
-
-    depth = dun_level * 50;
-    if (depth == 0)
-	(void)strcpy(depths, "Town    ");
-    else
-	(void)sprintf(depths, "%d ft", depth);
-    prt(depths, 23, 70);
-}
-
-
-/*
- * Prints status of hunger				-RAK-	 */
-void prt_hunger()
-{
-    if (PY_WEAK & py.flags.status)
-	put_buffer("Weak  ", 23, 0);
-    else if (PY_HUNGRY & py.flags.status)
-	put_buffer("Hungry", 23, 0);
-    else
-	put_buffer("      ", 23, 0);
-}
-
-
-/*
- * Prints Blind status					-RAK-	 */
-void prt_blind()
-{
-    if (PY_BLIND & py.flags.status)
-	put_buffer("Blind", 23, 7);
-    else
-	put_buffer("     ", 23, 7);
-}
-
-
-/*
- * Prints Confusion status				-RAK-	 */
-void prt_confused()
-{
-    if (PY_CONFUSED & py.flags.status)
-	put_buffer("Confused", 23, 13);
-    else
-	put_buffer("        ", 23, 13);
-}
-
-
-/*
- * Prints Fear status					-RAK-	 */
-void prt_afraid()
-{
-    if (PY_FEAR & py.flags.status)
-	put_buffer("Afraid", 23, 22);
-    else
-	put_buffer("      ", 23, 22);
-}
-
-
-/*
- * Prints Poisoned status				-RAK-	 */
-void prt_poisoned()
-{
-    if (PY_POISONED & py.flags.status)
-	put_buffer("Poisoned", 23, 29);
-    else
-	put_buffer("        ", 23, 29);
-}
-
-
-/*
- * Prints Searching, Resting, Paralysis, or 'count' status	-RAK-	 */
-void prt_state()
-{
-    char tmp[16];
-
-    py.flags.status &= ~PY_REPEAT;
-    if (py.flags.paralysis > 1)
-	put_buffer("Paralysed ", 23, 38);
-    else if (PY_REST & py.flags.status) {
-	if (py.flags.rest > 0)
-	    (void)sprintf(tmp, "Rest %-5d", py.flags.rest);
-	else if (py.flags.rest == -1)
-	    (void)sprintf(tmp, "Rest *****");
-	else if (py.flags.rest == -2)
-	    (void)sprintf(tmp, "Rest &&&&&");
-	put_buffer(tmp, 23, 38);
-    } else if (command_count > 0) {
-	(void)sprintf(tmp, "Repeat %-3d", command_count);
-	py.flags.status |= PY_REPEAT;
-	put_buffer(tmp, 23, 38);
-	if (PY_SEARCH & py.flags.status)
-	    put_buffer("Search    ", 23, 38);
-    } else if (PY_SEARCH & py.flags.status)
-	put_buffer("Searching ", 23, 38);
-    else			   /* "repeat 999" is 10 characters */
-	put_buffer("          ", 23, 38);
-}
-
-
-/*
- * Prints the speed of a character.			-CJS- */
-void prt_speed()
-{
-    register int i;
-
-    i = py.flags.speed;
-    if (PY_SEARCH & py.flags.status)	/* Search mode. */
-	i--;
-    if (i > 2)
-	put_buffer("Extremely Slow", 23, 49);
-    else if (i == 2)
-	put_buffer("Very Slow     ", 23, 49);
-    else if (i == 1)
-	put_buffer("Slow          ", 23, 49);
-    else if (i == 0)
-	put_buffer("              ", 23, 49);
-    else if (i == -1)
-	put_buffer("Fast          ", 23, 49);
-    else if (i == -2)
-	put_buffer("Very Fast     ", 23, 49);
-    else if (i == -3)
-	put_buffer("Extremely Fast", 23, 49);
-    else if (i == -4)
-	put_buffer("Deadly Speed  ", 23, 49);
-    else
-	put_buffer("Light Speed   ", 23, 49);
-}
-
-
-void prt_study()
-{
-    py.flags.status &= ~PY_STUDY;
-    if (py.flags.new_spells != 0)
-	put_buffer("Study", 23, 64);
-    else
-	put_buffer("     ", 23, 64);
-}
-
-void cut_player(int c)
-{
-    py.flags.cut += c;
-    c = py.flags.cut;
-    if (c > 5000)
-	msg_print("You have been given a mortal wound.");
-    else if (c > 900)
-	msg_print("You have been given a deep gash.");
-    else if (c > 200)
-	msg_print("You have been given a severe cut.");
-    else if (c > 100)
-	msg_print("You have been given a nasty cut.");
-    else if (c > 50)
-	msg_print("You have been given a bad cut.");
-    else if (c > 10)
-	msg_print("You have been given a light cut.");
-    else if (c > 0)
-	msg_print("You have been given a graze.");
-}
-
-void prt_cut()
-{
-    int c = py.flags.cut;
-
-    if (c > 900)
-	put_buffer("Mortal wound", 21, 0);
-    else if (c > 300)
-	put_buffer("Deep gash   ", 21, 0);
-    else if (c > 200)
-	put_buffer("Severe cut  ", 21, 0);
-    else if (c > 45)
-	put_buffer("Nasty cut   ", 21, 0);
-    else if (c > 15)
-	put_buffer("Bad cut     ", 21, 0);
-    else if (c > 5)
-	put_buffer("Light cut   ", 21, 0);
-    else if (c > 0)
-	put_buffer("Graze       ", 21, 0);
-    else
-	put_buffer("            ", 21, 0);
-}
-
-void stun_player(int s)
-{
-    int t;
-
-    if (!py.flags.sound_resist) {
-	t = py.flags.stun;
-	py.flags.stun += s;
-	s = py.flags.stun;
-	if (s > 100) {
-	    msg_print("You have been knocked out.");
-	    if (t == 0) {
-		py.misc.ptohit -= 20;
-		py.misc.ptodam -= 20;
-		py.misc.dis_th -= 20;
-		py.misc.dis_td -= 20;
-	    } else if (t <= 50) {
-		py.misc.ptohit -= 15;
-		py.misc.ptodam -= 15;
-		py.misc.dis_th -= 15;
-		py.misc.dis_td -= 15;
-	    }
-	} else if (s > 50) {
-	    msg_print("You've been heavily stunned.");
-	    if (t == 0) {
-		py.misc.ptohit -= 20;
-		py.misc.ptodam -= 20;
-		py.misc.dis_th -=20;
-		py.misc.dis_td -=20;
-	    } else if (t <= 50) {
-		py.misc.ptohit -= 15;
-		py.misc.ptodam -= 15;
-                py.misc.dis_th -= 15;
-                py.misc.dis_td -= 15;
-	    }
-	} else if (s > 0) {
-	    msg_print("You've been stunned.");
-	    if (t == 0) {
-		py.misc.ptohit -= 5;
-		py.misc.ptodam -= 5;
-                py.misc.dis_th -= 5;
-                py.misc.dis_td -= 5;
-	    }
-	}
-    }
-}
-
-void prt_stun()
-{
-    int s = py.flags.stun;
-
-    if (!py.flags.sound_resist) {
-	if (s > 100)
-	    put_buffer("Knocked out ", 22, 0);
-	else if (s > 50)
-	    put_buffer("Heavy stun  ", 22, 0);
-	else if (s > 0)
-	    put_buffer("Stun        ", 22, 0);
-	else
-	    put_buffer("            ", 22, 0);
-    }
-}
-
-/*
- * Prints winner status on display			-RAK-	 */
-void prt_winner()
-{
-    if (wizard)
-	put_buffer("Wizard", 20, 0);
-    else if (total_winner)
-	put_buffer("Winner", 20, 0);
-    else
-	put_buffer("       ", 20, 0);
-}
-
-
-u16b modify_stat(int stat, int amount)
-{
-    register int    loop, i;
-    register u16b tmp_stat;
-
-    tmp_stat = py.stats.cur_stat[stat];
-    loop = (amount < 0 ? -amount : amount);
-    for (i = 0; i < loop; i++) {
-	if (amount > 0) {
-	    if (tmp_stat < 18)
-		tmp_stat++;
-	    else
-		tmp_stat += 10;
-	} else {
-	    if (tmp_stat > 27)
-		tmp_stat -= 10;
-	    else if (tmp_stat > 18)
-		tmp_stat = 18;
-	    else if (tmp_stat > 3)
-		tmp_stat--;
-	}
-    }
-    return tmp_stat;
-}
-
-
-/*
- * Set the value of the stat which is actually used.	 -CJS- */
-void set_use_stat(int stat)
-{
-    py.stats.use_stat[stat] = modify_stat(stat, py.stats.mod_stat[stat]);
-
-    if (stat == A_STR) {
-	py.flags.status |= PY_STR_WGT;
-	calc_bonuses();
-    } else if (stat == A_DEX)
-	calc_bonuses();
-    else if (stat == A_INT && class[py.misc.pclass].spell == MAGE) {
-	calc_spells(A_INT);
-	calc_mana(A_INT);
-    } else if (stat == A_WIS && class[py.misc.pclass].spell == PRIEST) {
-	calc_spells(A_WIS);
-	calc_mana(A_WIS);
-    } else if (stat == A_CON)
-	calc_hitpoints();
-}
-
-
-/*
- * Increases a stat by one randomized level		-RAK-	 */
-int inc_stat(register int stat)
-{
-    register int tmp_stat, gain;
-
-    res_stat(stat);
-    tmp_stat = py.stats.cur_stat[stat];
-    if (tmp_stat < 118) {
-	if (tmp_stat < 18) {	   
-	    gain = randint(2);		/* let's be able to monitor the increase -CWS */
-	    tmp_stat += gain;
-	} else if (tmp_stat < 116) {
-	/* stat increases by 1/6 to 1/3 of difference from max */
-	    gain = ((118 - tmp_stat) / 2 + 3) >> 1;
-	    tmp_stat += randint(gain) + gain / 2;
-	    if (tmp_stat > 117)
-		tmp_stat = 117;
-	} else
-	    tmp_stat++;
-
-	py.stats.cur_stat[stat] = tmp_stat;
-	if (tmp_stat > py.stats.max_stat[stat])
-	    py.stats.max_stat[stat] = tmp_stat;
-	set_use_stat(stat);
-	prt_stat(stat);
-	return TRUE;
-    } else
-	return FALSE;
-}
-
-
-/*
- * Decreases a stat by one randomized level		-RAK-	 */
-int dec_stat(register int stat)
-{
-    register int tmp_stat, loss;
-
-    tmp_stat = py.stats.cur_stat[stat];
-    if (tmp_stat > 3) {
-	if (tmp_stat < 19)
-	    tmp_stat--;
-	else if (tmp_stat < 117) {
-	    loss = (((118 - tmp_stat) >> 1) + 1) >> 1;
-	    tmp_stat += -randint(loss) - loss;
-	    if (tmp_stat < 18)
-		tmp_stat = 18;
-	} else
-	    tmp_stat--;
-
-	py.stats.cur_stat[stat] = tmp_stat;
-	set_use_stat(stat);
-	prt_stat(stat);
-	return TRUE;
-    } else
-	return FALSE;
-}
-
-
-/*
- * Restore a stat.  Return TRUE only if this actually makes a difference. */
-int res_stat(int stat)
-{
-    register int i;
-
-    i = py.stats.max_stat[stat] - py.stats.cur_stat[stat];
-    if (i) {
-	py.stats.cur_stat[stat] += i;
-	set_use_stat(stat);
-	prt_stat(stat);
-	return TRUE;
-    }
-    return FALSE;
-}
 
 /*
  * Boost a stat artificially (by wearing something). If the display argument
@@ -1378,503 +4343,6 @@ void bst_stat(int stat, int amount)
     py.flags.status |= (PY_STR << stat);
 }
 
-
-/*
- * Returns a character's adjustment to hit.		 -JWT-	 */
-int tohit_adj()
-{
-    register int total, stat;
-
-    stat = py.stats.use_stat[A_DEX];
-    if      (stat <   4)  total = -3;
-    else if (stat <   6)  total = -2;
-    else if (stat <   8)  total = -1;
-    else if (stat <  16)  total =  0;
-    else if (stat <  17)  total =  1;
-    else if (stat <  18)  total =  2;
-    else if (stat <  69)  total =  3;
-    else if (stat < 108)  total =  4; /* 18/51 to 18/89 -CFT */
-    else if (stat < 118)  total =  5; /* 18/90 to 18/99 -CFT */
-    else if (stat < 128)  total =  6; /* 18/100 to 18/109 -CFT */
-    else if (stat < 138)  total =  7;
-    else if (stat < 148)  total =  8;
-    else if (stat < 158)  total =  9;
-    else if (stat < 168)  total = 10;
-    else if (stat < 178)  total = 11;
-    else if (stat < 188)  total = 12;
-    else if (stat < 198)  total = 13;
-    else if (stat < 218)  total = 14;
-    else if (stat < 228)  total = 15;
-    else total = 17;
-    stat = py.stats.use_stat[A_STR];
-    if      (stat <   4)  total -= 3;
-    else if (stat <   5)  total -= 2;
-    else if (stat <   7)  total -= 1;
-    else if (stat <  18)  total -= 0;
-    else if (stat <  88)  total += 1; /* 18 to 18/69 -CFT */
-    else if (stat <  98)  total += 2; /* 18/70 to 18/79 -CFT */
-    else if (stat < 108)  total += 3; /* 18/80 to 18/89 -CFT */
-    else if (stat < 118)  total += 4; /* 18/90 to 18/99 -CFT */
-    else if (stat < 128)  total += 5; /* 18/100 to 18/109 -CFT */
-    else if (stat < 138)  total += 6;
-    else if (stat < 148)  total += 7;
-    else if (stat < 158)  total += 8;
-    else if (stat < 168)  total += 9;
-    else if (stat < 178)  total +=10;
-    else if (stat < 188)  total +=11;
-    else if (stat < 198)  total +=12;
-    else if (stat < 218)  total +=13;
-    else if (stat < 228)  total +=14;
-    else total += 16;
-    return (total);
-}
-
-
-/*
- * Returns a character's adjustment to armor class	 -JWT-	 */
-int toac_adj()
-{
-    register int stat;
-
-    stat = py.stats.use_stat[A_DEX];
-    if      (stat <   4)  return(-4);
-    else if (stat ==  4)  return(-3);
-    else if (stat ==  5)  return(-2);
-    else if (stat ==  6)  return(-1);
-    else if (stat <  15)  return( 0);
-    else if (stat <  18)  return( 1);
-    else if (stat <  58)  return( 2); /* 18 to 18/49 -CFT */
-    else if (stat <  98)  return( 3); /* 18/50 to 18/79 -CFT */
-    else if (stat < 108)  return( 4); /* 18/80 to 18/89 -CFT */
-    else if (stat < 118)  return( 5); /* 18/90 to /99 -CFT */
-    else if (stat < 128)  return( 6); /* /100 to /109 -CFT */
-    else if (stat < 138)  return( 7);
-    else if (stat < 148)  return( 8);
-    else if (stat < 158)  return( 9);
-    else if (stat < 168)  return(10);
-    else if (stat < 178)  return(11);
-    else if (stat < 188)  return(12);
-    else if (stat < 198)  return(13);
-    else if (stat < 218)  return(14);
-    else if (stat < 228)  return(15);
-    else                  return(17);
-}
-
-
-/*
- * Returns a character's adjustment to disarm		 -RAK-	 */
-int todis_adj()
-{
-    register int stat;
-
-    stat = py.stats.use_stat[A_DEX];
-    if      (stat <=  3)  return(-8);
-    else if (stat ==  4)  return(-6);
-    else if (stat ==  5)  return(-4);
-    else if (stat ==  6)  return(-2);
-    else if (stat ==  7)  return(-1);
-    else if (stat <  13)  return( 0);
-    else if (stat <  16)  return( 1);
-    else if (stat <  18)  return( 2);
-    else if (stat <  58)  return( 4); /* 18 to 18/49 -CFT */
-    else if (stat <  88)  return( 5); /* 18/50 to 18/69 -CFT */
-    else if (stat < 108)  return( 6); /* 18/70 to 18/89 -CFT */
-    else if (stat < 118)  return( 7); /* 18/90 to 18/99 -CFT */
-    else                  return( 8); /* 18/100 and over -CFT */
-}
-
-
-/*
- * Returns a character's adjustment to damage		 -JWT-	 */
-int todam_adj()
-{
-    register int stat;
-
-    stat = py.stats.use_stat[A_STR];
-    if      (stat <   4)  return(-2);
-    else if (stat <   5)  return(-1);
-    else if (stat <  16)  return( 0);
-    else if (stat <  17)  return( 1);
-    else if (stat <  18)  return( 2);
-    else if (stat <  88)  return( 3); /* 18 to 18/69 -CFT */
-    else if (stat <  98)  return( 4); /* 18/70 to 18/79 -CFT */
-    else if (stat < 108)  return( 5); /* 18/80 to 18/89 -CFT */
-    else if (stat < 118)  return( 5); /* 18/90 to 18/99 -CFT */
-    else if (stat < 128)  return( 6); /* 18/100 to /109 -CFT */
-    else if (stat < 138)  return( 7);
-    else if (stat < 148)  return( 8);
-    else if (stat < 158)  return( 9);
-    else if (stat < 168)  return(10);
-    else if (stat < 178)  return(11);
-    else if (stat < 188)  return(12);
-    else if (stat < 198)  return(13);
-    else if (stat < 218)  return(14);
-    else if (stat < 228)  return(16);
-    else                  return(20);
-}
-
-
-/*
- * Prints character-screen info				-RAK-	 */
-void prt_stat_block()
-{
-    register u32b       status;
-    register struct misc *m_ptr;
-    register int          i;
-
-    m_ptr = &py.misc;
-    prt_field(race[py.misc.prace].trace, 1, STAT_COLUMN);
-    prt_field(class[py.misc.pclass].title, 2, STAT_COLUMN);
-    prt_field(title_string(), 3, STAT_COLUMN);
-    for (i = 0; i < 6; i++)
-	prt_stat(i);
-    prt_num("LEV", (int)m_ptr->lev, 12, STAT_COLUMN);
-    prt_lnum("EXP", m_ptr->exp, 13, STAT_COLUMN);
-    prt_num("MNA", m_ptr->cmana, 14, STAT_COLUMN);
-    prt_num("MHP", m_ptr->mhp, 15, STAT_COLUMN);
-    prt_num("CHP", m_ptr->chp, 16, STAT_COLUMN);
-    prt_chp();			   /* this will overwrite hp, in color, if
-				    * needed. -CFT */
-    prt_num("AC ", m_ptr->dis_ac, 18, STAT_COLUMN);
-    prt_lnum("AU ", m_ptr->au, 19, STAT_COLUMN);
-    prt_winner();
-    prt_cut();
-    prt_stun();
-    prt_study();
-    status = py.flags.status;
-    if ((PY_HUNGRY | PY_WEAK) & status)
-	prt_hunger();
-    if (PY_BLIND & status)
-	prt_blind();
-    if (PY_CONFUSED & status)
-	prt_confused();
-    if (PY_FEAR & status)
-	prt_afraid();
-    if (PY_POISONED & status)
-	prt_poisoned();
-    if ((PY_SEARCH | PY_REST) & status)
-	prt_state();
-/* if speed non zero, print it, modify speed if Searching */
-    if (py.flags.speed - ((PY_SEARCH & status) >> 8) != 0)
-	prt_speed();
-
-	prt_equippy_chars();
-}
-
-/* EQUIPMENT CHARACTER HANDLER  - DGK */
-void
-#ifdef __STDC__
-prt_equippy_chars(void)
-#else
-prt_equippy_chars()
-#endif                                    
-{                                        
-    int i, j;                              
-    inven_type *i_ptr;                     
-    vtype out_val;                           
-                                          
-    out_val[1]='\0';                       
-    for (i = INVEN_WIELD; i < INVEN_ARRAY_SIZE; i++) {
-	i_ptr = &inventory[i];                           
-	j = i - INVEN_WIELD;                             
-	
-	if (!equippy_chars || (i_ptr->tval == TV_NOTHING))
-	    out_val[0] = ' ';                                
-	else                                             
-	    out_val[0] = (int)(i_ptr->tchar);                
-	
-	put_buffer(out_val, 4, j);
-    }
-}
-
-
-/*
- * Draws entire screen					-RAK-	 */
-void draw_cave()
-{
-    clear_screen();
-    prt_stat_block();
-    prt_map();
-    prt_depth();
-}
-
-
-/*
- * Prints the following information on the screen.	-JWT-	 */
-void put_character()
-{
-    register struct misc *m_ptr;
-
-    m_ptr = &py.misc;
-    clear_screen();
-    put_buffer("Name        :", 2, 1);
-    put_buffer("Race        :", 3, 1);
-    put_buffer("Sex         :", 4, 1);
-    put_buffer("Class       :", 5, 1);
-    if (character_generated) {
-	put_buffer(m_ptr->name, 2, 15);
-	put_buffer(race[m_ptr->prace].trace, 3, 15);
-	put_buffer((m_ptr->male ? "Male" : "Female"), 4, 15);
-	put_buffer(class[m_ptr->pclass].title, 5, 15);
-    }
-}
-
-
-/*
- * Prints the following information on the screen.	-JWT-	 */
-void put_stats()
-{
-    register struct misc *m_ptr;
-    register int          i, temp;
-    vtype                 buf;
-
-    m_ptr = &py.misc;
-    for (i = 0; i < 6; i++) {
-	cnv_stat(py.stats.use_stat[i], buf);
-	put_buffer(stat_names[i], 2 + i, 61);
-	put_buffer(buf, 2 + i, 66);
-	if (py.stats.max_stat[i] > py.stats.cur_stat[i]) {
-	    /* this looks silly, but it happens because modify_stat() only
-	     * looks at cur_stat -CFT */
-	    temp = py.stats.cur_stat[i];
-	    py.stats.cur_stat[i] = py.stats.max_stat[i];
-	    cnv_stat (modify_stat(i,py.stats.mod_stat[i]), buf);
-	    py.stats.cur_stat[i] = temp; /* DON'T FORGET! -CFT */
-	    put_buffer(buf, 2 + i, 73);
-	}
-    }
-    prt_num("+ To Hit    ", m_ptr->dis_th, 9, 1);
-    prt_num("+ To Damage ", m_ptr->dis_td, 10, 1);
-    prt_num("+ To AC     ", m_ptr->dis_tac, 11, 1);
-    prt_num("  Total AC  ", m_ptr->dis_ac, 12, 1);
-}
-
-
-/*
- * Returns a rating of x depending on y			-JWT-	 */
-cptr likert(int x, int y)
-{
-    if ((x/y) < 0)
-	return ("Very Bad");
-
-    switch ((x / y)) {
-      case 0:
-      case 1:
-	return ("Bad");
-      case 2:
-	return ("Poor");
-      case 3:
-      case 4:
-	return ("Fair");
-      case 5:
-	return ("Good");
-      case 6:
-	return ("Very Good");
-      case 7:
-      case 8:
-	return ("Excellent");
-      case 9:
-      case 10:
-      case 11:
-      case 12:
-      case 13:
-	return ("Superb");
-      case 14:
-      case 15:
-      case 16:
-      case 17:
-	return ("Heroic");
-      default:
-	return ("Legendary");
-    }
-}
-
-
-/*
- * Prints age, height, weight, and SC			-JWT-	 */
-void put_misc1()
-{
-    register struct misc *m_ptr;
-
-    m_ptr = &py.misc;
-    prt_num("Age          ", (int)m_ptr->age, 2, 32);
-    prt_num("Height       ", (int)m_ptr->ht, 3, 32);
-    prt_num("Weight       ", (int)m_ptr->wt, 4, 32);
-    prt_num("Social Class ", (int)m_ptr->sc, 5, 32);
-}
-
-
-/*
- * Prints the following information on the screen.	-JWT-	 */
-void put_misc2()
-{
-    register struct misc *m_ptr;
-
-    m_ptr = &py.misc;
-    prt_num("Level      ", (int)m_ptr->lev, 9, 28);
-    prt_lnum("Experience ", m_ptr->exp, 10, 28);
-    prt_lnum("Max Exp    ", m_ptr->max_exp, 11, 28);
-    if (m_ptr->lev >= MAX_PLAYER_LEVEL) {
-	char                buf[40];	/* for this to look right, the
-					 * following should be spaced the
-					 * same as in the prt_lnum code...
-					 * -CFT */
-
-	sprintf(buf, "%s%9s", "Exp to Adv.", "****");
-	put_buffer(buf, 12, 28);
-    } else
-	prt_lnum("Exp to Adv.", (s32b) (player_exp[m_ptr->lev - 1] *
-					 m_ptr->expfact / 100), 12, 28);
-    prt_lnum("Gold       ", m_ptr->au, 13, 28);
-    prt_num("Max Hit Points ", m_ptr->mhp, 9, 52);
-    prt_num("Cur Hit Points ", m_ptr->chp, 10, 52);
-    prt_num("Max Mana       ", m_ptr->mana, 11, 52);
-    prt_num("Cur Mana       ", m_ptr->cmana, 12, 52);
-}
-
-
-/*
- * Prints ratings on certain abilities			-RAK-	 */
-void put_misc3()
-{
-    int                   xbth, xbthb, xfos, xsrh, xstl, xdis, xsave, xdev;
-    vtype                 xinfra;
-    register struct misc *p_ptr;
-
-    clear_from(14);
-    p_ptr = &py.misc;
-    xbth = p_ptr->bth + p_ptr->ptohit * BTH_PLUS_ADJ
-	+ (class_level_adj[p_ptr->pclass][CLA_BTH] * p_ptr->lev);
-    xbthb = p_ptr->bthb + p_ptr->ptohit * BTH_PLUS_ADJ
-	+ (class_level_adj[p_ptr->pclass][CLA_BTHB] * p_ptr->lev);
-/* this results in a range from 0 to 29 */
-    xfos = 40 - p_ptr->fos;
-    if (xfos < 0)
-	xfos = 0;
-    xsrh = p_ptr->srh;
-/* this results in a range from 0 to 9 */
-    xstl = p_ptr->stl + 1;
-    xdis = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-	+ (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
-    xsave = p_ptr->save + stat_adj(A_WIS)
-	+ (class_level_adj[p_ptr->pclass][CLA_SAVE] * p_ptr->lev / 3);
-    xdev = p_ptr->save + stat_adj(A_INT)
-	+ (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3);
-
-    (void)sprintf(xinfra, "%d feet", py.flags.see_infra * 10);
-
-    put_buffer("(Miscellaneous Abilities)", 15, 25);
-    put_buffer("Fighting    :", 16, 1);
-    put_buffer(likert(xbth, 12), 16, 15);
-    put_buffer("Bows/Throw  :", 17, 1);
-    put_buffer(likert(xbthb, 12), 17, 15);
-    put_buffer("Saving Throw:", 18, 1);
-    put_buffer(likert(xsave, 6), 18, 15);
-
-    put_buffer("Stealth     :", 16, 28);
-    put_buffer(likert(xstl, 1), 16, 42);
-    put_buffer("Disarming   :", 17, 28);
-    put_buffer(likert(xdis, 8), 17, 42);
-    put_buffer("Magic Device:", 18, 28);
-    put_buffer(likert(xdev, 6), 18, 42);
-
-    put_buffer("Perception  :", 16, 55);
-    put_buffer(likert(xfos, 3), 16, 69);
-    put_buffer("Searching   :", 17, 55);
-    put_buffer(likert(xsrh, 6), 17, 69);
-    put_buffer("Infra-Vision:", 18, 55);
-    put_buffer(xinfra, 18, 69);
-}
-
-
-/*
- * Used to display the character on the screen.		-RAK-	 */
-void display_char()
-{
-    put_character();
-    put_misc1();
-    put_stats();
-    put_misc2();
-    put_misc3();
-}
-
-
-/*
- * Gets a name for the character			-JWT-	 */
-void get_name()
-{
-    char tmp[100];
-
-    strcpy(tmp, py.misc.name);
-    prt("Enter your player's name  [press <RETURN> when finished]", 21, 2);
-    put_buffer(&blank_string[BLANK_LENGTH - 15], 2, 15);
-#ifdef MACINTOSH
-/*
- * Force player to give a name, would be nice to get name from chooser (STR
- * -16096), but that name might be too long 
- */
-    while (!get_string(py.misc.name, 2, 15, 15) || py.misc.name[0] == 0);
-#else
-    if (!get_string(py.misc.name, 2, 15, 15) || py.misc.name[0] == 0) {
-	strcpy(py.misc.name, tmp);
-	put_buffer(tmp, 2, 15);
-    }
-#endif
-    clear_from(20);
-#ifdef MACINTOSH
-/* Use the new name to set save file default name. */
-    initsavedefaults();
-#endif
-}
-
-
-/*
- * Changes the name of the character			-JWT-	 */
-void change_name()
-{
-    register char c;
-    register int  flag;
-
-#ifndef MACINTOSH
-    vtype         temp;
-
-#endif
-
-    flag = FALSE;
-    display_char();
-    do {
-	prt("<f>ile character description. <c>hange character name.", 21, 2);
-	c = inkey();
-	switch (c) {
-	  case 'c':
-	    get_name();
-	    flag = TRUE;
-	    break;
-	  case 'f':
-#ifdef MACINTOSH
-	/* On mac, file_character() gets filename with std file dialog. */
-	    if (file_character())
-		flag = TRUE;
-#else
-	    prt("File name:", 0, 0);
-	    if (get_string(temp, 0, 10, 60) && temp[0])
-		if (file_character(temp))
-		    flag = TRUE;
-#endif
-	    break;
-	  case ESCAPE:
-	  case ' ':
-	  case '\n':
-	  case '\r':
-	    flag = TRUE;
-	    break;
-	  default:
-	    bell();
-	    break;
-	}
-    }
-    while (!flag);
-}
 
 
 /*
@@ -1992,41 +4460,6 @@ register int perc;
 }
 
 
-/*
- * Computes current weight limit			-RAK-	 */
-int weight_limit()
-{
-    register s32b weight_cap;
-
-    weight_cap = (long)py.stats.use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP
-	+ (long)py.misc.wt;
-    if (weight_cap > 3000L)
-	weight_cap = 3000L;
-    return ((int)weight_cap);
-}
-
-
-/*
- * this code must be identical to the inven_carry() code below */
-int inven_check_num(register inven_type *t_ptr)
-{
-    register int i;
-
-    if (inven_ctr < INVEN_WIELD)
-	return TRUE;
-    else if (t_ptr->subval >= ITEM_SINGLE_STACK_MIN)
-	for (i = 0; i < inven_ctr; i++)
-	    if (inventory[i].tval == t_ptr->tval &&
-		inventory[i].subval == t_ptr->subval &&
-	/* make sure the number field doesn't overflow */
-		((int)inventory[i].number + (int)t_ptr->number < 256) &&
-	/* they always stack (subval < 192), or else they have same p1 */
-		((t_ptr->subval < ITEM_GROUP_MIN) || (inventory[i].p1 == t_ptr->p1))
-	/* only stack if both or neither are identified */
-		&& (known1_p(&inventory[i]) == known1_p(t_ptr)))
-		return TRUE;
-    return FALSE;
-}
 
 /*
  * return FALSE if picking up an object would change the players speed */
@@ -2106,1482 +4539,3 @@ void check_strength()
 }
 
 
-/*
- * Add an item to players inventory.  Return the item position for a
- * description if needed.	       -RAK- this code must be identical to
- * the inven_check_num() code above 
- */
-
-/*
- * Okay, here's my inven_carry() function (from misc2.c, I think).  Just
- * replace the existing inven_carry() with this one, and items will sort into
- * place, with mage spellbooks coming first for mages, rangers, and rogues.
- * Also, this will make Tenser's book sort after all the mage books except
- * Raals, instead of in the middle of them (which always seemed strange to
- * me). -CFT 
- */
-
-int inven_carry(register inven_type *i_ptr)
-{
-    register int         locn = 0, i;
-    register int         typ, subt;
-    register inven_type *t_ptr;
-    int                  known1p, always_known1p;
-    int                  tval_tmp;  /* used to make magic books before pray
-				    * books if magicuser */
-    int                  stacked = FALSE;
-
-    typ = i_ptr->tval;
-    subt = i_ptr->subval;
-    known1p = known1_p(i_ptr);
-    always_known1p = (object_offset(i_ptr) == -1);
-
-    if (inven_ctr >= INVEN_WIELD) /* sanity checking to prevent the inv from */
-	inven_ctr = INVEN_WIELD;  /* running over the equipment list -CWS */
-
-/*
- * to prevent nasty losses of objects, we first look through entire inven for
- * a place to stack, w/o assuming the inventory is sorted. -CFT 
- */
-    if (subt >= ITEM_SINGLE_STACK_MIN) {
-	for (locn = 0; locn < inven_ctr; locn++) {
-	    t_ptr = &inventory[locn];
-	    if (t_ptr->tval == typ &&
-		t_ptr->subval == subt &&
-	/* make sure the number field doesn't overflow */
-		((int)t_ptr->number + (int)i_ptr->number < 256) &&
-	/* they always stack (subval < 192), or else they have same p1 */
-		((subt < ITEM_GROUP_MIN) || (t_ptr->p1 == i_ptr->p1))
-	/* only stack if both or neither are identified */
-		&& (known1_p(&inventory[locn]) == known1p)) {
-		stacked = TRUE;	   /* note that we did process the item -CFT */
-		t_ptr->number += i_ptr->number;
-
-	/* if player bought at bargin price, then make sure he can't sell back
-	 * for normal value.  This is unfair, since it robs the value from items,
-	 * but it does prevent the player from "milking" the stores for cash.
-	 */
-		if (i_ptr->cost < t_ptr->cost)
-		    t_ptr->cost = i_ptr->cost;
-		break;
-	    } /* if it stacks here */
-	} /* for loop */
-    } /* if it stacks, try to stack it... */
-
-    if (!stacked) {
-    /* either it doesn't stack anyway, or it didn't match anything in the inventory.
-     * Now try to insert. -CFT */
-
-	for (locn = 0;; locn++) {
-	    t_ptr = &inventory[locn];
-
-	/* For items which are always known1p, i.e. never have a 'color',
-	 * insert them into the inventory in sorted order.  
-	 */
-	    if ((typ == TV_PRAYER_BOOK) && (class[py.misc.pclass].spell == MAGE))
-		typ = TV_MAGIC_BOOK - 1;
-	/* sort is in descending, so this will be immediately after magic books.
-	 * It helps that there is no tval that uses this. -CFT
-	 */
-	    tval_tmp = t_ptr->tval;
-	    if ((tval_tmp == TV_PRAYER_BOOK) &&
-		(class[py.misc.pclass].spell == MAGE))
-		tval_tmp = TV_MAGIC_BOOK - 1;
-	/* sort is in descending, so this will be immediately after magic books.
-	 * It helps that there is no tval that uses this. -CFT
-	 */
-	    if ((typ > tval_tmp) ||     /* sort by desc tval */
-		(always_known1p &&      /* if always known, then sort by inc level, */
-		 (typ == tval_tmp) &&	/* then by inc subval */
-		 ((i_ptr->level < t_ptr->level) ||
-	     ((i_ptr->level == t_ptr->level) && (subt < t_ptr->subval))))) {
-		for (i = inven_ctr - 1; i >= locn; i--)
-		    inventory[i + 1] = inventory[i];
-		inventory[locn] = *i_ptr;
-		inven_ctr++;
-		break;
-	    }
-	}
-    }
-    inven_weight += i_ptr->number * i_ptr->weight;
-    py.flags.status |= PY_STR_WGT;
-    return locn;
-}
-
-
-/*
- * Returns spell chance of failure for spell		-RAK-	 */
-int spell_chance(int spell)
-{
-    register spell_type *s_ptr;
-    register int         chance;
-    register int         stat;
-    int                  minfail;
-
-    s_ptr = &magic_spell[py.misc.pclass - 1][spell];
-    chance = s_ptr->sfail - 3 * (py.misc.lev - s_ptr->slevel);
-    if (class[py.misc.pclass].spell == MAGE)
-	stat = A_INT;
-    else
-	stat = A_WIS;
-    chance -= 3 * (stat_adj(stat) - 1);
-    if (s_ptr->smana > py.misc.cmana)
-	chance += 5 * (s_ptr->smana - py.misc.cmana);
-    switch (stat_adj(stat)) {
-      case 0:
-	minfail = 50;
-	break;			   /* I doubt can cast spells with stat this
-				    * low, anyways... */
-      case 1:
-	minfail = 12;
-	break;			   /* 8-14 stat */
-      case 2:
-	minfail = 8;
-	break;			   /* 15-17 stat */
-      case 3:
-	minfail = 5;
-	break;			   /* 18-18/49 stat */
-      case 4:
-	minfail = 4;
-	break;			   /* 18/50-18/69 */
-      case 5:
-	minfail = 4;
-	break;			   /* 18/70-18/89 */
-      case 6:
-	minfail = 3;
-	break;			   /* 18/90-18/99 */
-      case 7:
-	minfail = 3;
-	break;			   /* 18/100 */
-      case 8:
-      case 9:
-      case 10:
-	minfail = 2;
-	break;			   /* 18/101 - /130 */
-      case 11:
-      case 12:
-	minfail = 2;
-	break;			   /* /131 - /150 */
-      case 13:
-      case 14:
-	minfail = 1;
-	break;			   /* /151 - /170 */
-      case 15:
-      case 16:
-	minfail = 1;
-	break;			   /* /171 - /200 */
-      default:
-	minfail = 0;
-	break;			   /* > 18/200 */
-    }
-    if ((minfail < 5) && (py.misc.pclass != 1) && (py.misc.pclass != 2))
-	minfail = 5;		   /* only mages/priests can get best
-				    * chances... */
-    if (py.misc.pclass == 2) {	   /* Big prayer penalty for edged weapons
-				    * -DGK */
-	register inven_type *i_ptr = &inventory[INVEN_WIELD];
-
-	if ((i_ptr->tval == TV_SWORD) || (i_ptr->tval == TV_POLEARM))
-	    if ((i_ptr->flags2 & TR_BLESS_BLADE) == 0)
-		chance += 25;
-    }
-    if (chance > 95)
-	chance = 95;
-    else if (chance < minfail)
-	chance = minfail;
-    return chance;
-}
-
-
-/*
- * Print list of spells					-RAK-	 
- *
- * if nonconsec is -1: spells numbered consecutively from 'a' to 'a'+num >=0:
- * spells numbered by offset from nonconsec 
- */
-void print_spells(int *spell, register int num, int comment, int nonconsec)
-{
-    register int         i, j;
-    vtype                out_val;
-    register spell_type *s_ptr;
-    int                  col, offset;
-    cptr                 p;
-    char                 spell_char;
-
-    if (comment)
-	col = 22;
-    else
-	col = 31;
-    offset = (class[py.misc.pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
-    erase_line(1, col);
-    put_buffer("Name", 1, col + 5);
-    put_buffer("Lv Mana Fail", 1, col + 35);
-/* only show the first 22 choices */
-    if (num > 22)
-	num = 22;
-    for (i = 0; i < num; i++) {
-	j = spell[i];
-	s_ptr = &magic_spell[py.misc.pclass - 1][j];
-	if (comment == FALSE)
-	    p = "";
-	else if (j >= 32 ? ((spell_forgotten2 & (1L << (j - 32))) != 0)
-		 : ((spell_forgotten & (1L << j)) != 0))
-	    p = " forgotten";
-	else if (j >= 32 ? ((spell_learned2 & (1L << (j - 32))) == 0)
-		 : ((spell_learned & (1L << j)) == 0))
-	    p = " unknown";
-	else if (j >= 32 ? ((spell_worked2 & (1L << (j - 32))) == 0)
-		 : ((spell_worked & (1L << j)) == 0))
-	    p = " untried";
-	else
-	    p = "";
-    /* determine whether or not to leave holes in character choices,
-     * nonconsec -1 when learning spells, consec offset>=0 when asking which
-     * spell to cast 
-     */
-	if (nonconsec == -1)
-	    spell_char = 'a' + i;
-	else
-	    spell_char = 'a' + j - nonconsec;
-	(void)sprintf(out_val, "  %c) %-30s%2d %4d %3d%%%s", spell_char,
-		      spell_names[j + offset], s_ptr->slevel, s_ptr->smana,
-		      spell_chance(j), p);
-	prt(out_val, 2 + i, col);
-    }
-}
-
-
-/*
- * Returns spell pointer				-RAK-	 */
-int get_spell(int *spell, register int num, register int *sn, register int *sc, cptr prompt, int first_spell)
-{
-    register spell_type *s_ptr;
-    int                  flag, redraw, offset, i;
-    char                 choice;
-    vtype                out_str, tmp_str;
-
-    *sn = (-1);
-    flag = FALSE;
-    (void)sprintf(out_str, "(Spells %c-%c, *=List, <ESCAPE>=exit) %s",
-	   spell[0] + 'a' - first_spell, spell[num - 1] + 'a' - first_spell,
-		  prompt);
-    redraw = FALSE;
-    offset = (class[py.misc.pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
-    while (flag == FALSE && get_com(out_str, &choice)) {
-	if (isupper((int)choice)) {
-	    *sn = choice - 'A' + first_spell;
-	/* verify that this is in spell[], at most 22 entries in spell[] */
-	    for (i = 0; i < num; i++)
-		if (*sn == spell[i])
-		    break;
-	    if (i == num)
-		*sn = (-2);
-	    else {
-		s_ptr = &magic_spell[py.misc.pclass - 1][*sn];
-		(void)sprintf(tmp_str, "Cast %s (%d mana, %d%% fail)?",
-			      spell_names[*sn + offset], s_ptr->smana,
-			      spell_chance(*sn));
-		if (get_check(tmp_str))
-		    flag = TRUE;
-		else
-		    *sn = (-1);
-	    }
-	} else if (islower((int)choice)) {
-	    *sn = choice - 'a' + first_spell;
-	/* verify that this is in spell[], at most 22 entries in spell[] */
-	    for (i = 0; i < num; i++)
-		if (*sn == spell[i])
-		    break;
-	    if (i == num)
-		*sn = (-2);
-	    else
-		flag = TRUE;
-	} else if (choice == '*') {
-	/* only do this drawing once */
-	    if (!redraw) {
-		save_screen();
-		redraw = TRUE;
-		print_spells(spell, num, FALSE, first_spell);
-	    }
-	} else if (isalpha((int)choice))
-	    *sn = (-2);
-	else {
-	    *sn = (-1);
-	    bell();
-	}
-	if (*sn == -2) {
-	    sprintf(tmp_str, "You don't know that %s.",
-		(class[py.misc.pclass].spell == MAGE) ? "spell" : "prayer");
-	    msg_print(tmp_str);
-	}
-    }
-    if (redraw)
-	restore_screen();
-
-    erase_line(MSG_LINE, 0);
-    if (flag)
-	*sc = spell_chance(*sn);
-
-    return (flag);
-}
-
-
-/*
- * calculate number of spells player should have, and learn forget spells
- * until that number is met -JEW- 
- */
-void calc_spells(int stat)
-{
-    register int    i;
-    register u32b mask;
-    u32b          spell_flag;
-    int             j, offset;
-    int             num_allowed, new_spells, num_known, levels;
-    vtype           tmp_str;
-    cptr             p;
-    register struct misc *p_ptr;
-    register spell_type  *msp_ptr;
-
-    p_ptr = &py.misc;
-    msp_ptr = &magic_spell[p_ptr->pclass - 1][0];
-    if (stat == A_INT) {
-	p = "spell";
-	offset = SPELL_OFFSET;
-    } else {
-	p = "prayer";
-	offset = PRAYER_OFFSET;
-    }
-
-/* check to see if know any spells greater than level, eliminate them */
-    for (i = 31, mask = 0x80000000L; mask; mask >>= 1, i--) {
-	if (mask & spell_learned) {
-	    if (msp_ptr[i].slevel > p_ptr->lev) {
-		spell_learned &= ~mask;
-		spell_forgotten |= mask;
-		(void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
-			      spell_names[i + offset]);
-		msg_print(tmp_str);
-	    }
-	}
-	if (mask & spell_learned2) {
-	    if (msp_ptr[i + 32].slevel > p_ptr->lev) {
-		spell_learned2 &= ~mask;
-		spell_forgotten2 |= mask;
-		(void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
-			      spell_names[i + offset + 32]);
-		msg_print(tmp_str);
-	    }
-	}
-    }
-
-/* calc number of spells allowed */
-    levels = p_ptr->lev - class[p_ptr->pclass].first_spell_lev + 1;
-    switch (stat_adj(stat)) {
-      case 0:
-	num_allowed = 0;
-	break;
-      case 1:
-      case 2:
-      case 3:
-	num_allowed = 1 * levels;
-	break;
-      case 4:
-      case 5:
-	num_allowed = 3 * levels / 2;
-	break;
-      case 6:
-	num_allowed = 2 * levels;
-	break;
-      default:
-	num_allowed = 5 * levels / 2;
-	break;
-    }
-
-    num_known = 0;
-    for (mask = 0x1; mask; mask <<= 1) {
-	if (mask & spell_learned)
-	    num_known++;
-	if (mask & spell_learned2)
-	    num_known++;
-    }
-
-    new_spells = num_allowed - num_known;
-
-    if (new_spells > 0) {
-
-    /* remember forgotten spells while forgotten spells exist of new_spells
-     * positive, remember the spells in the order that they were learned 
-     */
-	for (i = 0; ((spell_forgotten | spell_forgotten2) && new_spells
-		     && (i < num_allowed) && (i < 64)); i++) {
-	/* j is (i+1)th spell learned */
-	    j = spell_order[i];
-
-	/* shifting by amounts greater than number of bits in long gives an
-	 * undefined result, so don't shift for unknown spells 
-	 */
-	    if (j == 99)
-		continue;	   /* don't process unknown spells... -CFT */
-
-	    if (j < 32) {	   /* use spell_learned, spell_forgotten...
-				    * -CFT */
-		mask = 1L << j;	   /* bit in spell fields */
-		if (mask & spell_forgotten) {
-		    if (msp_ptr[j].slevel <= p_ptr->lev) {
-			spell_forgotten &= ~mask;
-			spell_learned |= mask;
-			new_spells--;
-			(void)sprintf(tmp_str, "You have remembered the %s of %s.", p,
-				      spell_names[j + offset]);
-			msg_print(tmp_str);
-		    } else
-			num_allowed++;	/* if was too high lv to remember */
-		} /* if mask&spell_forgotten */
-	    }
-	     /* j < 32 */ 
-	    else {		   /* j > 31, use spell_learned2,
-				    * spell_forgotten2... -CFT */
-		mask = 1L << (j - 32);	/* bit in spell fields */
-		if (mask & spell_forgotten2) {
-		    if (msp_ptr[j].slevel <= p_ptr->lev) {
-			spell_forgotten2 &= ~mask;
-			spell_learned2 |= mask;
-			new_spells--;
-			(void)sprintf(tmp_str, "You have remembered the %s of %s.", p,
-				      spell_names[j + offset]);
-			msg_print(tmp_str);
-		    } else
-			num_allowed++;	/* if was too high lv to remember */
-		} /* if mask&spell_forgotten2 */
-	    } /* j > 31 */
-	} /* for loop... */
-
-	if (new_spells > 0) {
-	/* determine which spells player can learn */
-	/*
-	 * must check all spells here, in gain_spell() we actually check if
-	 * the books are present 
-	 */
-	/* only bother with spells learnable by class -CFT */
-	    spell_flag = spellmasks[py.misc.pclass][0] & ~spell_learned;
-	    mask = 0x1;
-	    i = 0;
-	    for (j = 0, mask = 0x1; spell_flag; mask <<= 1, j++)
-		if (spell_flag & mask) {
-		    spell_flag &= ~mask;
-		    if (msp_ptr[j].slevel <= p_ptr->lev)
-			i++;
-		}
-	/* only bother with spells learnable by class -CFT */
-	    spell_flag = spellmasks[py.misc.pclass][1] & ~spell_learned2;
-	    mask = 0x1;
-	    for (j = 0, mask = 0x1; spell_flag; mask <<= 1, j++)
-		if (spell_flag & mask) {
-		    spell_flag &= ~mask;
-		    if (msp_ptr[j + 32].slevel <= p_ptr->lev)
-			i++;
-		}
-	    if (new_spells > i)
-		new_spells = i;
-	}
-    } else if (new_spells < 0) {
-
-    /* forget spells until new_spells zero or no more spells know, spells are
-     * forgotten in the opposite order that they were learned 
-     */
-	for (i = 63; new_spells && (spell_learned | spell_learned2); i--) {
-	/* j is the (i+1)th spell learned */
-	    j = spell_order[i];
-
-	/* shifting by amounts greater than number of bits in long gives an
-	 * undefined result, so don't shift for unknown spells 
-	 */
-	    if (j == 99)
-		continue;	   /* don't process unknown spells... -CFT */
-
-	    if (j < 32) {	   /* use spell_learned, spell_forgotten...
-				    * -CFT */
-		mask = 1L << j;	   /* bit in spell fields */
-		if (mask & spell_learned) {
-		    spell_learned &= ~mask;
-		    spell_forgotten |= mask;
-		    new_spells++;
-		    (void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
-				  spell_names[j + offset]);
-		    msg_print(tmp_str);
-		} /* if mask&spell_learned */
-	    }
-	     /* j < 32 */ 
-	    else {		   /* j > 31, use spell_learned2,
-				    * spell_forgotten2... -CFT */
-		mask = 1L << (j - 32);	/* bit in spell fields */
-		if (mask & spell_learned2) {
-		    spell_learned2 &= ~mask;
-		    spell_forgotten2 |= mask;
-		    new_spells++;
-		    (void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
-				  spell_names[j + offset]);
-		    msg_print(tmp_str);
-		} /* if mask&spell_learned2 */
-	    } /* j > 31 */
-	} /* for loop... */
-	new_spells = 0;		   /* we've forgotten, so we shouldn't be
-				    * learning any... */
-    }
-    if (new_spells != py.flags.new_spells) {
-	if (new_spells > 0 && py.flags.new_spells == 0) {
-	    (void)sprintf(tmp_str, "You can learn some new %ss now.", p);
-	    msg_print(tmp_str);
-	}
-	py.flags.new_spells = new_spells;
-	py.flags.status |= PY_STUDY;
-    }
-}
-
-
-/*
- * gain spells when player wants to		- jw */
-void gain_spells()
-{
-    char                query;
-    int                 stat, diff_spells, new_spells;
-    int                 spells[63], offset, last_known;
-    register int        i, j;
-    register u32b     spell_flag = 0, spell_flag2 = 0, mask;
-    vtype               tmp_str;
-    struct misc         *p_ptr;
-    register spell_type *msp_ptr;
-
-    if (!py.misc.pclass) {
-	msg_print("A warrior learn magic???  HA!");
-	return;
-    }
-    i = 0;
-    if (py.flags.blind > 0)
-	msg_print("You can't see to read your spell book!");
-    else if (no_light())
-	msg_print("You have no light to read by.");
-    else if (py.flags.confused > 0)
-	msg_print("You are too confused.");
-    else
-	i = 1;
-    if (i == 0)
-	return;
-
-    new_spells = py.flags.new_spells;
-    diff_spells = 0;
-    p_ptr = &py.misc;
-    msp_ptr = &magic_spell[p_ptr->pclass - 1][0];
-    if (class[p_ptr->pclass].spell == MAGE) {
-	stat = A_INT;
-	offset = SPELL_OFFSET;
-    } else {
-	stat = A_WIS;
-	offset = PRAYER_OFFSET;
-    }
-
-    for (last_known = 0; last_known < 64; last_known++)
-	if (spell_order[last_known] == 99)
-	    break;
-
-    if (!new_spells) {
-	(void)sprintf(tmp_str, "You can't learn any new %ss!",
-		      (stat == A_INT ? "spell" : "prayer"));
-	msg_print(tmp_str);
-	free_turn_flag = TRUE;
-    } else {
-    /* determine which spells player can learn */
-    /* mages need the book to learn a spell, priests do not need the book */
-	spell_flag = 0;
-	spell_flag2 = 0;
-	for (i = 0; i < inven_ctr; i++)
-	    if (((stat == A_INT) && (inventory[i].tval == TV_MAGIC_BOOK))
-	    || ((stat == A_WIS) && (inventory[i].tval == TV_PRAYER_BOOK))) {
-		spell_flag |= inventory[i].flags;
-		spell_flag2 |= inventory[i].flags2;
-	    }
-    }
-
-/* clear bits for spells already learned */
-    spell_flag &= ~spell_learned;
-    spell_flag2 &= ~spell_learned2;
-
-    mask = 0x1;
-    i = 0;
-    for (j = 0, mask = 0x1; (spell_flag | spell_flag2); mask <<= 1, j++) {
-	if (spell_flag & mask) {
-	    spell_flag &= ~mask;
-	    if (msp_ptr[j].slevel <= p_ptr->lev) {
-		spells[i] = j;
-		i++;
-	    }
-	}
-	if (spell_flag2 & mask) {
-	    spell_flag2 &= ~mask;
-	    if (msp_ptr[j + 32].slevel <= p_ptr->lev) {
-		spells[i] = j + 32;
-		i++;
-	    }
-	}
-    }
-
-    if (new_spells > i) {
-	msg_print("You seem to be missing a book.");
-	diff_spells = new_spells - i;
-	new_spells = i;
-    }
-    if (new_spells == 0);
-    else if (stat == A_INT) {
-    /* get to choose which mage spells will be learned */
-	save_screen();
-	print_spells(spells, i, FALSE, -1);
-	while (new_spells && get_com("Learn which spell?", &query)) {
-	    j = query - 'a';
-
-	/* test j < 23 in case i is greater than 22, only 22 spells are
-	 * actually shown on the screen, so limit choice to those 
-	 */
-	    if (j >= 0 && j < i && j < 22) {
-		new_spells--;
-		if (spells[j] < 32)
-		    spell_learned |= 1L << spells[j];
-		else
-		    spell_learned2 |= 1L << (spells[j] - 32);
-		spell_order[last_known++] = spells[j];
-		for (; j <= i - 1; j++)
-		    spells[j] = spells[j + 1];
-		i--;
-		erase_line(j + 1, 31);
-		print_spells(spells, i, FALSE, -1);
-	    } else
-		bell();
-	}
-	restore_screen();
-    } else {
-    /* pick a prayer at random */
-	while (new_spells) {
-	    j = randint(i) - 1;
-	    if (spells[j] < 32)
-		spell_learned |= 1L << spells[j];
-	    else
-		spell_learned2 |= 1L << (spells[j] - 32);
-	    spell_order[last_known++] = spells[j];
-	    (void)sprintf(tmp_str,
-			  "You have learned the prayer of %s.",
-			  spell_names[spells[j] + offset]);
-	    msg_print(tmp_str);
-	    for (; j <= i - 1; j++)
-		spells[j] = spells[j + 1];
-	    i--;
-	    new_spells--;
-	}
-    }
-    py.flags.new_spells = new_spells + diff_spells;
-    if (py.flags.new_spells == 0)
-	py.flags.status |= PY_STUDY;
-/* set the mana for first level characters when they learn first spell */
-    if (py.misc.mana == 0)
-	calc_mana(stat);
-}
-
-
-
-/*
- * Gain some mana if you know at least one spell	-RAK-	 */
-void calc_mana(int stat)
-{
-    register int          new_mana, levels;
-    register struct misc *p_ptr;
-    register s32b        value;
-    register int          i;
-    register inven_type  *i_ptr;
-    int                   amrwgt, maxwgt;
-
-    p_ptr = &py.misc;
-    if (spell_learned != 0 || spell_learned2 != 0) {
-	levels = p_ptr->lev - class[p_ptr->pclass].first_spell_lev + 1;
-	switch (stat_adj(stat)) {
-	  case 0:
-	    new_mana = 0;
-	    break;
-	  case 1:
-	  case 2:
-	    new_mana = 1 * levels;
-	    break;
-	  case 3:
-	    new_mana = 3 * levels / 2;
-	    break;
-	  case 4:
-	    new_mana = 2 * levels;
-	    break;
-	  case 5:
-	    new_mana = 5 * levels / 2;
-	    break;
-	  case 6:
-	    new_mana = 3 * levels;
-	    break;
-	  case 7:
-	    new_mana = 4 * levels;
-	    break;
-	  case 8:
-	    new_mana = 9 * levels / 2;
-	    break;
-	  case 9:
-	    new_mana = 5 * levels;
-	    break;
-	  case 10:
-	    new_mana = 11 * levels / 2;
-	    break;
-	  case 11:
-	    new_mana = 6 * levels;
-	    break;
-	  case 12:
-	    new_mana = 13 * levels / 2;
-	    break;
-	  case 13:
-	    new_mana = 7 * levels;
-	    break;
-	  case 14:
-	    new_mana = 15 * levels / 2;
-	    break;
-	  default:
-	    new_mana = 8 * levels;
-	    break;
-	}
-    /* increment mana by one, so that first level chars have 2 mana */
-	if (new_mana > 0)
-	    new_mana++;
-	if ((inventory[INVEN_HANDS].tval != TV_NOTHING) &&
-	    !((inventory[INVEN_HANDS].flags & TR_FREE_ACT) ||
-	      ((inventory[INVEN_HANDS].flags & TR_DEX) &&
-	       (inventory[INVEN_HANDS].p1 > 0)))
-/* gauntlets of dex (or free action - DGK) can hardly interfere w/ spellcasting!
- * But cursed ones can! -CFT */
-
-	    &&(py.misc.pclass == 1 || py.misc.pclass == 3 || py.misc.pclass == 4)) {
-	    new_mana = (3 * new_mana) / 4;
-	}
-    /* Start of **NEW ENCUMBRANCE CALCULATION**    -DGK- */
-	amrwgt = 0;
-	for (i = INVEN_WIELD; i < INVEN_ARRAY_SIZE; i++) {
-	    i_ptr = &inventory[i];
-	    switch (i) {
-	      case INVEN_HEAD:
-	      case INVEN_BODY:
-	      case INVEN_ARM:
-	      case INVEN_HANDS:
-	      case INVEN_FEET:
-	      case INVEN_OUTER:
-		amrwgt += i_ptr->weight;
-	    }
-	}
-	switch (py.misc.pclass) {
-	  case 1:
-	    maxwgt = 300;
-	    break;
-	  case 2:
-	    maxwgt = 350;
-	    break;
-	  case 3:
-	    maxwgt = 350;
-	    break;
-	  case 4:
-	    maxwgt = 400;
-	    break;
-	  case 5:
-	    maxwgt = 400;
-	    break;
-	  default:
-	    maxwgt = 0;
-	}
-	if (amrwgt > maxwgt)
-	    new_mana -= ((amrwgt - maxwgt) / 10);
-    /* end of new mana calc */
-
-    /* if low int/wis, gloves, and lots of heavy armor, new_mana could be
-     * negative.  This would be very unlikely, except when int/wis was high
-     * enough to compensate for armor, but was severly drained by an annoying
-     * monster.  Since the following code blindly assumes that new_mana is >=
-     * 0, we must do the work and return here. -CFT 
-     */
-	if (new_mana < 1) {
-	    p_ptr->cmana = p_ptr->cmana_frac = p_ptr->mana = 0;
-	    py.flags.status |= PY_MANA;
-	    return;		   /* now return before we reach code that
-				    * assumes new_mana is positive.... */
-	}
-    /* mana can be zero when creating character */
-	if (p_ptr->mana != new_mana) {
-	    if (p_ptr->mana != 0) {
-	    /*
-	     * change current mana proportionately to change of max mana,
-	     * divide first to avoid overflow, little loss of accuracy 
-	     */
-		value = (((long)p_ptr->cmana << 16) + p_ptr->cmana_frac)
-		    / p_ptr->mana * new_mana;
-		p_ptr->cmana = value >> 16;
-		p_ptr->cmana_frac = value & 0xFFFF;
-	    } else {
-		p_ptr->cmana = new_mana;
-		p_ptr->cmana_frac = 0;
-	    }
-	    p_ptr->mana = new_mana;
-	/* can't print mana here, may be in store or inventory mode */
-	    py.flags.status |= PY_MANA;
-	}
-    } else if (p_ptr->mana != 0) {
-	p_ptr->mana = 0;
-	p_ptr->cmana = 0;
-    /* can't print mana here, may be in store or inventory mode */
-	py.flags.status |= PY_MANA;
-    }
-}
-
-
-/*
- * Increases hit points and level			-RAK-	 */
-static void gain_level()
-{
-    vtype               out_val;
-    register struct misc *p_ptr;
-    register player_class *c_ptr;
-
-    p_ptr = &py.misc;
-    p_ptr->lev++;
-    (void)sprintf(out_val, "Welcome to level %d.", (int)p_ptr->lev);
-    msg_print(out_val);
-    calc_hitpoints();
-    prt_level();
-    prt_title();
-    c_ptr = &class[p_ptr->pclass];
-    if (c_ptr->spell == MAGE) {
-	calc_spells(A_INT);
-	calc_mana(A_INT);
-    } else if (c_ptr->spell == PRIEST) {
-	calc_spells(A_WIS);
-	calc_mana(A_WIS);
-    }
-}
-
-/*
- * Prints experience					-RAK-	 */
-void prt_experience()
-{
-    register struct misc *p_ptr;
-    char out_val[100];
-    
-    p_ptr = &py.misc;
-    if (p_ptr->exp > MAX_EXP)
-	p_ptr->exp = MAX_EXP;
-    if (p_ptr->lev < MAX_PLAYER_LEVEL)
-    {
-	while ((player_exp[p_ptr->lev-1] * p_ptr->expfact / 100) <= p_ptr->exp
-	       && p_ptr->lev < MAX_PLAYER_LEVEL){
-	    gain_level();
-	    if (p_ptr->exp > p_ptr->max_exp) {
-		/* level was actually gained, not restored:
-		 * this 300 is arbitrary, but it makes human ages work okay,
-		 * and I chose the other racial age adjs based on this as well -CFT
-		 */
-		p_ptr->age += randint((u16b)class[p_ptr->pclass].age_adj *
-				      (u16b)race[p_ptr->prace].m_age)/300;
-	    }
-	}
-    }
-    if (p_ptr->exp > p_ptr->max_exp)
-	p_ptr->max_exp = p_ptr->exp;
-    (void) sprintf(out_val, "%8ld", (long)p_ptr->exp);
-    put_buffer(out_val, 13, STAT_COLUMN+4);
-}
-
-
-/*
- * Calculate the players hit points */
-void calc_hitpoints()
-{
-    register int          hitpoints;
-    register struct misc *p_ptr;
-    register s32b        value;
-
-    p_ptr = &py.misc;
-    hitpoints = player_hp[p_ptr->lev - 1] + (con_adj() * p_ptr->lev);
-/* always give at least one point per level + 1 */
-    if (hitpoints < (p_ptr->lev + 1))
-	hitpoints = p_ptr->lev + 1;
-
-    if (py.flags.status & PY_HERO)
-	hitpoints += 10;
-    if (py.flags.status & PY_SHERO)
-	hitpoints += 30;
-
-/* mhp can equal zero while character is being created */
-    if ((hitpoints != p_ptr->mhp) && (p_ptr->mhp != 0)) {
-    /* change current hit points proportionately to change of mhp, divide
-     * first to avoid overflow, little loss of accuracy 
-     */
-	value = (((long)p_ptr->chp << 16) + p_ptr->chp_frac) / p_ptr->mhp
-	    * hitpoints;
-	p_ptr->chp = value >> 16;
-	p_ptr->chp_frac = value & 0xFFFF;
-	p_ptr->mhp = hitpoints;
-
-    /* can't print hit points here, may be in store or inventory mode */
-	py.flags.status |= PY_HP;
-    }
-}
-
-
-/*
- * Inserts a string into a string				 */
-void insert_str(char *object_str, cptr mtc_str, cptr insert)
-{
-    int            obj_len;
-    char          *bound, *pc;
-    register int   i, mtc_len;
-    register char *temp_obj;
-    cptr           temp_mtc;
-    char           out_val[80];
-
-    mtc_len = strlen(mtc_str);
-    obj_len = strlen(object_str);
-    bound = object_str + obj_len - mtc_len;
-    for (pc = object_str; pc <= bound; pc++) {
-	temp_obj = pc;
-	temp_mtc = mtc_str;
-	for (i = 0; i < mtc_len; i++)
-	    if (*temp_obj++ != *temp_mtc++)
-		break;
-	if (i == mtc_len)
-	    break;
-    }
-
-    if (pc <= bound) {
-	(void)strncpy(out_val, object_str, (int)(pc - object_str));
-	out_val[(int)(pc - object_str)] = '\0';
-	if (insert)
-	    (void)strcat(out_val, insert);
-	(void)strcat(out_val, (char *)(pc + mtc_len));
-	(void)strcpy(object_str, out_val);
-    }
-}
-
-
-void insert_lnum(char *object_str, register cptr mtc_str, s32b number, int  show_sign)
-{
-    int            mlen;
-    vtype          str1, str2;
-    register char *string, *tmp_str;
-    int            flag;
-
-    flag = 1;
-    mlen = strlen(mtc_str);
-    tmp_str = object_str;
-    do {
-	string = (char *) strcmp(tmp_str, mtc_str[0]);
-	if (string == 0)
-	    flag = 0;
-	else {
-	    flag = strncmp(string, mtc_str, mlen);
-	    if (flag)
-		tmp_str = string + 1;
-	}
-    }
-    while (flag);
-    if (string) {
-	(void)strncpy(str1, object_str, (int)(string - object_str));
-	str1[(int)(string - object_str)] = '\0';
-	(void)strcpy(str2, string + mlen);
-	if ((number >= 0) && (show_sign))
-	    (void)sprintf(object_str, "%s+%ld%s", str1, (long)number, str2);
-	else
-	    (void)sprintf(object_str, "%s%ld%s", str1, (long)number, str2);
-    }
-}
-
-
-/*
- * lets anyone enter wizard mode after a disclaimer...		- JEW - */
-int enter_wiz_mode()
-{
-    register int answer;
-
-    if (!is_wizard(player_uid))
-	return FALSE;
-    if (!noscore) {
-	msg_print("Wizard mode is for debugging and experimenting.");
-	answer = get_check(
-			"The game will not be scored if you enter wizard mode. Are you sure?");
-    }
-    if (noscore || answer) {
-	noscore |= 0x2;
-	wizard = TRUE;
-	return (TRUE);
-    }
-    return (FALSE);
-}
-
-
-/*
- * Weapon weight VS strength and dexterity		-RAK-	 */
-int attack_blows(int  weight, int *wtohit)
-{
-    register int adj_weight;
-    register int str_index, dex_index, s, d;
-
-    s = py.stats.use_stat[A_STR];
-    d = py.stats.use_stat[A_DEX];
-    if (s * 15 < weight) {
-	*wtohit = s * 15 - weight;
-	return 1;
-    } else {
-	*wtohit = 0;
-	if (d < 10)
-	    dex_index = 0;
-	else if (d < 19)
-	    dex_index = 1;
-	else if (d < 68)
-	    dex_index = 2;
-	else if (d < 108)
-	    dex_index = 3;
-	else if (d < 118)
-	    dex_index = 4;
-	else if (d == 118)
-	    dex_index = 5;
-	else if (d < 128)
-	    dex_index = 6;
-	else if (d < 138)
-	    dex_index = 7;
-	else if (d < 148)
-	    dex_index = 8;
-	else if (d < 158)
-	    dex_index = 9;
-	else if (d < 168)
-	    dex_index = 10;
-	else
-	    dex_index = 11;
-
-	switch (py.misc.pclass) { /* new class-based weight penalties -CWS */
-	case 0:				/* Warriors */
-	    adj_weight = ((s * 10) / ((weight < 30) ? 30 : weight));
-	    break;
-	case 1:				/* Mages */
-	    adj_weight = ((s * 4) / ((weight < 40) ? 40 : weight));
-	    break;
-	case 2:				/* Priests */
-	    adj_weight = ((s * 7) / ((weight < 35) ? 35 : weight));
-	    break;
-	case 3:				/* Rogues */
-	    adj_weight = ((s * 6) / ((weight < 30) ? 30 : weight));
-	    break;
-	case 4:				/* Rangers */
-	    adj_weight = ((s * 8) / ((weight < 35) ? 35 : weight));
-	    break;
-	default:			/* Paladins */
-	    adj_weight = ((s * 8) / ((weight < 30) ? 30 : weight));
-	    break;
-	}
-
-	if (adj_weight < 2)
-	    str_index = 0;
-	else if (adj_weight < 3)
-	    str_index = 1;
-	else if (adj_weight < 4)
-	    str_index = 2;
-	else if (adj_weight < 6)
-	    str_index = 3;
-	else if (adj_weight < 8)
-	    str_index = 4;
-	else if (adj_weight < 10)
-	    str_index = 5;
-	else if (adj_weight < 13)
-	    str_index = 6;
-	else if (adj_weight < 15)
-	    str_index = 7;
-	else if (adj_weight < 18)
-	    str_index = 8;
-	else if (adj_weight < 20)
-	    str_index = 9;
-	else
-	    str_index = 10;
-
-	s = 0;				/* do Weapons of Speed */
-	for (d = INVEN_WIELD; d < INVEN_AUX; d++)
-	    if (inventory[d].flags2 & TR_ATTACK_SPD)
-		s += inventory[d].p1;
-
-	d = (int)blows_table[str_index][dex_index];
-	
-	if (py.misc.pclass != 0)	/* Non-warrior attack penalty */
-	    if (d > 5)
-		d = 5;
-	if (py.misc.pclass == 1)
-	    if (d > 4)
-		d = 4;
-
-	d += s;
-	return ((d < 1) ? 1 : d);
-    }
-}
-
-
-/*
- * Special damage due to magical abilities of object	-RAK-	 */
-int tot_dam(register inven_type *i_ptr, register int tdam, int monster)
-{
-    register creature_type *m_ptr;
-    register monster_lore   *r_ptr;
-    int                     reduced = FALSE;
-    /* don't resist more than one thing.... -CWS */
-
-    if ((((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW)) ||
-	 ((i_ptr->tval >= TV_HAFTED) && (i_ptr->tval <= TV_SWORD)) ||
-	 (i_ptr->tval == TV_FLASK))) {
-	m_ptr = &c_list[monster];
-	r_ptr = &c_recall[monster];
-    /* Mjollnir? :-> */
-	if (!(m_ptr->cdefense & IM_LIGHTNING) && (i_ptr->flags2 & TR_LIGHTNING)) {
-	    tdam *= 5;
-	}
-    /* Execute Dragon */
-	else if ((m_ptr->cdefense & DRAGON) && (i_ptr->flags & TR_SLAY_X_DRAGON)) {
-	    tdam *= 5;
-	    r_ptr->r_cdefense |= DRAGON;
-	}
-    /* Slay Dragon  */
-	else if ((m_ptr->cdefense & DRAGON) && (i_ptr->flags & TR_SLAY_DRAGON)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= DRAGON;
-	}
-    /* Slay Undead  */
-	else if ((m_ptr->cdefense & UNDEAD) && (i_ptr->flags & TR_SLAY_UNDEAD)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= UNDEAD;
-	}
-    /* Slay ORC     */
-	else if ((m_ptr->cdefense & ORC) && (i_ptr->flags2 & TR_SLAY_ORC)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= ORC;
-	}
-    /* Slay TROLL     */
-	else if ((m_ptr->cdefense & TROLL) && (i_ptr->flags2 & TR_SLAY_TROLL)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= TROLL;
-	}
-    /* Slay GIANT     */
-	else if ((m_ptr->cdefense & GIANT) && (i_ptr->flags2 & TR_SLAY_GIANT)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= GIANT;
-	}
-    /* Slay DEMON     */
-	else if ((m_ptr->cdefense & DEMON) && (i_ptr->flags2 & TR_SLAY_DEMON)) {
-	    tdam *= 3;
-	    r_ptr->r_cdefense |= DEMON;
-	}
-    /* Frost	       */
-	else if ((!(m_ptr->cdefense & IM_FROST))
-		 && (i_ptr->flags & TR_FROST_BRAND)) {
-	    tdam *= 3;
-	}
-    /* Fire	      */
-	else if ((!(m_ptr->cdefense & IM_FIRE))
-		 && (i_ptr->flags & TR_FLAME_TONGUE)) {
-	    tdam *= 3;
-	}
-    /* Slay Evil     */
-	else if ((m_ptr->cdefense & EVIL) && (i_ptr->flags & TR_SLAY_EVIL)) {
-	    tdam *= 2;
-	    r_ptr->r_cdefense |= EVIL;
-	}
-    /* Slay Animal  */
-	else if ((m_ptr->cdefense & ANIMAL) && (i_ptr->flags & TR_SLAY_ANIMAL)) {
-	    tdam *= 2;
-	    r_ptr->r_cdefense |= ANIMAL;
-	}
-				/* let's do the resistances */
-	if (((m_ptr->cdefense & IM_FROST)) && (i_ptr->flags & TR_FROST_BRAND)) {
-	    r_ptr->r_cdefense |= IM_FROST;
-	    tdam = (tdam * 3) / 4;
-	    reduced = TRUE;
-	}
-	if (((m_ptr->cdefense & IM_FIRE)) && (i_ptr->flags & TR_FLAME_TONGUE)) {
-	    r_ptr->r_cdefense |= IM_FIRE;
-	    if (!reduced) {
-		tdam = (tdam * 3) / 4;
-		reduced = TRUE;
-	    }
-	}
-	if (((m_ptr->cdefense & IM_LIGHTNING)) && (i_ptr->flags2 & TR_LIGHTNING)) {
-	    r_ptr->r_cdefense |= IM_LIGHTNING;
-	    if (!reduced) {
-		tdam = (tdam * 3) / 4;
-		reduced = TRUE;
-	    }
-	}
-	if ((i_ptr->flags2 & TR_IMPACT) && (tdam > 50))
-	    earthquake();
-    }
-    return (tdam);
-}
-
-
-/*
- * Critical hits, Nasty way to die.			-RAK-	 */
-int critical_blow(register int weight, register int plus, register int dam, int  attack_type)
-{
-    register int critical;
-
-    critical = dam;
-/* Weight of weapon, plusses to hit, and character level all */
-/* contribute to the chance of a critical	             */
-    if (randint(5000) <= (int)(weight + 5 * plus
-			     + (class_level_adj[py.misc.pclass][attack_type]
-				* py.misc.lev))) {
-	weight += randint(650);
-	if (weight < 400) {
-	    critical = 2 * dam + 5;
-	    msg_print("It was a good hit!");
-	} else if (weight < 700) {
-	    critical = 2 * dam + 10;
-	    msg_print("It was an excellent hit!");
-	} else if (weight < 900) {
-	    critical = 3 * dam + 15;
-	    msg_print("It was a superb hit!");
-	} else if (weight < 1300) {
-	    critical = 3 * dam + 20;
-	    msg_print("It was a *GREAT* hit!");
-	} else {
-	    critical = ((7 * dam) / 2) + 25;
-	    msg_print("It was a *SUPERB* hit!");
-	}
-    }
-    return (critical);
-}
-
-
-/*
- * Given direction "dir", returns new row, column location -RAK- 
- * targeting code stolen from Morgul -CFT 
- * 'dir=0' moves toward target				    CDW 
- */
-int mmove(int dir, register int *y, register int *x)
-{
-    register int new_row = 0, new_col = 0;
-    int          boolflag;
-
-    switch (dir) {
-#ifdef TARGET
-      case 0:			/* targetting code stolen from Morgul -CFT */
-	new_row = *y;
-	new_col = *x;
-	mmove2(&new_row, &new_col,
-	       char_row, char_col,
-	       target_row, target_col);
-	break;
-#endif /* TARGET */
-      case 1:
-	new_row = *y + 1;
-	new_col = *x - 1;
-	break;
-      case 2:
-	new_row = *y + 1;
-	new_col = *x;
-	break;
-      case 3:
-	new_row = *y + 1;
-	new_col = *x + 1;
-	break;
-      case 4:
-	new_row = *y;
-	new_col = *x - 1;
-	break;
-      case 5:
-	new_row = *y;
-	new_col = *x;
-	break;
-      case 6:
-	new_row = *y;
-	new_col = *x + 1;
-	break;
-      case 7:
-	new_row = *y - 1;
-	new_col = *x - 1;
-	break;
-      case 8:
-	new_row = *y - 1;
-	new_col = *x;
-	break;
-      case 9:
-	new_row = *y - 1;
-	new_col = *x + 1;
-	break;
-    }
-    boolflag = FALSE;
-    if ((new_row >= 0) && (new_row < cur_height)
-	&& (new_col >= 0) && (new_col < cur_width)) {
-	*y = new_row;
-	*x = new_col;
-	boolflag = TRUE;
-    }
-    return (boolflag);
-}
-
-
-/*
- * Saving throws for player character.		-RAK-	 */
-int player_saves()
-{
-    /* MPW C couldn't handle the expression, so split it into two parts */
-    s16b temp = class_level_adj[py.misc.pclass][CLA_SAVE];
-
-    if (randint(100) <= (py.misc.save + stat_adj(A_WIS)
-			 + (temp * py.misc.lev / 3)))
-	return (TRUE);
-    else
-	return (FALSE);
-}
-
-
-/*
- * Finds range of item in inventory list		-RAK-	 */
-int find_range(int item1, int item2, register int *j, register int *k)
-{
-    register int         i;
-    register inven_type *i_ptr;
-    int                  flag;
-
-    i = 0;
-    *j = (-1);
-    *k = (-1);
-    flag = FALSE;
-    i_ptr = &inventory[0];
-    while (i < inven_ctr) {
-	if (!flag) {
-	    if ((i_ptr->tval == item1) || (i_ptr->tval == item2)) {
-		flag = TRUE;
-		*j = i;
-	    }
-	} else {
-	    if ((i_ptr->tval != item1) && (i_ptr->tval != item2)) {
-		*k = i - 1;
-		break;
-	    }
-	}
-	i++;
-	i_ptr++;
-    }
-    if (flag && (*k == -1))
-	*k = inven_ctr - 1;
-    return (flag);
-}
-
-
-/*
- * Teleport the player to a new location		-RAK-	 */
-void teleport(int dis)
-{
-    register int y, x, count;
-
-    do {
-	count = 0;
-	do {
-	    count += 1;
-	    y = randint(cur_height) - 1;
-	    x = randint(cur_width) - 1;
-	    while (distance(y, x, char_row, char_col) > dis) {
-		y += ((char_row - y) / 2);
-		x += ((char_col - x) / 2);
-	    }
-	}
-	while (((cave[y][x].fval >= MIN_CLOSED_SPACE) ||
-		(cave[y][x].cptr >= 2) ||
-		(t_list[cave[y][x].tptr].index == OBJ_OPEN_DOOR) ||
-		(cave[y][x].fval == NT_DARK_FLOOR) ||
-		(cave[y][x].fval == NT_LIGHT_FLOOR)) && count < 1000);
-
-	dis *= 2;
-    } while (count == 1000);
-
-    move_rec(char_row, char_col, y, x);
-
-    /* unlight area teleported from */
-    darken_player(char_row, char_col);
-
-    char_row = y;
-    char_col = x;
-    check_view();
-    creatures(FALSE);
-    teleport_flag = FALSE;
-}
-
-
-/*
- * Add a comment to an object description.		-CJS- */
-void scribe_object()
-{
-    int   item_val, j;
-    vtype out_val, tmp_str;
-
-    if (inven_ctr > 0 || equip_ctr > 0) {
-	if (get_item(&item_val, "Which one? ", 0, INVEN_ARRAY_SIZE, 0)) {
-	    objdes(tmp_str, &inventory[item_val], TRUE);
-	    (void)sprintf(out_val, "Inscribing %s.", tmp_str);
-	    msg_print(out_val);
-	    if (inventory[item_val].inscrip[0] != '\0')
-		(void)sprintf(out_val, "Replace \"%s\" with the inscription: ",
-			      inventory[item_val].inscrip);
-	    else
-		(void)strcpy(out_val, "Inscription: ");
-	    j = 78 - strlen(tmp_str);
-	    if (j > 12)
-		j = 12;
-	    prt(out_val, 0, 0);
-	    if (get_string(out_val, 0, strlen(out_val), j))
-		inscribe(&inventory[item_val], out_val);
-	}
-    } else
-	msg_print("You are not carrying anything to inscribe.");
-}
-
-/*
- * Append an additional comment to an object description.	-CJS- */
-void add_inscribe(inven_type *i_ptr, int type)
-{
-    i_ptr->ident |= (byte) type;
-}
-
-/*
- * Replace any existing comment in an object description with a new one. CJS */
-void inscribe(inven_type *i_ptr, cptr str)
-{
-    (void)strcpy(i_ptr->inscrip, str);
-}
-
-
-/*
- * We need to reset the view of things.			-CJS- */
-void check_view()
-{
-    register int        i, j;
-    register cave_type *c_ptr, *d_ptr;
-
-    c_ptr = &cave[char_row][char_col];
-/* Check for new panel		   */
-    if (get_panel(char_row, char_col, FALSE))
-	prt_map();
-/* Move the light source		   */
-    move_light(char_row, char_col, char_row, char_col);
-/* A room of light should be lit.	 */
-    if (c_ptr->fval == LIGHT_FLOOR) {
-	if ((py.flags.blind < 1) && !c_ptr->pl)
-	    light_room(char_row, char_col);
-    }
-/* In doorway of light-room?		   */
-    else if (c_ptr->lr && (py.flags.blind < 1)) {
-	for (i = (char_row - 1); i <= (char_row + 1); i++)
-	    for (j = (char_col - 1); j <= (char_col + 1); j++) {
-		d_ptr = &cave[i][j];
-		if ((d_ptr->fval == LIGHT_FLOOR) && !d_ptr->pl)
-		    light_room(i, j);
-	    }
-    }
-}

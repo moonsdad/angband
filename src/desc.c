@@ -13,29 +13,136 @@
 #include "angband.h"
 
 
+/* Following are arrays for descriptive pieces
+ *
+ * Color adjectives and colors, for potions.
+ * Hack -- The first three are hard-coded for slime mold juice,
+ * apple juice, and water, so do not scramble them.
+ */
+
+cptr colors[MAX_COLORS] = {
+
+    "Icky Green", "Light Brown", "Clear","Azure","Blue",
+    "Blue Speckled","Black","Brown","Brown Speckled","Bubbling",
+    "Chartreuse","Cloudy","Copper Speckled","Crimson","Cyan",
+    "Dark Blue","Dark Green","Dark Red","Gold Speckled","Green",
+    "Green Speckled","Grey","Grey Speckled","Hazy","Indigo",
+    "Light Blue","Light Green","Magenta","Metallic Blue","Metallic Red",
+    "Metallic Green","Metallic Purple","Misty","Orange","Orange Speckled",
+    "Pink","Pink Speckled","Puce","Purple","Purple Speckled",
+    "Red","Red Speckled","Silver Speckled","Smoky","Tangerine",
+    "Violet","Vermilion","White","Yellow", "Purple Speckled",
+    "Pungent","Clotted Red","Viscous Pink","Oily Yellow","Gloopy Green",
+    "Shimmering","Coagulated Crimson"
+};
+
+
+
+/*
+ * Color adjectives and colors, for mushrooms and molds
+ */
+
+cptr mushrooms[MAX_MUSH] = {
+    "Blue","Black","Black Spotted","Brown","Dark Blue",
+    "Dark Green","Dark Red","Ecru","Furry","Green",
+    "Grey","Light Blue","Light Green","Plaid","Red",
+    "Slimy","Tan","White","White Spotted","Wooden",
+    "Wrinkled",/*"Yellow","Shaggy","Red Spotted","Pale Blue","Dark Orange"*/
+};
+
+
+/*
+ * Wood adjectives and colors, for staffs
+ */
+
+cptr woods[MAX_WOODS] = {
+    "Aspen","Balsa","Banyan","Birch","Cedar",
+    "Cottonwood","Cypress","Dogwood","Elm","Eucalyptus",
+    "Hemlock","Hickory","Ironwood","Locust","Mahogany",
+    "Maple","Mulberry","Oak","Pine","Redwood",
+    "Rosewood","Spruce","Sycamore","Teak","Walnut",
+    "Mistletoe","Hawthorn","Bamboo","Silver","Runed",
+    "Golden","Ashen"/*,"Gnarled","Ivory","Decorative","Willow"*/
+};
+
+
+/*
+ * Metal adjectives and colors, for wands
+ */
+
+cptr metals[MAX_METALS] = {
+    "Aluminum","Cast Iron","Chromium","Copper","Gold",
+    "Iron","Magnesium","Molybdenum","Nickel","Rusty",
+    "Silver","Steel","Tin","Titanium","Tungsten",
+    "Zirconium","Zinc","Aluminum-Plated","Copper-Plated","Gold-Plated",
+    "Nickel-Plated","Silver-Plated","Steel-Plated","Tin-Plated","Zinc-Plated",
+    "Mithril-Plated","Mithril","Runed","Bronze","Brass",
+    "Platinum","Lead"/*,"Lead-Plated","Ivory","Pewter"*/
+};
+
+
+/*
+ * Rock adjectives and colors, for rings
+ */
+
+cptr rocks[MAX_ROCKS] = {
+    "Alexandrite","Amethyst","Aquamarine","Azurite","Beryl",
+    "Bloodstone","Calcite","Carnelian","Corundum","Diamond",
+    "Emerald","Fluorite","Garnet","Granite","Jade",
+    "Jasper","Lapis Lazuli","Malachite","Marble","Moonstone",
+    "Onyx","Opal","Pearl","Quartz","Quartzite",
+    "Rhodonite","Ruby","Sapphire","Tiger Eye","Topaz",
+    "Turquoise","Zircon","Platinum","Bronze","Gold",
+    "Obsidian","Silver","Tortoise Shell","Mithril","Jet",
+    "Engagement","Adamantite"
+};
+
+
+/*
+ * Amulet adjectives and colors, for amulets
+ */
+
+cptr amulets[MAX_AMULETS] = {
+    "Amber","Driftwood","Coral","Agate","Ivory",
+    "Obsidian","Bone","Brass","Bronze","Pewter",
+    "Tortoise Shell","Golden","Azure","Crystal","Silver",
+    "Copper"
+};
+
+
+/*
+ * Syllables for scrolls
+ */
+
+cptr syllables[MAX_SYLLABLES] = {
+  "a","ab","ag","aks","ala","an","ankh","app",
+  "arg","arze","ash","aus","ban","bar","bat","bek",
+  "bie","bin","bit","bjor","blu","bot","bu",
+  "byt","comp","con","cos","cre","dalf","dan",
+  "den","der","doe","dok","eep","el","eng","er","ere","erk",
+  "esh","evs","fa","fid","flit","for","fri","fu","gan",
+  "gar","glen","gop","gre","ha","he","hyd","i",
+  "ing","ion","ip","ish","it","ite","iv","jo",
+  "kho","kli","klis","la","lech","man","mar",
+  "me","mi","mic","mik","mon","mung","mur","nag","nej",
+  "nelg","nep","ner","nes","nis","nih","nin","o",
+  "od","ood","org","orn","ox","oxy","pay","pet",
+  "ple","plu","po","pot","prok","re","rea","rhov",
+  "ri","ro","rog","rok","rol","sa","san","sat",
+  "see","sef","seh","shu","ski","sna","sne","snik",
+  "sno","so","sol","sri","sta","sun","ta","tab",
+  "tem","ther","ti","tox","trol","tue","turs","u",
+  "ulk","um","un","uni","ur","val","viv","vly",
+  "vom","wah","wed","werg","wex","whon","wun","x",
+  "yerg","yp","zun","tri","blaa"
+};
+
 
 char                titles[MAX_TITLES][10];
 
 /* Object descriptor routines					 */
 
-int is_a_vowel(int ch)
-{
-    switch (ch & 127) {
-      case 'a':
-      case 'e':
-      case 'i':
-      case 'o':
-      case 'u':
-      case 'A':
-      case 'E':
-      case 'I':
-      case 'O':
-      case 'U':
-	return (TRUE);
-      default:
-	return (FALSE);
-    }
-}
+
 
 /*
  * Initialize all Potions, wands, staves, scrolls, etc.	

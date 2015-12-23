@@ -350,6 +350,14 @@ int pdamroll(byte *array)
 
 
 /*
+ * Gives Max hit points					-RAK-	 
+ */
+int max_hp(byte *array)
+{
+    return ((int)(array[0]) * (int)(array[1]));
+}
+
+/*
  * Returns symbol for given row, column			-RAK-	 
  */
 unsigned char loc_symbol(int y, int x)

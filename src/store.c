@@ -100,55 +100,48 @@ static cptr comment6[5] = {
 };
 
 
-/* Lets do all prototypes correctly.... -CWS */
-#ifndef NO_LINT_ARGS
-#ifdef __STDC__
-static void prt_comment2(s32b, s32b, int);
-static void prt_comment3(s32b, s32b, int);
-static void haggle_commands(int);
-static void display_inventory(int, int);
-static void display_cost(int, int);
-static void display_store(int, int);
-static int get_store_item(int *, cptr, int, int);
-static int increase_insults(int);
-static void decrease_insults(int);
-static int haggle_insults(int);
-static int get_haggle(cptr, s32b *, int, s32b, int);
-static int receive_offer(int, cptr, s32b *, s32b, int, int, s32b, int);
-static int purchase_haggle(int, s32b *, inven_type *);
-static int sell_haggle(int, s32b *, inven_type *);
-static int store_purchase(int, int *);
-static int store_sell(int, int *);
-#else
-static void prt_comment2();
-static void prt_comment3();
-static void haggle_commands();
-static void display_inventory();
-static void display_cost();
-static void display_store();
-static int  get_store_item();
-static int  increase_insults();
-static void decrease_insults();
-static int  haggle_insults();
-static int  get_haggle();
-static int  receive_offer();
-static int  purchase_haggle();
-static int  sell_haggle();
-static int  store_purchase();
-static int  store_sell();
-#endif
-
-static void prt_comment1();
-static void prt_comment4();
-static void prt_comment5();
-static void prt_comment6();
-static void display_commands();
-static void store_prt_gold();
-#endif
 
 /*
- * Comments vary.					-RAK-	
+ * Comments vary.					-RAK-
  */
+
+
+/*
+ * Given a buffer, replace the first occurance of the string "target"
+ * with the textual form of the long integer "number"
+ */
+void insert_lnum(char *object_str,  cptr mtc_str, s32b number, int  show_sign)
+{
+    int            mlen;
+    vtype          str1, str2;
+    register char *string, *tmp_str;
+    int            flag;
+
+    flag = 1;
+    mlen = strlen(mtc_str);
+    tmp_str = object_str;
+    do {
+	string = (char *) strcmp(tmp_str, mtc_str[0]);
+	if (string == 0)
+	    flag = 0;
+	else {
+	    flag = strncmp(string, mtc_str, mlen);
+	    if (flag)
+		tmp_str = string + 1;
+	}
+    }
+    while (flag);
+    if (string) {
+	(void)strncpy(str1, object_str, (int)(string - object_str));
+	str1[(int)(string - object_str)] = '\0';
+	(void)strcpy(str2, string + mlen);
+	if ((number >= 0) && (show_sign))
+	    (void)sprintf(object_str, "%s+%ld%s", str1, (long)number, str2);
+	else
+	    (void)sprintf(object_str, "%s%ld%s", str1, (long)number, str2);
+    }
+}
+
 
 /*
  * Successful haggle.
@@ -232,7 +225,505 @@ static void prt_comment6(void)
 }
 
 
-/* Displays the set of commands				-RAK-	 */
+
+store_type store[MAX_STORES];
+
+/*
+ * Store owners have different characteristics for pricing and haggling
+ * Note: Store owners should be added in groups, one for each store    
+ */
+
+owner_type owners[MAX_OWNERS] = {
+
+{"Rincewind the Chicken  (Human)      General Store",
+	  450,	175,  108,    4,  0, 12},
+{"Mauglin the Grumpy     (Dwarf)      Armoury"	    ,
+	32000,	200,  112,    4,  5,  5},
+{"Arndal Beast-Slayer    (Half-Elf)   Weaponsmith"  ,
+	10000,	185,  110,    5,  1,  8},
+{"Ludwig the Humble      (Human)      Temple"	    ,
+	 5000,	175,  109,    6,  0, 15},
+{"Ga-nat the Greedy      (Gnome)      Alchemist"    ,
+	12000,	220,  115,    4,  4,  9},
+{"Luthien Starshine      (Elf)        Magic Shop"   ,
+	32000,	175,  110,    5,  2, 11},
+{"Durwin the Shifty      (Human)      Black Market" ,
+	32000,	250,  155,   10,  0,  5},
+{"Your home"   ,
+	    1,    1,    1,    1, 1, 1},
+
+{"Bilbo the Friendly     (Hobbit)     General Store",
+	  300,	170,  108,    5,  3, 15},
+{"Darg-Low the Grim      (Human)      Armoury"	    ,
+	10000,	190,  111,    4,  0,  9},
+{"Oglign Dragon-Slayer   (Dwarf)      Weaponsmith"  ,
+	32000,	195,  112,    4,  5,  8},
+{"Gunnar the Paladin     (Human)      Temple"	    ,
+	12000,	185,  110,    5,  0, 23},
+{"Mauser the Chemist     (Half-Elf)   Alchemist"    ,
+	10000,	190,  111,    5,  1,  8},
+{"Buggerby the Great!    (Gnome)      Magic Shop"   ,
+	20000,	215,  113,    6,  4, 10},
+{"Histor the Goblin      (Orc)        Black Market"   ,
+	32000,	250,  160,   10,  6,  5},
+{"Your sweet abode"   ,
+	    1,    1,    1,    1, 1, 1},
+
+{"Lyar-el the Comely     (Elf)        General Store",
+	  600,	165,  107,    6,  2, 18},
+{"Decado the Handsome    (Human)      Armoury",
+	25000,  200,  112,    4,  5, 10},
+{"Ithyl-Mak the Beastly  (Half-Troll) Weaponsmith"  ,
+	 6000,	210,  115,    6,  7,  8},
+{"Delilah the Pure       (Half-Elf)   Temple"	    ,
+	25000,	180,  107,    6,  1, 20},
+{"Wizzle the Chaotic     (Hobbit)     Alchemist"    ,
+	10000,	190,  110,    6,  3,  8},
+{"Inglorian the Mage     (Human?)     Magic Shop"   ,
+	32000,	200,  110,    7,  0, 10},
+{"Drago the Fair?        (Elf)        Black Market" ,
+	32000,	250,  150,   10,  2,  5},
+{"Your house"   ,
+	    1,    1,    1,    1, 1, 1}
+};
+
+
+/*
+ * Buying and selling adjustments for character race VS store
+ * owner race							
+ */
+
+byte rgold_adj[MAX_RACES][MAX_RACES] = {
+
+			/*Hum, HfE, Elf,  Hal, Gno, Dwa, HfO, HfT, Dun, HiE*/
+
+/*Human		 */	 { 100, 105, 105, 110, 113, 115, 120, 125, 100, 105},
+/*Half-Elf	 */	 { 110, 100, 100, 105, 110, 120, 125, 130, 110, 100},
+/*Elf		 */	 { 110, 105, 100, 105, 110, 120, 125, 130, 110, 100},
+/*Halfling	 */	 { 115, 110, 105,  95, 105, 110, 115, 130, 115, 105},
+/*Gnome		 */	 { 115, 115, 110, 105,  95, 110, 115, 130, 115, 110},
+/*Dwarf		 */	 { 115, 120, 120, 110, 110,  95, 125, 135, 115, 120},
+/*Half-Orc	 */	 { 115, 120, 125, 115, 115, 130, 110, 115, 115, 125},
+/*Half-Troll	 */	 { 110, 115, 115, 110, 110, 130, 110, 110, 110, 115},
+/*Dunedain 	 */	 { 100, 105, 105, 110, 113, 115, 120, 125, 100, 105},
+/*High_Elf	 */	 { 110, 105, 100, 105, 110, 120, 125, 130, 110, 100}
+
+};
+
+
+
+/*
+ * Returns the value for any given object		-RAK-
+ */
+s32b item_value(inven_type *i_ptr)
+{
+    s32b value;
+
+    /* Start with the item's known base cost */
+    value = i_ptr->cost;
+
+    /* don't purchase known cursed items */
+    if (i_ptr->ident & ID_DAMD) value = 0;
+
+		/* Weapons and armor	 */
+    else if (((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) ||
+	     ((i_ptr->tval >= TV_BOOTS) && (i_ptr->tval <= TV_SOFT_ARMOR))) {
+
+	if (!known2_p(i_ptr)) value = object_list[i_ptr->index].cost;
+
+	else if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) {
+	    if (i_ptr->tohit < 0) value = 0;
+	    else if (i_ptr->todam < 0) value = 0;
+	    else if (i_ptr->toac < 0) value = 0;
+	    else value = i_ptr->cost + (i_ptr->tohit + i_ptr->todam + i_ptr->toac) * 100;
+	}
+
+	else {
+	    if (i_ptr->toac < 0) value = 0;
+	    else value = i_ptr->cost + i_ptr->toac * 100;
+	}
+    }
+
+	else if (((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
+	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
+	if (!known2_p(i_ptr)) value = object_list[i_ptr->index].cost;
+
+	else {
+	    if (i_ptr->tohit < 0) value = 0;
+	    else if (i_ptr->todam < 0) value = 0;
+	    else if (i_ptr->toac < 0) value = 0;
+	    else
+
+	    /* use 5, because missiles generally appear in groups of 20, so
+	     * 20 * 5 == 100, which is comparable to weapon bonus above */
+		value = i_ptr->cost + (i_ptr->tohit + i_ptr->todam + i_ptr->toac) * 5;
+	}
+
+				/* Potions, Scrolls, and Food */
+    } else if ((i_ptr->tval == TV_SCROLL1) || (i_ptr->tval == TV_SCROLL2) ||
+	       (i_ptr->tval == TV_POTION1) || (i_ptr->tval == TV_POTION2)) {
+	if (!known1_p(i_ptr)) value = 20;
+
+    } else if (i_ptr->tval == TV_FOOD) {
+	if ((i_ptr->subval < (ITEM_SINGLE_STACK_MIN + MAX_MUSH))
+	    && !known1_p(i_ptr)) value = 1;
+
+				/* Rings and amulets */
+    } else if ((i_ptr->tval == TV_AMULET) || (i_ptr->tval == TV_RING)) {
+	if (!known1_p(i_ptr))
+	/* player does not know what type of ring/amulet this is */
+	    value = 45;
+
+	else if (!known2_p(i_ptr))
+	/* player knows what type of ring, but does not know whether it is
+	 * cursed or not, if refuse to buy cursed objects here, then player
+	 * can use this to 'identify' cursed objects  */
+	    value = object_list[i_ptr->index].cost;
+
+				/* Wands and staffs */
+    } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
+	if (!known1_p(i_ptr)) {
+
+	    if (i_ptr->tval == TV_WAND) value = 50;
+	    else value = 70;
+	} else if (known2_p(i_ptr))
+	    value = i_ptr->cost + (i_ptr->cost / 20) * i_ptr->p1;
+    }
+
+				/* picks and shovels */
+    else if (i_ptr->tval == TV_DIGGING) {
+	if (!known2_p(i_ptr))
+	    value = object_list[i_ptr->index].cost;
+
+	else {
+	    if (i_ptr->p1 < 0) value = 0;
+	    else {
+
+	    /* some digging tools start with non-zero p1 values, so only
+	     * multiply the plusses by 100, make sure result is positive 
+	     * no longer; have adjusted costs in treasure.c -CWS
+	     */
+		value = i_ptr->cost + i_ptr->p1;
+		if (value < 0)
+		    value = 0;
+	    }
+	}
+    }
+/* multiply value by number of items if it is a group stack item */
+    if (i_ptr->subval > ITEM_GROUP_MIN)	/* do not include torches here */
+	value = value * i_ptr->number;
+    return (value);
+}
+
+
+
+/*
+ * Asking price for an item				-RAK-
+ */
+s32b sell_price(int snum, s32b *max_sell, s32b *min_sell, inven_type *item)
+{
+    register s32b      i;
+    register store_type *s_ptr;
+
+    s_ptr = &store[snum];
+    i = item_value(item);
+
+    /* check item->cost in case it is cursed, check i in case it is damaged */
+    if ((item->cost > 0) && (i > 0)) {
+
+    /* Get the "basic value" */
+    i = i * rgold_adj[owners[s_ptr->owner].owner_race][py.misc.prace] / 100;
+
+    /* Nothing becomes free */
+    if (i < 1) i = 1;
+
+    /* Extract min/max sell values */
+    *max_sell = i * owners[s_ptr->owner].max_inflate / 100;
+    *min_sell = i * owners[s_ptr->owner].min_inflate / 100;
+
+    /* Black market is always over-priced */
+    if (snum == 6) {
+	(*max_sell) *= 2;
+	(*min_sell) *= 2;
+    }
+
+    /* Paranoia */
+    if (*min_sell > *max_sell) *min_sell = *max_sell;
+
+    /* Return the price */
+    return (i);
+    } else
+    /* don't let the item get into the store inventory */
+	return (0);
+}
+
+
+
+
+/*
+ * Check to see if he will be carrying too many objects	-RAK-	 
+ */
+int store_check_num(inven_type *t_ptr, int store_num)
+{
+    register int        store_check, i;
+    register store_type *s_ptr;
+    register inven_type *i_ptr;
+
+    store_check = FALSE;
+    s_ptr = &store[store_num];
+
+    /* Free space is always usable */
+    if (s_ptr->store_ctr < STORE_INVEN_MAX) store_check = TRUE;
+
+    /* Check all the items */
+    else if (t_ptr->subval >= ITEM_SINGLE_STACK_MIN)
+	for (i = 0; i < s_ptr->store_ctr; i++) {
+	    i_ptr = &s_ptr->store_inven[i].sitem;
+
+	/* note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
+	 * their subvals match */
+	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
+		&& ((int)i_ptr->number + (int)t_ptr->number < 256)
+		&& (t_ptr->subval < ITEM_GROUP_MIN
+		    || (i_ptr->p1 == t_ptr->p1)))
+		store_check = TRUE;
+	}
+
+/* But, wait.  If at home, don't let player drop 25th item, or he will lose it. -CFT */
+    if (is_home && (t_ptr->subval >= ITEM_SINGLE_STACK_MIN))
+	for (i = 0; i < s_ptr->store_ctr; i++) {
+	    i_ptr = &s_ptr->store_inven[i].sitem;
+	/* note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
+	 * their subvals match */
+	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
+		&& ((int)i_ptr->number + (int)t_ptr->number > 24)
+		&& (t_ptr->subval < ITEM_GROUP_MIN
+		    || (i_ptr->p1 == t_ptr->p1)))
+		store_check = FALSE;
+	}
+    return (store_check);
+}
+
+
+
+/*
+ * Add the item in INVEN_MAX to stores inventory.	-RAK-	 
+ */
+void store_carry(int store_num, int *ipos, inven_type *t_ptr)
+{
+    int                 item_num, item_val, flag;
+    register int        typ, subt;
+    s32b               icost, dummy;
+    register inven_type *i_ptr;
+    register store_type *s_ptr;
+    int stacked = FALSE; /* from inven_carry() -CFT */
+
+    *ipos = -1;
+    if (sell_price(store_num, &icost, &dummy, t_ptr) > 0 || is_home)
+    {
+	s_ptr = &store[store_num];
+	item_val = 0;
+	item_num = t_ptr->number;
+	flag = FALSE;
+	typ  = t_ptr->tval;
+	subt = t_ptr->subval;
+	if (subt >= ITEM_SINGLE_STACK_MIN) { /* try to stack in store's inven */
+	    do {
+		i_ptr = &s_ptr->store_inven[item_val].sitem;
+		if (typ == i_ptr->tval)
+		{
+		    if (subt == i_ptr->subval && /* Adds to other item        */
+			subt >= ITEM_SINGLE_STACK_MIN
+			&& (subt < ITEM_GROUP_MIN || i_ptr->p1 == t_ptr->p1))
+		    {
+			stacked = TRUE; /* remember that we did stack it... -CFT */
+			*ipos = item_val;
+			i_ptr->number += item_num;
+			/* must set new scost for group items, do this only for items
+			   strictly greater than group_min, not for torches, this
+			   must be recalculated for entire group */
+			if (subt > ITEM_GROUP_MIN)
+			{
+			    (void) sell_price (store_num, &icost, &dummy, i_ptr);
+			    s_ptr->store_inven[item_val].scost = -icost;
+			}
+			/* must let group objects (except torches) stack over 24
+			   since there may be more than 24 in the group */
+			else if (i_ptr->number > 24)
+			    i_ptr->number = 24;
+			flag = TRUE;
+		    }
+		}
+		item_val ++;
+	    } while (!stacked && (item_val < s_ptr->store_ctr));
+	} /* if might stack... -CFT */
+	if (!stacked) {		/* either never stacks, or didn't find a place to stack */
+	    item_val = 0;
+	    do {
+		i_ptr = &s_ptr->store_inven[item_val].sitem;
+		if ((typ > i_ptr->tval) || /* sort by desc tval, */
+		    ((typ == i_ptr->tval) &&
+		     ((t_ptr->level < i_ptr->level) || /* then by inc level, */
+		      ((t_ptr->level == i_ptr->level) &&
+		       (subt < i_ptr->subval))))) /* and finally by inc subval -CFT */
+		{		/* Insert into list             */
+		    insert_store(store_num, item_val, icost, t_ptr);
+		    flag = TRUE;
+		    *ipos = item_val;
+		}
+		item_val++;
+	    } while ((item_val < s_ptr->store_ctr) && (!flag));
+	} /* if didn't already stack it... */
+	if (!flag)		/* Becomes last item in list    */
+	{
+	    insert_store(store_num, (int)s_ptr->store_ctr, icost, t_ptr);
+	    *ipos = s_ptr->store_ctr - 1;
+	}
+    }
+}
+
+
+
+/*
+ * Destroy an item in the stores inventory.  Note that if	 
+ * "one_of" is false, an entire slot is destroyed	-RAK-	 
+ */
+void store_destroy(int store_num, int item_val, int one_of)
+{
+    register int         j, number;
+    register store_type *s_ptr;
+    register inven_type *i_ptr;
+
+    s_ptr = &store[store_num];
+    i_ptr = &s_ptr->store_inven[item_val].sitem;
+
+/* for single stackable objects, only destroy one half on average, this will
+ * help ensure that general store and alchemist have reasonable selection of
+ * objects 
+ */
+    if ((i_ptr->subval >= ITEM_SINGLE_STACK_MIN) &&
+	(i_ptr->subval <= ITEM_SINGLE_STACK_MAX)) {
+	if (one_of)
+	    number = 1;
+	else
+	    number = randint((int)i_ptr->number);
+    } else
+	number = i_ptr->number;
+
+    if (number != i_ptr->number)
+	i_ptr->number -= number;
+    else {
+	for (j = item_val; j < s_ptr->store_ctr - 1; j++)
+	    s_ptr->store_inven[j] = s_ptr->store_inven[j + 1];
+	invcopy(&s_ptr->store_inven[s_ptr->store_ctr - 1].sitem, OBJ_NOTHING);
+	s_ptr->store_inven[s_ptr->store_ctr - 1].scost = 0;
+	s_ptr->store_ctr--;
+    }
+}
+
+
+/* Creates an item and inserts it into store's inven	-RAK-	 */
+static void store_create(int store_num)
+{
+    register int         i, tries;
+    int                  cur_pos, dummy;
+    register store_type *s_ptr;
+    register inven_type *t_ptr;
+
+    tries = 0;
+    cur_pos = popt();
+    s_ptr = &store[store_num];
+    object_level = OBJ_TOWN_LEVEL;
+    do {
+	if (store_num != 6) {
+	    i = store_choice[store_num][randint(STORE_CHOICES) - 1];
+	    invcopy(&t_list[cur_pos], i);
+	    magic_treasure(cur_pos, OBJ_TOWN_LEVEL, FALSE, TRUE);
+	    t_ptr = &t_list[cur_pos];
+	    if (store_check_num(t_ptr, store_num)) {
+		if ((t_ptr->cost > 0) &&	/* Item must be good	 */
+		    (t_ptr->cost < owners[s_ptr->owner].max_cost)) {
+
+/* equivalent to calling ident_spell(), except will not change the object_ident array */
+		    store_bought(t_ptr);
+		    special_offer(t_ptr);
+		    store_carry(store_num, &dummy, t_ptr);
+		    tries = 10;
+		}
+	    }
+	    tries++;
+	} else {
+	    i = get_obj_num(40, FALSE);
+	    invcopy(&t_list[cur_pos], i);
+	    magic_treasure(cur_pos, 40, FALSE, TRUE);
+	    t_ptr = &t_list[cur_pos];
+	    if (store_check_num(t_ptr, store_num)) {
+		if (t_ptr->cost > 0) {	/* Item must be good	 */
+		/*
+		 * equivalent to calling ident_spell(), except will not
+		 * change the object_ident array 
+		 */
+		    store_bought(t_ptr);
+		    special_offer(t_ptr);
+		    store_carry(store_num, &dummy, t_ptr);
+		    tries = 10;
+		}
+	    }
+	    tries++;
+	}
+    }
+    while (tries <= 3);
+    pusht(cur_pos);
+}
+
+
+
+/*
+ * eliminate need to bargain if player has haggled well in the past   -DJB-
+ */
+int noneedtobargain(int store_num, s32b minprice)
+{
+    register int         flagnoneed;
+    register store_type *s_ptr;
+
+    /* Allow haggling to be turned off */
+    if (no_haggle_flag) return (TRUE);
+
+    s_ptr = &store[store_num];
+    flagnoneed = ((s_ptr->good_buy == MAX_SHORT)
+		  || ((s_ptr->good_buy - 3 * s_ptr->bad_buy) > (5 + (minprice/50))));
+
+    /* Return the flag */
+    return (flagnoneed);
+}
+
+
+/*
+ * update the bargain info					-DJB- 
+ */
+void updatebargain(int store_num, s32b price, s32b minprice)
+{
+    register store_type *s_ptr;
+
+    s_ptr = &store[store_num];
+    if (minprice > 9)
+	if (price == minprice) {
+	    if (s_ptr->good_buy < MAX_SHORT)
+		s_ptr->good_buy++;
+	}
+
+	else {
+	    if (s_ptr->bad_buy < MAX_SHORT) {
+		s_ptr->bad_buy++;
+	}
+	}
+}
+
+
+
+/*
+ * Displays the set of commands				-RAK-
+ */
 static void display_commands(void)
 {
     prt("You may:", 20, 0);
@@ -251,20 +742,25 @@ static void display_commands(void)
 
 
 /*
- * Displays the set of commands				-RAK-	
+ * Displays the set of commands				-RAK-	 
  */
 static void haggle_commands(int typ)
 {
-    if (typ == -1)
+    if (typ == -1) {
 	prt("Specify an asking-price in gold pieces.", 21, 0);
-    else
+    }
+    else {
 	prt("Specify an offer in gold pieces.", 21, 0);
+    }
+
     prt("ESC) Quit Haggling.", 22, 0);
     erase_line(23, 0);		   /* clear last line */
 }
 
-/* 
- * Displays a store's inventory				-RAK-	
+
+
+/*
+ * Displays a store's inventory				-RAK-
  */
 static void display_inventory(int store_num, int start)
 {
@@ -342,9 +838,9 @@ static void display_cost(int store_num, int pos)
 
 
 /*
- * Displays players gold					-RAK-	
+ * Displays players gold					-RAK-	 
  */
-static void store_prt_gold()
+static void store_prt_gold(void)
 {
     vtype out_val;
 
@@ -354,14 +850,15 @@ static void store_prt_gold()
 
 
 /*
- * Displays store					-RAK-	 
+ * Displays store (after clearing screen)		-RAK-	 
  */
 static void display_store(int store_num, int cur_top)
 {
-    register store_type *s_ptr;
+    register store_type *s_ptr = &store[store_num];
 
-    s_ptr = &store[store_num];
+    /* Erase the screen */
     clear_screen();
+
     put_buffer(owners[s_ptr->owner].owner_name, 3, 9);
     put_buffer("Item", 4, 3);
     if (!is_home) {
@@ -377,7 +874,7 @@ static void display_store(int store_num, int cur_top)
 /*
  * Get the ID of a store item and return it's value	-RAK-	 
  */
-static int get_store_item(int *com_val, cptr pmt, register int i, register int j)
+static int get_store_item(int *com_val, cptr pmt, int i, int j)
 {
     char         command;
     vtype        out_val;
@@ -416,8 +913,8 @@ static int get_store_item(int *com_val, cptr pmt, register int i, register int j
  */
 static int increase_insults(int store_num)
 {
-    register int         increase;
-    register store_type *s_ptr;
+    int         increase;
+    store_type *s_ptr;
 
     increase = FALSE;
     s_ptr = &store[store_num];
@@ -452,17 +949,15 @@ static void decrease_insults(int store_num)
  */
 static int haggle_insults(int store_num)
 {
-    register int haggle = FALSE;
     /* Increase insults */
-    if (increase_insults(store_num)) haggle = TRUE;
-    else {
+    if (increase_insults(store_num)) return (TRUE);
+
     /* Display and flush insult */
     prt_comment5();
     msg_print(NULL);
-    }
 
     /* Still okay */
-    return (haggle);
+    return (FALSE);
 }
 
 
@@ -515,11 +1010,11 @@ static int get_haggle(cptr comment, s32b *new_offer,
 	    i = 0;
 	}
 
-	if (last_inc && !i && !final)
-	    i = last_inc, inc = TRUE;
-	else if (!i)
-	    i = price;
+	if (last_inc && !i && !final) i = last_inc, inc = TRUE;
+
+	else if (!i) i = price;
     } while (flag && !i);
+
     if (flag) {
 	for (p = out_val; *p == ' '; p++);
 	if (*p == '+' || *p == '-')  *new_offer += i, last_inc = i;
@@ -1296,180 +1791,6 @@ void enter_store(int store_num)
 }
 
 
-/* Returns the value for any given object		-RAK-	 */
-s32b item_value(register inven_type *i_ptr)
-{
-    register s32b      value;
-
-    value = i_ptr->cost;
-/* don't purchase known cursed items */
-    if (i_ptr->ident & ID_DAMD)
-	value = 0;
-		/* Weapons and armor	 */
-    else if (((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) ||
-	     ((i_ptr->tval >= TV_BOOTS) && (i_ptr->tval <= TV_SOFT_ARMOR))) {
-	if (!known2_p(i_ptr))
-	    value = object_list[i_ptr->index].cost;
-	else if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) {
-	    if (i_ptr->tohit < 0)
-		value = 0;
-	    else if (i_ptr->todam < 0)
-		value = 0;
-	    else if (i_ptr->toac < 0)
-		value = 0;
-	    else
-		value = i_ptr->cost + (i_ptr->tohit + i_ptr->todam + i_ptr->toac) * 100;
-	} else {
-	    if (i_ptr->toac < 0)
-		value = 0;
-	    else
-		value = i_ptr->cost + i_ptr->toac * 100;
-	}
-    } else if (((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
-	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
-	if (!known2_p(i_ptr))
-	    value = object_list[i_ptr->index].cost;
-	else {
-	    if (i_ptr->tohit < 0)
-		value = 0;
-	    else if (i_ptr->todam < 0)
-		value = 0;
-	    else if (i_ptr->toac < 0)
-		value = 0;
-	    else
-
-	    /* use 5, because missiles generally appear in groups of 20, so
-	     * 20 * 5 == 100, which is comparable to weapon bonus above 
-	     */
-		value = i_ptr->cost + (i_ptr->tohit + i_ptr->todam + i_ptr->toac) * 5;
-	}
-				/* Potions, Scrolls, and Food */
-    } else if ((i_ptr->tval == TV_SCROLL1) || (i_ptr->tval == TV_SCROLL2) ||
-	       (i_ptr->tval == TV_POTION1) || (i_ptr->tval == TV_POTION2)) {
-	if (!known1_p(i_ptr))
-	    value = 20;
-    } else if (i_ptr->tval == TV_FOOD) {
-	if ((i_ptr->subval < (ITEM_SINGLE_STACK_MIN + MAX_MUSH))
-	    && !known1_p(i_ptr))
-	    value = 1;
-				/* Rings and amulets */
-    } else if ((i_ptr->tval == TV_AMULET) || (i_ptr->tval == TV_RING)) {
-	if (!known1_p(i_ptr))
-	/* player does not know what type of ring/amulet this is */
-	    value = 45;
-	else if (!known2_p(i_ptr))
-	/* player knows what type of ring, but does not know whether it is
-	 * cursed or not, if refuse to buy cursed objects here, then player
-	 * can use this to 'identify' cursed objects 
-	 */
-	    value = object_list[i_ptr->index].cost;
-				/* Wands and staffs */
-    } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
-	if (!known1_p(i_ptr)) {
-
-	    if (i_ptr->tval == TV_WAND)
-		value = 50;
-	    else
-		value = 70;
-	} else if (known2_p(i_ptr))
-	    value = i_ptr->cost + (i_ptr->cost / 20) * i_ptr->p1;
-    }
-				/* picks and shovels */
-    else if (i_ptr->tval == TV_DIGGING) {
-	if (!known2_p(i_ptr))
-	    value = object_list[i_ptr->index].cost;
-	else {
-	    if (i_ptr->p1 < 0)
-		value = 0;
-	    else {
-
-	    /* some digging tools start with non-zero p1 values, so only
-	     * multiply the plusses by 100, make sure result is positive 
-	     * no longer; have adjusted costs in treasure.c -CWS
-	     */
-		value = i_ptr->cost + i_ptr->p1;
-		if (value < 0)
-		    value = 0;
-	    }
-	}
-    }
-/* multiply value by number of items if it is a group stack item */
-    if (i_ptr->subval > ITEM_GROUP_MIN)	/* do not include torches here */
-	value = value * i_ptr->number;
-    return (value);
-}
-
-
-/* Asking price for an item				-RAK-	 */
-s32b sell_price(int snum, s32b *max_sell, s32b *min_sell, inven_type *item)
-{
-    register s32b      i;
-    register store_type *s_ptr;
-
-    s_ptr = &store[snum];
-    i = item_value(item);
-/* check item->cost in case it is cursed, check i in case it is damaged */
-    if ((item->cost > 0) && (i > 0)) {
-	i = i * rgold_adj[owners[s_ptr->owner].owner_race][py.misc.prace] / 100;
-	if (i < 1)
-	    i = 1;
-	*max_sell = i * owners[s_ptr->owner].max_inflate / 100;
-	*min_sell = i * owners[s_ptr->owner].min_inflate / 100;
-	if (snum == 6) {
-	    (*max_sell) *= 2;
-	    (*min_sell) *= 2;
-	}
-	if (*min_sell > *max_sell)
-	    *min_sell = *max_sell;
-	return (i);
-    } else
-    /* don't let the item get into the store inventory */
-	return (0);
-}
-
-
-/* Check to see if he will be carrying too many objects	-RAK-	 */
-int store_check_num(inven_type *t_ptr, int store_num)
-{
-    register int        store_check, i;
-    register store_type *s_ptr;
-    register inven_type *i_ptr;
-
-    store_check = FALSE;
-    s_ptr = &store[store_num];
-    if (s_ptr->store_ctr < STORE_INVEN_MAX)
-	store_check = TRUE;
-    else if (t_ptr->subval >= ITEM_SINGLE_STACK_MIN)
-	for (i = 0; i < s_ptr->store_ctr; i++) {
-	    i_ptr = &s_ptr->store_inven[i].sitem;
-
-	/* note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
-	 * their subvals match 
-	 */
-	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
-		&& ((int)i_ptr->number + (int)t_ptr->number < 256)
-		&& (t_ptr->subval < ITEM_GROUP_MIN
-		    || (i_ptr->p1 == t_ptr->p1)))
-		store_check = TRUE;
-	}
-
-/* But, wait.  If at home, don't let player drop 25th item, or he will lose it. -CFT */
-    if (is_home && (t_ptr->subval >= ITEM_SINGLE_STACK_MIN))
-	for (i = 0; i < s_ptr->store_ctr; i++) {
-	    i_ptr = &s_ptr->store_inven[i].sitem;
-	/*
-	 * note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
-	 * their subvals match 
-	 */
-	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
-		&& ((int)i_ptr->number + (int)t_ptr->number > 24)
-		&& (t_ptr->subval < ITEM_GROUP_MIN
-		    || (i_ptr->p1 == t_ptr->p1)))
-		store_check = FALSE;
-	}
-    return (store_check);
-}
-
 
 /* Insert INVEN_MAX at given location	 */
 static void insert_store(int store_num, register int pos, s32b icost, inven_type *i_ptr)
@@ -1486,193 +1807,6 @@ static void insert_store(int store_num, register int pos, s32b icost, inven_type
 }
 
 
-/* Add the item in INVEN_MAX to stores inventory.	-RAK-	 */
-void store_carry(int store_num, int *ipos, inven_type *t_ptr)
-{
-    int                 item_num, item_val, flag;
-    register int        typ, subt;
-    s32b               icost, dummy;
-    register inven_type *i_ptr;
-    register store_type *s_ptr;
-    int stacked = FALSE; /* from inven_carry() -CFT */
-
-    *ipos = -1;
-    if (sell_price(store_num, &icost, &dummy, t_ptr) > 0 || is_home)
-    {
-	s_ptr = &store[store_num];
-	item_val = 0;
-	item_num = t_ptr->number;
-	flag = FALSE;
-	typ  = t_ptr->tval;
-	subt = t_ptr->subval;
-	if (subt >= ITEM_SINGLE_STACK_MIN) { /* try to stack in store's inven */
-	    do {
-		i_ptr = &s_ptr->store_inven[item_val].sitem;
-		if (typ == i_ptr->tval)
-		{
-		    if (subt == i_ptr->subval && /* Adds to other item        */
-			subt >= ITEM_SINGLE_STACK_MIN
-			&& (subt < ITEM_GROUP_MIN || i_ptr->p1 == t_ptr->p1))
-		    {
-			stacked = TRUE; /* remember that we did stack it... -CFT */
-			*ipos = item_val;
-			i_ptr->number += item_num;
-			/* must set new scost for group items, do this only for items
-			   strictly greater than group_min, not for torches, this
-			   must be recalculated for entire group */
-			if (subt > ITEM_GROUP_MIN)
-			{
-			    (void) sell_price (store_num, &icost, &dummy, i_ptr);
-			    s_ptr->store_inven[item_val].scost = -icost;
-			}
-			/* must let group objects (except torches) stack over 24
-			   since there may be more than 24 in the group */
-			else if (i_ptr->number > 24)
-			    i_ptr->number = 24;
-			flag = TRUE;
-		    }
-		}
-		item_val ++;
-	    } while (!stacked && (item_val < s_ptr->store_ctr));
-	} /* if might stack... -CFT */
-	if (!stacked) {		/* either never stacks, or didn't find a place to stack */
-	    item_val = 0;
-	    do {
-		i_ptr = &s_ptr->store_inven[item_val].sitem;
-		if ((typ > i_ptr->tval) || /* sort by desc tval, */
-		    ((typ == i_ptr->tval) &&
-		     ((t_ptr->level < i_ptr->level) || /* then by inc level, */
-		      ((t_ptr->level == i_ptr->level) &&
-		       (subt < i_ptr->subval))))) /* and finally by inc subval -CFT */
-		{		/* Insert into list             */
-		    insert_store(store_num, item_val, icost, t_ptr);
-		    flag = TRUE;
-		    *ipos = item_val;
-		}
-		item_val++;
-	    } while ((item_val < s_ptr->store_ctr) && (!flag));
-	} /* if didn't already stack it... */
-	if (!flag)		/* Becomes last item in list    */
-	{
-	    insert_store(store_num, (int)s_ptr->store_ctr, icost, t_ptr);
-	    *ipos = s_ptr->store_ctr - 1;
-	}
-    }
-}
-
-
-/* Destroy an item in the stores inventory.  Note that if	 */
-/* "one_of" is false, an entire slot is destroyed	-RAK-	 */
-void store_destroy(int store_num, int item_val, int one_of)
-{
-    register int         j, number;
-    register store_type *s_ptr;
-    register inven_type *i_ptr;
-
-    s_ptr = &store[store_num];
-    i_ptr = &s_ptr->store_inven[item_val].sitem;
-
-/* for single stackable objects, only destroy one half on average, this will
- * help ensure that general store and alchemist have reasonable selection of
- * objects 
- */
-    if ((i_ptr->subval >= ITEM_SINGLE_STACK_MIN) &&
-	(i_ptr->subval <= ITEM_SINGLE_STACK_MAX)) {
-	if (one_of)
-	    number = 1;
-	else
-	    number = randint((int)i_ptr->number);
-    } else
-	number = i_ptr->number;
-
-    if (number != i_ptr->number)
-	i_ptr->number -= number;
-    else {
-	for (j = item_val; j < s_ptr->store_ctr - 1; j++)
-	    s_ptr->store_inven[j] = s_ptr->store_inven[j + 1];
-	invcopy(&s_ptr->store_inven[s_ptr->store_ctr - 1].sitem, OBJ_NOTHING);
-	s_ptr->store_inven[s_ptr->store_ctr - 1].scost = 0;
-	s_ptr->store_ctr--;
-    }
-}
-
-
-/* Initializes the stores with owners			-RAK-	 */
-void store_init()
-{
-    register int         i, j, k;
-    register store_type *s_ptr;
-
-    i = MAX_OWNERS / MAX_STORES;
-    for (j = 0; j < MAX_STORES; j++) {
-	s_ptr = &store[j];
-	s_ptr->owner = MAX_STORES * (randint(i) - 1) + j;
-	s_ptr->insult_cur = 0;
-	s_ptr->store_open = 0;
-	s_ptr->store_ctr = 0;
-	s_ptr->good_buy = 0;
-	s_ptr->bad_buy = 0;
-	for (k = 0; k < STORE_INVEN_MAX; k++) {
-	    invcopy(&s_ptr->store_inven[k].sitem, OBJ_NOTHING);
-	    s_ptr->store_inven[k].scost = 0;
-	}
-    }
-}
-
-
-/* Creates an item and inserts it into store's inven	-RAK-	 */
-static void store_create(int store_num)
-{
-    register int         i, tries;
-    int                  cur_pos, dummy;
-    register store_type *s_ptr;
-    register inven_type *t_ptr;
-
-    tries = 0;
-    cur_pos = popt();
-    s_ptr = &store[store_num];
-    object_level = OBJ_TOWN_LEVEL;
-    do {
-	if (store_num != 6) {
-	    i = store_choice[store_num][randint(STORE_CHOICES) - 1];
-	    invcopy(&t_list[cur_pos], i);
-	    magic_treasure(cur_pos, OBJ_TOWN_LEVEL, FALSE, TRUE);
-	    t_ptr = &t_list[cur_pos];
-	    if (store_check_num(t_ptr, store_num)) {
-		if ((t_ptr->cost > 0) &&	/* Item must be good	 */
-		    (t_ptr->cost < owners[s_ptr->owner].max_cost)) {
-
-/* equivalent to calling ident_spell(), except will not change the object_ident array */
-		    store_bought(t_ptr);
-		    special_offer(t_ptr);
-		    store_carry(store_num, &dummy, t_ptr);
-		    tries = 10;
-		}
-	    }
-	    tries++;
-	} else {
-	    i = get_obj_num(40, FALSE);
-	    invcopy(&t_list[cur_pos], i);
-	    magic_treasure(cur_pos, 40, FALSE, TRUE);
-	    t_ptr = &t_list[cur_pos];
-	    if (store_check_num(t_ptr, store_num)) {
-		if (t_ptr->cost > 0) {	/* Item must be good	 */
-		/*
-		 * equivalent to calling ident_spell(), except will not
-		 * change the object_ident array 
-		 */
-		    store_bought(t_ptr);
-		    special_offer(t_ptr);
-		    store_carry(store_num, &dummy, t_ptr);
-		    tries = 10;
-		}
-	    }
-	    tries++;
-	}
-    }
-    while (tries <= 3);
-    pusht(cur_pos);
-}
 
 static void special_offer(inven_type *i_ptr)
 {
@@ -1721,51 +1855,59 @@ void store_maint(void)
 	/* Activate that store */
 	s_ptr = &store[i];
 	s_ptr->insult_cur = 0;
+
 	if (s_ptr->store_ctr >= STORE_MIN_INVEN) {
+
 	    j = randint(STORE_TURN_AROUND);
+
 	    if (s_ptr->store_ctr >= STORE_MAX_INVEN)
 		j += 1 + s_ptr->store_ctr - STORE_MAX_INVEN;
+
 	    while (--j >= 0)
 		store_destroy(i, randint((int)s_ptr->store_ctr) - 1, FALSE);
 	}
+
 	if (s_ptr->store_ctr <= STORE_MAX_INVEN) {
 	    j = randint(STORE_TURN_AROUND);
+
 	    if (s_ptr->store_ctr < STORE_MIN_INVEN)
 		j += STORE_MIN_INVEN - s_ptr->store_ctr;
-	    while (--j >= 0)
-		store_create(i);
+
+	    while (--j >= 0) store_create(i);
 	}
     }
 }
 
-/* eliminate need to bargain if player has haggled well in the past   -DJB- */
-int noneedtobargain(int store_num, s32b minprice)
+
+/*
+ * Initialize the stores with owners			-RAK-
+ */
+void store_init(void)
 {
-    register int         flagnoneed;
+    register int         i, j, k;
     register store_type *s_ptr;
 
-    if (no_haggle_flag)
-	return (TRUE);
+    i = MAX_OWNERS / MAX_STORES;
 
-    s_ptr = &store[store_num];
-    flagnoneed = ((s_ptr->good_buy == MAX_SHORT)
-		  || ((s_ptr->good_buy - 3 * s_ptr->bad_buy) > (5 + (minprice/50))));
-    return (flagnoneed);
-}
+    /* Build each store */
+    for (j = 0; j < MAX_STORES; j++) {
+	s_ptr = &store[j];
 
+	/* Pick an owner */
+	s_ptr->owner = MAX_STORES * (randint(i) - 1) + j;
 
-/* update the bargin info					-DJB- */
-void updatebargain(int store_num, s32b price, s32b minprice)
-{
-    register store_type *s_ptr;
+	/* Initialize the store */
+	s_ptr->insult_cur = 0;
+	s_ptr->store_open = 0;
+	s_ptr->store_ctr = 0;
+	s_ptr->good_buy = 0;
+	s_ptr->bad_buy = 0;
 
-    s_ptr = &store[store_num];
-    if (minprice > 9)
-	if (price == minprice) {
-	    if (s_ptr->good_buy < MAX_SHORT)
-		s_ptr->good_buy++;
-	} else {
-	    if (s_ptr->bad_buy < MAX_SHORT)
-		s_ptr->bad_buy++;
+	/* No items yet */
+	for (k = 0; k < STORE_INVEN_MAX; k++) {
+	    invcopy(&s_ptr->store_inven[k].sitem, OBJ_NOTHING);
+	    s_ptr->store_inven[k].scost = 0;
 	}
+    }
 }
+

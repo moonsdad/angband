@@ -1040,14 +1040,20 @@ void disarm_trap()
 	    (void)sprintf(out_val, "%s is in your way!", m_name);
 	    msg_print(out_val);
 	} else if (c_ptr->tptr != 0) {
+
 	    tot = py.misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
 		+ (class_level_adj[py.misc.pclass][CLA_DISARM] * py.misc.lev / 3);
-	    if ((py.flags.blind > 0) || (no_light()))
+
+	    if ((py.flags.blind > 0) || (no_light())) {
 		tot = tot / 10;
-	    if (py.flags.confused > 0)
+	    }
+	    if (py.flags.confused > 0) {
 		tot = tot / 10;
-	    if (py.flags.image > 0)
+	    }
+	    if (py.flags.image > 0) {
 		tot = tot / 10;
+	    }
+
 	    i_ptr = &t_list[c_ptr->tptr];
 	    i = i_ptr->tval;
 	    level = i_ptr->level;
@@ -1268,5 +1274,54 @@ void rest(void)
     }
 }
 
+
+
+
+/*
+ * Replace any existing comment in an object description with a new one. CJS
+ */
+void inscribe(inven_type *i_ptr, cptr str)
+{
+    (void)strcpy(i_ptr->inscrip, str);
+}
+
+
+/*
+ * Append an additional comment to an object description.		-CJS- 
+ */
+void add_inscribe(inven_type *i_ptr, int type)
+{
+    i_ptr->ident |= (byte) type;
+}
+
+
+/*
+ * Add a comment to an object description.		-CJS-
+ */
+void scribe_object(void)
+{
+    int   item_val, j;
+    vtype out_val, tmp_str;
+
+    if (inven_ctr > 0 || equip_ctr > 0) {
+	if (get_item(&item_val, "Which one? ", 0, INVEN_ARRAY_SIZE, 0)) {
+	    objdes(tmp_str, &inventory[item_val], TRUE);
+	    (void)sprintf(out_val, "Inscribing %s.", tmp_str);
+	    msg_print(out_val);
+	    if (inventory[item_val].inscrip[0] != '\0')
+		(void)sprintf(out_val, "Replace \"%s\" with the inscription: ",
+			      inventory[item_val].inscrip);
+	    else
+		(void)strcpy(out_val, "Inscription: ");
+	    j = 78 - strlen(tmp_str);
+	    if (j > 12)
+		j = 12;
+	    prt(out_val, 0, 0);
+	    if (get_string(out_val, 0, strlen(out_val), j))
+		inscribe(&inventory[item_val], out_val);
+	}
+    } else
+	msg_print("You are not carrying anything to inscribe.");
+}
 
 
