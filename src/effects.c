@@ -921,18 +921,22 @@ void quaff(void)
     }
 }
 
-/* 
+
+
+
+/*
  * Scrolls for the reading -RAK-
  */
 void read_scroll(void)
 {
     u32b                i;
-    int                   j, k, item_val, y, x;
-    int                   tmp[6], used_up;
-    bigvtype              out_val, tmp_str;
-    register int          ident, l;
+    int                   item_val, y, x;
+    int			  j, k;
+    int                   used_up, ident, l;
+    int                   tmp[6];
     register inven_type  *i_ptr;
     register struct misc *m_ptr;
+    bigvtype              out_val, tmp_str;
 
     free_turn_flag = TRUE;
 
@@ -2091,6 +2095,10 @@ static int direction(int *dir)
     return 0;
 }
 
+
+
+
+
 /*
  * Activate (zap) a Rod
  */
@@ -2414,6 +2422,939 @@ void activate_rod(void)
 	    msg_print("The rod is currently exhausted.");
 	}
     }
+}
+
+
+static void activate(void)
+{
+    int          i, a, flag, first, num, j, redraw, dir, test = FALSE;
+    char         out_str[200], tmp[200], tmp2[200], choice;
+    inven_type  *i_ptr;
+    struct misc *m_ptr;
+
+    flag = FALSE;
+    redraw = FALSE;
+    num = 0;
+    first = 0;
+    for (i = 22; i < (INVEN_ARRAY_SIZE - 1); i++) {
+	if ((inventory[i].flags2 & TR_ACTIVATE) && (known2_p(&(inventory[i])))) {
+	    num++;
+	    if (!flag)
+		first = i;
+	    flag = TRUE;
+	}
+    }
+
+    /* Nothing found */
+    
+    if (!flag) {
+	msg_print("You are not wearing/wielding anything that can be activated.");
+	free_turn_flag = TRUE;
+	return;
+    }
+    sprintf(out_str, "Activate which item? (%c-%c, * to list, ESC to exit) ?",
+	    'a', 'a' + (num - 1));
+    flag = FALSE;
+    while (!flag){
+	if (!get_com(out_str, &choice))  /* on escape, get_com returns false: */
+	    choice = '\033';             /* so it's set here to ESC.  Wierd huh? -CFT */
+
+	if ((choice=='*') && !redraw) {  /* don't save screen again if it's already
+					  * listed, OW it doesn't clear -CFT */
+	    save_screen();
+	    j=0;
+	    if (!redraw) {
+		for (i = first; i < (INVEN_ARRAY_SIZE - 1); i++) {
+		    if ((inventory[i].flags2 & TR_ACTIVATE) &&
+			known2_p(&(inventory[i]))) {
+			objdes(tmp2, &inventory[i], TRUE);
+			sprintf(tmp, "%c) %-61s", 'a' + j, tmp2);
+			erase_line(1 + j, 13);
+/* we display at 15, but erase from 13 to give a couple of spaces,
+ * so it looks tidy.  -CFT */
+
+			sprintf(tmp, "%c) %-40s", 'a' + j, tmp2);
+			prt(tmp, 1 + j, 15);
+/* No need to check for bottom of screen, since only have 11 items in equip,
+ * so will never reach bottom... -CFT */
+			j++;
+		    }
+		}
+		redraw = TRUE;
+		continue;
+	    }
+	} else {
+	    if (choice >= 'A' && choice <= ('A' + (num - 1))) {
+		choice -= 'A';
+		test = TRUE; /* test to see if he means it */
+	    }
+	    else if (choice >= 'a' && choice <= ('a' + (num - 1)))
+		choice -= 'a';
+	    else if (choice == '\033') {
+		if (redraw) {
+		    restore_screen();
+		    redraw = FALSE;
+		}
+		free_turn_flag = TRUE;
+		break;
+	    } else {
+		bell();
+		continue;	   /* try another letter */
+	    }
+
+	    if (redraw) {
+		restore_screen();
+		redraw = FALSE;
+	    }
+	    if (choice > num)
+		continue;
+	    flag = TRUE;
+	    j = 0;
+	    for (i = first; i < (INVEN_ARRAY_SIZE - 1); i++) {
+		if ((inventory[i].flags2 & TR_ACTIVATE) && known2_p(&(inventory[i]))) {
+		    if (j == choice)
+			break;
+		    j++;
+		}
+	    }
+
+	    if ( (test && verify("Activate", i)) || !test)
+		flag = TRUE;
+	    else {
+		flag = TRUE;           /* exit loop, he didn't want to try it... */
+		free_turn_flag = TRUE; /* but he didn't do anything either */
+		continue;
+	    }
+
+	    if (inventory[i].timeout > 0) {
+		msg_print("It whines, glows and fades...");
+		break;
+	    }
+	    if (py.stats.use_stat[A_INT] < randint(18) &&
+	     randint(object_list[inventory[i].index].level) > py.misc.lev) {
+		msg_print("You fail to activate it properly.");
+		break;
+	    }
+	    msg_print("You activate it...");
+	    switch (inventory[i].index) {
+	      case (29):
+	      case (395):
+	      case (396):	   /* The dreaded daggers:-> */
+	      case (397):
+		if (inventory[i].name2 == SN_NARTHANC) {
+		    msg_print("Your dagger is covered in fire...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_FIRE, dir, char_row, char_col, damroll(9, 8));
+			inventory[i].timeout = 5 + randint(10);
+		    }
+		} else if (inventory[i].name2 == SN_NIMTHANC) {
+		    msg_print("Your dagger is covered in frost...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(6, 8));
+			inventory[i].timeout = 4 + randint(8);
+		    }
+		} else if (inventory[i].name2 == SN_DETHANC) {
+		    msg_print("Your dagger is covered in sparks...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_LIGHTNING, dir, char_row, char_col, damroll(4, 8));
+			inventory[i].timeout = 3 + randint(7);
+		    }
+		} else if (inventory[i].name2 == SN_RILIA) {
+		    msg_print("Your dagger throbs deep green...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_POISON_GAS, dir, char_row, char_col, 12, 3);
+			inventory[i].timeout = 3 + randint(3);
+		    }
+		} else if (inventory[i].name2 == SN_BELANGIL) {
+		    msg_print("Your dagger is covered in frost...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_FROST, dir, char_row, char_col, 48, 2);
+			inventory[i].timeout = 3 + randint(7);
+		    }
+		}
+		break;
+	      case (91):
+		if (inventory[i].name2 == SN_DAL) {
+		    msg_print("You feel energy flow through your feet...");
+		    remove_fear();
+		    cure_poison();
+		    inventory[i].timeout = 5;
+		}
+		break;
+	      case (42):
+	      case (43):
+		if (inventory[i].name2 == SN_RINGIL) {
+		    msg_print("Your sword glows an intense blue...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_FROST, dir, char_row, char_col, 100, 2);
+			inventory[i].timeout = 300;
+		    }
+		} else if (inventory[i].name2 == SN_ANDURIL) {
+		    msg_print("Your sword glows an intense red...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_FIRE, dir, char_row, char_col, 72, 2);
+			inventory[i].timeout = 400;
+		    }
+		}
+		break;
+	      case (52):
+		if (inventory[i].name2 == SN_FIRESTAR) {
+		    msg_print("Your morningstar rages in fire...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_FIRE, dir, char_row, char_col, 72, 3);
+			inventory[i].timeout = 100;
+		    }
+		}
+		break;
+	      case (92):
+		if (inventory[i].name2 == SN_FEANOR) {
+		    py.flags.fast += randint(25) + 15;
+		    inventory[i].timeout = 200;
+		}
+		break;
+	      case (59):
+		if (inventory[i].name2 == SN_THEODEN) {
+		    msg_print("The blade of your axe glows black...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			drain_life(dir, char_row, char_col, 120);
+			inventory[i].timeout = 400;
+		    }
+		}
+		break;
+	      case (62):
+		if (inventory[i].name2 == SN_TURMIL) {
+		    msg_print("The head of your hammer glows white...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			drain_life(dir, char_row, char_col, 90);
+			inventory[i].timeout = 70;
+		    }
+		}
+		break;
+	      case (111):
+		if (inventory[i].name2 == SN_CASPANION) {
+		    msg_print("Your mail magically disarms traps...");
+		    td_destroy();
+		    inventory[i].timeout = 10;
+		}
+		break;
+	      case (71):
+		if (inventory[i].name2 == SN_AVAVIR) {
+		    if (py.flags.word_recall == 0) {
+			py.flags.word_recall = 15 + randint(20);
+			msg_print("The air about you becomes charged...");
+		    } else {
+			py.flags.word_recall = 0;
+			msg_print("A tension leaves the air around you...");
+		    }
+		    inventory[i].timeout = 200;
+		}
+		break;
+	      case (53):
+		if (inventory[i].name2 == SN_TARATOL) {
+		    if (py.flags.fast == 0)
+			py.flags.fast += randint(30) + 15;
+		    inventory[i].timeout = 166;
+		}
+		break;
+	      case (54):
+		if (inventory[i].name2 == SN_ERIRIL) {
+		    ident_spell();
+		    inventory[i].timeout = 10;
+		} else if (inventory[i].name2 == SN_OLORIN) {
+		    probing();
+		    inventory[i].timeout = 20;
+		}
+		break;
+	      case (67):
+		if (inventory[i].name2 == SN_EONWE) {
+		    msg_print("Your axe lets out a long, shrill note...");
+		    mass_genocide(TRUE);
+		    inventory[i].timeout = 1000;
+		}
+		break;
+	      case (68):
+		if (inventory[i].name2 == SN_LOTHARANG) {
+		    msg_print("Your battle axe radiates deep purple...");
+		    hp_player(damroll(4, 7));
+		    if (py.flags.cut > 0) {
+			py.flags.cut = (py.flags.cut / 2) - 50;
+			if (py.flags.cut < 0)
+			    py.flags.cut = 0;
+			msg_print("You wounds heal.");
+		    }
+		    inventory[i].timeout = 2 + randint(2);
+		}
+		break;
+	      case (75):
+		if (inventory[i].name2 == SN_CUBRAGOL) {
+		    for (a = 0; a < INVEN_WIELD; a++)
+/* search for bolts that are not cursed and are not already named -CWS */
+			if ((inventory[a].tval == TV_BOLT) &&
+			    !(inventory[a].flags & TR_CURSED) &&
+			    (inventory[a].name2 == SN_NULL))
+			    break;
+		    if (a < INVEN_WIELD) {
+			i_ptr = &inventory[a];
+			msg_print("Your bolts are covered in a fiery aura!");
+			i_ptr->name2 = SN_FIRE;
+			i_ptr->flags |= (TR_FLAME_TONGUE|TR_RES_FIRE);
+			i_ptr->cost += 25;
+			enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);
+			calc_bonuses();
+		    } else {
+			msg_print("The fiery enchantment fails.");
+		    }
+		    inventory[i].timeout = 999;
+		}
+		break;
+	      case (34):
+	      case (35):
+		if (inventory[i].name2 == SN_ARUNRUTH) {
+		    msg_print("Your sword glows a pale blue...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(12, 8));
+			inventory[i].timeout = 500;
+		    }
+		}
+		break;
+	      case (64):
+		if (inventory[i].name2 == SN_AEGLOS) {
+		    msg_print("Your spear glows a bright white...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_FROST, dir, char_row, char_col, 100, 2);
+			inventory[i].timeout = 500;
+		    }
+		} else if (inventory[i].name2 == SN_OROME) {
+		    msg_print("Your spear pulsates...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			wall_to_mud(dir, char_row, char_col);
+			inventory[i].timeout = 5;
+		    }
+		}
+		break;
+	      case (118):
+		if (inventory[i].name2 == SN_SOULKEEPER) {
+		    msg_print("Your armour glows a bright white...");
+		    msg_print("You feel much better...");
+		    hp_player(1000);
+		    inventory[i].timeout = 888;
+		}
+		break;
+	      case (120):
+		if (inventory[i].name2 == SN_BELEGENNON) {
+		    teleport(10);
+		    inventory[i].timeout = 2;
+		}
+		break;
+	      case (119):
+		if (inventory[i].name2 == SN_CELEBORN) {
+		    genocide(TRUE);
+		    inventory[i].timeout = 500;
+		}
+		break;
+	      case (124):
+		if (inventory[i].name2 == SN_LUTHIEN) {
+		    restore_level();
+		    inventory[i].timeout = 450;
+		}
+		break;
+	      case (65):
+		if (inventory[i].name2 == SN_ULMO) {
+		    msg_print("Your trident glows deep red...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			teleport_monster(dir, char_row, char_col);
+			inventory[i].timeout = 150;
+		    }
+		}
+		break;
+	      case (123):	   /* Cloak */
+	      case (411):
+		if (inventory[i].name2 == SN_COLLUIN) {
+		    msg_print("Your cloak glows many colours...");
+		    msg_print("You feel you can resist anything.");
+		    py.flags.resist_heat += randint(20) + 20;
+		    py.flags.resist_cold += randint(20) + 20;
+		    py.flags.resist_light += randint(20) + 20;
+		    py.flags.resist_poison += randint(20) + 20;
+		    py.flags.resist_acid += randint(20) + 20;
+		    inventory[i].timeout = 111;
+		} else if (inventory[i].name2 == SN_HOLCOLLETH) {
+		    msg_print("You momentarily disappear...");
+		    sleep_monsters1(char_row, char_col);
+		    inventory[i].timeout = 55;
+		} else if (inventory[i].name2 == SN_THINGOL) {
+		    msg_print("You hear a low humming noise...");
+		    recharge(60);
+		    inventory[i].timeout = 70;
+		} else if (inventory[i].name2 == SN_COLANNON) {
+		    teleport(100);
+		    inventory[i].timeout = 45;
+		}
+		break;
+	      case (50):	   /* Flail */
+		if (inventory[i].name2 == SN_TOTILA) {
+		    msg_print("Your flail glows in scintillating colours...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			confuse_monster(dir, char_row, char_col, 20);
+			inventory[i].timeout = 15;
+		    }
+		}
+		break;
+	      case (125):	   /* Gloves */
+		if (inventory[i].name2 == SN_CAMMITHRIM) {
+		    msg_print("Your gloves glow extremely brightly...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_MAGIC_MISSILE, dir, char_row, char_col,
+				  damroll(2, 6));
+			inventory[i].timeout = 2;
+		    }
+		}
+		break;
+	      case (126):	   /* Gauntlets */
+		if (inventory[i].name2 == SN_PAURHACH) {
+		    msg_print("Your gauntlets are covered in fire...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			if (randint(4)==1)
+			    line_spell(GF_FIRE, dir, char_row, char_col, damroll(9,8));
+			else
+			    fire_bolt(GF_FIRE, dir, char_row, char_col, damroll(9,8));
+			inventory[i].timeout = 5 + randint(10);
+		    }
+		} else if (inventory[i].name2 == SN_PAURNIMMEN) {
+		    msg_print("Your gauntlets are covered in frost...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(6, 8));
+			inventory[i].timeout = 4 + randint(8);
+		    }
+		} else if (inventory[i].name2 == SN_PAURAEGEN) {
+		    msg_print("Your gauntlets are covered in sparks...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_LIGHTNING, dir, char_row, char_col, damroll(4, 8));
+			inventory[i].timeout = 3 + randint(7);
+		    }
+		} else if (inventory[i].name2 == SN_PAURNEN) {
+		    msg_print("Your gauntlets look very acidic...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_ACID, dir, char_row, char_col, damroll(5, 8));
+			inventory[i].timeout = 4 + randint(7);
+		    }
+		}
+		break;
+	      case (127):
+		if (inventory[i].name2 == SN_FINGOLFIN) {
+		    msg_print("Magical spikes appear on your cesti...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_ARROW, dir, char_row, char_col, 150);
+			inventory[i].timeout = 88 + randint(88);
+		    }
+		}
+		break;
+	      case (96):
+		if (inventory[i].name2 == SN_HOLHENNETH) {
+		    msg_print("You close your eyes and an image forms in your mind...");
+		    detection();
+		    inventory[i].timeout = 55 + randint(55);
+		}
+		break;
+	      case (99):
+		if (inventory[i].name2 == SN_GONDOR) {
+		    msg_print("You feel a warm tingling inside...");
+		    hp_player(500);
+		    inventory[i].timeout = 500;
+		}
+		break;
+	      case (SPECIAL_OBJ - 1):	/* Narya */
+		msg_print("The ring glows deep red...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_FIRE, dir, char_row, char_col, 120, 3);
+		    inventory[i].timeout = 222 + randint(222);
+		}
+		break;
+	      case (SPECIAL_OBJ): /* Nenya */
+		msg_print("The ring glows bright white...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_FROST, dir, char_row, char_col, 200, 3);
+		    inventory[i].timeout = 222 + randint(333);
+		}
+		break;
+	      case (SPECIAL_OBJ + 1):	/* Vilya */
+		msg_print("The ring glows deep blue...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_LIGHTNING, dir, char_row, char_col, 250, 3);
+		    inventory[i].timeout = 222 + randint(444);
+		}
+		break;
+	      case (SPECIAL_OBJ + 2):	/* Power */
+		msg_print("The ring glows intensely black...");
+		switch (randint(17) + (8 - py.misc.lev / 10)) {
+		  case 5:
+		    dispel_creature(0xFFFFFFFL, 1000);
+		    break;
+		  case 6:
+		  case 7:
+		    msg_print("You are surrounded by a malignant aura");
+		    m_ptr = &py.misc;
+		    m_ptr->lev--;
+		    m_ptr->exp = player_exp[m_ptr->lev - 2] * m_ptr->expfact / 100 +
+			randint((player_exp[m_ptr->lev - 1] * m_ptr->expfact / 100) -
+		       (player_exp[m_ptr->lev - 2] * m_ptr->expfact / 100));
+		    m_ptr->max_exp = m_ptr->exp;
+		    prt_experience();
+		    ruin_stat(A_STR);
+		    ruin_stat(A_INT);
+		    ruin_stat(A_WIS);
+		    ruin_stat(A_DEX);
+		    ruin_stat(A_CON);
+		    ruin_stat(A_CHR);
+		    calc_hitpoints();
+		    if (class[m_ptr->pclass].spell == MAGE) {
+			calc_spells(A_INT);
+			calc_mana(A_INT);
+		    } else if (class[m_ptr->pclass].spell == PRIEST) {
+			calc_spells(A_WIS);
+			calc_mana(A_WIS);
+		    }
+		    prt_level();
+		    prt_title();
+		    take_hit((py.misc.chp > 2) ? py.misc.chp / 2 : 0, "malignant aura");
+		    break;
+		  case 8:
+		  case 9:
+		  case 10:
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_MANA, dir, char_row, char_col, 300, 3);
+		    }
+		    break;
+		  default:
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_bolt(GF_MANA, dir, char_row, char_col, 250);
+		    }
+		}
+		inventory[i].timeout = 444 + randint(444);
+		break;
+	      case (389):	   /* Blue */
+		msg_print("You breathe lightning...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_LIGHTNING, dir, char_row, char_col, 100, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (390):	   /* White */
+		msg_print("You breathe frost...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_FROST, dir, char_row, char_col, 110, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (391):	   /* Black */
+		msg_print("You breathe acid...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_ACID, dir, char_row, char_col, 130, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (392):	   /* Gas */
+		msg_print("You breathe poison gas...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_POISON_GAS, dir, char_row, char_col, 150, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (393):	   /* Fire */
+		msg_print("You breathe fire...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_FIRE, dir, char_row, char_col, 200, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (394):	   /* Multi-hued */
+		if (inventory[i].name2 == SN_RAZORBACK) {
+		    msg_print("A storm of lightning spikes fires in all directions...");
+		    starball(char_row, char_col);
+		    inventory[i].timeout = 1000;
+		} else {
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			choice = randint(5);
+			sprintf(tmp2, "You breathe %s...",
+				((choice == 1) ? "lightning" :
+				 ((choice == 2) ? "frost" :
+				  ((choice == 3) ? "acid" :
+				((choice == 4) ? "poison gas" : "fire")))));
+			msg_print(tmp2);
+			fire_ball(((choice == 1) ? GF_LIGHTNING :
+				   ((choice == 2) ? GF_FROST :
+				    ((choice == 3) ? GF_ACID :
+			       ((choice == 4) ? GF_POISON_GAS : GF_FIRE)))),
+				  dir, char_row, char_col, 250, 2);
+			inventory[i].timeout = 222 + randint(222);
+		    }
+		}
+		break;
+	      case (408):	   /* Bronze */
+		msg_print("You breathe confusion...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_CONFUSION, dir, char_row, char_col, 120, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (409):	   /* Gold */
+		msg_print("You breathe sound...");
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    fire_ball(GF_SOUND, dir, char_row, char_col, 130, 2);
+		    inventory[i].timeout = 444 + randint(444);
+		}
+		break;
+	      case (415):	   /* Chaos */
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    choice = randint(2);
+		    sprintf(tmp2, "You breathe %s...",
+			    ((choice == 1 ? "chaos" : "disenchantment")));
+		    msg_print(tmp2);
+		    fire_ball((choice == 1 ? GF_CHAOS : GF_DISENCHANT), dir,
+			      char_row, char_col, 220, 2);
+		    inventory[i].timeout = 300 + randint(300);
+		}
+		break;
+	      case (416):	   /* Law */
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    choice = randint(2);
+		    sprintf(tmp2, "You breathe %s...",
+			    ((choice == 1 ? "sound" : "shards")));
+		    msg_print(tmp2);
+		    fire_ball((choice == 1 ? GF_SOUND : GF_SHARDS), dir,
+			      char_row, char_col, 230, 2);
+		    inventory[i].timeout = 300 + randint(300);
+		}
+		break;
+	      case (417):	   /* Balance */
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    choice = randint(4);
+		    sprintf(tmp2, "You breathe %s...",
+			    ((choice == 1) ? "chaos" :
+			     ((choice == 2) ? "disenchantment" :
+			      ((choice == 3) ? "sound" : "shards"))));
+		    msg_print(tmp2);
+		    fire_ball(((choice == 1) ? GF_CHAOS :
+			       ((choice == 2) ? GF_DISENCHANT :
+				((choice == 3) ? GF_SOUND : GF_SHARDS))),
+			      dir, char_row, char_col, 250, 2);
+		    inventory[i].timeout = 300 + randint(300);
+		}
+		break;
+	      case (418):	   /* Shining */
+		if (get_dir(NULL, &dir)) {
+		    if (py.flags.confused > 0) {
+			msg_print("You are confused.");
+			do {
+			    dir = randint(9);
+			} while (dir == 5);
+		    }
+		    choice = randint(2);
+		    sprintf(tmp2, "You breathe %s...",
+			    ((choice == 1 ? "light" : "darkness")));
+		    msg_print(tmp2);
+		    fire_ball((choice == 1 ? GF_LIGHT : GF_DARK), dir,
+			      char_row, char_col, 200, 2);
+		    inventory[i].timeout = 300 + randint(300);
+		}
+		break;
+	      case (419):	   /* Power Dragon Scale Mail */
+		if (inventory[i].name2 == SN_BLADETURNER) {
+		    msg_print("Your armour glows many colours...");
+		    msg_print("You enter a berserk rage...");
+		    py.flags.hero += randint(50) + 50;
+		    py.flags.shero += randint(50) + 50;
+		    bless(randint(50) + 50);
+		    py.flags.resist_heat += randint(50) + 50;
+		    py.flags.resist_cold += randint(50) + 50;
+		    py.flags.resist_light += randint(50) + 50;
+		    py.flags.resist_acid += randint(50) + 50;
+		    inventory[i].timeout = 400;
+		} else {
+		    msg_print("You breathe the elements...");
+		    if (get_dir(NULL, &dir)) {
+			if (py.flags.confused > 0) {
+			    msg_print("You are confused.");
+			    do {
+				dir = randint(9);
+			    } while (dir == 5);
+			}
+			fire_ball(GF_MAGIC_MISSILE, dir, char_row, char_col, 300, 2);
+			inventory[i].timeout = 300 + randint(300);
+		    }
+		}
+		break;
+	      case (SPECIAL_OBJ + 3):
+		msg_print("The phial wells with clear light...");
+		light_area(char_row, char_col, damroll(2, 15), 3);
+		inventory[i].timeout = 10 + randint(10);
+		break;
+	      case (SPECIAL_OBJ + 4):
+		msg_print("An aura of good floods the area...");
+		dispel_creature(EVIL, (int)(5 * py.misc.lev));
+		inventory[i].timeout = 444 + randint(222);
+		break;
+	      case (SPECIAL_OBJ + 5):
+		msg_print("The amulet lets out a shrill wail...");
+		msg_print("You feel somewhat safer...");
+		protect_evil();
+		inventory[i].timeout = 222 + randint(222);
+		break;
+	      case (SPECIAL_OBJ + 6):
+		msg_print("The star shines brightly...");
+		msg_print("And you sense your surroundings...");
+		map_area();
+		inventory[i].timeout = 50 + randint(50);
+		break;
+	      case (SPECIAL_OBJ + 7):
+		msg_print("The stone glows a deep green");
+		wizard_light(TRUE);
+		(void)detect_sdoor();
+		(void)detect_trap();
+		inventory[i].timeout = 100 + randint(100);
+		break;
+	      case (SPECIAL_OBJ + 8):
+		msg_print("The ring glows brightly...");
+		py.flags.fast += randint(100) + 50;
+		inventory[i].timeout = 200;
+		break;
+	      default:
+		(void)sprintf(tmp2, "Inventory num %d, index %d", i,
+			      inventory[i].index);
+		msg_print(tmp2);
+	    }
+	}
+    }
+
+    if (redraw) {
+	restore_screen();
+	redraw = FALSE;
+    }
+    if (!flag)			   /* if flag still false, then user aborted. 
+				    * So we don't charge him a turn. -CFT */
+	free_turn_flag = TRUE;
 }
 
 

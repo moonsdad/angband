@@ -21,14 +21,7 @@
 /* staves routines, and are occasionally called from other areas.	  */
 /* Now included are creature spells also.		       -RAK    */
 
-/* this assumes only 1 move apart -CFT */
-static char bolt_char(int y, int x, int ny, int nx)
-{
-    if (ny == y) return '-';
-    if (nx == x) return '|';
-    if ((ny-y) == (nx-x)) return '\\';
-    return '/';
-}
+
 
 /* return the appropriate item destroy test to the typ.  All that's left of
  * get_flags().  -CFT 

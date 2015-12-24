@@ -1,0 +1,1100 @@
+int unique_weapon(inven_type *t_ptr)
+{
+    cptr name;
+
+    if (be_nasty)
+	return 0;
+    name = object_list[t_ptr->index].name;
+    if (!stricmp("& Longsword", name)) {
+	switch (randint(15)) {
+	  case 1:
+	    if (RINGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Ringil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_RINGIL;
+	    t_ptr->tohit = 22;
+	    t_ptr->todam = 25;
+	    t_ptr->damage[0] = 4;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_UNDEAD | TR_SLAY_EVIL | TR_REGEN |
+		     TR_SPEED | TR_RES_COLD | TR_FROST_BRAND | TR_FREE_ACT |
+			    TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_LIGHT | TR_ACTIVATE
+			      | TR_RES_LT | TR_ARTIFACT);
+	    t_ptr->p1 = 1;
+	    t_ptr->cost = 300000L;
+	    RINGIL = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	  case 4:
+	    if (ANDURIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Anduril");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANDURIL;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_EVIL | TR_FREE_ACT |
+		     TR_SUST_STAT | TR_STR | TR_RES_FIRE | TR_FLAME_TONGUE);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_ACTIVATE | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->toac = 5;
+	    t_ptr->cost = 80000L;
+	    ANDURIL = 1;
+	    return 1;
+	  case 5:
+	  case 6:
+	  case 7:
+	  case 8:
+	    if (ANGUIREL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Anguirel");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANGUIREL;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 12;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_EVIL | TR_FREE_ACT | TR_RES_LIGHT
+			    | TR_STR | TR_CON);
+	    t_ptr->flags2 |= (TR_ARTIFACT |
+		       TR_LIGHTNING | TR_LIGHT | TR_SLAY_DEMON | TR_RES_LT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 40000L;
+	    ANGUIREL = 1;
+	    return 1;
+	  default:
+	    if (ELVAGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Elvagil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ELVAGIL;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 2;
+	    t_ptr->todam = 7;
+	    t_ptr->flags |= (TR_SEE_INVIS | TR_CHR | TR_DEX | TR_STEALTH | TR_FFALL);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 30000L;
+	    ELVAGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Two-Handed Sword", name)) {
+	switch (randint(8)) {
+	  case 1:
+	  case 2:
+	    if (GURTHANG)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Gurthang");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_GURTHANG;
+	    t_ptr->tohit = 13;
+	    t_ptr->todam = 17;
+	    t_ptr->flags = (TR_REGEN | TR_SLAY_X_DRAGON | TR_STR |
+			    TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 100000L;
+	    GURTHANG = 1;
+	    return 1;
+	  case 3:
+	    if (ZARCUTHRA)
+		return 0;
+	    if (randint(3) > 1)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Zarcuthra");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ZARCUTHRA;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 19;
+	    t_ptr->todam = 21;
+	    t_ptr->flags = (TR_SLAY_X_DRAGON | TR_STR | TR_SLAY_EVIL | TR_SLAY_ANIMAL |
+		  TR_SLAY_UNDEAD | TR_AGGRAVATE | TR_CHR | TR_FLAME_TONGUE |
+		  TR_SEE_INVIS | TR_RES_FIRE | TR_FREE_ACT | TR_INFRA);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC | TR_SLAY_GIANT
+			      | TR_SLAY_DEMON | TR_RES_CHAOS);
+	    t_ptr->p1 = 4;
+	    t_ptr->damage[0] = 6;
+	    t_ptr->damage[1] = 4;
+	    t_ptr->cost = 200000L;
+	    ZARCUTHRA = 1;
+	    return 1;
+	  default:
+	    if (MORMEGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Mormegil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_MORMEGIL;
+	    t_ptr->tohit = -40;
+	    t_ptr->todam = -60;
+	    t_ptr->flags = (TR_SPEED | TR_AGGRAVATE | TR_CURSED);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = -1;
+	    t_ptr->toac = -50;
+	    t_ptr->cost = 10000L;
+	    MORMEGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Broadsword", name)) {
+	switch (randint(12)) {
+	  case 1:
+	  case 2:
+	    if (ARUNRUTH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Arunruth");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ARUNRUTH;
+	    t_ptr->tohit = 20;
+	    t_ptr->todam = 12;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->flags = (TR_FFALL | TR_DEX |
+			    TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 50000L;
+	    ARUNRUTH = 1;
+	    return 1;
+	  case 3:
+	  case 4:
+	  case 5:
+	  case 6:
+	    if (GLAMDRING)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Glamdring");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_GLAMDRING;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SLOW_DIGEST | TR_SEARCH | TR_FLAME_TONGUE |
+			    TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_RES_LT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 40000L;
+	    GLAMDRING = 1;
+	    return 1;
+	  case 7:
+	    if (AEGLIN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Aeglin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_AEGLIN;
+	    t_ptr->tohit = 12;
+	    t_ptr->todam = 16;
+	    t_ptr->flags = (TR_SLOW_DIGEST | TR_SEARCH | TR_RES_LIGHT);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_LIGHTNING);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 45000L;
+	    AEGLIN = 1;
+	    return 1;
+	  default:
+	    if (ORCRIST)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Orcrist");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ORCRIST;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SLOW_DIGEST | TR_STEALTH | TR_FROST_BRAND |
+			    TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 40000L;
+	    ORCRIST = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Bastard Sword", name)) {
+	if (CALRIS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Calris");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CALRIS;
+	t_ptr->tohit = -20;
+	t_ptr->todam = 20;
+	t_ptr->damage[0] = 3;
+	t_ptr->damage[1] = 7;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_CON | TR_AGGRAVATE |
+			TR_CURSED | TR_SLAY_EVIL);
+	t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_RES_DISENCHANT
+			  | TR_ARTIFACT);
+	t_ptr->p1 = 5;
+	t_ptr->cost = 100000L;
+	CALRIS = 1;
+	return 1;
+    } else if (!stricmp("& Main Gauche", name)) {
+	if (randint(4) > 1)
+	    return 0;
+	if (MAEDHROS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Maedhros");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_MAEDHROS;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 15;
+	t_ptr->damage[0] = 2;
+	t_ptr->damage[1] = 6;
+	t_ptr->flags = (TR_DEX | TR_INT | TR_FREE_ACT | TR_SEE_INVIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_GIANT | TR_SLAY_TROLL);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 20000L;
+	MAEDHROS = 1;
+	return 1;
+    } else if (!stricmp("& Glaive", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (PAIN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Pain!");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_PAIN;
+	t_ptr->tohit = 0;
+	t_ptr->todam = 30;
+	t_ptr->damage[0] = 10;
+	t_ptr->damage[1] = 6;
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->cost = 50000L;
+	PAIN = 1;
+	return 1;
+    } else if (!stricmp("& Halberd", name)) {
+	if (OSONDIR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Osondir");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_OSONDIR;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 9;
+	t_ptr->flags = (TR_FLAME_TONGUE | TR_SLAY_UNDEAD | TR_RES_FIRE |
+			TR_FFALL | TR_CHR | TR_SEE_INVIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_SOUND | TR_SLAY_GIANT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 22000L;
+	OSONDIR = 1;
+	return 1;
+    } else if (!stricmp("& Lucerne Hammer", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TURMIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Turmil");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TURMIL;
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 6;
+	t_ptr->flags = (TR_WIS | TR_REGEN | TR_FROST_BRAND | TR_RES_COLD | TR_INFRA);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT |
+			  TR_ACTIVATE | TR_RES_LT);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 30000L;
+	t_ptr->toac = 8;
+	TURMIL = 1;
+	return 1;
+    } else if (!stricmp("& Pike", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Til-i-arc");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TIL;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 12;
+	t_ptr->toac = 10;
+	t_ptr->flags = (TR_FROST_BRAND | TR_FLAME_TONGUE | TR_RES_FIRE | TR_RES_COLD |
+			TR_SLOW_DIGEST | TR_INT | TR_SUST_STAT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_DEMON | TR_SLAY_GIANT | TR_SLAY_TROLL);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 32000L;
+	TIL = 1;
+	return 1;
+    } else if (!stricmp("& Mace of Disruption", name)) {
+	if (randint(5) > 1)
+	    return 0;
+	if (DEATHWREAKER)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Deathwreaker");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_DEATHWREAKER;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 18;
+	t_ptr->damage[1] = 12;
+	t_ptr->flags = (TR_STR | TR_FLAME_TONGUE | TR_SLAY_EVIL | TR_SLAY_DRAGON |
+		   TR_SLAY_ANIMAL | TR_TUNNEL | TR_AGGRAVATE | TR_RES_FIRE);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_IM_FIRE | TR_RES_CHAOS
+			  | TR_RES_DISENCHANT | TR_RES_DARK);
+	t_ptr->p1 = 6;
+	t_ptr->cost = 400000L;
+	DEATHWREAKER = 1;
+	return 1;
+    } else if (!stricmp("& Scythe", name)) {
+	if (AVAVIR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Avavir");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AVAVIR;
+	t_ptr->tohit = 8;
+	t_ptr->todam = 8;
+	t_ptr->toac = 10;
+	t_ptr->flags = (TR_DEX | TR_CHR | TR_FREE_ACT | TR_RES_FIRE | TR_RES_COLD |
+			TR_SEE_INVIS | TR_FLAME_TONGUE | TR_FROST_BRAND);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_LIGHT | TR_ACTIVATE | TR_RES_LT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 18000L;
+	AVAVIR = 1;
+	return 1;
+    } else if (!stricmp("& Mace", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (TARATOL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Taratol");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TARATOL;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 12;
+	t_ptr->weight = 200;
+	t_ptr->damage[1] = 7;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_LIGHTNING | TR_ACTIVATE | TR_RES_DARK);
+	t_ptr->cost = 20000L;
+	TARATOL = 1;
+	return 1;
+    } else if (!stricmp("& Lance", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (EORLINGAS)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Lance of Eorlingas");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_EORLINGAS;
+	t_ptr->tohit = 3;
+	t_ptr->todam = 21;
+	t_ptr->weight = 360;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_DEX);
+	t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	t_ptr->p1 = 2;
+	t_ptr->damage[1] = 12;
+	t_ptr->cost = 55000L;
+	EORLINGAS = 1;
+	return 1;
+    } else if (!stricmp("& Broad Axe", name)) {
+	if (BARUKKHELED)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Barukkheled");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_BARUKKHELED;
+	t_ptr->tohit = 13;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_CON);
+	t_ptr->flags2 |= (TR_SLAY_ORC | TR_SLAY_TROLL | TR_SLAY_GIANT | TR_ARTIFACT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 50000L;
+	BARUKKHELED = 1;
+	return 1;
+    } else if (!stricmp("& Trident", name)) {
+	switch (randint(3)) {
+	  case 1:
+	  case 2:
+	    if (randint(3) > 1)
+		return 0;
+	    if (WRATH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Wrath");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_WRATH;
+	    t_ptr->tohit = 16;
+	    t_ptr->todam = 18;
+	    t_ptr->weight = 300;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 9;
+	    t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_STR | TR_DEX |
+			     TR_SLAY_UNDEAD);
+	    t_ptr->flags2 |= (TR_RES_DARK | TR_RES_LT | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 90000L;
+	    WRATH = 1;
+	    return 1;
+	  case 3:
+	    if (randint(4) > 1)
+		return 0;
+	    if (ULMO)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Ulmo");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ULMO;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 19;
+	    t_ptr->damage[0] = 4;
+	    t_ptr->damage[1] = 10;
+	    t_ptr->flags = (TR_SEE_INVIS | TR_FREE_ACT | TR_DEX | TR_REGEN |
+			    TR_SLOW_DIGEST | TR_SLAY_ANIMAL | TR_SLAY_DRAGON |
+			    TR_RES_ACID);
+	    t_ptr->flags2 |= (TR_IM_ACID | TR_HOLD_LIFE | TR_ACTIVATE
+			    | TR_RES_NETHER | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 120000L;
+	    ULMO = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Scimitar", name)) {
+	if (HARADEKKET)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Haradekket");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_HARADEKKET;
+	t_ptr->tohit = 9;
+	t_ptr->todam = 11;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_DEX | TR_SLAY_UNDEAD
+			 | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 30000L;
+	HARADEKKET = 1;
+	return 1;
+    } else if (!stricmp("& Lochaber Axe", name)) {
+	if (MUNDWINE)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Mundwine");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_MUNDWINE;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 17;
+	t_ptr->flags |= (TR_SLAY_EVIL | TR_RES_FIRE | TR_RES_COLD
+			 | TR_RES_LIGHT | TR_RES_ACID);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->cost = 30000L;
+	MUNDWINE = 1;
+	return 1;
+    } else if (!stricmp("& Cutlass", name)) {
+	if (GONDRICAM)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Gondricam");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_GONDRICAM;
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->tohit = 10;
+	t_ptr->todam = 11;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_FFALL | TR_REGEN | TR_STEALTH | TR_RES_FIRE |
+			 TR_RES_COLD | TR_RES_ACID | TR_RES_LIGHT | TR_DEX);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->p1 = 3;
+	t_ptr->cost = 28000L;
+	GONDRICAM = 1;
+	return 1;
+    } else if (!stricmp("& Sabre", name)) {
+	if (CARETH)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Careth Asdriag");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CARETH;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 8;
+	t_ptr->flags |= (TR_SLAY_DRAGON | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_SLAY_GIANT | TR_SLAY_ORC | TR_SLAY_TROLL | TR_ARTIFACT |
+			  TR_ATTACK_SPD);
+	t_ptr->p1 = 1;
+	t_ptr->cost = 25000L;
+	CARETH = 1;
+	return 1;
+    } else if (!stricmp("& Rapier", name)) {
+	if (FORASGIL)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Forasgil");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_FORASGIL;
+	t_ptr->tohit = 12;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_RES_COLD | TR_FROST_BRAND | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_LIGHT | TR_RES_LT | TR_ARTIFACT);
+	t_ptr->cost = 15000L;
+	FORASGIL = 1;
+	return 1;
+    } else if (!stricmp("& Executioner's Sword", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (CRISDURIAN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Crisdurian");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_CRISDURIAN;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 19;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL | TR_SLAY_UNDEAD | TR_SLAY_DRAGON);
+	t_ptr->flags2 |= (TR_SLAY_GIANT | TR_SLAY_ORC | TR_SLAY_TROLL | TR_ARTIFACT);
+	t_ptr->cost = 100000L;
+	CRISDURIAN = 1;
+	return 1;
+    } else if (!stricmp("& Flail", name)) {
+	if (TOTILA)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Totila");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_TOTILA;
+	t_ptr->tohit = 6;
+	t_ptr->todam = 8;
+	t_ptr->damage[1] = 9;
+	t_ptr->flags = (TR_STEALTH | TR_RES_FIRE | TR_FLAME_TONGUE | TR_SLAY_EVIL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ACTIVATE | TR_RES_CONF);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 55000L;
+	TOTILA = 1;
+	return 1;
+    } else if (!stricmp("& Short sword", name)) {
+	if (GILETTAR)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Gilettar");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_GILETTAR;
+	t_ptr->tohit = 3;
+	t_ptr->todam = 7;
+	t_ptr->flags = (TR_REGEN | TR_SLOW_DIGEST | TR_SLAY_ANIMAL);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 15000L;
+	GILETTAR = 1;
+	return 1;
+    } else if (!stricmp("& Katana", name)) {
+	if (randint(3) > 1)
+	    return 0;
+	if (AGLARANG)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Aglarang");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AGLARANG;
+	t_ptr->tohit = 0;
+	t_ptr->todam = 0;
+	t_ptr->damage[0] = 6;
+	t_ptr->damage[1] = 8;
+	t_ptr->weight = 50;
+	t_ptr->flags = (TR_DEX | TR_SUST_STAT);
+	t_ptr->flags2 |= (TR_ARTIFACT);
+	t_ptr->p1 = 5;
+	t_ptr->cost = 40000L;
+	AGLARANG = 1;
+	return 1;
+    } else if (!stricmp("& Spear", name)) {
+	switch (randint(6)) {
+	  case 1:
+	    if (AEGLOS)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Aeglos");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_AEGLOS;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 25;
+	    t_ptr->damage[0] = 1;
+	    t_ptr->damage[1] = 20;
+	    t_ptr->flags = (TR_WIS | TR_FROST_BRAND |
+			    TR_RES_COLD | TR_FREE_ACT | TR_SLOW_DIGEST);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT |
+			      TR_BLESS_BLADE);
+	    t_ptr->toac = 5;
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 140000L;
+	    AEGLOS = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	  case 4:
+	  case 5:
+	    if (NIMLOTH)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nimloth");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NIMLOTH;
+	    t_ptr->tohit = 11;
+	    t_ptr->todam = 13;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD | TR_SLAY_UNDEAD |
+			    TR_SEE_INVIS | TR_STEALTH);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 30000L;
+	    NIMLOTH = 1;
+	    return 1;
+	  case 6:
+	    if (OROME)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Orome");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_OROME;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 15;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_SEE_INVIS | TR_SEARCH | TR_INT |
+			    TR_RES_FIRE | TR_FFALL | TR_INFRA);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR_SLAY_GIANT | TR_RES_LT
+			      | TR_ARTIFACT | TR_BLESS_BLADE);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 60000L;
+	    OROME = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Dagger", name)) {
+	switch (randint(11)) {
+	  case 1:
+	    if (ANGRIST)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Angrist");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ANGRIST;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 15;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 5;
+	    t_ptr->flags = (TR_DEX | TR_SLAY_EVIL | TR_SUST_STAT |
+			    TR_FREE_ACT);
+	    t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_DARK | TR_ARTIFACT);
+	    t_ptr->toac = 5;
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 100000L;
+	    ANGRIST = 1;
+	    return 1;
+	  case 2:
+	  case 3:
+	    if (NARTHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Narthanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NARTHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->cost = 12000;
+	    NARTHANC = 1;
+	    return 1;
+	  case 4:
+	  case 5:
+	    if (NIMTHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nimthanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NIMTHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->cost = 11000L;
+	    NIMTHANC = 1;
+	    return 1;
+	  case 6:
+	  case 7:
+	    if (DETHANC)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Dethanc");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_DETHANC;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 6;
+	    t_ptr->flags = (TR_RES_LIGHT);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHTNING | TR_ARTIFACT);
+	    t_ptr->cost = 13000L;
+	    DETHANC = 1;
+	    return 1;
+	  case 8:
+	  case 9:
+	    if (RILIA)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Rilia");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_RILIA;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 3;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 4;
+	    t_ptr->flags = TR_POISON;
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_RES_DISENCHANT | TR_ARTIFACT);
+	    t_ptr->cost = 15000L;
+	    RILIA = 1;
+	    return 1;
+	  case 10:
+	  case 11:
+	    if (BELANGIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Belangil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BELANGIL;
+	    t_ptr->tohit = 6;
+	    t_ptr->todam = 9;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 2;
+	    t_ptr->flags = (TR_FROST_BRAND | TR_RES_COLD | TR_REGEN | TR_SLOW_DIGEST |
+			    TR_DEX | TR_SEE_INVIS);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 40000L;
+	    BELANGIL = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Small sword", name)) {
+	if (STING)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Sting");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_STING;
+	t_ptr->tohit = 7;
+	t_ptr->todam = 8;
+	t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_EVIL |
+			 TR_SLAY_UNDEAD | TR_DEX | TR_CON | TR_STR |
+			 TR_FREE_ACT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_ORC | TR_LIGHT | TR_RES_LT |
+			  TR_ATTACK_SPD);
+	t_ptr->p1 = 2;
+	t_ptr->cost = 100000L;
+	STING = 1;
+	return 1;
+    } else if (!stricmp("& Great Axe", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (randint(6) > 1)
+		return 0;
+	    if (DURIN)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Durin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_DURIN;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 20;
+	    t_ptr->toac = 15;
+	    t_ptr->flags = (TR_SLAY_X_DRAGON | TR_CON | TR_FREE_ACT |
+			    TR_RES_FIRE | TR_RES_ACID);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_DARK
+			      | TR_RES_LT | TR_RES_CHAOS | TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 150000L;
+	    DURIN = 1;
+	    return 1;
+	  case 2:
+	    if (randint(8) > 1)
+		return 0;
+	    if (EONWE)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Eonwe");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_EONWE;
+	    t_ptr->tohit = 15;
+	    t_ptr->todam = 18;
+	    t_ptr->toac = 8;
+	    t_ptr->flags = (TR_STATS | TR_SLAY_EVIL | TR_SLAY_UNDEAD | TR_FROST_BRAND |
+			    TR_FREE_ACT | TR_SEE_INVIS | TR_RES_COLD);
+	    t_ptr->flags2 |= (TR_IM_COLD | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT |
+			      TR_BLESS_BLADE);
+	    t_ptr->p1 = 2;
+	    t_ptr->cost = 200000L;
+	    EONWE = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Battle Axe", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (BALLI)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Balli Stonehand");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BALLI;
+	    t_ptr->ident |= ID_NOSHOW_TYPE;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 11;
+	    t_ptr->damage[0] = 3;
+	    t_ptr->damage[1] = 6;
+	    t_ptr->toac = 5;
+	    t_ptr->flags = (TR_FFALL | TR_RES_LIGHT | TR_SEE_INVIS | TR_STR | TR_CON
+			    | TR_FREE_ACT | TR_RES_COLD | TR_RES_ACID
+			    | TR_RES_FIRE | TR_REGEN | TR_STEALTH);
+	    t_ptr->flags2 |= (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_BLIND
+			      | TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 90000L;
+	    BALLI = 1;
+	    return 1;
+	  case 2:
+	    if (LOTHARANG)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Lotharang");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_LOTHARANG;
+	    t_ptr->tohit = 4;
+	    t_ptr->todam = 3;
+	    t_ptr->flags = (TR_STR | TR_DEX);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
+	    t_ptr->p1 = 1;
+	    t_ptr->cost = 21000L;
+	    LOTHARANG = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& War Hammer", name)) {
+	if (randint(10) > 1)
+	    return 0;
+	if (AULE)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Aule");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_AULE;
+	t_ptr->damage[0] = 5;
+	t_ptr->damage[1] = 5;
+	t_ptr->tohit = 19;
+	t_ptr->todam = 21;
+	t_ptr->toac = 5;
+	t_ptr->flags = (TR_SLAY_X_DRAGON | TR_SLAY_EVIL | TR_SLAY_UNDEAD |
+		    TR_RES_FIRE | TR_RES_ACID | TR_RES_COLD | TR_RES_LIGHT |
+			TR_FREE_ACT | TR_SEE_INVIS | TR_WIS);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_DEMON | TR_LIGHTNING | TR_RES_NEXUS);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 250000L;
+	AULE = 1;
+	return 1;
+    } else if (!stricmp("& Beaked Axe", name)) {
+	if (randint(2) > 1)
+	    return 0;
+	if (THEODEN)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Theoden");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_THEODEN;
+	t_ptr->tohit = 8;
+	t_ptr->todam = 10;
+	t_ptr->flags = (TR_WIS | TR_CON | TR_SEARCH | TR_SLOW_DIGEST | TR_SLAY_DRAGON);
+	t_ptr->flags2 |= (TR_TELEPATHY | TR_ACTIVATE | TR_ARTIFACT);
+	t_ptr->ident |= ID_NOSHOW_TYPE;
+	t_ptr->p1 = 3;
+	t_ptr->cost = 40000L;
+	THEODEN = 1;
+	return 1;
+    } else if (!stricmp("& Two-Handed Great Flail", name)) {
+	if (randint(5) > 1)
+	    return 0;
+	if (THUNDERFIST)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Thunderfist");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_THUNDERFIST;
+	t_ptr->tohit = 5;
+	t_ptr->todam = 18;
+	t_ptr->flags = (TR_SLAY_ANIMAL | TR_STR | TR_FLAME_TONGUE |
+			TR_RES_FIRE | TR_RES_LIGHT);
+	t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC
+			  | TR_LIGHTNING | TR_RES_DARK);
+	t_ptr->p1 = 4;
+	t_ptr->cost = 160000L;
+	THUNDERFIST = 1;
+	return 1;
+    } else if (!stricmp("& Morningstar", name)) {
+	switch (randint(2)) {
+	  case 1:
+	    if (randint(2) > 1)
+		return 0;
+	    if (BLOODSPIKE)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Bloodspike");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_BLOODSPIKE;
+	    t_ptr->tohit = 8;
+	    t_ptr->todam = 22;
+	    t_ptr->flags = (TR_SLAY_ANIMAL | TR_STR | TR_SEE_INVIS);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_SLAY_TROLL | TR_SLAY_ORC | TR_RES_NEXUS);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 30000L;
+	    BLOODSPIKE = 1;
+	    return 1;
+	  case 2:
+	    if (FIRESTAR)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Firestar");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_FIRESTAR;
+	    t_ptr->tohit = 5;
+	    t_ptr->todam = 7;
+	    t_ptr->flags = (TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
+	    t_ptr->toac = 2;
+	    t_ptr->cost = 35000L;
+	    FIRESTAR = 1;
+	    return 1;
+	}
+    } else if (!stricmp("& Blade of Chaos", name)) {
+	if (DOOMCALLER)
+	    return 0;
+	if (randint(3) > 1)
+	    return 0;
+	if (wizard || peek)
+	    msg_print("Doomcaller");
+	else
+	    good_item_flag = TRUE;
+	t_ptr->name2 = SN_DOOMCALLER;
+	t_ptr->tohit = 18;
+	t_ptr->todam = 28;
+	t_ptr->flags = (TR_CON | TR_SLAY_ANIMAL | TR_SLAY_X_DRAGON |
+		TR_FROST_BRAND | TR_SLAY_EVIL | TR_FREE_ACT | TR_SEE_INVIS |
+		    TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT | TR_RES_ACID |
+			TR_AGGRAVATE);
+	t_ptr->flags2 |= (TR_SLAY_TROLL | TR_SLAY_ORC | TR_TELEPATHY | TR_ARTIFACT);
+	t_ptr->p1 = -5;
+	t_ptr->cost = 200000L;
+	DOOMCALLER = 1;
+	return 1;
+    } else if (!stricmp("& Quarterstaff", name)) {
+	switch (randint(7)) {
+	  case 1:
+	  case 2:
+	  case 3:
+	    if (NAR)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Nar-i-vagil");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_NAR;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 20;
+	    t_ptr->flags = (TR_INT | TR_SLAY_ANIMAL | TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT);
+	    t_ptr->p1 = 3;
+	    t_ptr->cost = 70000L;
+	    NAR = 1;
+	    return 1;
+	  case 4:
+	  case 5:
+	  case 6:
+	    if (ERIRIL)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Eriril");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_ERIRIL;
+	    t_ptr->tohit = 3;
+	    t_ptr->todam = 5;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SEE_INVIS | TR_INT | TR_WIS);
+	    t_ptr->flags2 |= (TR_LIGHT | TR_ACTIVATE | TR_RES_LT | TR_ARTIFACT);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 20000L;
+	    ERIRIL = 1;
+	    return 1;
+	  case 7:
+	    if (OLORIN)
+		return 0;
+	    if (randint(2) > 1)
+		return 0;
+	    if (wizard || peek)
+		msg_print("Olorin");
+	    else
+		good_item_flag = TRUE;
+	    t_ptr->name2 = SN_OLORIN;
+	    t_ptr->tohit = 10;
+	    t_ptr->todam = 13;
+	    t_ptr->damage[0] = 2;
+	    t_ptr->damage[1] = 10;
+	    t_ptr->flags = (TR_SLAY_EVIL | TR_SEE_INVIS | TR_WIS | TR_INT | TR_CHR
+			    | TR_FLAME_TONGUE | TR_RES_FIRE);
+	    t_ptr->flags2 |= (TR_ARTIFACT | TR_HOLD_LIFE | TR_SLAY_ORC | TR_SLAY_TROLL
+			      | TR_ACTIVATE | TR_RES_NETHER);
+	    t_ptr->p1 = 4;
+	    t_ptr->cost = 130000L;
+	    OLORIN = 1;
+	    return 1;
+	}
+    }
+    return 0;
+}

@@ -473,14 +473,13 @@ int multiply_monster(int, int, int, int);
 void creatures(int);
 
 /* death.c */
-void exit_game(void);
 void display_scores(int, int);
 void delete_entry(int);
 long total_points(void);
+void exit_game(void);
 int look_line(int);
 
 /* desc.c */
-int is_a_vowel(int);
 void magic_init(void);
 void known1(inven_type *);
 int known1_p(inven_type *);
@@ -501,6 +500,8 @@ void invcopy(inven_type *, int);
 void desc_charges(int);
 void desc_remain(int);
 s16b object_offset(inven_type *);
+
+/* command.c */
 
 /* dungeon.c */
 void dungeon(void);
@@ -588,11 +589,11 @@ int get_panel(int, int, int);
 int damroll(int, int);
 int pdamroll(byte *);
 unsigned char loc_symbol(int, int);
-int compact_monsters(void);
 void prt_map(void);
 void add_food(int);
 
 /* misc2.c */
+int compact_monsters(void);
 int m_pop(void);
 int max_hp(byte *);
 int place_monster(int, int, int, int);
@@ -615,18 +616,18 @@ int summon_gundead(int *, int *);
 int summon_ancientd(int *, int *);
 int summon_hound(int *, int *);
 int summon_jelly(int *, int *);
-int popt(void);
-void pusht(int);
-int magik(int);
-int m_bonus(int, int, int);
-void magic_treasure(int, int, int, int);
 void set_options(void);
 int next_to_walls(int, int);
 int get_nmons_num(int);
 int distance(int, int, int, int);
 
 /* misc3.c */
+int popt(void);
+void pusht(int);
+int magik(int);
+int m_bonus(int, int, int);
 void place_trap(int, int, int);
+void magic_treasure(int, int, int, int);
 void place_rubble(int, int);
 void place_gold(int, int);
 int get_obj_num(int,int);
@@ -717,6 +718,7 @@ void prt_equippy_chars(void);
 void get_coin_type(creature_type *);
 
 /* moria1.c */
+int is_a_vowel(int);
 void change_speed(int);
 void py_bonuses(struct inven_type *, int);
 cptr describe_use(int);

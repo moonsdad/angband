@@ -16,13 +16,13 @@
 /*
  * Hack -- Local "game mode" vars
  */
-int new_game = FALSE;
-int fiddle = FALSE;
-int force_rogue_like = FALSE;
-int force_keys_to = FALSE;
+static int new_game = FALSE;
+static int fiddle = FALSE;
+static int force_rogue_like = FALSE;
+static int force_keys_to = FALSE;
+
 int unfelt    = TRUE;
 int be_nasty  = FALSE;
-int rating    = 0;
 int peek      = FALSE;
 int player_uid;
 int quests[MAX_QUESTS];
@@ -51,6 +51,41 @@ PAURNEN, CAMMITHRIM, CAMBELEG, INGWE, CARLAMMAS, HOLHENNETH, AEGLIN, CAMLOST,
 NIMLOTH, NAR, BERUTHIEL, GORLIM, ELENDIL, THORIN, CELEGORM, THRAIN,
 GONDOR, THINGOL, THORONGIL, LUTHIEN, TUOR, ROHAN, TULKAS, NECKLACE, BARAHIR,
 CASPANION, RAZORBACK, BLADETURNER;
+
+
+/*
+ * Unix machines need to "check wizard permissions"
+ */
+int is_wizard(int uid)
+{
+    int		test;
+    FILE	*fp;
+    char	buf[100];
+
+    /* Open the wizard file */
+    fp = my_tfopen(ANGBAND_WIZ, "r");
+
+    if (!fp) {
+	fprintf(stderr, "Can't get wizard check...");
+	exit_game();
+    }
+    do {
+	(void)fgets(buf, sizeof buf, fp);
+	if (sscanf(buf, "%d", &test)) {
+	    if (test == uid && buf[0] != '#') {
+		fclose(fp);
+		return TRUE;
+	    }
+	}
+    } while (!feof(fp));
+
+    /* Close the file */
+    fclose(fp);
+
+    return FALSE;
+}
+
+
 
 /*
  * Initialize, restore, and get the ball rolling.	-RAK-	
@@ -86,12 +121,12 @@ int main(int argc, char * argv[])
     
 
 
-#ifndef MSDOS
 #ifndef SET_UID
+# if !defined(MSDOS) && !defined(__EMX__)
     (void) umask(0);
+# endif
 #endif
-#endif
-    
+
 #ifdef SECURE
     Authenticate();
 #endif
@@ -133,13 +168,10 @@ int main(int argc, char * argv[])
 #endif
     
 #ifdef ANNOY
-    if (player_uid == ANNOY)
-	be_nasty=TRUE;
+    if (player_uid == ANNOY) be_nasty=TRUE;
     else
-	be_nasty=FALSE;
-#else
-    be_nasty=FALSE;
 #endif
+    be_nasty=FALSE;
 
 #if !defined(MSDOS) && !defined(__MINT__)
     (void)gethostname(thishost, (sizeof thishost) - 1);	/* get host */
@@ -177,9 +209,8 @@ int main(int argc, char * argv[])
 	switch (argv[0][1]) {
 	  case 'A':
 	  case 'a':
-	    if (is_wizard(player_uid))
+	    if (!is_wizard(player_uid)) goto usage;
 	    peek=TRUE;
-	    else goto usage;
 	    break;
 	  case 'N':
 	  case 'n':
@@ -211,7 +242,7 @@ int main(int argc, char * argv[])
 	    exit_game();
 	  case 'F':
 	  case 'f':
-	    if (is_wizard(player_uid) || to_be_wizard) FIDDLE=TRUE;
+	    if (is_wizard(player_uid) || to_be_wizard) FIDDLE = TRUE;
 	    else goto usage;
 	    break;
 	  case 'W':
@@ -229,8 +260,10 @@ int main(int argc, char * argv[])
 		d_check(py.misc.name);
 		NO_SAVE=TRUE;
 	    break;
+
 	  default:
 	  usage:
+
 	    if (is_wizard(player_uid)) {
 #ifdef MSDOS
 		puts("Usage: angband [-afnorw] [-s<num>] [-d<num>] <file>");
@@ -536,7 +569,7 @@ int main(int argc, char * argv[])
 
 
 /*
- * Init players with some belongings			-RAK-	
+ * Init players with some belongings			-RAK-
  */
 static void char_inven_init()
 {

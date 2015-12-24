@@ -436,7 +436,8 @@ int get_dir(cptr prompt, int * dir)
 
 
 /* 
- * Search Mode enhancement				-RAK-	 */
+ * Search Mode enhancement				-RAK-
+ */
 void search_on()
 {
     change_speed(1);
@@ -467,7 +468,7 @@ void search_off(void)
  * Something happens to disturb the player.		-CJS-
  * The first arg indicates a major disturbance, which affects search.
  *
- * The second arg indicates a light change. 
+ * The second arg indicates a light change.
  */
 void disturb(int s, int l)
 {
@@ -648,7 +649,7 @@ static int find_direction;/* Keep a record of which way we are going. */
 
 
 /*
- * Do we see a wall? Used in running.		-CJS- 
+ * Hack -- Do we see a wall?  Used in running.		-CJS- 
  */
 static int see_wall(int dir, int y, int x)
 {
@@ -669,11 +670,11 @@ static int see_wall(int dir, int y, int x)
 	return TRUE;
     
     /* Default */
-    return (TRUE);
+    return (FALSE);
 }
 
 /*
- * Do we see anything? Used in running.		-CJS- 
+ * Hack -- Do we see anything? Used in running.		-CJS- 
  */
 static int see_nothing(int dir, int y, int x)
 {
@@ -827,7 +828,7 @@ static void area_affect(int dir, int y, int x)
 	    /* potential corners and never cut known corners, so you step */
 	    /* into the straight option. */
 	    if (option2 == 0 || (find_examine && !find_cut)) {
-		if (option != 0)find_direction = option;
+		if (option != 0) find_direction = option;
 		if (option2 == 0) find_prevdir = option;
 		else find_prevdir = option2;
 	    }
@@ -1134,7 +1135,6 @@ void move_char(int dir, int do_pickup)
    are both blank, then it is a potential corner and enter if find_examine
    is set, otherwise must stop because it is not a corner.
 */
-
 
 
 

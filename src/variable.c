@@ -40,6 +40,9 @@ int command_count;		/* Gives repetition of commands. -CJS- */
 char last_command = ' ';  	/* Memory of previous command. */
 int default_dir = FALSE;	/* Use last direction for repeated command */
 
+int create_up_stair = FALSE;
+int create_down_stair = FALSE;
+
 char *old_state = NULL;         /* state array initialized by time -CWS */
 char *dummy_state = NULL;       /* dummy state array -CWS */
 
@@ -76,6 +79,9 @@ int opening_chest = 0;          /* Hack -- prevent chest generation */
 
 
 /* Inventory info */
+s16b inven_ctr = 0;		/* Total different obj's	*/
+s16b inven_weight = 0;		/* Cur carried weight	*/
+s16b equip_ctr = 0;		/* Cur equipment ctr	*/
 s16b missile_ctr = 0;		/* Counter for missiles */
 int weapon_heavy = FALSE;
 int pack_heavy = FALSE;
@@ -123,6 +129,8 @@ int delay_spd = 1;		/* Delay factor (0 to 9) */
 
 
 int feeling = 0;		/* Most recent feeling */
+int rating = 0;			/* Level's current rating */
+int good_item_flag = FALSE;	/* True if "Artifact" on this level */
 
 int monster_is_afraid = 0;      /* redo monster fear messages -CWS */
 char doing_inven = 0;		/* Hack -- track inventory commands */
@@ -164,12 +172,9 @@ int NO_SAVE=FALSE;
 cave_type *cave[MAX_HEIGHT];
 
 
-/* Monster memories */
-#ifdef MACINTOSH
-monster_lore *c_recall;
-#else
+
+/* The array of monster "memory" [MAX_CREATURES] */
 monster_lore c_recall[MAX_CREATURES];
-#endif
 
 struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 

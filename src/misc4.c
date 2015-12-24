@@ -12,7 +12,8 @@
 
 #include "angband.h"
 
-
+#define BLANK_LENGTH	24
+static char blank_string[] = "                        ";
 
 static cptr stat_names[] = {
     "STR: ", "INT: ", "WIS: ", "DEX: ", "CON: ", "CHR: "
@@ -342,8 +343,9 @@ void prt_afraid()
 {
     if (PY_FEAR & py.flags.status) {
 	put_buffer("Afraid", 23, 22);
-    else
+    else {
 	put_buffer("      ", 23, 22);
+    }
 }
 
 
@@ -368,21 +370,38 @@ void prt_state(void)
 {
     char tmp[16];
 
+    /* Turn off the flag */
     py.flags.status &= ~PY_REPEAT;
-    if (py.flags.paralysis > 1)
+
+    /* Most important info is paralyzation */
+    if (py.flags.paralysis > 1) {
 	put_buffer("Paralysed ", 23, 38);
+    }
+
+    /* Then comes resting */
     else if (PY_REST & py.flags.status) {
-	if (py.flags.rest > 0)
+	if (py.flags.rest > 0) {
 	    (void)sprintf(tmp, "Rest %-5d", py.flags.rest);
-	else if (py.flags.rest == -1)
+    }
+    else if (py.flags.rest == -1) {
 	    (void)sprintf(tmp, "Rest *****");
-	else if (py.flags.rest == -2)
+    }
+    else if (py.flags.rest == -2) {
 	    (void)sprintf(tmp, "Rest &&&&&");
+    }
 	put_buffer(tmp, 23, 38);
-    } else if (command_count > 0) {
+    }
+
+    /* Then comes repeating */
+    else if (command_count > 0) {
+
 	(void)sprintf(tmp, "Repeat %-3d", command_count);
+
+	/* Hack -- we need to redraw this */
 	py.flags.status |= PY_REPEAT;
+
 	put_buffer(tmp, 23, 38);
+
 	if (PY_SEARCH & py.flags.status)
 	    put_buffer("Search    ", 23, 38);
     } else if (PY_SEARCH & py.flags.status)
@@ -400,6 +419,7 @@ void prt_speed()
     int i = py.flags.speed;
 
     if (PY_SEARCH & py.flags.status)	/* Search mode. */
+
 	i--;
     if (i > 2)
 	put_buffer("Extremely Slow", 23, 49);
@@ -425,10 +445,12 @@ void prt_speed()
 void prt_study()
 {
     py.flags.status &= ~PY_STUDY;
-    if (py.flags.new_spells != 0)
+    if (py.flags.new_spells != 0) {
 	put_buffer("Study", 23, 64);
-    else
+    }
+    else {
 	put_buffer("     ", 23, 64);
+    }
 }
 
 
@@ -764,7 +786,8 @@ int inc_stat(int stat)
 }
 
 
-/*
+
+/* 
  * Decreases a stat by one randomized level		-RAK-	
  */
 int dec_stat(int stat)
@@ -963,7 +986,7 @@ static void prt_lnum(cptr header, s32b num, int row, int column)
 }
 
 /*
- * Print number with header at given row, column	-RAK-	 
+ * Print number with header at given row, column	-RAK-
  */
 static void prt_num(cptr header, int num, int row, int column)
 {
@@ -1295,18 +1318,19 @@ void change_name()
 
 
 
+
 /*
- * Computes current weight limit			-RAK-
+ * Computes current weight limit.			-RAK-
  */
 int weight_limit(void)
 {
     register s32b weight_cap;
 
     /* Factor in strength */
-    weight_cap = (long)py.stats.use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP
+    weight_cap = (long)py.stats.use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP;
 
     /* Hack -- large players can carry more */
-	+ (long)py.misc.wt;
+    weight_cap += (long)py.misc.wt;
 
     /* Nobody can carry more than 300 pounds */
     if (weight_cap > 3000L) weight_cap = 3000L;

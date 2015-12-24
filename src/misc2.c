@@ -387,7 +387,7 @@ int place_monster(int y, int x, int z, int slp)
 	if ((j=='k')||(j=='L')||(j=='o')||(j=='O')||(j=='T')||(j=='y')|| (j=='I')||(j=='&')) {
 
 	    /* Try for the highest level monster we can get */
-	    for (cur_pos=MAX_CREATURES-1;cur_pos>=0;cur_pos--)
+	    for (cur_pos=MAX_CREATURES-1;cur_pos>=0;cur_pos--) {
 
 		/* Find a similar, lower level, non-unique, monster */
 		if ((c_list[cur_pos].cchar==j) &&
@@ -413,6 +413,7 @@ int place_monster(int y, int x, int z, int slp)
 			place_monster(ny,nx,cur_pos,slp);
 		    }
 		}
+	    }
 	}
     }
 

@@ -36,40 +36,8 @@ static struct {
 
 extern int peek;
 
-/*
- * Generates character's stats			-JWT-
- */
-static void get_stats()
-{
-    register int i, tot;
-    int dice[18];
-
-    do {
-	tot = 0;
-	for (i = 0; i < 18; i++) {
-	    dice[i] = randint(3 + i % 3); /* Roll 3,4,5 sided dice once each */
-	    tot += dice[i];
-	}
-    }
-    while (tot <= 42 || tot >= 54);
-    
-    for (i = 0; i < 6; i++)
-	py.stats.max_stat[i] = 5 + dice[3 * i] + dice[3 * i + 1] +
-	    dice[3 * i + 2];
-}
 
 
-
-
-
-/*
- * Changes stats by given amount                                -JWT-   
- */
-static void change_stat(int stat, int amount)
-{
-  py.stats.max_stat[stat] =
-        adjust_stat(py.stats.max_stat[stat], (s16b) amount, FALSE);
-}
 
 
 /*
@@ -110,68 +78,47 @@ static int get_prev_stats()
 }
 
 
+
+
+
+
+
+
 /*
- * generate all stats and modify for race. needed in a separate module so
- * looping of character selection would be allowed     -RGM- 
+ * Choose the character's sex				-JWT-	 
  */
-static void get_all_stats()
+static void get_sex(void)
 {
-    register player_type *p_ptr;
-    register player_race *r_ptr;
-    register int        j;
+    char        c;
+    int        exit_flag;
 
-    p_ptr = &py;
-    r_ptr = &race[p_ptr->misc.prace];
-    get_stats();
-    change_stat(A_STR, r_ptr->str_adj);
-    change_stat(A_INT, r_ptr->int_adj);
-    change_stat(A_WIS, r_ptr->wis_adj);
-    change_stat(A_DEX, r_ptr->dex_adj);
-    change_stat(A_CON, r_ptr->con_adj);
-    change_stat(A_CHR, r_ptr->chr_adj);
-    for (j = 0; j < 6; j++) {
-	py.stats.cur_stat[j] = py.stats.max_stat[j];
-	py.stats.use_stat[j] = modify_stat(j, py.stats.mod_stat[j]);
-    }
-
-    p_ptr->misc.srh = r_ptr->srh;
-    p_ptr->misc.bth = r_ptr->bth;
-    p_ptr->misc.bthb = r_ptr->bthb;
-    p_ptr->misc.fos = r_ptr->fos;
-    p_ptr->misc.stl = r_ptr->stl;
-    p_ptr->misc.save = r_ptr->bsav;
-    p_ptr->misc.hitdie = r_ptr->bhitdie;
-    p_ptr->misc.lev = 1;
-    p_ptr->misc.ptodam = todam_adj();
-    p_ptr->misc.ptohit = tohit_adj();
-    p_ptr->misc.ptoac = 0;
-    p_ptr->misc.pac = toac_adj();
-    p_ptr->misc.expfact = r_ptr->b_exp;
-    p_ptr->flags.see_infra = r_ptr->infra;
-}
-
-/* copied from misc2.c, so the display loop would work nicely -cft */
-static cptr stat_names[] = {"STR: ", "INT: ", "WIS: ", "DEX: ", "CON: ", "CHR: "};
-
-
-#ifdef AUTOROLLER
-/* used for auto-roller.  Just put_stats(), w/o the extra info -CFT */
-static void put_auto_stats()
-{
-    register int i;
-    vtype        buf;
-
-    for (i = 0; i < 6; i++) {
-	cnv_stat(py.stats.use_stat[i], buf);
-	put_buffer(stat_names[i], 2 + i, 61);
-	put_buffer(buf, 2 + i, 66);
-	if (py.stats.max_stat[i] > py.stats.cur_stat[i]) {
-	    cnv_stat(py.stats.max_stat[i], buf);
-	    put_buffer(buf, 2 + i, 73);
+    exit_flag = FALSE;
+    clear_from(20);
+    put_buffer("Choose a sex (? for Help):", 20, 2);
+    put_buffer("m) Male       f) Female", 21, 2);
+    do {
+	move_cursor(20, 29);
+	c = inkey();
+	if (c == 'f' || c == 'F') {
+	    py.misc.male = FALSE;
+	    put_buffer("Female", 4, 15);
+	    exit_flag = TRUE;
+	}
+	else if (c == 'm' || c == 'M') {
+	    py.misc.male = TRUE;
+	    put_buffer("Male", 4, 15);
+	    exit_flag = TRUE;
+	}
+	else if (c == '?') {
+	    helpfile(ANGBAND_WELCOME);
+	}
+	else {
+	    bell();
 	}
     }
+    while (!exit_flag);
 }
-#endif
+
 
 /*
  * Allows player to select a race			-JWT-	 
@@ -221,6 +168,143 @@ static void choose_race(void)
     r_ptr = &race[j];
     p_ptr->misc.prace = j;
     put_buffer(r_ptr->trace, 3, 15);
+}
+
+
+
+/*
+ * Gets a character class				-JWT-	 
+ */
+static void get_class_choice()
+{
+    register int i, j;
+    int          k, l, m;
+    int          cl[MAX_CLASS], exit_flag;
+    player_class   *c_ptr;
+    char         tmp_str[80], s;
+    u32b       mask;
+
+    for (j = 0; j < MAX_CLASS; j++)
+	cl[j] = 0;
+    i = py.misc.prace;
+    j = 0;
+    k = 0;
+    l = 2;
+    m = 21;
+    mask = 0x1;
+    clear_from(20);
+    put_buffer("Choose a class (? for Help):", 20, 2);
+    do {
+	if (race[i].rtclass & mask) {
+	    (void)sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
+	    put_buffer(tmp_str, m, l);
+	    cl[k] = j;
+	    l += 15;
+	    if (l > 70) {
+		l = 2;
+		m++;
+	    }
+	    k++;
+	}
+	j++;
+	mask <<= 1;
+    }
+    while (j < MAX_CLASS);
+    py.misc.pclass = 0;
+    exit_flag = FALSE;
+    do {
+	move_cursor(20, 31);
+	s = inkey();
+	j = s - 'a';
+	if ((j < k) && (j >= 0)) {
+	    py.misc.pclass = cl[j];
+	    c_ptr = &class[py.misc.pclass];
+	    exit_flag = TRUE;
+	    clear_from(20);
+	    put_buffer(c_ptr->title, 5, 15);
+	} else if (s == '?')
+	    helpfile(ANGBAND_WELCOME);
+	else
+	    bell();
+    } while (!exit_flag);
+}
+
+
+static void get_class()
+{
+    int        i;
+    int                 min_value, max_value;
+    int                 percent;
+    char                buf[50];
+    register struct misc *m_ptr;
+    register player_type *p_ptr;
+    player_class         *c_ptr;
+
+    c_ptr = &class[py.misc.pclass];
+    p_ptr = &py;
+    change_stat(A_STR, c_ptr->madj_str);
+    change_stat(A_INT, c_ptr->madj_int);
+    change_stat(A_WIS, c_ptr->madj_wis);
+    change_stat(A_DEX, c_ptr->madj_dex);
+    change_stat(A_CON, c_ptr->madj_con);
+    change_stat(A_CHR, c_ptr->madj_chr);
+
+    for (i = 0; i < 6; i++) {
+	p_ptr->stats.cur_stat[i] = p_ptr->stats.max_stat[i];
+	p_ptr->stats.use_stat[i] = p_ptr->stats.max_stat[i];
+    }
+    p_ptr->misc.ptodam = todam_adj();           /* Real values		 */
+    p_ptr->misc.ptohit = tohit_adj();
+    p_ptr->misc.ptoac = toac_adj();
+    p_ptr->misc.pac = 0;
+    p_ptr->misc.dis_td = p_ptr->misc.ptodam;	/* Displayed values	 */
+    p_ptr->misc.dis_th = p_ptr->misc.ptohit;
+    p_ptr->misc.dis_tac = p_ptr->misc.ptoac;
+    p_ptr->misc.dis_ac = p_ptr->misc.pac + p_ptr->misc.dis_tac;
+
+/*
+ * now set misc stats, do this after setting stats because of con_adj() for
+ * hitpoints 
+ */
+    m_ptr = &py.misc;
+    m_ptr->hitdie += c_ptr->adj_hd;
+    m_ptr->mhp = con_adj() + m_ptr->hitdie;
+    m_ptr->chp = m_ptr->mhp;
+    m_ptr->chp_frac = 0;
+
+/*
+ * initialize hit_points array: put bounds on total possible hp,
+ * only succeed if it is within 1/8 of average value
+ */
+    min_value = (MAX_PLAYER_LEVEL * 3 * (m_ptr->hitdie - 1)) / 8 +
+	MAX_PLAYER_LEVEL;
+    max_value = (MAX_PLAYER_LEVEL * 5 * (m_ptr->hitdie - 1)) / 8 +
+	MAX_PLAYER_LEVEL;
+
+    player_hp[0] = m_ptr->hitdie;
+    do {
+	for (i = 1; i < MAX_PLAYER_LEVEL; i++) {
+	    player_hp[i] = randint((int)m_ptr->hitdie);
+	    player_hp[i] += player_hp[i - 1];
+	}
+    }
+    while ((player_hp[MAX_PLAYER_LEVEL - 1] < min_value) ||
+	   (player_hp[MAX_PLAYER_LEVEL - 1] > max_value));
+
+    if (peek) {
+	percent = (int)(((long)player_hp[MAX_PLAYER_LEVEL - 1] * 200L) /
+		(m_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * m_ptr->hitdie)));
+	sprintf(buf, "%d%% Life Rating", percent);
+	msg_print(buf);
+    }
+    m_ptr->bth += c_ptr->mbth;
+    m_ptr->bthb += c_ptr->mbthb;   /* RAK */
+    m_ptr->srh += c_ptr->msrh;
+    m_ptr->disarm = c_ptr->mdis + todis_adj();
+    m_ptr->fos += c_ptr->mfos;
+    m_ptr->stl += c_ptr->mstl;
+    m_ptr->save += c_ptr->msav;
+    m_ptr->expfact += c_ptr->m_exp;
 }
 
 
@@ -287,6 +371,108 @@ static int adjust_stat(int stat_value, s16b amount, int auto_roll)
 
 
 /*
+ * Changes stats by given amount                                -JWT-
+ */
+static void change_stat(int stat, int amount)
+{
+  py.stats.max_stat[stat] =
+        adjust_stat(py.stats.max_stat[stat], (s16b) amount, FALSE);
+}
+
+
+
+/*
+ * Generates character's stats			-JWT-
+ */
+static void get_stats(void)
+{
+    register int        i, tot;
+    int dice[18];
+
+    do {
+	tot = 0;
+	for (i = 0; i < 18; i++) {
+	    dice[i] = randint(3 + i % 3); /* Roll 3,4,5 sided dice once each */
+	    tot += dice[i];
+	}
+    }
+    while (tot <= 42 || tot >= 54);
+    
+    for (i = 0; i < 6; i++)
+	py.stats.max_stat[i] = 5 + dice[3 * i] + dice[3 * i + 1] +
+	    dice[3 * i + 2];
+}
+
+/*
+ * Generate all stats and modify for race.
+ * Needed in a separate module so looping of character
+ * selection would be allowed     -RGM- 
+ */
+static void get_all_stats(void)
+{
+    register int        j;
+
+    player_type *p_ptr = &py;
+    player_race *r_ptr = &race[p_ptr->misc.prace];
+
+    get_stats();
+    /* Modify the stats for "class" */
+    change_stat(A_STR, r_ptr->str_adj);
+    change_stat(A_INT, r_ptr->int_adj);
+    change_stat(A_WIS, r_ptr->wis_adj);
+    change_stat(A_DEX, r_ptr->dex_adj);
+    change_stat(A_CON, r_ptr->con_adj);
+    change_stat(A_CHR, r_ptr->chr_adj);
+
+    /* Analyze the stats */
+    for (j = 0; j < 6; j++) {
+	py.stats.cur_stat[j] = py.stats.max_stat[j];
+	py.stats.use_stat[j] = modify_stat(j, py.stats.mod_stat[j]);
+    }
+
+    p_ptr->misc.srh = r_ptr->srh;
+    p_ptr->misc.bth = r_ptr->bth;
+    p_ptr->misc.bthb = r_ptr->bthb;
+    p_ptr->misc.fos = r_ptr->fos;
+    p_ptr->misc.stl = r_ptr->stl;
+    p_ptr->misc.save = r_ptr->bsav;
+    p_ptr->misc.hitdie = r_ptr->bhitdie;
+    p_ptr->misc.lev = 1;
+    p_ptr->misc.ptodam = todam_adj();
+    p_ptr->misc.ptohit = tohit_adj();
+    p_ptr->misc.ptoac = 0;
+    p_ptr->misc.pac = toac_adj();
+    p_ptr->misc.expfact = r_ptr->b_exp;
+    p_ptr->flags.see_infra = r_ptr->infra;
+}
+
+
+#ifdef AUTOROLLER
+
+/*
+ * used for auto-roller.  Just "put_stats()" w/o the extra info -CFT
+ */
+static void put_auto_stats()
+{
+    register int i;
+    vtype        buf;
+
+    /* Put the stats */
+    for (i = 0; i < 6; i++) {
+	cnv_stat(py.stats.use_stat[i], buf);
+	put_buffer(stat_names[i], 2 + i, 61);
+	put_buffer(buf, 2 + i, 66);
+	if (py.stats.max_stat[i] > py.stats.cur_stat[i]) {
+	    cnv_stat(py.stats.max_stat[i], buf);
+	    put_buffer(buf, 2 + i, 73);
+	}
+    }
+}
+
+#endif
+
+
+/*
  * Will print the history of a character			-JWT-	 
  */
 static void print_history()
@@ -296,40 +482,6 @@ static void print_history()
     put_buffer("Character Background", 14, 27);
     for (i = 0; i < 4; i++)
 	prt(py.misc.history[i], i + 15, 10);
-}
-
-
-static void set_prev_history()
-{
-    prev.bg.info = background->info;
-    prev.bg.roll = background->roll;
-    prev.bg.chart = background->chart;
-    prev.bg.next = background->next;
-    prev.bg.bonus = background->bonus;
-    prev.sc = py.misc.sc;
-
-    (void)strncpy(prev.history[0], py.misc.history[0], 60);
-    (void)strncpy(prev.history[1], py.misc.history[1], 60);
-    (void)strncpy(prev.history[2], py.misc.history[2], 60);
-    (void)strncpy(prev.history[3], py.misc.history[3], 60);
-
-    return;
-}
-
-
-static void get_prev_history()
-{
-    register int        i;
-
-    background->info = prev.bg.info;
-    background->roll = prev.bg.roll;
-    background->chart = prev.bg.chart;
-    background->next = prev.bg.next;
-    background->bonus = prev.bg.bonus;
-    py.misc.sc = prev.sc;
-
-    for (i = 0; i < 4; i++)
-	strncpy(py.misc.history[i], prev.history[i], 60);
 }
 
 
@@ -431,36 +583,36 @@ static void get_history(void)
 }
 
 
-/*
- * Gets the character's sex				-JWT-	
- */
-static void get_sex()
+static void get_prev_history()
 {
-    register int        exit_flag;
-    char                c;
+    register int        i;
 
-    exit_flag = FALSE;
-    clear_from(20);
-    put_buffer("Choose a sex (? for Help):", 20, 2);
-    put_buffer("m) Male       f) Female", 21, 2);
-    do {
-	move_cursor(20, 29);
-    /* speed not important here */
-	c = inkey();
-	if (c == 'f' || c == 'F') {
-	    py.misc.male = FALSE;
-	    put_buffer("Female", 4, 15);
-	    exit_flag = TRUE;
-	} else if (c == 'm' || c == 'M') {
-	    py.misc.male = TRUE;
-	    put_buffer("Male", 4, 15);
-	    exit_flag = TRUE;
-	} else if (c == '?')
-	    helpfile(ANGBAND_WELCOME);
-	else
-	    bell();
-    }
-    while (!exit_flag);
+    background->info = prev.bg.info;
+    background->roll = prev.bg.roll;
+    background->chart = prev.bg.chart;
+    background->next = prev.bg.next;
+    background->bonus = prev.bg.bonus;
+    py.misc.sc = prev.sc;
+
+    for (i = 0; i < 4; i++)
+	strncpy(py.misc.history[i], prev.history[i], 60);
+}
+
+static void set_prev_history()
+{
+    prev.bg.info = background->info;
+    prev.bg.roll = background->roll;
+    prev.bg.chart = background->chart;
+    prev.bg.next = background->next;
+    prev.bg.bonus = background->bonus;
+    prev.sc = py.misc.sc;
+
+    (void)strncpy(prev.history[0], py.misc.history[0], 60);
+    (void)strncpy(prev.history[1], py.misc.history[1], 60);
+    (void)strncpy(prev.history[2], py.misc.history[2], 60);
+    (void)strncpy(prev.history[3], py.misc.history[3], 60);
+
+    return;
 }
 
 
@@ -513,84 +665,39 @@ static void get_prev_ahw()
 
 
 /*
- * Gets a character class				-JWT-	
+ * Given a stat value, return a monetary value,
+ * which affects the amount of gold a player has. 
  */
-static void get_class()
+static int monval(int i)
 {
-    register int        i;
-    int                 min_value, max_value;
-    int                 percent;
-    char                buf[50];
-    register struct misc *m_ptr;
-    register player_type *p_ptr;
-    player_class         *c_ptr;
-
-    c_ptr = &class[py.misc.pclass];
-    p_ptr = &py;
-    change_stat(A_STR, c_ptr->madj_str);
-    change_stat(A_INT, c_ptr->madj_int);
-    change_stat(A_WIS, c_ptr->madj_wis);
-    change_stat(A_DEX, c_ptr->madj_dex);
-    change_stat(A_CON, c_ptr->madj_con);
-    change_stat(A_CHR, c_ptr->madj_chr);
-
-    for (i = 0; i < 6; i++) {
-	p_ptr->stats.cur_stat[i] = p_ptr->stats.max_stat[i];
-	p_ptr->stats.use_stat[i] = p_ptr->stats.max_stat[i];
-    }
-    p_ptr->misc.ptodam = todam_adj();           /* Real values		 */
-    p_ptr->misc.ptohit = tohit_adj();
-    p_ptr->misc.ptoac = toac_adj();
-    p_ptr->misc.pac = 0;
-    p_ptr->misc.dis_td = p_ptr->misc.ptodam;	/* Displayed values	 */
-    p_ptr->misc.dis_th = p_ptr->misc.ptohit;
-    p_ptr->misc.dis_tac = p_ptr->misc.ptoac;
-    p_ptr->misc.dis_ac = p_ptr->misc.pac + p_ptr->misc.dis_tac;
-
-/*
- * now set misc stats, do this after setting stats because of con_adj() for
- * hitpoints 
- */
-    m_ptr = &py.misc;
-    m_ptr->hitdie += c_ptr->adj_hd;
-    m_ptr->mhp = con_adj() + m_ptr->hitdie;
-    m_ptr->chp = m_ptr->mhp;
-    m_ptr->chp_frac = 0;
-
-/*
- * initialize hit_points array: put bounds on total possible hp,
- * only succeed if it is within 1/8 of average value
- */
-    min_value = (MAX_PLAYER_LEVEL * 3 * (m_ptr->hitdie - 1)) / 8 +
-	MAX_PLAYER_LEVEL;
-    max_value = (MAX_PLAYER_LEVEL * 5 * (m_ptr->hitdie - 1)) / 8 +
-	MAX_PLAYER_LEVEL;
-
-    player_hp[0] = m_ptr->hitdie;
-    do {
-	for (i = 1; i < MAX_PLAYER_LEVEL; i++) {
-	    player_hp[i] = randint((int)m_ptr->hitdie);
-	    player_hp[i] += player_hp[i - 1];
-	}
-    }
-    while ((player_hp[MAX_PLAYER_LEVEL - 1] < min_value) ||
-	   (player_hp[MAX_PLAYER_LEVEL - 1] > max_value));
-
-    if (peek) {
-	percent = (int)(((long)player_hp[MAX_PLAYER_LEVEL - 1] * 200L) /
-		(m_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * m_ptr->hitdie)));
-	sprintf(buf, "%d%% Life Rating", percent);
-	msg_print(buf);
-    }
-    m_ptr->bth += c_ptr->mbth;
-    m_ptr->bthb += c_ptr->mbthb;   /* RAK */
-    m_ptr->srh += c_ptr->msrh;
-    m_ptr->disarm = c_ptr->mdis + todis_adj();
-    m_ptr->fos += c_ptr->mfos;
-    m_ptr->stl += c_ptr->mstl;
-    m_ptr->save += c_ptr->msav;
-    m_ptr->expfact += c_ptr->m_exp;
+    return (5 * (i - 10));
 }
+
+/*
+ * Get the player's starting money
+ */
+static void get_money(void)
+{
+    register int        tmp, gold;
+    register u16b    *a_ptr;
+
+    a_ptr = py.stats.max_stat;
+    tmp = monval(a_ptr[A_STR]) + monval(a_ptr[A_INT])
+	+ monval(a_ptr[A_WIS]) + monval(a_ptr[A_CON])
+	+ monval(a_ptr[A_DEX]);
+
+    gold = py.misc.sc * 6 + randint(25) + 325;          /* Social Class adj */
+    gold -= tmp;		   /* Stat adj */
+    gold += monval(a_ptr[A_CHR]);  /* Charisma adj	 */
+    if (!py.misc.male)
+	gold += 50;		   /* She charmed the banker into it! -CJS- */
+				   /* She slept with the banker.. :) -GDH-  */
+    if (gold < 80)
+	gold = 80;		   /* Minimum */
+    py.misc.au = gold;
+}
+
+
 
 void rerate()
 {
@@ -621,94 +728,6 @@ void rerate()
     msg_print(buf);
 }
 
-/* 
- * Gets a character class				-JWT-	 
- */
-static void get_class_choice()
-{
-    register int i, j;
-    int          k, l, m;
-    int          cl[MAX_CLASS], exit_flag;
-    player_class   *c_ptr;
-    char         tmp_str[80], s;
-    u32b       mask;
-
-    for (j = 0; j < MAX_CLASS; j++)
-	cl[j] = 0;
-    i = py.misc.prace;
-    j = 0;
-    k = 0;
-    l = 2;
-    m = 21;
-    mask = 0x1;
-    clear_from(20);
-    put_buffer("Choose a class (? for Help):", 20, 2);
-    do {
-	if (race[i].rtclass & mask) {
-	    (void)sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
-	    put_buffer(tmp_str, m, l);
-	    cl[k] = j;
-	    l += 15;
-	    if (l > 70) {
-		l = 2;
-		m++;
-	    }
-	    k++;
-	}
-	j++;
-	mask <<= 1;
-    }
-    while (j < MAX_CLASS);
-    py.misc.pclass = 0;
-    exit_flag = FALSE;
-    do {
-	move_cursor(20, 31);
-	s = inkey();
-	j = s - 'a';
-	if ((j < k) && (j >= 0)) {
-	    py.misc.pclass = cl[j];
-	    c_ptr = &class[py.misc.pclass];
-	    exit_flag = TRUE;
-	    clear_from(20);
-	    put_buffer(c_ptr->title, 5, 15);
-	} else if (s == '?')
-	    helpfile(ANGBAND_WELCOME);
-	else
-	    bell();
-    } while (!exit_flag);
-}
-
-
-/*
- * Given a stat value, return a monetary value, which affects the amount of
- * gold a player has. 
- */
-static int monval( int i)
-{
-    return 5 * ((int)i - 10);
-}
-
-
-static void get_money()
-{
-    register int        tmp, gold;
-    register u16b    *a_ptr;
-
-    a_ptr = py.stats.max_stat;
-    tmp = monval(a_ptr[A_STR]) + monval(a_ptr[A_INT])
-	+ monval(a_ptr[A_WIS]) + monval(a_ptr[A_CON])
-	+ monval(a_ptr[A_DEX]);
-
-    gold = py.misc.sc * 6 + randint(25) + 325;          /* Social Class adj */
-    gold -= tmp;		   /* Stat adj */
-    gold += monval(a_ptr[A_CHR]);  /* Charisma adj	 */
-    if (!py.misc.male)
-	gold += 50;		   /* She charmed the banker into it! -CJS- */
-				   /* She slept with the banker.. :) -GDH-  */
-    if (gold < 80)
-	gold = 80;		   /* Minimum */
-    py.misc.au = gold;
-}
 
 
 /* ---------- M A I N  for Character Creation Routine ---------- */

@@ -108,11 +108,14 @@ static cptr look_mon_desc(int mnum)
 	else
 	    m->maxhp = pdamroll(c_list[m->mptr].hd);
     }
-    if (m->hp > m->maxhp)
-	m->hp = m->maxhp;
+
+    if (m->hp > m->maxhp) m->hp = m->maxhp;
 
     if ((m->maxhp == 0) || (m->hp >= m->maxhp))	/* shouldn't ever need > -CFT */
+
+	/* No damage */
 	return (living ? "unhurt" : "undamaged");
+
     thp = (s32b) m->hp;
     tmax = (s32b) m->maxhp;
 
@@ -150,8 +153,11 @@ static int look_see(int x, int y, int *transparent)
 	msg_print(tmp_str);
     }
 
-    if (x == 0 && y == 0) dstring = "You are on";
-    else dstring = "You see";
+    /* Default to looking at an object */
+    dstring = "You see";
+
+    /* Looking under the player */
+    if (!x && !y) dstring = "You are on";
 
     /* Something */
     j = char_col + gl_fxx * x + gl_fxy * y;
@@ -181,11 +187,13 @@ static int look_see(int x, int y, int *transparent)
 	j = m_list[c_ptr->cptr].mptr;
 
 	if (c_list[j].cdefense & UNIQUE) {
+
+	    /* Describe */
 	    (void)sprintf(out_val, "%s %s (%s).  [(r)ecall]",
-			  dstring,
-			  c_list[j].name,
-			  look_mon_desc((int)c_ptr->cptr));
+			  dstring, c_list[j].name, look_mon_desc((int)c_ptr->cptr));
 	}
+
+	/* Use prompt */
 	else {
 	    (void)sprintf(out_val, "%s %s %s (%s).  [(r)ecall]",
 			  dstring,
@@ -517,8 +525,8 @@ void look()
 
 
 /*
- * Chests have traps too.				-RAK-	 
- * Note: Chest traps are based on the FLAGS value		
+ * Chests have traps too.				-RAK-
+ * Note: Chest traps are based on the FLAGS value
  */
 static void chest_trap(int y, int x)
 {
@@ -1137,17 +1145,17 @@ void disarm_trap()
  * into the door way. To open a stuck door, it must be bashed. A closed door
  * can be jammed (which makes it stuck if previously locked). 
  *
- * Creatures can also open doors. A creature with open door ability will (if not
- * in the line of sight) move though a closed or secret door with no changes.
- * If in the line of sight, closed door are openned, & secret door revealed.
- * Whether in the line of sight or not, such a creature may unlock or unstick
- * a door. 
+ * Creatures can also open doors. A creature with open door ability will
+ * (if not in the line of sight) move though a closed or secret door with
+ * no changes.  If in the line of sight, closed door are openned, & secret
+ * door revealed.  Whether in the line of sight or not, such a creature may
+ * unlock or unstick a door.  
  *
  * A creature with no such ability will attempt to bash a non-secret door. 
  */
 void bash()
 {
-    int                  y, x, dir, tmp;
+    int                 y, x, tmp, dir;
     register cave_type  *c_ptr;
     register inven_type *t_ptr;
 #ifdef TARGET
@@ -1228,6 +1236,293 @@ void bash()
 
 
 /*
+ * Jam a closed door -RAK-
+ */
+static void jamdoor()
+{
+    int                  y, x, dir, i, j;
+    register cave_type  *c_ptr;
+    register inven_type *t_ptr, *i_ptr;
+    char                 tmp_str[80];
+#ifdef TARGET
+    int temp = target_mode; /* targetting will screw up get_dir.. -CFT */
+#endif /* TARGET */
+
+    free_turn_flag = TRUE;
+    y = char_row;
+    x = char_col;
+#ifdef TARGET
+    target_mode = FALSE; /* turn off target mode, restore later */
+#endif
+    if (get_dir(NULL, &dir)) {
+	(void)mmove(dir, &y, &x);
+	c_ptr = &cave[y][x];
+	if (c_ptr->tptr != 0) {
+	    t_ptr = &t_list[c_ptr->tptr];
+	    if (t_ptr->tval == TV_CLOSED_DOOR)
+		if (c_ptr->cptr == 0) {
+		    if (find_range(TV_SPIKE, TV_NEVER, &i, &j)) {
+			free_turn_flag = FALSE;
+			count_msg_print("You jam the door with a spike.");
+			if (t_ptr->p1 > 0)
+			    t_ptr->p1 = (-t_ptr->p1);	/* Make locked to stuck. */
+		    /* Successive spikes have a progressively smaller effect.
+		     * Series is: 0 20 30 37 43 48 52 56 60 64 67 70 ... 
+		     */
+			t_ptr->p1 -= 1 + 190 / (10 - t_ptr->p1);
+			i_ptr = &inventory[i];
+			if (i_ptr->number > 1) {
+			    i_ptr->number--;
+			    inven_weight -= i_ptr->weight;
+			} else
+			    inven_destroy(i);
+		    } else
+			msg_print("But you have no spikes.");
+		} else {
+		    free_turn_flag = FALSE;
+		    (void)sprintf(tmp_str, "The %s is in your way!",
+				  c_list[m_list[c_ptr->cptr].mptr].name);
+		    msg_print(tmp_str);
+		}
+	    else if (t_ptr->tval == TV_OPEN_DOOR)
+		msg_print("The door must be closed first.");
+	    else
+		msg_print("That isn't a door!");
+	} else
+	    msg_print("That isn't a door!");
+#ifdef TARGET
+	target_mode = temp;
+#endif
+    }
+}
+
+
+/*
+ * Throw an object across the dungeon.		-RAK-
+ * Note: Flasks of oil do "fire damage" (is this still true?)
+ * Note: Extra damage and chance of hitting when missiles are used
+ * with correct weapon.  I.E.  wield bow and throw arrow.
+ * Note: Some characters will now get multiple shots per turn -EAM
+ */
+void throw_object()
+{
+    int item_val, tbth, tpth, tdam, tdis;
+    int y, x, oldy, oldx, cur_dis, dir;
+    int flag, visible;
+    int thits, max_shots;
+    int ok_throw = FALSE; /* used to prompt user with, so doesn't throw wrong thing */
+    bigvtype            out_val, tmp_str;
+    inven_type          throw_obj;
+    register cave_type *c_ptr;
+    register monster_type *m_ptr;
+    register int        i;
+    char                tchar;
+
+    if (inven_ctr == 0) {
+	msg_print("But you are not carrying anything.");
+	free_turn_flag = TRUE;
+    } else if (get_item(&item_val, "Fire/Throw which one?", 0, inven_ctr - 1, 0)) {
+	inven_type *t = &inventory[item_val];
+	
+	if ((t->tval == TV_FLASK) || (t->tval == TV_SLING_AMMO) ||
+	    (t->tval == TV_ARROW) || (t->tval == TV_BOLT) ||
+	    (t->tval == TV_SPIKE) || (t->tval == TV_MISC))
+	    ok_throw = TRUE;
+	else if (((t->tval == TV_FOOD) || (t->tval == TV_POTION1) ||
+		  (t->tval == TV_POTION2)) && known1_p(t) &&
+		 /* almost all potions do 1d1 damage when thrown.  I want the code
+		    to ask before throwing away potions of DEX, *Healing*, etc.
+		    This also means it will ask before throwing potions of slow
+		    poison, and other low value items that the player is likely to
+		    not care about.  This code will mean that mushrooms/molds of
+		    unhealth, potions of detonations and death are the only
+		    always-throwable food/potions.  (plus known bad ones, in a
+		    later test...) -CFT */
+		 (t->damage[0] > 1) && (t->damage[1] > 1))
+	    ok_throw = TRUE; /* if it's a mushroom or potion that does
+                                damage when thrown... */
+	else if (!known2_p(t) && (t->ident & ID_DAMD))
+	    ok_throw = TRUE;  /* Not IDed, but user knows it's cursed... */
+	else if ((t->tval >= TV_MIN_WEAR) && (t->tval <= TV_MAX_WEAR) &&
+		 (t->flags & TR_CURSED) && known2_p(t))
+	    ok_throw = TRUE; /* if user wants to throw cursed, let him */
+	else if ((object_list[t->index].cost <= 0) && known1_p(t) &&
+		 !(known2_p(t) && (t->cost > 0)))
+	    ok_throw = TRUE;
+	else if ((t->cost <= 0) && known2_p(t))
+	    ok_throw = TRUE; /* it's junk, let him throw it */
+	else if ((t->tval >= TV_HAFTED) &&
+		 (t->tval <= TV_DIGGING) && !(t->name2))
+	    ok_throw = TRUE; /* non ego/art weapons are okay to just throw, since
+				they are damaging (Moral of story: wield your weapon
+				if you're worried that you might throw it away!) */
+	else { /* otherwise double-check with user before throwing -CFT */
+	    objdes(tmp_str, t, TRUE);
+	    sprintf(out_val, "Really throw %s?", tmp_str);
+	    ok_throw = get_check(out_val);
+	}
+    } /* if selected an item to throw */
+
+    if (ok_throw) { /* can only be true if selected item, and it either looked
+		     * okay, or user said yes... */
+	if (get_dir(NULL, &dir)) {
+	    desc_remain(item_val);
+	    if (py.flags.confused > 0) {
+		msg_print("You are confused.");
+		do {
+		    dir = randint(9);
+		}
+		while (dir == 5);
+	    }
+	    max_shots = inventory[item_val].number;
+	    inven_throw(item_val, &throw_obj);
+	    facts(&throw_obj, &tbth, &tpth, &tdam, &tdis, &thits);
+	    if (thits > max_shots)
+		thits = max_shots;
+	    tchar = throw_obj.tchar;
+	/* EAM Start loop over multiple shots */
+	    while (thits-- > 0) {
+		if (inventory[INVEN_WIELD].subval == 12)
+		    tpth -= 10;
+		flag = FALSE;
+		y = char_row;
+		x = char_col;
+		oldy = char_row;
+		oldx = char_col;
+		cur_dis = 0;
+		do {
+		    (void)mmove(dir, &y, &x);
+		    cur_dis++;
+		    lite_spot(oldy, oldx);
+		    if (cur_dis > tdis)
+			flag = TRUE;
+		    c_ptr = &cave[y][x];
+		    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (!flag)) {
+			if (c_ptr->cptr > 1) {
+			    flag = TRUE;
+			    m_ptr = &m_list[c_ptr->cptr];
+			    tbth = tbth - cur_dis;
+			/* if monster not lit, make it much more difficult to
+			 * hit, subtract off most bonuses, and reduce bthb
+			 * depending on distance 
+			 */
+			    if (!m_ptr->ml)
+				tbth = (tbth / (cur_dis + 2))
+				    - (py.misc.lev *
+				       class_level_adj[py.misc.pclass][CLA_BTHB] / 2)
+				    - (tpth * (BTH_PLUS_ADJ - 1));
+			    if (test_hit(tbth, (int)py.misc.lev, tpth,
+				   (int)c_list[m_ptr->mptr].ac, CLA_BTHB)) {
+				i = m_ptr->mptr;
+				objdes(tmp_str, &throw_obj, FALSE);
+			    /* Does the player know what he's fighting?	   */
+				if (!m_ptr->ml) {
+				    (void)sprintf(out_val,
+					   "The %s finds a mark.", tmp_str);
+				    visible = FALSE;
+				} else {
+				    if (c_list[i].cdefense & UNIQUE)
+					(void)sprintf(out_val, "The %s hits %s.",
+						   tmp_str, c_list[i].name);
+				    else
+					(void)sprintf(out_val, "The %s hits the %s.",
+						   tmp_str, c_list[i].name);
+				    visible = TRUE;
+				}
+				msg_print(out_val);
+				tdam = tot_dam(&throw_obj, tdam, i);
+				tdam = critical_blow((int)throw_obj.weight,
+						     tpth, tdam, CLA_BTHB);
+				if (tdam < 0)
+				    tdam = 0;
+			    /*
+			     * always print fear msgs, so player can stop
+			     * shooting -CWS 
+			     */
+				i = mon_take_hit((int)c_ptr->cptr, tdam, TRUE);
+				if (i < 0) {
+				    char                buf[100];
+				    char                cdesc[100];
+				    if (visible) {
+					if (c_list[i].cdefense & UNIQUE)
+					    sprintf(cdesc, "%s", c_list[m_ptr->mptr].name);
+					else
+					    sprintf(cdesc, "The %s", c_list[m_ptr->mptr].name);
+				    } else
+					strcpy(cdesc, "It");
+				    (void)sprintf(buf,
+						  pain_message((int)c_ptr->cptr,
+							       (int)tdam), cdesc);
+				    msg_print(buf);
+				}
+				if (i >= 0) {
+				    if (!visible)
+					msg_print("You have killed something!");
+				    else {
+					if (c_list[i].cdefense & UNIQUE)
+					    (void)sprintf(out_val, "You have killed %s.",
+							  c_list[i].name);
+					else
+					    (void)sprintf(out_val, "You have killed the %s.",
+							  c_list[i].name);
+					msg_print(out_val);
+				    }
+				    prt_experience();
+				}
+				if (stays_when_throw(&throw_obj))
+/* should it land on floor?  Or else vanish forever? */
+				    drop_throw(oldy, oldx, &throw_obj);
+			    }
+			    else
+				drop_throw(oldy, oldx, &throw_obj);
+			}
+			else
+			{   /* do not test c_ptr->fm here */
+			    if (panel_contains(y, x) && (py.flags.blind < 1)
+				&& (c_ptr->tl || c_ptr->pl)) {
+				print(tchar, y, x);
+				put_qio();	/* show object moving */
+				delay(8 * delay_spd);	/* milliseconds */
+			    }
+			}
+		    } else {
+			flag = TRUE;
+			drop_throw(oldy, oldx, &throw_obj);
+		    }
+		    oldy = y;
+		    oldx = x;
+		}
+		while (!flag);
+		if (thits > 0) {   /* triple crossbow check -- not really needed */
+		    if (inventory[INVEN_WIELD].subval != 12) {
+			(void)sprintf(out_val, "Keep shooting?");
+			if (get_check(out_val)) {
+			    desc_remain(item_val);
+			    inven_throw(item_val, &throw_obj);
+			} else
+			    thits = 0;
+		    } else {
+			desc_remain(item_val);
+			inven_throw(item_val, &throw_obj);
+		    }
+		}
+
+                /* If we're going to fire again, reroll damage for the
+                   next missile. This makes each missile's damage more
+                   random, AND it doesn't allow damage bonuses to accumulate!
+                */
+		if (thits > 0) {
+                    int dummy; /* ignore everything except tdam */
+                    facts(&throw_obj, &dummy, &dummy, &tdam, &dummy, &dummy);
+                }
+	    }
+	} /* EAM end loop over multiple shots */
+    }
+}
+
+
+
+/*
  * Resting allows a player to safely restore his hp	-RAK-
  */
 void rest(void)
@@ -1271,6 +1566,53 @@ void rest(void)
     } else {
 	erase_line(MSG_LINE, 0);
 	free_turn_flag = TRUE;
+    }
+}
+
+
+static void print_feeling()
+{
+    if (dun_level == 0)		/* snicker.... -CWS */
+	msg_print("You feel there is something special about the town level.");
+    else if (unfelt)
+	msg_print("Looks like any other level.");
+    else
+
+    /* Analyze the feeling */
+    switch(feeling) {
+      case 0:
+	msg_print("Looks like any other level.");
+	break;
+      case 1:
+	msg_print("You feel there is something special about this level.");
+	break;
+      case 2:
+	msg_print("You have a superb feeling about this level.");
+	break;
+      case 3:
+	msg_print("You have an excellent feeling that your luck is turning...");
+	break;
+      case 4:
+	msg_print("You have a very good feeling.");
+	break;
+      case 5:
+	msg_print("You have a good feeling.");
+	break;
+      case 6:
+	msg_print("You feel strangely lucky.");
+	break;
+      case 7:
+	msg_print("You feel your luck is turning...");
+	break;
+      case 8:
+	msg_print("You like the look of this place.");
+	break;
+      case 9:
+	msg_print("This level can't be all bad...");
+	break;
+      default:
+	msg_print("What a boring place...");
+	break;
     }
 }
 
@@ -1323,5 +1665,288 @@ void scribe_object(void)
     } else
 	msg_print("You are not carrying anything to inscribe.");
 }
+
+
+
+/*
+ * Check to see which artifacts have been seen		 
+ */
+void artifact_check(void)
+{
+    FILE *file1;
+    vtype filename;
+
+    prt("Checking for artifacts that have been seen... ", 0, 0);
+    prt("File name: ", 0, 0);
+    if (get_string(filename, 0, 11, 64)) {
+	if (strlen(filename) == 0)
+	    return;
+	if ((file1 = my_tfopen(filename, "w")) != NULL) {
+	    (void)fprintf(file1, "Artifacts that have been seen\n");
+	    (void)fprintf(file1, "\n");
+	    if (GROND)
+		fprintf(file1, "Grond\n");
+	    if (RINGIL)
+		fprintf(file1, "Ringil\n");
+	    if (AEGLOS)
+		fprintf(file1, "Aeglos\n");
+	    if (ARUNRUTH)
+		fprintf(file1, "Arunruth\n");
+	    if (MORMEGIL)
+		fprintf(file1, "Mormegil\n");
+	    if (ANGRIST)
+		fprintf(file1, "Angrist\n");
+	    if (GURTHANG)
+		fprintf(file1, "Gurthang\n");
+	    if (CALRIS)
+		fprintf(file1, "Calris\n");
+	    if (ANDURIL)
+		fprintf(file1, "Anduril\n");
+	    if (STING)
+		fprintf(file1, "Sting\n");
+	    if (ORCRIST)
+		fprintf(file1, "Orcrist\n");
+	    if (GLAMDRING)
+		fprintf(file1, "Glamdring\n");
+	    if (DURIN)
+		fprintf(file1, "Durin\n");
+	    if (AULE)
+		fprintf(file1, "Aule\n");
+	    if (THUNDERFIST)
+		fprintf(file1, "Thunderfist\n");
+	    if (BLOODSPIKE)
+		fprintf(file1, "Bloodspike\n");
+	    if (DOOMCALLER)
+		fprintf(file1, "Doomcaller\n");
+	    if (NARTHANC)
+		fprintf(file1, "Narthanc\n");
+	    if (NIMTHANC)
+		fprintf(file1, "Nimthanc\n");
+	    if (DETHANC)
+		fprintf(file1, "Dethanc\n");
+	    if (GILETTAR)
+		fprintf(file1, "Gilettar\n");
+	    if (RILIA)
+		fprintf(file1, "Rilia\n");
+	    if (BELANGIL)
+		fprintf(file1, "Belangil\n");
+	    if (BALLI)
+		fprintf(file1, "Balli Stonehand\n");
+	    if (LOTHARANG)
+		fprintf(file1, "Lotharang\n");
+	    if (FIRESTAR)
+		fprintf(file1, "Firestar\n");
+	    if (ERIRIL)
+		fprintf(file1, "Eriril\n");
+	    if (CUBRAGOL)
+		fprintf(file1, "Cubragol\n");
+	    if (BARD)
+		fprintf(file1, "Longbow of Bard\n");
+	    if (COLLUIN)
+		fprintf(file1, "Colluin\n");
+	    if (HOLCOLLETH)
+		fprintf(file1, "Holcolleth\n");
+	    if (TOTILA)
+		fprintf(file1, "Totila\n");
+	    if (PAIN)
+		fprintf(file1, "Glaive of Pain\n");
+	    if (ELVAGIL)
+		fprintf(file1, "Elvagil\n");
+	    if (AGLARANG)
+		fprintf(file1, "Aglarang\n");
+	    if (EORLINGAS)
+		fprintf(file1, "Eorlingas\n");
+	    if (BARUKKHELED)
+		fprintf(file1, "Barukkheled\n");
+	    if (WRATH)
+		fprintf(file1, "Trident of Wrath\n");
+	    if (HARADEKKET)
+		fprintf(file1, "Haradekket\n");
+	    if (MUNDWINE)
+		fprintf(file1, "Mundwine\n");
+	    if (GONDRICAM)
+		fprintf(file1, "Gondricam\n");
+	    if (ZARCUTHRA)
+		fprintf(file1, "Zarcuthra\n");
+	    if (CARETH)
+		fprintf(file1, "Careth Asdriag\n");
+	    if (FORASGIL)
+		fprintf(file1, "Forasgil\n");
+	    if (CRISDURIAN)
+		fprintf(file1, "Crisdurian\n");
+	    if (COLANNON)
+		fprintf(file1, "Colannon\n");
+	    if (HITHLOMIR)
+		fprintf(file1, "Hithlomir\n");
+	    if (THALKETTOTH)
+		fprintf(file1, "Thalkettoth\n");
+	    if (ARVEDUI)
+		fprintf(file1, "Arvedui\n");
+	    if (THRANDUIL)
+		fprintf(file1, "Thranduil\n");
+	    if (THENGEL)
+		fprintf(file1, "Thengel\n");
+	    if (HAMMERHAND)
+		fprintf(file1, "Hammerhand\n");
+	    if (CELEGORM)
+		fprintf(file1, "Celegorm\n");
+	    if (THROR)
+		fprintf(file1, "Thror\n");
+	    if (MAEDHROS)
+		fprintf(file1, "Maedhros\n");
+	    if (OLORIN)
+		fprintf(file1, "Olorin\n");
+	    if (ANGUIREL)
+		fprintf(file1, "Anguirel\n");
+	    if (OROME)
+		fprintf(file1, "Orome\n");
+	    if (EONWE)
+		fprintf(file1, "Eonwe\n");
+	    if (THEODEN)
+		fprintf(file1, "Theoden\n");
+	    if (ULMO)
+		fprintf(file1, "Trident of Ulmo\n");
+	    if (OSONDIR)
+		fprintf(file1, "Osondir\n");
+	    if (TURMIL)
+		fprintf(file1, "Turmil\n");
+	    if (TIL)
+		fprintf(file1, "Til-i-arc\n");
+	    if (DEATHWREAKER)
+		fprintf(file1, "Deathwreaker\n");
+	    if (AVAVIR)
+		fprintf(file1, "Avavir\n");
+	    if (TARATOL)
+		fprintf(file1, "Taratol\n");
+	    if (DOR_LOMIN)
+		fprintf(file1, "Dor-Lomin\n");
+	    if (BELEGENNON)
+		fprintf(file1, "Belegennon\n");
+	    if (FEANOR)
+		fprintf(file1, "Feanor\n");
+	    if (ISILDUR)
+		fprintf(file1, "Isildur\n");
+	    if (SOULKEEPER)
+		fprintf(file1, "Soulkeeper\n");
+	    if (FINGOLFIN)
+		fprintf(file1, "Fingolfin\n");
+	    if (ANARION)
+		fprintf(file1, "Anarion\n");
+	    if (BELEG)
+		fprintf(file1, "Belthronding\n");
+	    if (DAL)
+		fprintf(file1, "Dal-i-thalion\n");
+	    if (PAURHACH)
+		fprintf(file1, "Paurhach\n");
+	    if (PAURNIMMEN)
+		fprintf(file1, "Paurnimmen\n");
+	    if (PAURAEGEN)
+		fprintf(file1, "Pauraegen\n");
+	    if (PAURNEN)
+		fprintf(file1, "Paurnen\n");
+	    if (CAMMITHRIM)
+		fprintf(file1, "Cammithrin\n");
+	    if (CAMBELEG)
+		fprintf(file1, "Cambeleg\n");
+	    if (HOLHENNETH)
+		fprintf(file1, "Holhenneth\n");
+	    if (AEGLIN)
+		fprintf(file1, "Aeglin\n");
+	    if (CAMLOST)
+		fprintf(file1, "Camlost\n");
+	    if (NIMLOTH)
+		fprintf(file1, "Nimloth\n");
+	    if (NAR)
+		fprintf(file1, "Nar-i-vagil\n");
+	    if (BERUTHIEL)
+		fprintf(file1, "Beruthiel\n");
+	    if (GORLIM)
+		fprintf(file1, "Gorlim\n");
+	    if (THORIN)
+		fprintf(file1, "Thorin\n");
+	    if (CELEBORN)
+		fprintf(file1, "Celeborn\n");
+	    if (GONDOR)
+		fprintf(file1, "Gondor\n");
+	    if (THINGOL)
+		fprintf(file1, "Thingol\n");
+	    if (THORONGIL)
+		fprintf(file1, "Thorongil\n");
+	    if (LUTHIEN)
+		fprintf(file1, "Luthien\n");
+	    if (TUOR)
+		fprintf(file1, "Tuor\n");
+	    if (ROHAN)
+		fprintf(file1, "Rohan\n");
+	    if (CASPANION)
+		fprintf(file1, "Caspanion\n");
+	    if (NARYA)
+		fprintf(file1, "Narya\n");
+	    if (NENYA)
+		fprintf(file1, "Nenya\n");
+	    if (VILYA)
+		fprintf(file1, "Vilya\n");
+	    if (POWER)
+		fprintf(file1, "The One Ring\n");
+	    if (PHIAL)
+		fprintf(file1, "The Phial of Galadriel\n");
+	    if (INGWE)
+		fprintf(file1, "The Amulet of Ingwe\n");
+	    if (CARLAMMAS)
+		fprintf(file1, "The Amulet of Carlammas\n");
+	    if (TULKAS)
+		fprintf(file1, "The Ring of Tulkas\n");
+	    if (NECKLACE)
+		fprintf(file1, "The Amulet of the Dwarves\n");
+	    if (BARAHIR)
+		fprintf(file1, "The Ring of Barahir\n");
+	    if (ELENDIL)
+		fprintf(file1, "The Star of Elendil\n");
+	    if (THRAIN)
+		fprintf(file1, "The Arkenstone of Thrain\n");
+	    if (RAZORBACK)
+		fprintf(file1, "Razorback\n");
+	    if (BLADETURNER)
+		fprintf(file1, "Bladeturner\n");
+	    (void)fclose(file1);
+	    prt("Done...", 0, 0);
+	} else
+	    prt("File could not be opened.", 0, 0);
+    } else
+	prt("File could not be opened.", 0, 0);
+}
+
+
+void check_uniques()
+{
+    int      i, j, k;
+    bigvtype msg;
+
+    save_screen();
+    j = 15;
+
+    for (i = 1; i < 23; i++) erase_line(i, j - 2);
+
+    i = 1;
+    prt("Uniques:", i++, j + 5);
+
+    for (k = 0; k < (MAX_CREATURES - 1); k++) {
+	if ((strlen(c_list[k].name) > 0) && (c_list[k].cdefense & UNIQUE)) {
+	    if (wizard) {
+		sprintf(msg, "%s is %s.", c_list[k].name,
+			(u_list[k].dead) ? "dead" : "alive");
+		prt(msg, i++, j);
+		unique_screen_full(&i, j);
+	    } else if (u_list[k].dead) {
+		sprintf(msg, "%s is dead.", c_list[k].name);
+		prt(msg, i++, j);
+		unique_screen_full(&i, j);
+	    }
+	}
+    }
+    pause_line(i);
+    restore_screen();
+}
+
 
 

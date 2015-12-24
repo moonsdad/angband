@@ -358,3 +358,143 @@ void check_view(void)
 	    }
     }
 }
+
+
+/*
+ * Illuminate any room containing the given location.
+ */
+void light_room(int y, int x)
+{
+    register cave_type *c_ptr;
+    register monster_type  *m_ptr;
+
+    c_ptr = &cave[y][x];
+    if (!c_ptr->pl && c_ptr->lr) {
+	c_ptr->pl = TRUE;
+	m_ptr = &m_list[c_ptr->cptr];
+
+/* Monsters that are intelligent wake up all the time; non-MINDLESS monsters wake
+ * up 1/3 the time, and MINDLESS monsters wake up 1/10 the time -CWS
+ */
+	if ((c_list[m_ptr->mptr].cdefense & INTELLIGENT) ||
+	    (!(c_list[m_ptr->mptr].cdefense & MINDLESS) && (randint(3) == 1)) ||
+	    (randint(10) == 1))
+	    m_ptr->csleep = 0;
+
+	if (c_ptr->fval == NT_DARK_FLOOR)
+	    c_ptr->fval = NT_LIGHT_FLOOR;
+	else if (c_ptr->fval == DARK_FLOOR)
+	    c_ptr->fval = LIGHT_FLOOR;
+#ifdef MSDOS
+	lite_spot(y, x);	   /* this does all that; plus color-safe -CFT */
+#else
+	if ((y - panel_row_prt) < 23 && (y - panel_row_prt) > 0 &&
+	    (x - panel_col_prt) > 12 && (x - panel_col_prt) < 80)
+	    print(loc_symbol(y, x), y, x);
+#endif
+    
+	if (c_ptr->fval < MIN_CLOSED_SPACE) {
+	    c_ptr = &cave[y + 1][x];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y + 1, x);
+	    
+	    c_ptr = &cave[y - 1][x];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y - 1, x);
+
+	    c_ptr = &cave[y][x + 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y, x + 1);
+	    
+	    c_ptr = &cave[y][x - 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y, x - 1);
+	    
+	    c_ptr = &cave[y + 1][x + 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y + 1, x + 1);
+	    
+	    c_ptr = &cave[y - 1][x - 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y - 1, x - 1);
+	    
+	    c_ptr = &cave[y - 1][x + 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y - 1, x + 1);
+	    
+	    c_ptr = &cave[y + 1][x - 1];
+	    if ((!c_ptr->pl) && (c_ptr->lr))
+		light_room(y + 1, x - 1);
+	}
+    }     
+}
+
+/*
+ * Darken all rooms containing the given location
+ */
+void darken_room(int y, int x)
+{
+    register cave_type *c_ptr;
+
+    c_ptr = &cave[y][x];
+    if (c_ptr->pl && c_ptr->lr) {
+	c_ptr->tl = FALSE;
+	if (c_ptr->fval == NT_LIGHT_FLOOR)
+	    c_ptr->fval = NT_DARK_FLOOR;
+	else if (c_ptr->fval == LIGHT_FLOOR)
+	    c_ptr->fval = DARK_FLOOR;
+#ifdef MSDOS
+	if (panel_contains(y, x))
+	    if (c_ptr->fval < MIN_CLOSED_SPACE) {
+#else
+	if ((y - panel_row_prt) < 23 && (y - panel_row_prt) > 0 &&
+	    (x - panel_col_prt) > 12 && (x - panel_col_prt) < 80)
+	    if (c_ptr->fval < MIN_CLOSED_SPACE) {
+#endif
+		c_ptr->pl = FALSE;
+		darken_room(y + 1, x);
+		darken_room(y - 1, x);
+		darken_room(y, x + 1);
+		darken_room(y, x - 1);
+		darken_room(y + 1, x + 1);
+		darken_room(y - 1, x - 1);
+		darken_room(y - 1, x + 1);
+		darken_room(y + 1, x - 1);
+	    }
+	print(loc_symbol(y, x), y, x);
+    }
+}
+
+
+
+
+/* 
+ * Light up the dungeon					-RAK-
+ */
+void wizard_light(int light)
+{
+    register cave_type *c_ptr;
+    register int        k, l, i, j;
+    int                 flag;
+
+    if (!light) {
+	if (cave[char_row][char_col].pl)
+	    flag = FALSE;
+	else
+	    flag = TRUE;
+    } else {
+	flag = (light > 0) ? 1 : 0;
+    }
+    for (i = 0; i < cur_height; i++)
+	for (j = 0; j < cur_width; j++)
+	    if (cave[i][j].fval <= MAX_CAVE_FLOOR)
+		for (k = i - 1; k <= i + 1; k++)
+		    for (l = j - 1; l <= j + 1; l++) {
+			c_ptr = &cave[k][l];
+			c_ptr->pl = flag;
+			if (!flag)
+			    c_ptr->fm = FALSE;
+		    }
+    prt_map();
+}
+

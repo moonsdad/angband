@@ -1215,7 +1215,4 @@ inven_type t_list[MAX_TALLOC];
 inven_type inventory[INVEN_ARRAY_SIZE];
 
 /* Treasure related values					*/
-s16b inven_ctr = 0;		/* Total different obj's	*/
-s16b inven_weight = 0;		/* Cur carried weight	*/
-s16b equip_ctr = 0;		/* Cur equipment ctr	*/
 s16b tcptr;			/* Cur treasure heap ptr	*/
