@@ -15,6 +15,10 @@ cptr copyright[5] = {
 };
 
 
+/* Link the "version" into the executable */
+int cur_version_maj = CUR_VERSION_MAJ;
+int cur_version_min = CUR_VERSION_MIN;
+int cur_patch_level = CUR_PATCH_LEVEL;
 
 /* a horrible hack: needed because compact_monster() can be called from
    creatures() via summon_monster() and place_monster() */
@@ -87,7 +91,11 @@ int weapon_heavy = FALSE;
 int pack_heavy = FALSE;
 
 
-/*  OPTION: options set via the '=' command */
+s16b i_max;			/* Treasure heap size */
+s16b m_max;			/* Monster heap size */
+
+
+/* OPTION: options set via the '=' command */
 /* note that the values set here will be the default settings */
 /* the default keyset can thus be chosen via "rogue_like_commands" */
 
@@ -105,9 +113,9 @@ int notice_seams = TRUE;	/* Highlight mineral seams */
 
 int find_cut = TRUE;		/* Cut corners */
 int find_examine = TRUE;	/* Examine corners */
-int find_prself = FALSE;
-int find_bound = FALSE;		/* Stop on borders */
-int find_ignore_doors = FALSE;	/* Run through doors */
+int find_prself = TRUE;		/* Print self */
+int find_bound = TRUE;		/* Stop on borders */
+int find_ignore_doors = TRUE;	/* Run through doors */
 
 int wait_for_more = FALSE;	/* used when ^C hit during -more- prompt */
 int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
@@ -120,13 +128,14 @@ int light_flag = FALSE;		/* Track if temporary light about player.  */
 
 int no_haggle_flag = FALSE;	/* does the player not want to haggle? -CWS */
 
-int show_weight_flag = FALSE;
-int show_equip_weight_flag = FALSE;	/* Show weights in equip */
-int plain_descriptions = FALSE;	/* Plain descriptions */
+int show_inven_weight = TRUE;	/* Show weights in inven */
+int show_equip_weight = TRUE;	/* Show weights in equip */
+int plain_descriptions = TRUE;	/* Plain descriptions */
 
 int hitpoint_warn = 1;		/* Hitpoint warning (0 to 9) */
 int delay_spd = 1;		/* Delay factor (0 to 9) */
 
+int peek = FALSE;		/* Let user "see" internal stuff */
 
 int feeling = 0;		/* Most recent feeling */
 int rating = 0;			/* Level's current rating */
@@ -172,17 +181,35 @@ int NO_SAVE=FALSE;
 cave_type *cave[MAX_HEIGHT];
 
 
+/* The player's inventory */
+inven_type inventory[INVEN_TOTAL];
 
-/* The array of monster "memory" [MAX_CREATURES] */
-monster_lore c_recall[MAX_CREATURES];
 
-struct unique_mon u_list[MAX_CREATURES]; /* Unique check list... -LVB- */
 
-/* Player record for most player related info */
-static player_type py;	/* static player info record */
-player_type *p_ptr = &py;	/* Pointer to the player info */
+/* The array of dungeon monsters [MAX_M_IDX] */
+monster_type *m_list;
 
-/* 
+
+/* The array of monster "memory" [MAX_R_IDX] */
+monster_lore *l_list;
+
+/* Unique check list... -LVB- */
+struct unique_mon u_list[MAX_R_IDX];
+
+
+
+static player_type p_body;	/* Static player info record */
+player_type *p_ptr = &p_body;	/* Pointer to the player info */
+
+u32b spell_learned = 0;       /* bit mask of spells learned */
+u32b spell_learned2 = 0;      /* bit mask of spells learned */
+u32b spell_worked = 0;        /* bit mask of spells tried and worked */
+u32b spell_worked2 = 0;       /* bit mask of spells tried and worked */
+u32b spell_forgotten = 0;     /* bit mask of spells learned but forgotten */
+u32b spell_forgotten2 = 0;    /* bit mask of spells learned but forgotten */
+byte spell_order[64];          /* order spells learned/remembered/forgotten */
+
+/*
  * Calculated base hp values for player at each level,
  * store them so that drain life + restore life does not
  * affect hit points.  Also prevents shameless use of backup

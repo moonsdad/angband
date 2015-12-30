@@ -177,7 +177,7 @@ static void signal_handler(int sig)
     restore_term();
 
 #ifndef MSDOS
-/* always generate a core dump */
+    /* always generate a core dump */
     (void)signal(sig, SIG_DFL);
     (void)kill(getpid(), sig);
     (void)sleep(5);

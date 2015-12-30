@@ -23,10 +23,9 @@ static int force_keys_to = FALSE;
 
 int unfelt    = TRUE;
 int be_nasty  = FALSE;
-int peek      = FALSE;
 int player_uid;
-int quests[MAX_QUESTS];
-creature_type ghost;
+int quests[QUEST_MAX];
+monster_race ghost;
 
 #if (COST_ADJ != 100)
 static void price_adjust();
@@ -56,11 +55,14 @@ CASPANION, RAZORBACK, BLADETURNER;
 /*
  * Unix machines need to "check wizard permissions"
  */
-int is_wizard(int uid)
+static bool is_wizard(int uid)
 {
     int		test;
     FILE	*fp;
     char	buf[100];
+
+    bool allow = FALSE;
+
 
     /* Open the wizard file */
     fp = my_tfopen(ANGBAND_WIZ, "r");
@@ -82,7 +84,8 @@ int is_wizard(int uid)
     /* Close the file */
     fclose(fp);
 
-    return FALSE;
+    /* Result */
+    return (allow);
 }
 
 
@@ -93,7 +96,8 @@ int is_wizard(int uid)
 int main(int argc, char * argv[])
 {
     int generate, i;
-    int result=FALSE;
+    int result = FALSE;
+
 #ifndef __MINT__
     FILE *fp;
     char temphost[MAXHOSTNAMELEN+1];
@@ -117,7 +121,7 @@ int main(int argc, char * argv[])
     /* default command set defined in config.h file */
     rogue_like_commands = ROGUE_LIKE;
     
-    strcpy(py.misc.name, "\0");
+    strcpy(p_ptr->misc.name, "\0");
     
 
 
@@ -154,9 +158,9 @@ int main(int argc, char * argv[])
 	perror("Can't set permissions correctly!  Getuid call failed.\n");
 	exit(0);
     }
-    user_name(py.misc.name, player_uid);
+    user_name(p_ptr->misc.name, player_uid);
 #else
-    user_name(py.misc.name);
+    user_name(p_ptr->misc.name);
 #endif
 
 #if defined(SET_UID) && !defined(SECURE)
@@ -256,8 +260,8 @@ int main(int argc, char * argv[])
 	  case 'u':
 	  case 'U':
 	    if (!argv[0][2]) goto usage;
-	    strcpy(py.misc.name, &argv[0][2]);
-		d_check(py.misc.name);
+	    strcpy(p_ptr->misc.name, &argv[0][2]);
+		d_check(p_ptr->misc.name);
 		NO_SAVE=TRUE;
 	    break;
 
@@ -338,7 +342,7 @@ int main(int argc, char * argv[])
        hence, this code is not necessary */
 #endif
 
-    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, py.misc.name);
+    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, p_ptr->misc.name);
 
  /* This restoration of a saved character may get ONLY the monster memory. In
     this case, get_char returns false. It may also resurrect a dead character
@@ -362,7 +366,7 @@ int main(int argc, char * argv[])
 	change_name();
 
 	/* could be restoring a dead character after a signal or HANGUP */
-	if (py.misc.chp < 0)
+	if (p_ptr->misc.chp < 0)
 	    death = TRUE;
     } else {			/* Create character */
 	/* Unique Weapons, Armour and Rings */
@@ -479,27 +483,27 @@ int main(int argc, char * argv[])
 	ELENDIL=0;
 	THRAIN=0;
 
-	for (i=0; i<MAX_QUESTS; i++) quests[i]=0;
+	for (i=0; i<QUEST_MAX; i++) quests[i]=0;
 
 	quests[SAURON_QUEST]=99;
 
 	/* Unique Monster Flags */
-	for (i=0; i<MAX_CREATURES; i++)
+	for (i=0; i<MAX_R_IDX; i++)
 	    u_list[i].exist=0, u_list[i].dead=0;
 	create_character();
 
 	/* if we're creating a new character, change the savefile name */
-    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, py.misc.name);
+    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, p_ptr->misc.name);
 	char_inven_init();
-	py.flags.food = 7500;
-	py.flags.food_digested = 2;
-        if (class[py.misc.pclass].spell == MAGE)
+	p_ptr->flags.food = 7500;
+	p_ptr->flags.food_digested = 2;
+        if (class[p_ptr->misc.pclass].spell == MAGE)
 	{			/* Magic realm   */
 	    clear_screen();	/* makes spell list easier to read */
 	    calc_spells(A_INT);
 	    calc_mana(A_INT);
 	}
-	else if (class[py.misc.pclass].spell == PRIEST)
+	else if (class[p_ptr->misc.pclass].spell == PRIEST)
 	{			/* Clerical realm*/
 	    calc_spells(A_WIS);
 	    clear_screen();	/* force out the 'learn prayer' message */
@@ -523,7 +527,7 @@ int main(int argc, char * argv[])
 	rogue_like_commands = force_keys_to;
     }
 
-    magic_init();
+    flavor_init();
 
     /* Begin the game */
     clear_screen();
@@ -577,12 +581,12 @@ static void char_inven_init()
     inven_type inven_init;
     
     /* this is needed for bash to work right, it can't hurt anyway */
-    for (i = 0; i < INVEN_ARRAY_SIZE; i++)
+    for (i = 0; i < INVEN_TOTAL; i++)
 	invcopy(&inventory[i], OBJ_NOTHING);
 
     /* Give the player useful objects */
     for (i = 0; i < 5; i++) {
-	j = player_init[py.misc.pclass][i];
+	j = player_init[p_ptr->misc.pclass][i];
 	invcopy(&inven_init, j);
 	store_bought(&inven_init);
 	if (inven_init.tval == TV_SWORD || inven_init.tval == TV_HAFTED
@@ -607,9 +611,9 @@ static void init_m_level()
     for (i = 0; i <= MAX_MONS_LEVEL; i++)
 	m_level[i] = 0;
 
-    k = MAX_CREATURES - WIN_MON_TOT;
+    k = MAX_R_IDX - WIN_MON_TOT;
     for (i = 0; i < k; i++)
-	m_level[c_list[i].level]++;
+	m_level[r_list[i].level]++;
 
     for (i = 1; i <= MAX_MONS_LEVEL; i++)
 	m_level[i] += m_level[i-1];

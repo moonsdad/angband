@@ -15,12 +15,19 @@
 
 
 /*
+ * Hack -- make sure we have a good "ANSI" definition for "CTRL()"
+ */
+#undef CTRL
+#define CTRL(C) ((C)&037)
+
+
+
+/*
  * Examine a Book					-RAK-	
  */
 static void examine_book(void)
 {
-    u32b               j1;
-    u32b               j2;
+    u32b               j1, j2;
     int                  i, k, item_val, flag;
     int                  spell_index[63];
     register inven_type *i_ptr;
@@ -30,22 +37,22 @@ static void examine_book(void)
     if (!find_range(TV_MAGIC_BOOK, TV_PRAYER_BOOK, &i, &k)) {
 	msg_print("You are not carrying any books.");
     }
-    else if (py.flags.blind > 0) {
+    else if (p_ptr->flags.blind > 0) {
 	msg_print("You can't see to read your spell book!");
     }
     else if (no_light()) {
 	msg_print("You have no light to read by.");
     }
-    else if (py.flags.confused > 0) {
+    else if (p_ptr->flags.confused > 0) {
 	msg_print("You are too confused.");
     }
     else if (get_item(&item_val, "Which Book?", i, k, 0)) {
 	flag = TRUE;
 	i_ptr = &inventory[item_val];
-	if (class[py.misc.pclass].spell == MAGE) {
+	if (class[p_ptr->misc.pclass].spell == MAGE) {
 	    if (i_ptr->tval != TV_MAGIC_BOOK)
 		flag = FALSE;
-	} else if (class[py.misc.pclass].spell == PRIEST) {
+	} else if (class[p_ptr->misc.pclass].spell == PRIEST) {
 	    if (i_ptr->tval != TV_PRAYER_BOOK)
 		flag = FALSE;
 	} else
@@ -60,7 +67,7 @@ static void examine_book(void)
 	    j1 = (u32b) inventory[item_val].flags;	/* restore j1 value */
 	    while (j1) {
 		k = bit_pos(&j1);
-		s_ptr = &magic_spell[py.misc.pclass - 1][k];
+		s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k];
 		if (s_ptr->slevel < 99) {
 		    spell_index[i] = k;
 		    i++;
@@ -73,7 +80,7 @@ static void examine_book(void)
 	    }
 	    while (j2) {
 		k = bit_pos(&j2);
-		s_ptr = &magic_spell[py.misc.pclass - 1][k + 32];
+		s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k + 32];
 		if (s_ptr->slevel < 99) {
 		    spell_index[i] = (k + 32);
 		    i++;
@@ -99,6 +106,7 @@ static void go_up()
     int        no_stairs = FALSE;
 
     c_ptr = &cave[char_row][char_col];
+
     if (c_ptr->tptr != 0)
 	if (t_list[c_ptr->tptr].tval == TV_UP_STAIR) {
 	    if (dun_level == Q_PLANE) {
@@ -125,7 +133,7 @@ static void go_up()
 
 
 /*
- * Go down one level					-RAK-
+ * Go down one level -RAK-
  */
 static void go_down()
 {
@@ -133,6 +141,7 @@ static void go_down()
     int        no_stairs = FALSE;
 
     c_ptr = &cave[char_row][char_col];
+
     if (c_ptr->tptr != 0)
 	if (t_list[c_ptr->tptr].tval == TV_DOWN_STAIR) {
 	    if (dun_level == Q_PLANE) {
@@ -167,25 +176,34 @@ static void refill_lamp()
     register inven_type *i_ptr;
 
     free_turn_flag = TRUE;
-    k = inventory[INVEN_LIGHT].subval;
+    k = inventory[INVEN_LITE].subval;
     if (k != 0)
 	msg_print("But you are not using a lamp.");
-    else if (!find_range(TV_FLASK, TV_NEVER, &i, &j))
+    else if (!find_range(TV_FLASK, TV_NEVER, &i, &j)) {
 	msg_print("You have no oil.");
+    }
+
     else {
+
 	free_turn_flag = FALSE;
-	i_ptr = &inventory[INVEN_LIGHT];
+	i_ptr = &inventory[INVEN_LITE];
+
 	i_ptr->p1 += inventory[i].p1;
-	if (i_ptr->p1 > OBJ_LAMP_MAX) {
-	    i_ptr->p1 = OBJ_LAMP_MAX;
+
+	if (i_ptr->p1 > FUEL_LAMP) {
+	    i_ptr->p1 = FUEL_LAMP;
 	    msg_print("Your lamp overflows, spilling oil on the ground.");
 	    msg_print("Your lamp is full.");
-	} else if (i_ptr->p1 > OBJ_LAMP_MAX / 2)
+	}
+	else if (i_ptr->p1 > FUEL_LAMP / 2) {
 	    msg_print("Your lamp is more than half full.");
-	else if (i_ptr->p1 == OBJ_LAMP_MAX / 2)
+	}
+	else if (i_ptr->p1 == FUEL_LAMP / 2) {
 	    msg_print("Your lamp is half full.");
-	else
+	}
+	else {
 	    msg_print("Your lamp is less than half full.");
+	}
 	desc_remain(i);
 	inven_destroy(i);
     }
@@ -214,8 +232,8 @@ static opt_desc options[] = {
     { "(g)et-key to pickup objects", 		&prompt_carry_flag},
     { "Prompt before pickup", 			&carry_query_flag},
     { "Rogue like commands", 			&rogue_like_commands},
-    { "Show weights in inventory", 		&show_weight_flag},
-    { "Show weights in equipment list",		&show_equip_weight_flag},
+    { "Show weights in inventory", 		&show_inven_weight},
+    { "Show weights in equipment list",		&show_equip_weight},
     { "Highlight and notice mineral seams", 	&highlight_seams},
     { "Disable haggling in stores",		&no_haggle_flag},
     { "Plain object descriptions",		&plain_descriptions},
@@ -229,7 +247,7 @@ static opt_desc options[] = {
 
 
 /*
- * Set or unset various boolean options.		-CJS-
+ * Set or unset various boolean options. -CJS-
  */
 void set_options()
 {
@@ -275,8 +293,7 @@ void set_options()
 	  case ' ':
 	  case '\n':
 	  case '\r':
-	    if (i + 1 < max) i++;
-	    else i = 0;
+	    i = (i + 1) % max;
 	    break;
 	  case 'y':
 	  case 'Y':
@@ -285,9 +302,8 @@ void set_options()
 		bell();
 	    else {
 		put_buffer("yes ", i + 1, 40);
-		*options[i].o_var = TRUE;
-		if (i + 1 < max) i++;
-		else i = 0;
+	    *options[i].o_var = TRUE;
+	    i = (i + 1) % max;
 	    }
 	    break;
 	  case 'n':
@@ -300,8 +316,7 @@ void set_options()
 	    } else {
 		put_buffer("no  ", i + 1, 40);
 		*options[i].o_var = FALSE;
-		if (i + 1 < max) i++;
-		else i = 0;
+		i = (i + 1) % max;
 	    }
 	    break;
 	  case '1':
@@ -325,10 +340,7 @@ void set_options()
 		else
 		    sprintf(string, "%d   ", ch);
 		put_buffer(string, i + 1, 40);
-		if (i + 1 < max)
-		    i++;
-		else
-		    i = 0;
+		i = (i + 1) % max;
 	    }
 	    break;
 	  default:

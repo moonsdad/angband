@@ -29,24 +29,27 @@
 
 /*
  * Because this function uses (short) ints for all calculations, overflow may
- * occur if deltaX and deltaY exceed 90.
+ * occur if d_x and d_y exceed 90.
  */
 int los(int fromY, int fromX, int toY, int toX)
 {
-    register int tmp, deltaX, deltaY;
+    register int tmp, d_x, d_y;
 
-    deltaX = toX - fromX;
-    deltaY = toY - fromY;
+
+    /* Extract the offset */    
+    d_y = toY - fromY;
+    d_x = toX - fromX;
 
     /* Handle Adjacent (or identical) grids */
-    if ((deltaX < 2) && (deltaX > -2) && (deltaY < 2) && (deltaY > -2))
+    if ((d_x < 2) && (d_x > -2) && (d_y < 2) && (d_y > -2))
 	return TRUE;
 
-    /* Handle the cases where deltaX or deltaY == 0. */
-    if (deltaX == 0) {
-	register int        p_y;   /* y position -- loop variable	 */
+    /* Handle the cases where d_x or d_y == 0. */
+    if (!d_x) {
 
-	if (deltaY < 0) {
+	register int p_y;   /* y position -- loop variable	 */
+
+	if (d_y < 0) {
 	    tmp = fromY;
 	    fromY = toY;
 	    toY = tmp;
@@ -56,35 +59,39 @@ int los(int fromY, int fromX, int toY, int toX)
 		return FALSE;
 	return TRUE;
     }
-	else if (deltaY == 0) {
-	register int        px;	   /* x position -- loop variable	 */
 
-	if (deltaX < 0) {
+	else if (!d_y) {
+    
+	register int p_x;	   /* x position -- loop variable	 */
+
+	if (d_x < 0) {
 	    tmp = fromX;
 	    fromX = toX;
 	    toX = tmp;
 	}
-	for (px = fromX + 1; px < toX; px++) {
-	    if (cave[fromY][px].fval >= MIN_CLOSED_SPACE) return FALSE;
+	for (p_x = fromX + 1; p_x < toX; p_x++) {
+	    if (cave[fromY][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 	    }
+		
+	/* Assume los */
 	return TRUE;
     }
 
 
     /* Handle Knightlike shapes -CWS */
-    if (MY_ABS(deltaX) == 1) {
-	if (deltaY == 2) {
+    if (MY_ABS(d_x) == 1) {
+	if (d_y == 2) {
 	    if (cave[fromY + 1][fromX].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
-	else if (deltaY == (-2)) {
+	else if (d_y == (-2)) {
 	    if (cave[fromY - 1][fromX].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
     }
-    else if (MY_ABS(deltaY) == 1) {
-	if (deltaX == 2) {
+    else if (MY_ABS(d_y) == 1) {
+	if (d_x == 2) {
 	    if (cave[fromY][fromX + 1].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
-	else if (deltaX == (-2)) {
+	else if (d_x == (-2)) {
 	    if (cave[fromY][fromX - 1].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
     }
@@ -92,31 +99,31 @@ int los(int fromY, int fromX, int toY, int toX)
 
 /*
  * Now, we've eliminated all the degenerate cases. In the computations below,
- * dy (or dx) and m are multiplied by a scale factor, scale = abs(deltaX *
- * deltaY * 2), so that we can use integer arithmetic. 
+ * dy (or dx) and m are multiplied by a scale factor, scale = abs(d_x *
+ * d_y * 2), so that we can use integer arithmetic. 
  */
 
     {
 	register int        scale,	/* a scale factor		 */
 			    scale2;	/* above scale factor / 2	*/
-	int        px,	   /* x position			 */
+	int        p_x,	   /* x position			 */
 			   p_y;   /* y position			 */
 
-	int		    xSign,	/* sign of deltaX		 */
-			    ySign,	/* sign of deltaY		 */
+	int		    xSign,	/* sign of d_x		 */
+			    ySign,	/* sign of d_y		 */
 			    m;		/* slope or 1/slope of LOS	 */
 
-	scale2 = MY_ABS(deltaX * deltaY);
+	scale2 = MY_ABS(d_x * d_y);
 	scale = scale2 << 1;
 
-	xSign = (deltaX < 0) ? -1 : 1;
-	ySign = (deltaY < 0) ? -1 : 1;
+	xSign = (d_x < 0) ? -1 : 1;
+	ySign = (d_y < 0) ? -1 : 1;
 
 
 	/* Travel from one end of the line to the other, */
 	/* oriented along the longer axis. */
 
-	if (MY_ABS(deltaX) >= MY_ABS(deltaY)) {
+	if (MY_ABS(d_x) >= MY_ABS(d_y)) {
 
 	    register int        dy;  /* "fractional" y position	 */
 
@@ -124,12 +131,12 @@ int los(int fromY, int fromX, int toY, int toX)
 	 * We start at the border between the first and second tiles, where
 	 * the y offset = .5 * slope.  Remember the scale factor.  We have: 
 	 *
-	 * m = deltaY / deltaX * 2 * (deltaY * deltaX) = 2 * deltaY * deltaY. 
+	 * m = d_y / d_x * 2 * (d_y * d_x) = 2 * d_y * d_y. 
 	 */
 
-	    dy = deltaY * deltaY;
+	    dy = d_y * d_y;
 	    m = dy << 1;
-	    px = fromX + xSign;
+	    p_x = fromX + xSign;
 
 	    /* Consider the special case where slope == 1. */
 	    if (dy == scale2) {
@@ -140,24 +147,24 @@ int los(int fromY, int fromX, int toY, int toX)
 		p_y = fromY;
 	    }
 
-	    while (toX - px) {
-		if (cave[p_y][px].fval >= MIN_CLOSED_SPACE) return FALSE;
+	    while (toX - p_x) {
+		if (cave[p_y][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 		dy += m;
 		if (dy < scale2) {
-		    px += xSign;
+		    p_x += xSign;
 		}
 		else if (dy > scale2) {
 		    p_y += ySign;
-		    if (cave[p_y][px].fval >= MIN_CLOSED_SPACE) return FALSE;
+		    if (cave[p_y][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 		    dy -= scale;
-		    px += xSign;
+		    p_x += xSign;
 		}
 		else {
 		/* Note: This is the case, (dy == scale2), where */
 		/* the LOS exactly meets the corner of a tile. */
 		    p_y += ySign;
 		    dy -= scale;
-		    px += xSign;
+		    p_x += xSign;
 		}
 	    }
 	    return TRUE;
@@ -167,32 +174,34 @@ int los(int fromY, int fromX, int toY, int toX)
 	
 	    register int        dx;	/* "fractional" x position	 */
 
-	    dx = deltaX * deltaX;
+	    dx = d_x * d_x;
 	    m = dx << 1;
 
 	    p_y = fromY + ySign;
 	    if (dx == scale2) {
-		px = fromX + xSign;
+		p_x = fromX + xSign;
 		dx -= scale;
 	    }
 	    else {
-		px = fromX;
+		p_x = fromX;
 	    }
 
+	    /* Note (below) the case (dx == scale2), where */
+	    /* the LOS exactly meets the corner of a tile. */
 	    while (toY - p_y) {
-		if (cave[p_y][px].fval >= MIN_CLOSED_SPACE) return FALSE;
+		if (cave[p_y][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 		dx += m;
 		if (dx < scale2) {
 		    p_y += ySign;
 		}
 		else if (dx > scale2) {
-		    px += xSign;
-		    if (cave[p_y][px].fval >= MIN_CLOSED_SPACE) return FALSE;
+		    p_x += xSign;
+		    if (cave[p_y][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 		    dx -= scale;
 		    p_y += ySign;
 		}
 		else {
-		    px += xSign;
+		    p_x += xSign;
 		    dx -= scale;
 		    p_y += ySign;
 		}
@@ -223,13 +232,11 @@ int test_light(int y, int x)
 
 
 /*
- * Returns true if player has no light			-RAK-
+ * Returns true if player has no light -RAK-
  */
 int no_light(void)
 {
-    register cave_type *c_ptr;
-
-    c_ptr = &cave[char_row][char_col];
+    register cave_type *c_ptr = &cave[char_row][char_col];
     if (!c_ptr->tl && !c_ptr->pl) return TRUE;
     return FALSE;
 }
@@ -239,7 +246,7 @@ int no_light(void)
 
 
 /*
- * Moves the cursor to a given interpolated y, x position	-RAK-	 
+ * Moves the cursor to a given MAP (y,x) location -RAK-
  */
 
 void move_cursor_relative(int row, int col)
@@ -278,31 +285,34 @@ void move_cursor_relative(int row, int col)
 
 
 /*
- * Lights up given location				-RAK-
+ * Redraw (on the screen) a given MAP location -RAK-
  */
 void lite_spot(int y, int x)
 {
-    if (panel_contains(y, x)) print(loc_symbol(y, x), y, x);
+    /* Redraw if on screen */
+    if (panel_contains(y, x)) {
+	print(loc_symbol(y, x), y, x);
+    }
 }
 
 
 /*
- * Prints the map of the dungeon			-RAK-
+ * Prints the map of the dungeon -RAK-
  */
 void prt_map(void)
 {
-    register int           i, j, k;
+    register int x, y, k;
     register unsigned char tmp_char;
 
     k = 0;
-    for (i = panel_row_min; i <= panel_row_max; i++) {	/* Top to bottom */
+    for (y = panel_row_min; y <= panel_row_max; y++) {	/* Top to bottom */
 	k++;
 	erase_line(k, 13);
 
-	for (j = panel_col_min; j <= panel_col_max; j++) {	/* Left to right */
-	    tmp_char = loc_symbol(i, j);
+	for (x = panel_col_min; x <= panel_col_max; x++) {	/* Left to right */
+	    tmp_char = loc_symbol(y, x);
 	    if (tmp_char != ' ')
-		print(tmp_char, i, j);
+		print(tmp_char, y, x);
 	}
     }
 }
@@ -346,11 +356,11 @@ void check_view(void)
 
     /* A room of light should be lit.	 */
     if (c_ptr->fval == LIGHT_FLOOR) {
-		if ((py.flags.blind < 1) && !c_ptr->pl) light_room(char_row, char_col);
+		if ((p_ptr->flags.blind < 1) && !c_ptr->pl) light_room(char_row, char_col);
     }
 
     /* In doorway of light-room?		   */
-    else if (c_ptr->lr && (py.flags.blind < 1)) {
+    else if (c_ptr->lr && (p_ptr->flags.blind < 1)) {
 	for (i = (char_row - 1); i <= (char_row + 1); i++)
 	    for (j = (char_col - 1); j <= (char_col + 1); j++) {
 		d_ptr = &cave[i][j];
@@ -376,8 +386,8 @@ void light_room(int y, int x)
 /* Monsters that are intelligent wake up all the time; non-MINDLESS monsters wake
  * up 1/3 the time, and MINDLESS monsters wake up 1/10 the time -CWS
  */
-	if ((c_list[m_ptr->mptr].cdefense & INTELLIGENT) ||
-	    (!(c_list[m_ptr->mptr].cdefense & MINDLESS) && (randint(3) == 1)) ||
+	if ((r_list[m_ptr->mptr].cdefense & INTELLIGENT) ||
+	    (!(r_list[m_ptr->mptr].cdefense & MINDLESS) && (randint(3) == 1)) ||
 	    (randint(10) == 1))
 	    m_ptr->csleep = 0;
 
@@ -468,8 +478,8 @@ void darken_room(int y, int x)
 
 
 
-/* 
- * Light up the dungeon					-RAK-
+/*
+ * Light up the dungeon -RAK-
  */
 void wizard_light(int light)
 {

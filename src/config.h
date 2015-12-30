@@ -155,6 +155,7 @@
 /*
  * Make sure that "usleep()" works.
  *
+ * In general, this is only referenced by "Unix" machines.
  * Note that Solaris 2.x users without the BSD compatibilty kit need to
  * define this as well.
  */

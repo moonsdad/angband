@@ -181,10 +181,10 @@ static void prt_comment3(s32b offer, s32b asking, int final)
     vtype comment;
 
     if (final > 0) {
-	(void)strcpy(comment, comment3a[randint(3) - 1]);
+	(void)strcpy(comment, comment3a[rand_int(3)]);
     }
     else {
-	(void)strcpy(comment, comment3b[randint(15) - 1]);
+	(void)strcpy(comment, comment3b[rand_int(15)]);
     }
 
     insert_lnum(comment, "%A1", offer, FALSE);
@@ -199,9 +199,7 @@ static void prt_comment3(s32b offer, s32b asking, int final)
  */
 static void prt_comment4(void)
 {
-    register int tmp;
-
-    tmp = randint(5) - 1;
+    register int tmp = rand_int(5);
     msg_print(comment4a[tmp]);
     msg_print(comment4b[tmp]);
 }
@@ -212,7 +210,7 @@ static void prt_comment4(void)
  */
 static void prt_comment5(void)
 {
-    msg_print(comment5[randint(10) - 1]);
+    msg_print(comment5[rand_int(10)]);
 }
 
 
@@ -221,7 +219,7 @@ static void prt_comment5(void)
  */
 static void prt_comment6(void)
 {
-    msg_print(comment6[randint(5) - 1]);
+    msg_print(comment6[rand_int(5)]);
 }
 
 
@@ -293,7 +291,7 @@ owner_type owners[MAX_OWNERS] = {
  * owner race							
  */
 
-byte rgold_adj[MAX_RACES][MAX_RACES] = {
+static byte rgold_adj[MAX_RACES][MAX_RACES] = {
 
 			/*Hum, HfE, Elf,  Hal, Gno, Dwa, HfO, HfT, Dun, HiE*/
 
@@ -313,7 +311,7 @@ byte rgold_adj[MAX_RACES][MAX_RACES] = {
 
 
 /*
- * Returns the value for any given object		-RAK-
+ * Return the value of an item. -RAK-
  */
 s32b item_value(inven_type *i_ptr)
 {
@@ -365,7 +363,7 @@ s32b item_value(inven_type *i_ptr)
 	if (!known1_p(i_ptr)) value = 20;
 
     } else if (i_ptr->tval == TV_FOOD) {
-	if ((i_ptr->subval < (ITEM_SINGLE_STACK_MIN + MAX_MUSH))
+	if ((i_ptr->subval < (ITEM_SINGLE_STACK_MIN + MAX_SHROOM))
 	    && !known1_p(i_ptr)) value = 1;
 
 				/* Rings and amulets */
@@ -432,7 +430,7 @@ s32b sell_price(int snum, s32b *max_sell, s32b *min_sell, inven_type *item)
     if ((item->cost > 0) && (i > 0)) {
 
     /* Get the "basic value" */
-    i = i * rgold_adj[owners[s_ptr->owner].owner_race][py.misc.prace] / 100;
+    i = i * rgold_adj[owners[s_ptr->owner].owner_race][p_ptr->misc.prace] / 100;
 
     /* Nothing becomes free */
     if (i < 1) i = 1;
@@ -844,7 +842,7 @@ static void store_prt_gold(void)
 {
     vtype out_val;
 
-    (void)sprintf(out_val, "Gold Remaining : %ld", (long)py.misc.au);
+    (void)sprintf(out_val, "Gold Remaining : %ld", (long)p_ptr->misc.au);
     prt(out_val, 18, 17);
 }
 
@@ -878,23 +876,22 @@ static int get_store_item(int *com_val, cptr pmt, int i, int j)
 {
     char         command;
     vtype        out_val;
-    register int flag;
 
     *com_val = (-1);
-    flag = FALSE;
 
     /* Build the prompt */
     (void)sprintf(out_val, "(Items %c-%c, ESC to exit) %s",
 		  i + 'a', j + 'a', pmt);
 
     /* Ask until done */
-    while (get_com(out_val, &command)) {
+    while (TRUE) {
+
+	/* Escape */
+	if (!get_com(out_val, &command)) break;
 
 	/* Legal responses */
-	command -= 'a';
-	if (command >= i && command <= j) {
-	    flag = TRUE;
-	    *com_val = command;
+	if (command >= i+'a' && command <= j+'a') {
+	    *com_val = command - 'a';
 	    break;
 	}
 
@@ -904,7 +901,7 @@ static int get_store_item(int *com_val, cptr pmt, int i, int j)
 
     erase_line(MSG_LINE, 0);
 
-    return (flag);
+    return (command != ESCAPE);
 }
 
 
@@ -1035,8 +1032,8 @@ static int receive_offer(int store_num, cptr comment, s32b new_offer,
     register int flag, receive;
 
     receive = 0;
-    flag = FALSE;
-    do {
+
+    for (flag = FALSE; !flag; ) {
 	if (get_haggle(comment, new_offer, num_offer, price, final)) {
 	    if (*new_offer * factor >= last_offer * factor) {
 		flag = TRUE;
@@ -1056,7 +1053,7 @@ static int receive_offer(int store_num, cptr comment, s32b new_offer,
 	    flag = TRUE;
 	}
     }
-    while (!flag);
+
     return (receive);
 }
 
@@ -1064,7 +1061,7 @@ static int receive_offer(int store_num, cptr comment, s32b new_offer,
 /*
  * Haggling routine					-RAK-	 
  */
-static int purchase_haggle(int store_num, s32b *price, inven_type *item)
+static int purchase_haggle(int store_num, s32b *price, inven_type *i_ptr)
 {
     s32b               max_sell, min_sell, max_buy;
     s32b               cost, cur_ask, final_ask, min_offer;
@@ -1086,7 +1083,7 @@ static int purchase_haggle(int store_num, s32b *price, inven_type *item)
     o_ptr = &owners[s_ptr->owner];
 
     /* Determine the cost of the group of items */
-    cost = sell_price(store_num, &max_sell, &min_sell, item);
+    cost = sell_price(store_num, &max_sell, &min_sell, i_ptr);
 
     max_sell = max_sell * chr_adj() / 100;
     if (max_sell <= 0) max_sell = 1;
@@ -1209,7 +1206,7 @@ static int purchase_haggle(int store_num, s32b *price, inven_type *item)
 /*
  * Haggling routine					-RAK-	 
  */
-static int sell_haggle(int store_num, s32b price, inven_type *item)
+static int sell_haggle(int store_num, s32b price, inven_type *i_ptr)
 {
     s32b               max_sell = 0, max_buy = 0, min_buy = 0;
     s32b               cost = 0, cur_ask = 0, final_ask = 0, min_offer = 0;
@@ -1231,7 +1228,7 @@ static int sell_haggle(int store_num, s32b price, inven_type *item)
     final_flag = 0;
     s_ptr = &store[store_num];
 
-    cost = item_value(item);
+    cost = item_value(i_ptr);
 
     if (cost < 1) {
 	sell = 3;
@@ -1241,7 +1238,7 @@ static int sell_haggle(int store_num, s32b price, inven_type *item)
 
     cost = cost * (200 - chr_adj()) / 100;
 
-    cost = cost * (200 - rgold_adj[o_ptr->owner_race][py.misc.prace]) / 100;
+    cost = cost * (200 - rgold_adj[o_ptr->owner_race][p_ptr->misc.prace]) / 100;
 
     if (cost < 1) cost = 1;
     max_sell = cost * o_ptr->max_inflate / 100;
@@ -1429,10 +1426,10 @@ static int store_purchase(int store_num, int *cur_top)
 		} else
 		    choice = purchase_haggle(store_num, &price, &sell_obj);
 		if (choice == 0) {
-		    if (py.misc.au >= price) {
+		    if (p_ptr->misc.au >= price) {
 			prt_comment1();
 			decrease_insults(store_num);
-			py.misc.au -= price;
+			p_ptr->misc.au -= price;
 			item_new = inven_carry(&sell_obj);
 			i = s_ptr->store_ctr;
 			store_destroy(store_num, item_val, TRUE);
@@ -1543,7 +1540,7 @@ static int store_sell(int store_num, int *cur_top)
 
 			prt_comment1();
 			decrease_insults(store_num);
-			py.misc.au += price;
+			p_ptr->misc.au += price;
 
 			cost = item_value(&sold_obj);
 
@@ -1739,7 +1736,7 @@ void enter_store(int store_num)
 		  case 'w':	   /* Wear			 */
 		  case 'X':
 		  case 'x':	   /* Switch weapon		 */
-		    tmp_chr = py.stats.use_stat[A_CHR];
+		    tmp_chr = p_ptr->stats.use_stat[A_CHR];
 		    do {
 			in_store_flag = TRUE;
 			inven_command(command);
@@ -1748,7 +1745,7 @@ void enter_store(int store_num)
 		    }
 		    while (command);
 		/* redisplay store prices if charisma changes */
-		    if (tmp_chr != py.stats.use_stat[A_CHR])
+		    if (tmp_chr != p_ptr->stats.use_stat[A_CHR])
 			display_inventory(store_num, cur_top);
 		    free_turn_flag = FALSE;	/* No free moves here. -CJS- */
 		    break;

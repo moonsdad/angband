@@ -48,7 +48,7 @@ int delete_object(int y, int x)
 
 
 /*
- * If too many objects on floor level, delete some of them
+ * When too many objects gather on the floor, delete some of them
  */
 static void compact_objects()
 {
@@ -122,10 +122,10 @@ static void compact_objects()
 int popt(void)
 {
     /* Compact if needed */
-    if (tcptr == MAX_TALLOC) compact_objects();
+    if (i_max == MAX_I_IDX) compact_objects();
 
     /* Return the next free space */
-    return (tcptr++);
+    return (i_max++);
 }
 
 /*
@@ -139,17 +139,17 @@ void pusht(int my_x)
     s16b        x = (s16b) my_x;
     register int i, j;
 
-    if (x != tcptr - 1) {
-	t_list[x] = t_list[tcptr - 1];
+    if (x != i_max - 1) {
+	t_list[x] = t_list[i_max - 1];
 
     /* must change the tptr in the cave of the object just moved */
 	for (i = 0; i < cur_height; i++)
 	    for (j = 0; j < cur_width; j++)
-		if (cave[i][j].tptr == tcptr - 1)
+		if (cave[i][j].tptr == i_max - 1)
 		    cave[i][j].tptr = x;
     }
-    tcptr--;
-    invcopy(&t_list[tcptr], OBJ_NOTHING);
+    i_max--;
+    invcopy(&t_list[i_max], OBJ_NOTHING);
 }
 
 
@@ -1659,45 +1659,45 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    t_ptr->name2 = SN_EMPTY;
 	    break;
 	  case 2:
-	    t_ptr->flags |= CH_LOCKED;
+	    t_ptr->flags |= CH2_LOCKED;
 	    t_ptr->name2 = SN_LOCKED;
 	    break;
 	  case 3:
 	  case 4:
-	    t_ptr->flags |= (CH_LOSE_STR | CH_LOCKED);
+	    t_ptr->flags |= (CH2_LOSE_STR | CH2_LOCKED);
 	    t_ptr->name2 = SN_POISON_NEEDLE;
 	    break;
 	  case 5:
 	  case 6:
-	    t_ptr->flags |= (CH_POISON | CH_LOCKED);
+	    t_ptr->flags |= (CH2_POISON | CH2_LOCKED);
 	    t_ptr->name2 = SN_POISON_NEEDLE;
 	    break;
 	  case 7:
 	  case 8:
 	  case 9:
-	    t_ptr->flags |= (CH_PARALYSED | CH_LOCKED);
+	    t_ptr->flags |= (CH2_PARALYSED | CH2_LOCKED);
 	    t_ptr->name2 = SN_GAS_TRAP;
 	    break;
 	  case 10:
 	  case 11:
-	    t_ptr->flags |= (CH_EXPLODE | CH_LOCKED);
+	    t_ptr->flags |= (CH2_EXPLODE | CH2_LOCKED);
 	    t_ptr->name2 = SN_EXPLOSION_DEVICE;
 	    break;
 	  case 12:
 	  case 13:
 	  case 14:
-	    t_ptr->flags |= (CH_SUMMON | CH_LOCKED);
+	    t_ptr->flags |= (CH2_SUMMON | CH2_LOCKED);
 	    t_ptr->name2 = SN_SUMMONING_RUNES;
 	    break;
 	  case 15:
 	  case 16:
 	  case 17:
-	    t_ptr->flags |= (CH_PARALYSED | CH_POISON | CH_LOSE_STR |
-			     CH_LOCKED);
+	    t_ptr->flags |= (CH2_PARALYSED | CH2_POISON | CH2_LOSE_STR |
+			     CH2_LOCKED);
 	    t_ptr->name2 = SN_MULTIPLE_TRAPS;
 	    break;
 	  default:
-	    t_ptr->flags |= (CH_SUMMON | CH_EXPLODE | CH_LOCKED);
+	    t_ptr->flags |= (CH2_SUMMON | CH2_EXPLODE | CH2_LOCKED);
 	    t_ptr->name2 = SN_MULTIPLE_TRAPS;
 	    break;
 	}
@@ -2073,11 +2073,13 @@ void place_special(int y, int x, u32b good)
     do {
 	tmp = get_obj_num((object_level + 10), TRUE);
 	tv = object_list[sorted_objects[tmp]].tval;
-	if ((tv == TV_HELM) || (tv == TV_SHIELD) ||
-	    (tv == TV_CLOAK) || (tv == TV_HAFTED) || (tv == TV_POLEARM) ||
+
+	if ((tv == TV_HELM) || (tv == TV_SHIELD) || (tv == TV_CLOAK) ||
+	    (tv == TV_HAFTED) || (tv == TV_POLEARM) ||
 	    (tv == TV_BOW) || (tv == TV_BOLT) || (tv == TV_ARROW) ||
 	    (tv == TV_BOOTS) || (tv == TV_GLOVES))
 	    is_good = TRUE;
+
 	if ((tv == TV_SWORD) &&
 	    strncmp("& Broken", object_list[sorted_objects[tmp]].name, 8))
 	    is_good = TRUE;	   /* broken swords/daggers are NOT good!
@@ -2098,11 +2100,14 @@ void place_special(int y, int x, u32b good)
 	    (object_list[sorted_objects[tmp]].subval > ((good & SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
     } while (!is_good);
+
     invcopy(&t_list[cur_pos], sorted_objects[tmp]);
     magic_treasure(cur_pos, object_level, (good & SPECIAL) ? 666 : 1, 0);
-    if (peek) {
-	if (object_list[sorted_objects[tmp]].level > object_level) {
-	    char                buf[200];
+
+	/* Hack -- look at it */
+	if (peek) {
+	    char buf[200];
+	    if (object_list[sorted_objects[tmp]].level > object_level) {
 	    byte               t;
 
 	    t = t_list[cur_pos].ident;
@@ -2112,6 +2117,7 @@ void place_special(int y, int x, u32b good)
 	    msg_print(buf);
 	}
     }
+
     if (cave[y][x].cptr == 1) {
 	msg_print("You feel something roll beneath your feet.");
     }
@@ -2128,43 +2134,58 @@ void random_object(int y, int x, int num)
     register int        i, j, k;
     register cave_type *cave_ptr;
 
-    do {
-	i = 0;
-	do {
+    /* Attempt to place 'num' objects */
+    for (; num > 0; --num) {
+
+	/* Try up to 10 spots looking for empty space */
+	for (i = 0; i < 11; ++i) {
+
+	    /* Pick a random location */
 	    do {
 		j = y - 3 + randint(5);
 		k = x - 4 + randint(7);
 	    } while (!in_bounds(j, k));
 	    cave_ptr = &cave[j][k];
+
 	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
 		object_level = dun_level;
-		if (randint(100) < 75)
-		    place_object(j, k);
-		else
-		    place_gold(j, k);
-		i = 9;
+
+	    /* Place something */
+	    if (randint(100) < 75) {
+		place_object(j, k);
 	    }
-	    i++;
+	    else {
+		place_gold(j, k);
+	    }
+
+	    /* Placement accomplished */
+	    break;
+	    }
 	}
-	while (i <= 10);
-	num--;
     }
-    while (num != 0);
 }
 
 
+/*
+ * Same as above, but always "special"
+ * Only really called by "scroll of *acquirement*"
+ */
 void special_random_object(int y, int x, int num)
 {
     register int        i, j, k;
     register cave_type *cave_ptr;
 
     object_level = dun_level;
-    do {
-	i = 0;
-	do {
+    for (; num > 0; --num) {
+
+	/* Try up to 10 spots looking for empty space */
+	for (i = 0; i < 11; ++i) {
+	    
+	    /* Pick a random spot */
 	    j = y - 3 + randint(5);
 	    k = x - 4 + randint(7);
 	    cave_ptr = &cave[j][k];
+
 	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
 		if (randint(5) == 1) {
 		    if (!special_place_object(j, k))
@@ -2172,21 +2193,19 @@ void special_random_object(int y, int x, int num)
 		} else {
 		    place_special(j, k, SPECIAL);
 		}
-		i = 9;
+
+	    /* Placement accomplished */
+	    break;
 	    }
-	    i++;
 	}
-	while (i <= 10);
-	num--;
     }
-    while (num != 0);
 }
 
 
 
 
 /*
- * Places a particular trap at location y, x		-RAK-	
+ * Places a particular trap at location y, x		-RAK-	 
  */
 void place_trap(int y, int x, int subval)
 {
@@ -2194,7 +2213,7 @@ void place_trap(int y, int x, int subval)
 
     if (!in_bounds(y, x))
 	return;	       /* abort! -CFT */
-    if (cave[y][x].cptr >= MIN_MONIX)
+    if (cave[y][x].cptr >= MIN_M_IDX)
 	return;	       /* don't put rubble under monsters, it's annoying -CFT */
 
     if (cave[y][x].tptr != 0)
@@ -2220,52 +2239,50 @@ void place_rubble(int y, int x)
 {
     register int        cur_pos;
     register cave_type *cave_ptr;
+    register inven_type *i_ptr;
 
-    if (!in_bounds(y, x))
-	return;			   /* abort! -CFT */
+    if (!in_bounds(y, x)) return;			   /* abort! -CFT */
+
     if (cave[y][x].tptr != 0)
+
+   /* don't replace stairs, stores, artifacts */
 	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
 	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
 	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
 	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
 	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
 	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
-	    return;		   /* don't replace stairs, stores, artifacts */
+	    return;
 	else
-	    delete_object(y, x);
+    /* Delete whatever is there */
+    delete_object(y, x);
+
     cur_pos = popt();
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_RUBBLE);
+
+    /* Put the rubble in the cave */
     cave_ptr = &cave[y][x];
     cave_ptr->tptr = cur_pos;
+
+    /* Hack -- nuke any walls */
     cave_ptr->fval = BLOCKED_FLOOR;
-    invcopy(&t_list[cur_pos], OBJ_RUBBLE);
 }
 
 /*
  * Return the "coin type" of a monster race
- * Used to allocate proper treasure for killing creeping coins
- * if killed a 'Creeping _xxx_ coins'... -CWS 
+ * Used to allocate proper treasure for killing creeping coins -CWS
  */
-void get_coin_type(creature_type *c_ptr)
+void get_coin_type(monster_race *r_ptr)
 {
-    if (!stricmp(c_ptr->name, "Creeping copper coins")) {
-	coin_type = 2;
-    }
+    cptr name;
 
-    if (!stricmp(c_ptr->name, "Creeping silver coins")) {
-	coin_type = 5;
-    }
-
-    if (!stricmp(c_ptr->name, "Creeping gold coins")) {
-	coin_type = 10;
-    }
-
-    if (!stricmp(c_ptr->name, "Creeping mithril coins")) {
-	coin_type = 16;
-    }
-
-    if (!stricmp(c_ptr->name, "Creeping adamantite coins")) {
-	coin_type = 17;
-    }
+    name = r_ptr->name;
+    if (!stricmp(name, "Creeping copper coins")) coin_type = 2;
+    if (!stricmp(name, "Creeping silver coins")) coin_type = 5;
+    if (!stricmp(name, "Creeping gold coins")) coin_type = 10;
+    if (!stricmp(name, "Creeping mithril coins")) coin_type = 16;
+    if (!stricmp(name, "Creeping adamantite coins")) coin_type = 17;
 }
 
 /*
@@ -2288,48 +2305,57 @@ void place_gold(int y, int x)
 	else
 	    delete_object(y, x);
     cur_pos = popt();
+
+    /* Pick a Treasure variety */
     i = ((randint(object_level + 2) + 2) / 2) - 1;
-    if (randint(OBJ_GREAT) == 1)
+
+    /* Apply "extra" magic */
+    if (randint(OBJ_GREAT) == 1) {
 	i += randint(object_level + 1);
-    if (i >= MAX_GOLD)
-	i = MAX_GOLD - 1;
+    }
+
+    /* Do not create "illegal" Treasure Types */
+    if (i >= MAX_GOLD) i = MAX_GOLD - 1;
+
     if (coin_type) {			/* if killed a Creeping _xxx_ coins... */
-	if (coin_type > MAX_GOLD - 1)
-	    coin_type = 0;		/* safety check -CWS */
+	if (coin_type > MAX_GOLD - 1) coin_type = 0;		/* safety check -CWS */
 	i = coin_type;
     }
+
     cave[y][x].tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_GOLD_LIST + i);
     t_ptr = &t_list[cur_pos];
+    invcopy(t_ptr, OBJ_GOLD_LIST + i);
+
+    /* Determine the "cost" */
     t_ptr->cost += (8L * (long)randint((int)t_ptr->cost)) + randint(8);
 
-/*
- * average the values to make Creeping _xxx_ coins not give too great treasure drops */
-    if (coin_type)
+/* Hack -- average the values to make sure "creeping coins" are not too valuable */
+    if (coin_type) {
 	t_ptr->cost = ((8L * (long)randint((int)object_list[OBJ_GOLD_LIST + i].cost))
 		       + (t_ptr->cost)) >> 1;
-					  
-    if (cave[y][x].cptr == 1)
+    }
+
+    /* Under the player */
+    if (cave[y][x].cptr == 1) {
 	msg_print("You feel something roll beneath your feet.");
+    }
 }
 
 
 /*
- * Returns the array number of a random object		-RAK-	 */
+ * Returns the array number of a random object		-RAK-
+ */
 int get_obj_num(int level, int good)
 {
     register int i, j;
 
     do {
-	if (level == 0)
-	    i = randint(t_level[0]) - 1;
+	if (level == 0) i = rand_int(t_level[0]);
 	else {
-	    if (level >= MAX_OBJ_LEVEL)
-		level = MAX_OBJ_LEVEL;
+	    if (level >= MAX_OBJ_LEVEL) level = MAX_OBJ_LEVEL;
 	    else if (randint(OBJ_GREAT) == 1) {
 		level = level * MAX_OBJ_LEVEL / randint(MAX_OBJ_LEVEL) + 1;
-		if (level > MAX_OBJ_LEVEL)
-		    level = MAX_OBJ_LEVEL;
+		if (level > MAX_OBJ_LEVEL) level = MAX_OBJ_LEVEL;
 	    }
 
 
@@ -2342,25 +2368,23 @@ int get_obj_num(int level, int good)
 	 */
 
 	    if (randint(2) == 1)
-		i = randint(t_level[level]) - 1;
+		i = rand_int(t_level[level]);
 	    else {		   /* Choose three objects, pick the highest level. */
-		i = randint(t_level[level]) - 1;
-		j = randint(t_level[level]) - 1;
-		if (i < j)
-		    i = j;
-		j = randint(t_level[level]) - 1;
-		if (i < j)
-		    i = j;
+		i = rand_int(t_level[level]);
+		j = rand_int(t_level[level]);
+		if (i < j) i = j;
+		j = rand_int(t_level[level]);
+		if (i < j) i = j;
 		j = object_list[sorted_objects[i]].level;
-		if (j == 0)
-		    i = randint(t_level[0]) - 1;
-		else
-		    i = randint(t_level[j] - t_level[j - 1]) - 1 + t_level[j - 1];
+		if (j == 0) i = rand_int(t_level[0]);
+		else i = randint(t_level[j] - t_level[j - 1]) - 1 + t_level[j - 1];
 	    }
 	}
     } while (((object_list[sorted_objects[i]].rare ?
 	       (randint(object_list[sorted_objects[i]].rare) - 1) : 0) && !good)
 	     || (object_list[sorted_objects[i]].rare == 255));
+
+    /* Accept that object */
     return (i);
 }
 

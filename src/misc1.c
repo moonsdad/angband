@@ -43,9 +43,6 @@ typedef struct statstime {
 #endif
 
 
-extern int peek;
-extern int rating;
-
 /*
  * The standard R.N.G. state array (used below)
  */
@@ -230,6 +227,9 @@ int bit_pos(u32b *test)
 {
     register int    i;
     register u32b mask = 0x1L;
+
+    /* No bits set? */
+    if (!(*test)) return (-1);
     
     /* Scan the input */
     for (i = 0; i < sizeof(*test) * 8; i++) {
@@ -244,13 +244,14 @@ int bit_pos(u32b *test)
 	mask <<= 0x1L;
     }
 
-    /* no one bits found */
-    return (-1);
+    /* Paranoia -- massive error */
+    return (-99);
 }
 
 
 /*
  * Calculates current boundaries
+ * Called below and from "do_cmd_locate()".
  */
 void panel_bounds()
 {
@@ -267,7 +268,7 @@ void panel_bounds()
  * Given an row (y) and col (x), this routine detects when a move
  * off the screen has occurred and figures new borders. -RAK-
  *
- * "Update" forces the panel bounds to be recalculated, useful for 'W'here. 
+ * "Update" forces a "full update" to take place, useful for 'W'here.
  */
 int get_panel(int y, int x, int update)
 {
@@ -350,7 +351,7 @@ int pdamroll(byte *array)
 
 
 /*
- * Gives Max hit points					-RAK-	 
+ * Same as above, but always maximal
  */
 int max_hp(byte *array)
 {
@@ -366,7 +367,7 @@ unsigned char loc_symbol(int y, int x)
     register struct flags *f_ptr;
 
     cave_ptr = &cave[y][x];
-    f_ptr = &py.flags;
+    f_ptr = &p_ptr->flags;
 
     if ((cave_ptr->cptr == 1) && (!find_flag || find_prself))
 	return '@';
@@ -375,7 +376,7 @@ unsigned char loc_symbol(int y, int x)
     if ((f_ptr->image > 0) && (randint(12) == 1))
 	return randint(95) + 31;
     if ((cave_ptr->cptr > 1) && (m_list[cave_ptr->cptr].ml))
-	return c_list[m_list[cave_ptr->cptr].mptr].cchar;
+	return r_list[m_list[cave_ptr->cptr].mptr].cchar;
     if (!cave_ptr->pl && !cave_ptr->tl && !cave_ptr->fm)
 	return ' ';
     if ((cave_ptr->tptr != 0)
@@ -406,16 +407,14 @@ unsigned char loc_symbol(int y, int x)
  */
 void add_food(int num)
 {
-    register struct flags *p_ptr;
     register int           extra, penalty;
 
-    p_ptr = &py.flags;
-    if (p_ptr->food < 0) p_ptr->food = 0;
-    p_ptr->food += num;
+    if (p_ptr->flags.food < 0) p_ptr->flags.food = 0;
+    p_ptr->flags.food += num;
     /* overflow check */
-    if (num > 0 && p_ptr->food <= 0) p_ptr->food = 32000;
+    if (num > 0 && p_ptr->flags.food <= 0) p_ptr->flags.food = 32000;
 
-    if (p_ptr->food > PLAYER_FOOD_MAX) {
+    if (p_ptr->flags.food > PLAYER_FOOD_MAX) {
 
 	msg_print("You are bloated from overeating. ");
 
@@ -427,9 +426,9 @@ void add_food(int num)
 	if (extra > num) extra = num;
 	penalty = extra / 50;
 
-	p_ptr->slow += penalty;
-	if (extra == num) p_ptr->food = p_ptr->food - num + penalty;
-	else p_ptr->food = PLAYER_FOOD_MAX + penalty;
+	p_ptr->flags.slow += penalty;
+	if (extra == num) p_ptr->flags.food = p_ptr->flags.food - num + penalty;
+	else p_ptr->flags.food = PLAYER_FOOD_MAX + penalty;
     }
 
     else if (p_ptr->food > PLAYER_FOOD_FULL) {

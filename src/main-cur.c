@@ -136,7 +136,7 @@ static int          save_local_chars;
  * to be a way of resetting the count, with a call made for commands like run
  * or rest.
  */
-int check_input(int microsec)
+static int check_input(int microsec)
 {
 #if defined(USG) && !defined(M_XENIX)
     int                 arg, result;
@@ -192,8 +192,7 @@ int check_input(int microsec)
     arg = fcntl(0, F_GETFL, arg);
     arg &= ~O_NDELAY;
     (void)fcntl(0, F_SETFL, arg);
-    if (result == -1)
-	return 0;
+    if (result == -1) return 0;
     else
 	return 1;
 #endif
@@ -212,7 +211,7 @@ int check_input(int microsec)
  * careful with signals and interrupts, and does rudimentary job control, and
  * puts the terminal back in a standard mode. 
  */
-int system_cmd(char *p)
+int system_cmd(cptr p)
 {
     int                 pgrp, pid, i, mask;
     union wait          w;

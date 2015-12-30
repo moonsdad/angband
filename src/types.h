@@ -34,7 +34,8 @@ typedef char vtype[VTYPESIZ];
 /* note that since its output can easily exceed 80 characters, objdes must
    always be called with a bigvtype as the first paramter */
 typedef char bigvtype[BIGVTYPESIZ];
-typedef char stat_type[8];
+
+
 
 /*
  * Note that fixed length character fields allow pure "structure copy",
@@ -45,8 +46,8 @@ typedef char stat_type[8];
  * aligned within the structure to their natural size boundary, so that
  * the structures contain no padding and are minimum size.  In theory...
  *
- * Note that bit fields are extremely inefficient, and are only used
- * where they would provide a major savings in space.
+ * Note that bit fields are extremely inefficient, and are thus used
+ * where they provide a major savings in space.
  * Actually, this is not really true, perhaps we should eliminate them.
  */
 
@@ -64,13 +65,15 @@ struct _monster_attack {
     byte attack_sides;
 };
 
+
 /*
- * Monster "variety"
+ * Monster "variety" or "race"
  *
  */
-typedef struct _creature_type creature_type;
 
-struct _creature_type {
+typedef struct _monster_race monster_race;
+
+struct _monster_race {
 
   cptr name;			/* Descrip of creature				*/
 
@@ -88,7 +91,7 @@ struct _creature_type {
 
   u32b mexp;			/* Exp value for kill		*/
 
-  u16b  damage[4];		/* Type attack and damage	*/
+  u16b damage[4];		/* Type attack and damage	*/
 
   u32b cmove;		/* Bit field		*/
   u32b cdefense;		/* Bit field		*/
@@ -158,7 +161,7 @@ struct _monster_type {
 
   s16b csleep;			/* Inactive counter		*/
 
-  s16b cspeed;			/* Monster "speed"		*/
+  s16b mspeed;			/* Monster "speed"		*/
   
   byte stunned;		/* Monster is stunned		*/
   byte confused;		/* Monster is confused		*/
@@ -177,9 +180,9 @@ struct _monster_type {
  * Note that "name" must be at the end.
  */
 
-typedef struct _treasure_type treasure_type;
+typedef struct _inven_kind inven_kind;
 
-typedef struct _treasure_type {
+struct _inven_kind {
 
   cptr name;			/* Object Name				*/
 

@@ -43,24 +43,25 @@
 
 
 /*
- * Checks a co-ordinate for in bounds status		-RAK-	
+ * Determines if a map location is fully inside the outer walls -RAK-
  */
 #define in_bounds(y, x) \
-   ((((y) > 0) && ((y) < cur_height-1) && ((x) > 0) && ((x) < cur_width-1)) ? \
+   ((((y) > 0) && ((x) > 0) && ((y) < cur_height-1) && ((x) < cur_width-1)) ? \
     (TRUE) : (FALSE))
 
 /*
- * Checks if we can see this point (includes map edges) -CWS
+ * Determines if a map location is on or inside the outer walls
+ * Checks if we can see this point -CWS
  */
 #define in_bounds2(y, x) \
-   ((((y) >= 0) && ((y) < cur_height) && ((x) >= 0) && ((x) < cur_width)) ? \
+   ((((y) >= 0) && ((x) >= 0) && ((y) < cur_height) && ((x) < cur_width)) ? \
     (TRUE) : (FALSE))
 
 
     
 /*
- * Tests a given point to see if it is within the screen -RAK-
- * boundaries.
+ * Determines if a map location is currently "on screen" -RAK-
+ * Note that "panel_contains(y,x)" always implies "in_bounds2(y,x)".
  */
 #define panel_contains(y, x) \
   ((((y) >= panel_row_min) && ((y) <= panel_row_max) && \
@@ -106,7 +107,9 @@
 /*
  * Variable access to the version
  */
-extern char *copyright[5];
+extern int cur_version_maj;
+extern int cur_version_min;
+extern int cur_patch_level;
 
 extern int NO_SAVE;
 
@@ -131,7 +134,7 @@ extern s16b log_index;		/* Index to log file. -CJS- */
 
 
 /*
- * These are options, set with set_options command -CJS-
+ * These are options, set with via "set_options()" -CJS-
  */
 
 /* Option set 1 */
@@ -142,7 +145,7 @@ extern int prompt_carry_flag;		/* Require "g" key to pick up */
 extern int carry_query_flag;		/* Prompt for pickup */
 
 extern int equippy_chars;	/* do equipment characters -CWS */
-extern int notice_seams;	/* Highlight magma and quartz */
+extern int notice_seams;	/* Highlight mineral seams */
 
 /* Option Set 2  */
 
@@ -157,16 +160,16 @@ extern int find_ignore_doors;	/* Run through doors */
 
 extern int no_haggle_flag;	/* Cancel haggling */
 
-extern int show_weight_flag;	/* Show weights in inven */
-extern int show_equip_weight_flag;	/* Show weights in equip  */
+extern int show_inven_weight;	/* Show weights in inven */
+extern int show_equip_weight;	/* Show weights in equip */
 extern int plain_descriptions;	/* Plain descriptions don't add color */
 
 
 /*
  * More options
  */
-extern int delay_spd;		/* 1-10 for delays */
-extern int hitpoint_warn;	/* Low hitpoint warning */
+extern int delay_spd;		/* 1-9 for delays, or zero */
+extern int hitpoint_warn;	/* 1-9 for hitpoint warning, or zero */
 
 
 /*
@@ -174,7 +177,7 @@ extern int hitpoint_warn;	/* Low hitpoint warning */
  */
 extern int in_store_flag;		/* Currently in a store */
 extern int peek;			/* should we display additional msgs */
-extern int coin_type;			/* Hack -- creeping _xxx_ coin type */
+extern int coin_type;			/* Hack -- creeping coin treasure type */
 extern int opening_chest;		/* Hack -- do not generate another chest */
 
 extern int is_home;			/* are we in our home? */
@@ -200,10 +203,10 @@ HOLHENNETH, AEGLIN, CAMLOST, NIMLOTH, NAR, BERUTHIEL, GORLIM, ELENDIL,
 THORIN, CELEBORN, THRAIN, GONDOR, THINGOL, THORONGIL, LUTHIEN, TUOR, ROHAN,
 TULKAS, NECKLACE, BARAHIR, CASPANION, RAZORBACK, BLADETURNER;
 
-/* Brand new extra effecient and kind way to add unique monsters... HOORAY!! */
-extern struct unique_mon u_list[MAX_CREATURES];
+/* The current dungeon level */
+/* Was: extern cave_type cave[MAX_HEIGHT][MAX_WIDTH]; */
+extern cave_type *cave[MAX_HEIGHT];
 
-extern int quests[MAX_QUESTS];
 
 /*
  * global flags
@@ -215,12 +218,13 @@ extern int closing_flag;		/* Used for closing   */
 extern int in_store_flag;		/* Notice when in stores */
 extern int good_item_flag;		/* Notice artifact created... */
 extern int feeling;			/* level feeling */
+extern int rating;			/* level rating */
 extern int unfelt;
 extern int new_level_flag;		/* Next level when true  */
 extern int teleport_flag;		/* Handle teleport traps  */
 extern int eof_flag;			/* Used to handle eof/HANGUP */
 extern int player_light;		/* Player carrying light */
-extern int cur_lite, old_lite;           /* Light radius */
+extern int cur_lite, old_lite;          /* Light radius */
 extern int find_flag;			/* Are we running */
 extern int free_turn_flag;		/* Is this turn free */
 
@@ -230,11 +234,12 @@ extern int pack_heavy;			/* Flag if the pack too heavy -CJS- */
 extern char doing_inven;		/* Track inventory commands */
 extern int screen_change;		/* Notice disturbing of inventory */
 
+extern int character_generated;		/* Character generation complete */
+extern int character_saved;		/* prevents save on kill after save_char() */
+extern int peek;			/* Peek like a wizard */
 extern int be_nasty;
 extern int monster_is_afraid;	/* redo monster fear messages -CWS */
 
-extern int character_generated;	/* Character generation complete */
-extern int character_saved;		/* prevents save on kill after save_char() */
 
 extern int highscore_fd;		/* High score file descriptor */
 extern int command_count;		/* Repetition of commands. -CJS- */
@@ -281,17 +286,11 @@ extern u16b target_row;
 extern u16b target_col;
 #endif
 
-/*  Following are all floor definitions				*/
-#ifdef MACINTOSH
-extern cave_type (*cave)[MAX_WIDTH];
-#else
-extern cave_type cave[MAX_HEIGHT][MAX_WIDTH];
-#endif
-
 /* A pointer to the main player record */
-extern player_type py;
+extern player_type *p_ptr;
 
 extern player_race race[MAX_RACES];
+extern player_class class[MAX_CLASS];
 extern player_background background[MAX_BACKGROUND];
 
 extern cptr player_title[MAX_CLASS][MAX_PLAYER_LEVEL];
@@ -308,11 +307,8 @@ extern char *dsp_race[MAX_RACES]; /* Short strings for races. -CJS- */
 
 extern byte rgold_adj[MAX_RACES][MAX_RACES];
 
-extern player_class class[MAX_CLASS];
 extern s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ];
-
-/* used to check if player knows all spells knowable to him -CFT */
-extern u16b player_init[MAX_CLASS][5];
+extern u16b player_init[MAX_CLASS][5]; /* used to check if player knows all spells knowable to him -CFT */
 
 extern s16b total_winner;
 
@@ -335,43 +331,42 @@ extern u32b spellmasks[MAX_CLASS][2];	/* what spells can classes learn */
 /*** Store information ***/
 
 extern owner_type owners[MAX_OWNERS];
-#ifdef MACINTOSH
-extern store_type *store;
-#else
 extern store_type store[MAX_STORES];
-#endif
 extern u16b store_choice[MAX_STORES][STORE_CHOICES];
-#ifndef MACINTOSH
 extern int (*store_buy[MAX_STORES])();
-#endif
 
 
 /*** Miscellaneous Information ***/
 
+extern monster_attack a_list[MAX_A_IDX];	/* Monster attacks */
+
+extern byte blows_table[11][12];
+
+extern u16b normal_table[NORMAL_TABLE_SIZE];
 
 /*** Inventory ***/
-/* Following are treasure arrays	and variables			*/
 
 /* Inventory information */
 extern s16b inven_weight;		/* Total carried weight */
-extern s16b inven_ctr;			/* Total different obj's */
-extern s16b equip_ctr;			/* Cur equipment ctr */
+extern s16b inven_ctr;			/* Number of obj's in inven */
+extern s16b equip_ctr;			/* Number of obj's in equip */
 
 /* Player inventory */
-extern inven_type inventory[INVEN_ARRAY_SIZE];
+extern inven_type inventory[INVEN_TOTAL];
+
 
 /*** Item Information ***/
 
-/* Treasure heap pointer */
-extern s16b tcptr;
+/* Treasure heap pointer (used with t_list) */
+extern s16b i_max;
 
-extern treasure_type object_list[MAX_OBJECTS];
+extern inven_type t_list[MAX_I_IDX];
+
+extern inven_kind object_list[MAX_OBJECTS];
 
 extern byte object_ident[OBJECT_IDENT_SIZE];
 
 extern s16b t_level[MAX_OBJ_LEVEL+1];
-
-extern inven_type t_list[MAX_TALLOC];
 
 extern cptr special_names[SN_ARRAY_SIZE];
 
@@ -379,45 +374,34 @@ extern s16b sorted_objects[MAX_DUNGEON_OBJ];
 
 
 /*** Monster Information ***/
-/* Following are creature arrays and variables			*/
 
-/* Cur free monster ptr	*/
-extern s16b mfptr;
+/* Monster heap pointer (used with m_list) */
+extern s16b m_max;
 
-extern creature_type c_list[MAX_CREATURES];
-extern monster_type m_list[MAX_MALLOC];
-extern describe_mon_type desc_list[MAX_CREATURES];
-extern s16b m_level[MAX_MONS_LEVEL+1];
-extern monster_attack monster_attacks[N_MONS_ATTS];
+/* Actual array of physical monsters */
+extern monster_type m_list[MAX_M_IDX];
+
+/* The array of monster races */
+extern monster_race r_list[MAX_R_IDX];
 
 /* Monster memories. -CJS- */
-#ifdef MACINTOSH
-extern monster_lore *c_recall;
-#else
-extern monster_lore c_recall[MAX_CREATURES];
-#endif
+extern monster_lore l_list[MAX_R_IDX];
+
+extern describe_mon_type desc_list[MAX_R_IDX];
+
+extern s16b m_level[MAX_MONS_LEVEL+1];
+
+/* Brand new extra effecient and kind way to add unique monsters... HOORAY!! */
+extern struct unique_mon u_list[MAX_R_IDX];
+
+extern int quests[MAX_QUESTS];
 
 extern monster_type blank_monster; /* Blank monster values	*/
 extern s16b mon_tot_mult;		   /* # of repro's of creature	*/
 
-/* Following are arrays for descriptive pieces			*/
-extern cptr colors[MAX_COLORS];
-extern cptr mushrooms[MAX_MUSH];
-extern cptr woods[MAX_WOODS];
-extern cptr metals[MAX_METALS];
-extern cptr rocks[MAX_ROCKS];
-extern cptr amulets[MAX_AMULETS];
-extern cptr syllables[MAX_SYLLABLES];
-
-extern byte blows_table[11][12];
-
-extern u16b normal_table[NORMAL_TABLE_SIZE];
-
-/* Initialized data which had to be moved from some other file */
-/* Since these get modified, macrsrc.c must be able to access them */
-/* Otherwise, game cannot be made restartable */
 /* dungeon.c */
 extern char last_command;		/* Memory of previous command. */
+
 /* moria1.c */
 /* Track if temporary light about player.  */
 extern int light_flag;
@@ -429,30 +413,28 @@ extern char	moriatop[], moriasav[];
 #endif
 
 
-/* 
- * The FILEPATH's to various files
- * If you use NEW_FILEPATHS, we need these externs; if you use OLD_FILEPATHS
- * these are #define'd to something, so they aren't variables.         [cjh]
+/*
+ * The FILEPATH's to various files, see "arrays.c"
  */
-extern char *ANGBAND_BONES;		/* was LIBDIR(bones)				*/
-extern char *ANGBAND_SAV;		/* was LIBDIR(save)					*/
-extern char *ANGBAND_TST;		/* was LIBDIR(test)					*/
+extern cptr ANGBAND_BONES;		/* was LIBDIR(bones)				*/
+extern cptr ANGBAND_SAV;		/* was LIBDIR(save)					*/
+extern cptr ANGBAND_TST;		/* was LIBDIR(test)					*/
 
-extern char *ANGBAND_MOR;		/* was LIBDIR(files/news)			*/
-extern char *ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
-extern char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
+extern cptr ANGBAND_MOR;		/* was LIBDIR(files/news)			*/
+extern cptr ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
+extern cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
 
-extern char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-extern char *ANGBAND_HOU;		/* was LIBDIR(files/hours)			*/
-extern char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-extern char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+extern cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
+extern cptr ANGBAND_HOU;		/* was LIBDIR(files/hours)			*/
+extern cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
+extern cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
 
-extern char *ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
-extern char *ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
-extern char *ANGBAND_WIZ_HELP;	/* was LIBDIR(files/rwizcmds.hlp)	*/
-extern char *ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
+extern cptr ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
+extern cptr ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
+extern cptr ANGBAND_WIZ_HELP;	/* was LIBDIR(files/rwizcmds.hlp)	*/
+extern cptr ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
 
-extern char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+extern cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
 
 
 /*
@@ -480,7 +462,7 @@ void exit_game(void);
 int look_line(int);
 
 /* desc.c */
-void magic_init(void);
+void flavor_init(void);
 void known1(inven_type *);
 int known1_p(inven_type *);
 void known2(inven_type *);
@@ -715,7 +697,7 @@ void special_random_object(int, int, int);
 void cut_player(int);
 void stun_player(int);
 void prt_equippy_chars(void);
-void get_coin_type(creature_type *);
+void get_coin_type(monster_race *);
 
 /* moria1.c */
 int is_a_vowel(int);
@@ -771,7 +753,7 @@ void rest(void);
 
 
 /* moria4.c */
-int at_target(int, int); /* target fns stolen from Morgul -CFT */
+int target_at(int, int); /* target fns stolen from Morgul -CFT */
 void target(void); /* target fns stolen from Morgul -CFT */
 void mmove2(int *, int *, int, int, int, int);
 int get_alldir(cptr, int *);
@@ -879,8 +861,8 @@ void default_signals(void);
 void restore_signals(void);
 
 /* spells.c */
-void monster_name(char *, struct monster_type *, struct creature_type *);
-void lower_monster_name(char *, struct monster_type *, struct creature_type *);
+void monster_name(char *, struct monster_type *, struct monster_race *);
+void lower_monster_name(char *, struct monster_type *, struct monster_race *);
 int sleep_monsters1(int, int);
 int detect_treasure(void);
 int detect_object(void);

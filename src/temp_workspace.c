@@ -123,11 +123,11 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
  */
 void bst_stat(int stat, int amount)
 {
-    py.stats.mod_stat[stat] += amount;
+    p_ptr->stats.mod_stat[stat] += amount;
 
     set_use_stat(stat);
 /* can not call prt_stat() here, may be in store, may be in inven_command */
-    py.flags.status |= (PY_STR << stat);
+    p_ptr->flags.status |= (PY_STR << stat);
 }
 
 
@@ -141,7 +141,7 @@ void check_strength()
 
     i_ptr = &inventory[INVEN_WIELD];
     if (i_ptr->tval != TV_NOTHING
-	&& (py.stats.use_stat[A_STR] * 15 < i_ptr->weight)) {
+	&& (p_ptr->stats.use_stat[A_STR] * 15 < i_ptr->weight)) {
 	if (weapon_heavy == FALSE) {
 	    msg_print("You have trouble wielding such a heavy weapon.");
 	    weapon_heavy = TRUE;
@@ -168,15 +168,15 @@ void check_strength()
 	change_speed(i - pack_heavy);
 	pack_heavy = i;
     }
-    py.flags.status &= ~PY_STR_WGT;
+    p_ptr->flags.status &= ~PY_STR_WGT;
 
-    if (py.misc.pclass == 2 && !notlike) {
+    if (p_ptr->misc.pclass == 2 && !notlike) {
         if ((i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
             && ((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
             notlike = TRUE;
             msg_print("You do not feel comfortable with your weapon.");
         }
-    } else if (py.misc.pclass == 2 && notlike) {
+    } else if (p_ptr->misc.pclass == 2 && notlike) {
         if (i_ptr->tval == TV_NOTHING) {
             notlike = FALSE;
             msg_print("You feel comfortable again after removing that weapon.");
@@ -200,8 +200,8 @@ void check_strength()
  */
 void change_speed(register int num)
 {
-    py.flags.speed += num;
-    py.flags.status |= PY_SPEED;
+    p_ptr->flags.speed += num;
+    p_ptr->flags.status |= PY_SPEED;
 }
 
 
@@ -224,11 +224,11 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 		bst_stat(i, amount);
     }
     if (TR_SEARCH & t_ptr->flags) {
-	py.misc.srh += amount;
-	py.misc.fos -= amount;
+	p_ptr->misc.srh += amount;
+	p_ptr->misc.fos -= amount;
     }
     if (TR_STEALTH & t_ptr->flags)
-	py.misc.stl += amount;
+	p_ptr->misc.stl += amount;
     if (TR_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
@@ -246,7 +246,7 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 	change_speed(-amount);
     }
     if (TR_INFRA & t_ptr->flags)
-	py.flags.see_infra += amount;
+	p_ptr->flags.see_infra += amount;
 }
 
 
@@ -493,7 +493,7 @@ void darken_player(int y1, int x1)
 /* Four cases : Normal, Finding, Blind, and Nolight	 -RAK-	 */
 void move_light(int y1, int x1, int y2, int x2)
 {
-    if (py.flags.blind > 0 || !player_light)
+    if (p_ptr->flags.blind > 0 || !player_light)
 	sub3_move_light(y1, x1, y2, x2);
     else
 	sub1_move_light(y1, x1, y2, x2);
@@ -694,7 +694,7 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case CTRL('R'):
-	if (py.flags.image > 0)
+	if (p_ptr->flags.image > 0)
 	    msg_print("You cannot be sure what is real and what is not!");
 	else {
 	    draw_cave();
@@ -848,7 +848,7 @@ static void do_command(char com_val)
 	    free_turn_flag = TRUE;
 	break;
       case 'W':			/* (W)here are we on the map	(L)ocate on map */
-	if ((py.flags.blind > 0) || no_light())
+	if ((p_ptr->flags.blind > 0) || no_light())
 	    msg_print("You can't see your map.");
 	else {
 	    int                 cy, cx, p_y, p_x;
@@ -913,7 +913,7 @@ static void do_command(char com_val)
 	rest();
 	break;
       case '#':			/* (#) search toggle	(S)earch toggle */
-	if (py.flags.status & PY_SEARCH)
+	if (p_ptr->flags.status & PY_SEARCH)
 	    search_off();
 	else
 	    search_on();
@@ -996,7 +996,7 @@ static void do_command(char com_val)
 	read_scroll();
 	break;
       case 's':			/* (s)earch for a turn */
-	search(char_row, char_col, py.misc.srh);
+	search(char_row, char_col, p_ptr->misc.srh);
 	break;
       case 'T':			/* (T)ake off something	(t)ake off */
 	inven_command('t');
@@ -1048,8 +1048,8 @@ static void do_command(char com_val)
 		(void)res_stat(A_CHR);
 		(void)restore_level();
 		(void)hp_player(2000);
-		py.flags.food = PLAYER_FOOD_MAX;
-		f_ptr = &py.flags;
+		p_ptr->flags.food = PLAYER_FOOD_MAX;
+		f_ptr = &p_ptr->flags;
 		if (f_ptr->slow > 1)
 		    f_ptr->slow = 1;
 		if (f_ptr->image > 1)
@@ -1162,12 +1162,12 @@ static void do_command(char com_val)
 		break;
 	      case '+':
 		if (command_count > 0) {
-		    py.misc.exp = command_count;
+		    p_ptr->misc.exp = command_count;
 		    command_count = 0;
-		} else if (py.misc.exp == 0)
-		    py.misc.exp = 1;
+		} else if (p_ptr->misc.exp == 0)
+		    p_ptr->misc.exp = 1;
 		else
-		    py.misc.exp = py.misc.exp * 2;
+		    p_ptr->misc.exp = p_ptr->misc.exp * 2;
 		prt_experience();
 		break;
 	      default:
@@ -1283,7 +1283,7 @@ int ruin_stat(register int stat)
 {
     register int tmp_stat;
 
-    tmp_stat = py.stats.cur_stat[stat];
+    tmp_stat = p_ptr->stats.cur_stat[stat];
     if (tmp_stat > 3) {
 	if (tmp_stat > 6) {
 	    if (tmp_stat < 19) {
@@ -1296,8 +1296,8 @@ int ruin_stat(register int stat)
 	} else
 	    tmp_stat--;
 
-	py.stats.cur_stat[stat] = tmp_stat;
-	py.stats.max_stat[stat] = tmp_stat;
+	p_ptr->stats.cur_stat[stat] = tmp_stat;
+	p_ptr->stats.max_stat[stat] = tmp_stat;
 	set_use_stat(stat);
 	prt_stat(stat);
 	return TRUE;

@@ -91,33 +91,34 @@ static int map_diag2[] = {2, 1, 0, 4, 3};
  */
 static cptr look_mon_desc(int mnum)
 {
-    monster_type *m = &m_list[mnum];
+    monster_type *m_ptr = &m_list[mnum];
 
     byte         living;
     s32b         thp, tmax, perc;
 
-    living = !((c_list[m->mptr].cdefense & (UNDEAD|DEMON)) ||
-	       ((c_list[m->mptr].cchar == 'E') ||
-		(c_list[m->mptr].cchar == 'g') ||
-		(c_list[m->mptr].cchar == 'v') ||
-		(c_list[m->mptr].cchar == 'X')));
+    living = !((r_list[m_ptr->mptr].cdefense & (UNDEAD|DEMON)) ||
+	       ((r_list[m_ptr->mptr].cchar == 'E') ||
+		(r_list[m_ptr->mptr].cchar == 'g') ||
+		(r_list[m_ptr->mptr].cchar == 'v') ||
+		(r_list[m_ptr->mptr].cchar == 'X')));
     
-    if (m->maxhp == 0) {	   /* then we're just going to fix it! -CFT */
-	if ((c_list[m->mptr].cdefense & MAX_HP) || be_nasty)
-	    m->maxhp = max_hp(c_list[m->mptr].hd);
+    if (m_ptr->maxhp == 0) {	   /* then we're just going to fix it! -CFT */
+	if ((r_list[m_ptr->mptr].cdefense & MAX_HP) || be_nasty)
+	    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
 	else
-	    m->maxhp = pdamroll(c_list[m->mptr].hd);
+	    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
     }
 
-    if (m->hp > m->maxhp) m->hp = m->maxhp;
+    if (m_ptr->hp > m->maxhp) m_ptr->hp = m_ptr->maxhp;
 
-    if ((m->maxhp == 0) || (m->hp >= m->maxhp))	/* shouldn't ever need > -CFT */
+    if ((m_ptr->maxhp == 0) || (m_ptr->hp >= m_ptr->maxhp)) {	/* shouldn't ever need > -CFT */
 
 	/* No damage */
 	return (living ? "unhurt" : "undamaged");
+    }
 
-    thp = (s32b) m->hp;
-    tmax = (s32b) m->maxhp;
+    thp = (s32b) m_ptr->hp;
+    tmax = (s32b) m_ptr->maxhp;
 
     perc = (s32b) (thp * 100L) / tmax;
 
@@ -186,19 +187,19 @@ static int look_see(int x, int y, int *transparent)
 
 	j = m_list[c_ptr->cptr].mptr;
 
-	if (c_list[j].cdefense & UNIQUE) {
+	if (r_list[j].cdefense & UNIQUE) {
 
 	    /* Describe */
 	    (void)sprintf(out_val, "%s %s (%s).  [(r)ecall]",
-			  dstring, c_list[j].name, look_mon_desc((int)c_ptr->cptr));
+			  dstring, r_list[j].name, look_mon_desc((int)c_ptr->cptr));
 	}
 
 	/* Use prompt */
 	else {
 	    (void)sprintf(out_val, "%s %s %s (%s).  [(r)ecall]",
 			  dstring,
-			  (is_a_vowel(c_list[j].name[0]) ? "an" : "a"),
-			  c_list[j].name,
+			  (is_a_vowel(r_list[j].name[0]) ? "an" : "a"),
+			  r_list[j].name,
 			  look_mon_desc((int)c_ptr->cptr));
 	}
 	dstring = "It is on";
@@ -221,15 +222,16 @@ static int look_see(int x, int y, int *transparent)
 
 	    if (t_list[c_ptr->tptr].tval == TV_SECRET_DOOR) goto granite;
 
+	    /* No rock, yes visible object */
 	    if (!gl_rock &&
 		(t_list[c_ptr->tptr].tval != TV_INVIS_TRAP)) {
 		
 		objdes(tmp_str, &t_list[c_ptr->tptr], TRUE);
 		(void)sprintf(out_val, "%s %s.  ---pause---", dstring, tmp_str);
-		dstring = "It is in";
 		prt(out_val, 0, 0);
 		move_cursor_relative(y, x);
 		query = inkey();
+		dstring = "It is in";
 	    }
 	}
 	if ((gl_rock || out_val[0]) && c_ptr->fval >= MIN_CLOSED_SPACE) {
@@ -414,12 +416,12 @@ void look()
     int                 dir, dummy;
 
     /* Blind */
-    if (py.flags.blind > 0) {
+    if (p_ptr->flags.blind > 0) {
 	msg_print("You can't see a damn thing!");
     }
 
     /* Hallucinating */
-    else if (py.flags.image > 0) {
+    else if (p_ptr->flags.image > 0) {
 	msg_print("You can't believe what you are seeing! It's like a dream!");
     }
 
@@ -532,12 +534,11 @@ static void chest_trap(int y, int x)
 {
     register int        i, j, k;
 
-    register inven_type *t_ptr;
+    register inven_type *i_ptr = &t_list[cave[y][x].tptr];
 
-    t_ptr = &t_list[cave[y][x].tptr];
-    if (CH_LOSE_STR & t_ptr->flags) {
+    if (i_ptr->flags2 & CH2_LOSE_STR) {
 	msg_print("A small needle has pricked you!");
-	if (!py.flags.sustain_str) {
+	if (!p_ptr->flags.sustain_str) {
 	    (void)dec_stat(A_STR);
 	    take_hit(damroll(1, 4), "a poison needle");
 	    msg_print("You feel weakened!");
@@ -547,28 +548,28 @@ static void chest_trap(int y, int x)
 	}
     }
 
-    if (CH_POISON & t_ptr->flags) {
+    if (i_ptr->flags2 & CH2_POISON) {
 	msg_print("A small needle has pricked you!");
 	take_hit(damroll(1, 6), "a poison needle");
-	if (!(py.flags.poison_resist ||
-	      py.flags.resist_poison ||
-	      py.flags.poison_im)) {
-	    py.flags.poisoned += 10 + randint(20);
+	if (!(p_ptr->flags.poison_resist ||
+	      p_ptr->flags.resist_poison ||
+	      p_ptr->flags.poison_im)) {
+	    p_ptr->flags.poisoned += 10 + randint(20);
 	}
     }
 
-    if (CH_PARALYSED & t_ptr->flags) {
+    if (i_ptr->flags2 & CH2_PARALYSED) {
 	msg_print("A puff of yellow gas surrounds you!");
-	if (py.flags.free_act) {
+	if (p_ptr->flags.free_act) {
 	    msg_print("You are unaffected.");
 	}
 	else {
 	    msg_print("You choke and pass out.");
-	    py.flags.paralysis = 10 + randint(20);
+	    p_ptr->flags.paralysis = 10 + randint(20);
 	}
     }
 
-    if (CH_SUMMON & t_ptr->flags) {
+    if (i_ptr->flags2 & CH2_SUMMON) {
 	for (i = 0; i < 3; i++) {
 	    j = y;
 	    k = x;
@@ -576,7 +577,7 @@ static void chest_trap(int y, int x)
 	}
     }
 
-    if (CH_EXPLODE & t_ptr->flags) {
+    if (i_ptr->flags2 & CH2_EXPLODE) {
 	msg_print("There is a sudden explosion!");
 	(void)delete_object(y, x);
 	take_hit(damroll(5, 8), "an exploding chest");
@@ -618,10 +619,10 @@ void openobject()
 	     || t_list[c_ptr->tptr].tval == TV_CHEST)) {
 	    m_ptr = &m_list[c_ptr->cptr];
 	    if (m_ptr->ml) {
-		if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-		    (void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
+		if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+		    (void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 		else
-		    (void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
+		    (void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
 	    } else
 		(void)strcpy(m_name, "Something");
 	    (void)sprintf(out_val, "%s is in your way!", m_name);
@@ -631,18 +632,17 @@ void openobject()
 	    if (t_list[c_ptr->tptr].tval == TV_CLOSED_DOOR) {
 		t_ptr = &t_list[c_ptr->tptr];
 		if (t_ptr->p1 > 0) {
-		    p_ptr = &py.misc;
-		    i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-			+ (class_level_adj[p_ptr->pclass][CLA_DISARM]
-			   * p_ptr->lev / 3);
+		    i = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
+			+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM]
+			   * p_ptr->misc.lev / 3);
 	/* give a 1/50 chance of opening anything, anyway -CWS */
 		    if ((i - t_ptr->p1) < 2)
 			i = t_ptr->p1 + 2;
-		    if (py.flags.confused > 0)
+		    if (p_ptr->flags.confused > 0)
 			msg_print("You are too confused to pick the lock.");
 		    else if ((i - t_ptr->p1) > randint(100)) {
 			msg_print("You have picked the lock.");
-			py.misc.exp++;
+			p_ptr->misc.exp++;
 			prt_experience();
 			t_ptr->p1 = 0;
 		    } else
@@ -659,32 +659,31 @@ void openobject()
 	    }
     /* Open a closed chest.		     */
 	    else if (t_list[c_ptr->tptr].tval == TV_CHEST) {
-		p_ptr = &py.misc;
-		i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-		    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
+		i = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
+		    + (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
 		t_ptr = &t_list[c_ptr->tptr];
 		flag = FALSE;
-		if (CH_LOCKED & t_ptr->flags)
-		    if (py.flags.confused > 0)
+		if (CH2_LOCKED & t_ptr->flags)
+		    if (p_ptr->flags.confused > 0)
 			msg_print("You are too confused to pick the lock.");
 		    else if ((i - (int)t_ptr->level) > randint(100)) {
 			msg_print("You have picked the lock.");
 			flag = TRUE;
-			py.misc.exp += t_ptr->level;
+			p_ptr->misc.exp += t_ptr->level;
 			prt_experience();
 		    } else
 			count_msg_print("You failed to pick the lock.");
 		else
 		    flag = TRUE;
 		if (flag) {
-		    t_ptr->flags &= ~CH_LOCKED;
+		    t_ptr->flags &= ~CH2_LOCKED;
 		    t_ptr->name2 = SN_EMPTY;
 		    known2(t_ptr);
 		    t_ptr->cost = 0;
 		}
 		flag = FALSE;
 	    /* Was chest still trapped?	 (Snicker)   */
-		if ((CH_LOCKED & t_ptr->flags) == 0) {
+		if ((CH2_LOCKED & t_ptr->flags) == 0) {
 		    chest_trap(y, x);
 		    if (c_ptr->tptr != 0)
 			flag = TRUE;
@@ -770,10 +769,10 @@ void closeobject()
 		else {
 		    m_ptr = &m_list[c_ptr->cptr];
 		    if (m_ptr->ml) {
-			if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-			    (void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
+			if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+			    (void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 			else
-			    (void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
+			    (void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
 		    } else
 			(void)strcpy(m_name, "Something");
 		    (void)sprintf(out_val, "%s is in your way!", m_name);
@@ -813,6 +812,8 @@ int twall(int y, int x, int t1, int t2)
     if (t1 > t2) {
 
 	c_ptr = &cave[y][x];
+
+
 	if (c_ptr->tptr) { /* secret door or rubble or gold -CFT */
 	    if (t_list[c_ptr->tptr].tval == TV_RUBBLE) {
 		delete_object(y,x); /* blow it away... */
@@ -879,7 +880,7 @@ void tunnel(int dir)
     monster_type       *m_ptr;
     vtype               out_val, m_name;
 
-    if ((py.flags.confused > 0) && /* Confused?	     */
+    if ((p_ptr->flags.confused > 0) && /* Confused?	     */
 	(randint(4) > 1))	   /* 75% random movement   */
 	dir = randint(9);
     y = char_row;
@@ -889,7 +890,7 @@ void tunnel(int dir)
     c_ptr = &cave[y][x];
 /* Compute the digging ability of player; based on	   */
 /* strength, and type of tool used			   */
-    tabil = py.stats.use_stat[A_STR];
+    tabil = p_ptr->stats.use_stat[A_STR];
     i_ptr = &inventory[INVEN_WIELD];
 
 /* Don't let the player tunnel somewhere illegal, this is necessary to
@@ -913,17 +914,17 @@ void tunnel(int dir)
     if (c_ptr->cptr > 1) {
 	m_ptr = &m_list[c_ptr->cptr];
 	if (m_ptr->ml) {
-	    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
-		(void)sprintf(m_name, "%s", c_list[m_ptr->mptr].name);
+	    if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+		(void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 	    else
-		(void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
+		(void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
 	} else
 	    (void)strcpy(m_name, "Something");
 	(void)sprintf(out_val, "%s is in your way!", m_name);
 	msg_print(out_val);
 
     /* let the player attack the creature */
-	if (py.flags.afraid < 1)
+	if (p_ptr->flags.afraid < 1)
 	    py_attack(y, x);
 	else
 	    msg_print("You are too afraid!");
@@ -938,7 +939,7 @@ void tunnel(int dir)
 	}
 
 	if (weapon_heavy) {
-	    tabil += (py.stats.use_stat[A_STR] * 15) - i_ptr->weight;
+	    tabil += (p_ptr->stats.use_stat[A_STR] * 15) - i_ptr->weight;
 	    if (tabil < 0)
 		tabil = 0;
 	}
@@ -993,7 +994,7 @@ void tunnel(int dir)
 	    /* Secret doors. */
 		else if (t_list[c_ptr->tptr].tval == TV_SECRET_DOOR) {
 		    count_msg_print("You tunnel into the granite wall.");
-		    search(char_row, char_col, py.misc.srh);
+		    search(char_row, char_col, p_ptr->misc.srh);
 		}
 		else {
 		    msg_print("You can't tunnel through that.");
@@ -1042,23 +1043,23 @@ void disarm_trap()
 	     || t_list[c_ptr->tptr].tval == TV_CHEST)) {
 	    m_ptr = &m_list[c_ptr->cptr];
 	    if (m_ptr->ml)
-		(void)sprintf(m_name, "The %s", c_list[m_ptr->mptr].name);
+		(void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
 	    else
 		(void)strcpy(m_name, "Something");
 	    (void)sprintf(out_val, "%s is in your way!", m_name);
 	    msg_print(out_val);
 	} else if (c_ptr->tptr != 0) {
 
-	    tot = py.misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-		+ (class_level_adj[py.misc.pclass][CLA_DISARM] * py.misc.lev / 3);
+	    tot = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
+		+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
 
-	    if ((py.flags.blind > 0) || (no_light())) {
+	    if ((p_ptr->flags.blind > 0) || (no_light())) {
 		tot = tot / 10;
 	    }
-	    if (py.flags.confused > 0) {
+	    if (p_ptr->flags.confused > 0) {
 		tot = tot / 10;
 	    }
-	    if (py.flags.image > 0) {
+	    if (p_ptr->flags.image > 0) {
 		tot = tot / 10;
 	    }
 
@@ -1068,13 +1069,13 @@ void disarm_trap()
 	    if (i == TV_VIS_TRAP) {/* Floor trap    */
 		if ((tot + 100 - level) > randint(100)) {
 		    msg_print("You have disarmed the trap.");
-		    py.misc.exp += i_ptr->p1;
+		    p_ptr->misc.exp += i_ptr->p1;
 		    (void)delete_object(y, x);
 		/* make sure we move onto the trap even if confused */
-		    tmp = py.flags.confused;
-		    py.flags.confused = 0;
+		    tmp = p_ptr->flags.confused;
+		    p_ptr->flags.confused = 0;
 		    move_char(dir, FALSE);
-		    py.flags.confused = tmp;
+		    p_ptr->flags.confused = tmp;
 		    prt_experience();
 		}
 	    /* avoid randint(0) call */
@@ -1083,25 +1084,25 @@ void disarm_trap()
 		else {
 		    msg_print("You set the trap off!");
 		/* make sure we move onto the trap even if confused */
-		    tmp = py.flags.confused;
-		    py.flags.confused = 0;
+		    tmp = p_ptr->flags.confused;
+		    p_ptr->flags.confused = 0;
 		    move_char(dir, FALSE);
-		    py.flags.confused += tmp;
+		    p_ptr->flags.confused += tmp;
 		}
 	    } else if (i == TV_CHEST) {
 		if (!known2_p(i_ptr)) {
 		    msg_print("I don't see a trap.");
 		    free_turn_flag = TRUE;
-		} else if (CH_TRAPPED & i_ptr->flags) {
+		} else if (CH2_TRAP_MASK & i_ptr->flags) {
 		    if ((tot - level) > randint(100)) {
-			i_ptr->flags &= ~CH_TRAPPED;
-			if (CH_LOCKED & i_ptr->flags)
+			i_ptr->flags &= ~CH2_TRAP_MASK;
+			if (CH2_LOCKED & i_ptr->flags)
 			    i_ptr->name2 = SN_LOCKED;
 			else
 			    i_ptr->name2 = SN_DISARMED;
 			msg_print("You have disarmed the chest.");
 			known2(i_ptr);
-			py.misc.exp += level;
+			p_ptr->misc.exp += level;
 			prt_experience();
 		    } else if ((tot > 5) && (randint(tot) > 5))
 			count_msg_print("You failed to disarm the chest.");
@@ -1140,10 +1141,11 @@ void disarm_trap()
  *
  * For an open door, p1 is positive for a broken door. 
  *
- * A closed door can be opened - harder if locked. Any door might be bashed open
- * (and thereby broken). Bashing a door is (potentially) faster! You move
- * into the door way. To open a stuck door, it must be bashed. A closed door
- * can be jammed (which makes it stuck if previously locked). 
+ * A closed door can be opened - harder if locked. Any door might be 
+ * bashed open (and thereby broken). Bashing a door is (potentially)
+ * faster! You move into the door way. To open a stuck door, it must 
+ * be bashed. A closed door can be jammed.
+ * (which makes it stuck if previously locked). 
  *
  * Creatures can also open doors. A creature with open door ability will
  * (if not in the line of sight) move though a closed or secret door with
@@ -1157,7 +1159,7 @@ void bash()
 {
     int                 y, x, tmp, dir;
     register cave_type  *c_ptr;
-    register inven_type *t_ptr;
+    register inven_type *i_ptr;
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
@@ -1168,8 +1170,9 @@ void bash()
 #ifdef TARGET
     target_mode = FALSE;
 #endif
+
     if (get_dir(NULL, &dir)) {
-	if (py.flags.confused > 0) {
+	if (p_ptr->flags.confused > 0) {
 	    msg_print("You are confused.");
 	    do {
 		dir = randint(9);
@@ -1178,42 +1181,70 @@ void bash()
 	}
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
+
+	/* Request to bash a monster */
 	if (c_ptr->cptr > 1) {
-	    if (py.flags.afraid > 0)
+	    if (p_ptr->flags.afraid > 0) {
 		msg_print("You are too afraid!");
-	    else
+	    }
+	    else {
 		py_bash(y, x);
-	} else if (c_ptr->tptr != 0) {
-	    t_ptr = &t_list[c_ptr->tptr];
-	    if (t_ptr->tval == TV_CLOSED_DOOR) {
+	    }
+	}
+
+	/* Request to bash something */
+	else if (c_ptr->tptr != 0) {
+
+	    /* What is there */
+	    i_ptr = &t_list[c_ptr->tptr];
+
+	    /* Bash a closed door */
+	    if (i_ptr->tval == TV_CLOSED_DOOR) {
+
 		count_msg_print("You smash into the door!");
-		tmp = py.stats.use_stat[A_STR] + py.misc.wt / 2;
-	    /* Use (roughly) similar method as for monsters. */
-		if (randint(tmp * (20 + MY_ABS(t_ptr->p1))) <
-			10 * (tmp - MY_ABS(t_ptr->p1))) {
+
+		tmp = p_ptr->stats.use_stat[A_STR] + p_ptr->misc.wt / 2;
+
+		/* Use (roughly) similar method as for monsters. */
+		if (randint(tmp * (20 + MY_ABS(i_ptr->p1))) <
+			10 * (tmp - MY_ABS(i_ptr->p1))) {
+
 		    msg_print("The door crashes open!");
+
+		    /* Hack -- drop on the old object */
 		    invcopy(&t_list[c_ptr->tptr], OBJ_OPEN_DOOR);
-		    t_ptr->p1 = 1 - randint(2);	/* 50% chance of breaking door */
+
+		    /* 50% chance of breaking door */
+		    i_ptr->p1 = 1 - randint(2);
 		    c_ptr->fval = CORR_FLOOR;
-		    if (py.flags.confused == 0)
+
+		    /* If not confused, fall through the door */
+		    if (p_ptr->flags.confused == 0) {
 			move_char(dir, FALSE);
+		    }
 		    else
 			lite_spot(y, x);
+
+		    /* Check the view */
 		    check_view();
-		} else if (randint(150) > py.stats.use_stat[A_DEX]) {
+		}
+		else if (randint(150) > p_ptr->stats.use_stat[A_DEX]) {
 		    msg_print("You are off-balance.");
-		    py.flags.paralysis = 1 + randint(2);
-		} else if (command_count == 0)
+		    p_ptr->flags.paralysis = 1 + randint(2);
+		}
+		else if (command_count == 0)
 		    msg_print("The door holds firm.");
-	    } else if (t_ptr->tval == TV_CHEST) {
+	    } else if (i_ptr->tval == TV_CHEST) {
 		if (randint(10) == 1) {
 		    msg_print("You have destroyed the chest and its contents!");
-		    t_ptr->index = OBJ_RUINED_CHEST;
-		    t_ptr->flags = 0;
-		} else if ((CH_LOCKED & t_ptr->flags) && (randint(10) == 1)) {
+		    i_ptr->index = OBJ_RUINED_CHEST;
+		    i_ptr->flags = 0;
+		}
+		else if ((CH2_LOCKED & i_ptr->flags) && (randint(10) == 1)) {
 		    msg_print("The lock breaks open!");
-		    t_ptr->flags &= ~CH_LOCKED;
-		} else
+		    i_ptr->flags &= ~CH2_LOCKED;
+		}
+		else
 		    count_msg_print("The chest holds firm.");
 	    } else
 	    /*
@@ -1281,7 +1312,7 @@ static void jamdoor()
 		} else {
 		    free_turn_flag = FALSE;
 		    (void)sprintf(tmp_str, "The %s is in your way!",
-				  c_list[m_list[c_ptr->cptr].mptr].name);
+				  r_list[m_list[c_ptr->cptr].mptr].name);
 		    msg_print(tmp_str);
 		}
 	    else if (t_ptr->tval == TV_OPEN_DOOR)
@@ -1330,14 +1361,14 @@ void throw_object()
 	    ok_throw = TRUE;
 	else if (((t->tval == TV_FOOD) || (t->tval == TV_POTION1) ||
 		  (t->tval == TV_POTION2)) && known1_p(t) &&
-		 /* almost all potions do 1d1 damage when thrown.  I want the code
-		    to ask before throwing away potions of DEX, *Healing*, etc.
-		    This also means it will ask before throwing potions of slow
-		    poison, and other low value items that the player is likely to
-		    not care about.  This code will mean that mushrooms/molds of
-		    unhealth, potions of detonations and death are the only
-		    always-throwable food/potions.  (plus known bad ones, in a
-		    later test...) -CFT */
+		 /* almost all potions do 1d1 damage when thrown.  I want the code	*/
+		 /* to ask before throwing away potions of DEX, *Healing*, etc.	*/
+		 /* This also means it will ask before throwing potions of slow	*/
+		 /* poison, and other low value items that the player is likely to	*/
+		 /* not care about.  This code will mean that mushrooms/molds of	*/
+		 /* unhealth, potions of detonations and death are the only	*/
+		 /* always-throwable food/potions.  (plus known bad ones, in a	*/
+		 /* later test...) -CFT */
 		 (t->damage[0] > 1) && (t->damage[1] > 1))
 	    ok_throw = TRUE; /* if it's a mushroom or potion that does
                                 damage when thrown... */
@@ -1367,7 +1398,7 @@ void throw_object()
 		     * okay, or user said yes... */
 	if (get_dir(NULL, &dir)) {
 	    desc_remain(item_val);
-	    if (py.flags.confused > 0) {
+	    if (p_ptr->flags.confused > 0) {
 		msg_print("You are confused.");
 		do {
 		    dir = randint(9);
@@ -1408,11 +1439,11 @@ void throw_object()
 			 */
 			    if (!m_ptr->ml)
 				tbth = (tbth / (cur_dis + 2))
-				    - (py.misc.lev *
-				       class_level_adj[py.misc.pclass][CLA_BTHB] / 2)
+				    - (p_ptr->misc.lev *
+				       class_level_adj[p_ptr->misc.pclass][CLA_BTHB] / 2)
 				    - (tpth * (BTH_PLUS_ADJ - 1));
-			    if (test_hit(tbth, (int)py.misc.lev, tpth,
-				   (int)c_list[m_ptr->mptr].ac, CLA_BTHB)) {
+			    if (test_hit(tbth, (int)p_ptr->misc.lev, tpth,
+				   (int)r_list[m_ptr->mptr].ac, CLA_BTHB)) {
 				i = m_ptr->mptr;
 				objdes(tmp_str, &throw_obj, FALSE);
 			    /* Does the player know what he's fighting?	   */
@@ -1421,12 +1452,12 @@ void throw_object()
 					   "The %s finds a mark.", tmp_str);
 				    visible = FALSE;
 				} else {
-				    if (c_list[i].cdefense & UNIQUE)
+				    if (r_list[i].cdefense & UNIQUE)
 					(void)sprintf(out_val, "The %s hits %s.",
-						   tmp_str, c_list[i].name);
+						   tmp_str, r_list[i].name);
 				    else
 					(void)sprintf(out_val, "The %s hits the %s.",
-						   tmp_str, c_list[i].name);
+						   tmp_str, r_list[i].name);
 				    visible = TRUE;
 				}
 				msg_print(out_val);
@@ -1444,10 +1475,10 @@ void throw_object()
 				    char                buf[100];
 				    char                cdesc[100];
 				    if (visible) {
-					if (c_list[i].cdefense & UNIQUE)
-					    sprintf(cdesc, "%s", c_list[m_ptr->mptr].name);
+					if (r_list[i].cdefense & UNIQUE)
+					    sprintf(cdesc, "%s", r_list[m_ptr->mptr].name);
 					else
-					    sprintf(cdesc, "The %s", c_list[m_ptr->mptr].name);
+					    sprintf(cdesc, "The %s", r_list[m_ptr->mptr].name);
 				    } else
 					strcpy(cdesc, "It");
 				    (void)sprintf(buf,
@@ -1459,12 +1490,12 @@ void throw_object()
 				    if (!visible)
 					msg_print("You have killed something!");
 				    else {
-					if (c_list[i].cdefense & UNIQUE)
+					if (r_list[i].cdefense & UNIQUE)
 					    (void)sprintf(out_val, "You have killed %s.",
-							  c_list[i].name);
+							  r_list[i].name);
 					else
 					    (void)sprintf(out_val, "You have killed the %s.",
-							  c_list[i].name);
+							  r_list[i].name);
 					msg_print(out_val);
 				    }
 				    prt_experience();
@@ -1478,7 +1509,7 @@ void throw_object()
 			}
 			else
 			{   /* do not test c_ptr->fm here */
-			    if (panel_contains(y, x) && (py.flags.blind < 1)
+			    if (panel_contains(y, x) && (p_ptr->flags.blind < 1)
 				&& (c_ptr->tl || c_ptr->pl)) {
 				print(tchar, y, x);
 				put_qio();	/* show object moving */
@@ -1523,7 +1554,7 @@ void throw_object()
 
 
 /*
- * Resting allows a player to safely restore his hp	-RAK-
+ * Resting allows a player to safely restore his hp	-RAK-	 
  */
 void rest(void)
 {
@@ -1555,26 +1586,35 @@ void rest(void)
 	}
     }
     if (rest_num != 0) {
-	if (py.flags.status & PY_SEARCH)
+
+	if (p_ptr->flags.status & PY_SEARCH)
 	    search_off();
-	py.flags.rest = rest_num;
-	py.flags.status |= PY_REST;
+
+	p_ptr->flags.rest = rest_num;
+	p_ptr->flags.status |= PY_REST;
 	prt_state();
-	py.flags.food_digested--;
+	p_ptr->flags.food_digested--;
 	prt("Press any key to stop resting...", 0, 0);
 	put_qio();
-    } else {
+    }
+
+    /* Rest was cancelled */    
+    else {
 	erase_line(MSG_LINE, 0);
 	free_turn_flag = TRUE;
-    }
+    }    
 }
 
 
 static void print_feeling()
 {
-    if (dun_level == 0)		/* snicker.... -CWS */
+    /* No useful feeling in town */
+    if (!dun_level) {
 	msg_print("You feel there is something special about the town level.");
-    else if (unfelt)
+	return;
+    }
+
+    if (unfelt)
 	msg_print("Looks like any other level.");
     else
 
@@ -1646,7 +1686,7 @@ void scribe_object(void)
     vtype out_val, tmp_str;
 
     if (inven_ctr > 0 || equip_ctr > 0) {
-	if (get_item(&item_val, "Which one? ", 0, INVEN_ARRAY_SIZE, 0)) {
+	if (get_item(&item_val, "Which one? ", 0, INVEN_TOTAL, 0)) {
 	    objdes(tmp_str, &inventory[item_val], TRUE);
 	    (void)sprintf(out_val, "Inscribing %s.", tmp_str);
 	    msg_print(out_val);
@@ -1923,6 +1963,7 @@ void check_uniques()
     bigvtype msg;
 
     save_screen();
+
     j = 15;
 
     for (i = 1; i < 23; i++) erase_line(i, j - 2);
@@ -1930,15 +1971,15 @@ void check_uniques()
     i = 1;
     prt("Uniques:", i++, j + 5);
 
-    for (k = 0; k < (MAX_CREATURES - 1); k++) {
-	if ((strlen(c_list[k].name) > 0) && (c_list[k].cdefense & UNIQUE)) {
+    for (k = 0; k < (MAX_R_IDX - 1); k++) {
+	if ((strlen(r_list[k].name) > 0) && (r_list[k].cdefense & UNIQUE)) {
 	    if (wizard) {
-		sprintf(msg, "%s is %s.", c_list[k].name,
-			(u_list[k].dead) ? "dead" : "alive");
+		sprintf(msg, "%s is %s.", r_list[k].name,
+			(u_list[k].dead) ? "dead" : "alive");            
 		prt(msg, i++, j);
 		unique_screen_full(&i, j);
 	    } else if (u_list[k].dead) {
-		sprintf(msg, "%s is dead.", c_list[k].name);
+		sprintf(msg, "%s is dead.", r_list[k].name);
 		prt(msg, i++, j);
 		unique_screen_full(&i, j);
 	    }

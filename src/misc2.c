@@ -19,19 +19,19 @@
 static int test_place(int y, int x)
 {
     /* Require legal grid */
-    if (!in_bounds(y, x) ||
+    if (!in_bounds(y, x)) return (FALSE);
     
     /* Require "empty" floor grid */
-	(cave[y][x].fval >= MIN_CLOSED_SPACE) ||
+    if (cave[y][x].fval >= MIN_CLOSED_SPACE) return (FALSE);
 
     /* And do not use special walls */
-	(cave[y][x].fval == NULL_WALL) ||
+    if (cave[y][x].fval == NULL_WALL) return (FALSE);
 
     /* Or the player himself */
-	(cave[y][x].cptr != 0) || (y == char_row && x == char_col)) return (0);
+    if(cave[y][x].cptr != 0) || ((y == char_row) && (x == char_col))) return (FALSE);
 
     /* Use it */
-    return (1);
+    return TRUE;
 }
 
 
@@ -49,28 +49,34 @@ void delete_monster(int j)
     /* Get the monster */
     m_ptr = &m_list[j];
 
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
+    if (r_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
 
     cave[m_ptr->fy][m_ptr->fx].cptr = 0;
 
     if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
 
-    if (j != mfptr - 1) {
 
 #ifdef TARGET
-	/* This targetting code stolen from Morgul -CFT */
-	/* Targetted monster dead or compacted.      CDW */
-	if (j == target_mon) target_mode = FALSE;
+    /* This targetting code stolen from Morgul -CFT */
+    /* Targetted monster dead or compacted.      CDW */
+    if (j == target_mon) target_mode = FALSE;
+#endif
 
+    /* One less monster */
+    m_max--;
+
+    /* Do structure dumping */
+    if (j != mfptr) {
+
+#ifdef TARGET
 	/* Targetted monster moved to replace dead or compacted monster CDW */
 	if (target_mon == mfptr-1) target_mon = j;
 #endif
 
-	m_ptr = &m_list[mfptr - 1];
+	m_ptr = &m_list[mfptr];
 	cave[m_ptr->fy][m_ptr->fx].cptr = j;
-	m_list[j] = m_list[mfptr - 1];
+	m_list[j] = m_list[mfptr];
     }
-    mfptr--;
 
     /* Wipe the monster record */
     m_list[mfptr] = blank_monster;
@@ -111,7 +117,7 @@ void fix1_delete_monster(int j)
     /* Get the monster */
     m_ptr = &m_list[j];
 
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
+    if (r_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
 
 /* force the hp negative to ensure that the monster is dead, for example, if
  * the monster was just eaten by another, it will still have positive hit
@@ -143,8 +149,8 @@ void fix2_delete_monster(int j)
     if (target_mon==mfptr-1) target_mon = j; 
 #endif
 
-    m_ptr = &m_list[j];		   /* Fixed from a c_list ptr to a m_list ptr. -CFT */
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
+    m_ptr = &m_list[j];		   /* Fixed from a r_list ptr to a m_list ptr. -CFT */
+    if (r_list[m_ptr->mptr].cdefense & UNIQUE) check_unique(m_ptr);
     if (j != mfptr - 1) {
 	m_ptr = &m_list[mfptr - 1];
 	cave[m_ptr->fy][m_ptr->fx].cptr = j;
@@ -178,11 +184,11 @@ int compact_monsters(void)
     delete_any = FALSE;
 
     do {
-	for (i = mfptr - 1; i >= MIN_MONIX; i--) {
+	for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
 	    mon_ptr = &m_list[i];
 	    if ((cur_dis < mon_ptr->cdis) && (randint(3) == 1)) {
 	    /* Don't compact Melkor! */
-		if (c_list[mon_ptr->mptr].cmove & CM_WIN)
+		if (r_list[mon_ptr->mptr].cmove & CM_WIN)
 		/* do nothing */
 		    ;
 
@@ -220,7 +226,7 @@ int compact_monsters(void)
 int m_pop(void)
 {
     /* Out of space?  Compact. */
-    if (mfptr == MAX_MALLOC) if (!compact_monsters())
+    if (mfptr == MAX_M_IDX) if (!compact_monsters())
 
     /* XXX XXX XXX XXX Out of memory! */    
     return (-1);
@@ -242,18 +248,18 @@ int place_monster(int y, int x, int z, int slp)
     char                   buf[100];
 
     /* another paranoia check -CFT */
-    if ((z < 0) || (z >= MAX_CREATURES)) return FALSE;
+    if ((z < 0) || (z >= MAX_R_IDX)) return FALSE;
 
     /* YA paranoia check -CFT */
     if (!test_place(y, x)) return FALSE;
 
-    if (c_list[z].cdefense & UNIQUE) {
+    if (r_list[z].cdefense & UNIQUE) {
 	if (u_list[z].exist) {
 
 	/* Note for wizard */
 	if (wizard) {
 	    (void)sprintf(buf, "Tried to create %s but exists.",
-			  c_list[z].name);
+			  r_list[z].name);
 	    msg_print(buf);
 	}
 
@@ -266,7 +272,7 @@ int place_monster(int y, int x, int z, int slp)
 	/* Note for wizard */
 	if (wizard) {
 	    (void)sprintf(buf, "Tried to create %s but dead.",
-	    		  c_list[z].name);
+	    		  r_list[z].name);
 	    msg_print(buf);
 	}
 
@@ -284,18 +290,18 @@ int place_monster(int y, int x, int z, int slp)
     if (cur_pos == -1) return FALSE;
 
     /* Note the monster */
-    if ((wizard || peek) && (c_list[z].cdefense & UNIQUE)) {
-	msg_print(c_list[z].name);
+    if ((wizard || peek) && (r_list[z].cdefense & UNIQUE)) {
+	msg_print(r_list[z].name);
     }
     
     /* Powerful monster */
-    if (c_list[z].level > (unsigned)dun_level) {
+    if (r_list[z].level > (unsigned)dun_level) {
 	int                 c;
 
-	rating += ((c = c_list[z].level - dun_level) > 30) ? 15 : c / 2;
-	if (c_list[z].cdefense & UNIQUE) {
+	rating += ((c = r_list[z].level - dun_level) > 30) ? 15 : c / 2;
+	if (r_list[z].cdefense & UNIQUE) {
 	/* Normal monsters are worth "half" as much */
-	    rating += (c_list[z].level - dun_level) / 2;
+	    rating += (r_list[z].level - dun_level) / 2;
 	}
     }
 
@@ -309,18 +315,18 @@ int place_monster(int y, int x, int z, int slp)
     mon_ptr->mptr = z;
 
     /* Assign maximal hitpoints */
-    if ((c_list[z].cdefense & MAX_HP) || be_nasty) {
-	mon_ptr->hp = max_hp(c_list[z].hd);
+    if ((r_list[z].cdefense & MAX_HP) || be_nasty) {
+	mon_ptr->hp = max_hp(r_list[z].hd);
     }
     else {
-	mon_ptr->hp = pdamroll(c_list[z].hd);
+	mon_ptr->hp = pdamroll(r_list[z].hd);
     }
 
     /* And start out fully healthy */
     mon_ptr->maxhp = mon_ptr->hp;
 
     /* Extract the monster base speed */
-    mon_ptr->cspeed = c_list[z].speed - 10;
+    mon_ptr->mspeed = r_list[z].speed - 10;
     
     /* No "damage" yet */
     mon_ptr->stunned = 0;
@@ -336,12 +342,12 @@ int place_monster(int y, int x, int z, int slp)
 
     /* Update the monster sleep info */
     if (slp) {
-	if (c_list[z].sleep == 0) {
+	if (r_list[z].sleep == 0) {
 	    mon_ptr->csleep = 0;
 	}
 	else {
-	    mon_ptr->csleep = ((int)c_list[z].sleep * 2) +
-			     randint((int)c_list[z].sleep * 10);
+	    mon_ptr->csleep = ((int)r_list[z].sleep * 2) +
+			     randint((int)r_list[z].sleep * 10);
 	}
     } else
 
@@ -350,18 +356,18 @@ int place_monster(int y, int x, int z, int slp)
     /* This is an extension of Um55's sleeping dragon code...            */
 
     /* if asleep only to prevent summon-breathe-breathe-breathe-die, then don't sleep long -CFT */
-    if (((c_list[z].spells & (CAUSE_LIGHT|CAUSE_SERIOUS|HOLD_PERSON|
+    if (((r_list[z].spells & (CAUSE_LIGHT|CAUSE_SERIOUS|HOLD_PERSON|
                                   BLINDNESS|CONFUSION|FEAR|SLOW|BREATH_L|
                                   BREATH_G|BREATH_A|BREATH_FR|BREATH_FI|
                                   FIRE_BOLT|FROST_BOLT|ACID_BOLT|MAG_MISS|
                                   CAUSE_CRIT|FIRE_BALL|FROST_BALL|MANA_BOLT))
-          || (c_list[z].spells2 & (BREATH_CH|BREATH_SH|BREATH_SD|BREATH_CO|
+          || (r_list[z].spells2 & (BREATH_CH|BREATH_SH|BREATH_SD|BREATH_CO|
                                   BREATH_DI|BREATH_LD|LIGHT_BOLT|LIGHT_BALL|
                                   ACID_BALL|TRAP_CREATE|RAZOR|MIND_BLAST|
                                   MISSILE|PLASMA_BOLT|NETHER_BOLT|ICE_BOLT|
                                   FORGET|BRAIN_SMASH|ST_CLOUD|TELE_LEV|
                                   WATER_BOLT|WATER_BALL|NETHER_BALL|BREATH_NE))
-          || (c_list[z].spells3 & (BREATH_WA|BREATH_SL|BREATH_LT|BREATH_TI|
+          || (r_list[z].spells3 & (BREATH_WA|BREATH_SL|BREATH_LT|BREATH_TI|
                                   BREATH_GR|BREATH_DA|BREATH_PL|ARROW|
                                   DARK_STORM|MANA_STORM)))
        && los(y, x, char_row, char_col)) {
@@ -379,20 +385,20 @@ int place_monster(int y, int x, int z, int slp)
     /* get a "following" of escorts.  -DGK-    But not skeletons, */
     /* because that would include druj, making Cantoras amazingly tough -CFT */
 
-    if (c_list[z].cdefense & UNIQUE) {
+    if (r_list[z].cdefense & UNIQUE) {
 
-	j = c_list[z].cchar;
+	j = r_list[z].cchar;
 
 	/* Monsters with escorts */
 	if ((j=='k')||(j=='L')||(j=='o')||(j=='O')||(j=='T')||(j=='y')|| (j=='I')||(j=='&')) {
 
 	    /* Try for the highest level monster we can get */
-	    for (cur_pos=MAX_CREATURES-1;cur_pos>=0;cur_pos--) {
+	    for (cur_pos=MAX_R_IDX-1;cur_pos>=0;cur_pos--) {
 
 		/* Find a similar, lower level, non-unique, monster */
-		if ((c_list[cur_pos].cchar==j) &&
-		    (c_list[cur_pos].level<=c_list[z].level) &&
-		    !(c_list[cur_pos].cdefense & UNIQUE)) {
+		if ((r_list[cur_pos].cchar==j) &&
+		    (r_list[cur_pos].level<=r_list[z].level) &&
+		    !(r_list[cur_pos].cdefense & UNIQUE)) {
 
 		    /* Try up to 50 nearby places */
 		    count = 0;
@@ -404,7 +410,7 @@ int place_monster(int y, int x, int z, int slp)
 
 		    /* Certain monsters come in groups */
 		    if ((j=='k') || (j=='y') || (j=='&') ||
-			(c_list[cur_pos].cdefense&GROUP)) {
+			(r_list[cur_pos].cdefense&GROUP)) {
 			place_group(ny,nx,cur_pos,slp);
 		    }
 
@@ -455,12 +461,12 @@ int place_win_monster()
 
 	mon_ptr->fy = y;
 	mon_ptr->fx = x;
-	mon_ptr->mptr = MAX_CREATURES - 2;
-	if (c_list[mon_ptr->mptr].cdefense & MAX_HP)
-	    mon_ptr->hp = max_hp(c_list[mon_ptr->mptr].hd);
+	mon_ptr->mptr = MAX_R_IDX - 2;
+	if (r_list[mon_ptr->mptr].cdefense & MAX_HP)
+	    mon_ptr->hp = max_hp(r_list[mon_ptr->mptr].hd);
 	else
-	    mon_ptr->hp = pdamroll(c_list[mon_ptr->mptr].hd);
-	mon_ptr->cspeed = c_list[mon_ptr->mptr].speed - 10;
+	    mon_ptr->hp = pdamroll(r_list[mon_ptr->mptr].hd);
+	mon_ptr->mspeed = r_list[mon_ptr->mptr].speed - 10;
 	mon_ptr->stunned = 0;
 	mon_ptr->cdis = distance(char_row, char_col, y, x);
 	cave[y][x].cptr = cur_pos;
@@ -481,17 +487,17 @@ static char *cap(char *str)
  * Prepare the "ghost" monster_race info
  *
  */
-void set_ghost(creature_type *g, char *name, int r, int c, int l)
+void set_ghost(monster_race *g, char *name, int r, int c, int l)
 {
     char ghost_race[20];
     char ghost_class[20];
     int  i;
 
     /* Allocate storage for name -TL -- braindamaged ghost name spoo -CWS */
-    if (c_list[MAX_CREATURES - 1].name == NULL) {
-	c_list[MAX_CREATURES - 1].name = (char*)malloc(101);
-	bzero((char *) c_list[MAX_CREATURES - 1].name, 101);
-	*((char *) c_list[MAX_CREATURES - 1].name) = 'A';
+    if (r_list[MAX_R_IDX - 1].name == NULL) {
+	r_list[MAX_R_IDX - 1].name = (char*)malloc(101);
+	bzero((char *) r_list[MAX_R_IDX - 1].name, 101);
+	*((char *) r_list[MAX_R_IDX - 1].name) = 'A';
     }
 
     switch (r) {
@@ -919,7 +925,7 @@ int place_ghost()
 {
     register int           y, x, cur_pos;
     register monster_type *mon_ptr;
-    creature_type         *ghost = &c_list[MAX_CREATURES - 1];
+    monster_race         *ghost = &r_list[MAX_R_IDX - 1];
     char                   tmp[100];
     char                   name[100];
     int                    i, j, level;
@@ -931,10 +937,10 @@ int place_ghost()
     if (!dun_level) {
 
 	/* You have to be level 5, and even then its only 10% */
-	if (py.misc.lev < 5 || randint(10) > 1) return 0;
+	if (p_ptr->misc.lev < 5 || randint(10) > 1) return 0;
 
 	/* Look for a proper bones file */
-	sprintf(tmp, "%s/%d", ANGBAND_BONES, py.misc.lev);
+	sprintf(tmp, "%s/%d", ANGBAND_BONES, p_ptr->misc.lev);
 	if ((fp = my_tfopen(tmp, "r")) != NULL) {
 
 	/* Read the bones info */
@@ -954,7 +960,7 @@ int place_ghost()
 	    }
 	    ghost->hd[0] = i;	   /* set_ghost may adj for race/class/lv */
 	    ghost->hd[1] = j;
-	    level = py.misc.lev;
+	    level = p_ptr->misc.lev;
 	} else {
 	    return 0;
 	}
@@ -1018,12 +1024,12 @@ int place_ghost()
     mon_ptr->fy = y;
     mon_ptr->fx = x;
 
-    mon_ptr->mptr = (MAX_CREATURES - 1);
+    mon_ptr->mptr = (MAX_R_IDX - 1);
 
     mon_ptr->hp = (s16b) ghost->hd[0] * (s16b) ghost->hd[1];
 
-    /* the c_list speed value is 10 greater, so that it can be a byte */
-    mon_ptr->cspeed = c_list[mon_ptr->mptr].speed - 10;
+    /* the r_list speed value is 10 greater, so that it can be a byte */
+    mon_ptr->mspeed = r_list[mon_ptr->mptr].speed - 10;
 
     mon_ptr->stunned = 0;
 
@@ -1075,7 +1081,7 @@ again:
 		i = randint(num) - 1;
 		j = randint(num) - 1;
 		if (j > i) i = j;
-		level = c_list[i + m_level[0]].level;
+		level = r_list[i + m_level[0]].level;
 	    }
 
 	    /* Bizarre function */            
@@ -1085,14 +1091,14 @@ again:
 	}
 
 	/* Uniques never appear out of "modified" depth */
-	if ((c_list[i].level > old) &&
-	    (c_list[i].cdefense & UNIQUE)) {
+	if ((r_list[i].level > old) &&
+	    (r_list[i].cdefense & UNIQUE)) {
 	    goto again;
 	}
 
 	/* Quest Monsters never appear out of depth */
-	if ((c_list[i].level > (unsigned) dun_level) &&
-	    (c_list[i].cdefense & QUESTOR)) {
+	if ((r_list[i].level > (unsigned) dun_level) &&
+	    (r_list[i].cdefense & QUESTOR)) {
 	    goto again;
 	}
     return i;
@@ -1131,19 +1137,19 @@ again:
 	    j = rand_int(num);
 	    if (j > i) i = j;
 
-	    level = c_list[i + m_level[0]].level;
+	    level = r_list[i + m_level[0]].level;
 	    i = m_level[level] - m_level[level - 1];
 	    if (i == 0) i = 1;
 
 	    i = randint(i) - 1 + m_level[level - 1];
 	}
 
-	if ((c_list[i].level > old) && (c_list[i].cdefense & UNIQUE)) {
+	if ((r_list[i].level > old) && (r_list[i].cdefense & UNIQUE)) {
 	    goto again;
 	}
 
-	if (( c_list[i].level > (unsigned) dun_level) &&
-	    (c_list[i].cdefense & QUESTOR)) {
+	if (( r_list[i].level > (unsigned) dun_level) &&
+	    (r_list[i].cdefense & QUESTOR)) {
 	    goto again;
 	}
 
@@ -1159,13 +1165,13 @@ void place_group(int y, int x, int mon, int slp)
     int extra = 0;
 
     /* reduce size of group if out-of-depth */
-    if (c_list[mon].level > (unsigned) dun_level) {
-	extra = (-randint(c_list[mon].level - dun_level));
+    if (r_list[mon].level > (unsigned) dun_level) {
+	extra = (-randint(r_list[mon].level - dun_level));
     }
 
     /* if monster is deeper than normal, then travel in bigger packs -CFT */
-    else if (c_list[mon].level < (unsigned) dun_level) {
-	extra = randint(dun_level - c_list[mon].level);
+    else if (r_list[mon].level < (unsigned) dun_level) {
+	extra = randint(dun_level - r_list[mon].level);
     }
 
     /* put an upper bounds on it... -CFT */
@@ -1251,32 +1257,32 @@ void alloc_monster(int num, int dis, int slp)
 
 	do {
 	    mon = get_mons_num(dun_level);
-	} while (randint(c_list[mon].rarity) > 1);
+	} while (randint(r_list[mon].rarity) > 1);
 
     /*
      * to give the player a sporting chance, any monster that appears in
      * line-of-sight and can cast spells or breathe, should be asleep. This
      * is an extension of Um55's sleeping dragon code... 
      */
-	if (((c_list[mon].spells & (CAUSE_LIGHT | CAUSE_SERIOUS | HOLD_PERSON |
+	if (((r_list[mon].spells & (CAUSE_LIGHT | CAUSE_SERIOUS | HOLD_PERSON |
 			    BLINDNESS | CONFUSION | FEAR | SLOW | BREATH_L |
 			       BREATH_G | BREATH_A | BREATH_FR | BREATH_FI |
 			     FIRE_BOLT | FROST_BOLT | ACID_BOLT | MAG_MISS |
 			   CAUSE_CRIT | FIRE_BALL | FROST_BALL | MANA_BOLT))
-	     || (c_list[mon].spells2 & (BREATH_CH | BREATH_SH | BREATH_SD | BREATH_CO |
+	     || (r_list[mon].spells2 & (BREATH_CH | BREATH_SH | BREATH_SD | BREATH_CO |
 			   BREATH_DI | BREATH_LD | LIGHT_BOLT | LIGHT_BALL |
 			      ACID_BALL | TRAP_CREATE | RAZOR | MIND_BLAST |
 			    MISSILE | PLASMA_BOLT | NETHER_BOLT | ICE_BOLT |
 				FORGET | BRAIN_SMASH | ST_CLOUD | TELE_LEV |
 			 WATER_BOLT | WATER_BALL | NETHER_BALL | BREATH_NE))
-	     || (c_list[mon].spells3 & (BREATH_WA | BREATH_SL | BREATH_LT | BREATH_TI |
+	     || (r_list[mon].spells3 & (BREATH_WA | BREATH_SL | BREATH_LT | BREATH_TI |
 				 BREATH_GR | BREATH_DA | BREATH_PL | ARROW |
 					DARK_STORM | MANA_STORM)))
 	    && (los(y, x, char_row, char_col))) {
 	    slp = TRUE;
 	}
 
-	if (!(c_list[mon].cdefense & GROUP)) {
+	if (!(r_list[mon].cdefense & GROUP)) {
 	    place_monster(y, x, mon, slp);
 	}
 	else {
@@ -1314,7 +1320,7 @@ int summon_monster(int *y, int *x, int slp)
 	if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
 	
 	/* Place the monster */
-	if (c_list[l].cdefense & GROUP) {
+	if (r_list[l].cdefense & GROUP) {
 	    place_group(j, k, l, slp);
 	}
 	else {
@@ -1353,8 +1359,8 @@ int summon_undead(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if ((c_list[m].cdefense & UNDEAD) && !(c_list[m].cdefense & UNIQUE) &&
-		(c_list[m].level < dun_level + 5)) {
+	    if ((r_list[m].cdefense & UNDEAD) && !(r_list[m].cdefense & UNIQUE) &&
+		(r_list[m].level < dun_level + 5)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1399,8 +1405,8 @@ int summon_demon(int lev, int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cdefense & DEMON && !(c_list[m].cdefense & UNIQUE) &&
-		(c_list[m].level <= lev)) {
+	    if (r_list[m].cdefense & DEMON && !(r_list[m].cdefense & UNIQUE) &&
+		(r_list[m].level <= lev)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1445,7 +1451,7 @@ int summon_dragon(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cdefense & DRAGON && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cdefense & DRAGON && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1493,7 +1499,7 @@ int summon_wraith(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'W' && (c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'W' && (r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1541,7 +1547,7 @@ int summon_reptile(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'R' && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'R' && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1590,7 +1596,7 @@ int summon_spider(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'S' && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'S' && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1638,7 +1644,7 @@ int summon_angel(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'A' && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'A' && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1684,7 +1690,7 @@ int summon_ant(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'a' && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'a' && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1732,7 +1738,7 @@ int summon_unique(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (!(c_list[m].cchar == 'P') && (c_list[m].cdefense & UNIQUE)) {
+	    if (!(r_list[m].cchar == 'P') && (r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1780,7 +1786,7 @@ int summon_jabberwock(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'J' && !(c_list[m].cdefense & UNIQUE)) {
+	    if (r_list[m].cchar == 'J' && !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1828,8 +1834,8 @@ int summon_gundead(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if ((c_list[m].cchar == 'L') || (c_list[m].cchar == 'V')
-		|| (c_list[m].cchar == 'W')) {
+	    if ((r_list[m].cchar == 'L') || (r_list[m].cchar == 'V')
+		|| (r_list[m].cchar == 'W')) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1877,7 +1883,7 @@ int summon_ancientd(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (c_list[m].cchar == 'D') {
+	    if (r_list[m].cchar == 'D') {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1925,8 +1931,8 @@ int summon_hound(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if ((c_list[m].cchar == 'C' || c_list[m].cchar == 'Z')
-		&& !(c_list[m].cdefense & UNIQUE)) {
+	    if ((r_list[m].cchar == 'C' || r_list[m].cchar == 'Z')
+		&& !(r_list[m].cdefense & UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {
@@ -1969,7 +1975,7 @@ int summon_jelly(int *y, int *x)
     l = m_level[MAX_MONS_LEVEL];
     do {
 	m = randint(l) - 1;
-	if (c_list[m].cchar == 'J') {
+	if (r_list[m].cchar == 'J') {
 	    summon = TRUE;
 	    place_monster(*y, *x, m, TRUE);
 	}

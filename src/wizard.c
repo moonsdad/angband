@@ -26,9 +26,9 @@ static void change_character()
     register s32b        tmp_lval;
     u16b               *a_ptr;
     vtype                 tmp_str;
-    register struct misc *m_ptr;
+    register struct misc *m_ptr = &p_ptr->misc;
 
-    a_ptr = py.stats.max_stat;
+    a_ptr = p_ptr->stats.max_stat;
     prt("(3 - 118) Strength     = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 3)) {
 
@@ -89,7 +89,6 @@ static void change_character()
     }
     } else return;
 
-    m_ptr = &py.misc;
     prt("(1 - 32767) Hit points = ", 0, 0);
     if (get_string(tmp_str, 0, 25, 5)) {
 
@@ -226,14 +225,14 @@ static void change_character()
  */
 void wizard_create()
 {
-    register int         tmp_val;
+    int         tmp_val;
     int                  i, j, k;
     s32b                tmp_lval;
     char                 tmp_str[100];
-    register inven_type *i_ptr;
-    treasure_type        t_type, *t_ptr;
+    inven_type *i_ptr;
+    inven_kind        t_type, *t_ptr;
     inven_type           forge;
-    register cave_type  *c_ptr;
+    cave_type  *c_ptr;
     char                 ch;
     int                  more = FALSE;
 
@@ -249,6 +248,7 @@ void wizard_create()
 	restore_screen();
 	return;
     }
+
     switch (ch) {
 
       case 'W': case 'w':

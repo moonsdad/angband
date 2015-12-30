@@ -20,8 +20,7 @@
  * apple juice, and water, so do not scramble them.
  */
 
-cptr colors[MAX_COLORS] = {
-
+static cptr potion_adj[MAX_COLORS] = {
     "Icky Green", "Light Brown", "Clear","Azure","Blue",
     "Blue Speckled","Black","Brown","Brown Speckled","Bubbling",
     "Chartreuse","Cloudy","Copper Speckled","Crimson","Cyan",
@@ -42,7 +41,7 @@ cptr colors[MAX_COLORS] = {
  * Color adjectives and colors, for mushrooms and molds
  */
 
-cptr mushrooms[MAX_MUSH] = {
+static cptr food_adj[MAX_SHROOM] = {
     "Blue","Black","Black Spotted","Brown","Dark Blue",
     "Dark Green","Dark Red","Ecru","Furry","Green",
     "Grey","Light Blue","Light Green","Plaid","Red",
@@ -55,7 +54,7 @@ cptr mushrooms[MAX_MUSH] = {
  * Wood adjectives and colors, for staffs
  */
 
-cptr woods[MAX_WOODS] = {
+static cptr staff_adj[MAX_WOODS] = {
     "Aspen","Balsa","Banyan","Birch","Cedar",
     "Cottonwood","Cypress","Dogwood","Elm","Eucalyptus",
     "Hemlock","Hickory","Ironwood","Locust","Mahogany",
@@ -70,7 +69,7 @@ cptr woods[MAX_WOODS] = {
  * Metal adjectives and colors, for wands
  */
 
-cptr metals[MAX_METALS] = {
+static cptr wand_adj[MAX_METALS] = {
     "Aluminum","Cast Iron","Chromium","Copper","Gold",
     "Iron","Magnesium","Molybdenum","Nickel","Rusty",
     "Silver","Steel","Tin","Titanium","Tungsten",
@@ -85,7 +84,7 @@ cptr metals[MAX_METALS] = {
  * Rock adjectives and colors, for rings
  */
 
-cptr rocks[MAX_ROCKS] = {
+static cptr ring_adj[MAX_ROCKS] = {
     "Alexandrite","Amethyst","Aquamarine","Azurite","Beryl",
     "Bloodstone","Calcite","Carnelian","Corundum","Diamond",
     "Emerald","Fluorite","Garnet","Granite","Jade",
@@ -102,7 +101,7 @@ cptr rocks[MAX_ROCKS] = {
  * Amulet adjectives and colors, for amulets
  */
 
-cptr amulets[MAX_AMULETS] = {
+static cptr amulet_adj[MAX_AMULETS] = {
     "Amber","Driftwood","Coral","Agate","Ivory",
     "Obsidian","Bone","Brass","Bronze","Pewter",
     "Tortoise Shell","Golden","Azure","Crystal","Silver",
@@ -114,7 +113,7 @@ cptr amulets[MAX_AMULETS] = {
  * Syllables for scrolls
  */
 
-cptr syllables[MAX_SYLLABLES] = {
+static cptr syllables[MAX_SYLLABLES] = {
   "a","ab","ag","aks","ala","an","ankh","app",
   "arg","arze","ash","aus","ban","bar","bat","bek",
   "bie","bin","bit","bjor","blu","bot","bu",
@@ -138,72 +137,78 @@ cptr syllables[MAX_SYLLABLES] = {
 };
 
 
-char                titles[MAX_TITLES][10];
+/*
+ * Hold the titles of scrolls, ten characters each
+ */
 
-/* Object descriptor routines					 */
+static char scroll_adj[MAX_TITLES][10];
 
 
 
 /*
- * Initialize all Potions, wands, staves, scrolls, etc.	
+ * The "color"/"metal"/"type" of an item is its "flavor".
+ *
+ * Initialize descriptions for the "colored" objects, including:
+ * Food, Scrolls, Potions, Wands, Staffs, Rods, Rings, Amulets.
+ *
  */
-void magic_init(void)
+void flavor_init(void)
 {
     register int        h, i, j, k;
-    register cptr		tmp;
+    register cptr		tmp1;
     vtype               string;
 
 
     /* Hack -- Play games with the R.N.G. */
     set_seed(randes_seed);
 
-    /* The first 3 entries for colors are fixed */
+    /* The first 3 entries for potions are fixed */
     /* That is, slime mold juice, apple juice, water */
     for (i = 3; i < MAX_COLORS; i++) {
-	j = randint(MAX_COLORS - 3) + 2;
-	tmp = colors[i];
-	colors[i] = colors[j];
-	colors[j] = tmp;
+	j = rand_int(MAX_COLORS - 3) + 3;
+	tmp1 = potion_adj[i];
+	potion_adj[i] = potion_adj[j];
+	potion_adj[j] = tmp1;
     }
 
     /* Woods are used for staffs */
     for (i = 0; i < MAX_WOODS; i++) {
-	j = randint(MAX_WOODS) - 1;
-	tmp = woods[i];
-	woods[i] = woods[j];
-	woods[j] = tmp;
+	j = rand_int(MAX_WOODS);
+	tmp1 = staff_adj[i];
+	staff_adj[i] = staff_adj[j];
+	staff_adj[j] = tmp1;
     }
 
     /* Wands are made of metal */
     for (i = 0; i < MAX_METALS; i++) {
-	j = randint(MAX_METALS) - 1;
-	tmp = metals[i];
-	metals[i] = metals[j];
-	metals[j] = tmp;
+	j = rand_int(MAX_METALS);
+	tmp1 = wand_adj[i];
+	wand_adj[i] = wand_adj[j];
+	wand_adj[j] = tmp1;
     }
 
     /* Rocks are used for rings */
     for (i = 0; i < MAX_ROCKS; i++) {
-	j = randint(MAX_ROCKS) - 1;
-	tmp = rocks[i];
-	rocks[i] = rocks[j];
-	rocks[j] = tmp;
+	j = rand_int(MAX_ROCKS);
+	tmp1 = ring_adj[i];
+	ring_adj[i] = ring_adj[j];
+	ring_adj[j] = tmp1;
     }
 
     /* Rocks are used for amulets */
     for (i = 0; i < MAX_AMULETS; i++) {
-	j = randint(MAX_AMULETS) - 1;
-	tmp = amulets[i];
-	amulets[i] = amulets[j];
-	amulets[j] = tmp;
+	j = rand_int(MAX_AMULETS);
+	tmp1 = amulet_adj[i];
+	amulet_adj[i] = amulet_adj[j];
+	amulet_adj[j] = tmp1;
     }
 
     /* Hack -- Molds and Mushrooms (not normal foods) have colors */
-    for (i = 0; i < MAX_MUSH; i++) {
-	j = randint(MAX_MUSH) - 1;
-	tmp = mushrooms[i];
-	mushrooms[i] = mushrooms[j];
-	mushrooms[j] = tmp;
+    for (i = 0; i < MAX_SHROOM; i++) {
+	j = rand_int(MAX_SHROOM);
+	tmp1 = food_adj[i];
+	food_adj[i] = food_adj[j];
+	food_adj[j] = tmp1;
     }
 
     /* Hack -- Scrolls have titles, and are always white */
@@ -211,12 +216,12 @@ void magic_init(void)
 	string[0] = '\0';
 
 	/* Construct a two or three word title */
-	k = randint(2) + 1;
+	k = rand_range(2,3);
 	for (i = 0; i < k; i++) {
 
 	    /* Add a one or two syllable word */
-	    for (j = randint(2); j > 0; j--) {
-		(void)strcat(string, syllables[randint(MAX_SYLLABLES) - 1]);
+	    for (j = rand_range(1,2); j > 0; j--) {
+		(void)strcat(string, syllables[rand_int(MAX_SYLLABLES)]);
 	    }
 
 	    /* Add a space */
@@ -234,7 +239,7 @@ void magic_init(void)
 	}
 
 	/* Save the title */
-	(void)strcpy(titles[h], string);
+	(void)strcpy(scroll_adj[h], string);
     }
     reset_seed();
 }
@@ -259,7 +264,7 @@ s16b object_offset(inven_type *t_ptr)
       case TV_POTION2:
 	return (5);
       case TV_FOOD:
-	if ((t_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1)) < MAX_MUSH)
+	if ((t_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1)) < MAX_SHROOM)
 	    return (6);
 	return (-1);
       default:
@@ -539,9 +544,9 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Amulet";
-	    modstr = amulets[indexx];
+	    modstr = amulet_adj[indexx];
 	    if (!modify)
-		append_name = TRUE;
+	    append_name = TRUE;
 	}
 	else {
 	    basenm = "& Amulet";
@@ -554,15 +559,13 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_RING:
 	if (!stricmp("Power", basenm)) { /* name this "the One Ring" -CWS */
 	    append_name = FALSE;
-	    if (!known2_p(i_ptr))
-		basenm = "a plain gold Ring";
-	    else
-		basenm = "The One Ring";
+	    if (!known2_p(i_ptr)) basenm = "a plain gold Ring";
+	    else basenm = "The One Ring";
 	} else if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Ring";
-	    modstr = rocks[indexx];
+	    modstr = ring_adj[indexx];
 	    if (!modify)
-		append_name = TRUE;
+	    append_name = TRUE;
 	}
 	else {
 	    basenm = "& Ring";
@@ -574,9 +577,9 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_STAFF:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Staff";
-	    modstr = woods[indexx];
+	    modstr = staff_adj[indexx];
 	    if (!modify)
-		append_name = TRUE;
+	    append_name = TRUE;
 	}
 	else {
 	    basenm = "& Staff";
@@ -588,9 +591,9 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_WAND:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Wand";
-	    modstr = metals[indexx];
+	    modstr = wand_adj[indexx];
 	    if (!modify)
-		append_name = TRUE;
+	    append_name = TRUE;
 	}
 	else {
 	    basenm = "& Wand";
@@ -602,7 +605,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_ROD:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Rod";
-	    modstr = metals[indexx];
+	    modstr = wand_adj[indexx];
 	    if (!modify)
 	    append_name = TRUE;
 	}
@@ -616,7 +619,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_SCROLL2:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& Scroll~ titled \"%s\"";
-	    modstr = titles[indexx];
+	    modstr = scroll_adj[indexx];
 	    if (!modify)
 	    append_name = TRUE;
 	}
@@ -630,7 +633,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_POTION2:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Potion~";
-	    modstr = colors[indexx];
+	    modstr = potion_adj[indexx];
 	    if (!modify)
 	    append_name = TRUE;
 	}
@@ -655,7 +658,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	    else
 		append_name = FALSE;	/* Ordinary food has no name appended. */
 	    if (indexx <= 20)
-		modstr = mushrooms[indexx];
+		modstr = food_adj[indexx];
 	}
 	else {
 	    append_name = TRUE;
@@ -957,7 +960,7 @@ void desc_remain(int item_val)
  */
 void invcopy(register inven_type *to, int from_index)
 {
-    register treasure_type *from;
+    register inven_kind *from;
 
     from = &object_list[from_index];
     to->index = from_index;

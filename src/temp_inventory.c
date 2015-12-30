@@ -62,15 +62,15 @@ static void inven_screen(int new_scr)
 	    line = 7;
 	    break;
 	  case INVEN_SCR:
-	    scr_left = show_inven(0, inven_ctr - 1, show_weight_flag, scr_left, 0);
+	    scr_left = show_inven(0, inven_ctr - 1, show_inven_weight, scr_left, 0);
 	    line = inven_ctr;
 	    break;
 	  case WEAR_SCR:
-	    scr_left = show_inven(wear_low, wear_high, show_weight_flag, scr_left, 0);
+	    scr_left = show_inven(wear_low, wear_high, show_inven_weight, scr_left, 0);
 	    line = wear_high - wear_low + 1;
 	    break;
 	  case EQUIP_SCR:
-	    scr_left = show_equip(show_equip_weight_flag, scr_left);
+	    scr_left = show_equip(show_equip_weight, scr_left);
 	    line = equip_ctr;
 	    break;
 	}
@@ -201,7 +201,7 @@ void inven_command(int command)
 		inventory[INVEN_AUX] = inventory[INVEN_WIELD];
 		inventory[INVEN_WIELD] = tmp_obj;
 		if (scr_state == EQUIP_SCR)
-		    scr_left = show_equip(show_weight_flag, scr_left);
+		    scr_left = show_equip(show_inven_weight, scr_left);
 		py_bonuses(&inventory[INVEN_AUX], -1);	/* Subtract bonuses */
 		py_bonuses(&inventory[INVEN_WIELD], 1);	/* Add bonuses    */
 
@@ -332,7 +332,7 @@ void inven_command(int command)
 				item = (-1);
 			}
 			if (item >= 0)
-			    if (item == INVEN_LIGHT)
+			    if (item == INVEN_LITE)
 				light_chg = TRUE;
 			if (command == 'r') {
 			    inven_drop(item, TRUE);
@@ -367,7 +367,7 @@ void inven_command(int command)
 				slot = INVEN_WIELD;
 				break;
 			      case TV_LIGHT:
-				slot = INVEN_LIGHT;
+				slot = INVEN_LITE;
 				break;
 			      case TV_BOOTS:
 				slot = INVEN_FEET;
@@ -453,7 +453,7 @@ void inven_command(int command)
 			/* OK. Wear it. */
 			    free_turn_flag = FALSE;
 
-			    if (slot == INVEN_LIGHT)
+			    if (slot == INVEN_LITE)
 				light_chg = TRUE;
 
 			/* first remove new item from inventory */
@@ -486,7 +486,7 @@ void inven_command(int command)
 			    py_bonuses(i_ptr, 1);
 			    if (slot == INVEN_WIELD)
 				string = "You are wielding";
-			    else if (slot == INVEN_LIGHT)
+			    else if (slot == INVEN_LITE)
 				string = "Your light source is";
 			    else
 				string = "You are wearing";
@@ -557,7 +557,7 @@ void inven_command(int command)
 	} else {
 	/* Put an appropriate header. */
 	    if (scr_state == INVEN_SCR) {
-		if (!show_weight_flag || inven_ctr == 0)
+		if (!show_inven_weight || inven_ctr == 0)
 		    (void)sprintf(prt1,
 			  "You are carrying %d.%d pounds. In your pack there is %s",
 				  inven_weight / 10, inven_weight % 10,
@@ -612,15 +612,15 @@ void inven_command(int command)
 #endif
 	tmp2 = cur_lite;
 	print('@', char_row, char_col);
-	if (inventory[INVEN_LIGHT].tval == TV_LIGHT)
-	    tmp = inventory[INVEN_LIGHT].subval;
+	if (inventory[INVEN_LITE].tval == TV_LIGHT)
+	    tmp = inventory[INVEN_LITE].subval;
 	else
 	    tmp = 195;
 	cur_lite = 1 + (tmp < 190) + (tmp == 4 || tmp == 6);
 	if (tmp2 < cur_lite)
 	    tmp2 = cur_lite;
 
-	if (!py.flags.blind) {
+	if (!p_ptr->flags.blind) {
 	    min_i = MY_MAX(0, (char_row - cur_lite));
 	    max_i = MY_MIN(cur_height, (char_row + cur_lite));
 	    min_j = MY_MAX(0, (char_col - cur_lite));
@@ -667,7 +667,7 @@ void inven_destroy(int item_val)
 	invcopy(&inventory[inven_ctr - 1], OBJ_NOTHING);
 	inven_ctr--;
     }
-    py.flags.status |= PY_STR_WGT;
+    p_ptr->flags.status |= PY_STR_WGT;
 }
 
 

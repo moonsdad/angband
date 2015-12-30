@@ -73,6 +73,36 @@ int (*store_buy[MAX_STORES])() = {
        blackmarket, home};
 #endif
 
+/*
+ * Each type of character starts out with a few provisions.
+ * Note that the entries refer to elements of the object_list[] array
+ * 356 = Food Ration, 365 = Wooden Torch, 123 = Cloak, 30 = Stiletto,
+   103 = Soft Leather Armor, 318 = Beginners-Magic, 322 = Beginners Handbook
+ */
+
+u16b player_init[MAX_CLASS][5] = {
+
+	/* Warrior */
+		{ MDO, MDO+21,  34, 109, 258},
+
+	/* Mage */
+		{ MDO, MDO+21,  29, 330, 220},
+
+	/* Priest */
+		{ MDO, MDO+21,  53, 334, 242},
+
+	/* Rogue */
+		{ MDO, MDO+21,  46, 103, 330},
+
+	/* Ranger */
+		{ MDO, MDO+21,  34, 330,  74},
+
+	/* Paladin */
+		{ MDO, MDO+21,  34, 334, 209}
+        /* Last array object added for one extra useful object per class */
+};
+
+
 
 
 /*
@@ -137,10 +167,74 @@ u16b normal_table[NORMAL_TABLE_SIZE] = {
 
 
 
+/*
+		Monster Attack types:
+		1	Normal attack
+		2	Poison Strength
+		3	Confusion attack
+		4	Fear attack
+		5	Fire attack
+		6	Acid attack
+		7	Cold attack
+		8	Lightning attack
+		9	Corrosion attack
+		10	Blindness attack
+		11	Paralysis attack
+		12	Steal Money
+		13	Steal Object
+		14	Poison
+		15	Lose dexterity
+		16	Lose constitution
+		17	Lose intelligence
+		18	Lose wisdom
+		19	Lose experience
+		20	Aggravation
+		21	Disenchant
+		22	Eats food
+		23	Eat light
+		24	Energy drain from pack
+		25      Drain all stats
+		99	Blank
+
+		Attack descriptions:
+		1	hits you.
+		2	bites you.
+		3	claws you.
+		4	stings you.
+		5	touches you.
+		6	kicks you.
+		7	gazes at you.
+		8	breathes on you.
+		9	spits on you.
+		10	makes a horrible wail.
+		11	embraces you.
+		12	crawls on you.
+		13	releases a cloud of spores.
+		14	begs you for money.
+		15	You've been slimed.
+		16	crushes you.
+		17	tramples you.
+		18	drools on you.
+		19	insults you.
+
+		20	butts you.
+		21	charges you.
+		22	engulfs you.
+		23      talks to you about mushrooms and dogs
+
+		99	is repelled.
+
+	Example:  For a creature which bites for 1d6, then stings for
+		  2d4 and loss of dex you would use:
+			{1,2,1,6},{15,4,2,4}
+*/
+
+
+
 /* These should never be created by accident (and probably won't ;-). -CWS */
 
 /* ERROR: attack #35 is no longer used */
-struct monster_attack monster_attacks[N_MONS_ATTS] = {
+monster_attack a_list[MAX_A_IDX] = {
 /* 0 */	{0, 0, 0, 0},	{1, 1, 1, 2},	{1, 1, 1, 3},	{1, 1, 1, 4},
 	{1, 1, 1, 5},	{1, 1, 1, 6},	{1, 1, 1, 7},	{1, 1, 1, 8},
 	{1, 1, 1, 9},	{1, 1, 1, 10},	{1, 1, 1, 12},	{1, 1, 2, 2},
@@ -636,17 +730,10 @@ s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ] = {
 
 };
 
-u32b spell_learned = 0;	/* bit mask of spells learned */
-u32b spell_learned2 = 0;	/* bit mask of spells learned */
-u32b spell_worked = 0;	/* bit mask of spells tried and worked */
-u32b spell_worked2 = 0;	/* bit mask of spells tried and worked */
-u32b spell_forgotten = 0;	/* bit mask of spells learned but forgotten */
-u32b spell_forgotten2 = 0;	/* bit mask of spells learned but forgotten */
-byte spell_order[64];		/* order spells learned/remembered/forgotten */
 
 /*
  * Warriors don't have spells, so there is no entry for them.  Note that
- * this means you must always subtract one from the py.misc.pclass before
+ * this means you must always subtract one from the p_ptr->misc.pclass before
  * indexing into magic_spell[].
  */
 spell_type magic_spell[MAX_CLASS-1][63] = {
@@ -1166,21 +1253,6 @@ cptr spell_names[127] = {
   "blank"
 };
 
-#define MDO MAX_DUNGEON_OBJ
-/* Each type of character starts out with a few provisions.	*/
-/* Note that the entries refer to elements of the object_list[] array*/
-/* 356 = Food Ration, 365 = Wooden Torch, 123 = Cloak, 30 = Stiletto,
-   103 = Soft Leather Armor, 318 = Beginners-Magic, 322 = Beginners Handbook */
-
-u16b player_init[MAX_CLASS][5] = {
-		{ MDO, MDO+21,  34, 109, 258},	/* Warrior	 */
-		{ MDO, MDO+21,  29, 330, 220},	/* Mage		 */
-		{ MDO, MDO+21,  53, 334, 242},	/* Priest	 */
-		{ MDO, MDO+21,  46, 103, 330},	/* Rogue	 */
-		{ MDO, MDO+21,  34, 330,  74},	/* Ranger	 */
-		{ MDO, MDO+21,  34, 334, 209}	/* Paladin	 */
-        /* Last array object added for one extra useful object per class */
-};
 
 /*
  * spellmasks[][] is used to control the "you seem to be missing a book"

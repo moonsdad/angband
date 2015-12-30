@@ -52,7 +52,7 @@
  * procedure 
  */
 
-static FILE *fileptr;		/* Current save "file" */
+static FILE	*fff;		/* Current save "file" */
 
 static byte	xor_byte;	/* Simple encryption */
 
@@ -125,7 +125,7 @@ static int sv_write()
 	l |= 16;
     if (rogue_like_commands)
 	l |= 32;
-    if (show_weight_flag)
+    if (show_inven_weight)
 	l |= 64;
     if (notice_seams)
 	l |= 128;
@@ -145,7 +145,7 @@ static int sv_write()
     l |= ((hitpoint_warn & 0xf) << 17);
     if (plain_descriptions)	/* don't do "black Mushroom of Curing" -CWS */
 	l |= 0x00400000L;
-    if (show_equip_weight_flag)
+    if (show_equip_weight)
 	l |= 0x00800000L;
     if (feeling > 10)
 	feeling = 0;		/* bounds for level feelings -CWS */
@@ -272,14 +272,14 @@ static int sv_write()
     wr_long(RAZORBACK);
     wr_long(BLADETURNER);
 
-    for (i = 0; i < MAX_QUESTS; i++)
+    for (i = 0; i < QUEST_MAX; i++)
 	wr_long(quests[i]);
 
-    for (i = 0; i < MAX_CREATURES; i++)
+    for (i = 0; i < MAX_R_IDX; i++)
 	wr_unique(&u_list[i]);
 
-    for (i = 0; i < MAX_CREATURES; i++) {
-	r_ptr = &c_recall[i];
+    for (i = 0; i < MAX_R_IDX; i++) {
+	r_ptr = &l_list[i];
 	if (r_ptr->r_cmove || r_ptr->r_cdefense || r_ptr->r_kills ||
 	    r_ptr->r_spells2 || r_ptr->r_spells3 || r_ptr->r_spells ||
 	    r_ptr->r_deaths || r_ptr->r_attacks[0] || r_ptr->r_attacks[1] ||
@@ -305,7 +305,7 @@ static int sv_write()
     wr_long(l);
     wr_long(l);
 
-    m_ptr = &py.misc;
+    m_ptr = &p_ptr->misc;
     wr_string(m_ptr->name);
     wr_byte(m_ptr->male);
     wr_long((u32b) m_ptr->au);
@@ -346,13 +346,13 @@ static int sv_write()
     for (i = 0; i < 4; i++)
 	wr_string(m_ptr->history[i]);
 
-    s_ptr = &py.stats;
+    s_ptr = &p_ptr->stats;
     wr_shorts(s_ptr->max_stat, 6);
     wr_bytes(s_ptr->cur_stat, 6);               /* Was wr_shorts -TL */
     wr_shorts((u16b *) s_ptr->mod_stat, 6);
     wr_shorts(s_ptr->use_stat, 6);
 
-    f_ptr = &py.flags;
+    f_ptr = &p_ptr->flags;
     wr_long(f_ptr->status);
     wr_short((u16b) f_ptr->rest);
     wr_short((u16b) f_ptr->blind);
@@ -430,7 +430,7 @@ static int sv_write()
     wr_short((u16b) inven_ctr);
     for (i = 0; i < inven_ctr; i++)
 	wr_item(&inventory[i]);
-    for (i = INVEN_WIELD; i < INVEN_ARRAY_SIZE; i++)
+    for (i = INVEN_WIELD; i < INVEN_TOTAL; i++)
 	wr_item(&inventory[i]);
     wr_short((u16b) inven_weight);
     wr_short((u16b) equip_ctr);
@@ -485,7 +485,7 @@ static int sv_write()
  * resurrected, the dungeon level info is not needed for a resurrection 
  */
     if (death) {
-	if (ferror(fileptr) || fflush(fileptr) == EOF)
+	if (ferror(fff) || fflush(fff) == EOF)
 	    return FALSE;
 	return TRUE;
     }
@@ -547,30 +547,30 @@ static int sv_write()
  * this is necessary so that if the user changes the graphics line, the
  * program will be able change all existing walls/floors to the new symbol 
  */
-    t_ptr = &t_list[tcptr - 1];
-    for (i = tcptr - 1; i >= MIN_TRIX; i--) {
+    t_ptr = &t_list[i_max - 1];
+    for (i = i_max - 1; i >= MIN_I_IDX; i--) {
 	if (t_ptr->tchar == wallsym)
 	    t_ptr->tchar = '#';
 	t_ptr--;
     }
 #endif
-    wr_short((u16b) tcptr);
-    for (i = MIN_TRIX; i < tcptr; i++)
+    wr_short((u16b) i_max);
+    for (i = MIN_I_IDX; i < i_max; i++)
 	wr_item(&t_list[i]);
-    wr_short((u16b) mfptr);
-    for (i = MIN_MONIX; i < mfptr; i++)
+    wr_short((u16b) m_max);
+    for (i = MIN_M_IDX; i < m_max; i++)
 	wr_monster(&m_list[i]);
 
 /* Save ghost names & stats etc... */
-     if (!c_list[MAX_CREATURES - 1].name) {
+     if (!r_list[MAX_R_IDX - 1].name) {
                                   /* Can't dereference NULL! */
-	 c_list[MAX_CREATURES - 1].name = (char*)malloc(101);
-	 bzero((char *)c_list[MAX_CREATURES - 1].name, 101);
+	 r_list[MAX_R_IDX - 1].name = (char*)malloc(101);
+	 bzero((char *)r_list[MAX_R_IDX - 1].name, 101);
      }
-    wr_bytes(c_list[MAX_CREATURES - 1].name, 100);
-    wr_long((u32b) c_list[MAX_CREATURES - 1].cmove);
-    wr_long((u32b) c_list[MAX_CREATURES - 1].spells);
-    wr_long((u32b) c_list[MAX_CREATURES - 1].cdefense);
+    wr_bytes(r_list[MAX_R_IDX - 1].name, 100);
+    wr_long((u32b) r_list[MAX_R_IDX - 1].cmove);
+    wr_long((u32b) r_list[MAX_R_IDX - 1].spells);
+    wr_long((u32b) r_list[MAX_R_IDX - 1].cdefense);
     {
 	u16b temp;
 /* fix player ghost's exp bug.  The mexp field is really an u32b, but the
@@ -581,22 +581,22 @@ static int sv_write()
  * perfectly with a similar fix when* loading a character. -CFT
  */
 
-	if (c_list[MAX_CREATURES - 1].mexp > (u32b) 0xff00)
+	if (r_list[MAX_R_IDX - 1].mexp > (u32b) 0xff00)
 	    temp = (u16b) 0xff00;
 	else
-	    temp = (u16b) c_list[MAX_CREATURES - 1].mexp;
+	    temp = (u16b) r_list[MAX_R_IDX - 1].mexp;
 	wr_short((u16b) temp);
     }
-    wr_short((byte) c_list[MAX_CREATURES - 1].sleep);
-    wr_byte((byte) c_list[MAX_CREATURES - 1].aaf);
-    wr_short((byte) c_list[MAX_CREATURES - 1].ac);
-    wr_byte((byte) c_list[MAX_CREATURES - 1].speed);
-    wr_byte((byte) c_list[MAX_CREATURES - 1].cchar);
-    wr_bytes(c_list[MAX_CREATURES - 1].hd, 2);
-    wr_bytes(c_list[MAX_CREATURES - 1].damage, sizeof(u16b ) * 4);
-    wr_short((u16b) c_list[MAX_CREATURES - 1].level);
+    wr_short((byte) r_list[MAX_R_IDX - 1].sleep);
+    wr_byte((byte) r_list[MAX_R_IDX - 1].aaf);
+    wr_short((byte) r_list[MAX_R_IDX - 1].ac);
+    wr_byte((byte) r_list[MAX_R_IDX - 1].speed);
+    wr_byte((byte) r_list[MAX_R_IDX - 1].cchar);
+    wr_bytes(r_list[MAX_R_IDX - 1].hd, 2);
+    wr_bytes(r_list[MAX_R_IDX - 1].damage, sizeof(u16b ) * 4);
+    wr_short((u16b) r_list[MAX_R_IDX - 1].level);
 
-    if (ferror(fileptr) || (fflush(fileptr) == EOF))
+    if (ferror(fff) || (fflush(fff) == EOF))
 	return FALSE;
     return TRUE;
 }
@@ -650,7 +650,7 @@ int _save_char(char *fnam)
     ok = FALSE;
 #ifndef ATARIST_MWC
     fd = (-1);
-    fileptr = NULL;		   /* Do not assume it has been init'ed */
+    fff = NULL;		   /* Do not assume it has been init'ed */
 #ifdef SET_UID
     fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL, 0600);
 #else
@@ -678,9 +678,9 @@ int _save_char(char *fnam)
 #endif				   /* !ATARIST_MWC */
     /* GCC for atari st defines atarist */
 #if defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS) || defined(__MINT__)
-	fileptr = my_tfopen(savefile, "wb");
+	fff = my_tfopen(savefile, "wb");
 #else
-	fileptr = my_tfopen(savefile, "w");
+	fff = my_tfopen(savefile, "w");
 #endif
 #ifndef ATARIST_MWC
     }
@@ -688,10 +688,10 @@ int _save_char(char *fnam)
 #endif
 
     /* Successful open */
-    if (fileptr != NULL) {
+    if (fff != NULL) {
 
 #ifdef MSDOS
-	(void)setmode(fileno(fileptr), O_BINARY);
+	(void)setmode(fileno(fff), O_BINARY);
 #endif
 
 	xor_byte = 0;
@@ -699,7 +699,7 @@ int _save_char(char *fnam)
 	xor_byte = 0;
 	wr_byte((byte) CUR_VERSION_MIN);
 	xor_byte = 0;
-	wr_byte((byte) PATCH_LEVEL);
+	wr_byte((byte) CUR_PATCH_LEVEL);
 	xor_byte = 0;
 	char_tmp = randint(256) - 1;
 	wr_byte(char_tmp);
@@ -709,7 +709,7 @@ int _save_char(char *fnam)
 	ok = sv_write();
 
 	/* Attempt to close it */
-	if (fclose(fileptr) == EOF) ok = FALSE;
+	if (fclose(fff) == EOF) ok = FALSE;
     }
 
 
@@ -820,7 +820,7 @@ int get_char(int *generate)
 	log_index = (-1);
 	ok = TRUE;
 
-#ifndef SET_UID
+#if !defined(SET_UID) 
 	(void)fstat(fd, &statbuf);
 #endif
 
@@ -829,11 +829,11 @@ int get_char(int *generate)
 
     /* GCC for atari st defines atarist */
 #if defined(__MINT__) || defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS)
-	fileptr = my_tfopen(savefile, "rb");
+	fff = my_tfopen(savefile, "rb");
 #else
-	fileptr = my_tfopen(savefile, "r");
+	fff = my_tfopen(savefile, "r");
 #endif
-	if (fileptr == NULL) goto error;
+	if (fff == NULL) goto error;
 
 	prt("Restoring Memory...", 0, 0);
 	put_qio();
@@ -859,7 +859,7 @@ int get_char(int *generate)
 
 	if ((version_maj != CUR_VERSION_MAJ)
 	    || (version_min > CUR_VERSION_MIN)
-	    || (version_min == CUR_VERSION_MIN && patch_level > PATCH_LEVEL)) {
+	    || (version_min == CUR_VERSION_MIN && patch_level > CUR_PATCH_LEVEL)) {
 	    prt("Sorry. This savefile is from a different version of Angband.",
 		2, 0);
 	    goto error;
@@ -986,12 +986,12 @@ int get_char(int *generate)
 	    prt("Loaded Armour Artifacts", 3, 0);
 	put_qio();
 
-	for (i = 0; i < MAX_QUESTS; i++)
+	for (i = 0; i < QUEST_MAX; i++)
 	    rd_long(&quests[i]);
 	if (to_be_wizard)
 	    prt("Loaded Quests", 4, 0);
 
-	for (i = 0; i < MAX_CREATURES; i++)
+	for (i = 0; i < MAX_R_IDX; i++)
 	    rd_unique(&u_list[i]);
 	if (to_be_wizard)
 	    prt("Loaded Unique Beasts", 5, 0);
@@ -999,9 +999,9 @@ int get_char(int *generate)
 
 	rd_short(&int16u_tmp);
 	while (int16u_tmp != 0xFFFF) {
-	    if (int16u_tmp >= MAX_CREATURES)
+	    if (int16u_tmp >= MAX_R_IDX)
 		goto error;
-	    r_ptr = &c_recall[int16u_tmp];
+	    r_ptr = &l_list[int16u_tmp];
 	    rd_long(&r_ptr->r_cmove);
 	    rd_long(&r_ptr->r_spells);
 	    rd_long(&r_ptr->r_spells2);
@@ -1054,9 +1054,9 @@ int get_char(int *generate)
 	else
 	    rogue_like_commands = FALSE;
 	if (l & 64)
-	    show_weight_flag = TRUE;
+	    show_inven_weight = TRUE;
 	else
-	    show_weight_flag = FALSE;
+	    show_inven_weight = FALSE;
 	if (l & 128)
 	    notice_seams = TRUE;
 	else
@@ -1089,9 +1089,9 @@ int get_char(int *generate)
 	else
 	    plain_descriptions = FALSE;
 	if (l & 0x00800000L)
-	    show_equip_weight_flag = TRUE;
+	    show_equip_weight = TRUE;
 	else
-	    show_equip_weight_flag = FALSE;
+	    show_equip_weight = FALSE;
 	feeling = ((l >> 24) & 0xf);
 	if (feeling > 10)
 	    feeling = 0;	    /* bounds for level feelings -CWS */
@@ -1112,7 +1112,7 @@ int get_char(int *generate)
 	    && get_check("Resurrect a dead character?"))
 	    l &= ~0x80000000L;
 	if ((l & 0x80000000L) == 0) {
-	    m_ptr = &py.misc;
+	    m_ptr = &p_ptr->misc;
 	    rd_string(m_ptr->name);
 	    rd_byte(&m_ptr->male);
 	    rd_long((u32b *) & m_ptr->au);
@@ -1153,7 +1153,7 @@ int get_char(int *generate)
 	    for (i = 0; i < 4; i++)
 		rd_string(m_ptr->history[i]);
 
-	    s_ptr = &py.stats;
+	    s_ptr = &p_ptr->stats;
 	    rd_shorts(s_ptr->max_stat, 6);
 	    if (version_maj <= 2 && version_min <=5 && patch_level <= 6)
 		rd_shorts(s_ptr->cur_stat, 6);
@@ -1162,7 +1162,7 @@ int get_char(int *generate)
 	    rd_shorts((u16b *) s_ptr->mod_stat, 6);
 	    rd_shorts(s_ptr->use_stat, 6);
 
-	    f_ptr = &py.flags;
+	    f_ptr = &p_ptr->flags;
 	    rd_long(&f_ptr->status);
 	    rd_short((u16b *) & f_ptr->rest);
 	    rd_short((u16b *) & f_ptr->blind);
@@ -1251,7 +1251,7 @@ int get_char(int *generate)
 	    }
 	    for (i = 0; i < inven_ctr; i++)
 		rd_item(&inventory[i]);
-	    for (i = INVEN_WIELD; i < INVEN_ARRAY_SIZE; i++)
+	    for (i = INVEN_WIELD; i < INVEN_TOTAL; i++)
 		rd_item(&inventory[i]);
 	    rd_short((u16b *) & inven_weight);
 	    rd_short((u16b *) & equip_ctr);
@@ -1306,38 +1306,38 @@ int get_char(int *generate)
 #endif
 	    rd_string(died_from);
 	}
-	if ((c = getc(fileptr)) == EOF || (l & 0x80000000L)) {
+	if ((c = getc(fff)) == EOF || (l & 0x80000000L)) {
 	    if ((l & 0x80000000L) == 0) {
 		if (!to_be_wizard || turn < 0) {
 		    prt("ERROR in to_be_wizard", 10, 0);
 		    goto error;
 		}
 		prt("Attempting a resurrection!", 0, 0);
-		if (py.misc.chp < 0) {
-		    py.misc.chp = 0;
-		    py.misc.chp_frac = 0;
+		if (p_ptr->misc.chp < 0) {
+		    p_ptr->misc.chp = 0;
+		    p_ptr->misc.chp_frac = 0;
 		}
 	    /* don't let him starve to death immediately */
-		if (py.flags.food < 5000)
-		    py.flags.food = 5000;
+		if (p_ptr->flags.food < 5000)
+		    p_ptr->flags.food = 5000;
 		cure_poison();
 		cure_blindness();
 		cure_confusion();
 		remove_fear();
 
-		if (py.flags.image > 0) py.flags.image = 0;
-		if (py.flags.cut > 0) py.flags.cut = 0;
-		if (py.flags.stun > 0) {
-		    if (py.flags.stun > 50) {
-			py.misc.ptohit += 20;
-			py.misc.ptodam += 20;
+		if (p_ptr->flags.image > 0) p_ptr->flags.image = 0;
+		if (p_ptr->flags.cut > 0) p_ptr->flags.cut = 0;
+		if (p_ptr->flags.stun > 0) {
+		    if (p_ptr->flags.stun > 50) {
+			p_ptr->misc.ptohit += 20;
+			p_ptr->misc.ptodam += 20;
 		    } else {
-			py.misc.ptohit += 5;
-			py.misc.ptodam += 5;
+			p_ptr->misc.ptohit += 5;
+			p_ptr->misc.ptodam += 5;
 		    }
-		    py.flags.stun = 0;
+		    p_ptr->flags.stun = 0;
 		}
-		if (py.flags.word_recall > 0) py.flags.word_recall = 0;
+		if (p_ptr->flags.word_recall > 0) p_ptr->flags.word_recall = 0;
 
 		/* Resurrect on the town level. */
 		dun_level = 0;
@@ -1370,7 +1370,7 @@ int get_char(int *generate)
 	    log_index = (-1);
 	    goto closefiles;
 	}
-	if (ungetc(c, fileptr) == EOF) {
+	if (ungetc(c, fff) == EOF) {
 	    prt("ERROR in ungetc", 11, 0);
 	    goto error;
 	}
@@ -1448,25 +1448,25 @@ int get_char(int *generate)
 	    total_count += count;
 	}
 
-	rd_short((u16b *) & tcptr);
-	if (tcptr > MAX_TALLOC) {
-	    prt("ERROR in MAX_TALLOC", 14, 0);
+	rd_short((u16b *) & i_max);
+	if (i_max > MAX_I_IDX) {
+	    prt("ERROR in MAX_I_IDX", 14, 0);
 	    goto error;
 	}
-	for (i = MIN_TRIX; i < tcptr; i++)
+	for (i = MIN_I_IDX; i < i_max; i++)
 	    rd_item(&t_list[i]);
-	rd_short((u16b *) & mfptr);
-	if (mfptr > MAX_MALLOC) {
-	    prt("ERROR in MAX_MALLOC", 15, 0);
+	rd_short((u16b *) & m_max);
+	if (m_max > MAX_M_IDX) {
+	    prt("ERROR in MAX_M_IDX", 15, 0);
 	    goto error;
 	}
-	for (i = MIN_MONIX; i < mfptr; i++) {
+	for (i = MIN_M_IDX; i < m_max; i++) {
 	    rd_monster(&m_list[i]);
 	}
 #ifdef MSDOS
     /* change walls and floors to graphic symbols */
-	t_ptr = &t_list[tcptr - 1];
-	for (i = tcptr - 1; i >= MIN_TRIX; i--) {
+	t_ptr = &t_list[i_max - 1];
+	for (i = i_max - 1; i >= MIN_I_IDX; i--) {
 	    if (t_ptr->tchar == '#')
 		t_ptr->tchar = wallsym;
 	    t_ptr--;
@@ -1475,13 +1475,13 @@ int get_char(int *generate)
 
 				/* Restore ghost names & stats etc... */
 				/* Allocate storage for name */
-	c_list[MAX_CREATURES - 1].name = (char*)malloc(101);
-	bzero((char *)c_list[MAX_CREATURES - 1].name, 101);
-	*((char *) c_list[MAX_CREATURES - 1].name) = 'A';
-	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].name), 100);
-	rd_long((u32b *) & (c_list[MAX_CREATURES - 1].cmove));
-	rd_long((u32b *) & (c_list[MAX_CREATURES - 1].spells));
-	rd_long((u32b *) & (c_list[MAX_CREATURES - 1].cdefense));
+	r_list[MAX_R_IDX - 1].name = (char*)malloc(101);
+	bzero((char *)r_list[MAX_R_IDX - 1].name, 101);
+	*((char *) r_list[MAX_R_IDX - 1].name) = 'A';
+	rd_bytes((byte *) (r_list[MAX_R_IDX - 1].name), 100);
+	rd_long((u32b *) & (r_list[MAX_R_IDX - 1].cmove));
+	rd_long((u32b *) & (r_list[MAX_R_IDX - 1].spells));
+	rd_long((u32b *) & (r_list[MAX_R_IDX - 1].cdefense));
 	{
 	    u16b t1;
 /* fix player ghost's exp bug.  The mexp field is really an u32b, but the
@@ -1492,31 +1492,31 @@ int get_char(int *generate)
  */
 
 	    rd_short((u16b *) & t1);
-	    c_list[MAX_CREATURES - 1].mexp = (u32b) t1;
+	    r_list[MAX_R_IDX - 1].mexp = (u32b) t1;
 	}
 
 /* more stupid size bugs that would've never been needed if these variables
  * had been given enough space in the first place -CWS
  */
 	if ((version_maj >= 2) && (version_min >= 6))
-	    rd_short((u16b *) & (c_list[MAX_CREATURES - 1].sleep));
+	    rd_short((u16b *) & (r_list[MAX_R_IDX - 1].sleep));
 	else
-	    rd_byte((byte *) & (c_list[MAX_CREATURES - 1].sleep));
+	    rd_byte((byte *) & (r_list[MAX_R_IDX - 1].sleep));
 
-	rd_byte((byte *) & (c_list[MAX_CREATURES - 1].aaf));
+	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].aaf));
 
 	if ((version_maj >= 2) && (version_min >= 6))
-	    rd_short((u16b *) & (c_list[MAX_CREATURES - 1].ac));
+	    rd_short((u16b *) & (r_list[MAX_R_IDX - 1].ac));
 	else
-	    rd_byte((byte *) & (c_list[MAX_CREATURES - 1].ac));
+	    rd_byte((byte *) & (r_list[MAX_R_IDX - 1].ac));
 
-	rd_byte((byte *) & (c_list[MAX_CREATURES - 1].speed));
-	rd_byte((byte *) & (c_list[MAX_CREATURES - 1].cchar));
+	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].speed));
+	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].cchar));
 
-	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].hd), 2);
+	rd_bytes((byte *) (r_list[MAX_R_IDX - 1].hd), 2);
 
-	rd_bytes((byte *) (c_list[MAX_CREATURES - 1].damage), sizeof(u16b) * 4);
-	rd_short((u16b *) & (c_list[MAX_CREATURES - 1].level));
+	rd_bytes((byte *) (r_list[MAX_R_IDX - 1].damage), sizeof(u16b) * 4);
+	rd_short((u16b *) & (r_list[MAX_R_IDX - 1].level));
 	*generate = FALSE;	   /* We have restored a cave - no need to generate. */
 
 	if ((version_min == 1 && patch_level < 3)
@@ -1542,7 +1542,7 @@ int get_char(int *generate)
     /* read the time that the file was saved */
 	rd_long(&time_saved);
 
-	if (ferror(fileptr)) {
+	if (ferror(fff)) {
 	    prt("FILE ERROR", 17, 0);
 	    goto error;
 	}
@@ -1560,7 +1560,7 @@ error:
 	else {
 
 	    /* don't overwrite the "killed by" string if character is dead */
-	    if (py.misc.chp >= 0) {
+	    if (p_ptr->misc.chp >= 0) {
 		(void)strcpy(died_from, "(alive and well)");
 	    }
 
@@ -1569,8 +1569,8 @@ error:
 
 closefiles:
 
-	if (fileptr != NULL) {
-	    if (fclose(fileptr) < 0) ok = FALSE;
+	if (fff != NULL) {
+	    if (fclose(fff) < 0) ok = FALSE;
 	}
 	if (fd >= 0) (void)close(fd);
 
@@ -1660,27 +1660,27 @@ closefiles:
 static void wr_byte(byte c)
 {
     xor_byte ^= c;
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
 }
 
 static void wr_short(u16b s)
 {
     xor_byte ^= (s & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
     xor_byte ^= ((s >> 8) & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
 }
 
 static void wr_long(register u32b l)
 {
     xor_byte ^= (l & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
     xor_byte ^= ((l >> 8) & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
     xor_byte ^= ((l >> 16) & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
     xor_byte ^= ((l >> 24) & 0xFF);
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
 }
 
 static void wr_bytes(byte *c, register int count)
@@ -1691,7 +1691,7 @@ static void wr_bytes(byte *c, register int count)
     ptr = c;
     for (i = 0; i < count; i++) {
 	xor_byte ^= *ptr++;
-	(void)putc((int)xor_byte, fileptr);
+	(void)putc((int)xor_byte, fff);
     }
 }
 
@@ -1699,10 +1699,10 @@ static void wr_string(register char *str)
 {
     while (*str != '\0') {
 	xor_byte ^= *str++;
-	(void)putc((int)xor_byte, fileptr);
+	(void)putc((int)xor_byte, fff);
     }
     xor_byte ^= *str;
-    (void)putc((int)xor_byte, fileptr);
+    (void)putc((int)xor_byte, fff);
 }
 
 static void 
@@ -1714,9 +1714,9 @@ wr_shorts(u16b *s, register int count)
     sptr = s;
     for (i = 0; i < count; i++) {
 	xor_byte ^= (*sptr & 0xFF);
-	(void)putc((int)xor_byte, fileptr);
+	(void)putc((int)xor_byte, fff);
 	xor_byte ^= ((*sptr++ >> 8) & 0xFF);
-	(void)putc((int)xor_byte, fileptr);
+	(void)putc((int)xor_byte, fff);
     }
 }
 
@@ -1749,7 +1749,7 @@ static void wr_monster(register monster_type *mon)
     wr_short((u16b) mon->hp);
     wr_short((u16b) mon->maxhp); /* added -CWS */
     wr_short((u16b) mon->csleep);
-    wr_short((u16b) mon->cspeed);
+    wr_short((u16b) mon->mspeed);
     wr_short(mon->mptr);
     wr_byte(mon->fy);
     wr_byte(mon->fx);
@@ -1764,7 +1764,7 @@ static void rd_byte(byte *ptr)
 {
     byte c;
 
-    c = getc(fileptr) & 0xFF;
+    c = getc(fff) & 0xFF;
     *ptr = c ^ xor_byte;
     xor_byte = c;
 }
@@ -1774,9 +1774,9 @@ static void rd_short(u16b *ptr)
     byte  c;
     u16b s;
 
-    c = (getc(fileptr) & 0xFF);
+    c = (getc(fff) & 0xFF);
     s = c ^ xor_byte;
-    xor_byte = (getc(fileptr) & 0xFF);
+    xor_byte = (getc(fff) & 0xFF);
     s |= (u16b) (c ^ xor_byte) << 8;
     *ptr = s;
 }
@@ -1786,13 +1786,13 @@ static void rd_long(u32b *ptr)
     register u32b l;
     register byte  c;
 
-    c = (getc(fileptr) & 0xFF);
+    c = (getc(fff) & 0xFF);
     l = c ^ xor_byte;
-    xor_byte = (getc(fileptr) & 0xFF);
+    xor_byte = (getc(fff) & 0xFF);
     l |= (u32b) (c ^ xor_byte) << 8;
-    c = (getc(fileptr) & 0xFF);
+    c = (getc(fff) & 0xFF);
     l |= (u32b) (c ^ xor_byte) << 16;
-    xor_byte = (getc(fileptr) & 0xFF);
+    xor_byte = (getc(fff) & 0xFF);
     l |= (u32b) (c ^ xor_byte) << 24;
     *ptr = l;
 }
@@ -1803,7 +1803,7 @@ static void rd_bytes(byte *ptr, int count)
     byte c, nc;
 
     for (i = 0; i < count; i++) {
-	c = (getc(fileptr) & 0xFF);
+	c = (getc(fff) & 0xFF);
 	nc = c ^ xor_byte;
 	*ptr = nc;
 	ptr++;
@@ -1816,7 +1816,7 @@ static void rd_string(char *str)
     register byte c;
 
     do {
-	c = (getc(fileptr) & 0xFF);
+	c = (getc(fff) & 0xFF);
 	*str = c ^ xor_byte;
 	xor_byte = c;
     }
@@ -1832,9 +1832,9 @@ static void rd_shorts(u16b *ptr, register int count)
 
     sptr = ptr;
     for (i = 0; i < count; i++) {
-	c = (getc(fileptr) & 0xFF);
+	c = (getc(fff) & 0xFF);
 	s = c ^ xor_byte;
-	xor_byte = (getc(fileptr) & 0xFF);
+	xor_byte = (getc(fff) & 0xFF);
 	s |= (u16b) (c ^ xor_byte) << 8;
 	*sptr++ = s;
     }
@@ -1875,7 +1875,7 @@ static void rd_monster(register monster_type *mon)
     }
 
     rd_short((u16b *) & mon->csleep);
-    rd_short((u16b *) & mon->cspeed);
+    rd_short((u16b *) & mon->mspeed);
     rd_short(&mon->mptr);
     rd_byte(&mon->fy);
     rd_byte(&mon->fx);

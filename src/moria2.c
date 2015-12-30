@@ -43,13 +43,12 @@ int is_quest(int level)
 
 
 /*
- *Player hit a real trap. (Chuckle) -RAK-
+ * Player hit a real trap. (Chuckle) -RAK-
  */
-static void hit_trap(int y, int x)
+void hit_trap(int y, int x)
 {
     int                   i, ty, tx, num, dam;
     register cave_type   *c_ptr;
-    register struct misc *p_ptr;
     register inven_type  *i_ptr;
     bigvtype              tmp;
 
@@ -58,7 +57,6 @@ static void hit_trap(int y, int x)
 
     /* Get the cave grid */
     c_ptr = &cave[y][x];
-    p_ptr = &py.misc;
 
     /* Get the trap */
     i_ptr = &t_list[c_ptr->tptr];
@@ -71,7 +69,7 @@ static void hit_trap(int y, int x)
 
       case 1:			   /* Open pit */
 	msg_print("You fell into a pit!");
-	if (py.flags.ffall) {
+	if (p_ptr->flags.ffall) {
 	    msg_print("You gently float down.");
 	}
 	else {
@@ -81,7 +79,7 @@ static void hit_trap(int y, int x)
 	break;
 
       case 2:			   /* Arrow trap */
-	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("An arrow hits you.");
@@ -95,7 +93,7 @@ static void hit_trap(int y, int x)
 
 	msg_print("You fell into a covered pit.");
 
-	if (py.flags.ffall) {
+	if (p_ptr->flags.ffall) {
 	    msg_print("You gently float down.");
 	}
 
@@ -111,7 +109,7 @@ static void hit_trap(int y, int x)
 	msg_print("You fell through a trap door!");
 	new_level_flag = TRUE;
 	dun_level++;
-	if (py.flags.ffall) {
+	if (p_ptr->flags.ffall) {
 	    msg_print("You gently float down.");
 	}
 	else {
@@ -124,14 +122,14 @@ static void hit_trap(int y, int x)
 	 /* end normal */ 
 	else {			   /* it's a quest level, can't let them fall through */
 	    msg_print("You fall into a spiked pit!");
-	    if (py.flags.ffall)
+	    if (p_ptr->flags.ffall)
 		msg_print("You gently float down.");
 	    else {
 		dam = (dam * 3) / 2;	/* do a little extra damage for spikes */
 		if (randint(3) == 1) {
 		    msg_print("The spikes are poisoned!");
-		    if (!(py.flags.poison_im || py.flags.poison_resist ||
-			  py.flags.resist_poison))
+		    if (!(p_ptr->flags.poison_im || p_ptr->flags.poison_resist ||
+			  p_ptr->flags.resist_poison))
 			dam *= 2;  /* more damage from poison!  :-)  -CFT */
 		    else
 			msg_print("You are unaffected by the poison.");
@@ -141,14 +139,14 @@ static void hit_trap(int y, int x)
 	break;
 
       case 5:			   /* Sleep gas */
-	if (py.flags.paralysis == 0) {
+	if (p_ptr->flags.paralysis == 0) {
 	    msg_print("A strange white mist surrounds you!");
-	    if (py.flags.free_act) {
+	    if (p_ptr->flags.free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else {
 		msg_print("You fall asleep.");
-		py.flags.paralysis += randint(10) + 4;
+		p_ptr->flags.paralysis += randint(10) + 4;
 	    }
 	}
 	break;
@@ -160,8 +158,8 @@ static void hit_trap(int y, int x)
 	break;
 
       case 7:			   /* STR Dart */
-	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
-	    if (!py.flags.sustain_str) {
+	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
+	    if (!p_ptr->flags.sustain_str) {
 		(void)dec_stat(A_STR);
 		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
@@ -217,34 +215,34 @@ static void hit_trap(int y, int x)
 
       case 14:			   /* Poison gas */
 	msg_print("A pungent green gas surrounds you!");
-	if (!(py.flags.poison_im || py.flags.poison_resist || py.flags.resist_poison))
+	if (!(p_ptr->flags.poison_im || p_ptr->flags.poison_resist || p_ptr->flags.resist_poison))
 	poison_gas(dam, "a poison gas trap");
 	break;
 
       case 15:			   /* Blind Gas */
 	msg_print("A black gas surrounds you!");
-	if (!py.flags.blindness_resist) {
-	    py.flags.blind += randint(50) + 50;
+	if (!p_ptr->flags.blindness_resist) {
+	    p_ptr->flags.blind += randint(50) + 50;
 	}
 	break;
 
       case 16:			   /* Confuse Gas */
 	msg_print("A gas of scintillating colors surrounds you!");
-	if ((!py.flags.confusion_resist) && (!py.flags.chaos_resist)) {
-	    py.flags.confused += randint(15) + 15;
+	if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+	    p_ptr->flags.confused += randint(15) + 15;
 	}
 	break;
 
       case 17:			   /* Slow Dart */
-	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("A small dart hits you!");
-	    if (py.flags.free_act) {
+	    if (p_ptr->flags.free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else {
-		py.flags.slow += randint(20) + 10;
+		p_ptr->flags.slow += randint(20) + 10;
 	    }
 	}
 	else {
@@ -253,10 +251,10 @@ static void hit_trap(int y, int x)
 	break;
 
       case 18:			   /* CON Dart */
-	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
 		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
-	    if (!py.flags.sustain_con) {
+	    if (!p_ptr->flags.sustain_con) {
 		(void)dec_stat(A_CON);
 		msg_print("A small dart saps your health!");
 	    }
@@ -308,7 +306,7 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
     register spell_type *s_ptr;
 
     /* if a warrior, abort as if by ESC -CFT */
-    if (!py.misc.pclass) return 0;
+    if (!p_ptr->misc.pclass) return 0;
 
     /* Assume nothing to read */
     result = (-1);
@@ -321,11 +319,11 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
     first_spell = bit_pos(&j1);
     /* set j1 again, since bit_pos modified it */
     j1 = inventory[item_val].flags & spell_learned;
-    s_ptr = magic_spell[py.misc.pclass - 1];
+    s_ptr = magic_spell[p_ptr->misc.pclass - 1];
 
     while (j1) {
 	k = bit_pos(&j1);
-	if (s_ptr[k].slevel <= py.misc.lev) {
+	if (s_ptr[k].slevel <= p_ptr->misc.lev) {
 	    spell[i] = k;
 	    i++;
 	}
@@ -335,15 +333,15 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
     j2 = inventory[item_val].flags2 & spell_learned2;
     while (j2) {
 	k = bit_pos(&j2);
-	if (s_ptr[k + 32].slevel <= py.misc.lev) {
+	if (s_ptr[k + 32].slevel <= p_ptr->misc.lev) {
 	    spell[i] = k + 32;
 	    i++;
 	}
     }
     if (i > 0) {
 	result = get_spell(spell, i, sn, sc, prompt, first_spell);
-	if (result && magic_spell[py.misc.pclass - 1][*sn].smana > py.misc.cmana) {
-	    if (class[py.misc.pclass].spell == MAGE)
+	if (result && magic_spell[p_ptr->misc.pclass - 1][*sn].smana > p_ptr->misc.cmana) {
+	    if (class[p_ptr->misc.pclass].spell == MAGE)
 		result = get_check("You summon your limited strength to cast this one! Confirm?");
 	    else
 		result = get_check("The gods may think you presumptuous for this! Confirm?");
@@ -356,7 +354,7 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
 
 void check_unique(monster_type *m_ptr)
 {
-    if (c_list[m_ptr->mptr].cdefense & UNIQUE)
+    if (r_list[m_ptr->mptr].cdefense & UNIQUE)
 	u_list[m_ptr->mptr].exist = 0;
 }
 
@@ -365,8 +363,8 @@ void delete_unique()
 {
     int i;
 
-    for (i = 0; i < MAX_CREATURES; i++)
-	if (c_list[i].cdefense & UNIQUE)
+    for (i = 0; i < MAX_R_IDX; i++)
+	if (r_list[i].cdefense & UNIQUE)
 	    u_list[i].exist = 0;
 }
 
@@ -610,7 +608,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 /*
  * return whether a monster is "fearless" and will never run away. -CWS
  */
-static int fearless(creature_type *c_ptr)
+static int fearless(monster_race *c_ptr)
 {
     int flag = FALSE;
 
@@ -651,38 +649,38 @@ static int fearless(creature_type *c_ptr)
  * (Picking on my babies.)			       -RAK-
  * added fear (DGK) and check whether to print fear messages -CWS
  */
-int mon_take_hit(int monptr, int dam, int print_fear)
+int mon_take_hit(int m_idx, int dam, int print_fear)
 {
-    s32b         i;
     int                     found = FALSE;
-    s32b                   new_exp, new_exp_frac;
-    register monster_type  *m_ptr;
-    register struct misc   *p_ptr;
-    register creature_type *c_ptr;
-    int                     m_take_hit = (-1);
-    s32b                  tmp;
+    s32b                   new_exp, new_exp_frac, i, tmp;
     int                     percentage;
+    int                     m_take_hit = (-1);
+
+    register monster_type  *m_ptr;
+    register monster_race *r_ptr;
+
     char                    m_name[80];
     vtype                   out_val;
 
     /* Get the creature */
-    m_ptr = &m_list[monptr];
+    m_ptr = &m_list[m_idx];
 
     /* Hurt it, and wake it up */
     m_ptr->hp -= dam;
     m_ptr->csleep = 0;
 
-    c_ptr = &c_list[m_ptr->mptr];
+    r_ptr = &r_list[m_ptr->mptr];
 
     /* It is dead now */
     if (m_ptr->hp < 0) {
 
-	if (m_ptr->mptr == (MAX_CREATURES - 1)) {
+	/* Delete ghost file */
+	if (m_ptr->mptr == (MAX_R_IDX-1)) {
 
 	    char                temp[100];
 
 	    if (!dun_level) {
-		sprintf(temp, "%s/%d", ANGBAND_BONES, c_list[m_ptr->mptr].level);
+		sprintf(temp, "%s/%d", ANGBAND_BONES, r_list[m_ptr->mptr].level);
 	    }
 	    else {
 		sprintf(temp, "%s/%d", ANGBAND_BONES, dun_level);
@@ -691,16 +689,16 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	    unlink(temp);
 	}
 
-	if (c_list[m_ptr->mptr].cdefense & QUESTOR) {
+	if (r_list[m_ptr->mptr].cdefense & QUESTOR) {
 	    for (i = 0; i < DEFINED_QUESTS; i++) {	/* search for monster's lv, not... */
-		if (quests[i] == c_list[m_ptr->mptr].level) {	/* ...cur lv. -CFT */
+		if (quests[i] == r_list[m_ptr->mptr].level) {	/* ...cur lv. -CFT */
 		    quests[i] = 0;
 		    found = TRUE;
 		    break;
 		}
 	    }
 	    if (found) {
-		if ((unsigned) dun_level != c_list[m_ptr->mptr].level) {
+		if ((unsigned) dun_level != r_list[m_ptr->mptr].level) {
 		    /* just mesg */
 		    msg_print("Well done!!  Now continue onward towards Morgoth.");
 		} else {	   /* stairs and mesg */
@@ -736,51 +734,50 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 		} /* if-else for stairway */
 	    } /* if found */
 	} /* if quest monster */
-	object_level = (dun_level + c_ptr->level) >> 1;
+	object_level = (dun_level + r_ptr->level) >> 1;
 	coin_type = 0;
-	get_coin_type(c_ptr);
+	get_coin_type(r_ptr);
 	i = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
-			  c_list[m_ptr->mptr].cmove,
-			  (c_list[m_ptr->mptr].cdefense & (SPECIAL | GOOD)),
-			  (c_list[m_ptr->mptr].cmove & WINNER));
+			  r_list[m_ptr->mptr].cmove,
+			  (r_list[m_ptr->mptr].cdefense & (SPECIAL | GOOD)),
+			  (r_list[m_ptr->mptr].cmove & WINNER));
 	coin_type = 0;
-	if ((py.flags.blind < 1 && m_ptr->ml) ||
-	    (c_list[m_ptr->mptr].cmove & CM_WIN) ||
-	    (c_list[m_ptr->mptr].cdefense & UNIQUE)) {
+	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
+	    (r_list[m_ptr->mptr].cmove & CM_WIN) ||
+	    (r_list[m_ptr->mptr].cdefense & UNIQUE)) {
 	    /* recall even invisible uniques */
 
-	    tmp = (c_recall[m_ptr->mptr].r_cmove & CM_TREASURE) >> CM_TR_SHIFT;
+	    tmp = (l_list[m_ptr->mptr].r_cmove & CM_TREASURE) >> CM_TR_SHIFT;
 	    if (tmp > ((i & CM_TREASURE) >> CM_TR_SHIFT))
 		i = (i & ~CM_TREASURE) | (tmp << CM_TR_SHIFT);
-	    c_recall[m_ptr->mptr].r_cmove =
-		(c_recall[m_ptr->mptr].r_cmove & ~CM_TREASURE) | i;
-	    if (c_recall[m_ptr->mptr].r_kills < MAX_SHORT)
-		c_recall[m_ptr->mptr].r_kills++;
+	    l_list[m_ptr->mptr].r_cmove =
+		(l_list[m_ptr->mptr].r_cmove & ~CM_TREASURE) | i;
+	    if (l_list[m_ptr->mptr].r_kills < MAX_SHORT)
+		l_list[m_ptr->mptr].r_kills++;
 	}
-	c_ptr = &c_list[m_ptr->mptr];
-	p_ptr = &py.misc;
+	r_ptr = &r_list[m_ptr->mptr];
 
-	if (c_ptr->cdefense & UNIQUE) {
+	if (r_ptr->cdefense & UNIQUE) {
 	    u_list[m_ptr->mptr].exist = 0;
 	    u_list[m_ptr->mptr].dead = 1;
 	}
-	new_exp = ((long)c_ptr->mexp * c_ptr->level) / p_ptr->lev;
-	new_exp_frac = ((((long)c_ptr->mexp * c_ptr->level) % p_ptr->lev)
-			* 0x10000L / p_ptr->lev) + p_ptr->exp_frac;
+	new_exp = ((long)r_ptr->mexp * r_ptr->level) / p_ptr->misc.lev;
+	new_exp_frac = ((((long)r_ptr->mexp * r_ptr->level) % p_ptr->misc.lev)
+			* 0x10000L / p_ptr->misc.lev) + p_ptr->misc.exp_frac;
 
 	if (new_exp_frac >= 0x10000L) {
 	    new_exp++;
-	    p_ptr->exp_frac = new_exp_frac - 0x10000L;
+	    p_ptr->misc.exp_frac = new_exp_frac - 0x10000L;
 	}
 	else {
-	    p_ptr->exp_frac = new_exp_frac;
+	    p_ptr->misc.exp_frac = new_exp_frac;
 	}
 
-	p_ptr->exp += new_exp;
+	p_ptr->misc.exp += new_exp;
 
 	/* When drained, the player advances at 10% the normal rate */
-	if (p_ptr->exp < p_ptr->max_exp) {
-	    p_ptr->max_exp += new_exp/10;
+	if (p_ptr->misc.exp < p_ptr->misc.max_exp) {
+	    p_ptr->misc.max_exp += new_exp/10;
 	}
 
 	/* can't call prt_experience() here, as that would result in "new level"
@@ -790,17 +787,17 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	/* in case this is called from within creatures(), this is a horrible
 	 * hack, the m_list/creatures() code needs to be rewritten 
 	 */
-	if (hack_m_idx < monptr)
-	    delete_monster(monptr);
+	if (hack_m_idx < m_idx)
+	    delete_monster(m_idx);
 	else
-	    fix1_delete_monster(monptr);
+	    fix1_delete_monster(m_idx);
 	monster_is_afraid = 0;
     } else {
 	if (m_ptr->maxhp <= 0)	   /* Then fix it! -DGK */
 	    m_ptr->maxhp = 1;
 	percentage = (m_ptr->hp * 100L) / (m_ptr->maxhp);
 
-	if (fearless(c_ptr)) {
+	if (fearless(r_ptr)) {
 	    monster_is_afraid = 0;
 	    return (-1);
 	}
@@ -819,7 +816,7 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 	    /* Take note */
 	    if (print_fear && m_ptr->ml &&
 		los(char_row, char_col, m_ptr->fy, m_ptr->fx)) {
-		monster_name(m_name, m_ptr, c_ptr);
+		monster_name(m_name, m_ptr, r_ptr);
 		sprintf(out_val, "%s flees in terror!", m_name);
 		msg_print(out_val);
 	    }
@@ -841,9 +838,9 @@ int mon_take_hit(int monptr, int dam, int print_fear)
 		if (monster_is_afraid == 1) monster_is_afraid = (-1);
 		m_ptr->monfear = 0;
 		if (m_ptr->ml && print_fear) {
-		    char                sex = c_ptr->gender;
+		    char                sex = r_ptr->gender;
 
-		    monster_name(m_name, m_ptr, c_ptr);
+		    monster_name(m_name, m_ptr, r_ptr);
 		    sprintf(out_val, "%s recovers %s courage.", m_name,
 			    (sex == 'm' ? "his" : sex == 'f' ? "her" :
 			     sex == 'p' ? "their" : "its"));
@@ -877,10 +874,10 @@ void py_attack(int y, int x)
     /* Does the player know what he's fighting?	   */
     if (!m_list[crptr].ml) (void)strcpy(m_name, "it");
     else {
-	if (c_list[monptr].cdefense & UNIQUE)
-	    (void)sprintf(m_name, "%s", c_list[monptr].name);
+	if (r_list[monptr].cdefense & UNIQUE)
+	    (void)sprintf(m_name, "%s", r_list[monptr].name);
 	else
-	    (void)sprintf(m_name, "the %s", c_list[monptr].name);
+	    (void)sprintf(m_name, "the %s", r_list[monptr].name);
     }
 
     /* Proper weapon */
@@ -903,16 +900,15 @@ void py_attack(int y, int x)
     if ((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
     /* Fix for arrows */
 	blows = 1;
-    p_ptr = &py.misc;
-    tot_tohit += p_ptr->ptohit;
+    tot_tohit += p_ptr->misc.ptohit;
 
     /* If creature is lit, use base rates, else, make it harder to hit */
     if (m_list[crptr].ml) {
-	base_tohit = p_ptr->bth;
+	base_tohit = p_ptr->misc.bth;
     }
     else {
-	base_tohit = (p_ptr->bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1)) -
-	             (p_ptr->lev * class_level_adj[p_ptr->pclass][CLA_BTH] / 2);
+	base_tohit = (p_ptr->misc.bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1)) -
+	             (p_ptr->misc.lev * class_level_adj[p_ptr->misc.pclass][CLA_BTH] / 2);
     }
 
     /* Assume no fear messages need to be redone */
@@ -922,8 +918,8 @@ void py_attack(int y, int x)
     do {
 
 	/* We hit it! */
-	if (test_hit(base_tohit, (int)p_ptr->lev, tot_tohit,
-		     (int)c_list[monptr].ac, CLA_BTH)) {
+	if (test_hit(base_tohit, (int)p_ptr->misc.lev, tot_tohit,
+		     (int)r_list[monptr].ac, CLA_BTH)) {
 
 	    if (!wizard) {
 		(void) sprintf(out_val, "You hit %s.", m_name);
@@ -943,24 +939,24 @@ void py_attack(int y, int x)
 	    }
 
 	    /* Apply the player damage bonuses */
-	    k += p_ptr->ptodam;
+	    k += p_ptr->misc.ptodam;
 
 	    if (wizard) {
 		(void)sprintf(out_val,
 			      "You hit %s with %d hp, doing %d+%d damage.",
-			      m_name, m_list[crptr].hp, (k - p_ptr->ptodam),
-			      p_ptr->ptodam);
+			      m_name, m_list[crptr].hp, (k - p_ptr->misc.ptodam),
+			      p_ptr->misc.ptodam);
 		msg_print(out_val);
 	    }
 
 	    if (k < 0) k = 0;
 
 	    /* Confusion attack */
-	    if (py.flags.confuse_monster) {
-		py.flags.confuse_monster = FALSE;
+	    if (p_ptr->flags.confuse_monster) {
+		p_ptr->flags.confuse_monster = FALSE;
 		msg_print("Your hands stop glowing.");
-		if ((c_list[monptr].cdefense & CHARM_SLEEP) ||
-		    (randint(MAX_MONS_LEVEL) < c_list[monptr].level)) {
+		if ((r_list[monptr].cdefense & CHARM_SLEEP) ||
+		    (randint(MAX_MONS_LEVEL) < r_list[monptr].level)) {
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
 		}
 		else {
@@ -973,8 +969,8 @@ void py_attack(int y, int x)
 		msg_print(out_val);
 
 		if (m_list[crptr].ml && randint(4) == 1) {
-		    c_recall[monptr].r_cdefense |=
-			c_list[monptr].cdefense & CHARM_SLEEP;
+		    l_list[monptr].r_cdefense |=
+			r_list[monptr].cdefense & CHARM_SLEEP;
 		}
 	    }
 	    if (k < 0) k = 0;		   /* no neg damage! */
@@ -982,10 +978,10 @@ void py_attack(int y, int x)
 	    /* See if we done it in.  */
 	    if (mon_take_hit(crptr, k, FALSE) >= 0) {	/* never print msgs -CWS */
 
-		if ((c_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
-		    (c_list[monptr].cchar == 'E') ||
-		    (c_list[monptr].cchar == 'v') ||
-		    (c_list[monptr].cchar == 'g')) {
+		if ((r_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
+		    (r_list[monptr].cchar == 'E') ||
+		    (r_list[monptr].cchar == 'v') ||
+		    (r_list[monptr].cchar == 'g')) {
 		    (void)sprintf(out_val, "You have destroyed %s.", m_name);
 		}
 		else {
@@ -1001,7 +997,7 @@ void py_attack(int y, int x)
 		&& (i_ptr->tval <= TV_ARROW)) {	/* Use missiles up */
 		i_ptr->number--;
 		inven_weight -= i_ptr->weight;
-		py.flags.status |= PY_STR_WGT;
+		p_ptr->flags.status |= PY_STR_WGT;
 		if (i_ptr->number == 0) {
 		    equip_ctr--;
 		    py_bonuses(i_ptr, -1);
@@ -1025,10 +1021,10 @@ void py_attack(int y, int x)
     if (!m_list[crptr].ml)
 	(void)strcpy(m_name, "It");
     else {
-	if (c_list[monptr].cdefense & UNIQUE)
-	    (void)sprintf(m_name, "%s", c_list[monptr].name);
+	if (r_list[monptr].cdefense & UNIQUE)
+	    (void)sprintf(m_name, "%s", r_list[monptr].name);
 	else
-	    (void)sprintf(m_name, "The %s", c_list[monptr].name);
+	    (void)sprintf(m_name, "The %s", r_list[monptr].name);
     }
 
     if (monster_is_afraid == 1) {
@@ -1036,7 +1032,7 @@ void py_attack(int y, int x)
 	msg_print(out_val);
     }
     if (monster_is_afraid == -1) {
-	char                sex = c_list[monptr].gender;
+	char                sex = r_list[monptr].gender;
 
 	sprintf(out_val, "%s recovers %s courage.", m_name,
 		(sex == 'm' ? "his" : sex == 'f' ? "her" :
@@ -1056,7 +1052,7 @@ static void inven_throw(int item_val, inven_type *t_ptr)
 	t_ptr->number = 1;
 	i_ptr->number--;
 	inven_weight -= i_ptr->weight;
-	py.flags.status |= PY_STR_WGT;
+	p_ptr->flags.status |= PY_STR_WGT;
     } else
 	inven_destroy(item_val);
 }
@@ -1069,22 +1065,22 @@ static void inven_throw(int item_val, inven_type *t_ptr)
 static void facts(inven_type *i_ptr, \
 		  int *tbth, int *tpth, int *tdam, int *tdis, int *thits)
 {
-    register int        tmp_weight;
+    register int tmp_weight;
 
     if (i_ptr->weight < 1) tmp_weight = 1;
     else tmp_weight = i_ptr->weight;
 
     /* Throwing objects			 */
     *tdam = pdamroll(i_ptr->damage) + i_ptr->todam;
-    *tbth = py.misc.bthb * 75 / 100;
-    *tpth = py.misc.ptohit + i_ptr->tohit;
+    *tbth = p_ptr->misc.bthb * 75 / 100;
+    *tpth = p_ptr->misc.ptohit + i_ptr->tohit;
 
     /* Add this back later if the correct throwing device. -CJS- */
     if (inventory[INVEN_WIELD].tval != TV_NOTHING)
 	*tpth -= inventory[INVEN_WIELD].tohit;
 
     /* Distance based on strength */
-    *tdis = (((py.stats.use_stat[A_STR] + 20) * 10) / tmp_weight);
+    *tdis = (((p_ptr->stats.use_stat[A_STR] + 20) * 10) / tmp_weight);
 
     /* Max distance of 10, no matter how strong */
     if (*tdis > 10) *tdis = 10;
@@ -1100,88 +1096,96 @@ static void facts(inven_type *i_ptr, \
     /* Using Bows,  slings,  or crossbows	 */
     if (inventory[INVEN_WIELD].tval == TV_BOW)
 	switch (inventory[INVEN_WIELD].subval) {
+
+	  /* Sling and ammo */
 	  case 20:
-	    if (i_ptr->tval == TV_SLING_AMMO) {	/* Sling and ammo */
-		*tbth = py.misc.bthb;
+	    if (i_ptr->tval != TV_SLING_AMMO) break;
+		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 2;
 		*tdis = 20;
-	    }
 	    break;
+
+	  /* Sling of Might and ammo */
 	  case 21:
-	    if (i_ptr->tval == TV_SLING_AMMO){ /* Sling of Might and ammo */
-		*tbth = py.misc.bthb;
+	    if (i_ptr->tval != TV_SLING_AMMO) break;
+		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 3;
 		*tdis = 20;
-	    }
 	    break;
+
+	  /* Short Bow and Arrow	 */
 	  case 1:
-	    if (i_ptr->tval == TV_ARROW) {	/* Short Bow and Arrow	 */
-		*tbth = py.misc.bthb;
+	    if (i_ptr->tval != TV_ARROW) break;
+		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 2;
 		*tdis = 25;
-	    }
 	    break;
+
+	  /* Long Bow and Arrow	 */
 	  case 2:
-	    if (i_ptr->tval == TV_ARROW) {	/* Long Bow and Arrow	 */
-		*tbth = py.misc.bthb;
+	    if (i_ptr->tval != TV_ARROW) break;
+		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 3;
 		*tdis = 30;
-	    }
 	    break;
+
+      /* C Bow, BARD, L bow of M and Arrow*/
 	  case 3:
-	    if (i_ptr->tval == TV_ARROW){   /* C Bow, BARD, L bow of M and Arrow*/
-		*tbth = py.misc.bthb;
-		*tpth += 2 * inventory[INVEN_WIELD].tohit;
-		*tdam += inventory[INVEN_WIELD].todam;
-		*tdam = *tdam * 4;
-		*tdis = 35;
-	    }
+	    if (i_ptr->tval != TV_ARROW) break;
+	    *tbth = p_ptr->misc.bthb;
+	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
+	    *tdam += inventory[INVEN_WIELD].todam;
+	    *tdam = *tdam * 4;
+	    *tdis = 35;
 	    break;
+
+	  /* C Bow of M, BELEG and Arrow*/
 	  case 4:
-	    if (i_ptr->tval == TV_ARROW){   /* C Bow of M, BELEG and Arrow*/
-		*tbth = py.misc.bthb;
-		*tpth += 2 * inventory[INVEN_WIELD].tohit;
-		*tdam += inventory[INVEN_WIELD].todam;
-		*tdam = *tdam * 5;
-		*tdis = 35;
-	    }
-	    break;	    
+	    if (i_ptr->tval != TV_ARROW) break;
+	    *tbth = p_ptr->misc.bthb;
+	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
+	    *tdam += inventory[INVEN_WIELD].todam;
+	    *tdam = *tdam * 5;
+	    *tdis = 35;
+	    break;
+
+	  /* Light Crossbow and Bolt */
 	  case 10:
-	    if (i_ptr->tval == TV_BOLT) {	/* Light Crossbow and Bolt */
-		*tbth = py.misc.bthb;
-		*tpth += 2 * inventory[INVEN_WIELD].tohit;
-		*tdam += inventory[INVEN_WIELD].todam;
-		*tdam = *tdam * 3;
-		*tdis = 25;
-	    }
+	    if (i_ptr->tval != TV_BOLT) break;
+	    *tbth = p_ptr->misc.bthb;
+	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
+	    *tdam += inventory[INVEN_WIELD].todam;
+	    *tdam = *tdam * 3;
+	    *tdis = 25;
 	    break;
+
+	  /* Heavy Crossbow and Bolt */
 	  case 11:
-	    if (i_ptr->tval == TV_BOLT) {	/* Heavy Crossbow and Bolt */
-		*tbth = py.misc.bthb;
-		*tpth += 2 * inventory[INVEN_WIELD].tohit;
-		*tdam += inventory[INVEN_WIELD].todam;
-		*tdam = *tdam * 4;
-		*tdis = 35;
-	    }
+	    if (i_ptr->tval != TV_BOLT) break;
+	    *tbth = p_ptr->misc.bthb;
+	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
+	    *tdam += inventory[INVEN_WIELD].todam;
+	    *tdam = *tdam * 4;
+	    *tdis = 35;
 	    break;
+
+	  /* H xbow of M and Bolt*/
 	  case 12:
-	    if (i_ptr->tval == TV_BOLT){    /* H xbow of M and Bolt*/
-		*tbth = py.misc.bthb;
-		*tpth += 2 * inventory[INVEN_WIELD].tohit;
-		*tdam += inventory[INVEN_WIELD].todam;
-		*tdam = *tdam * 5;
-		*tdis = 35;
-	    }
+	    if (i_ptr->tval != TV_BOLT) break;
+	    *tbth = p_ptr->misc.bthb;
+	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
+	    *tdam += inventory[INVEN_WIELD].todam;
+	    *tdam = *tdam * 5;
+	    *tdis = 35;
 	    break;
-	    
 	}
 }
 
@@ -1248,10 +1252,9 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
 	t_list[cur_pos] = *t_ptr;
 	lite_spot(i, j);
     }
-    else
-    {
+    else {
 	objdes(tmp_str, t_ptr, FALSE);
-	(void) sprintf(out_val, "The %s disappears.", tmp_str);
+	(void)sprintf(out_val, "The %s disappears.", tmp_str);
 	msg_print(out_val);
     }
 }
@@ -1270,14 +1273,27 @@ static int stays_when_throw(inven_type *i_ptr)
   /* for non-artifacts, drop_throw() still loses 20% of them... */
   if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_STAFF))
     return TRUE;
+
   switch (i_ptr->tval){
-    case TV_CHEST: case TV_SLING_AMMO: case TV_ROD: case TV_FOOD:
-    case TV_MAGIC_BOOK: case TV_PRAYER_BOOK:
+    case TV_CHEST:
+    case TV_SLING_AMMO:
+    case TV_ROD:
+    case TV_FOOD:
+    case TV_MAGIC_BOOK:
+    case TV_PRAYER_BOOK:
       return TRUE;
-    case TV_MISC: case TV_SPIKE: case TV_WAND: case TV_BOLT:
-    case TV_ARROW: case TV_LIGHT: case TV_SCROLL1: case TV_SCROLL2:
+
+    case TV_MISC:
+    case TV_SPIKE:
+    case TV_WAND:
+    case TV_BOLT:
+    case TV_ARROW:
+    case TV_LIGHT:
+    case TV_SCROLL1:
+    case TV_SCROLL2:
       return (randint(2)==1);
   }
+
   return FALSE;
 }
 
@@ -1293,53 +1309,54 @@ static int stays_when_throw(inven_type *i_ptr)
  * Used to be part of bash (below). 
  * [Said above, was below, now in moria3. rmhv]
  */
-static void py_bash(int y, int x)
+void py_bash(int y, int x)
 {
-    int                     monster, k, avg_max_hp, base_tohit, monptr;
-    register creature_type *c_ptr;
+    int                     monster, k, avg_max_hp, base_tohit, r_idx;
     register monster_type  *m_ptr;
+    register monster_race *r_ptr;
     vtype                   m_name, out_val;
 
     monster = cave[y][x].cptr;
     m_ptr = &m_list[monster];
-    monptr = m_ptr->mptr;
+    r_idx = m_ptr->mptr;
     m_ptr->csleep = 0;
 
     /* Get the creature pointer, used many times below */
-    c_ptr = &c_list[monptr];
+    r_ptr = &r_list[r_idx];
 
     /* Does the player know what he's fighting?	   */
     /* Extract the monster name (or "it") */
     if (!m_ptr->ml)
 	(void)strcpy(m_name, "it");
     else {
-	if (c_list[monptr].cdefense & UNIQUE)
-	    (void)sprintf(m_name, "%s", c_list[monptr].name);
+	if (r_list[r_idx].cdefense & UNIQUE)
+	    (void)sprintf(m_name, "%s", r_list[r_idx].name);
 	else
-	    (void)sprintf(m_name, "the %s", c_list[monptr].name);
+	    (void)sprintf(m_name, "the %s", r_list[r_idx].name);
     }
 
     /* Attempt to bash */
-    base_tohit = (py.stats.use_stat[A_STR] +
+    base_tohit = (p_ptr->stats.use_stat[A_STR] +
 		  inventory[INVEN_ARM].weight / 2 +
-		   py.misc.wt / 10);
+		  p_ptr->misc.wt / 10);
 
     /* Harder to bash invisible monsters */
     if (!m_ptr->ml) {
-	base_tohit = (base_tohit / 2) - (py.stats.use_stat[A_DEX] * (BTH_PLUS_ADJ - 1))
-	    - (py.misc.lev * class_level_adj[py.misc.pclass][CLA_BTH] / 2);
+	base_tohit = (base_tohit / 2) - 
+	     (p_ptr->stats.use_stat[A_DEX] * (BTH_PLUS_ADJ - 1)) -
+	     (p_ptr->misc.lev * class_level_adj[p_ptr->misc.pclass][CLA_BTH] / 2);
     }
 
     /* Hack -- test for contact */
-    if (test_hit(base_tohit, (int)py.misc.lev,
-		 (int)py.stats.use_stat[A_DEX], (int)c_ptr->ac, CLA_BTH)) {
+    if (test_hit(base_tohit, (int)p_ptr->misc.lev,
+		 (int)p_ptr->stats.use_stat[A_DEX], (int)r_ptr->ac, CLA_BTH)) {
 
 	(void)sprintf(out_val, "You hit %s.", m_name);
 	msg_print(out_val);
 	k = pdamroll(inventory[INVEN_ARM].damage);
-	k = critical_blow((int)(inventory[INVEN_ARM].weight / 4
-				+ py.stats.use_stat[A_STR]), 0, k, CLA_BTH);
-	k += py.misc.wt / 60 + 3;
+	k = critical_blow((int)(inventory[INVEN_ARM].weight / 4 +
+				p_ptr->stats.use_stat[A_STR]), 0, k, CLA_BTH);
+	k += p_ptr->misc.wt / 60 + 3;
 
 	/* No negative damage */
 	if (k < 0) k = 0;
@@ -1348,10 +1365,10 @@ static void py_bash(int y, int x)
 	if (mon_take_hit(monster, k, TRUE) >= 0) {
 
 	    /* Appropriate message */
-	    if ((c_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
-		(c_list[monptr].cchar == 'E') ||
-		(c_list[monptr].cchar == 'v') ||
-		(c_list[monptr].cchar == 'g')) {
+	    if ((r_list[r_idx].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
+		(r_list[r_idx].cchar == 'E') ||
+		(r_list[r_idx].cchar == 'v') ||
+		(r_list[r_idx].cchar == 'g')) {
 		(void)sprintf(out_val, "You have destroyed %s.", m_name);
 	    }
 	    else {
@@ -1366,9 +1383,9 @@ static void py_bash(int y, int x)
 	    m_name[0] = toupper((int)m_name[0]);	/* Capitalize */
 
 	    /* Can not stun Balrog */
-	    avg_max_hp = (c_ptr->cdefense & MAX_HP ?
-			  c_ptr->hd[0] * c_ptr->hd[1] :
-			  (c_ptr->hd[0] * (c_ptr->hd[1] + 1)) >> 1);
+	    avg_max_hp = (r_ptr->cdefense & MAX_HP ?
+			  r_ptr->hd[0] * r_ptr->hd[1] :
+			  (r_ptr->hd[0] * (r_ptr->hd[1] + 1)) >> 1);
 
 	    /* Apply saving throw */
 	    if ((100 + randint(400) + randint(400)) >
@@ -1389,9 +1406,9 @@ static void py_bash(int y, int x)
     }
 
     /* Stumble */
-    if (randint(150) > py.stats.use_stat[A_DEX]) {
+    if (randint(150) > p_ptr->stats.use_stat[A_DEX]) {
 	msg_print("You are off balance.");
-	py.flags.paralysis = (1 + randint(2));
+	p_ptr->flags.paralysis = (1 + randint(2));
     }
 }
 
@@ -1400,28 +1417,32 @@ static void py_bash(int y, int x)
 
 /*
  * Attacker's level and plusses,  defender's AC 
+ * Note: pth could be less than 0 if weapon is too heavy
+ * Always miss 1 out of 20, always hit 1 out of 20
  */
 int test_hit(int bth, int level, int pth, int ac, int attack_type)
 {
-    register int i, die;
+    register int i;
 
     /* Hack -- disturb the player */
     disturb(1, 0);
 
-    i = bth + pth * BTH_PLUS_ADJ
-	+ (level * class_level_adj[py.misc.pclass][attack_type]);
+    /* Hack -- 1 in 20 always miss, 1 in 20 always hit */
+    i = randint(20);
+    if (i == 1) return (FALSE);
+    if (i == 20) return (TRUE);
 
-	/* pth could be less than 0 if player wielding weapon too heavy for him */
-	/* always miss 1 out of 20, always hit 1 out of 20 */
-    die = randint(20);
+    /* Calculate the "attack quality" */    
+    i = (bth + pth * BTH_PLUS_ADJ +
+	 (level * class_level_adj[p_ptr->misc.pclass][attack_type]));
 
-    if ((die != 1) && ((die == 20)
-    || ((i > 0) && (randint(i) > ((3 * ac) / 4))))) {
+    /* Apply the "pth" against the "ac" */
+    if ((i > 0) && (randint(i) > ((3 * ac) / 4))) {
 	return TRUE;
     }
 
     /* Assume miss */    
-    else return FALSE;
+    return FALSE;
 }
 
 
@@ -1430,40 +1451,40 @@ int test_hit(int bth, int level, int pth, int ac, int attack_type)
  */
 void take_hit(int damage, cptr hit_from)
 {
-    if (py.flags.invuln > 0 && damage < 9000) {
-	damage = 0;
+    /* Hack -- Apply "invulnerability" */
+    if (p_ptr->flags.invuln > 0 && damage < 9000) {
+	return;
     }
 
     /* Hurt the player */
-    py.misc.chp -= damage;
+    p_ptr->misc.chp -= damage;
 
     /* Dead player */
-    if (py.misc.chp < 0) {
+    if (p_ptr->misc.chp < 0) {
 
 	/* Hack -- allow wizard to abort death */
 	if ((wizard) && !(get_check("Die?"))) {
-	    py.misc.chp=py.misc.mhp;
-	    death=FALSE;
+	    p_ptr->misc.chp = p_ptr->misc.mhp;
 	    prt_chp();
 	    msg_print("OK, so you don't die.");
+	    return;
 	}
-
-	else {   
 
 	if (!death) {
 	    death = TRUE;
 	    (void)strcpy(died_from, hit_from);
 	    total_winner = FALSE;
 	}
+
+	/* Dead */
 	    new_level_flag = TRUE;
-	}
     }
 
     /* Display the hitpoints */
-	else prt_chp();
+    prt_chp();
 
     /* Hack -- hitpoint warning */    
-    if (py.misc.chp <= py.misc.mhp * hitpoint_warn / 10) {
+    if (p_ptr->misc.chp <= p_ptr->misc.mhp * hitpoint_warn / 10) {
 	msg_print("*** LOW HITPOINT WARNING! ***");
 	msg_print(NULL);	/* make sure they see it -CWS */
     }

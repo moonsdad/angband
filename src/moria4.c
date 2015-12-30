@@ -23,18 +23,16 @@
 
 /*
  * This targetting code stolen from Morgul -CFT
- * Assuming target_mode == TRUE, returns if the position is the target. CDW
+ * Returns TRUE if the given position is the target. -CDW 
  */
-int at_target(int row,int col)
+int target_at(int row,int col)
 {
 
 #ifdef TARGET
 
-/* don't ever assume a condition holds, especially when it's so easy to test for. -CFT */
-    if (target_mode == FALSE) return FALSE;
 
     /* Compare the locations */
-    if ((row==target_row)&&(col==target_col)) {
+    if (target_mode && (row==target_row) && (col==target_col)) {
 	return (TRUE);
     }
 
@@ -63,7 +61,7 @@ void target()
 
     exit = FALSE;
     exit2 = FALSE;
-    if (py.flags.blind > 0)
+    if (p_ptr->flags.blind > 0)
 	msg_print("You can't see anything to target!");
     /* Check monsters first */
     else {
@@ -74,7 +72,7 @@ void target()
 		    (los(char_row,char_col,m_list[monptr].fy,m_list[monptr].fx))) {
 		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
 		    (void) sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
-				   c_list[m_list[monptr].mptr].name);
+				   r_list[m_list[monptr].mptr].name);
 		    prt(desc,0,0);
 		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
 		    query = inkey();
@@ -165,7 +163,7 @@ void target()
 			    0,0);
 		    else {
 			target_mode = TRUE;
-			target_mon  = MAX_MALLOC;
+			target_mon  = MAX_M_IDX;
 			exit = TRUE;
 		    }
 		    break;
@@ -375,7 +373,7 @@ int get_alldir(cptr prompt, int *dir)
  * Prompts for a direction				-RAK-
  * Direction memory added, for repeated commands.  -CJS
  */
-int get_dir(cptr prompt, int * dir)
+int get_dir(cptr prompt, int *dir)
 {
     char        command;
     int         save;
@@ -395,9 +393,9 @@ int get_dir(cptr prompt, int * dir)
    targetting mode shouldn't help the player shoot a monster in a
    dark room.  If he can't see it, he shouldn't be able to aim... -CFT */
     if ((target_mode)&&
-	(((target_mon<MAX_MALLOC)&& m_list[target_mon].ml &&
+	(((target_mon<MAX_M_IDX)&& m_list[target_mon].ml &&
 	  (los(char_row,char_col,m_list[target_mon].fy,m_list[target_mon].fx))||
-	  ((target_mon>=MAX_MALLOC) &&
+	  ((target_mon>=MAX_M_IDX) &&
 	   (los(char_row,char_col,target_row,target_col)))))) {
       /* It don't get no better than this */
 	*dir=0;
@@ -443,11 +441,10 @@ void search_on()
     change_speed(1);
     
     /* Visual feedback */
-
-    py.flags.status |= PY_SEARCH;
+    p_ptr->flags.status |= PY_SEARCH;
     prt_state();
     prt_speed();
-    py.flags.food_digested++;
+    p_ptr->flags.food_digested++;
 }
 
 void search_off(void)
@@ -457,10 +454,10 @@ void search_off(void)
     change_speed(-1);
     
     /* Visual feedback */
-    py.flags.status &= ~PY_SEARCH;
+    p_ptr->flags.status &= ~PY_SEARCH;
     prt_state();
     prt_speed();
-    py.flags.food_digested--;
+    p_ptr->flags.food_digested--;
 }
 
 
@@ -468,17 +465,16 @@ void search_off(void)
  * Something happens to disturb the player.		-CJS-
  * The first arg indicates a major disturbance, which affects search.
  *
- * The second arg indicates a light change.
  */
-void disturb(int s, int l)
+void disturb(int stop_search, int light change)
 {
     command_count = 0;
 
-    if (s && (py.flags.status & PY_SEARCH)) search_off();
+    if (stop_search && (p_ptr->flags.status & PY_SEARCH)) search_off();
 
-    if (py.flags.rest != 0) rest_off();
+    if (p_ptr->flags.rest != 0) rest_off();
 
-    if (l || find_flag) {
+    if (light_change || find_flag) {
 	find_flag = FALSE;
 	check_view();
     }
@@ -495,15 +491,12 @@ void search(int y, int x, int chance)
 {
     register int           i, j;
     register cave_type    *c_ptr;
-    register inven_type   *t_ptr;
-    register struct flags *p_ptr;
+    register inven_type   *i_ptr;
     bigvtype               tmp_str, tmp_str2;
 
-    p_ptr = &py.flags;
-
-    if ((p_ptr->blind > 0) || no_light()) chance = chance / 10;
-    if (p_ptr->confused > 0) chance = chance / 10;
-    if (p_ptr->image > 0) chance = chance / 10;
+    if ((p_ptr->flag.blind > 0) || no_light()) chance = chance / 10;
+    if (p_ptr->flag.confused > 0) chance = chance / 10;
+    if (p_ptr->flag.image > 0) chance = chance / 10;
 
     /* Search the nearby grids, which are always in bounds */
     for (i = (y - 1); i <= (y + 1); i++) {
@@ -513,14 +506,14 @@ void search(int y, int x, int chance)
 	    if (randint(100) < chance) {
 
 		c_ptr = &cave[i][j];
+		i_ptr = &t_list[c_ptr->tptr];
 
 	    /* Search for hidden objects */
 		if (c_ptr->tptr != 0) {
-		    t_ptr = &t_list[c_ptr->tptr];
 
 		/* Trap on floor? */
-		    if (t_ptr->tval == TV_INVIS_TRAP) {
-			objdes(tmp_str2, t_ptr, TRUE);
+		    if (i_ptr->tval == TV_INVIS_TRAP) {
+			objdes(tmp_str2, i_ptr, TRUE);
 			(void)sprintf(tmp_str, "You have found %s.", tmp_str2);
 			msg_print(tmp_str);
 			change_trap(i, j);
@@ -528,18 +521,18 @@ void search(int y, int x, int chance)
 		    }
 
 		/* Secret door?	*/
-		    else if (t_ptr->tval == TV_SECRET_DOOR) {
+		    else if (i_ptr->tval == TV_SECRET_DOOR) {
 			msg_print("You have found a secret door.");
 			change_trap(i, j);
 			end_find();
 		    }
 
 		/* Chest is trapped? */
-		else if (t_ptr->tval == TV_CHEST) {
+		else if (i_ptr->tval == TV_CHEST) {
 		    /* mask out the treasure bits */
-			if ((t_ptr->flags & CH_TRAPPED) > 1)
-			if (!known2_p(t_ptr)) {
-			known2(t_ptr);
+			if ((i_ptr->flags & CH2_TRAP_MASK) > 1)
+			if (!known2_p(i_ptr)) {
+			known2(i_ptr);
 			msg_print("You have discovered a trap on the chest!");
 			}
 			else msg_print("The chest is trapped!");
@@ -554,16 +547,16 @@ void search(int y, int x, int chance)
 
 void rest_off()
 {
-    py.flags.rest = 0;
+    p_ptr->flags.rest = 0;
 
     /* Hack -- update the state */
-    py.flags.status &= ~PY_REST;
+    p_ptr->flags.status &= ~PY_REST;
     prt_state();
 
     /* flush last message, or delete "press any key" message */
     msg_print(NULL);
 
-    py.flags.food_digested++;
+    p_ptr->flags.food_digested++;
 }
 
 
@@ -571,10 +564,11 @@ void rest_off()
 
 
 /*
+ * Player wants to pick up an object or gold.
  * Player is on an object.  Many things can happen based -RAK-	 
  * on the TVAL of the object.  Traps are set off, money and most 
  * objects are picked up.  Some objects, such as open doors, just 
- * sit there.						      
+ * sit there.
  */
 void carry(int y, int x, int pickup)
 {
@@ -586,19 +580,23 @@ void carry(int y, int x, int pickup)
     c_ptr = &cave[y][x];
     i_ptr = &t_list[c_ptr->tptr];
     i = t_list[c_ptr->tptr].tval;
+
     if (i <= TV_MAX_PICK_UP) {
 	end_find();
+
     /* There's GOLD in them thar hills!      */
-	if (i == TV_GOLD) {
-	    py.misc.au += i_ptr->cost;
-	    objdes(tmp_str, i_ptr, TRUE);
-	    (void)sprintf(out_val,
-			  "You have found %ld gold pieces worth of %s.",
-			  (long)i_ptr->cost, tmp_str);
-	    prt_gold();
-	    (void)delete_object(y, x);
-	    msg_print(out_val);
-	} else {
+    if (i == TV_GOLD) {
+	p_ptr->misc.au += i_ptr->cost;
+	objdes(tmp_str, i_ptr, TRUE);
+	(void)sprintf(out_val,
+		      "You have found %ld gold pieces worth of %s.",
+		      (long)i_ptr->cost, tmp_str);
+	prt_gold();
+	delete_object(y, x);
+	msg_print(out_val);
+    }
+
+    else {
 	    if (pickup && inven_check_num(i_ptr)) { /* Too many objects? */
 		if (carry_query_flag) {	/* Okay,  pick it up  */
 		    objdes(tmp_str, i_ptr, TRUE);
@@ -621,8 +619,8 @@ void carry(int y, int x, int pickup)
 		    msg_print(out_val);
 		    (void)delete_object(y, x);
 		}
-	    } else if (pickup) {   /* only if was trying to pick it up...
-				    * -CFT */
+	    }
+		else if (pickup) {   /* only if was trying to pick it up... -CFT */
 		objdes(tmp_str, i_ptr, TRUE);
 		(void)sprintf(out_val, "You can't carry %s.", tmp_str);
 		msg_print(out_val);
@@ -667,7 +665,7 @@ static int see_wall(int dir, int y, int x)
     if ((c = loc_symbol(y, x)) == '#' || c == '%')
 #endif
 #endif
-	return TRUE;
+	return (TRUE);
     
     /* Default */
     return (FALSE);
@@ -700,7 +698,7 @@ static void area_affect(int dir, int y, int x)
     register cave_type *c_ptr;
 
     /* We must be able to see... */
-    if (py.flags.blind < 1) {
+    if (p_ptr->flags.blind < 1) {
 
 	option = 0;
 	option2 = 0;
@@ -748,7 +746,7 @@ static void area_affect(int dir, int y, int x)
 	    }
 
 	    else inv = TRUE;		/* Square unseen. Treat as open. */
-	    if (c_ptr->fval <= MAX_OPEN_SPACE || inv) {
+	    if (inv || c_ptr->fval <= MAX_OPEN_SPACE) {
 
 		/* Certain somethings */
 		if (find_openarea) {
@@ -891,16 +889,21 @@ void move_char(int dir, int do_pickup)
     register int        i, j;
     register cave_type *c_ptr, *d_ptr;
 
-    if (((py.flags.confused > 0) || (py.flags.stun > 0)) &&	/* Confused/Stunned?  */
+    if (((p_ptr->flags.confused > 0) || (p_ptr->flags.stun > 0)) &&	/* Confused/Stunned?  */
 	(randint(4) > 1) &&	   /* 75% random movement */
 	(dir != 5)) {		   /* Never random if sitting */
 	dir = randint(9);
 	end_find();
     }
+
+    /* Find the result of moving */
     y = char_row;
     x = char_col;
     if (mmove(dir, &y, &x)) {	   /* Legal move?	      */
+
+    /* Examine the destination */    
 	c_ptr = &cave[y][x];
+
     /* if there is no creature, or an unlit creature in the walls then... */
     /* disallow attacks against unlit creatures in walls because moving into
      * a wall is a free turn normally, hence don't give player free turns
@@ -925,17 +928,17 @@ void move_char(int dir, int do_pickup)
 		    area_affect(dir, char_row, char_col);
 	    /* Check to see if he notices something  */
 	    /* fos may be negative if have good rings of searching */
-		if ((py.misc.fos <= 1) || (randint(py.misc.fos) == 1) ||
-		    (py.flags.status & PY_SEARCH))
-		    search(char_row, char_col, py.misc.srh);
+		if ((p_ptr->misc.fos <= 1) || (randint(p_ptr->misc.fos) == 1) ||
+		    (p_ptr->flags.status & PY_SEARCH))
+		    search(char_row, char_col, p_ptr->misc.srh);
 	    /* A room of light should be lit.	     */
 		if ((c_ptr->fval == LIGHT_FLOOR) ||
 		    (c_ptr->fval == NT_LIGHT_FLOOR)) {
-		    if (!c_ptr->pl && !py.flags.blind)
+		    if (!c_ptr->pl && !p_ptr->flags.blind)
 			light_room(char_row, char_col);
 		}
 	    /* In doorway of light-room?	       */
-		else if (c_ptr->lr && (py.flags.blind < 1)) {
+		else if (c_ptr->lr && (p_ptr->flags.blind < 1)) {
 		    byte lit = FALSE;	/* only call light_room once... -CFT */
 
 		    for (i = (char_row - 1); !lit && i <= (char_row + 1); i++)
@@ -1006,7 +1009,7 @@ void move_char(int dir, int do_pickup)
 	    /* did not do anything this turn */
 		free_turn_flag = TRUE;
 	    } else {
-		if (py.flags.afraid < 1)	/* Coward?	 */
+		if (p_ptr->flags.afraid < 1)	/* Coward?	 */
 		    py_attack(y, x);
 		else		   /* Coward!	 */
 		    msg_print("You are too afraid!");
@@ -1173,7 +1176,7 @@ void find_init(int dir)
 	find_flag = 1;
 	find_breakright = find_breakleft = FALSE;
 	find_prevdir = dir;
-	if (py.flags.blind < 1) {
+	if (p_ptr->flags.blind < 1) {
 	    i = chome[dir];
 	    deepleft = deepright = FALSE;
 	    shortright = shortleft = FALSE;

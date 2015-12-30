@@ -78,7 +78,7 @@
 				the player.
 									*/
 
-creature_type c_list[MAX_CREATURES] = {
+creature_type r_list[MAX_R_IDX] = {
 
 {"Filthy street urchin"	    ,(MV_ATT_NORM|MV_20|THRO_DR|PICK_UP)
 			    ,(NONE8),(NONE8),(NONE8),(NONE8)
@@ -3055,10 +3055,8 @@ creature_type c_list[MAX_CREATURES] = {
 		            ,'@',{5,5},{0,0,0,0},32000,255,'n'}
 };
 
-monster_type m_list[MAX_MALLOC];
 s16b m_level[MAX_MONS_LEVEL+1];
 
 /* Blank monster values	*/
 monster_type blank_monster = {0,0,0,0,0,0,0,FALSE,0,FALSE};
-s16b mfptr;			/* Cur free monster ptr	*/
 s16b mon_tot_mult;		/* # of repro's of creature	*/

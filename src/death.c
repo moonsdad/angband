@@ -523,76 +523,75 @@ int file_character(cptr filename1)
 	blank = " ";
 
 	(void)fprintf(file1, "%c\n\n", CTRL('L'));
-	(void)fprintf(file1, " Name%9s %-23s", colon, py.misc.name);
-	(void)fprintf(file1, "Age%11s %6d ", colon, (int)py.misc.age);
-	cnv_stat(py.stats.use_stat[A_STR], prt1);
+	(void)fprintf(file1, " Name%9s %-23s", colon, p_ptr->misc.name);
+	(void)fprintf(file1, "Age%11s %6d ", colon, (int)p_ptr->misc.age);
+	cnv_stat(p_ptr->stats.use_stat[A_STR], prt1);
 	(void)fprintf(file1, "   STR : %s\n", prt1);
-	(void)fprintf(file1, " Race%9s %-23s", colon, race[py.misc.prace].trace);
-	(void)fprintf(file1, "Height%8s %6d ", colon, (int)py.misc.ht);
-	cnv_stat(py.stats.use_stat[A_INT], prt1);
+	(void)fprintf(file1, " Race%9s %-23s", colon, race[p_ptr->misc.prace].trace);
+	(void)fprintf(file1, "Height%8s %6d ", colon, (int)p_ptr->misc.ht);
+	cnv_stat(p_ptr->stats.use_stat[A_INT], prt1);
 	(void)fprintf(file1, "   INT : %s\n", prt1);
 	(void)fprintf(file1, " Sex%10s %-23s", colon,
-		      (py.misc.male ? "Male" : "Female"));
-	(void)fprintf(file1, "Weight%8s %6d ", colon, (int)py.misc.wt);
-	cnv_stat(py.stats.use_stat[A_WIS], prt1);
+		      (p_ptr->misc.male ? "Male" : "Female"));
+	(void)fprintf(file1, "Weight%8s %6d ", colon, (int)p_ptr->misc.wt);
+	cnv_stat(p_ptr->stats.use_stat[A_WIS], prt1);
 	(void)fprintf(file1, "   WIS : %s\n", prt1);
 	(void)fprintf(file1, " Class%8s %-23s", colon,
-		      class[py.misc.pclass].title);
-	(void)fprintf(file1, "Social Class : %6d ", py.misc.sc);
-	cnv_stat(py.stats.use_stat[A_DEX], prt1);
+		      class[p_ptr->misc.pclass].title);
+	(void)fprintf(file1, "Social Class : %6d ", p_ptr->misc.sc);
+	cnv_stat(p_ptr->stats.use_stat[A_DEX], prt1);
 	(void)fprintf(file1, "   DEX : %s\n", prt1);
 	(void)fprintf(file1, " Title%8s %-23s", colon, title_string());
 	(void)fprintf(file1, "%22s", blank);
-	cnv_stat(py.stats.use_stat[A_CON], prt1);
+	cnv_stat(p_ptr->stats.use_stat[A_CON], prt1);
 	(void)fprintf(file1, "   CON : %s\n", prt1);
 	(void)fprintf(file1, "%34s", blank);
 	(void)fprintf(file1, "%26s", blank);
-	cnv_stat(py.stats.use_stat[A_CHR], prt1);
+	cnv_stat(p_ptr->stats.use_stat[A_CHR], prt1);
 	(void)fprintf(file1, "   CHR : %s\n\n", prt1);
 
-	(void)fprintf(file1, " + To Hit    : %6d", py.misc.dis_th);
-	(void)fprintf(file1, "%7sLevel      :%9d", blank, (int)py.misc.lev);
-	(void)fprintf(file1, "   Max Hit Points : %6d\n", py.misc.mhp);
-	(void)fprintf(file1, " + To Damage : %6d", py.misc.dis_td);
-	(void)fprintf(file1, "%7sExperience :%9ld", blank, (long)py.misc.exp);
-	(void)fprintf(file1, "   Cur Hit Points : %6d\n", py.misc.chp);
-	(void)fprintf(file1, " + To AC     : %6d", py.misc.dis_tac);
-	(void)fprintf(file1, "%7sMax Exp    :%9ld", blank, (long)py.misc.max_exp);
-	(void)fprintf(file1, "   Max Mana%8s %6d\n", colon, py.misc.mana);
-	(void)fprintf(file1, "   Total AC  : %6d", py.misc.dis_ac);
+	(void)fprintf(file1, " + To Hit    : %6d", p_ptr->misc.dis_th);
+	(void)fprintf(file1, "%7sLevel      :%9d", blank, (int)p_ptr->misc.lev);
+	(void)fprintf(file1, "   Max Hit Points : %6d\n", p_ptr->misc.mhp);
+	(void)fprintf(file1, " + To Damage : %6d", p_ptr->misc.dis_td);
+	(void)fprintf(file1, "%7sExperience :%9ld", blank, (long)p_ptr->misc.exp);
+	(void)fprintf(file1, "   Cur Hit Points : %6d\n", p_ptr->misc.chp);
+	(void)fprintf(file1, " + To AC     : %6d", p_ptr->misc.dis_tac);
+	(void)fprintf(file1, "%7sMax Exp    :%9ld", blank, (long)p_ptr->misc.max_exp);
+	(void)fprintf(file1, "   Max Mana%8s %6d\n", colon, p_ptr->misc.mana);
+	(void)fprintf(file1, "   Total AC  : %6d", p_ptr->misc.dis_ac);
 	
-	if (py.misc.lev >= MAX_PLAYER_LEVEL) {
+	if (p_ptr->misc.lev >= MAX_PLAYER_LEVEL) {
 	    (void)fprintf(file1, "%7sExp to Adv.:%9s", blank, "****");
 	}
 	else {
 	    (void)fprintf(file1, "%7sExp to Adv.:%9ld", blank,
-			  (long) (player_exp[py.misc.lev - 1] *
-				   py.misc.expfact / 100));
+			  (long) (player_exp[p_ptr->misc.lev - 1] *
+				   p_ptr->misc.expfact / 100));
 	}
 
-	(void)fprintf(file1, "   Cur Mana%8s %6d\n", colon, py.misc.cmana);
-	(void)fprintf(file1, "%28sGold%8s%9ld\n", blank, colon, (long)py.misc.au);
+	(void)fprintf(file1, "   Cur Mana%8s %6d\n", colon, p_ptr->misc.cmana);
+	(void)fprintf(file1, "%28sGold%8s%9ld\n", blank, colon, (long)p_ptr->misc.au);
 
-	p_ptr = &py.misc;
-	xbth = p_ptr->bth + p_ptr->ptohit * BTH_PLUS_ADJ
-	    + (class_level_adj[p_ptr->pclass][CLA_BTH] * p_ptr->lev);
-	xbthb = p_ptr->bthb + p_ptr->ptohit * BTH_PLUS_ADJ
-	    + (class_level_adj[p_ptr->pclass][CLA_BTHB] * p_ptr->lev);
+	xbth = p_ptr->misc.bth + p_ptr->misc.ptohit * BTH_PLUS_ADJ
+	    + (class_level_adj[p_ptr->misc.pclass][CLA_BTH] * p_ptr->misc.lev);
+	xbthb = p_ptr->misc.bthb + p_ptr->misc.ptohit * BTH_PLUS_ADJ
+	    + (class_level_adj[p_ptr->misc.pclass][CLA_BTHB] * p_ptr->misc.lev);
     /* this results in a range from 0 to 29 */
-	xfos = 40 - p_ptr->fos;
+	xfos = 40 - p_ptr->misc.fos;
 	if (xfos < 0)
 	    xfos = 0;
-	xsrh = p_ptr->srh;
+	xsrh = p_ptr->misc.srh;
     /* this results in a range from 0 to 9 */
-	xstl = p_ptr->stl + 1;
-	xdis = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-	    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
-	xsave = p_ptr->save + stat_adj(A_WIS)
-	    + (class_level_adj[p_ptr->pclass][CLA_SAVE] * p_ptr->lev / 3);
-	xdev = p_ptr->save + stat_adj(A_INT)
-	    + (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3);
+	xstl = p_ptr->misc.stl + 1;
+	xdis = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
+	    + (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
+	xsave = p_ptr->misc.save + stat_adj(A_WIS)
+	    + (class_level_adj[p_ptr->misc.pclass][CLA_SAVE] * p_ptr->misc.lev / 3);
+	xdev = p_ptr->misc.save + stat_adj(A_INT)
+	    + (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3);
 
-	(void)sprintf(xinfra, "%d feet", py.flags.see_infra * 10);
+	(void)sprintf(xinfra, "%d feet", p_ptr->flags.see_infra * 10);
 
 	(void)fprintf(file1, "(Miscellaneous Abilities)\n\n");
 	(void)fprintf(file1, " Fighting    : %-10s", likert(xbth, 12));
@@ -608,7 +607,7 @@ int file_character(cptr filename1)
 	/* Write out the character's history     */
 	(void)fprintf(file1, "Character Background\n");
 	for (i = 0; i < 4; i++) {
-	    (void)fprintf(file1, " %s\n", py.misc.history[i]);
+	    (void)fprintf(file1, " %s\n", p_ptr->misc.history[i]);
 	}
 
 	/* Write out the equipment list.	     */
@@ -618,7 +617,7 @@ int file_character(cptr filename1)
 	    (void)fprintf(file1, "  Character has no equipment in use.\n");
 	}
 	else {
-	    for (i = INVEN_WIELD; i < INVEN_ARRAY_SIZE; i++) {
+	    for (i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
 		i_ptr = &inventory[i];
 		if (i_ptr->tval != TV_NOTHING) {
 		    switch (i) {
@@ -652,7 +651,7 @@ int file_character(cptr filename1)
 		      case INVEN_OUTER:
 			p = "Worn about body";
 			break;
-		      case INVEN_LIGHT:
+		      case INVEN_LITE:
 			p = "Light source is";
 			break;
 		      case INVEN_AUX:
@@ -683,8 +682,8 @@ int file_character(cptr filename1)
 	}
 	(void)fprintf(file1, "%c", CTRL('L'));
 
-	fprintf(file1, "  [%s%s Home Inventory]\n\n", py.misc.name,
-		(toupper(py.misc.name[strlen(py.misc.name)-1]) == 'S' ? "'" : "'s"));
+	fprintf(file1, "  [%s%s Home Inventory]\n\n", p_ptr->misc.name,
+		(toupper(p_ptr->misc.name[strlen(p_ptr->misc.name)-1]) == 'S' ? "'" : "'s"));
 	if (store[MAX_STORES-1].store_ctr == 0) {
 	    (void) fprintf(file1, "  Character has no objects at home.\n");
 	}
@@ -734,7 +733,7 @@ static void print_tomb()
 #endif
 #endif
 		fprintf(fp, "%s\n%d\n%d\n%d",
-		  py.misc.name, py.misc.mhp, py.misc.prace, py.misc.pclass);
+		  p_ptr->misc.name, p_ptr->misc.mhp, p_ptr->misc.prace, p_ptr->misc.pclass);
 		if (fp) fclose(fp);
 	    }
 	} else {
@@ -753,7 +752,7 @@ static void print_tomb()
     put_buffer("/", 5, 11);
     put_buffer("\\  : _;,,,;_    :   :", 5, 41);
     (void)sprintf(str, "/%s\\,;_          _;,,,;_",
-		  center_string(tmp_str, py.misc.name));
+		  center_string(tmp_str, p_ptr->misc.name));
     put_buffer(str, 6, 10);
     put_buffer("|               the               |   ___", 7, 9);
     p = total_winner ? "Magnificent" : title_string();
@@ -762,9 +761,9 @@ static void print_tomb()
     put_buffer("|", 9, 9);
     put_buffer("|  :   :", 9, 43);
     if (!total_winner) {
-	p = class[py.misc.pclass].title;
+	p = class[p_ptr->misc.pclass].title;
     }
-    else if (py.misc.male) {
+    else if (p_ptr->misc.male) {
 	p = "*King*";
     }
     else {
@@ -773,13 +772,13 @@ static void print_tomb()
 
     (void)sprintf(str, "| %s | _;,,,;_   ____", center_string(tmp_str, p));
     put_buffer(str, 10, 9);
-    (void)sprintf(str, "Level : %d", (int)py.misc.lev);
+    (void)sprintf(str, "Level : %d", (int)p_ptr->misc.lev);
     (void)sprintf(str, "| %s |          /    \\", center_string(tmp_str, str));
     put_buffer(str, 11, 9);
-    (void)sprintf(str, "%ld Exp", (long)py.misc.exp);
+    (void)sprintf(str, "%ld Exp", (long)p_ptr->misc.exp);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
     put_buffer(str, 12, 9);
-    (void)sprintf(str, "%ld Au", (long)py.misc.au);
+    (void)sprintf(str, "%ld Au", (long)p_ptr->misc.au);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
     put_buffer(str, 13, 9);
     (void)sprintf(str, "Died on Level : %d", dun_level);
@@ -807,7 +806,7 @@ static void print_tomb()
 
     if (get_string(str, 22, 18, 60)) {
 
-	for (i = 0; i < INVEN_ARRAY_SIZE; i++) {
+	for (i = 0; i < INVEN_TOTAL; i++) {
     inven_type *i_ptr = &inventory[i];
     if (i_ptr && i_ptr->tval != TV_NOTHING) {
 	    known1(i_ptr);
@@ -870,7 +869,7 @@ static void print_tomb()
 /* Calculates the total number of points earned		-JWT-	 */
 long total_points()
 {
-    return (py.misc.max_exp + (100 * py.misc.max_dlv));
+    return (p_ptr->misc.max_exp + (100 * p_ptr->misc.max_dlv));
 }
 
 
@@ -916,16 +915,16 @@ static errr top_twenty(void)
 
     myscore.points = total_points();
     myscore.dun_level = dun_level;
-    myscore.lev = py.misc.lev;
-    myscore.max_lev = py.misc.max_dlv;
-    myscore.mhp = py.misc.mhp;
-    myscore.chp = py.misc.chp;
+    myscore.lev = p_ptr->misc.lev;
+    myscore.max_lev = p_ptr->misc.max_dlv;
+    myscore.mhp = p_ptr->misc.mhp;
+    myscore.chp = p_ptr->misc.chp;
     myscore.uid = player_uid;
 /* First character of sex, lower case */
-    myscore.sex = py.misc.male;
-    myscore.prace = py.misc.prace;
-    myscore.pclass = py.misc.pclass;
-    (void)strcpy(myscore.name, py.misc.name);
+    myscore.sex = p_ptr->misc.male;
+    myscore.prace = p_ptr->misc.prace;
+    myscore.pclass = p_ptr->misc.pclass;
+    (void)strcpy(myscore.name, p_ptr->misc.name);
     (void)strncpy(myscore.died_from, died_from, strlen(died_from));
     myscore.died_from[strlen(died_from)] = '\0';
 /* Get rid of '.' at end of death description */
@@ -1071,7 +1070,6 @@ void delete_entry(int which)
  */
 static void kingly()
 {
-    register struct misc *p_ptr;
     register cptr p;
 
     /* Change the character attributes.		 */
@@ -1079,12 +1077,11 @@ static void kingly()
 
     /* Change the character attributes.		 */
     (void)strcpy(died_from, "Ripe Old Age");
-    p_ptr = &py.misc;
     (void)restore_level();
-    p_ptr->lev += MAX_PLAYER_LEVEL;
-    p_ptr->au += 250000L;
-    p_ptr->max_exp += 5000000L;
-    p_ptr->exp = p_ptr->max_exp;
+    s_ptr->misc.lev += MAX_PLAYER_LEVEL;
+    s_ptr->misc.au += 250000L;
+    s_ptr->misc.max_exp += 5000000L;
+    s_ptr->misc.exp = s_ptr->misc.max_exp;
 
     /* Let the player know that he did good.	 */
     clear_screen();
@@ -1103,7 +1100,7 @@ static void kingly()
     put_buffer(p, 12, 24);
     put_buffer("Veni, Vidi, Vici!", 15, 26);
     put_buffer("I came, I saw, I conquered!", 16, 21);
-    if (p_ptr->male) {
+    if (s_ptr->misc.male) {
 	put_buffer("All Hail the Mighty King!", 17, 22);
     }
     else {

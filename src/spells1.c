@@ -15,7 +15,8 @@ typedef int (*inven_func)(inven_type *);
  */
 int inven_damage(inven_func typ, int perc)
 {
-    register int index, i, j, offset;
+    register int i, index, offset;
+    int		j,
     vtype	tmp_str, out_val;
 
     j = 0;
@@ -52,10 +53,10 @@ int inven_damage(inven_func typ, int perc)
  */
 int minus_ac(s32b typ_dam)
 {
-    register int         i, j;
+    int         i, j;
     int                  tmp[6], minus, do_damage;
-    register inven_type *i_ptr;
-    bigvtype             out_val, tmp_str;
+    inven_type		*i_ptr;
+    bigvtype		out_val, tmp_str;
 
     i = 0;
     if (inventory[INVEN_BODY].tval != TV_NOTHING) {
@@ -123,15 +124,15 @@ void acid_dam(int dam, cptr kb_str)
 {
     register int flag;
 
-    if (py.flags.acid_resist > 0) dam = dam / 3;
-    if (py.flags.resist_acid > 0) dam = dam / 3;
-    if (py.flags.acid_im) dam = 1;
+    if (p_ptr->flags.acid_resist > 0) dam = dam / 3;
+    if (p_ptr->flags.resist_acid > 0) dam = dam / 3;
+    if (p_ptr->flags.acid_im) dam = 1;
 
     flag = 0;
 
-    if (!py.flags.resist_acid)
+    if (!p_ptr->flags.resist_acid)
 	if (minus_ac((s32b) TR_RES_ACID)) flag = 1;
-    if (py.flags.acid_resist) flag += 2;
+    if (p_ptr->flags.acid_resist) flag += 2;
     inven_damage(set_acid_affect, 3);
 }
 
@@ -141,9 +142,9 @@ void acid_dam(int dam, cptr kb_str)
  */
 void light_dam(int dam, cptr kb_str)
 {
-    if (py.flags.resist_light) dam = dam / 3;
-    if (py.flags.lght_resist) dam = dam / 3;
-    if (py.flags.light_im) dam = 1;
+    if (p_ptr->flags.resist_light) dam = dam / 3;
+    if (p_ptr->flags.lght_resist) dam = dam / 3;
+    if (p_ptr->flags.light_im) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_lightning_destroy, 3);
 }
@@ -156,9 +157,9 @@ void light_dam(int dam, cptr kb_str)
  */
 void fire_dam(int dam, cptr kb_str)
 {
-    if (py.flags.fire_resist) dam = dam / 3;
-    if (py.flags.resist_heat > 0) dam = dam / 3;
-    if (py.flags.fire_im) dam = 1;
+    if (p_ptr->flags.fire_resist) dam = dam / 3;
+    if (p_ptr->flags.resist_heat > 0) dam = dam / 3;
+    if (p_ptr->flags.fire_im) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_flammable, 3);
 }
@@ -169,9 +170,9 @@ void fire_dam(int dam, cptr kb_str)
  */
 void cold_dam(int dam, cptr kb_str)
 {
-    if (py.flags.cold_resist) dam = dam / 3;
-    if (py.flags.resist_cold > 0) dam = dam / 3;
-    if (py.flags.cold_im) dam = 1;
+    if (p_ptr->flags.cold_resist) dam = dam / 3;
+    if (p_ptr->flags.resist_cold > 0) dam = dam / 3;
+    if (p_ptr->flags.cold_im) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_frost_destroy, 5);
 }
@@ -183,12 +184,12 @@ void cold_dam(int dam, cptr kb_str)
  */
 void poison_gas(int dam, cptr kb_str)
 {
-    if (py.flags.resist_poison > 0) dam = 2 * dam / 3;
-    if (py.flags.poison_resist) dam = (dam * 3) / 5;
-    if (py.flags.poison_im) dam = 1;
+    if (p_ptr->flags.resist_poison > 0) dam = 2 * dam / 3;
+    if (p_ptr->flags.poison_resist) dam = (dam * 3) / 5;
+    if (p_ptr->flags.poison_im) dam = 1;
     take_hit(dam, kb_str);
-    if (!(py.flags.poison_resist || py.flags.resist_poison
-	  || py.flags.poison_im)) py.flags.poisoned += 12 + randint(dam);
+    if (!(p_ptr->flags.poison_resist || p_ptr->flags.resist_poison
+	  || p_ptr->flags.poison_im)) p_ptr->flags.poisoned += 12 + randint(dam);
 }
 
 
@@ -197,7 +198,7 @@ void poison_gas(int dam, cptr kb_str)
  */
 void corrode_gas(cptr kb_str)
 {
-    if (!py.flags.acid_im)
+    if (!p_ptr->flags.acid_im)
 	if (!minus_ac((s32b) TR_RES_ACID))
 	    take_hit(randint(8), kb_str);
     inven_damage(set_corrodes, 5);

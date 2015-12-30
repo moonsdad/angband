@@ -58,15 +58,15 @@
 
 	Wands and Staffs:
 	Flags defines a function, p1 contains number of charges
-	for item.  p1 is set in magic_init() in misc.c.
+	for item.  p1 is set in flavor_init() in misc.c.
 
 	Chests:
         p1 contains level chest is found on (randomly determined for
         store-bought chests).
-	Traps are added randomly by magic_init() in misc.c.	*/
+	Traps are added randomly by flavor_init() in desc.c.	*/
 
 /* Object list (All objects must be defined here)		 */
-treasure_type object_list[MAX_OBJECTS] = {
+inven_kind object_list[MAX_OBJECTS] = {
 /* Dungeon items from 0 to MAX_DUNGEON_OBJ */
 {"Poison"			,0x00000001L,	TV_FOOD, ',',	/*  0*/
   500,	   0,	64,   1,   1,	0,   0,	 0,   0, {0,0}	,  7, 0, 0x0L},
@@ -1211,8 +1211,5 @@ s16b sorted_objects[MAX_DUNGEON_OBJ];
 /* Identified objects flags					*/
 byte object_ident[OBJECT_IDENT_SIZE];
 s16b t_level[MAX_OBJ_LEVEL+1];
-inven_type t_list[MAX_TALLOC];
-inven_type inventory[INVEN_ARRAY_SIZE];
+inven_type t_list[MAX_I_IDX];
 
-/* Treasure related values					*/
-s16b tcptr;			/* Cur treasure heap ptr	*/

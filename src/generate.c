@@ -22,8 +22,6 @@ typedef struct coords {
 static coords doorstk[100];
 static int    doorindex;
 
-extern int    rating;
-extern int    peek;
 
 
 
@@ -79,12 +77,13 @@ static void rand_dir(int *rdir, int *cdir)
     }
 }
 
-/* Checks all adjacent spots for corridors		-RAK-	 */
+
 /*
+ * Checks all adjacent spots for corridors		-RAK-
  * note that y, x is always in_bounds(), hence no need to check that j, k are
  * in_bounds(), even if they are 0 or cur_x-1 is still works 
  */
-int next_to_corr(int y, int x)
+static int next_to_corr(int y, int x)
 {
     register int        k, j, i = 0;
     register cave_type *c_ptr;
@@ -96,9 +95,11 @@ int next_to_corr(int y, int x)
 	    /* Access the grid */
 	    c_ptr = &cave[j][k];
 
+	    /* Skip non-corridors */
+	    if (c_ptr->fval != CORR_FLOOR) continue;
+
 	    /* should fail if there is already a door present */
-	    if (c_ptr->fval == CORR_FLOOR
-	    && (c_ptr->tptr == 0 || t_list[c_ptr->tptr].tval < TV_MIN_DOORS))
+	    if (c_ptr->tptr == 0 || t_list[c_ptr->tptr].tval < TV_MIN_DOORS))
 	    
 	    /* Count these grids */
 	    i++;
@@ -113,37 +114,38 @@ int next_to_corr(int y, int x)
 /* 
  * Allocates an object for tunnels and rooms		-RAK-	
  */
-void alloc_object(int (*alloc_set) (), int typ, int num)
+static void alloc_object(int (*alloc_set) (), int typ, int num)
 {
-    register int i, j, k;
+    register int y, x, k;
 
+    /* Place some objects */
     for (k = 0; k < num; k++) {
 	do {
-	    i = randint(cur_height) - 1;
-	    j = randint(cur_width) - 1;
+	    y = randint(cur_height) - 1;
+	    x = randint(cur_width) - 1;
 	}
 
 	/* Don't put an object beneath the player, this could cause */
 	/* problems if player is standing under rubble, or on a trap */
 
-	while ((!(*alloc_set) (cave[i][j].fval)) ||
-	       (cave[i][j].tptr != 0) || (i == char_row && j == char_col));
-	if (typ < 4) {		   /* typ == 2 not used, used to be visible
-				    * traps */
+	while ((!(*alloc_set) (cave[y][x].fval)) ||
+	       (cave[y][x].tptr != 0) || (y == char_row && x == char_col));
+
+    if (typ < 4) {	   /* typ == 2 not used, used to be visible traps */
 	    if (typ == 1) {
-		place_trap(i, j, randint(MAX_TRAP) - 1);	/* typ == 1 */
+		place_trap(y, x, randint(MAX_TRAP) - 1);	/* typ == 1 */
 	    }
-	    else {
-		place_rubble(i, j);/* typ == 3 */
+	    else /* (typ == 3) */ {
+		place_rubble(y, x);
 	    }
 	}       
 	else {
 	    object_level = dun_level;
 	    if (typ == 4) {
-		place_gold(i, j);  /* typ == 4 */
+		place_gold(y, x);
 	    }
-	    else {
-		place_object(i, j);/* typ == 5 */
+	    else /* (typ == 5) */ {
+		place_object(y, x);
 	    }
 	}
     }
@@ -375,13 +377,15 @@ static void place_open_door(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_OPEN_DOOR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_OPEN_DOOR);
     c_ptr->fval = CORR_FLOOR;
 }
 
@@ -390,13 +394,15 @@ static void place_broken_door(int y, int x)
 {
     int		cur_pos;
     cave_type	*c_ptr;
+    inven_type	*i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_OPEN_DOOR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_OPEN_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = CORR_FLOOR;
@@ -408,13 +414,15 @@ static void place_closed_door(int y, int x)
 {
     int		cur_pos;
     cave_type	*c_ptr;
+    inven_type	*i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_CLOSED_DOOR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = BLOCKED_FLOOR;
@@ -425,19 +433,21 @@ static void place_locked_door(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_CLOSED_DOOR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = BLOCKED_FLOOR;
 
     /* Lock the door */
-    t_list[cur_pos].p1 = randint(10) + 10;
+    i_ptr->p1 = randint(10) + 10;
 }
 
 
@@ -445,19 +455,21 @@ static void place_stuck_door(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_CLOSED_DOOR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = BLOCKED_FLOOR;
 
     /* Stick the door */
-    t_list[cur_pos].p1 = (-randint(10) - 10);
+    i_ptr->p1 = (-randint(10) - 10);
 }
 
 
@@ -465,13 +477,17 @@ static void place_secret_door(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_SECRET_DOOR);
+
+    /* Put the object in the cave */
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_SECRET_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = BLOCKED_FLOOR;
@@ -511,14 +527,15 @@ static void place_up_stairs(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_UP_STAIR);
-
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_UP_STAIR);
 }
 
 
@@ -529,6 +546,7 @@ static void place_down_stairs(int y, int x)
 {
     register int        cur_pos;
     register cave_type *c_ptr;
+    inven_type *i_ptr;
 
     /* Hack -- no stairs on quest levels */
     if (is_quest(dun_level)) {
@@ -541,7 +559,8 @@ static void place_down_stairs(int y, int x)
 
     cur_pos = popt();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_DOWN_STAIR);
+    i_ptr = &t_list[cur_pos];
+    invcopy(i_ptr, OBJ_DOWN_STAIR);
 
     /* on town level -CWS */
     if (dun_level == 0) c_ptr->pl = TRUE;
@@ -555,7 +574,7 @@ static void place_down_stairs(int y, int x)
  */
 static void place_stairs(int typ, int num, int walls)
 {
-    register cave_type *cave_ptr;
+    cave_type *cave_ptr;
     int                 i, j, flag;
     int        y1, x1, y2, x2;
 
@@ -614,9 +633,9 @@ static void place_stairs(int typ, int num, int walls)
  */
 static void vault_trap(int y, int x, int yd, int xd, int num)
 {
-    register int		count, y1, x1;
+    int		count, y1, x1;
     int                 i, flag;
-    register cave_type *c_ptr;
+    cave_type *c_ptr;
 
     for (i = 0; i < num; i++) {
 	flag = FALSE;
@@ -663,8 +682,8 @@ static void vault_jelly(int y, int x)
     /* Hack -- allocate a simple sleeping jelly */
     while (1) {
 	int m = rand_int(l-1);
-	if (!strchr("jmi,", c_list[m].cchar)) continue;
-	if (c_list[m].cdefense & EVIL) continue;
+	if (!strchr("jmi,", r_list[m].cchar)) continue;
+	if (r_list[m].cdefense & EVIL) continue;
 	place_monster(y, x, m, TRUE);
 	break;
     }
@@ -679,8 +698,8 @@ static void vault_undead(int y, int x)
     /* Hack -- allocate a sleeping non-unique undead */
     while (1) {
 	int m = rand_int(l-1);
-	if (!(c_list[m].cdefense & UNDEAD)) continue;
-	if (c_list[m].cdefense & UNIQUE) continue;
+	if (!(r_list[m].cdefense & UNDEAD)) continue;
+	if (r_list[m].cdefense & UNIQUE) continue;
 
 	place_monster(y, x, m, TRUE);
 	break;
@@ -694,37 +713,37 @@ static void vault_orc(int y, int x, int rank)
     i = 0;
     switch (rank) {
       case 1:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Snaga"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Snaga"))
 		break;
 	    i++;
 	}
 	break;
       case 2:
       case 3:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Black orc"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Black orc"))
 		break;
 	    i++;
 	}
 	break;
       case 4:
       case 5:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Uruk-Hai"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Uruk-Hai"))
 		break;
 	    i++;
 	}
 	break;
       case 6:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Orc captain"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Orc captain"))
 		break;
 	    i++;
 	}
 	break;
     }
-    if (i != MAX_CREATURES)
+    if (i != MAX_R_IDX)
 	place_monster(y, x, i, FALSE);
 }
 
@@ -735,49 +754,49 @@ static void vault_troll(int y, int x, int rank)
     i = 0;
     switch (rank) {
       case 1:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Forest troll"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Forest troll"))
 		break;
 	    i++;
 	}
 	break;
       case 2:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Stone troll"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Stone troll"))
 		break;
 	    i++;
 	}
 	break;
       case 3:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Ice troll"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Ice troll"))
 		break;
 	    i++;
 	}
 	break;
       case 4:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Cave troll"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Cave troll"))
 		break;
 	    i++;
 	}
 	break;
       case 5:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Water troll"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Water troll"))
 		break;
 	    i++;
 	}
 	break;
       case 6:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Olog-Hai"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Olog-Hai"))
 		break;
 	    i++;
 	}
 	break;
     }
-    if (i != MAX_CREATURES)
+    if (i != MAX_R_IDX)
 	place_monster(y, x, i, FALSE);
 }
 
@@ -791,43 +810,43 @@ static void vault_dragon(int y, int x, int rank, int type)
       case 3:
 	switch (type) {
 	  case 1:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young blue dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young blue dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 2:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young white dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young white dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 3:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young green dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young green dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 4:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young black dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young black dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 5:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young red dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young red dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 6:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Young Multi-Hued Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Young Multi-Hued Dragon"))
 		    break;
 		i++;
 	    }
@@ -838,43 +857,43 @@ static void vault_dragon(int y, int x, int rank, int type)
       case 5:
 	switch (type) {
 	  case 1:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature blue Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature blue Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 2:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature white Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature white Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 3:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature green Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature green Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 4:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature black Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature black Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 5:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature red Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature red Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 6:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Mature Multi-Hued Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Mature Multi-Hued Dragon"))
 		    break;
 		i++;
 	    }
@@ -884,43 +903,43 @@ static void vault_dragon(int y, int x, int rank, int type)
       case 6:
 	switch (type) {
 	  case 1:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient blue Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient blue Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 2:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient white Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient white Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 3:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient green Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient green Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 4:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient black Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient black Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 5:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient red Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient red Dragon"))
 		    break;
 		i++;
 	    }
 	    break;
 	  case 6:
-	    while (i < MAX_CREATURES) {
-		if (!stricmp(c_list[i].name, "Ancient Multi-Hued Dragon"))
+	    while (i < MAX_R_IDX) {
+		if (!stricmp(r_list[i].name, "Ancient Multi-Hued Dragon"))
 		    break;
 		i++;
 	    }
@@ -928,7 +947,7 @@ static void vault_dragon(int y, int x, int rank, int type)
 	}
 	break;
     }
-    if (i != MAX_CREATURES)
+    if (i != MAX_R_IDX)
 	place_monster(y, x, i, FALSE);
 }
 
@@ -938,49 +957,49 @@ static void vault_demon(int y, int x, int rank)
 
     switch (rank) {
       case 1:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Vrock"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Vrock"))
 		break;
 	    i++;
 	}
 	break;
       case 2:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Hezrou"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Hezrou"))
 		break;
 	    i++;
 	}
 	break;
       case 3:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Glabrezu"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Glabrezu"))
 		break;
 	    i++;
 	}
 	break;
       case 4:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Nalfeshnee"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Nalfeshnee"))
 		break;
 	    i++;
 	}
 	break;
       case 5:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Marilith"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Marilith"))
 		break;
 	    i++;
 	}
 	break;
       case 6:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Lesser balrog"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Lesser balrog"))
 		break;
 	    i++;
 	}
 	break;
     }
-    if (i != MAX_CREATURES)
+    if (i != MAX_R_IDX)
 	place_monster(y, x, i, FALSE);
 }
 
@@ -991,49 +1010,49 @@ static void vault_giant(int y, int x, int rank)
 
     switch (rank) {
       case 1:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Hill giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Hill giant"))
 		break;
 	    i++;
 	}
 	break;
       case 2:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Frost giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Frost giant"))
 		break;
 	    i++;
 	}
 	break;
       case 3:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Fire giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Fire giant"))
 		break;
 	    i++;
 	}
 	break;
       case 4:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Stone giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Stone giant"))
 		break;
 	    i++;
 	}
 	break;
       case 5:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Cloud giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Cloud giant"))
 		break;
 	    i++;
 	}
 	break;
       case 6:
-	while (i < MAX_CREATURES) {
-	    if (!stricmp(c_list[i].name, "Storm giant"))
+	while (i < MAX_R_IDX) {
+	    if (!stricmp(r_list[i].name, "Storm giant"))
 		break;
 	    i++;
 	}
 	break;
     }
-    if (i != MAX_CREATURES)
+    if (i != MAX_R_IDX)
 	place_monster(y, x, i, FALSE);
 }
 
@@ -1076,7 +1095,7 @@ static void build_room(int yval, int xval)
      * rewriting the y loop */
     for (y = y1; y <= y2; y++) {
 	for (x = x1; x <= x2; x++) {
-	c_ptr = &cave[y][x];
+	    c_ptr = &cave[y][x];
 	    c_ptr->fval = floor;
 	    c_ptr->lr = TRUE;
 	}
@@ -1152,7 +1171,7 @@ static void build_type1(int yval, int xval)
 	 * bother rewriting the y loop  */
 	for (i = y1; i <= y2; i++) {
 	    for (j = x1; j <= x2; j++) {
-	    c_ptr = &cave[i][j];
+		c_ptr = &cave[i][j];
 		c_ptr->fval = floor;
 		c_ptr->lr = TRUE;
 	    }
@@ -1203,7 +1222,7 @@ static void build_type2(int yval, int xval)
 {
     register int        i, j, y1, x1;
     int                 y2, x2, tmp;
-    byte               floor;
+    byte                floor;
     cave_type		*c_ptr, *d_ptr;
 
 
@@ -1380,7 +1399,6 @@ static void build_type2(int yval, int xval)
 
 	/* Occasionally, some Inner rooms */
 	if (randint(3) == 1) {
-	
 	
 	    /* Long horizontal walls */
 	    for (i = xval - 5; i <= xval + 5; i++) {
@@ -2810,7 +2828,7 @@ static void cave_gen(void)
     new_spot(&char_row, &char_col);
 
     /* Allocate some monsters */
-    alloc_monster((randint(8) + MIN_MALLOC_LEVEL + alloc_level), 0, TRUE);
+    alloc_monster((randint(8) + MIN_M_ALLOC_LEVEL + alloc_level), 0, TRUE);
 
     /* Put some treasures in corridors */
     alloc_object(set_corr, 3, randint(alloc_level));
@@ -2904,9 +2922,9 @@ static void tlink()
 {
     register int i;
 
-    for (i = 0; i < MAX_TALLOC; i++)
+    for (i = 0; i < MAX_I_IDX; i++)
 	invcopy(&t_list[i], OBJ_NOTHING);
-    tcptr = MIN_TRIX;
+    i_max = MIN_I_IDX;
 }
 
 
@@ -2917,13 +2935,13 @@ static void mlink()
 {
     register int i;
 
-    for (i = 0; i < MAX_MALLOC; i++)
+    for (i = 0; i < MAX_M_IDX; i++)
 	if (m_list[i].mptr)
 	    delete_monster(i);
-    for (i = 0; i < MAX_MALLOC; i++)
+    for (i = 0; i < MAX_M_IDX; i++)
 	m_list[i] = blank_monster;
     delete_unique();		   /* Kludgey Fix ~Ludwig */
-    mfptr = MIN_MONIX;
+    m_max = MIN_M_IDX;
 }
 
 
@@ -2968,7 +2986,7 @@ static void town_gen(void)
 	    }
 	}
 	/* Make some night-time residents *
-	alloc_monster(MIN_MALLOC_TN, 3, TRUE);
+	alloc_monster(MIN_M_ALLOC_TN, 3, TRUE);
     } else {			   /* Day */
 	for (i = 0; i < cur_height; i++) {
 	    c_ptr = &cave[i][0];
@@ -2979,7 +2997,7 @@ static void town_gen(void)
 	}
 
 	/* Make some daytime residents */
-	alloc_monster(MIN_MALLOC_TD, 3, TRUE);
+	alloc_monster(MIN_M_ALLOC_TD, 3, TRUE);
     }
     store_maint();
 

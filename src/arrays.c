@@ -38,24 +38,24 @@
  * forehead. [cjh]
  */
 
-char *ANGBAND_BONES;		/* was LIBDIR(bones)			*/
-char *ANGBAND_SAV;		/* was LIBDIR(save)			*/
-char *ANGBAND_TST;		/* was LIBDIR(test)			*/
+cptr ANGBAND_BONES;		/* was LIBDIR(bones)			*/
+cptr ANGBAND_SAV;		/* was LIBDIR(save)			*/
+cptr ANGBAND_TST;		/* was LIBDIR(test)			*/
 
-char *ANGBAND_MOR;		/* was LIBDIR(files/news)		*/
-char *ANGBAND_WELCOME;		/* was LIBDIR(files/welcome.hlp)	*/
-char *ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
-char *ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+cptr ANGBAND_MOR;		/* was LIBDIR(files/news)		*/
+cptr ANGBAND_WELCOME;		/* was LIBDIR(files/welcome.hlp)	*/
+cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
+cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
 
-char *ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-char *ANGBAND_HOU;		/* was LIBDIR(files/hours)		*/
-char *ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-char *ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
+cptr ANGBAND_HOU;		/* was LIBDIR(files/hours)		*/
+cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
+cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
 
-char *ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
-char *ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
-char *ANGBAND_WIZ_HELP;		/* was LIBDIR(files/rwizcmds.hlp)	*/
-char *ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
+cptr ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
+cptr ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
+cptr ANGBAND_WIZ_HELP;		/* was LIBDIR(files/rwizcmds.hlp)	*/
+cptr ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
 
 
 /*

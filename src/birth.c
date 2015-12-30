@@ -34,7 +34,6 @@ static struct {
 
 } prev;
 
-extern int peek;
 
 
 
@@ -49,7 +48,7 @@ static void set_prev_stats()
 
     /* Save the stats */
     for (i = 0; i < 6; i++) {
-	prev.stat[i] = (u16b) py.stats.max_stat[i];
+	prev.stat[i] = (u16b) p_ptr->stats.max_stat[i];
     }
 
     return;
@@ -65,14 +64,14 @@ static int get_prev_stats()
 
     if (!prev.stat[0]) return 0;
     for (i = 0; i < 6; i++) {
-	py.stats.cur_stat[i] = prev.stat[i];
-	py.stats.max_stat[i] = prev.stat[i];
-	py.stats.use_stat[i] = prev.stat[i];
+	p_ptr->stats.cur_stat[i] = prev.stat[i];
+	p_ptr->stats.max_stat[i] = prev.stat[i];
+	p_ptr->stats.use_stat[i] = prev.stat[i];
     }
 
-    py.misc.ptodam = todam_adj();
-    py.misc.ptohit = tohit_adj();
-    py.misc.pac = toac_adj();
+    p_ptr->misc.ptodam = todam_adj();
+    p_ptr->misc.ptohit = tohit_adj();
+    p_ptr->misc.pac = toac_adj();
     prev.stat[0] = 0;
     return 1;
 }
@@ -90,24 +89,23 @@ static int get_prev_stats()
 static void get_sex(void)
 {
     char        c;
-    int        exit_flag;
 
-    exit_flag = FALSE;
     clear_from(20);
     put_buffer("Choose a sex (? for Help):", 20, 2);
     put_buffer("m) Male       f) Female", 21, 2);
-    do {
+
+    while (1) {
 	move_cursor(20, 29);
 	c = inkey();
-	if (c == 'f' || c == 'F') {
-	    py.misc.male = FALSE;
-	    put_buffer("Female", 4, 15);
-	    exit_flag = TRUE;
-	}
-	else if (c == 'm' || c == 'M') {
-	    py.misc.male = TRUE;
+	if (c == 'm' || c == 'M') {
+	    p_ptr->misc.male = TRUE;
 	    put_buffer("Male", 4, 15);
-	    exit_flag = TRUE;
+	    break;
+	}
+	else if (c == 'f' || c == 'F') {
+	    p_ptr->misc.male = FALSE;
+	    put_buffer("Female", 4, 15);
+	    break;
 	}
 	else if (c == '?') {
 	    helpfile(ANGBAND_WELCOME);
@@ -116,7 +114,6 @@ static void get_sex(void)
 	    bell();
 	}
     }
-    while (!exit_flag);
 }
 
 
@@ -125,10 +122,8 @@ static void get_sex(void)
  */
 static void choose_race(void)
 {
-    int                  j, k, l, m, exit_flag;
+    int                  j, k, l, m;
     char                 s, tmp_str[80];
-    register player_type *p_ptr;
-    register player_race   *r_ptr;
 
     k = 0;
     l = 2;
@@ -136,24 +131,25 @@ static void choose_race(void)
 
     clear_from(20);
     put_buffer("Choose a race (? for Help):", 20, 2);
-    do {
-	(void)sprintf(tmp_str, "%c) %s", k + 'a', race[j].trace);
+
+    for (j = 0; j < MAX_RACES; j++) {
+	(void)sprintf(tmp_str, "%c) %s", j + 'a', race[j].trace);
 	put_buffer(tmp_str, m, l);
 	l += 15;
 	if (l > 70) {
 	    l = 2;
 	    m++;
 	}
-	j++;
     }
-    while (j < MAX_RACES);
-    exit_flag = FALSE;
-    do {
+
+    while (1) {
 	move_cursor(20, 30);
 	s = inkey();
 	j = s - 'a';
 	if ((j < MAX_RACES) && (j >= 0)) {
-	    exit_flag = TRUE;
+	    p_ptr->misc.prace = j;
+	    put_buffer(race[j].trace, 3, 15);
+	    break;
 	}
 	else if (s == '?') {
 	    helpfile(ANGBAND_WELCOME);
@@ -162,12 +158,6 @@ static void choose_race(void)
 	    bell();
 	}
     }
-    while (!exit_flag);
-
-    p_ptr = &py;
-    r_ptr = &race[j];
-    p_ptr->misc.prace = j;
-    put_buffer(r_ptr->trace, 3, 15);
 }
 
 
@@ -177,56 +167,61 @@ static void choose_race(void)
  */
 static void get_class_choice()
 {
-    register int i, j;
-    int          k, l, m;
-    int          cl[MAX_CLASS], exit_flag;
+    int         i, j, k, l, m;
+    int          cl[MAX_CLASS];
     player_class   *c_ptr;
     char         tmp_str[80], s;
     u32b       mask;
 
-    for (j = 0; j < MAX_CLASS; j++)
-	cl[j] = 0;
-    i = py.misc.prace;
-    j = 0;
+    /* Clear the display */
+    clear_from(20);
+
+    /* Prepare to list */
+    i = p_ptr->misc.prace;
     k = 0;
     l = 2;
     m = 21;
     mask = 0x1;
-    clear_from(20);
+
+    /* No legal choices yet */
+    for (j = 0; j < MAX_CLASS; j++) cl[j] = 0;
+
     put_buffer("Choose a class (? for Help):", 20, 2);
-    do {
+    /* Display the legal choices */
+    for (j = 0; j < MAX_CLASS; j++) {
 	if (race[i].rtclass & mask) {
-	    (void)sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
+	    sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
 	    put_buffer(tmp_str, m, l);
-	    cl[k] = j;
+	    cl[k++] = j;
 	    l += 15;
 	    if (l > 70) {
 		l = 2;
 		m++;
 	    }
-	    k++;
 	}
-	j++;
 	mask <<= 1;
     }
-    while (j < MAX_CLASS);
-    py.misc.pclass = 0;
-    exit_flag = FALSE;
-    do {
+
+    /* Get a class */
+    p_ptr->misc.pclass = 0;
+    while (1) {
 	move_cursor(20, 31);
 	s = inkey();
 	j = s - 'a';
 	if ((j < k) && (j >= 0)) {
-	    py.misc.pclass = cl[j];
-	    c_ptr = &class[py.misc.pclass];
-	    exit_flag = TRUE;
+	    p_ptr->misc.pclass = cl[j];
+	    c_ptr = &class[p_ptr->misc.pclass];
 	    clear_from(20);
 	    put_buffer(c_ptr->title, 5, 15);
-	} else if (s == '?')
+	    break;
+	}
+	else if (s == '?') {
 	    helpfile(ANGBAND_WELCOME);
-	else
+	}
+	else {
 	    bell();
-    } while (!exit_flag);
+	}
+    }
 }
 
 
@@ -237,11 +232,9 @@ static void get_class()
     int                 percent;
     char                buf[50];
     register struct misc *m_ptr;
-    register player_type *p_ptr;
     player_class         *c_ptr;
 
-    c_ptr = &class[py.misc.pclass];
-    p_ptr = &py;
+    c_ptr = &class[p_ptr->misc.pclass];
     change_stat(A_STR, c_ptr->madj_str);
     change_stat(A_INT, c_ptr->madj_int);
     change_stat(A_WIS, c_ptr->madj_wis);
@@ -266,7 +259,7 @@ static void get_class()
  * now set misc stats, do this after setting stats because of con_adj() for
  * hitpoints 
  */
-    m_ptr = &py.misc;
+    m_ptr = &p_ptr->misc;
     m_ptr->hitdie += c_ptr->adj_hd;
     m_ptr->mhp = con_adj() + m_ptr->hitdie;
     m_ptr->chp = m_ptr->mhp;
@@ -371,36 +364,43 @@ static int adjust_stat(int stat_value, s16b amount, int auto_roll)
 
 
 /*
- * Changes stats by given amount                                -JWT-
+ * Changes stats by given amount -JWT-
  */
 static void change_stat(int stat, int amount)
 {
-  py.stats.max_stat[stat] =
-        adjust_stat(py.stats.max_stat[stat], (s16b) amount, FALSE);
+    int max = p_ptr->stats.max_stat[stat];
+    int tmp = adjust_stat(max, (s16b)amount, FALSE);
+    p_ptr->stats.max_stat[stat] = tmp;
 }
 
 
 
 /*
- * Generates character's stats			-JWT-
+ * Generates character's stats -JWT-
  */
 static void get_stats(void)
 {
-    register int        i, tot;
+    register int        i, j;
     int dice[18];
 
-    do {
-	tot = 0;
-	for (i = 0; i < 18; i++) {
+    /* Roll and verify some stats */
+    while (TRUE) {
+
+	/* Roll some dice */
+	for (j = i = 0; i < 18; i++) {
 	    dice[i] = randint(3 + i % 3); /* Roll 3,4,5 sided dice once each */
-	    tot += dice[i];
+	    j += dice[i];
 	}
+
+	/* Verify totals */
+	if (j > 42 && j < 54) break;
     }
-    while (tot <= 42 || tot >= 54);
-    
-    for (i = 0; i < 6; i++)
-	py.stats.max_stat[i] = 5 + dice[3 * i] + dice[3 * i + 1] +
-	    dice[3 * i + 2];
+
+    /* Each stat is 5 + 1d3 + 1d4 + 1d5 */
+    for (i = 0; i < 6; i++) {
+	j = 5 + dice[3*i] + dice[3*i+1] + dice[3*i+2];
+	p_ptr->stats.max_stat[i] = j;
+    }
 }
 
 /*
@@ -412,38 +412,38 @@ static void get_all_stats(void)
 {
     register int        j;
 
-    player_type *p_ptr = &py;
-    player_race *r_ptr = &race[p_ptr->misc.prace];
+    player_race *rp_ptr = &race[p_ptr->misc.prace];
 
     get_stats();
+
     /* Modify the stats for "class" */
-    change_stat(A_STR, r_ptr->str_adj);
-    change_stat(A_INT, r_ptr->int_adj);
-    change_stat(A_WIS, r_ptr->wis_adj);
-    change_stat(A_DEX, r_ptr->dex_adj);
-    change_stat(A_CON, r_ptr->con_adj);
-    change_stat(A_CHR, r_ptr->chr_adj);
+    change_stat(A_STR, rp_ptr->str_adj);
+    change_stat(A_INT, rp_ptr->int_adj);
+    change_stat(A_WIS, rp_ptr->wis_adj);
+    change_stat(A_DEX, rp_ptr->dex_adj);
+    change_stat(A_CON, rp_ptr->con_adj);
+    change_stat(A_CHR, rp_ptr->chr_adj);
 
     /* Analyze the stats */
     for (j = 0; j < 6; j++) {
-	py.stats.cur_stat[j] = py.stats.max_stat[j];
-	py.stats.use_stat[j] = modify_stat(j, py.stats.mod_stat[j]);
+	p_ptr->stats.cur_stat[j] = p_ptr->stats.max_stat[j];
+	p_ptr->stats.use_stat[j] = modify_stat(j, p_ptr->stats.mod_stat[j]);
     }
 
-    p_ptr->misc.srh = r_ptr->srh;
-    p_ptr->misc.bth = r_ptr->bth;
-    p_ptr->misc.bthb = r_ptr->bthb;
-    p_ptr->misc.fos = r_ptr->fos;
-    p_ptr->misc.stl = r_ptr->stl;
-    p_ptr->misc.save = r_ptr->bsav;
-    p_ptr->misc.hitdie = r_ptr->bhitdie;
+    p_ptr->misc.srh = rp_ptr->srh;
+    p_ptr->misc.bth = rp_ptr->bth;
+    p_ptr->misc.bthb = rp_ptr->bthb;
+    p_ptr->misc.fos = rp_ptr->fos;
+    p_ptr->misc.stl = rp_ptr->stl;
+    p_ptr->misc.save = rp_ptr->bsav;
+    p_ptr->misc.hitdie = rp_ptr->bhitdie;
     p_ptr->misc.lev = 1;
     p_ptr->misc.ptodam = todam_adj();
     p_ptr->misc.ptohit = tohit_adj();
     p_ptr->misc.ptoac = 0;
     p_ptr->misc.pac = toac_adj();
-    p_ptr->misc.expfact = r_ptr->b_exp;
-    p_ptr->flags.see_infra = r_ptr->infra;
+    p_ptr->misc.expfact = rp_ptr->b_exp;
+    p_ptr->flags.see_infra = rp_ptr->infra;
 }
 
 
@@ -459,11 +459,11 @@ static void put_auto_stats()
 
     /* Put the stats */
     for (i = 0; i < 6; i++) {
-	cnv_stat(py.stats.use_stat[i], buf);
+	cnv_stat(p_ptr->stats.use_stat[i], buf);
 	put_buffer(stat_names[i], 2 + i, 61);
 	put_buffer(buf, 2 + i, 66);
-	if (py.stats.max_stat[i] > py.stats.cur_stat[i]) {
-	    cnv_stat(py.stats.max_stat[i], buf);
+	if (p_ptr->stats.max_stat[i] > p_ptr->stats.cur_stat[i]) {
+	    cnv_stat(p_ptr->stats.max_stat[i], buf);
 	    put_buffer(buf, 2 + i, 73);
 	}
     }
@@ -480,8 +480,9 @@ static void print_history()
     register int        i;
 
     put_buffer("Character Background", 14, 27);
-    for (i = 0; i < 4; i++)
-	prt(py.misc.history[i], i + 15, 10);
+    for (i = 0; i < 4; i++) {
+	prt(p_ptr->misc.history[i], i + 15, 10);
+    }
 }
 
 
@@ -493,57 +494,54 @@ static void print_history()
 
 static void get_history(void)
 {
-    int                      hist_ptr, cur_ptr, test_roll, flag;
+    int                      hist_idx, cur_idx, test_roll, flag;
     register int             start_pos, end_pos, cur_len;
     int                      line_ctr, new_start = 0, social_class;
     char                     history_block[240];
-    player_background		*b_ptr;
+    player_background		*bp_ptr;
 
     /* Get a block of history text */
     /* Special race */
-    if (py.misc.prace == 8) {
-	hist_ptr = 1;
+    if (p_ptr->misc.prace == 8) {
+	hist_idx = 1;
     }
 
     /* Special race */
-    else if (py.misc.prace > 8) {
-	hist_ptr = 2 * 3 + 1;
+    else if (p_ptr->misc.prace > 8) {
+	hist_idx = 2 * 3 + 1;
     }
 
     /* Normal races */
     else {
-	hist_ptr = py.misc.prace * 3 + 1;
+	hist_idx = p_ptr->misc.prace * 3 + 1;
     }
 
     history_block[0] = '\0';
     social_class = randint(4);
-    cur_ptr = 0;
+    cur_idx = 0;
 
     /* Process the history */
-    do {
-	flag = FALSE;
-	do {
-	    if (background[cur_ptr].chart == hist_ptr) {
+    while (hist_idx >= 1) {
+	for (flag = FALSE; !flag; ) {
+	    if (background[cur_idx].chart == hist_idx) {
 		test_roll = randint(100);
-		while (test_roll > background[cur_ptr].roll) cur_ptr++;
-		b_ptr = &background[cur_ptr];
-		(void)strcat(history_block, b_ptr->info);
-		social_class += b_ptr->bonus - 50;
-		if (hist_ptr > b_ptr->next) cur_ptr = 0;
-		hist_ptr = b_ptr->next;
+		while (test_roll > background[cur_idx].roll) cur_idx++;
+		bp_ptr = &background[cur_idx];
+		(void)strcat(history_block, bp_ptr->info);
+		social_class += bp_ptr->bonus - 50;
+		if (hist_idx > bp_ptr->next) cur_idx = 0;
+		hist_idx = bp_ptr->next;
 		flag = TRUE;
 	    }
 	    else {
-		cur_ptr++;
+		cur_idx++;
 	    }
 	}
-	while (!flag);
     }
-    while (hist_ptr >= 1);
 
     /* clear the previous history strings */
-    for (hist_ptr = 0; hist_ptr < 4; hist_ptr++) {
-	py.misc.history[hist_ptr][0] = '\0';
+    for (hist_idx = 0; hist_idx < 4; hist_idx++) {
+	p_ptr->misc.history[hist_idx][0] = '\0';
     }
 
     /* Process block of history text for pretty output	 */
@@ -553,7 +551,7 @@ static void get_history(void)
     flag = FALSE;
     while (history_block[end_pos] == ' ') end_pos--;
 
-    do {
+    for (flag = FALSE; !flag; ) {
 	while (history_block[start_pos] == ' ') start_pos++;
 	cur_len = end_pos - start_pos + 1;
 	if (cur_len > 60) {
@@ -566,20 +564,19 @@ static void get_history(void)
 	    flag = TRUE;
 	}
 
-	(void)strncpy(py.misc.history[line_ctr],
+	(void)strncpy(p_ptr->misc.history[line_ctr],
 		&history_block[start_pos], cur_len);
-	py.misc.history[line_ctr][cur_len] = '\0';
+	p_ptr->misc.history[line_ctr][cur_len] = '\0';
 	line_ctr++;
 	start_pos = new_start;
     }
-    while (!flag);
 
     /* Verify social class */
     if (social_class > 100) social_class = 100;
     else if (social_class < 1) social_class = 1;
 
     /* Save the social class */
-    py.misc.sc = social_class;
+    p_ptr->misc.sc = social_class;
 }
 
 
@@ -592,10 +589,10 @@ static void get_prev_history()
     background->chart = prev.bg.chart;
     background->next = prev.bg.next;
     background->bonus = prev.bg.bonus;
-    py.misc.sc = prev.sc;
+    p_ptr->misc.sc = prev.sc;
 
     for (i = 0; i < 4; i++)
-	strncpy(py.misc.history[i], prev.history[i], 60);
+	strncpy(p_ptr->misc.history[i], prev.history[i], 60);
 }
 
 static void set_prev_history()
@@ -605,12 +602,12 @@ static void set_prev_history()
     prev.bg.chart = background->chart;
     prev.bg.next = background->next;
     prev.bg.bonus = background->bonus;
-    prev.sc = py.misc.sc;
+    prev.sc = p_ptr->misc.sc;
 
-    (void)strncpy(prev.history[0], py.misc.history[0], 60);
-    (void)strncpy(prev.history[1], py.misc.history[1], 60);
-    (void)strncpy(prev.history[2], py.misc.history[2], 60);
-    (void)strncpy(prev.history[3], py.misc.history[3], 60);
+    (void)strncpy(prev.history[0], p_ptr->misc.history[0], 60);
+    (void)strncpy(prev.history[1], p_ptr->misc.history[1], 60);
+    (void)strncpy(prev.history[2], p_ptr->misc.history[2], 60);
+    (void)strncpy(prev.history[3], p_ptr->misc.history[3], 60);
 
     return;
 }
@@ -623,32 +620,32 @@ static void get_ahw(void)
 {
     register int        i;
 
-    i = py.misc.prace;
+    i = p_ptr->misc.prace;
     
     /* Calculate the starting age */
-    py.misc.age = race[i].b_age + randint((int)race[i].m_age);
+    p_ptr->misc.age = race[i].b_age + randint((int)race[i].m_age);
 
     /* Calculate the height/weight for males */
-    if (py.misc.male) {
-	py.misc.ht = randnor((int)race[i].m_b_ht, (int)race[i].m_m_ht);
-	py.misc.wt = randnor((int)race[i].m_b_wt, (int)race[i].m_m_wt);
+    if (p_ptr->misc.male) {
+	p_ptr->misc.ht = randnor((int)race[i].m_b_ht, (int)race[i].m_m_ht);
+	p_ptr->misc.wt = randnor((int)race[i].m_b_wt, (int)race[i].m_m_wt);
     }
 
     /* Calculate the height/weight for females */
     else {
-	py.misc.ht = randnor((int)race[i].f_b_ht, (int)race[i].f_m_ht);
-	py.misc.wt = randnor((int)race[i].f_b_wt, (int)race[i].f_m_wt);
+	p_ptr->misc.ht = randnor((int)race[i].f_b_ht, (int)race[i].f_m_ht);
+	p_ptr->misc.wt = randnor((int)race[i].f_b_wt, (int)race[i].f_m_wt);
     }
-    py.misc.disarm += race[i].b_dis;
+    p_ptr->misc.disarm += race[i].b_dis;
 }
 
 
 static void set_prev_ahw()
 {
-    prev.age = py.misc.age;
-    prev.wt = py.misc.wt;
-    prev.ht = py.misc.ht;
-    prev.disarm = py.misc.disarm;
+    prev.age = p_ptr->misc.age;
+    prev.wt = p_ptr->misc.wt;
+    prev.ht = p_ptr->misc.ht;
+    prev.disarm = p_ptr->misc.disarm;
 
     return;
 }
@@ -656,10 +653,10 @@ static void set_prev_ahw()
 
 static void get_prev_ahw()
 {
-    py.misc.age = prev.age;
-    py.misc.wt = prev.wt;
-    py.misc.ht = prev.ht;
-    py.misc.disarm = prev.disarm;
+    p_ptr->misc.age = prev.age;
+    p_ptr->misc.wt = prev.wt;
+    p_ptr->misc.ht = prev.ht;
+    p_ptr->misc.disarm = prev.disarm;
     prev.age = prev.wt = prev.ht = prev.disarm = 0;
 }
 
@@ -678,23 +675,30 @@ static int monval(int i)
  */
 static void get_money(void)
 {
-    register int        tmp, gold;
-    register u16b    *a_ptr;
+    register int        gold;
 
-    a_ptr = py.stats.max_stat;
-    tmp = monval(a_ptr[A_STR]) + monval(a_ptr[A_INT])
-	+ monval(a_ptr[A_WIS]) + monval(a_ptr[A_CON])
-	+ monval(a_ptr[A_DEX]);
+    /* Social Class adj */
+    gold = p_ptr->misc.sc * 6 + randint(25) + 325;
 
-    gold = py.misc.sc * 6 + randint(25) + 325;          /* Social Class adj */
-    gold -= tmp;		   /* Stat adj */
-    gold += monval(a_ptr[A_CHR]);  /* Charisma adj	 */
-    if (!py.misc.male)
-	gold += 50;		   /* She charmed the banker into it! -CJS- */
-				   /* She slept with the banker.. :) -GDH-  */
-    if (gold < 80)
-	gold = 80;		   /* Minimum */
-    py.misc.au = gold;
+    /* Stat adj */
+    gold -= monval(p_ptr->stats.max_stat[A_STR]);
+    gold -= monval(p_ptr->stats.max_stat[A_INT]);
+    gold -= monval(p_ptr->stats.max_stat[A_WIS]);
+    gold -= monval(p_ptr->stats.max_stat[A_CON]);
+    gold -= monval(p_ptr->stats.max_stat[A_DEX]);
+
+    /* Charisma adj */
+    gold += monval(a_ptr[A_CHR]);
+
+    /* Minimum 80 gold */
+    if (gold < 80) gold = 80;
+
+    /* She charmed the banker into it! -CJS- */
+    /* She slept with the banker.. :) -GDH-  */
+    if (!p_ptr->misc.male) gold += 50;
+
+    /* Save the gold */
+    p_ptr->misc.au = gold;
 }
 
 
@@ -703,7 +707,7 @@ void rerate()
 {
     int         min_value, max_value, i, percent;
     char        buf[50];
-    struct misc *m_ptr = &py.misc;
+    struct misc *m_ptr = &p_ptr->misc;
 
     min_value = (MAX_PLAYER_LEVEL * 3 * (m_ptr->hitdie - 1)) / 8 +
 	MAX_PLAYER_LEVEL;
@@ -730,14 +734,20 @@ void rerate()
 
 
 
-/* ---------- M A I N  for Character Creation Routine ---------- */
-/* -JWT-	 */
+
+/*
+ * Create a character.  Then wait for a moment.
+ *
+ * The delay may be reduced, but is recommended to keep players
+ * from continuously rolling up characters, which can be VERY
+ * expensive CPU wise. -JWT-
+ */
 void create_character()
 {
-    char       c;
+    char		c;
 
-    player_class	*cptr;
-    player_race		*rptr;
+    player_class	*cp_ptr;
+    player_race		*rp_ptr;
 
 #ifdef AUTOROLLER
 
@@ -746,6 +756,7 @@ void create_character()
     int			stat[6];
     int			autoroll = 0;
     int			msstat = 0; /* Max autoroll w/ look for -SAC */
+    int			stat_idx = 0;
 
     char		inp[60];
 
@@ -766,6 +777,11 @@ void create_character()
     /* Choose a class */
     get_class_choice();
 
+    /* Access the race/class */
+    cp_ptr = &class[p_ptr->misc.pclass];
+    rp_ptr = &race[p_ptr->misc.prace];
+
+
 #ifdef AUTOROLLER
 
 /*
@@ -778,71 +794,58 @@ void create_character()
     put_buffer("Do you want to use automatic rolling? (? for Help) ", 20, 2);
 
     /* allow multiple key entry, so they can ask for help and still get back to this menu... -CFT */
-    do {   
+    while (1) {
 	move_cursor(20, 52);
 	c = inkey();
 	if (c == '?') helpfile(ANGBAND_WELCOME);
-    } while ((c != 'y') && (c != 'Y') && (c != 'n') && (c != 'N'));
+	else if (strchr("ynYN", c)) break;
+    }
 
 
     /* Prepare the autoroller */
     if ((c == 'Y') || (c == 'y')) {
 
-	autoroll = 1;
+	autoroll = TRUE;
 
 	clear_from(15);
-	cptr = &class[py.misc.pclass];
-	rptr = &race[py.misc.prace];
 	put_buffer("Enter minimum attribute for: ", 15, 2);
 
 	/* Check the stats */
 	for (i = 0; i < 6; i++) {
-	    int                 stat_idx = 0;
+
+		clear_from(16 + i);
 
 	    switch (i) {
 	      case 0:
 		stat_idx = A_STR;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_str+rptr->str_adj, TRUE);
-		sprintf(inp, "    Strength (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_str + rp_ptr->str_adj;
 		break;
 	      case 1:
 		stat_idx = A_INT;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_int+rptr->int_adj, TRUE);
-		sprintf(inp, "Intelligence (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_int + rp_ptr->int_adj;
 		break;
 	      case 2:
 		stat_idx = A_WIS;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_wis+rptr->wis_adj, TRUE);
-		sprintf(inp, "      Wisdom (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_wis + rp_ptr->wis_adj;
 		break;
 	      case 3:
 		stat_idx = A_DEX;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_dex+rptr->dex_adj, TRUE);
-		sprintf(inp, "   Dexterity (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_dex + rp_ptr->dex_adj;
 		break;
 	      case 4:
 		stat_idx = A_CON;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_con+rptr->con_adj, TRUE);
-		sprintf(inp, "Constitution (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_con + rp_ptr->con_adj;
 		break;
 	      case 5:
 		stat_idx = A_CHR;
-		clear_from(16 + i);
-		msstat = adjust_stat(17, cptr->madj_chr+rptr->chr_adj, TRUE);
-		sprintf(inp, "    Charisma (Max of %2d): ", msstat);
-		put_buffer(inp, 16 + i, 5);
+		msstat = cp_ptr->madj_chr + rp_ptr->chr_adj;
 		break;
 	    } /* switch */
+
+	    msstat = adjust_stat(17, msstat, TRUE);
+
+	    sprintf(inp, "%-12s (Max of %2d): ", stat_name[i], msstat);
+		put_buffer(inp, 16 + i, 5);
 
 	    do {
 
@@ -908,12 +911,12 @@ void create_character()
 	} while ((autoroll) &&
 
 	    /* Break if "happy" */
-		 ((stat[A_STR] > py.stats.cur_stat[A_STR]) ||
-		  (stat[A_INT] > py.stats.cur_stat[A_INT]) ||
-		  (stat[A_WIS] > py.stats.cur_stat[A_WIS]) ||
-		  (stat[A_DEX] > py.stats.cur_stat[A_DEX]) ||
-		  (stat[A_CON] > py.stats.cur_stat[A_CON]) ||
-		  (stat[A_CHR] > py.stats.cur_stat[A_CHR]))
+		 ((stat[A_STR] > p_ptr->stats.cur_stat[A_STR]) ||
+		  (stat[A_INT] > p_ptr->stats.cur_stat[A_INT]) ||
+		  (stat[A_WIS] > p_ptr->stats.cur_stat[A_WIS]) ||
+		  (stat[A_DEX] > p_ptr->stats.cur_stat[A_DEX]) ||
+		  (stat[A_CON] > p_ptr->stats.cur_stat[A_CON]) ||
+		  (stat[A_CHR] > p_ptr->stats.cur_stat[A_CHR]))
 
 #if (defined (unix) || defined(ATARI_ST)) /* CFT's if/elif/else    */
 		 && (!check_input(1)));	  /* unix needs flush here */
@@ -926,7 +929,7 @@ void create_character()
 #endif				   /* character checks */
 #endif				   /* AUTOROLLER main looping section */
 
-	/* Common stuff */
+	/* Calculate Common stuff */
        get_history();
        get_ahw();
 
