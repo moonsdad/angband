@@ -47,9 +47,6 @@ int default_dir = FALSE;	/* Use last direction for repeated command */
 int create_up_stair = FALSE;
 int create_down_stair = FALSE;
 
-char *old_state = NULL;         /* state array initialized by time -CWS */
-char *dummy_state = NULL;       /* dummy state array -CWS */
-
 s16b log_index = (-1);		/* Index to log file. (<= 0 means no log) */
 int highscore_fd;		/* File descriptor to high score file */
 
@@ -75,7 +72,6 @@ int to_be_wizard = FALSE;	/* used during startup, when -w option used */
 s16b panic_save = FALSE;	/* this is true if playing from a panic save */
 s16b noscore = FALSE;		/* Don't log the game. -CJS- */
 
-int is_home = FALSE;		/* Are we in our home? */
 int in_store_flag = FALSE;	/* Don't redisplay light in stores -DGK */
 
 int coin_type = 0;		/* Hack -- force coin type */
@@ -126,7 +122,7 @@ int eof_flag = FALSE;		/* Used to signal EOF/HANGUP condition */
 int player_light;		/* Player carrying light */
 int light_flag = FALSE;		/* Track if temporary light about player.  */
 
-int no_haggle_flag = FALSE;	/* does the player not want to haggle? -CWS */
+int no_haggle_flag = FALSE;	/* Cancel haggling */
 
 int show_inven_weight = TRUE;	/* Show weights in inven */
 int show_equip_weight = TRUE;	/* Show weights in equip */

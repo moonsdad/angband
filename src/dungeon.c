@@ -167,7 +167,7 @@ static void regen_monsters(void)
 
 	if (m_ptr->hp >= 0) {
 	    if (m_ptr->maxhp == 0) {	/* then we're just going to fix it!  -CFT */
-		if ((r_list[m_ptr->mptr].cdefense & MAX_HP) || be_nasty)
+		if ((r_list[m_ptr->mptr].cdefense & MF2_MAX_HP) || be_nasty)
 		    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
 		else
 		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
@@ -206,7 +206,7 @@ void dungeon(void)
 	player_light = TRUE;
     else
 	player_light = FALSE;
-    if (i_ptr->tval == TV_LIGHT)
+    if (i_ptr->tval == TV_LITE)
 	i = i_ptr->subval;
     else
 	i = 195;
@@ -1049,7 +1049,7 @@ void dungeon(void)
 			    (i_ptr->tval == TV_BOLT) ||
 			    (i_ptr->tval == TV_ARROW) ||
 			    (i_ptr->tval == TV_DIGGING) ||
-			    (i_ptr->tval == TV_SLING_AMMO) ||
+			    (i_ptr->tval == TV_SHOT) ||
 			    (i_ptr->tval == TV_SOFT_ARMOR) ||
 			    (i_ptr->tval == TV_HARD_ARMOR) ||
 			    (i_ptr->tval == TV_HELM) ||
@@ -1098,7 +1098,7 @@ void dungeon(void)
 		     (i_ptr->tval == TV_BOOTS) ||
 		     (i_ptr->tval == TV_GLOVES) ||
 		     (i_ptr->tval == TV_DIGGING) ||
-		     (i_ptr->tval == TV_SLING_AMMO) ||
+		     (i_ptr->tval == TV_SHOT) ||
 		     (i_ptr->tval == TV_BOLT) ||
 		     (i_ptr->tval == TV_ARROW) ||
 		     (i_ptr->tval == TV_BOW) ||
@@ -1132,7 +1132,7 @@ void dungeon(void)
 				  describe_use(i),
 				  ((i_ptr->tval == TV_BOLT) ||
 				   (i_ptr->tval == TV_ARROW) ||
-				   (i_ptr->tval == TV_SLING_AMMO) ||
+				   (i_ptr->tval == TV_SHOT) ||
 				   (i_ptr->tval == TV_BOOTS) ||
 				 (i_ptr->tval == TV_GLOVES)) ? "are" : "is",
 				  value_check(i_ptr));

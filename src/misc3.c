@@ -205,16 +205,16 @@ int m_bonus(int base, int limit, int level)
 void give_1_hi_resist(inven_type *t)
 {
     switch (randint(10)) {
-	case 1: t->flags2 |= TR_RES_CONF; break;
-	case 2: t->flags2 |= TR_RES_SOUND; break;
-	case 3: t->flags2 |= TR_RES_LT; break;
-	case 4: t->flags2 |= TR_RES_DARK; break;
-	case 5: t->flags2 |= TR_RES_CHAOS; break;
-	case 6: t->flags2 |= TR_RES_DISENCHANT; break;
-	case 7: t->flags2 |= TR_RES_SHARDS; break;
-	case 8: t->flags2 |= TR_RES_NEXUS; break;
-	case 9: t->flags2 |= TR_RES_BLIND; break;
-	case 10: t->flags2 |= TR_RES_NETHER; break;
+	case 1: t->flags2 |= TR2_RES_CONF; break;
+	case 2: t->flags2 |= TR2_RES_SOUND; break;
+	case 3: t->flags2 |= TR2_RES_LT; break;
+	case 4: t->flags2 |= TR2_RES_DARK; break;
+	case 5: t->flags2 |= TR2_RES_CHAOS; break;
+	case 6: t->flags2 |= TR2_RES_DISENCHANT; break;
+	case 7: t->flags2 |= TR2_RES_SHARDS; break;
+	case 8: t->flags2 |= TR2_RES_NEXUS; break;
+	case 9: t->flags2 |= TR2_RES_BLIND; break;
+	case 10: t->flags2 |= TR2_RES_NETHER; break;
     }
 }
 
@@ -278,8 +278,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    if (!stricmp(object_list[t_ptr->index].name, "& Robe") &&
 		((magik(special) && randint(30) == 1)
 		 || (good == 666 && magik(special)))) {
-		t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD | TR_RES_ACID |
-				 TR_RES_FIRE | TR_SUST_STAT);
+		t_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD | TR2_RES_ACID |
+				 TR2_RES_FIRE | TR_SUST_STAT);
 		if (wizard || peek)
 		    msg_print("Robe of the Magi");
 		rating += 30;
@@ -298,13 +298,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if ((randint(3) == 1 || good == 666) && !not_unique &&
 			unique_armour(t_ptr))
 			break;
-		    t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD | TR_RES_ACID |
-				     TR_RES_FIRE);
+		    t_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD | TR2_RES_ACID |
+				     TR2_RES_FIRE);
 		    if (randint(3) == 1) {
 			if (peek) msg_print("Elvenkind");
 			rating += 25;
 			give_1_hi_resist(t_ptr);	/* JLS */
-			t_ptr->flags |= TR_STEALTH;
+			t_ptr->flags |= TR1_STEALTH;
 			t_ptr->p1 = randint(3);
 			t_ptr->name2 = SN_ELVENKIND;
 			t_ptr->toac += 15;
@@ -330,7 +330,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    if (peek) msg_print("Resist Acid");
 		    rating += 15;
-		    t_ptr->flags |= TR_RES_ACID;
+		    t_ptr->flags |= TR2_RES_ACID;
 		    t_ptr->name2 = SN_RA;
 		    t_ptr->cost += 1000L;
 		    break;
@@ -341,7 +341,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    if (peek) msg_print("Resist Fire");
 		    rating += 17;
-		    t_ptr->flags |= TR_RES_FIRE;
+		    t_ptr->flags |= TR2_RES_FIRE;
 		    t_ptr->name2 = SN_RF;
 		    t_ptr->cost += 600L;
 		    break;
@@ -352,7 +352,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    if (peek) msg_print("Resist Cold");
 		    rating += 16;
-		    t_ptr->flags |= TR_RES_COLD;
+		    t_ptr->flags |= TR2_RES_COLD;
 		    t_ptr->name2 = SN_RC;
 		    t_ptr->cost += 600L;
 		    break;
@@ -363,7 +363,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    if (peek) msg_print("Resist Lightning");
 		    rating += 15;
-		    t_ptr->flags |= TR_RES_LIGHT;
+		    t_ptr->flags |= TR2_RES_LIGHT;
 		    t_ptr->name2 = SN_RL;
 		    t_ptr->cost += 500L;
 		    break;
@@ -399,7 +399,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if (peek) msg_print("Whip of Fire");
 		    rating += 20;
 		    t_ptr->name2 = SN_FIRE;
-		    t_ptr->flags |= (TR_FLAME_TONGUE | TR_RES_FIRE);
+		    t_ptr->flags |= (TR1_BRAND_FIRE | TR2_RES_FIRE);
 		    /* this should allow some WICKED whips -CFT */
 		    while (randint(5*(int)t_ptr->damage[0])==1) {
 			t_ptr->damage[0]++;
@@ -419,8 +419,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Holy Avenger");
 			rating += 30;
 			t_ptr->flags |= (TR_SEE_INVIS | TR_SUST_STAT |
-				      TR_SLAY_UNDEAD | TR_SLAY_EVIL | TR_WIS);
-			t_ptr->flags2 |= (TR_SLAY_DEMON | TR_BLESS_BLADE);
+				      TR1_SLAY_UNDEAD | TR1_SLAY_EVIL | TR1_WIS);
+			t_ptr->flags2 |= (TR1_SLAY_DEMON | TR_BLESS_BLADE);
 			t_ptr->tohit += 5;
 			t_ptr->todam += 5;
 			t_ptr->toac += randint(4);
@@ -439,9 +439,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Defender");
 			rating += 23;
-			t_ptr->flags |= (TR_FFALL | TR_RES_LIGHT | TR_SEE_INVIS
-				   | TR_FREE_ACT | TR_RES_COLD | TR_RES_ACID
-				     | TR_RES_FIRE | TR_REGEN | TR_STEALTH);
+			t_ptr->flags |= (TR_FFALL | TR2_RES_LIGHT | TR_SEE_INVIS
+				   | TR2_FREE_ACT | TR2_RES_COLD | TR2_RES_ACID
+				     | TR2_RES_FIRE | TR_REGEN | TR1_STEALTH);
 			t_ptr->tohit += 3;
 			t_ptr->todam += 3;
 			t_ptr->toac += 5 + randint(5);
@@ -458,7 +458,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    unique_weapon(t_ptr))
 			    break;
 			rating += 20;
-			t_ptr->flags |= (TR_FLAME_TONGUE | TR_RES_FIRE);
+			t_ptr->flags |= (TR1_BRAND_FIRE | TR2_RES_FIRE);
 			if (peek)
 			    msg_print("Flame");
 			t_ptr->tohit += 2;
@@ -474,7 +474,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Frost");
 			rating += 20;
-			t_ptr->flags |= (TR_FROST_BRAND | TR_RES_COLD);
+			t_ptr->flags |= (TR1_BRAND_COLD | TR2_RES_COLD);
 			t_ptr->tohit += 2;
 			t_ptr->todam += 2;
 			t_ptr->name2 = SN_FB;
@@ -482,7 +482,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		      case 7:
 		      case 8:	   /* Slay Animal  */
-			t_ptr->flags |= TR_SLAY_ANIMAL;
+			t_ptr->flags |= TR1_SLAY_ANIMAL;
 			rating += 15;
 			if (peek)
 			    msg_print("Slay Animal");
@@ -493,7 +493,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		      case 9:
 		      case 10:	   /* Slay Dragon	 */
-			t_ptr->flags |= TR_SLAY_DRAGON;
+			t_ptr->flags |= TR1_SLAY_DRAGON;
 			if (peek)
 			    msg_print("Slay Dragon");
 			rating += 18;
@@ -504,9 +504,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		      case 11:
 		      case 12:	   /* Slay Evil   */
-			t_ptr->flags |= TR_SLAY_EVIL;
+			t_ptr->flags |= TR1_SLAY_EVIL;
 			if (randint(3) == 1) {
-			    t_ptr->flags |= (TR_WIS);
+			    t_ptr->flags |= (TR1_WIS);
 			    t_ptr->flags2 |= (TR_BLESS_BLADE);
 			    t_ptr->p1 = m_bonus(0, 3, level);
 			    t_ptr->cost += (200 * t_ptr->p1);
@@ -521,7 +521,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		      case 13:
 		      case 14:	   /* Slay Undead	  */
-			t_ptr->flags |= (TR_SEE_INVIS | TR_SLAY_UNDEAD);
+			t_ptr->flags |= (TR_SEE_INVIS | TR1_SLAY_UNDEAD);
 			if (randint(3) == 1) {
 			    t_ptr->flags2 |= (TR_HOLD_LIFE);
 			    t_ptr->cost += 1000;
@@ -537,7 +537,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      case 15:
 		      case 16:
 		      case 17:	   /* Slay Orc */
-			t_ptr->flags2 |= TR_SLAY_ORC;
+			t_ptr->flags2 |= TR1_SLAY_ORC;
 			if (peek)
 			    msg_print("Slay Orc");
 			rating += 13;
@@ -549,7 +549,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      case 18:
 		      case 19:
 		      case 20:	   /* Slay Troll */
-			t_ptr->flags2 |= TR_SLAY_TROLL;
+			t_ptr->flags2 |= TR1_SLAY_TROLL;
 			if (peek)
 			    msg_print("Slay Troll");
 			rating += 13;
@@ -561,7 +561,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      case 21:
 		      case 22:
 		      case 23:
-			t_ptr->flags2 |= TR_SLAY_GIANT;
+			t_ptr->flags2 |= TR1_SLAY_GIANT;
 			if (peek)
 			    msg_print("Slay Giant");
 			rating += 14;
@@ -573,7 +573,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      case 24:
 		      case 25:
 		      case 26:
-			t_ptr->flags2 |= TR_SLAY_DEMON;
+			t_ptr->flags2 |= TR1_SLAY_DEMON;
 			if (peek)
 			    msg_print("Slay Demon");
 			rating += 16;
@@ -589,9 +589,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Westernesse");
 			rating += 20;
-			t_ptr->flags |= (TR_SEE_INVIS | TR_DEX | TR_CON | TR_STR |
-					 TR_FREE_ACT);
-			t_ptr->flags2 |= TR_SLAY_ORC;
+			t_ptr->flags |= (TR_SEE_INVIS | TR1_DEX | TR1_CON | TR1_STR |
+					 TR2_FREE_ACT);
+			t_ptr->flags2 |= TR1_SLAY_ORC;
 			t_ptr->tohit += randint(5) + 3;
 			t_ptr->todam += randint(5) + 3;
 			t_ptr->p1 = 1;
@@ -607,7 +607,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Blessed");
 			rating += 20;
-			t_ptr->flags = TR_WIS;
+			t_ptr->flags = TR1_WIS;
 			t_ptr->flags2 = TR_BLESS_BLADE;
 			t_ptr->tohit += 3;
 			t_ptr->todam += 3;
@@ -679,8 +679,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			t_ptr->tohit = 20;
 			t_ptr->todam = 22;
 			t_ptr->p1 = 3;
-			t_ptr->flags |= (TR_STEALTH | TR_DEX);
-			t_ptr->flags2 |= (TR_ARTIFACT | TR_RES_DISENCHANT);
+			t_ptr->flags |= (TR1_STEALTH | TR1_DEX);
+			t_ptr->flags2 |= (TR_ARTIFACT | TR2_RES_DISENCHANT);
 			t_ptr->cost = 35000L;
 			BELEG = 1;
 			break;
@@ -696,7 +696,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			t_ptr->tohit = 17;
 			t_ptr->todam = 19;
 			t_ptr->p1 = 3;
-			t_ptr->flags |= (TR_FREE_ACT | TR_DEX);
+			t_ptr->flags |= (TR2_FREE_ACT | TR1_DEX);
 			t_ptr->flags2 |= (TR_ARTIFACT);
 			t_ptr->cost = 20000L;
 			BARD = 1;
@@ -716,7 +716,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    t_ptr->tohit = 10;
 		    t_ptr->todam = 14;
 		    t_ptr->p1 = 1;
-		    t_ptr->flags |= (TR_SPEED | TR_RES_FIRE);
+		    t_ptr->flags |= (TR1_SPEED | TR2_RES_FIRE);
 		    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 		    t_ptr->cost = 38000L;
 		    CUBRAGOL = 1;
@@ -798,7 +798,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		  case 1: case 2: case 3:
 		    if (peek)	msg_print("Free action");
 		    rating += 11;
-		    t_ptr->flags |= TR_FREE_ACT;
+		    t_ptr->flags |= TR2_FREE_ACT;
 		    t_ptr->name2 = SN_FREE_ACTION;
 		    t_ptr->cost += 1000L;
 		    break;
@@ -820,7 +820,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			msg_print("Agility");
 		    rating += 14;
 		    t_ptr->p1 = 2 + randint(2);
-		    t_ptr->flags |= TR_DEX;
+		    t_ptr->flags |= TR1_DEX;
 		    t_ptr->cost += (t_ptr->p1) * 400;
 		    break;
 
@@ -835,7 +835,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    t_ptr->p1 = 1 + randint(4);
 		    t_ptr->tohit += 1 + randint(4);
 		    t_ptr->todam += 1 + randint(4);
-		    t_ptr->flags |= TR_STR;
+		    t_ptr->flags |= TR1_STR;
 		    t_ptr->ident |= ID_SHOW_HITDAM;
 		    t_ptr->ident |= ID_NOSHOW_TYPE;
 		    t_ptr->cost += (t_ptr->tohit + t_ptr->todam + t_ptr->p1) * 300;
@@ -847,11 +847,11 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	else if (magik(cursed)) {
 	    if (magik(special)) {
 		if (randint(2) == 1) {
-		    t_ptr->flags |= TR_DEX;
+		    t_ptr->flags |= TR1_DEX;
 		    t_ptr->name2 = SN_CLUMSINESS;
 		}
 		else {
-		    t_ptr->flags |= TR_STR;
+		    t_ptr->flags |= TR1_STR;
 		    t_ptr->name2 = SN_WEAKNESS;
 		}
 		t_ptr->p1 = (randint(3) - m_bonus(0, 10, level));
@@ -874,7 +874,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		if (tmp == 1) {
 		    if (!((randint(2) == 1) && !not_unique
 			  && unique_armour(t_ptr))) {
-			t_ptr->flags |= TR_SPEED;
+			t_ptr->flags |= TR1_SPEED;
 			if (wizard || peek)
 			    msg_print("Boots of Speed");
 			t_ptr->name2 = SN_SPEED;
@@ -890,13 +890,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			t_ptr->name2 = SN_SLOW_DESCENT;
 			t_ptr->cost += 250;
 		    } else if (tmp < 5) {
-			t_ptr->flags |= TR_STEALTH;
+			t_ptr->flags |= TR1_STEALTH;
 			rating += 16;
 			t_ptr->p1 = randint(3);
 			t_ptr->name2 = SN_STEALTH;
 			t_ptr->cost += 500;
 		    } else {	   /* 5,6 */
-			t_ptr->flags |= TR_FREE_ACT;
+			t_ptr->flags |= TR2_FREE_ACT;
 			rating += 15;
 			t_ptr->name2 = SN_FREE_ACTION;
 			t_ptr->cost += 500;
@@ -905,7 +905,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		else
 		 /* is metal boots, different odds since no stealth */
 		    if (tmp < 5) {
-			t_ptr->flags |= TR_FREE_ACT;
+			t_ptr->flags |= TR2_FREE_ACT;
 			rating += 15;
 			t_ptr->name2 = SN_FREE_ACTION;
 			t_ptr->cost += 500;
@@ -920,7 +920,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	} else if (magik(cursed)) {
 	    tmp = randint(3);
 	    if (tmp == 1) {
-		t_ptr->flags |= TR_SPEED;
+		t_ptr->flags |= TR1_SPEED;
 		t_ptr->name2 = SN_SLOWNESS;
 		t_ptr->p1 = -1;
 	    } else if (tmp == 2) {
@@ -955,7 +955,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 				msg_print("Intelligence");
 			    t_ptr->p1 = randint(2);
 			    rating += 13;
-			    t_ptr->flags |= TR_INT;
+			    t_ptr->flags |= TR1_INT;
 			    t_ptr->name2 = SN_INTELLIGENCE;
 			    t_ptr->cost += t_ptr->p1 * 500;
 			}
@@ -966,7 +966,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 				msg_print("Wisdom");
 			    rating += 13;
 			    t_ptr->p1 = randint(2);
-			    t_ptr->flags |= TR_WIS;
+			    t_ptr->flags |= TR1_WIS;
 			    t_ptr->name2 = SN_WISDOM;
 			    t_ptr->cost += t_ptr->p1 * 500;
 			}
@@ -984,7 +984,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			      unique_armour(t_ptr))) {
 			    if (peek)
 				msg_print("Light");
-			    t_ptr->flags2 |= (TR_RES_LT | TR_LIGHT);
+			    t_ptr->flags2 |= (TR2_RES_LT | TR_LIGHT);
 			    rating += 6;
 			    t_ptr->name2 = SN_LIGHT;
 			    t_ptr->cost += 500;
@@ -995,7 +995,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    if (peek)
 				msg_print("Helm of Seeing");
 			    t_ptr->flags |= TR_SEE_INVIS;
-			    t_ptr->flags2 |= TR_RES_BLIND;
+			    t_ptr->flags2 |= TR2_RES_BLIND;
 			    rating += 8;
 			    t_ptr->name2 = SN_SEEING;
 			    t_ptr->cost += 1000;
@@ -1020,8 +1020,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 				msg_print("Crown of Might");
 			    rating += 19;
 			    t_ptr->p1 = randint(3);
-			    t_ptr->flags |= (TR_FREE_ACT | TR_CON |
-					     TR_DEX | TR_STR);
+			    t_ptr->flags |= (TR2_FREE_ACT | TR1_CON |
+					     TR1_DEX | TR1_STR);
 			    t_ptr->name2 = SN_MIGHT;
 			    t_ptr->cost += 1000 + t_ptr->p1 * 500;
 			}
@@ -1031,7 +1031,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Lordliness");
 			t_ptr->p1 = randint(3);
 			rating += 17;
-			t_ptr->flags |= (TR_CHR | TR_WIS);
+			t_ptr->flags |= (TR1_CHR | TR1_WIS);
 			t_ptr->name2 = SN_LORDLINESS;
 			t_ptr->cost += 1000 + t_ptr->p1 * 500;
 			break;
@@ -1040,8 +1040,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Crown of the Magi");
 			rating += 15;
 			t_ptr->p1 = randint(3);
-			t_ptr->flags |= (TR_RES_LIGHT | TR_RES_COLD
-				      | TR_RES_ACID | TR_RES_FIRE | TR_INT);
+			t_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD
+				      | TR2_RES_ACID | TR2_RES_FIRE | TR1_INT);
 			t_ptr->name2 = SN_MAGI;
 			t_ptr->cost += 3000 + t_ptr->p1 * 500;
 			break;
@@ -1050,7 +1050,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Beauty");
 			t_ptr->p1 = randint(4);
-			t_ptr->flags |= TR_CHR;
+			t_ptr->flags |= TR1_CHR;
 			t_ptr->name2 = SN_BEAUTY;
 			t_ptr->cost += 750;
 			break;
@@ -1059,7 +1059,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Seeing");
 			rating += 8;
 			t_ptr->p1 = 5 * (1 + randint(4));
-			t_ptr->flags |= (TR_SEE_INVIS | TR_SEARCH);
+			t_ptr->flags |= (TR_SEE_INVIS | TR1_SEARCH);
 			t_ptr->name2 = SN_SEEING;
 			t_ptr->cost += 1000 + t_ptr->p1 * 100;
 			break;
@@ -1086,19 +1086,19 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		switch (randint(7)) {
 		  case 1:
 		    t_ptr->p1 = -randint(5);
-		    t_ptr->flags |= TR_INT;
+		    t_ptr->flags |= TR1_INT;
 		    t_ptr->name2 = SN_STUPIDITY;
 		    break;
 		  case 2:
 		  case 3:
 		    t_ptr->p1 = -randint(5);
-		    t_ptr->flags |= TR_WIS;
+		    t_ptr->flags |= TR1_WIS;
 		    t_ptr->name2 = SN_DULLNESS;
 		    break;
 		  case 4:
 		  case 5:
 		    t_ptr->p1 = -randint(5);
-		    t_ptr->flags |= TR_STR;
+		    t_ptr->flags |= TR1_STR;
 		    t_ptr->name2 = SN_WEAKNESS;
 		    break;
 		  case 6:
@@ -1107,7 +1107,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    break;
 		  case 7:
 		    t_ptr->p1 = -randint(5);
-		    t_ptr->flags |= TR_CHR;
+		    t_ptr->flags |= TR1_CHR;
 		    t_ptr->name2 = SN_UGLINESS;
 		    break;
 		}
@@ -1259,7 +1259,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 
     /* Subval should be even for store, odd for dungeon */
     /* Dungeon found ones will be partially charged	 */
-      case TV_LIGHT:
+      case TV_LITE:
 	if ((t_ptr->subval % 2) == 1) {
 	    t_ptr->p1 = randint(t_ptr->p1);
 	    t_ptr->subval -= 1;
@@ -1483,8 +1483,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_COLLUIN;
 			t_ptr->toac = 15;
-			t_ptr->flags |= (TR_RES_FIRE | TR_RES_COLD | TR_POISON |
-					 TR_RES_LIGHT | TR_RES_ACID);
+			t_ptr->flags |= (TR2_RES_FIRE | TR_RES_COLD | TR_POISON |
+					 TR2_RES_LIGHT | TR2_RES_ACID);
 			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 			t_ptr->cost = 10000L;
 			made_art_cloak = 1;
@@ -1501,8 +1501,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			t_ptr->name2 = SN_HOLCOLLETH;
 			t_ptr->toac = 4;
 			t_ptr->p1 = 2;
-			t_ptr->flags |= (TR_INT | TR_WIS | TR_STEALTH |
-					 TR_RES_ACID);
+			t_ptr->flags |= (TR1_INT | TR1_WIS | TR1_STEALTH |
+					 TR2_RES_ACID);
 			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 			t_ptr->ident |= ID_NOSHOW_TYPE;
 			t_ptr->cost = 13000L;
@@ -1518,8 +1518,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_THINGOL;
 			t_ptr->toac = 18;
-			t_ptr->flags = (TR_DEX | TR_CHR | TR_RES_FIRE |
-				   TR_RES_ACID | TR_RES_COLD | TR_FREE_ACT);
+			t_ptr->flags = (TR1_DEX | TR1_CHR | TR2_RES_FIRE |
+				   TR2_RES_ACID | TR2_RES_COLD | TR2_FREE_ACT);
 			t_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
 			t_ptr->p1 = 3;
 			t_ptr->cost = 35000L;
@@ -1536,8 +1536,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_THORONGIL;
 			t_ptr->toac = 10;
-			t_ptr->flags = (TR_SEE_INVIS | TR_FREE_ACT |
-					TR_RES_ACID);
+			t_ptr->flags = (TR_SEE_INVIS | TR2_FREE_ACT |
+					TR2_RES_ACID);
 			t_ptr->flags2 |= (TR_ARTIFACT);
 			t_ptr->cost = 8000L;
 			made_art_cloak = 1;
@@ -1553,7 +1553,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_COLANNON;
 			t_ptr->toac = 15;
-			t_ptr->flags |= (TR_STEALTH | TR_RES_ACID);
+			t_ptr->flags |= (TR1_STEALTH | TR2_RES_ACID);
 			t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 			t_ptr->p1 = 3;
 			t_ptr->cost = 11000L;
@@ -1576,8 +1576,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_LUTHIEN;
 			t_ptr->toac = 20;
-			t_ptr->flags = (TR_RES_FIRE | TR_RES_COLD |
-				    TR_INT | TR_WIS | TR_CHR | TR_RES_ACID);
+			t_ptr->flags = (TR2_RES_FIRE | TR_RES_COLD |
+				    TR1_INT | TR1_WIS | TR1_CHR | TR2_RES_ACID);
 			t_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
 			t_ptr->p1 = 2;
 			t_ptr->cost = 45000L;
@@ -1593,9 +1593,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			t_ptr->name2 = SN_TUOR;
 			t_ptr->toac = 12;
-			t_ptr->flags = (TR_STEALTH |
-				  TR_FREE_ACT | TR_SEE_INVIS | TR_RES_ACID);
-			t_ptr->flags2 |= (TR_IM_ACID | TR_ARTIFACT);
+			t_ptr->flags = (TR1_STEALTH |
+				  TR2_FREE_ACT | TR_SEE_INVIS | TR2_RES_ACID);
+			t_ptr->flags2 |= (TR2_IM_ACID | TR_ARTIFACT);
 			t_ptr->p1 = 4;
 			t_ptr->cost = 35000L;
 			made_art_cloak = 1;
@@ -1612,14 +1612,14 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    } else if (randint(10) < 10) {
 			t_ptr->toac += m_bonus(3, 10, level);
 			t_ptr->p1 = randint(3);
-			t_ptr->flags |= TR_STEALTH;
+			t_ptr->flags |= TR1_STEALTH;
 			t_ptr->name2 = SN_STEALTH;
 			t_ptr->cost += 500 + (50 * t_ptr->p1);
 			rating += 9;
 		    } else {
 			t_ptr->toac += 10 + randint(10);
 			t_ptr->p1 = randint(3);
-			t_ptr->flags |= (TR_STEALTH | TR_RES_ACID);
+			t_ptr->flags |= (TR1_STEALTH | TR2_RES_ACID);
 			t_ptr->name2 = SN_AMAN;
 			t_ptr->cost += 4000 + (100 * t_ptr->toac);
 			rating += 16;
@@ -1718,7 +1718,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	t_ptr->p1 = missile_ctr;
 	break;
 
-    case TV_BOLT: case TV_ARROW: case TV_SLING_AMMO:
+    case TV_BOLT: case TV_ARROW: case TV_SHOT:
      /* this fn makes ammo for player's missile weapon more common -CFT */
       magic_ammo(t_ptr, good, chance, special, cursed, level);
       break;

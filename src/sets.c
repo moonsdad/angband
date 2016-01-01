@@ -54,8 +54,8 @@ inven_type *e;
       case TV_SHIELD:
       case TV_HARD_ARMOR:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_ACID)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_ACID))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_WAND:
@@ -81,8 +81,8 @@ inven_type *e;
       case TV_CLOAK:
       case TV_SOFT_ARMOR:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_FIRE)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_FIRE))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_FIRE)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_FIRE))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_STAFF:
@@ -90,7 +90,7 @@ inven_type *e;
       case TV_SCROLL2:
       case TV_FLASK:
 	return (TRUE);
-      case TV_LIGHT:
+      case TV_LITE:
 	if (e->subval >= 192)	   /* only torches... -CFT */
 	    return (TRUE);
 	else
@@ -180,8 +180,8 @@ inven_type *e;
       case TV_CLOAK:
       case TV_SOFT_ARMOR:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_ACID)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_ACID))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_MISC:
@@ -201,8 +201,8 @@ inven_type *e;
     switch (element) {
       case TV_RING:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_LIGHT)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_LIGHT))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_LIGHT)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_LIGHT))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_WAND:
@@ -239,8 +239,8 @@ inven_type *e;
       case TV_HARD_ARMOR:
       case TV_SOFT_ARMOR:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_ACID)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_ACID))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_SCROLL1:
@@ -271,8 +271,8 @@ inven_type *e;
       case TV_CLOAK:
       case TV_SOFT_ARMOR:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR_RES_FIRE)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR_IM_FIRE))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_FIRE)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_FIRE))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_STAFF:
@@ -285,7 +285,7 @@ inven_type *e;
       case TV_OPEN_DOOR:
       case TV_CLOSED_DOOR:
 	return (TRUE);
-      case TV_LIGHT:
+      case TV_LITE:
 	if (e->subval >= 192)	   /* only torches... -CFT */
 	    return (TRUE);
 	else
@@ -305,7 +305,7 @@ int element;
       case TV_CLOAK:
       case TV_FOOD:
       case TV_FLASK:
-      case TV_LIGHT:
+      case TV_LITE:
       case TV_SPIKE:
 	return (TRUE);
     }
@@ -335,7 +335,7 @@ weaponsmith(element)
 int element;
 {
     switch (element) {
-      case TV_SLING_AMMO:
+      case TV_SHOT:
       case TV_BOLT:
       case TV_ARROW:
       case TV_BOW:

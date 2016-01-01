@@ -180,8 +180,6 @@ extern int peek;			/* should we display additional msgs */
 extern int coin_type;			/* Hack -- creeping coin treasure type */
 extern int opening_chest;		/* Hack -- do not generate another chest */
 
-extern int is_home;			/* are we in our home? */
-
 extern int wait_for_more;
 
 /* Unique artifact weapon flags */
@@ -250,8 +248,6 @@ extern s16b noscore;			/* Don't score this game. -CJS- */
 extern u32b randes_seed;		/* Hack -- consistent object colors */
 extern u32b town_seed;		/* Hack -- consistent town layout */
 
-extern char *old_state;			/* state array initialized by time -CWS */
-extern char *dummy_state;		/* dummy state array so that town/colors look  the same -CWS */
 
 extern s16b dun_level;			/* Cur dungeon level   */
 extern s16b object_level;		/* used to generate objects -CWS */
@@ -389,7 +385,7 @@ extern monster_lore l_list[MAX_R_IDX];
 
 extern describe_mon_type desc_list[MAX_R_IDX];
 
-extern s16b m_level[MAX_MONS_LEVEL+1];
+extern s16b m_level[MAX_R_LEV+1];
 
 /* Brand new extra effecient and kind way to add unique monsters... HOORAY!! */
 extern struct unique_mon u_list[MAX_R_IDX];

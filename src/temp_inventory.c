@@ -356,7 +356,7 @@ void inven_command(int command)
 			    item = (-1);
 			else
 			    switch (inventory[item].tval) { /* Slot for equipment */
-			      case TV_SLING_AMMO:
+			      case TV_SHOT:
 			      case TV_BOLT:
 			      case TV_ARROW:
 			      case TV_BOW:
@@ -366,7 +366,7 @@ void inven_command(int command)
 			      case TV_DIGGING:
 				slot = INVEN_WIELD;
 				break;
-			      case TV_LIGHT:
+			      case TV_LITE:
 				slot = INVEN_LITE;
 				break;
 			      case TV_BOOTS:
@@ -612,7 +612,7 @@ void inven_command(int command)
 #endif
 	tmp2 = cur_lite;
 	print('@', char_row, char_col);
-	if (inventory[INVEN_LITE].tval == TV_LIGHT)
+	if (inventory[INVEN_LITE].tval == TV_LITE)
 	    tmp = inventory[INVEN_LITE].subval;
 	else
 	    tmp = 195;

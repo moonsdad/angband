@@ -1555,7 +1555,7 @@ void aim(void)
 	    break;
 
     case WD_DRG_FRST:
-	    fire_ball(GF_FROST, dir, k, l, 80, 3);
+	    fire_ball(GF_COLD, dir, k, l, 80, 3);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -1566,16 +1566,16 @@ void aim(void)
 		    fire_ball(GF_FIRE, dir, k, l, 100, 3);
 		    break;
 		  case 2:
-		    fire_ball(GF_FROST, dir, k, l, 80, 3);
+		    fire_ball(GF_COLD, dir, k, l, 80, 3);
 		    break;
 		  case 3:
 		    fire_ball(GF_ACID, dir, k, l, 90, 3);
 		    break;
 		  case 4:
-		    fire_ball(GF_LIGHTNING, dir, k, l, 70, 3);
+		    fire_ball(GF_ELEC, dir, k, l, 70, 3);
 		    break;
 		  default:
-		    fire_ball(GF_POISON_GAS, dir, k, l, 70, 3);
+		    fire_ball(GF_POIS, dir, k, l, 70, 3);
 		    break;
 		}
 	    ident = TRUE;
@@ -1593,18 +1593,18 @@ void aim(void)
 
 	case WD_LT_BLTS:	/* Lightning */
 		if (randint(6)==1)
-		    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
+		    line_spell(GF_ELEC,dir,k,l,damroll(3,8));
 		else
-		    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+		    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
 		ident = TRUE;
 		done_effect = 1;
 	    break;
 
 	case WD_FT_BLTS:	/* Frost */
 		if (randint(6)==1)
-		    line_spell(GF_LIGHTNING,dir,k,l,damroll(3,8));
+		    line_spell(GF_ELEC,dir,k,l,damroll(3,8));
 		else
-		    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+		    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -1698,13 +1698,13 @@ void aim(void)
 	    break;
 
 	case WD_LT_BALL:
-	    fire_ball(GF_LIGHTNING, dir, k, l, 32, 2);
+	    fire_ball(GF_ELEC, dir, k, l, 32, 2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
 	case WD_CD_BALL:
-	    fire_ball(GF_FROST, dir, k, l, 48, 2);
+	    fire_ball(GF_COLD, dir, k, l, 48, 2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -1716,7 +1716,7 @@ void aim(void)
 	    break;
 
 	case WD_ST_CLD:
-	    fire_ball(GF_POISON_GAS, dir, k, l, 12, 2);
+	    fire_ball(GF_POIS, dir, k, l, 12, 2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -2179,9 +2179,9 @@ void activate_rod(void)
       case RD_LT_BLTS:	   /* Lightning */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(12)==1)
-	    line_spell(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+	    line_spell(GF_ELEC, dir, k, l, damroll(3, 8));
 	else
-	    fire_bolt(GF_LIGHTNING, dir, k, l, damroll(3, 8));
+	    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
 	ident = TRUE;
 	i_ptr->timeout = 11;
 	break;
@@ -2189,9 +2189,9 @@ void activate_rod(void)
       case RD_FT_BLTS:	   /* Frost */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(10)==1)
-	    line_spell(GF_FROST, dir, k, l, damroll(5, 8));
+	    line_spell(GF_COLD, dir, k, l, damroll(5, 8));
 	else
-	    fire_bolt(GF_FROST, dir, k, l, damroll(5, 8));
+	    fire_bolt(GF_COLD, dir, k, l, damroll(5, 8));
 	ident = TRUE;
 	i_ptr->timeout = 13;
 	break;
@@ -2244,14 +2244,14 @@ void activate_rod(void)
 
       case RD_LT_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_LIGHTNING, dir, k, l, 32, 2);
+	fire_ball(GF_ELEC, dir, k, l, 32, 2);
 	ident = TRUE;
 	i_ptr->timeout = 23;
 	break;
 
       case RD_CD_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_FROST, dir, k, l, 48, 2);
+	fire_ball(GF_COLD, dir, k, l, 48, 2);
 	ident = TRUE;
 	i_ptr->timeout = 25;
 	break;
@@ -2553,7 +2553,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(6, 8));
+			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
 		} else if (inventory[i].name2 == SN_DETHANC) {
@@ -2565,7 +2565,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_LIGHTNING, dir, char_row, char_col, damroll(4, 8));
+			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
 		} else if (inventory[i].name2 == SN_RILIA) {
@@ -2577,7 +2577,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_ball(GF_POISON_GAS, dir, char_row, char_col, 12, 3);
+			fire_ball(GF_POIS, dir, char_row, char_col, 12, 3);
 			inventory[i].timeout = 3 + randint(3);
 		    }
 		} else if (inventory[i].name2 == SN_BELANGIL) {
@@ -2589,7 +2589,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_ball(GF_FROST, dir, char_row, char_col, 48, 2);
+			fire_ball(GF_COLD, dir, char_row, char_col, 48, 2);
 			inventory[i].timeout = 3 + randint(7);
 		    }
 		}
@@ -2613,7 +2613,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_ball(GF_FROST, dir, char_row, char_col, 100, 2);
+			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 300;
 		    }
 		} else if (inventory[i].name2 == SN_ANDURIL) {
@@ -2748,7 +2748,7 @@ static void activate(void)
 			i_ptr = &inventory[a];
 			msg_print("Your bolts are covered in a fiery aura!");
 			i_ptr->name2 = SN_FIRE;
-			i_ptr->flags |= (TR_FLAME_TONGUE|TR_RES_FIRE);
+			i_ptr->flags |= (TR1_BRAND_FIRE|TR2_RES_FIRE);
 			i_ptr->cost += 25;
 			enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);
 			calc_bonuses();
@@ -2769,7 +2769,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(12, 8));
+			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(12, 8));
 			inventory[i].timeout = 500;
 		    }
 		}
@@ -2784,7 +2784,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_ball(GF_FROST, dir, char_row, char_col, 100, 2);
+			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 500;
 		    }
 		} else if (inventory[i].name2 == SN_OROME) {
@@ -2922,7 +2922,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_FROST, dir, char_row, char_col, damroll(6, 8));
+			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
 		} else if (inventory[i].name2 == SN_PAURAEGEN) {
@@ -2934,7 +2934,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_LIGHTNING, dir, char_row, char_col, damroll(4, 8));
+			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
 		} else if (inventory[i].name2 == SN_PAURNEN) {
@@ -3002,7 +3002,7 @@ static void activate(void)
 			    dir = randint(9);
 			} while (dir == 5);
 		    }
-		    fire_ball(GF_FROST, dir, char_row, char_col, 200, 3);
+		    fire_ball(GF_COLD, dir, char_row, char_col, 200, 3);
 		    inventory[i].timeout = 222 + randint(333);
 		}
 		break;
@@ -3015,7 +3015,7 @@ static void activate(void)
 			    dir = randint(9);
 			} while (dir == 5);
 		    }
-		    fire_ball(GF_LIGHTNING, dir, char_row, char_col, 250, 3);
+		    fire_ball(GF_ELEC, dir, char_row, char_col, 250, 3);
 		    inventory[i].timeout = 222 + randint(444);
 		}
 		break;
@@ -3087,7 +3087,7 @@ static void activate(void)
 			    dir = randint(9);
 			} while (dir == 5);
 		    }
-		    fire_ball(GF_LIGHTNING, dir, char_row, char_col, 100, 2);
+		    fire_ball(GF_ELEC, dir, char_row, char_col, 100, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
@@ -3100,7 +3100,7 @@ static void activate(void)
 			    dir = randint(9);
 			} while (dir == 5);
 		    }
-		    fire_ball(GF_FROST, dir, char_row, char_col, 110, 2);
+		    fire_ball(GF_COLD, dir, char_row, char_col, 110, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
@@ -3126,7 +3126,7 @@ static void activate(void)
 			    dir = randint(9);
 			} while (dir == 5);
 		    }
-		    fire_ball(GF_POISON_GAS, dir, char_row, char_col, 150, 2);
+		    fire_ball(GF_POIS, dir, char_row, char_col, 150, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
@@ -3163,10 +3163,10 @@ static void activate(void)
 				  ((choice == 3) ? "acid" :
 				((choice == 4) ? "poison gas" : "fire")))));
 			msg_print(tmp2);
-			fire_ball(((choice == 1) ? GF_LIGHTNING :
-				   ((choice == 2) ? GF_FROST :
+			fire_ball(((choice == 1) ? GF_ELEC :
+				   ((choice == 2) ? GF_COLD :
 				    ((choice == 3) ? GF_ACID :
-			       ((choice == 4) ? GF_POISON_GAS : GF_FIRE)))),
+			       ((choice == 4) ? GF_POIS : GF_FIRE)))),
 				  dir, char_row, char_col, 250, 2);
 			inventory[i].timeout = 222 + randint(222);
 		    }

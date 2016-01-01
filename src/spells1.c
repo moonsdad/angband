@@ -89,8 +89,8 @@ int minus_ac(s32b typ_dam)
 	j = tmp[randint(i) - 1];
 	i_ptr = &inventory[j];
 	switch (typ_dam) {
-	  case TR_RES_ACID:
-	    if ((i_ptr->flags & TR_RES_ACID) || (i_ptr->flags2 & TR_IM_ACID) ||
+	  case TR2_RES_ACID:
+	    if ((i_ptr->flags & TR2_RES_ACID) || (i_ptr->flags2 & TR2_IM_ACID) ||
 		((i_ptr->flags2 & TR_ARTIFACT) && (randint(5)>2)))
 		do_damage = FALSE;
 	    else
@@ -131,7 +131,7 @@ void acid_dam(int dam, cptr kb_str)
     flag = 0;
 
     if (!p_ptr->flags.resist_acid)
-	if (minus_ac((s32b) TR_RES_ACID)) flag = 1;
+	if (minus_ac((s32b) TR2_RES_ACID)) flag = 1;
     if (p_ptr->flags.acid_resist) flag += 2;
     inven_damage(set_acid_affect, 3);
 }
@@ -199,7 +199,7 @@ void poison_gas(int dam, cptr kb_str)
 void corrode_gas(cptr kb_str)
 {
     if (!p_ptr->flags.acid_im)
-	if (!minus_ac((s32b) TR_RES_ACID))
+	if (!minus_ac((s32b) TR2_RES_ACID))
 	    take_hit(randint(8), kb_str);
     inven_damage(set_corrodes, 5);
 }

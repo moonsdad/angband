@@ -58,7 +58,7 @@ void update_mon(int m_idx)
 	    /* Once in a while, sense spiders  -CFT*/
 	    /* But always sense Driders and Uniques (Shelob and Ungol) */
 	    else if (c=='S' && strncmp(n, "Drider", 6) &&
-		     !(r_list[m_ptr->mptr].cdefense & UNIQUE)) {
+		     !(r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)) {
 		if (randint(5)==1) flag = TRUE;
 	    }
 
@@ -80,7 +80,7 @@ void update_mon(int m_idx)
 	    else if (c==',' && strncmp(n, "Magic", 5));
 
 	    /* Never sense mindless monsters. */
-	    else if (!(r_list[m_ptr->mptr].cdefense & MINDLESS)) flag = TRUE;
+	    else if (!(r_list[m_ptr->mptr].cdefense & MF2_MINDLESS)) flag = TRUE;
 	}
 
 	/* Normal line of sight */
@@ -96,10 +96,10 @@ void update_mon(int m_idx)
 
 		/* Infravision only works on "warm" creatures */
 		/* changed to act sensibly -CFT */
-		if (NO_INFRA & r_ptr->cdefense)	l_list[m_ptr->mptr].r_cdefense |= NO_INFRA;
+		if (MF2_NO_INFRA & r_ptr->cdefense)	l_list[m_ptr->mptr].r_cdefense |= NO_INFRA;
 		
 		/* Infravision works */
-		else flag = TRUE;   /* only can see if not NO_INFRA... */
+		else flag = TRUE;   /* only can see if not MF2_NO_INFRA... */
 	    }
 
 	    /* Check for "illumination" of the monster grid */
@@ -463,7 +463,7 @@ static void shatter_quake(int mon_y, int mon_x)
 		    r_ptr = &r_list[m_ptr->mptr];
 
 		    if (!(r_ptr->cmove & CM_PHASE) &&
-			!(r_ptr->cdefense & BREAK_WALL)) {
+			!(r_ptr->cdefense & MF2_BREAK_WALL)) {
 			if ((movement_rate(c_ptr->cptr) == 0) ||
 			    (r_ptr->cmove & CM_ATTACK_ONLY))
 			/* monster can not move to escape the wall */
@@ -499,7 +499,7 @@ static void shatter_quake(int mon_y, int mon_x)
  * So, we let then live, but extremely wimpy.  This isn't great, because
  * monster might heal itself before player's next swing... -CFT
  */
-			if ((r_ptr->cdefense & UNIQUE) && (m_ptr->hp < 0))
+			if ((r_ptr->cdefense & MF2_UNIQUE) && (m_ptr->hp < 0))
 			    m_ptr->hp = 0;
 			if (m_ptr->hp < 0) {
 			    u32b              temp, treas;
@@ -750,19 +750,19 @@ static void make_attack(int monptr)
     m_ptr = &m_list[monptr];
     r_ptr = &r_list[m_ptr->mptr];
 
-    if (r_ptr->cdefense & DESTRUCT) shatter = TRUE;
+    if (r_ptr->cdefense & MF2_DESTRUCT) shatter = TRUE;
 
     if (!m_ptr->ml)
 	(void)strcpy(cdesc, "It ");
     else {
-	if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+	if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
 	    (void)sprintf(cdesc, "%s ", r_ptr->name);
 	else
 	    (void)sprintf(cdesc, "The %s ", r_ptr->name);
     }
 
     /* For "DIED_FROM" string	   */
-    if (r_ptr->cdefense & UNIQUE)
+    if (r_ptr->cdefense & MF2_UNIQUE)
 	(void)sprintf(ddesc, "%s", r_ptr->name);
     else if (is_a_vowel(r_ptr->name[0]))
 	(void)sprintf(ddesc, "an %s", r_ptr->name);
@@ -1603,8 +1603,8 @@ static void make_attack(int monptr)
 		if (p_ptr->flags.confuse_monster && p_ptr->flags.protevil <= 0) {
 		    msg_print("Your hands stop glowing.");
 		    p_ptr->flags.confuse_monster = FALSE;
-		    if ((randint(MAX_MONS_LEVEL) < r_ptr->level) ||
-			(CHARM_SLEEP & r_ptr->cdefense)) {
+		    if ((randint(MAX_R_LEV) < r_ptr->level) ||
+			(MF2_CHARM_SLEEP & r_ptr->cdefense)) {
 			(void)sprintf(tmp_str, "%sis unaffected.", cdesc);
 		    }
 		    else {
@@ -1614,7 +1614,7 @@ static void make_attack(int monptr)
 		    msg_print(tmp_str);
 
 		    if (visible && !death && randint(4) == 1) {
-			l_list[m_ptr->mptr].r_cdefense |= r_ptr->cdefense & CHARM_SLEEP;
+			l_list[m_ptr->mptr].r_cdefense |= r_ptr->cdefense & MF2_CHARM_SLEEP;
 		    }
 		}
 	    }
@@ -1724,12 +1724,12 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 	}
 
 	/* Crunch up those Walls Morgoth and Umber Hulks!!!! */
-	else if (r_list[m_ptr->mptr].cdefense & BREAK_WALL) {
+	else if (r_list[m_ptr->mptr].cdefense & MF2_BREAK_WALL) {
 
 		t_ptr = &t_list[c_ptr->tptr];
 	    do_move = TRUE;
 
-		l_list[m_ptr->mptr].r_cdefense |= BREAK_WALL;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_BREAK_WALL;
 
 	    /* Hack -- break open doors */
 	    if ((t_ptr->tval == TV_CLOSED_DOOR) ||
@@ -1950,18 +1950,18 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 			*rcmove |= CM_PICKS_UP;
 #endif
 			t = 0L;
-			if ((t_list[c_ptr->tptr].flags & TR_SLAY_DRAGON) ||
-			    (t_list[c_ptr->tptr].flags & TR_SLAY_X_DRAGON))
+			if ((t_list[c_ptr->tptr].flags & TR1_SLAY_DRAGON) ||
+			    (t_list[c_ptr->tptr].flags & TR1_KILL_DRAGON))
 			    t |= DRAGON;
-			if (t_list[c_ptr->tptr].flags & TR_SLAY_UNDEAD)
+			if (t_list[c_ptr->tptr].flags & TR1_SLAY_UNDEAD)
 			    t |= UNDEAD;
-			if (t_list[c_ptr->tptr].flags2 & TR_SLAY_DEMON)
+			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_DEMON)
 			    t |= DEMON;
-			if (t_list[c_ptr->tptr].flags2 & TR_SLAY_TROLL)
-			    t |= TROLL;
-			if (t_list[c_ptr->tptr].flags2 & TR_SLAY_GIANT)
-			    t |= GIANT;
-			if (t_list[c_ptr->tptr].flags2 & TR_SLAY_ORC)
+			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_TROLL)
+			    t |= MF2_TROLL;
+			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_GIANT)
+			    t |= MF2_GIANT;
+			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_ORC)
 			    t |= ORC;
 		    /* if artifact, or wearable & hurts this monster -CWS */
 			if ((t_list[c_ptr->tptr].flags2 & TR_ARTIFACT) ||
@@ -2074,23 +2074,23 @@ static void mon_cast_spell(int monptr, int *took_turn)
 
     /* Describe the attack */
 	if (m_ptr->ml) {
-	    if (r_ptr->cdefense & UNIQUE) (void)sprintf(cdesc, "%s ", r_ptr->name);
+	    if (r_ptr->cdefense & MF2_UNIQUE) (void)sprintf(cdesc, "%s ", r_ptr->name);
 	    else (void)sprintf(cdesc, "The %s ", r_ptr->name);
 	} else (void)strcpy(cdesc, "It ");
 
     /* Get the "died from" name */
-	if (UNIQUE & r_ptr->cdefense) (void)sprintf(ddesc, "%s", r_ptr->name);
+	if (MF2_UNIQUE & r_ptr->cdefense) (void)sprintf(ddesc, "%s", r_ptr->name);
 	else if (is_a_vowel(r_ptr->name[0])) (void)sprintf(ddesc, "an %s", r_ptr->name);
 	else (void)sprintf(ddesc, "a %s", r_ptr->name);
 
     /* Extract all possible spells into spell_choice */
-    if ((r_ptr->cdefense & INTELLIGENT) &&
+    if ((r_ptr->cdefense & MF2_INTELLIGENT) &&
 	(m_ptr->hp < ((r_ptr->hd[0] * r_ptr->hd[1]) / 10)) &&
 	(r_ptr->spells & CS_INT1 || r_ptr->spells2 & CS_INT2 ||
 	 r_ptr->spells3 & CS_INT3) && randint(2) == 1) {
 
 	desperate = TRUE;
-	l_list[m_ptr->mptr].r_cdefense |= INTELLIGENT;
+	l_list[m_ptr->mptr].r_cdefense |= MF2_INTELLIGENT;
 	}
 
     /* No spells yet */
@@ -2320,7 +2320,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "breathes lightning.");
 	    else (void)strcat(cdesc, "breathes, and you get zapped.");
 	    msg_print(cdesc);
-	    breath(GF_LIGHTNING, char_row, char_col,
+	    breath(GF_ELEC, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
 		   ddesc, monptr);
 	    break;
@@ -2329,7 +2329,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "breathes gas.");
 	    else (void)strcat(cdesc, "breathes, and you inhale noxious gases.");
 	    msg_print(cdesc);
-	    breath(GF_POISON_GAS, char_row, char_col,
+	    breath(GF_POIS, char_row, char_col,
 		((m_ptr->hp / 3) > 800 ? 800 : (m_ptr->hp / 3)), ddesc, monptr);
 	    break;
 
@@ -2346,7 +2346,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "breathes frost.");
 	    else (void)strcat(cdesc, "breathes, and feel a frigid blast.");
 	    msg_print(cdesc);
-	    breath(GF_FROST, char_row, char_col,
+	    breath(GF_COLD, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
 		   ddesc, monptr);
 	    break;
@@ -2373,7 +2373,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Frost bolt.");
 	    else (void)strcat(cdesc, "mumbles, and you feel a frigid blast .");
 	    msg_print(cdesc);
-	    bolt(GF_FROST, char_row, char_col,
+	    bolt(GF_COLD, char_row, char_col,
 		 damroll(6, 8) + (r_list[m_ptr->mptr].level / 3)
 		 ,ddesc, m_ptr, monptr);
 	    break;
@@ -2421,7 +2421,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Frost ball.");
 	    else (void)strcat(cdesc, "mumbles, and you feel a frigid blast.");
 	    msg_print(cdesc);
-	    breath(GF_FROST, char_row, char_col,
+	    breath(GF_COLD, char_row, char_col,
 		   randint((r_list[m_ptr->mptr].level * 3) / 2) + 10,
 		   ddesc, monptr);
 	    break;
@@ -2487,7 +2487,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Lightning bolt.");
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
-	    bolt(GF_LIGHTNING, char_row, char_col,
+	    bolt(GF_ELEC, char_row, char_col,
 		 damroll(4, 8) + (r_list[m_ptr->mptr].level / 3)
 		 ,ddesc, m_ptr, monptr);
 	    break;
@@ -2496,7 +2496,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Lightning Ball.");
 	    else (void)strcat(cdesc, "mumbles, and you get zapped.");
 	    msg_print(cdesc);
-	    breath(GF_LIGHTNING, char_row, char_col,
+	    breath(GF_ELEC, char_row, char_col,
 		randint((r_list[m_ptr->mptr].level * 3) / 2) + 8, ddesc, monptr);
 	    break;
 
@@ -2576,7 +2576,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(outval);
 	    monster_is_afraid = 0;
 	    if (m_ptr->maxhp == 0) {	/* then we're just going to fix it! -CFT */
-		if ((r_list[m_ptr->mptr].cdefense & MAX_HP) || be_nasty)
+		if ((r_list[m_ptr->mptr].cdefense & MF2_MAX_HP) || be_nasty)
 		    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
 		else
 		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
@@ -2700,7 +2700,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts an Ice Bolt.");
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
-	    bolt(GF_FROST, char_row, char_col,
+	    bolt(GF_COLD, char_row, char_col,
 		 damroll(6, 6) + (r_list[m_ptr->mptr].level)
 		 ,ddesc, m_ptr, monptr);
 	    break;
@@ -2779,7 +2779,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Stinking Cloud.");
 	    else (void)strcat(cdesc, "mumbles, and you smell a foul odor.");
 	    msg_print(cdesc);
-	    breath(GF_POISON_GAS, char_row, char_col,
+	    breath(GF_POIS, char_row, char_col,
 		   damroll(12, 2), ddesc, monptr);
 	    break;
 
@@ -3457,7 +3457,7 @@ void creatures(int attack)
 			    if (m_ptr->stunned == 0) {
 				if (!m_ptr->ml)
 				    (void)strcpy(cdesc, "It ");
-				else if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+				else if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
 				    (void)sprintf(cdesc, "%s ",
 						  r_list[m_ptr->mptr].name);
 				else

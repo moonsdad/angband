@@ -678,7 +678,7 @@ static void vault_monster(int y1, int x1, int num)
  */
 static void vault_jelly(int y, int x)
 {
-    int l = m_level[MAX_MONS_LEVEL];
+    int l = m_level[MAX_R_LEV];
     /* Hack -- allocate a simple sleeping jelly */
     while (1) {
 	int m = rand_int(l-1);
@@ -694,12 +694,12 @@ static void vault_jelly(int y, int x)
  */
 static void vault_undead(int y, int x)
 {
-    int l = m_level[MAX_MONS_LEVEL];
+    int l = m_level[MAX_R_LEV];
     /* Hack -- allocate a sleeping non-unique undead */
     while (1) {
 	int m = rand_int(l-1);
 	if (!(r_list[m].cdefense & UNDEAD)) continue;
-	if (r_list[m].cdefense & UNIQUE) continue;
+	if (r_list[m].cdefense & MF2_UNIQUE) continue;
 
 	place_monster(y, x, m, TRUE);
 	break;
@@ -2726,8 +2726,8 @@ static void cave_gen(void)
     for (y = 0; y < row_rooms; y++) {
 	for (x = 0; x < col_rooms; x++) {
 	    if (room_map[y][x]) {
-		yloc[k] = y * (SCREEN_HEIGHT >> 1) + QUART_HEIGHT;
-		xloc[k] = x * (SCREEN_WIDTH >> 1) + QUART_WIDTH;
+		yloc[k] = y * (SCREEN_HEIGHT >> 1) + (SCREEN_HEIGHT >> 2);
+		xloc[k] = x * (SCREEN_WIDTH >> 1) + (SCREEN_WIDTH >> 2);
 		if (dun_level > randint(DUN_UNUSUAL)) {
 		    tmp = randint(5);
 		    if ((tmp == 1) || (spec_level)) {

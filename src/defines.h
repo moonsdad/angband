@@ -103,8 +103,6 @@
 #define SCREEN_HEIGHT		22	/* Hard Coded */
 #define SCREEN_WIDTH		66	/* Hard Coded */
 
-#define QUART_HEIGHT (SCREEN_HEIGHT / 4)
-#define QUART_WIDTH  (SCREEN_WIDTH / 4)
 
 /*
  * Dungeon generation values
@@ -242,7 +240,7 @@
 
 #define MIN_M_IDX           2   /* Minimum index in m_list (1=player, 0=no mon) */
 #define MAX_M_IDX         600   /* Max monsters that can be allocated per level */
-#define MAX_MONS_LEVEL     99   /* Maximum level of creatures               */
+#define MAX_R_LEV          99   /* Maximum level of creatures               */
 
 #define MAX_SIGHT          20   /* Maximum dis a creature can be seen       */
 #define MAX_SPELL_DIS      18   /* Maximum dis creat. spell can be cast     */
@@ -430,7 +428,7 @@
 #define CM_ATTACK_ONLY  0x00000001L
 #define CM_MOVE_NORMAL  0x00000002L
 
-#define CM_RANDOM_MOVE  0x0000001CL
+#define CM1_RANDOM_MOVE  0x0000001CL
 #define CM_20_RANDOM    0x00000004L
 #define CM_40_RANDOM    0x00000008L
 #define CM_75_RANDOM    0x00000010L
@@ -744,26 +742,26 @@
 #define TV_NEVER        -1	/* used by find_range() for non-search */
 #define TV_NOTHING       0
 #define TV_MISC          1
-#define TV_SPIKE         3
-#define TV_CHEST         2
+#define TV_SPIKE         3	/* Spikes ('~') */
+#define TV_CHEST         2	/* Chests ('~') */
 #define TV_MIN_WEAR     10	/* Min tval for "wearable" items */
 #define TV_MIN_ENCHANT  10
-#define TV_LIGHT        15
-#define TV_SLING_AMMO   10
-#define TV_ARROW        12
-#define TV_BOLT         11
-#define TV_BOW          20
-#define TV_DIGGING      25
-#define TV_HAFTED       21
-#define TV_POLEARM      22
-#define TV_SWORD        23
-#define TV_BOOTS        30
-#define TV_GLOVES       31
-#define TV_HELM         33
-#define TV_SHIELD       34
-#define TV_CLOAK        32
-#define TV_SOFT_ARMOR   36
-#define TV_HARD_ARMOR   35
+#define TV_LITE        15	/* Torches, Lanterns, Specials */
+#define TV_SHOT   10	/* Ammo for slings */
+#define TV_ARROW        12	/* Ammo for bows */
+#define TV_BOLT         11	/* Ammo for x-bows */
+#define TV_BOW          20	/* Slings/Bows/Xbows */
+#define TV_DIGGING      25	/* Shovels/Picks */
+#define TV_HAFTED       21	/* Priest Weapons */
+#define TV_POLEARM      22	/* Axes and Pikes */
+#define TV_SWORD        23	/* Edged Weapons */
+#define TV_BOOTS        30	/* Boots */
+#define TV_GLOVES       31	/* Gloves */
+#define TV_HELM         33	/* Helms/Crowns */
+#define TV_SHIELD       34	/* Shields */
+#define TV_CLOAK        32	/* Cloaks */
+#define TV_SOFT_ARMOR   36	/* Soft Armor */
+#define TV_HARD_ARMOR   35	/* Hard Armor */
 #define TV_MAX_ENCHANT  39 /* max tval that uses the TR_* flags */
 #define TV_AMULET       40
 #define TV_RING         45
@@ -805,72 +803,71 @@
  */
 
 #define TR_STATS        0x0000003FL /* the stats must be the low 6 bits */
-#define TR_STR          0x00000001L
-#define TR_INT          0x00000002L
-#define TR_WIS          0x00000004L
-#define TR_DEX          0x00000008L
-#define TR_CON          0x00000010L
-#define TR_CHR          0x00000020L
-#define TR_SEARCH       0x00000040L
+#define TR1_STR			0x00000001L
+#define TR1_INT			0x00000002L
+#define TR1_WIS			0x00000004L
+#define TR1_DEX			0x00000008L
+#define TR1_CON			0x00000010L
+#define TR1_CHR			0x00000020L
+#define TR1_STEALTH		0x00000100L
+#define TR1_SEARCH		0x00000040L
 #define TR_SLOW_DIGEST  0x00000080L
-#define TR_STEALTH      0x00000100L
 #define TR_AGGRAVATE    0x00000200L
 #define TR_TELEPORT     0x00000400L
 #define TR_REGEN        0x00000800L
-#define TR_SPEED        0x00001000L
-
+#define TR1_SPEED        0x00001000L
 #define TR_EGO_WEAPON   0x0007E000L
-#define TR_SLAY_DRAGON  0x00002000L
-#define TR_SLAY_ANIMAL  0x00004000L
-#define TR_SLAY_EVIL    0x00008000L
-#define TR_SLAY_UNDEAD  0x00010000L
-#define TR_FROST_BRAND  0x00020000L
-#define TR_FLAME_TONGUE 0x00040000L
+#define TR1_SLAY_ANIMAL		0x00004000L
+#define TR1_SLAY_EVIL		0x00008000L
+#define TR1_SLAY_UNDEAD  0x00010000L
+#define TR1_SLAY_DRAGON  0x00002000L
+#define TR1_KILL_DRAGON        0x08000000L
+#define TR1_BRAND_FIRE 0x00040000L
+#define TR1_BRAND_COLD  0x00020000L
 
-#define TR_RES_FIRE     0x00080000L
-#define TR_RES_ACID     0x00100000L
-#define TR_RES_COLD     0x00200000L
+#define TR2_RES_FIRE     0x00080000L
+#define TR2_RES_ACID     0x00100000L
+#define TR2_RES_COLD     0x00200000L
 #define TR_SUST_STAT    0x00400000L
-#define TR_FREE_ACT     0x00800000L
+#define TR2_FREE_ACT     0x00800000L	/* Free Action */
 #define TR_SEE_INVIS    0x01000000L
-#define TR_RES_LIGHT    0x02000000L
+#define TR2_RES_LIGHT    0x02000000L
 #define TR_FFALL        0x04000000L
-#define TR_SLAY_X_DRAGON        0x08000000L
 #define TR_POISON       0x10000000L
 #define TR_TUNNEL       0x20000000L
 #define TR_INFRA        0x40000000L
 #define TR_CURSED       0x80000000L
 
 /* flags for flags2 */
-#define TR_SLAY_DEMON   0x00000001L
-#define TR_SLAY_TROLL   0x00000002L
-#define TR_SLAY_GIANT   0x00000004L
+#define TR1_SLAY_DEMON   0x00000001L
+#define TR1_SLAY_TROLL   0x00000002L
+#define TR1_SLAY_GIANT   0x00000004L
 #define TR_HOLD_LIFE    0x00000008L
-#define TR_SLAY_ORC     0x00000010L
+#define TR1_SLAY_ORC     0x00000010L
 #define TR_TELEPATHY    0x00000020L
-#define TR_IM_FIRE      0x00000040L
-#define TR_IM_COLD      0x00000080L
-#define TR_IM_ACID      0x00000100L
-#define TR_IM_LIGHT     0x00000200L
+#define TR2_IM_FIRE      0x00000040L
+#define TR2_IM_COLD      0x00000080L
+#define TR2_IM_ACID      0x00000100L
+#define TR2_IM_LIGHT     0x00000200L
 #define TR_LIGHT        0x00000400L
 #define TR_ACTIVATE     0x00000800L
 #define TR_LIGHTNING    0x00001000L
-#define TR_IMPACT       0x00002000L
-#define TR_IM_POISON    0x00004000L
-#define TR_RES_CONF     0x00008000L
-#define TR_RES_SOUND    0x00010000L
-#define TR_RES_LT       0x00020000L
-#define TR_RES_DARK     0x00040000L
-#define TR_RES_CHAOS    0x00080000L
-#define TR_RES_DISENCHANT       0x00100000L
-#define TR_RES_SHARDS   0x00200000L
-#define TR_RES_NEXUS    0x00400000L
-#define TR_RES_BLIND    0x00800000L
-#define TR_RES_NETHER   0x01000000L
+#define TR1_IMPACT       0x00002000L
+#define TR2_IM_POIS    0x00004000L
+#define TR2_RES_CONF     0x00008000L
+#define TR2_RES_SOUND    0x00010000L
+#define TR2_RES_LT       0x00020000L
+#define TR2_RES_DARK     0x00040000L
+#define TR2_RES_CHAOS    0x00080000L
+#define TR2_RES_DISENCHANT       0x00100000L
+#define TR2_RES_SHARDS   0x00200000L
+#define TR2_RES_NEXUS    0x00400000L
+#define TR2_RES_BLIND    0x00800000L
+#define TR2_RES_NETHER   0x01000000L
 #define TR_ARTIFACT     0x02000000L /* means "is an artifact" -CFT */
 #define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/
 #define TR_ATTACK_SPD   0x08000000L /* extra attacks/round -DGK */
-#define TR_RES_FEAR     0x10000000L
+#define TR2_RES_FEAR     0x10000000L
 /* definitions for objects that can be worn */
 
 /* Mask for chest traps (flags2) */
@@ -892,10 +889,10 @@
  * Spell types used by get_flags(), breathe(), fire_bolt() and fire_ball()
  */
 #define GF_MAGIC_MISSILE 0
-#define GF_LIGHTNING    1
-#define GF_POISON_GAS   2
+#define GF_ELEC         1
+#define GF_POIS         2
 #define GF_ACID         3
-#define GF_FROST        4
+#define GF_COLD         4
 #define GF_FIRE         5
 #define GF_HOLY_ORB     6
 #define GF_ARROW        7
@@ -1029,132 +1026,140 @@
 
 
 
-#define NONE8       	0x00000000L
-#define MV_ONLY_ATT    	0x00000001L
-#define MV_ATT_NORM 	0x00000002L
-#define MV_20	        0x00000004L
-#define MV_40		0x00000008L
-#define MV_75		0x00000010L
-#define MV_INVIS	0x00010000L
-#define THRO_DR		0x00020000L
-#define THRO_WALL	0x00040000L
-#define THRO_CREAT	0x00080000L
-#define PICK_UP		0x00100000L
-#define MULTIPLY        0x00200000L
-#define CARRY_OBJ   	0x01000000L
-#define CARRY_GOLD	0x02000000L
-#define HAS_60		0x04000000L
-#define HAS_90		0x08000000L
-#define HAS_1D2		0x10000000L
-#define HAS_2D2		0x20000000L
-#define HAS_4D2		0x40000000L
-#define WINNER		0x80000000L
+#define MF1_MV_ONLY_ATT		0x00000001L /* The monster does not move */
+#define MF1_MV_ATT_NORM 	0x00000002L /* The monster moves normally */
+#define MF1_MV_20	        0x00000004L /* 20% random */
+#define MF1_MV_40		0x00000008L /* 40% random */
+#define MF1_MV_75		0x00000010L /* 75% random */
+/* 3 bits missing */
+#define MF1_MV_INVIS		0x00010000L
+#define MF1_THRO_DR		0x00020000L
+#define MF1_THRO_WALL		0x00040000L
+#define MF1_THRO_CREAT		0x00080000L
+#define MF1_PICK_UP		0x00100000L
+#define MF1_MULTIPLY		0x00200000L
+/* 2 bits missing */
+#define MF1_CARRY_OBJ   	0x01000000L
+#define MF1_CARRY_GOLD		0x02000000L
+#define MF1_HAS_60		0x04000000L
+#define MF1_HAS_90		0x08000000L
+#define MF1_HAS_1D2		0x10000000L
+#define MF1_HAS_2D2		0x20000000L
+#define MF1_HAS_4D2		0x40000000L
+#define MF1_WINNER		0x80000000L
 
-#define BLINK		0x000010L
-#define TELE		0x000020L
-#define TELE_TO	 	0x000040L
-#define CAUSE_LIGHT	0x000080L
-#define CAUSE_SERIOUS	0x000100L
-#define HOLD_PERSON	0x000200L
-#define BLINDNESS	0x000400L
-#define CONFUSION	0x000800L
-#define FEAR		0x001000L
-#define MONSTER		0x002000L
-#define S_UNDEAD	0x004000L
-#define SLOW		0x008000L
-#define MANA_DRAIN	0x010000L
-#define S_DEMON		0x020000L
-#define S_DRAGON	0x040000L
-#define BREATH_L	0x080000L
-#define BREATH_G	0x100000L
-#define BREATH_A	0x200000L
-#define BREATH_FR	0x400000L
-#define BREATH_FI	0x800000L
-#define FIRE_BOLT   	0x1000000L
-#define FROST_BOLT	0x2000000L
-#define ACID_BOLT     	0x04000000L
-#define MAG_MISS      	0x08000000L
-#define CAUSE_CRIT    	0x10000000L
-#define FIRE_BALL     	0x20000000L
-#define FROST_BALL    	0x40000000L
-#define MANA_BOLT     	0x80000000L
-
-/* spells 2 :-> */
-#define BREATH_CH   	0x00000001L /* Chaos */
-#define BREATH_SH    	0x00000002L /* Shards */
-#define BREATH_SD    	0x00000004L /* Sound */
-#define BREATH_CO   	0x00000008L /* Confusion */
-#define BREATH_DI 	0x00000010L /* Disenchantment */
-#define BREATH_LD  	0x00000020L /* Life Draining */
-#define LIGHT_BOLT 	0x00000040L
-#define LIGHT_BALL   	0x00000080L
-#define ACID_BALL    	0x00000100L
-#define TRAP_CREATE  	0x00000200L
-#define RAZOR        	0x00000400L
-#define MIND_BLAST   	0x00000800L
-#define TELE_AWAY    	0x00001000L
-#define HEAL         	0x00002000L
-#define HASTE        	0x00004000L
-#define MISSILE      	0x00008000L
-#define PLASMA_BOLT  	0x00010000L
-#define SUMMON       	0x00020000L
-#define NETHER_BOLT  	0x00040000L
-#define ICE_BOLT     	0x00080000L
-#define DARKNESS     	0x00100000L
-#define FORGET       	0x00200000L
-#define BRAIN_SMASH  	0x00400000L
-#define ST_CLOUD     	0x00800000L
-#define TELE_LEV     	0x01000000L
-#define WATER_BOLT   	0x02000000L
-#define WATER_BALL   	0x04000000L
-#define NETHER_BALL  	0x08000000L
-#define S_ANGEL      	0x10000000L
-#define S_SPIDER     	0x20000000L
-#define S_HOUND      	0x40000000L
-#define BREATH_NE    	0x80000000L /* Nexus */
-
-/* spells 3:-> */
-#define BREATH_WA    	0x00000001L /* Wall Building */
-#define BREATH_SL    	0x00000002L /* Slowness */
-#define BREATH_LT    	0x00000004L /* Light */
-#define BREATH_TI    	0x00000008L /* Time */
-#define BREATH_GR    	0x00000010L /* Gravity */
-#define BREATH_DA    	0x00000020L /* Darkness */
-#define BREATH_PL    	0x00000040L /* Plasma */
-#define ARROW        	0x00000080L /* fires an arrow */
-#define S_WRAITH     	0x00000100L /* Summon ringwraiths */
-#define DARK_STORM   	0x00000200L /* Big darkness breath */
-#define MANA_STORM   	0x00000400L /* Mana storm */
-#define S_REPTILE    	0x00000800L /* Summon reptiles */
-#define S_ANT	     	0x00001000L /* Summon ants/ant lions */
-#define S_UNIQUE     	0x00002000L /* Summon uniques */
-#define S_GUNDEAD    	0x00004000L /* Summon greater undead */
-#define S_ANCIENTD   	0x00008000L /* Summon ancient dragon */
-
-#define ANIMAL		0x00000001L
+#define MF2_ANIMAL		0x00000001L
 #define EVIL		0x00000002L
-#define ORC		0x00000004L
+#define ORC			0x00000004L
 #define UNDEAD		0x00000008L
 #define DRAGON		0x00000010L
 #define DEMON		0x00000020L
-#define HURT_LIGHT	0x00000040L
-#define	HURT_ROCK	0x00000080L
-#define CHARM_SLEEP	0x00000100L
-#define NO_INFRA	0x00000200L
-#define MAX_HP		0x00000400L
-#define IM_FROST	0x00000800L
-#define IM_FIRE		0x00001000L
-#define IM_LIGHTNING	0x00002000L
-#define IM_POISON	0x00004000L
-#define IM_ACID		0x00008000L
-#define TROLL		0x00010000L
-#define GIANT		0x00020000L
-#define SPECIAL         0x00040000L
-#define GROUP           0x00080000L
-#define GOOD            0x00100000L
-#define BREAK_WALL      0x00200000L
-#define DESTRUCT        0x00400000L
-#define QUESTOR         0x00800000L /* killing it completes a quest */
-#define INTELLIGENT     0x01000000L /* casts spells intelligently   */
-#define MINDLESS        0x02000000L /* does not have a mind -CWS    */
-#define UNIQUE          0x80000000L /* unique monster */
+#define MF2_HURT_LITE		0x00000040L
+#define	MF2_HURT_ROCK		0x00000080L
+#define MF2_CHARM_SLEEP		0x00000100L
+#define MF2_NO_INFRA		0x00000200L
+#define MF2_MAX_HP		0x00000400L
+#define MF2_IM_COLD		0x00000800L
+#define MF2_IM_FIRE		0x00001000L
+#define MF2_IM_ELEC		0x00002000L
+#define MF2_IM_POIS		0x00004000L
+#define MF2_IM_ACID		0x00008000L
+#define MF2_TROLL		0x00010000L
+#define MF2_GIANT		0x00020000L
+#define SPECIAL       	0x00040000L
+#define MF2_GROUP         	0x00080000L
+#define MF2_GOOD           	0x00100000L
+#define MF2_BREAK_WALL		0x00200000L
+#define MF2_DESTRUCT		0x00400000L
+#define MF2_QUESTOR		0x00800000L /* killing it completes a quest */
+#define MF2_INTELLIGENT		0x01000000L /* casts spells intelligently   */
+#define MF2_MINDLESS		0x02000000L /* does not have a mind -CWS    */
+/* 5 bits missing */
+#define MF2_UNIQUE		0x80000000L /* unique monster */
+
+#define MS1_BLINK		0x00000010L
+#define TELE		0x000020L
+#define MS1_TELE_TO	 	0x00000040L
+#define MS1_CAUSE_1		0x00000080L
+#define MS1_CAUSE_2		0x00000100L
+#define MS1_HOLD		0x00000200L
+#define MS1_BLIND		0x00000400L
+#define MS1_CONF		0x00000800L
+#define FEAR		0x001000L
+#define MS1_S_MONSTER		0x00002000L
+#define MS1_S_UNDEAD		0x00004000L
+#define SLOW		0x00008000L
+#define MS1_MANA_DRAIN		0x00010000L
+#define MS1_S_DEMON		0x00020000L
+#define MS1_S_DRAGON		0x00040000L
+#define MS1_BR_ELEC		0x00080000L
+#define MS1_BR_POIS		0x00100000L
+#define MS1_BR_ACID		0x00200000L
+#define MS1_BR_COLD		0x00400000L
+#define MS1_BR_FIRE		0x00800000L
+#define MS1_BO_FIRE   		0x01000000L
+#define MS1_BO_COLD		0x02000000L
+#define MS1_BO_ACID     	0x04000000L
+#define MAG_MISS      	0x08000000L
+#define MS1_CAUSE_3    		0x10000000L
+#define MS1_BA_FIRE     	0x20000000L
+#define MS1_BA_COLD    		0x40000000L
+#define MS1_BO_MANA     	0x80000000L
+
+/* spells 2 :-> */
+#define MS2_BR_CHAO   		0x00000001L /* Chaos */
+#define MS2_BR_SHAR    		0x00000002L /* Shards */
+#define MS2_BR_SOUN    		0x00000004L /* Sound */
+#define MS2_BR_CONF   		0x00000008L /* Confusion */
+#define MS2_BR_DISE 		0x00000010L /* Disenchantment */
+#define MS2_BR_LIFE  		0x00000020L /* Life Draining */
+#define MS2_BO_ELEC 		0x00000040L
+#define MS2_BA_ELEC   		0x00000080L
+#define MS2_BA_ACID    		0x00000100L
+#define MS2_TRAP_CREATE  	0x00000200L
+#define RAZOR        	0x00000400L
+#define MS2_MIND_BLAST   	0x00000800L
+#define MS2_TELE_AWAY    	0x00001000L
+#define HEAL         	0x00002000L
+#define MS2_HASTE        	0x00004000L
+#define MISSILE      	0x00008000L
+#define MS2_BO_PLAS  		0x00010000L
+#define SUMMON       	0x00020000L
+#define MS2_BO_NETH  		0x00040000L
+#define MS2_BO_ICEE     	0x00080000L
+#define MS2_DARKNESS     	0x00100000L
+#define MS2_FORGET       	0x00200000L
+#define MS2_BRAIN_SMASH  	0x00400000L
+#define ST_CLOUD     	0x00800000L
+#define MS2_TELE_LEVEL     	0x01000000L
+#define MS2_BO_WATE   		0x02000000L
+#define MS2_BA_WATE   		0x04000000L
+#define MS2_BA_NETH  		0x08000000L
+#define MS2_S_ANGEL      	0x10000000L
+#define MS2_S_SPIDER     	0x20000000L
+#define MS2_S_HOUND      	0x40000000L
+#define MS2_BR_NETH    		0x80000000L /* Nexus */
+
+/* spells 3:-> */
+#define MS3_BR_WALL   		0x00000001L /* Wall Building */
+#define MS3_BR_SLOW   	 	0x00000002L /* Slowness */
+#define MS3_BR_LITE    		0x00000004L /* Light */
+#define MS3_BR_TIME    		0x00000008L /* Time */
+#define MS3_BR_GRAV    		0x00000010L /* Gravity */
+#define MS3_BR_DARK    		0x00000020L /* Darkness */
+#define MS3_BR_PLAS    		0x00000040L /* Plasma */
+#define ARROW        	0x00000080L /* fires an arrow */
+#define MS3_S_WRAITH     	0x00000100L /* Summon ringwraiths */
+#define MS3_DARK_STORM   	0x00000200L /* Big darkness breath */
+#define MS3_MANA_STORM   	0x00000400L /* Mana storm */
+#define MS3_S_REPTILE    	0x00000800L /* Summon reptiles */
+#define MS3_S_ANT	     	0x00001000L /* Summon ants/ant lions */
+#define MS3_S_UNIQUE     	0x00002000L /* Summon uniques */
+#define MS3_S_GUNDEAD    	0x00004000L /* Summon greater undead */
+#define MS3_S_ANCIENTD   	0x00008000L /* Summon ancient dragon */
+
+/*
+ * Eight bits of zeros
+ */
+#define NONE8			0x00000000L
+

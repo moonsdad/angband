@@ -494,8 +494,8 @@ void calc_mana(int stat)
 	/* gauntlets of dex (or free action - DGK) can hardly interfere w/ spellcasting!
 	 * But cursed ones can! -CFT */
 	if ((inventory[INVEN_HANDS].tval != TV_NOTHING) &&
-	    !((inventory[INVEN_HANDS].flags & TR_FREE_ACT) ||
-	      ((inventory[INVEN_HANDS].flags & TR_DEX) &&
+	    !((inventory[INVEN_HANDS].flags & TR2_FREE_ACT) ||
+	      ((inventory[INVEN_HANDS].flags & TR1_DEX) &&
 	       (inventory[INVEN_HANDS].p1 > 0)))) {
 
 	    /* Only mages are affected */
@@ -717,7 +717,7 @@ void cast()
 
 	  case 9:
 	    if (!get_dir(NULL, &dir)) return;
-	    fire_ball(GF_POISON_GAS, dir, char_row, char_col,
+	    fire_ball(GF_POIS, dir, char_row, char_col,
 		      10 + (p_ptr->misc.lev / 2), 2);
 	    break;
 
@@ -729,10 +729,10 @@ void cast()
 	  case 11:
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < (chance-10))
-		    line_spell(GF_LIGHTNING, dir, char_row, char_col,
+		    line_spell(GF_ELEC, dir, char_row, char_col,
 			       damroll(3+((p_ptr->misc.lev-5)/4),8));
 		else
-		    fire_bolt(GF_LIGHTNING, dir, char_row, char_col,
+		    fire_bolt(GF_ELEC, dir, char_row, char_col,
 			      damroll(3+((p_ptr->misc.lev-5)/4),8));
 	    break;
 	    
@@ -762,10 +762,10 @@ void cast()
 	  case 17:
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < (chance-10))
-		    line_spell(GF_FROST, dir, char_row, char_col,
+		    line_spell(GF_COLD, dir, char_row, char_col,
 			 damroll(5+((p_ptr->misc.lev-5)/4),8));
 		else
-		    fire_bolt(GF_FROST, dir, char_row, char_col,
+		    fire_bolt(GF_COLD, dir, char_row, char_col,
 			 damroll(5+((p_ptr->misc.lev-5)/4),8));
 	    break;
 
@@ -816,7 +816,7 @@ void cast()
 
 	  case 27:
 	    if (!get_dir(NULL, &dir)) return;
-	    fire_ball(GF_FROST, dir, char_row, char_col,
+	    fire_ball(GF_COLD, dir, char_row, char_col,
 		      30 + (p_ptr->misc.lev), 2);
 	    break;
 
@@ -891,7 +891,7 @@ void cast()
 
 	  case 40:	   /* Cloud kill */
 	    if (!get_dir(NULL, &dir)) return;
-	    fire_ball(GF_POISON_GAS, dir, char_row, char_col,
+	    fire_ball(GF_POIS, dir, char_row, char_col,
 		      20 + (p_ptr->misc.lev / 2), 3);
 	    break;
 
@@ -903,7 +903,7 @@ void cast()
 
 	  case 42:	   /* Ice Storm */
 	    if (!get_dir(NULL, &dir)) return;
-	    fire_ball(GF_FROST, dir, char_row, char_col,
+	    fire_ball(GF_COLD, dir, char_row, char_col,
 		      70 + (p_ptr->misc.lev), 3);
 	    break;
 
@@ -1495,13 +1495,13 @@ void pray()
 			    "Your %s is covered in a fiery shield!",
 			    tmp_str);
 		    i_ptr->name2 |= SN_FT;
-		    i_ptr->flags |= (TR_FLAME_TONGUE | TR_RES_FIRE);
+		    i_ptr->flags |= (TR1_BRAND_FIRE | TR2_RES_FIRE);
 		}
 		else {
 		    sprintf(out_val, "Your %s glows deep, icy blue!",
 			    tmp_str);
 		    i_ptr->name2 |= SN_FB;
-		    i_ptr->flags |= (TR_FROST_BRAND | TR_RES_COLD);
+		    i_ptr->flags |= (TR1_BRAND_COLD | TR2_RES_COLD);
 		}
 		msg_print(out_val);
 		enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);

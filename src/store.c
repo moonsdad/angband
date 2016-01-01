@@ -11,6 +11,7 @@
  */
 
 #include "angband.h"
+int is_home = FALSE;		/* Are we in our home? */
 
 
 
@@ -342,7 +343,7 @@ s32b item_value(inven_type *i_ptr)
 	}
     }
 
-	else if (((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
+	else if (((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
 	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
 	if (!known2_p(i_ptr)) value = object_list[i_ptr->index].cost;
 
@@ -1881,17 +1882,16 @@ void store_maint(void)
  */
 void store_init(void)
 {
-    register int         i, j, k;
+    register int         j, k;
     register store_type *s_ptr;
-
-    i = MAX_OWNERS / MAX_STORES;
 
     /* Build each store */
     for (j = 0; j < MAX_STORES; j++) {
+
 	s_ptr = &store[j];
 
 	/* Pick an owner */
-	s_ptr->owner = MAX_STORES * (randint(i) - 1) + j;
+	s_ptr->owner = MAX_STORES * rand_int(MAX_OWNERS / MAX_STORES) + j;
 
 	/* Initialize the store */
 	s_ptr->insult_cur = 0;

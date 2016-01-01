@@ -15,7 +15,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
     else if (inventory[INVEN_AUX].tval == TV_BOW) i_ptr=&inventory[INVEN_AUX];
 
     if (i_ptr && (randint(2)==1)){
-	if ((t_ptr->tval == TV_SLING_AMMO) &&
+	if ((t_ptr->tval == TV_SHOT) &&
 	    (i_ptr->subval >= 20) && (i_ptr->subval <= 21));
 	/* right type, do nothing */
 	else if ((t_ptr->tval == TV_ARROW) &&
@@ -58,7 +58,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		rating += 5;
 		break;
 	      case 4: case 5:
-		t_ptr->flags |= (TR_FLAME_TONGUE|TR_RES_FIRE); /* RF so won't burn */
+		t_ptr->flags |= (TR1_BRAND_FIRE|TR2_RES_FIRE); /* RF so won't burn */
 		t_ptr->tohit += 2;
 		t_ptr->todam += 4;
 		t_ptr->name2 = SN_FIRE;
@@ -66,7 +66,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		rating += 6;
 		break;
 	      case 6: case 7:
-		t_ptr->flags |= TR_SLAY_EVIL;
+		t_ptr->flags |= TR1_SLAY_EVIL;
 		t_ptr->tohit += 3;
 		t_ptr->todam += 3;
 		t_ptr->name2 = SN_SLAY_EVIL;
@@ -74,7 +74,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		rating += 7;
 		break;
 	      case 8: case 9:
-		t_ptr->flags |= TR_SLAY_ANIMAL;
+		t_ptr->flags |= TR1_SLAY_ANIMAL;
 		t_ptr->tohit += 2;
 		t_ptr->todam += 2;
 		t_ptr->name2 = SN_SLAY_ANIMAL;
@@ -82,7 +82,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		rating += 5;
 		break;
 	      case 10:
-		t_ptr->flags |= TR_SLAY_DRAGON;
+		t_ptr->flags |= TR1_SLAY_DRAGON;
 		t_ptr->tohit += 3;
 		t_ptr->todam += 3;
 		t_ptr->name2 = SN_DRAGON_SLAYING;
@@ -223,13 +223,13 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 	    if ((1 << i) & t_ptr->flags)
 		bst_stat(i, amount);
     }
-    if (TR_SEARCH & t_ptr->flags) {
+    if (TR1_SEARCH & t_ptr->flags) {
 	p_ptr->misc.srh += amount;
 	p_ptr->misc.fos -= amount;
     }
-    if (TR_STEALTH & t_ptr->flags)
+    if (TR1_STEALTH & t_ptr->flags)
 	p_ptr->misc.stl += amount;
-    if (TR_SPEED & t_ptr->flags) {
+    if (TR1_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
 		     object_list[t_ptr->index].name) &&
@@ -545,7 +545,7 @@ int special_check(register inven_type *t_ptr)
 	t_ptr->tval != TV_CLOAK && t_ptr->tval != TV_GLOVES &&
 	t_ptr->tval != TV_BOOTS && t_ptr->tval != TV_HELM &&
 	t_ptr->tval != TV_DIGGING && t_ptr->tval != TV_SPIKE &&
-	t_ptr->tval != TV_SLING_AMMO && t_ptr->tval != TV_BOLT &&
+	t_ptr->tval != TV_SHOT && t_ptr->tval != TV_BOLT &&
 	t_ptr->tval != TV_ARROW && t_ptr->tval != TV_BOW &&
 	t_ptr->tval != TV_POLEARM && t_ptr->tval != TV_HAFTED)
 	return 0;

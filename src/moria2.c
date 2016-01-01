@@ -354,7 +354,7 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
 
 void check_unique(monster_type *m_ptr)
 {
-    if (r_list[m_ptr->mptr].cdefense & UNIQUE)
+    if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
 	u_list[m_ptr->mptr].exist = 0;
 }
 
@@ -364,7 +364,7 @@ void delete_unique()
     int i;
 
     for (i = 0; i < MAX_R_IDX; i++)
-	if (r_list[i].cdefense & UNIQUE)
+	if (r_list[i].cdefense & MF2_UNIQUE)
 	    u_list[i].exist = 0;
 }
 
@@ -463,7 +463,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			cave[j][k].tptr = cur_pos;
 			invcopy(&t_list[cur_pos], 98);
 			t_ptr = &t_list[cur_pos];
-			t_ptr->flags |= (TR_STR | TR_DEX | TR_CON | TR_INT | TR_WIS | TR_CHR |
+			t_ptr->flags |= (TR1_STR | TR1_DEX | TR1_CON | TR1_INT | TR1_WIS | TR1_CHR |
 				       TR_SEE_INVIS | TR_CURSED | TR_INFRA);
 			t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR_ARTIFACT);
 			t_ptr->ident |= ID_NOSHOW_TYPE;
@@ -487,12 +487,12 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			t_ptr->damage[0] = 10;
 			t_ptr->damage[1] = 8;
 			t_ptr->weight = 600;
-			t_ptr->flags = (TR_SEE_INVIS | TR_SLAY_EVIL | TR_SLAY_UNDEAD |
-					TR_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
-					TR_RES_ACID | TR_SLAY_ANIMAL | TR_SPEED |
-					TR_SLAY_X_DRAGON | TR_AGGRAVATE);
-			t_ptr->flags2 = (TR_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC |
-				    TR_IMPACT | TR_TELEPATHY | TR_ARTIFACT);
+			t_ptr->flags = (TR_SEE_INVIS | TR1_SLAY_EVIL | TR1_SLAY_UNDEAD |
+					TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
+					TR2_RES_ACID | TR1_SLAY_ANIMAL | TR1_SPEED |
+					TR1_KILL_DRAGON | TR_AGGRAVATE);
+			t_ptr->flags2 = (TR1_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC |
+				    TR1_IMPACT | TR_TELEPATHY | TR_ARTIFACT);
 			t_ptr->p1 = (-1);
 			t_ptr->toac = 10;
 			t_ptr->cost = 500000L;
@@ -612,7 +612,7 @@ static int fearless(monster_race *c_ptr)
 {
     int flag = FALSE;
 
-    if (c_ptr->cdefense & MINDLESS) {
+    if (c_ptr->cdefense & MF2_MINDLESS) {
 	flag = TRUE;
     }
 
@@ -630,7 +630,7 @@ static int fearless(monster_race *c_ptr)
     }
 
     /* catch intelligent monsters */
-    if (c_ptr->cdefense & INTELLIGENT) {
+    if (c_ptr->cdefense & MF2_INTELLIGENT) {
 	flag = FALSE;
     }
 
@@ -689,7 +689,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	    unlink(temp);
 	}
 
-	if (r_list[m_ptr->mptr].cdefense & QUESTOR) {
+	if (r_list[m_ptr->mptr].cdefense & MF2_QUESTOR) {
 	    for (i = 0; i < DEFINED_QUESTS; i++) {	/* search for monster's lv, not... */
 		if (quests[i] == r_list[m_ptr->mptr].level) {	/* ...cur lv. -CFT */
 		    quests[i] = 0;
@@ -739,12 +739,12 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	get_coin_type(r_ptr);
 	i = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
 			  r_list[m_ptr->mptr].cmove,
-			  (r_list[m_ptr->mptr].cdefense & (SPECIAL | GOOD)),
-			  (r_list[m_ptr->mptr].cmove & WINNER));
+			  (r_list[m_ptr->mptr].cdefense & (SPECIAL | MF2_GOOD)),
+			  (r_list[m_ptr->mptr].cmove & MF1_WINNER));
 	coin_type = 0;
 	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
 	    (r_list[m_ptr->mptr].cmove & CM_WIN) ||
-	    (r_list[m_ptr->mptr].cdefense & UNIQUE)) {
+	    (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)) {
 	    /* recall even invisible uniques */
 
 	    tmp = (l_list[m_ptr->mptr].r_cmove & CM_TREASURE) >> CM_TR_SHIFT;
@@ -757,7 +757,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	}
 	r_ptr = &r_list[m_ptr->mptr];
 
-	if (r_ptr->cdefense & UNIQUE) {
+	if (r_ptr->cdefense & MF2_UNIQUE) {
 	    u_list[m_ptr->mptr].exist = 0;
 	    u_list[m_ptr->mptr].dead = 1;
 	}
@@ -874,7 +874,7 @@ void py_attack(int y, int x)
     /* Does the player know what he's fighting?	   */
     if (!m_list[crptr].ml) (void)strcpy(m_name, "it");
     else {
-	if (r_list[monptr].cdefense & UNIQUE)
+	if (r_list[monptr].cdefense & MF2_UNIQUE)
 	    (void)sprintf(m_name, "%s", r_list[monptr].name);
 	else
 	    (void)sprintf(m_name, "the %s", r_list[monptr].name);
@@ -897,7 +897,7 @@ void py_attack(int y, int x)
 	tot_tohit = (-3);
     }
 
-    if ((i_ptr->tval >= TV_SLING_AMMO) && (i_ptr->tval <= TV_ARROW))
+    if ((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
     /* Fix for arrows */
 	blows = 1;
     tot_tohit += p_ptr->misc.ptohit;
@@ -955,8 +955,8 @@ void py_attack(int y, int x)
 	    if (p_ptr->flags.confuse_monster) {
 		p_ptr->flags.confuse_monster = FALSE;
 		msg_print("Your hands stop glowing.");
-		if ((r_list[monptr].cdefense & CHARM_SLEEP) ||
-		    (randint(MAX_MONS_LEVEL) < r_list[monptr].level)) {
+		if ((r_list[monptr].cdefense & MF2_CHARM_SLEEP) ||
+		    (randint(MAX_R_LEV) < r_list[monptr].level)) {
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
 		}
 		else {
@@ -970,7 +970,7 @@ void py_attack(int y, int x)
 
 		if (m_list[crptr].ml && randint(4) == 1) {
 		    l_list[monptr].r_cdefense |=
-			r_list[monptr].cdefense & CHARM_SLEEP;
+			r_list[monptr].cdefense & MF2_CHARM_SLEEP;
 		}
 	    }
 	    if (k < 0) k = 0;		   /* no neg damage! */
@@ -978,7 +978,7 @@ void py_attack(int y, int x)
 	    /* See if we done it in.  */
 	    if (mon_take_hit(crptr, k, FALSE) >= 0) {	/* never print msgs -CWS */
 
-		if ((r_list[monptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
+		if ((r_list[monptr].cdefense & (DEMON|UNDEAD|MF2_MINDLESS)) ||
 		    (r_list[monptr].cchar == 'E') ||
 		    (r_list[monptr].cchar == 'v') ||
 		    (r_list[monptr].cchar == 'g')) {
@@ -993,7 +993,7 @@ void py_attack(int y, int x)
 		/* No more attacks */
 		blows = 0;
 	    }
-	    if ((i_ptr->tval >= TV_SLING_AMMO)
+	    if ((i_ptr->tval >= TV_SHOT)
 		&& (i_ptr->tval <= TV_ARROW)) {	/* Use missiles up */
 		i_ptr->number--;
 		inven_weight -= i_ptr->weight;
@@ -1021,7 +1021,7 @@ void py_attack(int y, int x)
     if (!m_list[crptr].ml)
 	(void)strcpy(m_name, "It");
     else {
-	if (r_list[monptr].cdefense & UNIQUE)
+	if (r_list[monptr].cdefense & MF2_UNIQUE)
 	    (void)sprintf(m_name, "%s", r_list[monptr].name);
 	else
 	    (void)sprintf(m_name, "The %s", r_list[monptr].name);
@@ -1099,7 +1099,7 @@ static void facts(inven_type *i_ptr, \
 
 	  /* Sling and ammo */
 	  case 20:
-	    if (i_ptr->tval != TV_SLING_AMMO) break;
+	    if (i_ptr->tval != TV_SHOT) break;
 		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
@@ -1109,7 +1109,7 @@ static void facts(inven_type *i_ptr, \
 
 	  /* Sling of Might and ammo */
 	  case 21:
-	    if (i_ptr->tval != TV_SLING_AMMO) break;
+	    if (i_ptr->tval != TV_SHOT) break;
 		*tbth = p_ptr->misc.bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
@@ -1276,7 +1276,7 @@ static int stays_when_throw(inven_type *i_ptr)
 
   switch (i_ptr->tval){
     case TV_CHEST:
-    case TV_SLING_AMMO:
+    case TV_SHOT:
     case TV_ROD:
     case TV_FOOD:
     case TV_MAGIC_BOOK:
@@ -1288,7 +1288,7 @@ static int stays_when_throw(inven_type *i_ptr)
     case TV_WAND:
     case TV_BOLT:
     case TV_ARROW:
-    case TV_LIGHT:
+    case TV_LITE:
     case TV_SCROLL1:
     case TV_SCROLL2:
       return (randint(2)==1);
@@ -1329,7 +1329,7 @@ void py_bash(int y, int x)
     if (!m_ptr->ml)
 	(void)strcpy(m_name, "it");
     else {
-	if (r_list[r_idx].cdefense & UNIQUE)
+	if (r_list[r_idx].cdefense & MF2_UNIQUE)
 	    (void)sprintf(m_name, "%s", r_list[r_idx].name);
 	else
 	    (void)sprintf(m_name, "the %s", r_list[r_idx].name);
@@ -1365,7 +1365,7 @@ void py_bash(int y, int x)
 	if (mon_take_hit(monster, k, TRUE) >= 0) {
 
 	    /* Appropriate message */
-	    if ((r_list[r_idx].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
+	    if ((r_list[r_idx].cdefense & (DEMON|UNDEAD|MF2_MINDLESS)) ||
 		(r_list[r_idx].cchar == 'E') ||
 		(r_list[r_idx].cchar == 'v') ||
 		(r_list[r_idx].cchar == 'g')) {
@@ -1383,7 +1383,7 @@ void py_bash(int y, int x)
 	    m_name[0] = toupper((int)m_name[0]);	/* Capitalize */
 
 	    /* Can not stun Balrog */
-	    avg_max_hp = (r_ptr->cdefense & MAX_HP ?
+	    avg_max_hp = (r_ptr->cdefense & MF2_MAX_HP ?
 			  r_ptr->hd[0] * r_ptr->hd[1] :
 			  (r_ptr->hd[0] * (r_ptr->hd[1] + 1)) >> 1);
 

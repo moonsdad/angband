@@ -41,14 +41,14 @@ static void ball_destroy(int typ, int (**destroy) ())
       case GF_ACID:
 	*destroy = set_acid_destroy;
 	break;
-      case GF_FROST:
+      case GF_COLD:
       case GF_SHARDS:
       case GF_ICE:
       case GF_FORCE:
       case GF_SOUND:
 	*destroy = set_frost_destroy;	/* just potions and flasks -DGK */
 	break;
-      case GF_LIGHTNING:
+      case GF_ELEC:
 	*destroy = set_lightning_destroy;
 	break;
       case GF_PLASMA:		   /* DGK */
@@ -64,7 +64,7 @@ static void ball_destroy(int typ, int (**destroy) ())
 	*destroy = set_holy_destroy;	/* cursed stuff -DGK */
 	break;
       case GF_MAGIC_MISSILE:
-      case GF_POISON_GAS:
+      case GF_POIS:
       case GF_ARROW:
       case GF_NETHER:
       case GF_WATER:
@@ -91,7 +91,7 @@ void monster_name(char *m_name, monster_type *m_ptr, monster_race *r_ptr)
     if (!m_ptr->ml)
 	(void)strcpy(m_name, "It");
     else {
-	if (r_ptr->cdefense & UNIQUE)
+	if (r_ptr->cdefense & MF2_UNIQUE)
 	    (void)sprintf(m_name, "%s", r_ptr->name);
 	else
 	    (void)sprintf(m_name, "The %s", r_ptr->name);
@@ -103,7 +103,7 @@ void lower_monster_name(char *m_name, monster_type *m_ptr, monster_race *r_ptr)
     if (!m_ptr->ml)
 	(void)strcpy(m_name, "it");
     else {
-	if (r_ptr->cdefense & UNIQUE)
+	if (r_ptr->cdefense & MF2_UNIQUE)
 	    (void)sprintf(m_name, "%s", r_ptr->name);
 	else
 	    (void)sprintf(m_name, "the %s", r_ptr->name);
@@ -145,9 +145,9 @@ int sleep_monsters1(int y, int x)
 		monster_name(m_name, m_ptr, r_ptr);
 		if ((r_ptr->level >
 		     randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-		    (CHARM_SLEEP & r_ptr->cdefense) || (r_ptr->cdefense & UNIQUE)) {
-		    if (m_ptr->ml && (r_ptr->cdefense & CHARM_SLEEP))
-			l_list[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+		    (MF2_CHARM_SLEEP & r_ptr->cdefense) || (r_ptr->cdefense & MF2_UNIQUE)) {
+		    if (m_ptr->ml && (r_ptr->cdefense & MF2_CHARM_SLEEP))
+			l_list[m_ptr->mptr].r_cdefense |= MF2_CHARM_SLEEP;
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
 		    msg_print(out_val);
 		} else {
@@ -483,9 +483,9 @@ void mon_light_dam(int y, int x, int dam)
 	r_ptr = &r_list[m_ptr->mptr];
 	monster_name(m_name, m_ptr, r_ptr);
 	m_ptr->csleep = 0;
-	if (HURT_LIGHT & r_ptr->cdefense) {
+	if (MF2_HURT_LITE & r_ptr->cdefense) {
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= HURT_LIGHT;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_HURT_LITE;
 	    i = mon_take_hit((int)c_ptr->cptr, dam, FALSE);
 	    if (i >= 0) {
 		(void)sprintf(out_val, "%s shrivels away in the light!", m_name);
@@ -1019,7 +1019,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
  * (monster not marked as dead, quest monsters don't satisfy quest, etc).
  * So, we let them live, but extremely wimpy. -CFT
  */
-		    if ((r_ptr->cdefense & UNIQUE) && (m_ptr->hp < 0))
+		    if ((r_ptr->cdefense & MF2_UNIQUE) && (m_ptr->hp < 0))
 			m_ptr->hp = 0;
 
 		    if (m_ptr->hp < 0) {
@@ -1029,7 +1029,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			treas = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
 					      r_ptr->cmove, 0, 0);
 			coin_type = 0;
-			if (m_ptr->ml || (r_list[m_ptr->mptr].cdefense & UNIQUE)) {
+			if (m_ptr->ml || (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)) {
 			    tmp = (l_list[m_ptr->mptr].r_cmove & CM_TREASURE)
 				>> CM_TR_SHIFT;
 			    if (tmp > ((treas & CM_TREASURE) >> CM_TR_SHIFT))
@@ -1052,12 +1052,12 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			dam_hp = 1;
 		    m_ptr = &m_list[monptr];
 		    switch (typ) {
-		      case GF_LIGHTNING:
+		      case GF_ELEC:
 			if (blind)
 			    msg_print("You are hit by electricity!");
 			light_dam(dam_hp, ddesc);
 			break;
-		      case GF_POISON_GAS:
+		      case GF_POIS:
 			if (blind)
 			    msg_print("You are hit by a blast of noxious gases!");
 			poison_gas(dam_hp, ddesc);
@@ -1067,7 +1067,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			    msg_print("You are hit by a jet of acidic fluid!");
 			acid_dam(dam_hp, ddesc);
 			break;
-		      case GF_FROST:
+		      case GF_COLD:
 			if (blind)
 			    msg_print("You are hit by something cold!");
 			cold_dam(dam_hp, ddesc);
@@ -1623,7 +1623,7 @@ void starball(register int y, register int x)
 
     for (i = 1; i <= 9; i++)
 	if (i != 5)
-	    fire_ball(GF_LIGHTNING, i, y, x, 150, 3);
+	    fire_ball(GF_ELEC, i, y, x, 150, 3);
 }
 
 /* Breath weapon works like a fire_ball, but affects the player. */
@@ -1645,7 +1645,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
     r_ptr = &r_list[m_ptr->mptr];
     ch = r_ptr->cchar;
     if ((ch == 'v' || ch == 'D' || ch == 'E' || ch == '&' || ch == 'A') ||
-	((ch == 'd' || ch == 'R') && r_ptr->cdefense & UNIQUE))
+	((ch == 'd' || ch == 'R') && r_ptr->cdefense & MF2_UNIQUE))
 	max_dis = 3;
     else
 	max_dis = 2;
@@ -1732,7 +1732,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
  * them live, but extremely wimpy.  This isn't great, because monster might heal
  * itself before player's next swing... -CFT
  */
-			if ((r_ptr->cdefense & UNIQUE) && (m_ptr->hp < 0))
+			if ((r_ptr->cdefense & MF2_UNIQUE) && (m_ptr->hp < 0))
 			    m_ptr->hp = 0;
 
 			if (m_ptr->hp < 0) {
@@ -1743,7 +1743,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 						  r_ptr->cmove, 0, 0);
 				coin_type = 0;
 				/* recall even invisible uniques -CWS */
-			    if (m_ptr->ml || (r_list[m_ptr->mptr].cdefense & UNIQUE)) {
+			    if (m_ptr->ml || (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)) {
 				tmp = (l_list[m_ptr->mptr].r_cmove & CM_TREASURE)
 				    >> CM_TR_SHIFT;
 				if (tmp > ((treas & CM_TREASURE) >> CM_TR_SHIFT))
@@ -1771,16 +1771,16 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			if (dam > 1600)
 			    dam = 1600;
 			switch (typ) {
-			  case GF_LIGHTNING:
+			  case GF_ELEC:
 			    light_dam(dam, ddesc);
 			    break;
-			  case GF_POISON_GAS:
+			  case GF_POIS:
 			    poison_gas(dam, ddesc);
 			    break;
 			  case GF_ACID:
 			    acid_dam(dam, ddesc);
 			    break;
-			  case GF_FROST:
+			  case GF_COLD:
 			    cold_dam(dam, ddesc);
 			    break;
 			  case GF_FIRE:
@@ -2385,7 +2385,7 @@ int speed_monster(int dir, int y, int x, int spd)
 		speed = TRUE;
 	    } else if ((r_ptr->level >
 			randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-		       (r_ptr->cdefense & UNIQUE)) {
+		       (r_ptr->cdefense & MF2_UNIQUE)) {
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 		m_ptr->csleep = 0;
@@ -2428,10 +2428,10 @@ int confuse_monster(int dir, int y, int x, int lvl)
 	    flag = TRUE;
 	    if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-		(r_ptr->cdefense & UNIQUE ||
-		 r_ptr->spells2 & (BREATH_CO | BREATH_CH))) {
-		if (m_ptr->ml && (r_ptr->cdefense & CHARM_SLEEP))
-		    l_list[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+		(r_ptr->cdefense & MF2_UNIQUE ||
+		 r_ptr->spells2 & (MS2_BR_CONF | MS2_BR_CHAO))) {
+		if (m_ptr->ml && (r_ptr->cdefense & MF2_CHARM_SLEEP))
+		    l_list[m_ptr->mptr].r_cdefense |= MF2_CHARM_SLEEP;
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 		m_ptr->csleep = 0;
@@ -2475,9 +2475,9 @@ int fear_monster(int dir, int y, int x, int lvl)
 	    flag = TRUE;
 	    if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-		(r_ptr->cdefense & UNIQUE)) {
-		if (m_ptr->ml && (r_ptr->cdefense & CHARM_SLEEP))
-		    l_list[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+		(r_ptr->cdefense & MF2_UNIQUE)) {
+		if (m_ptr->ml && (r_ptr->cdefense & MF2_CHARM_SLEEP))
+		    l_list[m_ptr->mptr].r_cdefense |= MF2_CHARM_SLEEP;
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 		m_ptr->csleep = 0;
@@ -2521,9 +2521,9 @@ int sleep_monster(int dir, int y, int x)
 	    monster_name(m_name, m_ptr, r_ptr);
 	    if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-	    (r_ptr->cdefense & UNIQUE) || (r_ptr->cdefense & CHARM_SLEEP)) {
-		if (m_ptr->ml && (r_ptr->cdefense & CHARM_SLEEP))
-		    l_list[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+	    (r_ptr->cdefense & MF2_UNIQUE) || (r_ptr->cdefense & MF2_CHARM_SLEEP)) {
+		if (m_ptr->ml && (r_ptr->cdefense & MF2_CHARM_SLEEP))
+		    l_list[m_ptr->mptr].r_cdefense |= MF2_CHARM_SLEEP;
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
 	    } else {
@@ -2596,18 +2596,18 @@ int wall_to_mud(int dir, int y, int x)
 	if (c_ptr->cptr > 1) {
 	    m_ptr = &m_list[c_ptr->cptr];
 	    r_ptr = &r_list[m_ptr->mptr];
-	    if (HURT_ROCK & r_ptr->cdefense) {
+	    if (MF2_HURT_ROCK & r_ptr->cdefense) {
 		monster_name(m_name, m_ptr, r_ptr);
 		flag = m_ptr->ml;
 		i = mon_take_hit((int)c_ptr->cptr, (20 + randint(30)), TRUE);
 		if (flag) {
 		    if (i >= 0) {
-			l_list[i].r_cdefense |= HURT_ROCK;
+			l_list[i].r_cdefense |= MF2_HURT_ROCK;
 			(void)sprintf(out_val, "%s dissolves!", m_name);
 			msg_print(out_val);
 			prt_experience();	/* print msg before calling prt_exp */
 		    } else {
-			l_list[m_ptr->mptr].r_cdefense |= HURT_ROCK;
+			l_list[m_ptr->mptr].r_cdefense |= MF2_HURT_ROCK;
 			(void)sprintf(out_val, "%s grunts in pain!", m_name);
 			msg_print(out_val);
 		    }
@@ -2663,17 +2663,17 @@ static int poly(int mnum)
     int y, x;
     int i,j,k;
     
-    if (c_ptr->cdefense & UNIQUE) return 0;
+    if (c_ptr->cdefense & MF2_UNIQUE) return 0;
     y = m_list[mnum].fy;
     x = m_list[mnum].fx;
     i = (randint(20)/randint(9))+1;
     k = j = c_ptr->level;
     if ((j -=i)<0) j = 0;
-    if ((k +=i)>MAX_MONS_LEVEL) k = MAX_MONS_LEVEL;
+    if ((k +=i)>MAX_R_LEV) k = MAX_MONS_LEVEL;
     delete_monster(mnum);
     do {
 	i = randint(m_level[k]-m_level[j])-1+m_level[j];  /* new creature index */
-    } while (r_list[i].cdefense & UNIQUE);
+    } while (r_list[i].cdefense & MF2_UNIQUE);
     place_monster(y,x,i,FALSE);
     return 1;
 }
@@ -2703,7 +2703,7 @@ int poly_monster(int dir, int y, int x)
 	    m_ptr = &m_list[c_ptr->cptr];
 	    r_ptr = &r_list[m_ptr->mptr];
 	    if ((r_ptr->level < randint((p_ptr->misc.lev-10)<1?1:(p_ptr->misc.lev-10))+10)
-                && !(r_ptr->cdefense & UNIQUE)) {
+                && !(r_ptr->cdefense & MF2_UNIQUE)) {
 		poly(c_ptr->cptr);
 		if (panel_contains(y, x) && (c_ptr->tl || c_ptr->pl))
 		    p = TRUE;
@@ -2921,7 +2921,7 @@ int mass_genocide(int spell)
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
 	if (((m_ptr->cdis <= MAX_SIGHT) && ((r_ptr->cmove & CM_WIN) == 0) &&
-	     ((r_ptr->cdefense & UNIQUE) == 0)) || (wizard &&
+	     ((r_ptr->cdefense & MF2_UNIQUE) == 0)) || (wizard &&
 					      (m_ptr->cdis <= MAX_SIGHT))) {
 	    delete_monster(i);
 	    if (spell) {
@@ -2968,7 +2968,7 @@ int genocide(int spell)
 		 * know the names of the creatures he did not destroy, this
 		 * message makes no sense otherwise 
 		 */
-		    if (r_ptr->cdefense & UNIQUE)
+		    if (r_ptr->cdefense & MF2_UNIQUE)
 			(void)sprintf(out_val, "%s is unaffected.", r_ptr->name);
 		    else
 			(void)sprintf(out_val, "The %s is unaffected.", r_ptr->name);
@@ -3011,7 +3011,7 @@ int speed_monsters(int spd)
 
 	 if ((r_ptr->level <
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) &&
-		   !(r_ptr->cdefense & UNIQUE)) {
+		   !(r_ptr->cdefense & MF2_UNIQUE)) {
 
 	    m_ptr->mspeed += spd;
 
@@ -3057,10 +3057,10 @@ int sleep_monsters2(void)
 
 	if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-	    (r_ptr->cdefense & UNIQUE) || (r_ptr->cdefense & CHARM_SLEEP)) {
+	    (r_ptr->cdefense & MF2_UNIQUE) || (r_ptr->cdefense & MF2_CHARM_SLEEP)) {
 	    if (m_ptr->ml) {
-		if (r_ptr->cdefense & CHARM_SLEEP) {
-		    l_list[m_ptr->mptr].r_cdefense |= CHARM_SLEEP;
+		if (r_ptr->cdefense & MF2_CHARM_SLEEP) {
+		    l_list[m_ptr->mptr].r_cdefense |= MF2_CHARM_SLEEP;
 		}
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
 		msg_print(out_val);
@@ -3097,7 +3097,7 @@ int mass_poly()
 	m_ptr = &m_list[i];
 	if (m_ptr->cdis <= MAX_SIGHT) {
 	    r_ptr = &r_list[m_ptr->mptr];
-	    if (((r_ptr->cmove & CM_WIN) == 0) && !(r_ptr->cdefense & UNIQUE)) {
+	    if (((r_ptr->cmove & CM_WIN) == 0) && !(r_ptr->cdefense & MF2_UNIQUE)) {
 		mass = poly(i);
 	    }
 	}
@@ -3297,7 +3297,7 @@ void earthquake(void)
 		    r_ptr = &r_list[m_ptr->mptr];
 
 		    if (!(r_ptr->cmove & CM_PHASE) &&
-			!(r_ptr->cdefense & BREAK_WALL)) {
+			!(r_ptr->cdefense & MF2_BREAK_WALL)) {
 
 			/* monster can not move to escape the wall */
 			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cmove & CM_ATTACK_ONLY)) {
@@ -3438,7 +3438,7 @@ int probing(void)
 	if ((m_ptr->cdis <= MAX_SIGHT) &&
 	    los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx) && 
 	    (m_ptr->ml)) {
-	    if (r_ptr->cdefense & UNIQUE)
+	    if (r_ptr->cdefense & MF2_UNIQUE)
 		sprintf(m_name, "%s", r_ptr->name);
 	    else
 		sprintf(m_name, "The %s", r_ptr->name);
@@ -3699,7 +3699,7 @@ static void replace_spot(int y, int x, int typ)
 	break;
     }
 
-    /* this is no longer part of a room */
+    /* No longer part of a room */
     c_ptr->pl = FALSE;
     c_ptr->fm = FALSE;
     c_ptr->lr = FALSE;
@@ -3707,7 +3707,7 @@ static void replace_spot(int y, int x, int typ)
 
     /* Delete the object, if any */
     if (c_ptr->tptr != 0)
-	(void)delete_object(y, x);
+    delete_object(y, x);
 
     /* Delete the monster (if any) */
     if (c_ptr->cptr > 1)
@@ -3897,7 +3897,7 @@ cptr pain_message(int m_idx, int dam)
     }
 
     /* Dogs and Hounds */
-    else if (r_ptr->cchar == 'C' || r_ptr->cchar == 'Z') {
+    else if (strchr("CZ", r_ptr->cchar)) {
 
 	if (percentage > 95)
 	    return "%s shrugs off the attack.";
@@ -3915,11 +3915,7 @@ cptr pain_message(int m_idx, int dam)
     }
 
     /* One type of monsters (ignore,squeal,shriek) */
-    else if (r_ptr->cchar == 'K' || r_ptr->cchar == 'c' || r_ptr->cchar == 'a' ||
-	r_ptr->cchar == 'U' || r_ptr->cchar == 'q' || r_ptr->cchar == 'R' ||
-	r_ptr->cchar == 'X' || r_ptr->cchar == 'b' || r_ptr->cchar == 'F' ||
-	r_ptr->cchar == 'J' || r_ptr->cchar == 'l' || r_ptr->cchar == 'r' ||
-	r_ptr->cchar == 's' || r_ptr->cchar == 'S' || r_ptr->cchar == 't') {
+    else if (strchr("KcaUqRXbFJlrsSt", r_ptr->cchar)) {
 
 	if (percentage > 95)
 	    return "%s ignores the attack.";
@@ -4064,7 +4060,7 @@ void self_knowledge()
     for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {	/* get flags from items */
 	if (inventory[i].tval != TV_NOTHING) {
 	    if (inventory[i].p1 < 0) /* don't adjust TR_STATS if p1 is negative -CWS */
-		f |= (inventory[i].flags & ~(TR_STATS | TR_SEARCH | TR_STEALTH) );
+		f |= (inventory[i].flags & ~(TR_STATS | TR1_SEARCH | TR1_STEALTH) );
 	    else
 		f |= inventory[i].flags;
 	    f2 |= inventory[i].flags2;
@@ -4121,9 +4117,9 @@ void self_knowledge()
     if (p_ptr->flags.word_recall > 0)
 	prt("You will soon be recalled.", i++, j);
 
-    if (f & TR_STEALTH)
+    if (f & TR1_STEALTH)
 	prt("You are magically stealthy.", i++, j);
-    if (f & TR_SEARCH) {
+    if (f & TR1_SEARCH) {
 	prt("You are magically perceptive.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -4262,27 +4258,27 @@ void self_knowledge()
 /* Are these needed?  The player can see this...  For now, in here for
  * completeness... -CFT 
  */
-    if (f & TR_STR) {
+    if (f & TR1_STR) {
 	prt("You are magically strong.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_INT) {
+    if (f & TR1_INT) {
 	prt("You are magically intelligent.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_WIS) {
+    if (f & TR1_WIS) {
 	prt("You are magically wise.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_DEX) {
+    if (f & TR1_DEX) {
 	prt("You are magically agile.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_CON) {
+    if (f & TR1_CON) {
 	prt("You are magically tough.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_CHR) {
+    if (f & TR1_CHR) {
 	prt("You are magically popular.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -4352,46 +4348,46 @@ void self_knowledge()
 	prt("Your weapon strikes with uncommon speed.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_SLAY_ORC) {
+    if (f2 & TR1_SLAY_ORC) {
 	prt("Your weapon is especially deadly against orcs.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_SLAY_TROLL) {
+    if (f2 & TR1_SLAY_TROLL) {
 	prt("Your weapon is especially deadly against trolls.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_SLAY_GIANT) {
+    if (f2 & TR1_SLAY_GIANT) {
 	prt("Your weapon is especially deadly against giants.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_SLAY_ANIMAL) {
+    if (f & TR1_SLAY_ANIMAL) {
 	prt("Your weapon is especially deadly against natural creatures.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_SLAY_X_DRAGON) {
+    if (f & TR1_KILL_DRAGON) {
 	prt("Your weapon is a great bane of dragons.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if (f & TR_SLAY_DRAGON) {
+    } else if (f & TR1_SLAY_DRAGON) {
 	prt("Your weapon is especially deadly against dragons.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_SLAY_DEMON) {
+    if (f2 & TR1_SLAY_DEMON) {
 	prt("Your weapon strikes at demons with holy wrath.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_SLAY_UNDEAD) {
+    if (f & TR1_SLAY_UNDEAD) {
 	prt("Your weapon strikes at undead with holy wrath.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_SLAY_EVIL) {
+    if (f & TR1_SLAY_EVIL) {
 	prt("Your weapon fights against evil with holy fury.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_FROST_BRAND) {
+    if (f & TR1_BRAND_COLD) {
 	prt("Your frigid weapon freezes your foes.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_FLAME_TONGUE) {
+    if (f & TR1_BRAND_FIRE) {
 	prt("Your flaming weapon burns your foes.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -4399,7 +4395,7 @@ void self_knowledge()
 	prt("Your weapon electrocutes your foes.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_IMPACT)
+    if (f2 & TR1_IMPACT)
 	prt("The unbelievable impact of your weapon can cause earthquakes.", i++, j);
 
     /* Pause */
@@ -4445,7 +4441,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     *x = m_ptr->fx; 
     r_ptr = &r_list[m_ptr->mptr];
     if (m_ptr->ml){
-	if (r_ptr->cdefense & UNIQUE)
+	if (r_ptr->cdefense & MF2_UNIQUE)
 	    sprintf(cdesc, "%s ", r_ptr->name);
 	else
 	    sprintf(cdesc, "The %s ", r_ptr->name);
@@ -4457,44 +4453,44 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     switch ( typ ){		/* check for resists... */
       case GF_MAGIC_MISSILE:	/* pure damage, no resist possible */
 	break;
-      case GF_LIGHTNING:
-	if (r_ptr->cdefense & IM_LIGHTNING) {
+      case GF_ELEC:
+	if (r_ptr->cdefense & MF2_IM_ELEC) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_LIGHTNING;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ELEC;
         }
 	break;
-      case GF_POISON_GAS:
-	if (r_ptr->cdefense & IM_POISON) {
+      case GF_POIS:
+	if (r_ptr->cdefense & MF2_IM_POIS) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_POISON;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_POIS;
         }
 	break;
       case GF_ACID:
-	if (r_ptr->cdefense & IM_ACID) {
+	if (r_ptr->cdefense & MF2_IM_ACID) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_ACID;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ACID;
         }
 	break;
-      case GF_FROST:
-	if (r_ptr->cdefense & IM_FROST) {
+      case GF_COLD:
+	if (r_ptr->cdefense & MF2_IM_COLD) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_FROST;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
         }
 	break;
       case GF_FIRE:
-	if (r_ptr->cdefense & IM_FIRE) {
+	if (r_ptr->cdefense & MF2_IM_FIRE) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_FIRE;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_FIRE;
         }
 	break;
       case GF_HOLY_ORB:
@@ -4508,10 +4504,10 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
       case GF_ARROW:		/* for now, no defense... maybe it should have a
 				   chance of missing? -CFT */
 	break;
-      case GF_PLASMA:		/* maybe IM_LIGHTNING (ball lightning is supposed
-				   to be plasma) or IM_FIRE (since it's hot)? -CFT */
+      case GF_PLASMA:		/* maybe MF2_IM_ELEC (ball lightning is supposed
+				   to be plasma) or MF2_IM_FIRE (since it's hot)? -CFT */
 	if (!strncmp("Plasma", r_ptr->name, 6) ||
-	    (r_ptr->spells3 & BREATH_PL)){ /* if is a "plasma" monster,
+	    (r_ptr->spells3 & MS3_BR_PLAS)){ /* if is a "plasma" monster,
 					      or can breathe plasma, then
 					      we assume it should be immune.
 					      plasma bolts don't count, since
@@ -4530,7 +4526,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    if (m_ptr->ml)
 		l_list[m_ptr->mptr].r_cdefense |= UNDEAD;
         }
-	else if (r_ptr->spells2 & BREATH_LD) { /* if can breath nether, should get
+	else if (r_ptr->spells2 & MS2_BR_LIFE) { /* if can breath nether, should get
 						  good resist to damage -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
@@ -4550,15 +4546,15 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	break;
       case GF_CHAOS:
-	if (r_ptr->spells2 & BREATH_CH){ /* assume anything that breathes
+	if (r_ptr->spells2 & MS2_BR_CHAO){ /* assume anything that breathes
 					    choas is chaotic enough to deserve resistance... -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
         }
 	if ((*dam <= m_ptr->hp) && /* don't bother if it's gonna die */
-	    !(r_ptr->spells2 & BREATH_CH) &&
-	    !(r_ptr->cdefense & UNIQUE) &&
+	    !(r_ptr->spells2 & MS2_BR_CHAO) &&
+	    !(r_ptr->cdefense & MF2_UNIQUE) &&
 	    (randint(90) > r_ptr->level)) { /* then we'll polymorph it -CFT */
 	    res = CHANGED;
 	    if (poly(cave[*y][*x].cptr))
@@ -4566,9 +4562,9 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 			     makes things easier to handle */
 	} /* end of choas-poly.  If was poly-ed don't bother confuse... it's
 	     too hectic to keep track of... -CFT */
-	else if (!(r_ptr->cdefense & CHARM_SLEEP) &&
-		 !(r_ptr->spells2 & BREATH_CH) && /* choatics hard to confuse */
-		 !(r_ptr->spells2 & BREATH_CO)){   /* so are bronze dragons */
+	else if (!(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+		 !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
+		 !(r_ptr->spells2 & MS2_BR_CONF)){   /* so are bronze dragons */
 	    if (m_ptr->confused > 0) { 
 		res = MORE_CONF;
 		if (m_ptr->confused < 240){ /* make sure not to overflow -CFT */
@@ -4582,21 +4578,21 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	}
 	break;
       case GF_SHARDS:
-	if (r_ptr->spells2 & BREATH_SH){ /* shard breathers resist -CFT */
+	if (r_ptr->spells2 & MS2_BR_SHAR){ /* shard breathers resist -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
         }
 	break;
       case GF_SOUND:
-      if (r_ptr->spells2 & BREATH_SD){ /* ditto for sound -CFT */
+      if (r_ptr->spells2 & MS2_BR_SOUN){ /* ditto for sound -CFT */
 	  res = RESIST;
 	  *dam *= 2;
 	  *dam /= (randint(6)+6);
       }
 	if ((*dam <= m_ptr->hp) && /* don't bother if it's dead */
-	    !(r_ptr->spells2 & BREATH_SD) &&
-	    !(r_ptr->spells3 & BREATH_WA)) { /* sound and impact breathers
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)) { /* sound and impact breathers
 	  					should not stun -CFT */
 	    if (m_ptr->confused > 0) { 
 		res = MORE_DAZED;
@@ -4611,19 +4607,19 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
   	}
 	break;
       case GF_CONFUSION:
-	if (r_ptr->spells2 & BREATH_CO){ 
+	if (r_ptr->spells2 & MS2_BR_CONF){ 
 	    res = RESIST;
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & CHARM_SLEEP){
+	else if (r_ptr->cdefense & MF2_CHARM_SLEEP){
 	    res = SOME_RES;
 	    *dam /= 2; /* only some resist, but they also avoid confuse -CFT */
         }
 	if ((*dam <= m_ptr->hp) && /* don't bother if it's dead */
-	    !(r_ptr->cdefense & CHARM_SLEEP) &&
-	    !(r_ptr->spells2 & BREATH_CH) && /* choatics hard to confuse */
-	    !(r_ptr->spells2 & BREATH_CO)) {  /* so are bronze dragons */
+	    !(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+	    !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
+	    !(r_ptr->spells2 & MS2_BR_CONF)) {  /* so are bronze dragons */
 	    if (m_ptr->confused > 0) { 
 		res = MORE_CONF;
 		if (m_ptr->confused < 240){ /* make sure not to overflow -CFT */
@@ -4637,7 +4633,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	}
         break;
       case GF_DISENCHANT:
-	if ((r_ptr->spells2 & BREATH_DI) ||
+	if ((r_ptr->spells2 & MS2_BR_DISE) ||
 	    !strncmp("Disen", r_ptr->name, 5)) {
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
@@ -4645,7 +4641,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	break;
       case GF_NEXUS:
-	if ((r_ptr->spells2 & BREATH_NE) ||
+	if ((r_ptr->spells2 & MS2_BR_NETH) ||
 	    !strncmp("Nexus", r_ptr->name, 5)) {
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
@@ -4653,15 +4649,15 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	break;
       case GF_FORCE:
-	if (r_ptr->spells3 & BREATH_WA){ /* breath ele force resists
+	if (r_ptr->spells3 & MS3_BR_WALL){ /* breath ele force resists
 					    ele force -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
         }
 	if ((*dam <= m_ptr->hp) &&
-	    !(r_ptr->spells2 & BREATH_SD) &&
-	    !(r_ptr->spells3 & BREATH_WA)){ /* sound and impact breathers
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)){ /* sound and impact breathers
 					       should not stun -CFT */
 	    if (m_ptr->confused > 0) { 
 		res = MORE_DAZED;
@@ -4676,7 +4672,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	}
 	break;
       case GF_INERTIA:
-	if (r_ptr->spells3 & BREATH_SL){ /* if can breath inertia, then
+	if (r_ptr->spells3 & MS3_BR_SLOW){ /* if can breath inertia, then
 					    resist it. */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
@@ -4684,44 +4680,44 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	break;
       case GF_LIGHT:
-	if (r_ptr->spells3 & BREATH_LT){ /* breathe light to res light */
+	if (r_ptr->spells3 & MS3_BR_LITE){ /* breathe light to res light */
 	    res = RESIST;
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & HURT_LIGHT){
+	else if (r_ptr->cdefense & MF2_HURT_LITE){
 	    res = SUSCEPT;
 	    *dam *= 2; /* hurt bad by light */
         }
-	else if (r_ptr->spells3 & BREATH_DA){ /* breathe dark gets hurt */
+	else if (r_ptr->spells3 & MS3_BR_DARK){ /* breathe dark gets hurt */
 	    res = SUSCEPT;
 	    *dam = (*dam * 3)/2;
         }
 	break;
       case GF_DARK:
-	if (r_ptr->spells2 & BREATH_DA){ /* shard breathers resist -CFT */
+	if (r_ptr->spells2 & MS3_BR_DARK){ /* shard breathers resist -CFT */
 	    res = RESIST;
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & HURT_LIGHT){
+	else if (r_ptr->cdefense & MF2_HURT_LITE){
 	    res = SOME_RES;
 	    *dam /= 2; /* hurt bad by light, so not hurt bad by dark */
         }
-	else if (r_ptr->spells3 & BREATH_LT){ /* breathe light gets hurt */
+	else if (r_ptr->spells3 & MS3_BR_LITE){ /* breathe light gets hurt */
 	    res = SUSCEPT;
 	    *dam = (*dam * 3)/2;
         }
 	break;
       case GF_TIME:
-	if (r_ptr->spells3 & BREATH_TI){ /* time breathers resist -CFT */
+	if (r_ptr->spells3 & MS3_BR_TIME){ /* time breathers resist -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
         }
 	break;
       case GF_GRAVITY:
-	if (r_ptr->spells3 & BREATH_GR){ /* breathers resist -CFT */
+	if (r_ptr->spells3 & MS3_BR_GRAV){ /* breathers resist -CFT */
 	    res = RESIST;
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
@@ -4741,15 +4737,15 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 			 so I could make it a different color -CFT */
 	break;
       case GF_ICE: /* ice is basically frost + cuts + stun -CFT */
-	if (r_ptr->cdefense & IM_FROST) {
+	if (r_ptr->cdefense & MF2_IM_COLD) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= IM_FROST;
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
         }
 	if ((*dam <= m_ptr->hp) &&
-	    !(r_ptr->spells2 & BREATH_SD) &&
-	    !(r_ptr->spells3 & BREATH_WA)){  /* sound and impact breathers
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)){  /* sound and impact breathers
 	  					should not stun -CFT */
 	    if (m_ptr->confused > 0) { 
 		res += MORE_DAZED;
@@ -4770,9 +4766,9 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     if (res == CHANGED)
 	sprintf(outval, "%schanges!",cdesc);
     else if ((*dam > m_ptr->hp) &&
-	     (by_player || !(r_list[m_ptr->mptr].cdefense & UNIQUE))) {
+	     (by_player || !(r_list[m_ptr->mptr].cdefense & MF2_UNIQUE))) {
 	res = DEAD;
-	if ((r_list[m_ptr->mptr].cdefense & (DEMON|UNDEAD|MINDLESS)) ||
+	if ((r_list[m_ptr->mptr].cdefense & (DEMON|UNDEAD|MF2_MINDLESS)) ||
 	    (r_list[m_ptr->mptr].cchar == 'E') ||
 	    (r_list[m_ptr->mptr].cchar == 'v') ||
 	    (r_list[m_ptr->mptr].cchar == 'g') ||

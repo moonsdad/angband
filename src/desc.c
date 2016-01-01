@@ -477,12 +477,12 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_MISC:
       case TV_CHEST:
 	break;
-      case TV_SLING_AMMO:
+      case TV_SHOT:
       case TV_BOLT:
       case TV_ARROW:
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->damage[0], i_ptr->damage[1]);
 	break;
-      case TV_LIGHT:
+      case TV_LITE:
 	p1_use = LIGHT;
 	if (!stricmp("The Phial of Galadriel", basenm) && !known2_p(i_ptr))
 	    basenm = "a Shining Phial";
@@ -828,15 +828,15 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 				  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
 
 		else if (p1_use == FLAGS) {
-		    if ((i_ptr->flags & TR_SPEED) &&
+		    if ((i_ptr->flags & TR1_SPEED) &&
 			     (i_ptr->name2 != SN_SPEED))
 			(void)sprintf(tmp_str, " (%c%d to speed)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
-		    else if (i_ptr->flags & TR_SEARCH)
+		    else if (i_ptr->flags & TR1_SEARCH)
 			/*			&& (i_ptr->name2 != SN_SEARCH)) */
 			(void)sprintf(tmp_str, " (%c%d to searching)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
-		    else if ((i_ptr->flags & TR_STEALTH) &&
+		    else if ((i_ptr->flags & TR1_STEALTH) &&
 			     (i_ptr->name2 != SN_STEALTH))
 			(void)sprintf(tmp_str, " (%c%d to stealth)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
