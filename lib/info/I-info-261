@@ -1,0 +1,33 @@
+=== This is the "changes" file for "MacAngband 2.6.1" ===
+==== So some of this is relevant to "Angband 2.7.0" =====
+=========================================================
+
+Angband 2.6.1 version 2 for the Macintosh.
+
+This is version 2 of Angband 2.6.1 for the Macintosh.  It should run on
+any 68000 with System 6.0.1? or higher OS.
+
+It *SHOULD* be savefile-compatible with all other 2.6.1's on other platforms.
+Remember to use BINARY when ftping!  This will also work with savefiles from
+MacAngband 2.5.8.  (But 2.5.8 won't work with savefiles from 2.6.1!)
+
+You can add fonts and sizes to the font and size menu using ResEdit.  Be sure the
+fonts you add are fixed width fonts.  A list of fonts available on your system
+can be obtained by looking at the Key Caps menu.
+
+Please let me know if you encounter a bug, and try to describe it so that I can
+reproduce it (mail me a binhex'd copy of your savefile if that will help).  Also,
+any comments or suggestions you have will be greatly appreciated.
+
+Send any comments, suggestions, and bugs to:
+  Keith H. Randall
+  randall@theory.lcs.mit.edu
+
+
+Known Bugs:
+
+- Sometimes MacAngband can't find the lib directory- this is caused by an
+   incompatibility with some INITs.  MacAngband will ask you to locate the
+   lib directory manually if this occurs.  If this doesn't work, try putting
+   the lib directory in your root directory.
+
