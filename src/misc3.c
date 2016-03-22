@@ -401,8 +401,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    t_ptr->name2 = SN_FIRE;
 		    t_ptr->flags |= (TR1_BRAND_FIRE | TR2_RES_FIRE);
 		    /* this should allow some WICKED whips -CFT */
-		    while (randint(5*(int)t_ptr->damage[0])==1) {
-			t_ptr->damage[0]++;
+		    while (randint(5*(int)t_ptr->dd)==1) {
+			t_ptr->dd++;
 			t_ptr->cost += 2500;
 			t_ptr->cost *= 2;
 		    }

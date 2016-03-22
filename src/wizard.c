@@ -621,12 +621,12 @@ again:
 	prt("Damage (dice): ", 0, 0);
 	if (!get_string(tmp_str, 0, 15, 3)) goto end;
 	tmp_val = atoi(tmp_str);
-	if (tmp_val != 0) i_ptr->damage[0] = tmp_val;
+	if (tmp_val != 0) i_ptr->dd = tmp_val;
 
 	prt("Damage (sides): ", 0, 0);
 	if (!get_string(tmp_str, 0, 16, 3)) goto end;
 	tmp_val = atoi(tmp_str);
-	if (tmp_val != 0) i_ptr->damage[1] = tmp_val;
+	if (tmp_val != 0) i_ptr->ds = tmp_val;
     }
 
     prt("+To hit: ", 0, 0);

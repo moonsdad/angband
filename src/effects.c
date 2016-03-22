@@ -1259,7 +1259,7 @@ void read_scroll(void)
 		    i_ptr->todam = (-randint(5) - randint(5));
 		    i_ptr->flags = TR_CURSED;
 		    i_ptr->flags2 = 0;
-		    i_ptr->damage[0] = i_ptr->damage[1] = 1;
+		    i_ptr->dd = i_ptr->ds = 1;
 		    i_ptr->toac = 0;	/* in case defender... */
 		    i_ptr->cost = (-1);
 			py_bonuses(i_ptr, 1);	/* now apply new "bonuses"  -CFT */

@@ -480,7 +480,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_SHOT:
       case TV_BOLT:
       case TV_ARROW:
-	(void)sprintf(damstr, " (%dd%d)", i_ptr->damage[0], i_ptr->damage[1]);
+	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
       case TV_LITE:
 	p1_use = LIGHT;
@@ -518,12 +518,12 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_HAFTED:
       case TV_POLEARM:
       case TV_SWORD:
-	(void)sprintf(damstr, " (%dd%d)", i_ptr->damage[0], i_ptr->damage[1]);
+	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	p1_use = FLAGS;
 	break;
       case TV_DIGGING:
 	p1_use = Z_PLUSSES;
-	(void)sprintf(damstr, " (%dd%d)", i_ptr->damage[0], i_ptr->damage[1]);
+	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
 
       /* Armour uses flags */
@@ -979,8 +979,8 @@ void invcopy(register inven_type *to, int from_index)
     to->todam = from->todam;
     to->ac = from->ac;
     to->toac = from->toac;
-    to->damage[0] = from->damage[0];
-    to->damage[1] = from->damage[1];
+    to->dd = from->damage[0];
+    to->ds = from->damage[1];
     to->level = from->level;
     to->ident = 0;
 }

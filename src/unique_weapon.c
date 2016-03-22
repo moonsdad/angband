@@ -17,7 +17,7 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_RINGIL;
 	    t_ptr->tohit = 22;
 	    t_ptr->todam = 25;
-	    t_ptr->damage[0] = 4;
+	    t_ptr->dd = 4;
 	    t_ptr->flags = (TR_SEE_INVIS | TR1_SLAY_UNDEAD | TR1_SLAY_EVIL | TR_REGEN |
 		     TR1_SPEED | TR2_RES_COLD | TR1_BRAND_COLD | TR2_FREE_ACT |
 			    TR_SLOW_DIGEST);
@@ -125,8 +125,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->flags2 |= (TR_ARTIFACT | TR1_SLAY_TROLL | TR_SLAY_ORC | TR_SLAY_GIANT
 			      | TR1_SLAY_DEMON | TR2_RES_CHAOS);
 	    t_ptr->p1 = 4;
-	    t_ptr->damage[0] = 6;
-	    t_ptr->damage[1] = 4;
+	    t_ptr->dd = 6;
+	    t_ptr->ds = 4;
 	    t_ptr->cost = 200000L;
 	    ZARCUTHRA = 1;
 	    return 1;
@@ -161,7 +161,7 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_ARUNRUTH;
 	    t_ptr->tohit = 20;
 	    t_ptr->todam = 12;
-	    t_ptr->damage[0] = 3;
+	    t_ptr->dd = 3;
 	    t_ptr->flags = (TR_FFALL | TR1_DEX |
 			    TR2_FREE_ACT | TR_SLOW_DIGEST);
 	    t_ptr->flags2 |= (TR1_SLAY_DEMON | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT);
@@ -233,8 +233,8 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_CALRIS;
 	t_ptr->tohit = -20;
 	t_ptr->todam = 20;
-	t_ptr->damage[0] = 3;
-	t_ptr->damage[1] = 7;
+	t_ptr->dd = 3;
+	t_ptr->ds = 7;
 	t_ptr->flags = (TR1_KILL_DRAGON | TR1_CON | TR_AGGRAVATE |
 			TR_CURSED | TR1_SLAY_EVIL);
 	t_ptr->flags2 |= (TR1_SLAY_DEMON | TR_SLAY_TROLL | TR2_RES_DISENCHANT
@@ -255,8 +255,8 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_MAEDHROS;
 	t_ptr->tohit = 12;
 	t_ptr->todam = 15;
-	t_ptr->damage[0] = 2;
-	t_ptr->damage[1] = 6;
+	t_ptr->dd = 2;
+	t_ptr->ds = 6;
 	t_ptr->flags = (TR1_DEX | TR1_INT | TR2_FREE_ACT | TR_SEE_INVIS);
 	t_ptr->flags2 |= (TR_ARTIFACT | TR1_SLAY_GIANT | TR_SLAY_TROLL);
 	t_ptr->p1 = 3;
@@ -275,8 +275,8 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_PAIN;
 	t_ptr->tohit = 0;
 	t_ptr->todam = 30;
-	t_ptr->damage[0] = 10;
-	t_ptr->damage[1] = 6;
+	t_ptr->dd = 10;
+	t_ptr->ds = 6;
 	t_ptr->flags2 |= (TR_ARTIFACT);
 	t_ptr->cost = 50000L;
 	PAIN = 1;
@@ -351,7 +351,7 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_DEATHWREAKER;
 	t_ptr->tohit = 18;
 	t_ptr->todam = 18;
-	t_ptr->damage[1] = 12;
+	t_ptr->ds = 12;
 	t_ptr->flags = (TR1_STR | TR1_BRAND_FIRE | TR1_SLAY_EVIL | TR1_SLAY_DRAGON |
 		   TR1_SLAY_ANIMAL | TR_TUNNEL | TR_AGGRAVATE | TR2_RES_FIRE);
 	t_ptr->flags2 |= (TR_ARTIFACT | TR2_IM_FIRE | TR2_RES_CHAOS
@@ -391,7 +391,7 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->tohit = 12;
 	t_ptr->todam = 12;
 	t_ptr->weight = 200;
-	t_ptr->damage[1] = 7;
+	t_ptr->ds = 7;
 	t_ptr->flags = (TR1_KILL_DRAGON | TR2_RES_LIGHT);
 	t_ptr->flags2 |= (TR_ARTIFACT | TR_LIGHTNING | TR_ACTIVATE | TR2_RES_DARK);
 	t_ptr->cost = 20000L;
@@ -413,7 +413,7 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->flags |= (TR_SEE_INVIS | TR1_SLAY_EVIL | TR1_DEX);
 	t_ptr->flags2 |= (TR1_SLAY_TROLL | TR_SLAY_ORC | TR_ARTIFACT);
 	t_ptr->p1 = 2;
-	t_ptr->damage[1] = 12;
+	t_ptr->ds = 12;
 	t_ptr->cost = 55000L;
 	EORLINGAS = 1;
 	return 1;
@@ -449,8 +449,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->tohit = 16;
 	    t_ptr->todam = 18;
 	    t_ptr->weight = 300;
-	    t_ptr->damage[0] = 3;
-	    t_ptr->damage[1] = 9;
+	    t_ptr->dd = 3;
+	    t_ptr->ds = 9;
 	    t_ptr->flags |= (TR_SEE_INVIS | TR1_SLAY_EVIL | TR1_STR | TR1_DEX |
 			     TR1_SLAY_UNDEAD);
 	    t_ptr->flags2 |= (TR2_RES_DARK | TR_RES_LT | TR_ARTIFACT | TR_BLESS_BLADE);
@@ -470,8 +470,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_ULMO;
 	    t_ptr->tohit = 15;
 	    t_ptr->todam = 19;
-	    t_ptr->damage[0] = 4;
-	    t_ptr->damage[1] = 10;
+	    t_ptr->dd = 4;
+	    t_ptr->ds = 10;
 	    t_ptr->flags = (TR_SEE_INVIS | TR2_FREE_ACT | TR1_DEX | TR_REGEN |
 			    TR_SLOW_DIGEST | TR1_SLAY_ANIMAL | TR_SLAY_DRAGON |
 			    TR2_RES_ACID);
@@ -592,7 +592,7 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_TOTILA;
 	t_ptr->tohit = 6;
 	t_ptr->todam = 8;
-	t_ptr->damage[1] = 9;
+	t_ptr->ds = 9;
 	t_ptr->flags = (TR1_STEALTH | TR2_RES_FIRE | TR1_BRAND_FIRE | TR1_SLAY_EVIL);
 	t_ptr->flags2 |= (TR_ARTIFACT | TR_ACTIVATE | TR2_RES_CONF);
 	t_ptr->p1 = 2;
@@ -627,8 +627,8 @@ int unique_weapon(inven_type *t_ptr)
 	t_ptr->name2 = SN_AGLARANG;
 	t_ptr->tohit = 0;
 	t_ptr->todam = 0;
-	t_ptr->damage[0] = 6;
-	t_ptr->damage[1] = 8;
+	t_ptr->dd = 6;
+	t_ptr->ds = 8;
 	t_ptr->weight = 50;
 	t_ptr->flags = (TR1_DEX | TR_SUST_STAT);
 	t_ptr->flags2 |= (TR_ARTIFACT);
@@ -648,8 +648,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_AEGLOS;
 	    t_ptr->tohit = 15;
 	    t_ptr->todam = 25;
-	    t_ptr->damage[0] = 1;
-	    t_ptr->damage[1] = 20;
+	    t_ptr->dd = 1;
+	    t_ptr->ds = 20;
 	    t_ptr->flags = (TR1_WIS | TR1_BRAND_COLD |
 			    TR2_RES_COLD | TR2_FREE_ACT | TR_SLOW_DIGEST);
 	    t_ptr->flags2 |= (TR1_SLAY_TROLL | TR_SLAY_ORC | TR_ACTIVATE | TR_ARTIFACT |
@@ -711,8 +711,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_ANGRIST;
 	    t_ptr->tohit = 10;
 	    t_ptr->todam = 15;
-	    t_ptr->damage[0] = 2;
-	    t_ptr->damage[1] = 5;
+	    t_ptr->dd = 2;
+	    t_ptr->ds = 5;
 	    t_ptr->flags = (TR1_DEX | TR1_SLAY_EVIL | TR_SUST_STAT |
 			    TR2_FREE_ACT);
 	    t_ptr->flags2 |= (TR1_SLAY_TROLL | TR_SLAY_ORC | TR2_RES_DARK | TR_ARTIFACT);
@@ -780,8 +780,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_RILIA;
 	    t_ptr->tohit = 4;
 	    t_ptr->todam = 3;
-	    t_ptr->damage[0] = 2;
-	    t_ptr->damage[1] = 4;
+	    t_ptr->dd = 2;
+	    t_ptr->ds = 4;
 	    t_ptr->flags = TR_POISON;
 	    t_ptr->flags2 |= (TR_ACTIVATE | TR2_RES_DISENCHANT | TR_ARTIFACT);
 	    t_ptr->cost = 15000L;
@@ -798,8 +798,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_BELANGIL;
 	    t_ptr->tohit = 6;
 	    t_ptr->todam = 9;
-	    t_ptr->damage[0] = 3;
-	    t_ptr->damage[1] = 2;
+	    t_ptr->dd = 3;
+	    t_ptr->ds = 2;
 	    t_ptr->flags = (TR1_BRAND_COLD | TR2_RES_COLD | TR_REGEN | TR_SLOW_DIGEST |
 			    TR1_DEX | TR_SEE_INVIS);
 	    t_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
@@ -885,8 +885,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->ident |= ID_NOSHOW_TYPE;
 	    t_ptr->tohit = 8;
 	    t_ptr->todam = 11;
-	    t_ptr->damage[0] = 3;
-	    t_ptr->damage[1] = 6;
+	    t_ptr->dd = 3;
+	    t_ptr->ds = 6;
 	    t_ptr->toac = 5;
 	    t_ptr->flags = (TR_FFALL | TR2_RES_LIGHT | TR_SEE_INVIS | TR1_STR | TR1_CON
 			    | TR2_FREE_ACT | TR2_RES_COLD | TR2_RES_ACID
@@ -924,8 +924,8 @@ int unique_weapon(inven_type *t_ptr)
 	else
 	    good_item_flag = TRUE;
 	t_ptr->name2 = SN_AULE;
-	t_ptr->damage[0] = 5;
-	t_ptr->damage[1] = 5;
+	t_ptr->dd = 5;
+	t_ptr->ds = 5;
 	t_ptr->tohit = 19;
 	t_ptr->todam = 21;
 	t_ptr->toac = 5;
@@ -1084,8 +1084,8 @@ int unique_weapon(inven_type *t_ptr)
 	    t_ptr->name2 = SN_OLORIN;
 	    t_ptr->tohit = 10;
 	    t_ptr->todam = 13;
-	    t_ptr->damage[0] = 2;
-	    t_ptr->damage[1] = 10;
+	    t_ptr->dd = 2;
+	    t_ptr->ds = 10;
 	    t_ptr->flags = (TR1_SLAY_EVIL | TR_SEE_INVIS | TR1_WIS | TR1_INT | TR1_CHR
 			    | TR1_BRAND_FIRE | TR2_RES_FIRE);
 	    t_ptr->flags2 |= (TR_ARTIFACT | TR_HOLD_LIFE | TR1_SLAY_ORC | TR_SLAY_TROLL

@@ -198,7 +198,7 @@ struct _inven_kind {
   s16b todam;			/* Plusses to damage		*/
   s16b toac;			/* Plusses to AC		*/
   s16b ac;			/* Normal AC			*/
-  byte damage[2];			/* Damage when hits		*/
+  byte dd, ds;			/* Damage when hits dice/sides		*/
   u16b weight;			/* Weight			*/
 
   s32b cost;			/* Object "base cost"		*/
@@ -249,7 +249,7 @@ struct _inven_type {
   s16b todam;			/* Plusses to damage		*/
   s16b toac;			/* Plusses to AC		*/
   s16b ac;			/* Normal AC			*/
-  byte damage[2];			/* Damage when hits		*/
+  byte dd, ds;			/* Damage when hits dice/sides		*/
 
   s32b cost;			/* Cost of item			*/
 
@@ -347,20 +347,7 @@ struct _store_type {
   inven_record store_inven[STORE_INVEN_MAX];
 };
 
-typedef struct high_scores {
-  s32b points;
-  u16b lev;
-  u16b max_lev;
-  s16b mhp;
-  s16b chp;
-  s16b uid;
-  s16b dun_level;
-  byte sex;
-  vtype name;
-  vtype died_from;
-  byte pclass;
-  byte prace;
-} high_scores;
+
 
 typedef struct _player_race player_race;
 

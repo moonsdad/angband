@@ -39,6 +39,21 @@
 #endif
 
 
+typedef struct high_scores {
+  s32b points;
+  u16b lev;
+  u16b max_lev;
+  s16b mhp;
+  s16b chp;
+  s16b uid;
+  s16b dun_level;
+  byte sex;
+  vtype name;
+  vtype died_from;
+  byte pclass;
+  byte prace;
+} high_scores;
+
 static void date(char *day)
 {
     register char *tmp;

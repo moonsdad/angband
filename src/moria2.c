@@ -484,8 +484,8 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			t_ptr->name2 = SN_GROND;
 			t_ptr->tohit = 5;
 			t_ptr->todam = 25;
-			t_ptr->damage[0] = 10;
-			t_ptr->damage[1] = 8;
+			t_ptr->dd = 10;
+			t_ptr->ds = 8;
 			t_ptr->weight = 600;
 			t_ptr->flags = (TR_SEE_INVIS | TR1_SLAY_EVIL | TR1_SLAY_UNDEAD |
 					TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |

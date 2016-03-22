@@ -667,25 +667,25 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	/* XXX */
 	g->hd[1] = 1;
 
-	g->damage[0] = 5 + ((l > 18) ? 18 : l);
-	g->damage[1] = g->damage[0];
+	g->dd = 5 + ((l > 18) ? 18 : l);
+	g->ds = g->dd;
 
 	switch (c) {
 	  case 0:
-	    g->damage[2] = ((l < 30) ? (5 + ((l > 18) ? 18 : l)) : 235);
-	    g->damage[3] = g->damage[2];
+	    g->ddds = ((l < 30) ? (5 + ((l > 18) ? 18 : l)) : 235);
+	    g->damage[3] = g->ddds;
 	    break;
 	  case 1:
 	  case 2:
-	    g->damage[2] = 0;
+	    g->ddds = 0;
 	    g->damage[3] = 0;
 	    break;
 	  case 3:
-	    g->damage[2] = g->damage[3] = ((l < 30) ? 149 : 232);
+	    g->ddds = g->damage[3] = ((l < 30) ? 149 : 232);
 	    break;
 	  case 4:
 	  case 5:
-	    g->damage[2] = g->damage[3] = g->damage[1];
+	    g->ddds = g->damage[3] = g->ds;
 	    break;
 	}
 
@@ -707,9 +707,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 11;
 	g->cchar = 's';
 	g->hd[1] = 1;
-	g->damage[0] = 5;
-	g->damage[1] = 5;
-	g->damage[2] = 0;
+	g->dd = 5;
+	g->ds = 5;
+	g->ddds = 0;
 	g->damage[3] = 0;
 	break;
 
@@ -725,9 +725,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 11;
 	g->cchar = 'z';
 	g->hd[1] *= 2;
-	g->damage[0] = 8;
-	g->damage[1] = 0;
-	g->damage[2] = 0;
+	g->dd = 8;
+	g->ds = 0;
+	g->ddds = 0;
 	g->damage[3] = 0;
 	break;
 
@@ -739,9 +739,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->ac = 20;
 	g->speed = 13;
 	g->cchar = 'G';
-	g->damage[0] = 5;
-	g->damage[1] = 5;
-	g->damage[2] = 93;
+	g->dd = 5;
+	g->ds = 5;
+	g->ddds = 93;
 	g->damage[3] = 93;
 	g->mexp = (g->mexp * 3) / 2;
 	break;
@@ -758,9 +758,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 11;
 	g->cchar = 'M';
 	g->hd[1] *= 2;
-	g->damage[0] = 16;
-	g->damage[1] = 16;
-	g->damage[2] = 16;
+	g->dd = 16;
+	g->ds = 16;
+	g->ddds = 16;
 	g->damage[3] = 0;
 	g->mexp = (g->mexp * 3) / 2;
 	break;
@@ -776,9 +776,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 11;
 	g->cchar = 'G';
 	g->hd[1] *= 2;
-	g->damage[0] = 19;
-	g->damage[1] = 185;
-	g->damage[2] = 99;
+	g->dd = 19;
+	g->ds = 185;
+	g->ddds = 99;
 	g->damage[3] = 178;
 	g->mexp = g->mexp * 3;
 	break;
@@ -793,9 +793,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 12;
 	g->cchar = 'G';
 	g->hd[1] *= 2;
-	g->damage[0] = 99;
-	g->damage[1] = 99;
-	g->damage[2] = 192;
+	g->dd = 99;
+	g->ds = 99;
+	g->ddds = 192;
 	g->damage[3] = 184;
 	g->mexp = (g->mexp * 7) / 2;
 	break;
@@ -809,9 +809,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 11;
 	g->cchar = 'V';
 	g->hd[1] *= 3;
-	g->damage[0] = 20;
-	g->damage[1] = 20;
-	g->damage[2] = 190;
+	g->dd = 20;
+	g->ds = 20;
+	g->ddds = 190;
 	g->damage[3] = 0;
 	g->mexp = g->mexp * 3;
 	break;
@@ -828,9 +828,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 12;
 	g->cchar = 'W';
 	g->hd[1] *= 3;
-	g->damage[0] = 20;
-	g->damage[1] = 20;
-	g->damage[2] = 190;
+	g->dd = 20;
+	g->ds = 20;
+	g->ddds = 190;
 	g->damage[3] = 0;
 	g->mexp = g->mexp * 5;
 	break;
@@ -846,9 +846,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->cchar = 'V';
 	g->hd[1] *= 2;
 	g->hd[0] = (g->hd[0] * 5) / 2;
-	g->damage[0] = 20;
-	g->damage[1] = 20;
-	g->damage[2] = 20;
+	g->dd = 20;
+	g->ds = 20;
+	g->ddds = 20;
 	g->damage[3] = 198;
 	g->mexp = g->mexp * 20;
 	break;
@@ -863,9 +863,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->speed = 13;
 	g->cchar = 'G';
 	g->hd[1] *= 3;
-	g->damage[0] = 99;
-	g->damage[1] = 99;
-	g->damage[2] = 192;
+	g->dd = 99;
+	g->ds = 99;
+	g->ddds = 192;
 	g->damage[3] = 184;
 	g->mexp = g->mexp * 20;
 	break;
@@ -884,9 +884,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->cchar = 'L';
 	g->hd[1] *= 3;
 	g->hd[0] *= 2;
-	g->damage[0] = 181;
-	g->damage[1] = 201;
-	g->damage[2] = 214;
+	g->dd = 181;
+	g->ds = 201;
+	g->ddds = 214;
 	g->damage[3] = 181;
 	g->mexp = g->mexp * 50;
 	break;
@@ -906,9 +906,9 @@ void set_ghost(monster_race *g, char *name, int r, int c, int l)
 	g->cchar = 'G';
 	g->hd[1] *= 2;
 	g->hd[0] = (g->hd[0] * 5) / 2;
-	g->damage[0] = 99;
-	g->damage[1] = 99;
-	g->damage[2] = 192;
+	g->dd = 99;
+	g->ds = 99;
+	g->ddds = 192;
 	g->damage[3] = 184;
 	g->mexp = g->mexp * 30;
 	break;

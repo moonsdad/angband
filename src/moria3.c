@@ -932,7 +932,7 @@ void tunnel(int dir)
 	if (TR_TUNNEL & i_ptr->flags)
 	    tabil += 25 + i_ptr->p1 * 50;
 	else {
-	    tabil += (i_ptr->damage[0] * i_ptr->damage[1]) + i_ptr->tohit
+	    tabil += (i_ptr->dd * i_ptr->ds) + i_ptr->tohit
 		+ i_ptr->todam;
 	/* divide by two so that digging without shovel isn't too easy */
 	    tabil >>= 1;
@@ -1369,7 +1369,7 @@ void throw_object()
 		 /* unhealth, potions of detonations and death are the only	*/
 		 /* always-throwable food/potions.  (plus known bad ones, in a	*/
 		 /* later test...) -CFT */
-		 (t->damage[0] > 1) && (t->damage[1] > 1))
+		 (t->dd > 1) && (t->ds > 1))
 	    ok_throw = TRUE; /* if it's a mushroom or potion that does
                                 damage when thrown... */
 	else if (!known2_p(t) && (t->ident & ID_DAMD))

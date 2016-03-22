@@ -53,7 +53,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->name2 = SN_WOUNDING; /* swapped with slaying -CFT */
 		t_ptr->tohit += 5;
 		t_ptr->todam += 5;
-		t_ptr->damage[0] ++; /* added -CFT */
+		t_ptr->dd ++; /* added -CFT */
 		t_ptr->cost += 30;
 		rating += 5;
 		break;
@@ -93,14 +93,14 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->tohit += 10; /* reduced because of dice bonus -CFT */
 		t_ptr->todam += 10;
 		t_ptr->name2 = SN_SLAYING; /* swapped w/ wounding -CFT */
-		t_ptr->damage[0] += 2; /* added -CFT */
+		t_ptr->dd += 2; /* added -CFT */
 		t_ptr->cost += 45;
 		rating += 10;
 		break;
 	    }
 	while (magik(special)) { /* added -CFT */
-	    t_ptr->damage[0]++;
-	    t_ptr->cost += t_ptr->damage[0]*5;
+	    t_ptr->dd++;
+	    t_ptr->cost += t_ptr->dd*5;
 	}
     }
     else if (magik(cursed)) {
