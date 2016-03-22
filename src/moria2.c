@@ -65,7 +65,7 @@ void hit_trap(int y, int x)
     dam = pdamroll(i_ptr->damage);
 
     /* Examine the trap sub-val */
-    switch (i_ptr->subval) {
+    switch (i_ptr->sval) {
 
       case 1:			   /* Open pit */
 	msg_print("You fell into a pit!");
@@ -280,7 +280,7 @@ void hit_trap(int y, int x)
       case 106:
       case 107:
       case 108:
-	enter_store(i_ptr->subval - 101);
+	enter_store(i_ptr->sval - 101);
 	break;
 
       default:
@@ -1095,7 +1095,7 @@ static void facts(inven_type *i_ptr, \
 
     /* Using Bows,  slings,  or crossbows	 */
     if (inventory[INVEN_WIELD].tval == TV_BOW)
-	switch (inventory[INVEN_WIELD].subval) {
+	switch (inventory[INVEN_WIELD].sval) {
 
 	  /* Sling and ammo */
 	  case 20:

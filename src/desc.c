@@ -264,7 +264,7 @@ s16b object_offset(inven_type *t_ptr)
       case TV_POTION2:
 	return (5);
       case TV_FOOD:
-	if ((t_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1)) < MAX_SHROOM)
+	if ((t_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1)) < MAX_SHROOM)
 	    return (6);
 	return (-1);
       default:
@@ -281,7 +281,7 @@ void known1(inven_type *i_ptr)
     if ((offset = object_offset(i_ptr)) < 0)
 	return;
     offset <<= 6;
-    indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
     object_ident[offset + indexx] |= OD_KNOWN1;
 /* clear the tried flag, since it is now known */
     object_ident[offset + indexx] &= ~OD_TRIED;
@@ -300,7 +300,7 @@ int known1_p(inven_type *i_ptr)
     if (store_bought_p(i_ptr))
 	return OD_KNOWN1;
     offset <<= 6;
-    indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
     return (object_ident[offset + indexx] & OD_KNOWN1);
 }
 
@@ -357,7 +357,7 @@ static void unsample(inven_type *i_ptr)
     if ((offset = object_offset(i_ptr)) < 0)
 	return;
     offset <<= 6;
-    indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
     object_ident[offset + indexx] &= ~OD_TRIED;
 }
 
@@ -372,7 +372,7 @@ void sample(inven_type *i_ptr)
     if ((offset = object_offset(i_ptr)) < 0)
 	return;
     offset <<= 6;
-    indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
     object_ident[offset + indexx] |= OD_TRIED;
 }
 
@@ -397,14 +397,14 @@ void identify(int *item)
     if (!known1_p(i_ptr)) {
 	known1(i_ptr);
 	x1 = i_ptr->tval;
-	x2 = i_ptr->subval;
+	x2 = i_ptr->sval;
 	if (x2 < ITEM_SINGLE_STACK_MIN || x2 >= ITEM_GROUP_MIN)
 	/* no merging possible */
 	    ;
 	else
 	    for (i = 0; i < inven_ctr; i++) {
 		t_ptr = &inventory[i];
-		if (t_ptr->tval == x1 && t_ptr->subval == x2 && i != *item
+		if (t_ptr->tval == x1 && t_ptr->sval == x2 && i != *item
 		    && ((int)t_ptr->number + (int)i_ptr->number < 256)) {
 		/* make *item the smaller number */
 		    if (*item > i) {
@@ -462,7 +462,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
     vtype                tmp_str, damstr;
     bigvtype             tmp_val;
 
-    indexx = i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1);
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
     basenm = object_list[i_ptr->index].name;
     modstr = NULL;
 
@@ -494,7 +494,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_SPIKE:
 	break;
       case TV_BOW:
-	switch(i_ptr->subval) { /* whole new code -CFT */
+	switch(i_ptr->sval) { /* whole new code -CFT */
 	  case 20: case 1: /* sling, sh. bow */
 	    strcpy(damstr, " (x2)");
 	    break;
@@ -891,7 +891,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	tmp_str[0] = '\0';
 	if ((indexx = object_offset(i_ptr)) >= 0) {
 	    indexx = (indexx <<= 6) +
-		(i_ptr->subval & (ITEM_SINGLE_STACK_MIN - 1));
+		(i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1));
 	/* don't print tried string for store bought items */
 	    if ((object_ident[indexx] & OD_TRIED) && !store_bought_p(i_ptr))
 		(void)strcat(tmp_str, "tried ");
@@ -972,7 +972,7 @@ void invcopy(register inven_type *to, int from_index)
     to->tchar = from->tchar;
     to->p1 = from->p1;
     to->cost = from->cost;
-    to->subval = from->subval;
+    to->sval = from->subval;
     to->number = from->number;
     to->weight = from->weight;
     to->tohit = from->tohit;

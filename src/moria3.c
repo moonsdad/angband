@@ -1413,7 +1413,7 @@ void throw_object()
 	    tchar = throw_obj.tchar;
 	/* EAM Start loop over multiple shots */
 	    while (thits-- > 0) {
-		if (inventory[INVEN_WIELD].subval == 12)
+		if (inventory[INVEN_WIELD].sval == 12)
 		    tpth -= 10;
 		flag = FALSE;
 		y = char_row;
@@ -1525,7 +1525,7 @@ void throw_object()
 		}
 		while (!flag);
 		if (thits > 0) {   /* triple crossbow check -- not really needed */
-		    if (inventory[INVEN_WIELD].subval != 12) {
+		    if (inventory[INVEN_WIELD].sval != 12) {
 			(void)sprintf(out_val, "Keep shooting?");
 			if (get_check(out_val)) {
 			    desc_remain(item_val);

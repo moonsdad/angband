@@ -441,7 +441,7 @@ void inven_command(int command)
 				    (void)strcat(prt2, "wearing ");
 				msg_print(strcat(prt2, "appears to be cursed."));
 				item = (-1);
-			    } else if (inventory[item].subval == ITEM_GROUP_MIN &&
+			    } else if (inventory[item].sval == ITEM_GROUP_MIN &&
 				       inventory[item].number > 1 &&
 				       !inven_check_num(&inventory[slot])) {
  /* this can happen if try to wield a torch, and have more than one in your inventory */
@@ -463,7 +463,7 @@ void inven_command(int command)
 			    wear_high--;
 			/* Fix for torches	   */
 			    if (i_ptr->number > 1
-				&& i_ptr->subval <= ITEM_SINGLE_STACK_MAX) {
+				&& i_ptr->sval <= ITEM_SINGLE_STACK_MAX) {
 				i_ptr->number = 1;
 				wear_high++;
 			    }
@@ -613,7 +613,7 @@ void inven_command(int command)
 	tmp2 = cur_lite;
 	print('@', char_row, char_col);
 	if (inventory[INVEN_LITE].tval == TV_LITE)
-	    tmp = inventory[INVEN_LITE].subval;
+	    tmp = inventory[INVEN_LITE].sval;
 	else
 	    tmp = 195;
 	cur_lite = 1 + (tmp < 190) + (tmp == 4 || tmp == 6);
@@ -657,7 +657,7 @@ void inven_destroy(int item_val)
     register inven_type *i_ptr;
 
     i_ptr = &inventory[item_val];
-    if ((i_ptr->number > 1) && (i_ptr->subval <= ITEM_SINGLE_STACK_MAX)) {
+    if ((i_ptr->number > 1) && (i_ptr->sval <= ITEM_SINGLE_STACK_MAX)) {
 	i_ptr->number--;
 	inven_weight -= i_ptr->weight;
     } else {
@@ -678,8 +678,8 @@ void inven_destroy(int item_val)
 void take_one_item(register inven_type *s_ptr, register inven_type *i_ptr)
 {
     *s_ptr = *i_ptr;
-    if ((s_ptr->number > 1) && (s_ptr->subval >= ITEM_SINGLE_STACK_MIN)
-	&& (s_ptr->subval <= ITEM_SINGLE_STACK_MAX))
+    if ((s_ptr->number > 1) && (s_ptr->sval >= ITEM_SINGLE_STACK_MIN)
+	&& (s_ptr->sval <= ITEM_SINGLE_STACK_MAX))
 	s_ptr->number = 1;
 }
 

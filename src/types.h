@@ -187,7 +187,7 @@ struct _inven_kind {
   cptr name;			/* Object Name				*/
 
   byte tval;			/* Object type Category number			*/
-  byte subval;			/* Object Sub-type Category number		*/
+  byte sval;			/* Object Sub-type Category number		*/
   s16b p1;			/* Object extra info		*/
 
   byte level;			/* Object level			*/
@@ -234,7 +234,7 @@ struct _inven_type {
   byte level;			/* Level item first found	*/
 
   byte tval;			/* Category number		*/
-  byte subval;			/* Sub-category number		*/
+  byte sval;			/* Sub-category number		*/
   s16b p1;			/* Misc. use variable		*/
 
 

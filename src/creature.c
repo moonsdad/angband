@@ -1281,11 +1281,11 @@ static void make_attack(int monptr)
 		    /* Message */
 		    sprintf(t2, "%sour %s (%c) %s stolen!",
 		    /* stacked single items */
-			    ((inventory[i].subval <= ITEM_SINGLE_STACK_MAX) &&
+			    ((inventory[i].sval <= ITEM_SINGLE_STACK_MAX) &&
 			     (inventory[i].number > 1))? "One of y" : "Y",
 			    t1, i + 'a',
 		    /* stacked group items */
-			    ((inventory[i].subval > ITEM_SINGLE_STACK_MAX) &&
+			    ((inventory[i].sval > ITEM_SINGLE_STACK_MAX) &&
 			     (inventory[i].number > 1))? "were" : "was");
 		    msg_print(t2);
 
@@ -1853,7 +1853,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 
 	/* Hack -- check for Glyph of Warding */
 	if (do_move && (c_ptr->tptr != 0) &&
-	    (t_list[c_ptr->tptr].tval == TV_VIS_TRAP) && (t_list[c_ptr->tptr].subval == 99)) {
+	    (t_list[c_ptr->tptr].tval == TV_VIS_TRAP) && (t_list[c_ptr->tptr].sval == 99)) {
 
 	    /* Break the ward */
 	    if (randint(OBJ_BREAK_GLYPH) < r_list[m_ptr->mptr].level) {

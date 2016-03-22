@@ -364,7 +364,7 @@ s32b item_value(inven_type *i_ptr)
 	if (!known1_p(i_ptr)) value = 20;
 
     } else if (i_ptr->tval == TV_FOOD) {
-	if ((i_ptr->subval < (ITEM_SINGLE_STACK_MIN + MAX_SHROOM))
+	if ((i_ptr->sval < (ITEM_SINGLE_STACK_MIN + MAX_SHROOM))
 	    && !known1_p(i_ptr)) value = 1;
 
 				/* Rings and amulets */
@@ -409,7 +409,7 @@ s32b item_value(inven_type *i_ptr)
 	}
     }
 /* multiply value by number of items if it is a group stack item */
-    if (i_ptr->subval > ITEM_GROUP_MIN)	/* do not include torches here */
+    if (i_ptr->sval > ITEM_GROUP_MIN)	/* do not include torches here */
 	value = value * i_ptr->number;
     return (value);
 }
@@ -475,28 +475,28 @@ int store_check_num(inven_type *t_ptr, int store_num)
     if (s_ptr->store_ctr < STORE_INVEN_MAX) store_check = TRUE;
 
     /* Check all the items */
-    else if (t_ptr->subval >= ITEM_SINGLE_STACK_MIN)
+    else if (t_ptr->sval >= ITEM_SINGLE_STACK_MIN)
 	for (i = 0; i < s_ptr->store_ctr; i++) {
 	    i_ptr = &s_ptr->store_inven[i].sitem;
 
-	/* note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
-	 * their subvals match */
-	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
+	/* note: items with sval of gte ITEM_SINGLE_STACK_MAX only stack if
+	 * their svals match */
+	    if (i_ptr->tval == t_ptr->tval && i_ptr->sval == t_ptr->subval
 		&& ((int)i_ptr->number + (int)t_ptr->number < 256)
-		&& (t_ptr->subval < ITEM_GROUP_MIN
+		&& (t_ptr->sval < ITEM_GROUP_MIN
 		    || (i_ptr->p1 == t_ptr->p1)))
 		store_check = TRUE;
 	}
 
 /* But, wait.  If at home, don't let player drop 25th item, or he will lose it. -CFT */
-    if (is_home && (t_ptr->subval >= ITEM_SINGLE_STACK_MIN))
+    if (is_home && (t_ptr->sval >= ITEM_SINGLE_STACK_MIN))
 	for (i = 0; i < s_ptr->store_ctr; i++) {
 	    i_ptr = &s_ptr->store_inven[i].sitem;
-	/* note: items with subval of gte ITEM_SINGLE_STACK_MAX only stack if
-	 * their subvals match */
-	    if (i_ptr->tval == t_ptr->tval && i_ptr->subval == t_ptr->subval
+	/* note: items with sval of gte ITEM_SINGLE_STACK_MAX only stack if
+	 * their svals match */
+	    if (i_ptr->tval == t_ptr->tval && i_ptr->sval == t_ptr->subval
 		&& ((int)i_ptr->number + (int)t_ptr->number > 24)
-		&& (t_ptr->subval < ITEM_GROUP_MIN
+		&& (t_ptr->sval < ITEM_GROUP_MIN
 		    || (i_ptr->p1 == t_ptr->p1)))
 		store_check = FALSE;
 	}
@@ -525,13 +525,13 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 	item_num = t_ptr->number;
 	flag = FALSE;
 	typ  = t_ptr->tval;
-	subt = t_ptr->subval;
+	subt = t_ptr->sval;
 	if (subt >= ITEM_SINGLE_STACK_MIN) { /* try to stack in store's inven */
 	    do {
 		i_ptr = &s_ptr->store_inven[item_val].sitem;
 		if (typ == i_ptr->tval)
 		{
-		    if (subt == i_ptr->subval && /* Adds to other item        */
+		    if (subt == i_ptr->sval && /* Adds to other item        */
 			subt >= ITEM_SINGLE_STACK_MIN
 			&& (subt < ITEM_GROUP_MIN || i_ptr->p1 == t_ptr->p1))
 		    {
@@ -564,7 +564,7 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 		    ((typ == i_ptr->tval) &&
 		     ((t_ptr->level < i_ptr->level) || /* then by inc level, */
 		      ((t_ptr->level == i_ptr->level) &&
-		       (subt < i_ptr->subval))))) /* and finally by inc subval -CFT */
+		       (subt < i_ptr->sval))))) /* and finally by inc subval -CFT */
 		{		/* Insert into list             */
 		    insert_store(store_num, item_val, icost, t_ptr);
 		    flag = TRUE;
@@ -600,8 +600,8 @@ void store_destroy(int store_num, int item_val, int one_of)
  * help ensure that general store and alchemist have reasonable selection of
  * objects 
  */
-    if ((i_ptr->subval >= ITEM_SINGLE_STACK_MIN) &&
-	(i_ptr->subval <= ITEM_SINGLE_STACK_MAX)) {
+    if ((i_ptr->sval >= ITEM_SINGLE_STACK_MIN) &&
+	(i_ptr->sval <= ITEM_SINGLE_STACK_MAX)) {
 	if (one_of)
 	    number = 1;
 	else
@@ -778,8 +778,8 @@ static void display_inventory(int store_num, int start)
 	i_ptr = &s_ptr->store_inven[start].sitem;
 	x = i_ptr->number;
 	if (!is_home) {
-	    if ((i_ptr->subval >= ITEM_SINGLE_STACK_MIN)
-		&& (i_ptr->subval <= ITEM_SINGLE_STACK_MAX))
+	    if ((i_ptr->sval >= ITEM_SINGLE_STACK_MIN)
+		&& (i_ptr->sval <= ITEM_SINGLE_STACK_MAX))
 		i_ptr->number = 1;
 	}
 	objdes(out_val1, i_ptr, TRUE);

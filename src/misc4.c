@@ -1372,17 +1372,17 @@ int inven_check_num(inven_type *t_ptr)
     /* If there is an empty space, we are fine */
     if (inven_ctr < INVEN_WIELD) return TRUE;
 
-    else if (t_ptr->subval >= ITEM_SINGLE_STACK_MIN)
+    else if (t_ptr->sval >= ITEM_SINGLE_STACK_MIN)
 
     /* Scan every possible match */
     for (i = 0; i < inven_ctr; i++) {
 
 	    if (inventory[i].tval == t_ptr->tval &&
-		inventory[i].subval == t_ptr->subval &&
+		inventory[i].sval == t_ptr->subval &&
 	/* make sure the number field doesn't overflow */
 		((int)inventory[i].number + (int)t_ptr->number < 256) &&
-	/* they always stack (subval < 192), or else they have same p1 */
-		((t_ptr->subval < ITEM_GROUP_MIN) || (inventory[i].p1 == t_ptr->p1))
+	/* they always stack (sval < 192), or else they have same p1 */
+		((t_ptr->sval < ITEM_GROUP_MIN) || (inventory[i].p1 == t_ptr->p1))
 	/* only stack if both or neither are identified */
 		&& (known1_p(&inventory[i]) == known1_p(t_ptr)))
 		return TRUE;
@@ -1416,7 +1416,7 @@ int inven_carry(inven_type *i_ptr)
     int                  stacked = FALSE;
 
     typ = i_ptr->tval;
-    subt = i_ptr->subval;
+    subt = i_ptr->sval;
     known1p = known1_p(i_ptr);
     always_known1p = (object_offset(i_ptr) == -1);
 
@@ -1431,10 +1431,10 @@ int inven_carry(inven_type *i_ptr)
 	for (locn = 0; locn < inven_ctr; locn++) {
 	    t_ptr = &inventory[locn];
 	    if (t_ptr->tval == typ &&
-		t_ptr->subval == subt &&
+		t_ptr->sval == subt &&
 	/* make sure the number field doesn't overflow */
 		((int)t_ptr->number + (int)i_ptr->number < 256) &&
-	/* they always stack (subval < 192), or else they have same p1 */
+	/* they always stack (sval < 192), or else they have same p1 */
 		((subt < ITEM_GROUP_MIN) || (t_ptr->p1 == i_ptr->p1))
 	/* only stack if both or neither are identified */
 		&& (known1_p(&inventory[locn]) == known1p)) {
@@ -1476,9 +1476,9 @@ int inven_carry(inven_type *i_ptr)
 	 */
 	    if ((typ > tval_tmp) ||     /* sort by desc tval */
 		(always_known1p &&      /* if always known, then sort by inc level, */
-		 (typ == tval_tmp) &&	/* then by inc subval */
+		 (typ == tval_tmp) &&	/* then by inc sval */
 		 ((i_ptr->level < t_ptr->level) ||
-	     ((i_ptr->level == t_ptr->level) && (subt < t_ptr->subval))))) {
+	     ((i_ptr->level == t_ptr->level) && (subt < t_ptr->sval))))) {
 		for (i = inven_ctr - 1; i >= locn; i--)
 		    inventory[i + 1] = inventory[i];
 		inventory[locn] = *i_ptr;

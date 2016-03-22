@@ -16,17 +16,17 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 
     if (i_ptr && (randint(2)==1)){
 	if ((t_ptr->tval == TV_SHOT) &&
-	    (i_ptr->subval >= 20) && (i_ptr->subval <= 21));
+	    (i_ptr->sval >= 20) && (i_ptr->subval <= 21));
 	/* right type, do nothing */
 	else if ((t_ptr->tval == TV_ARROW) &&
-		 (i_ptr->subval >= 1) && (i_ptr->subval <= 4));
+		 (i_ptr->sval >= 1) && (i_ptr->subval <= 4));
 	/* right type, do nothing */
 	else if ((t_ptr->tval == TV_BOLT) &&
-		 (i_ptr->subval >= 10) && (i_ptr->subval <= 12));
+		 (i_ptr->sval >= 10) && (i_ptr->subval <= 12));
 	/* right type, do nothing */
-	else if ((i_ptr->subval >= 20) && (i_ptr->subval <= 21))
+	else if ((i_ptr->sval >= 20) && (i_ptr->subval <= 21))
 	    invcopy(t_ptr, 83); /* this should be treasure list index of shots -CFT */
-	else if ((i_ptr->subval >= 1) && (i_ptr->subval <= 4))
+	else if ((i_ptr->sval >= 1) && (i_ptr->subval <= 4))
 	    invcopy(t_ptr, 78); /* this should be index of arrows -CFT */
 	else			/* xbow */
 	    invcopy(t_ptr, 80); /* this should be index of bolts -CFT */

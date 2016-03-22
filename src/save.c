@@ -1730,7 +1730,7 @@ static void wr_item(register inven_type *item)
     wr_byte(item->tchar);
     wr_short((u16b) item->p1);
     wr_long((u32b) item->cost);
-    wr_byte(item->subval);
+    wr_byte(item->sval);
     wr_byte(item->number);
     wr_short(item->weight);
     wr_short((u16b) item->tohit);
@@ -1850,7 +1850,7 @@ static void rd_item(register inven_type *item)
     rd_byte(&item->tchar);
     rd_short((u16b *) & item->p1);
     rd_long((u32b *) & item->cost);
-    rd_byte(&item->subval);
+    rd_byte(&item->sval);
     rd_byte(&item->number);
     rd_short(&item->weight);
     rd_short((u16b *) & item->tohit);
