@@ -157,14 +157,14 @@ void eat(void)
 	switch (j + 1) {
 
 	  case 1:
-	    if (!p_ptr->flags.poison_resist) {
+	    if (!p_ptr->flags.resist_pois) {
 		p_ptr->flags.poisoned += randint(10) + i_ptr->level;
 	    }
 		ident = TRUE;
 	    break;
 
 	  case 2:
-	    if (!p_ptr->flags.blindness_resist) {
+	    if (!p_ptr->flags.resist_blind) {
 		p_ptr->flags.blind += randint(250) + 10 * i_ptr->level + 100;
 		draw_cave();
 		msg_print("A veil of darkness surrounds you.");
@@ -173,7 +173,7 @@ void eat(void)
 	    break;
 
 	  case 3:
-	    if (!p_ptr->flags.fear_resist) {
+	    if (!p_ptr->flags.resist_fear) {
 		p_ptr->flags.afraid += randint(10) + i_ptr->level;
 		msg_print("You feel terrified!");
 		ident = TRUE;
@@ -181,7 +181,7 @@ void eat(void)
 	    break;
 
 	  case 4:
-	    if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+	    if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 		p_ptr->flags.confused += randint(10) + i_ptr->level;
 		msg_print("You feel drugged.");
 	    }
@@ -584,7 +584,7 @@ void quaff(void)
 	    break;
 
 	  case 20:
-	    if (!p_ptr->flags.blindness_resist) {
+	    if (!p_ptr->flags.resist_blind) {
 		if (p_ptr->flags.blind == 0) {
 		    msg_print("You are covered by a veil of darkness.");
 		    ident = TRUE;
@@ -594,7 +594,7 @@ void quaff(void)
 	    break;
 
 	  case 21:
-	    if (!p_ptr->flags.confusion_resist) {
+	    if (!p_ptr->flags.resist_conf) {
 		if (p_ptr->flags.confused == 0) {
 		    msg_print("Hey!  This is good stuff!  *Hick!*");
 		    ident = TRUE;
@@ -604,16 +604,16 @@ void quaff(void)
 	    break;
 
 	  case 22:
-	    if (!(p_ptr->flags.poison_im ||
-		  p_ptr->flags.poison_resist ||
-		  p_ptr->flags.resist_poison)) {
+	    if (!(p_ptr->flags.immune_pois ||
+		  p_ptr->flags.resist_pois ||
+		  p_ptr->flags.oppose_pois)) {
 		msg_print("You feel very sick.");
 		p_ptr->flags.poisoned += randint(15) + 10;
 	    }
 	    else {
 		msg_print("The poison has no effect.");
 	    }
-	    if (!p_ptr->flags.poison_resist)
+	    if (!p_ptr->flags.resist_pois)
 	    ident = TRUE;
 	    break;
 
@@ -711,13 +711,13 @@ void quaff(void)
 	    break;
 
 	  case 41:
-	    if (!p_ptr->flags.resist_heat) ident = TRUE;
-	    p_ptr->flags.resist_heat += randint(10) + 10;
+	    if (!p_ptr->flags.oppose_fire) ident = TRUE;
+	    p_ptr->flags.oppose_fire += randint(10) + 10;
 	    break;
 
 	  case 42:
-	    if (!p_ptr->flags.resist_cold) ident = TRUE;
-	    p_ptr->flags.resist_cold += randint(10) + 10;
+	    if (!p_ptr->flags.oppose_cold) ident = TRUE;
+	    p_ptr->flags.oppose_cold += randint(10) + 10;
 	    break;
 
 	  case 43:
@@ -1191,7 +1191,7 @@ void read_scroll(void)
 
 	  case 27:
 	    ident = unlight_area(char_row, char_col);
-	    if (!p_ptr->flags.blindness_resist) {
+	    if (!p_ptr->flags.resist_blind) {
 		p_ptr->flags.blind += 3 + randint(5);
 	    }
 	    break;
@@ -2847,11 +2847,11 @@ static void activate(void)
 		if (inventory[i].name2 == SN_COLLUIN) {
 		    msg_print("Your cloak glows many colours...");
 		    msg_print("You feel you can resist anything.");
-		    p_ptr->flags.resist_heat += randint(20) + 20;
-		    p_ptr->flags.resist_cold += randint(20) + 20;
-		    p_ptr->flags.resist_light += randint(20) + 20;
-		    p_ptr->flags.resist_poison += randint(20) + 20;
-		    p_ptr->flags.resist_acid += randint(20) + 20;
+		    p_ptr->flags.oppose_fire += randint(20) + 20;
+		    p_ptr->flags.oppose_cold += randint(20) + 20;
+		    p_ptr->flags.oppose_elec += randint(20) + 20;
+		    p_ptr->flags.oppose_pois += randint(20) + 20;
+		    p_ptr->flags.oppose_acid += randint(20) + 20;
 		    inventory[i].timeout = 111;
 		} else if (inventory[i].name2 == SN_HOLCOLLETH) {
 		    msg_print("You momentarily disappear...");
@@ -3277,10 +3277,10 @@ static void activate(void)
 		    p_ptr->flags.hero += randint(50) + 50;
 		    p_ptr->flags.shero += randint(50) + 50;
 		    bless(randint(50) + 50);
-		    p_ptr->flags.resist_heat += randint(50) + 50;
-		    p_ptr->flags.resist_cold += randint(50) + 50;
-		    p_ptr->flags.resist_light += randint(50) + 50;
-		    p_ptr->flags.resist_acid += randint(50) + 50;
+		    p_ptr->flags.oppose_fire += randint(50) + 50;
+		    p_ptr->flags.oppose_cold += randint(50) + 50;
+		    p_ptr->flags.oppose_elec += randint(50) + 50;
+		    p_ptr->flags.oppose_acid += randint(50) + 50;
 		    inventory[i].timeout = 400;
 		} else {
 		    msg_print("You breathe the elements...");

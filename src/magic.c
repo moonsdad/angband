@@ -939,27 +939,27 @@ void cast()
 	    break;
 
 	  case 50:
-	    p_ptr->flags.resist_heat += randint(20) + 20;
+	    p_ptr->flags.oppose_fire += randint(20) + 20;
 	    break;
 
 	  case 51:
-	    p_ptr->flags.resist_cold += randint(20) + 20;
+	    p_ptr->flags.oppose_cold += randint(20) + 20;
 	    break;
 	    
 	  case 52:
-	    p_ptr->flags.resist_acid += randint(20) + 20;
+	    p_ptr->flags.oppose_acid += randint(20) + 20;
 	    break;
 	    
 	  case 53:
-	    p_ptr->flags.resist_poison += randint(20) + 20;
+	    p_ptr->flags.oppose_pois += randint(20) + 20;
 	    break;
 	    
 	  case 54:
-	    p_ptr->flags.resist_heat += randint(20) + 20;
-	    p_ptr->flags.resist_cold += randint(20) + 20;
-	    p_ptr->flags.resist_light += randint(20) + 20;
-	    p_ptr->flags.resist_poison += randint(20) + 20;
-	    p_ptr->flags.resist_acid += randint(20) + 20;
+	    p_ptr->flags.oppose_fire += randint(20) + 20;
+	    p_ptr->flags.oppose_cold += randint(20) + 20;
+	    p_ptr->flags.oppose_elec += randint(20) + 20;
+	    p_ptr->flags.oppose_pois += randint(20) + 20;
+	    p_ptr->flags.oppose_acid += randint(20) + 20;
 	    break;
 	    
 	  case 55:
@@ -1193,8 +1193,8 @@ void pray()
 	    break;
 	    
 	  case 16:
-	    p_ptr->flags.resist_heat += randint(10) + 10;
-	    p_ptr->flags.resist_cold += randint(10) + 10;
+	    p_ptr->flags.oppose_fire += randint(10) + 10;
+	    p_ptr->flags.oppose_cold += randint(10) + 10;
 	    break;
 	    
 	  case 17:

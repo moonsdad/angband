@@ -551,9 +551,9 @@ static void chest_trap(int y, int x)
     if (i_ptr->flags2 & CH2_POISON) {
 	msg_print("A small needle has pricked you!");
 	take_hit(damroll(1, 6), "a poison needle");
-	if (!(p_ptr->flags.poison_resist ||
-	      p_ptr->flags.resist_poison ||
-	      p_ptr->flags.poison_im)) {
+	if (!(p_ptr->flags.resist_pois ||
+	      p_ptr->flags.oppose_pois ||
+	      p_ptr->flags.immune_pois)) {
 	    p_ptr->flags.poisoned += 10 + randint(20);
 	}
     }

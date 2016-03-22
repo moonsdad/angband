@@ -1130,7 +1130,7 @@ static void make_attack(int monptr)
 	      /* Confusion attack */
 	      case 3:
 		take_hit(damage, ddesc);
-		if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 		    if (randint(2) == 1) {
 			if (f_ptr->confused < 1) {
 			    msg_print("You feel confused.");
@@ -1152,7 +1152,7 @@ static void make_attack(int monptr)
 		take_hit(damage, ddesc);
 		if (player_saves() ||
 		    (p_ptr->misc.pclass == 1 && randint(3) == 1) ||
-		    p_ptr->flags.fear_resist) {
+		    p_ptr->flags.resist_fear) {
 		    msg_print("You stand your ground!");
 		}
 		else if (f_ptr->afraid < 1) {
@@ -1199,7 +1199,7 @@ static void make_attack(int monptr)
 	      /* Blindness attack */
 	      case 10:
 		take_hit(damage, ddesc);
-		if (!p_ptr->flags.blindness_resist) {
+		if (!p_ptr->flags.resist_blind) {
 		    if (f_ptr->blind < 1) {
 			f_ptr->blind += 10 + randint((int)r_ptr->level);
 			msg_print("Your eyes begin to sting.");
@@ -1305,9 +1305,9 @@ static void make_attack(int monptr)
 	      /* Poison	 */
 	      case 14:
 		take_hit(damage, ddesc);
-		if (!(f_ptr->poison_im ||
-		    f_ptr->poison_resist ||
-		    f_ptr->resist_poison)) {
+		if (!(f_ptr->immune_pois ||
+		    f_ptr->resist_pois ||
+		    f_ptr->oppose_pois)) {
 		    msg_print("You feel very sick.");
 		    f_ptr->poisoned += randint((int)r_ptr->level) + 5;
 		}
@@ -1390,7 +1390,7 @@ static void make_attack(int monptr)
 	      case 21:
 
 		/* Allow complete resist */
-		if (!p_ptr->flags.disenchant_resist) {
+		if (!p_ptr->flags.resist_disen) {
 		    byte               chance = 0;
 
 		    /* Take some damage */
@@ -2180,7 +2180,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a spell, burning your eyes!");
 	    else (void)strcat(cdesc, "mumbles, and your eyes burn even more.");
 	    msg_print(cdesc);
-	    if ((player_saves()) || (p_ptr->flags.blindness_resist)) {
+	    if ((player_saves()) || (p_ptr->flags.resist_blind)) {
 		if (!blind) msg_print("You blink and your vision clears.");
 		else msg_print("But the extra burning quickly fades away.");
 	    }
@@ -2197,8 +2197,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you hear puzzling noises.");
 	    msg_print(cdesc);
 	    if ((player_saves()) ||
-		(p_ptr->flags.confusion_resist) ||
-		(p_ptr->flags.chaos_resist)) {
+		(p_ptr->flags.resist_conf) ||
+		(p_ptr->flags.resist_chaos)) {
 		msg_print("You disbelieve the feeble spell.");
 	    }
 	    else if (p_ptr->flags.confused > 0) {
@@ -2213,7 +2213,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a fearful illusion.");
 	    else (void)strcat(cdesc, "mumbles, and you hear scary noises.");
 	    msg_print(cdesc);
-	    if (player_saves() || p_ptr->flags.fear_resist) {
+	    if (player_saves() || p_ptr->flags.resist_fear) {
 		msg_print("You refuse to be frightened.");
 	    }
 	    else if (p_ptr->flags.afraid > 0) {
@@ -2545,7 +2545,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    }
 	    else {
 		msg_print("Your mind is blasted by psionic energy.");
-		if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 		    if (p_ptr->flags.confused > 0) {
 			p_ptr->flags.confused += 2;
 		    }
@@ -2742,7 +2742,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else {
 		msg_print("Your mind is blasted by psionic energy.");
 		take_hit(damroll(12, 15), ddesc);
-		if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 		    if (p_ptr->flags.confused > 0) {
 			p_ptr->flags.confused += 2;
 		    }
@@ -2764,7 +2764,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 			p_ptr->flags.slow = randint(5) + 3;
 		    }
 		}
-		if (!p_ptr->flags.blindness_resist) {
+		if (!p_ptr->flags.resist_blind) {
 		    if (p_ptr->flags.blind > 0) {
 			p_ptr->flags.blind += 6;
 		    }
@@ -2788,7 +2788,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles strangely.");
 	    msg_print(cdesc);
 	    if ((player_saves()) || (randint(3) != 1) ||
-		(p_ptr->flags.nexus_resist)) {
+		(p_ptr->flags.resist_nexus)) {
 		msg_print("You keep your feet firmly on the ground.");
 	    }
 	    else {

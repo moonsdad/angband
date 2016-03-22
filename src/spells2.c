@@ -1102,7 +1102,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_NETHER:
 			if (blind)
 			    msg_print("You are hit by an unholy blast!");
-			if (p_ptr->flags.nether_resist) {
+			if (p_ptr->flags.resist_nether) {
 			    dam_hp *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1122,32 +1122,32 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_WATER:
 			if (blind)
 			    msg_print("You are hit by a jet of water!");
-			if (!p_ptr->flags.sound_resist)
+			if (!p_ptr->flags.resist_sound)
 			    stun_player(randint(15));
 			take_hit(dam_hp, ddesc);
 			break;
 		      case GF_CHAOS:
 			if (blind)
 			    msg_print("You are hit by wave of entropy!");
-			if (p_ptr->flags.chaos_resist) {
+			if (p_ptr->flags.resist_chaos) {
 			    dam_hp *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .858 to .5 -CFT */
 			}
-			if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+			if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 			    if (p_ptr->flags.confused > 0)
 				p_ptr->flags.confused += 12;
 			    else
 				p_ptr->flags.confused = randint(20) + 10;
 			}
-			if (!p_ptr->flags.chaos_resist)
+			if (!p_ptr->flags.resist_chaos)
 			    p_ptr->flags.image += randint(10);
 			take_hit(dam_hp, ddesc);
 			break;
 		      case GF_SHARDS:
 			if (blind)
 			    msg_print("You are cut by sharp fragments!");
-			if (p_ptr->flags.shards_resist) {
+			if (p_ptr->flags.resist_shards) {
 			    dam_hp *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1159,7 +1159,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_SOUND:
 			if (blind)
 			    msg_print("You are deafened by a blast of noise!");
-			if (p_ptr->flags.sound_resist) {
+			if (p_ptr->flags.resist_sound) {
 			    dam_hp *= 5;
 			    dam_hp /= (randint(6) + 6);
 			} else {
@@ -1170,11 +1170,11 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_CONFUSION:
 			if (blind)
 			    msg_print("You are hit by a wave of dizziness!");
-			if (p_ptr->flags.confusion_resist) {
+			if (p_ptr->flags.resist_conf) {
 			    dam_hp *= 5;
 			    dam_hp /= (randint(6) + 6);
 			}
-			if (!p_ptr->flags.confusion_resist && !p_ptr->flags.chaos_resist) {
+			if (!p_ptr->flags.resist_conf && !p_ptr->flags.resist_chaos) {
 			    if (p_ptr->flags.confused > 0)
 				p_ptr->flags.confused += 8;
 			    else
@@ -1185,7 +1185,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_DISENCHANT:
 			if (blind)
 			    msg_print("You are hit by something!");
-			if (p_ptr->flags.disenchant_resist) {
+			if (p_ptr->flags.resist_disen) {
 			    dam_hp *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1266,7 +1266,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_NEXUS:
 			if (blind)
 			    msg_print("You are hit by something strange!");
-			if (p_ptr->flags.nexus_resist) {
+			if (p_ptr->flags.resist_nexus) {
 			    dam_hp *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1276,7 +1276,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_FORCE:
 			if (blind)
 			    msg_print("You are hit hard by a sudden force!");
-			if (!p_ptr->flags.sound_resist)
+			if (!p_ptr->flags.resist_sound)
 			    stun_player(randint(15) + 1);
 			take_hit(dam_hp, ddesc);
 			break;
@@ -1294,11 +1294,11 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_LIGHT:
 			if (blind)
 			    msg_print("You are hit by something!");
-			if (p_ptr->flags.light_resist) {
+			if (p_ptr->flags.resist_lite) {
 			    dam_hp *= 4;	/* these 2 lines give avg dam
 						 * of .444, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .556 to .333 -CFT */
-			} else if (!blind && !p_ptr->flags.blindness_resist) {
+			} else if (!blind && !p_ptr->flags.resist_blind) {
 			    msg_print("You are blinded by the flash!");
 			    p_ptr->flags.blind += randint(5) + 2;
 			}
@@ -1307,12 +1307,12 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_DARK:
 			if (blind)
 			    msg_print("You are hit by something!");
-			if (p_ptr->flags.dark_resist) {
+			if (p_ptr->flags.resist_dark) {
 			    dam_hp *= 4;	/* these 2 lines give avg dam
 						 * of .444, ranging from */
 			    dam_hp /= (randint(6) + 6);	/* .556 to .333 -CFT */
 			} else {
-			    if (!blind && !p_ptr->flags.blindness_resist) {
+			    if (!blind && !p_ptr->flags.resist_blind) {
 				msg_print("The darkness prevents you from seeing!");
 				p_ptr->flags.blind += randint(5) + 2;
 			    }
@@ -1366,7 +1366,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_GRAVITY:
 			if (blind)
 			    msg_print("You are hit by a surge of gravity!");
-			if ((!p_ptr->flags.sound_resist) && (!p_ptr->flags.ffall))	/* DGK */
+			if ((!p_ptr->flags.resist_sound) && (!p_ptr->flags.ffall))	/* DGK */
 			    stun_player(randint(15) + 1);
 			if (p_ptr->flags.ffall) {	/* DGK */
 			    dam_hp *= 3;	/* these 2 lines give avg dam
@@ -1396,9 +1396,9 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			if (blind)
 			    msg_print("You are hit by something cold and sharp!");
 			cold_dam(dam_hp, ddesc);
-			if (!p_ptr->flags.sound_resist)
+			if (!p_ptr->flags.resist_sound)
 			    stun_player(randint(15) + 1);
-			if (!p_ptr->flags.shards_resist)
+			if (!p_ptr->flags.resist_shards)
 			    cut_player(damroll(8, 10));
 			break;
 		      default:
@@ -1799,12 +1799,12 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    break;
 			  case GF_PLASMA:	/* no resist to plasma? */
 			    take_hit(dam, ddesc);
-			    if (!p_ptr->flags.sound_resist)
+			    if (!p_ptr->flags.resist_sound)
 				stun_player(randint(
 				(dam_hp > 40) ? 35 : (dam_hp * 3 / 4 + 5)));
 			    break;
 			  case GF_NETHER:
-			    if (p_ptr->flags.nether_resist) {
+			    if (p_ptr->flags.resist_nether) {
 				dam *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(5) + 6);	/* .858 to .5 -CFT */
@@ -1822,10 +1822,10 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_WATER:
-			    if (!p_ptr->flags.sound_resist)
+			    if (!p_ptr->flags.resist_sound)
 				stun_player(randint(55));
-			    if (!player_saves() && !p_ptr->flags.confusion_resist
-				&& !p_ptr->flags.chaos_resist) {
+			    if (!player_saves() && !p_ptr->flags.resist_conf
+				&& !p_ptr->flags.resist_chaos) {
 				if ((p_ptr->flags.confused > 0) &&
 				    (p_ptr->flags.confused < 32000))
 				    p_ptr->flags.confused += 6;
@@ -1835,21 +1835,21 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_CHAOS:
-			    if (p_ptr->flags.chaos_resist) {
+			    if (p_ptr->flags.resist_chaos) {
 				dam *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(6) + 6);	/* .858 to .5 -CFT */
 			    }
-			    if ((!p_ptr->flags.confusion_resist) &&
-				(!p_ptr->flags.chaos_resist)) {
+			    if ((!p_ptr->flags.resist_conf) &&
+				(!p_ptr->flags.resist_chaos)) {
 				if (p_ptr->flags.confused > 0)
 				    p_ptr->flags.confused += 12;
 				else
 				    p_ptr->flags.confused = randint(20) + 10;
 			    }
-			    if (!p_ptr->flags.chaos_resist)
+			    if (!p_ptr->flags.resist_chaos)
 				p_ptr->flags.image += randint(10);
-			    if (!p_ptr->flags.nether_resist && !p_ptr->flags.chaos_resist) {
+			    if (!p_ptr->flags.resist_nether && !p_ptr->flags.resist_chaos) {
 				if (p_ptr->flags.hold_life && randint(3) > 1)
 				    msg_print("You keep hold of your life force!");
 				else if (p_ptr->flags.hold_life) {
@@ -1863,7 +1863,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_SHARDS:
-			    if (p_ptr->flags.shards_resist) {
+			    if (p_ptr->flags.resist_shards) {
 				dam *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1873,7 +1873,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_SOUND:
-			    if (p_ptr->flags.sound_resist) {
+			    if (p_ptr->flags.resist_sound) {
 				dam *= 5;
 				dam /= (randint(6) + 6);
 			    } else {
@@ -1882,12 +1882,12 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_CONFUSION:
-			    if (p_ptr->flags.confusion_resist) {
+			    if (p_ptr->flags.resist_conf) {
 				dam *= 5;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(6) + 6);	/* .858 to .5 -CFT */
 			    }
-			    if (!p_ptr->flags.confusion_resist && !p_ptr->flags.chaos_resist) {
+			    if (!p_ptr->flags.resist_conf && !p_ptr->flags.resist_chaos) {
 				if (p_ptr->flags.confused > 0)
 				    p_ptr->flags.confused += 12;
 				else
@@ -1896,7 +1896,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_DISENCHANT:
-			    if (p_ptr->flags.disenchant_resist) {
+			    if (p_ptr->flags.resist_disen) {
 				dam *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -1978,7 +1978,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    break;
 			  case GF_NEXUS:
 			    /* no spec. effects from nexus bolt, only breath -CFT */
-			    if (p_ptr->flags.nexus_resist) {
+			    if (p_ptr->flags.resist_nexus) {
 				dam *= 6;	/* these 2 lines give avg dam
 						 * of .655, ranging from */
 				dam /= (randint(6) + 6);	/* .858 to .5 -CFT */
@@ -2045,7 +2045,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_FORCE:
-			    if (!p_ptr->flags.sound_resist)
+			    if (!p_ptr->flags.resist_sound)
 				stun_player(randint(20));
 			    take_hit(dam, ddesc);
 			    break;
@@ -2059,10 +2059,10 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_LIGHT:
-			    if (p_ptr->flags.light_resist) {
+			    if (p_ptr->flags.resist_lite) {
 				dam *= 4;
 				dam /= (randint(6) + 6);
-			    } else if (!blind && !p_ptr->flags.blindness_resist) {
+			    } else if (!blind && !p_ptr->flags.resist_blind) {
 				msg_print("You are blinded by the flash!");
 				p_ptr->flags.blind += randint(6) + 3;
 			    }
@@ -2070,7 +2070,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_DARK:
-			    if (p_ptr->flags.dark_resist) {
+			    if (p_ptr->flags.resist_dark) {
 				dam *= 4;
 				dam /= (randint(6) + 6);
 			    } else {
@@ -2155,7 +2155,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_GRAVITY:
-			    if ((!p_ptr->flags.sound_resist) && (!p_ptr->flags.ffall))	/* DGK */
+			    if ((!p_ptr->flags.resist_sound) && (!p_ptr->flags.ffall))	/* DGK */
 				stun_player(randint((dam > 90) ? 35 : (dam / 3 + 5)));
 			    if (p_ptr->flags.ffall) {	/* DGK */
 				dam_hp *= 3;	/* these 2 lines give avg dam
@@ -2181,9 +2181,9 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    break;
 			  case GF_ICE:
 			    cold_dam(dam, ddesc);
-			    if (!p_ptr->flags.sound_resist)
+			    if (!p_ptr->flags.resist_sound)
 				stun_player(randint(25));
-			    if (!p_ptr->flags.shards_resist)
+			    if (!p_ptr->flags.resist_shards)
 				cut_player(damroll(8, 10));
 			    break;
 			  default:
@@ -3726,7 +3726,7 @@ void destroy_area(int y, int x)
 
     msg_print("There is a searing blast of light!");
 
-    if (!p_ptr->flags.blindness_resist && !p_ptr->flags.light_resist) {
+    if (!p_ptr->flags.resist_blind && !p_ptr->flags.resist_lite) {
 	p_ptr->flags.blind += 10 + randint(10);
     }
 
@@ -3750,7 +3750,7 @@ void destroy_area(int y, int x)
     }
 
     /* We need to redraw the screen. -DGK */
-    if (p_ptr->flags.blindness_resist || p_ptr->flags.light_resist) {
+    if (p_ptr->flags.resist_blind || p_ptr->flags.resist_lite) {
 
     /* Hack -- redraw the cave */
     draw_cave();
@@ -4159,97 +4159,97 @@ void self_knowledge()
 	prt("You are carrying a permanent light.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.fear_resist) {
+    if (p_ptr->flags.resist_fear) {
 	prt("You are completely fearless.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.blindness_resist) {
+    if (p_ptr->flags.resist_blind) {
 	prt("Your eyes are resistant to blindness.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.fire_im) {
+    if (p_ptr->flags.immune_fire) {
 	prt("You are completely immune to fire.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.fire_resist) && (p_ptr->flags.resist_heat)) {
+    } else if ((p_ptr->flags.resist_fire) && (p_ptr->flags.oppose_fire)) {
 	prt("You resist fire exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.fire_resist) || (p_ptr->flags.resist_heat)) {
+    } else if ((p_ptr->flags.resist_fire) || (p_ptr->flags.oppose_fire)) {
 	prt("You are resistant to fire.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.cold_im) {
+    if (p_ptr->flags.immune_cold) {
 	prt("You are completely immune to cold.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.cold_resist) && (p_ptr->flags.resist_cold)) {
+    } else if ((p_ptr->flags.resist_cold) && (p_ptr->flags.oppose_cold)) {
 	prt("You resist cold exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.cold_resist) || (p_ptr->flags.resist_cold)) {
+    } else if ((p_ptr->flags.resist_cold) || (p_ptr->flags.oppose_cold)) {
 	prt("You are resistant to cold.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.acid_im) {
+    if (p_ptr->flags.immune_acid) {
 	prt("You are completely immune to acid.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.acid_resist) && (p_ptr->flags.resist_acid)) {
+    } else if ((p_ptr->flags.resist_acid) && (p_ptr->flags.oppose_acid)) {
 	prt("You resist acid exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.acid_resist) || (p_ptr->flags.resist_acid)) {
+    } else if ((p_ptr->flags.resist_acid) || (p_ptr->flags.oppose_acid)) {
 	prt("You are resistant to acid.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.poison_im) {
+    if (p_ptr->flags.immune_pois) {
 	prt("You are completely immune to poison.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.poison_resist) && (p_ptr->flags.resist_poison)) {
+    } else if ((p_ptr->flags.resist_pois) && (p_ptr->flags.oppose_pois)) {
 	prt("You resist poison exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.poison_resist) || (p_ptr->flags.resist_poison)) {
+    } else if ((p_ptr->flags.resist_pois) || (p_ptr->flags.oppose_pois)) {
 	prt("You are resistant to poison.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.light_im) {
+    if (p_ptr->flags.immune_elec) {
 	prt("You are completely immune to lightning.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.lght_resist) && (p_ptr->flags.resist_light)) {
+    } else if ((p_ptr->flags.resist_elec) && (p_ptr->flags.oppose_elec)) {
 	prt("You resist lightning exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.lght_resist) || (p_ptr->flags.resist_light)) {
+    } else if ((p_ptr->flags.resist_elec) || (p_ptr->flags.oppose_elec)) {
 	prt("You are resistant to lightning.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.light_resist) {
+    if (p_ptr->flags.resist_lite) {
 	prt("You are resistant to bright light.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.dark_resist) {
+    if (p_ptr->flags.resist_dark) {
 	prt("You are resistant to darkness.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.confusion_resist) {
+    if (p_ptr->flags.resist_conf) {
 	prt("You are resistant to confusion.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.sound_resist) {
+    if (p_ptr->flags.resist_sound) {
 	prt("You are resistant to sonic attacks.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.disenchant_resist) {
+    if (p_ptr->flags.resist_disen) {
 	prt("You are resistant to disenchantment.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.chaos_resist) {
+    if (p_ptr->flags.resist_chaos) {
 	prt("You are resistant to chaos.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.shards_resist) {
+    if (p_ptr->flags.resist_shards) {
 	prt("You are resistant to blasts of shards.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.nexus_resist) {
+    if (p_ptr->flags.resist_nexus) {
 	prt("You are resistant to nexus attacks.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.nether_resist) {
+    if (p_ptr->flags.resist_nether) {
 	prt("You are resistant to nether forces.", i++, j);
 	pause_if_screen_full(&i, j);
     }

@@ -485,7 +485,7 @@ void prt_stun(void)
 {
     int s = p_ptr->flags.stun;
 
-    if (!p_ptr->flags.sound_resist) {
+    if (!p_ptr->flags.resist_sound) {
 	if (s > 100) {
 	    put_buffer("Knocked out ", 22, 0);
 	}
@@ -658,7 +658,7 @@ void stun_player(int s)
 {
     int t;
 
-    if (!p_ptr->flags.sound_resist) {
+    if (!p_ptr->flags.resist_sound) {
 	t = p_ptr->flags.stun;
 	p_ptr->flags.stun += s;
 	s = p_ptr->flags.stun;

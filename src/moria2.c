@@ -128,8 +128,8 @@ void hit_trap(int y, int x)
 		dam = (dam * 3) / 2;	/* do a little extra damage for spikes */
 		if (randint(3) == 1) {
 		    msg_print("The spikes are poisoned!");
-		    if (!(p_ptr->flags.poison_im || p_ptr->flags.poison_resist ||
-			  p_ptr->flags.resist_poison))
+		    if (!(p_ptr->flags.immune_pois || p_ptr->flags.resist_pois ||
+			  p_ptr->flags.oppose_pois))
 			dam *= 2;  /* more damage from poison!  :-)  -CFT */
 		    else
 			msg_print("You are unaffected by the poison.");
@@ -215,20 +215,20 @@ void hit_trap(int y, int x)
 
       case 14:			   /* Poison gas */
 	msg_print("A pungent green gas surrounds you!");
-	if (!(p_ptr->flags.poison_im || p_ptr->flags.poison_resist || p_ptr->flags.resist_poison))
+	if (!(p_ptr->flags.immune_pois || p_ptr->flags.resist_pois || p_ptr->flags.oppose_pois))
 	poison_gas(dam, "a poison gas trap");
 	break;
 
       case 15:			   /* Blind Gas */
 	msg_print("A black gas surrounds you!");
-	if (!p_ptr->flags.blindness_resist) {
+	if (!p_ptr->flags.resist_blind) {
 	    p_ptr->flags.blind += randint(50) + 50;
 	}
 	break;
 
       case 16:			   /* Confuse Gas */
 	msg_print("A gas of scintillating colors surrounds you!");
-	if ((!p_ptr->flags.confusion_resist) && (!p_ptr->flags.chaos_resist)) {
+	if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
 	    p_ptr->flags.confused += randint(15) + 15;
 	}
 	break;

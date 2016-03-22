@@ -502,13 +502,13 @@ void dungeon(void)
 	/* Afraid */
 	if (p_ptr->flags.afraid > 0) {
 	    if ((PY_FEAR & p_ptr->flags.status) == 0) {
-		if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.fear_resist) > 0)
+		if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
 		    p_ptr->flags.afraid = 0;
 		else {
 		    p_ptr->flags.status |= PY_FEAR;
 		    prt_afraid();
 		}
-	    } else if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.fear_resist) > 0)
+	    } else if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
 		p_ptr->flags.afraid = 1;
 	    p_ptr->flags.afraid--;
 	    if (p_ptr->flags.afraid == 0) {
@@ -585,9 +585,9 @@ void dungeon(void)
 	    }
 	    p_ptr->flags.poisoned--;
 	    if (p_ptr->flags.poisoned == 0 ||
-		 p_ptr->flags.poison_im ||
-		p_ptr->flags.poison_resist ||
-		p_ptr->flags.resist_poison) {
+		 p_ptr->flags.immune_pois ||
+		p_ptr->flags.resist_pois ||
+		p_ptr->flags.oppose_pois) {
 		p_ptr->flags.poisoned = 0;
 		p_ptr->flags.status &= ~PY_POISONED;
 		prt_poisoned();
@@ -844,40 +844,40 @@ void dungeon(void)
 	/*** Timed resistance must end eventually ***/
 
     /* Resist Heat   */
-	if (p_ptr->flags.resist_heat > 0) {
-	    p_ptr->flags.resist_heat--;
-	    if (p_ptr->flags.resist_heat == 0) {
+	if (p_ptr->flags.oppose_fire > 0) {
+	    p_ptr->flags.oppose_fire--;
+	    if (p_ptr->flags.oppose_fire == 0) {
 		msg_print("You no longer feel safe from flame.");
 	    }
 	}
 
     /* Resist Cold   */
-	if (p_ptr->flags.resist_cold > 0) {
-	    p_ptr->flags.resist_cold--;
-	    if (!p_ptr->flags.resist_cold) {
+	if (p_ptr->flags.oppose_cold > 0) {
+	    p_ptr->flags.oppose_cold--;
+	    if (!p_ptr->flags.oppose_cold) {
 		msg_print("You no longer feel safe from cold.");
 	    }
 	}
 
     /* Resist Acid   */
-	if (p_ptr->flags.resist_acid > 0) {
-	    p_ptr->flags.resist_acid--;
-	    if (!p_ptr->flags.resist_acid) {
+	if (p_ptr->flags.oppose_acid > 0) {
+	    p_ptr->flags.oppose_acid--;
+	    if (!p_ptr->flags.oppose_acid) {
 		msg_print("You no longer feel safe from acid.");
 	    }
 	}
     /* Resist Lightning   */
-	if (p_ptr->flags.resist_light > 0) {
-	    p_ptr->flags.resist_light--;
-	    if (!p_ptr->flags.resist_light) {
+	if (p_ptr->flags.oppose_elec > 0) {
+	    p_ptr->flags.oppose_elec--;
+	    if (!p_ptr->flags.oppose_elec) {
 		msg_print("You no longer feel safe from lightning.");
 	    }
 	}
 
     /* Resist Poison   */
-	if (p_ptr->flags.resist_poison > 0) {
-	    p_ptr->flags.resist_poison--;
-	    if (!p_ptr->flags.resist_poison) {
+	if (p_ptr->flags.oppose_pois > 0) {
+	    p_ptr->flags.oppose_pois--;
+	    if (!p_ptr->flags.oppose_pois) {
 		msg_print("You no longer feel safe from poison.");
 		}
 	}
