@@ -33,45 +33,63 @@
  */
 int los(int fromY, int fromX, int toY, int toX)
 {
-    register int tmp, d_x, d_y;
+    register int p_x, p_y, d_x, d_y, a_x, a_y;
 
 
     /* Extract the offset */    
     d_y = toY - fromY;
     d_x = toX - fromX;
 
-    /* Handle Adjacent (or identical) grids */
-    if ((d_x < 2) && (d_x > -2) && (d_y < 2) && (d_y > -2))
-	return TRUE;
+    /* Extract the absolute offset */
+    a_y = MY_ABS(d_y);
+    a_x = MY_ABS(d_x);
 
-    /* Handle the cases where d_x or d_y == 0. */
+
+    /* Handle adjacent (or identical) grids */
+    if ((a_x < 2) && (a_y < 2)) return (TRUE);
+
+
+    /* Directly South/North: Handle the cases where d_x or d_y == 0. */
     if (!d_x) {
 
 	register int p_y;   /* y position -- loop variable	 */
 
-	if (d_y < 0) {
-	    tmp = fromY;
-	    fromY = toY;
-	    toY = tmp;
+	/* South -- check for walls */
+	if (d_y > 0) {
+	    for (p_y = fromY + 1; p_y < toY; p_y++) {
+		if (cave[p_y][fromX].fval >= MIN_CLOSED_SPACE) return FALSE;
+	    }
 	}
-	for (p_y = fromY + 1; p_y < toY; p_y++)
-	    if (cave[p_y][fromX].fval >= MIN_CLOSED_SPACE)
-		return FALSE;
+	
+	/* North -- check for walls */
+	else {
+	    for (p_y = fromY - 1; p_y > toY; p_y--) {
+		if (cave[p_y][fromX].fval >= MIN_CLOSED_SPACE) return FALSE;
+	    }
+	}
+	
+	/* Assume los */
 	return TRUE;
     }
 
-	else if (!d_y) {
+    /* Directly East/West */
+    if (!d_y) {
     
 	register int p_x;	   /* x position -- loop variable	 */
 
-	if (d_x < 0) {
-	    tmp = fromX;
-	    fromX = toX;
-	    toX = tmp;
-	}
-	for (p_x = fromX + 1; p_x < toX; p_x++) {
-	    if (cave[fromY][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
+	/* East -- check for walls */
+	if (d_x > 0) {
+	    for (p_x = fromX + 1; p_x < toX; p_x++) {
+		if (cave[fromY][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 	    }
+	}
+
+	/* West -- check for walls */
+	else {
+	    for (p_x = fromX - 1; p_x > toX; p_x--) {
+		if (cave[fromY][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
+	    }
+	}
 		
 	/* Assume los */
 	return TRUE;
@@ -79,7 +97,7 @@ int los(int fromY, int fromX, int toY, int toX)
 
 
     /* Handle Knightlike shapes -CWS */
-    if (MY_ABS(d_x) == 1) {
+    if (a_x == 1) {
 	if (d_y == 2) {
 	    if (cave[fromY + 1][fromX].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
@@ -87,7 +105,7 @@ int los(int fromY, int fromX, int toY, int toX)
 	    if (cave[fromY - 1][fromX].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
     }
-    else if (MY_ABS(d_y) == 1) {
+    else if (a_y == 1) {
 	if (d_x == 2) {
 	    if (cave[fromY][fromX + 1].fval <= MAX_OPEN_SPACE) return TRUE;
 	}
@@ -105,15 +123,13 @@ int los(int fromY, int fromX, int toY, int toX)
 
     {
 	register int        scale,	/* a scale factor		 */
-			    scale2;	/* above scale factor / 2	*/
-	int        p_x,	   /* x position			 */
-			   p_y;   /* y position			 */
+			    scale2;	/* above scale factor / 2	 */
 
 	int		    xSign,	/* sign of d_x		 */
 			    ySign,	/* sign of d_y		 */
 			    m;		/* slope or 1/slope of LOS	 */
 
-	scale2 = MY_ABS(d_x * d_y);
+	scale2 = (a_x * a_y);
 	scale = scale2 << 1;
 
 	xSign = (d_x < 0) ? -1 : 1;
@@ -123,7 +139,7 @@ int los(int fromY, int fromX, int toY, int toX)
 	/* Travel from one end of the line to the other, */
 	/* oriented along the longer axis. */
 
-	if (MY_ABS(d_x) >= MY_ABS(d_y)) {
+	if (a_x >= a_y) {
 
 	    register int        dy;  /* "fractional" y position	 */
 
@@ -147,6 +163,8 @@ int los(int fromY, int fromX, int toY, int toX)
 		p_y = fromY;
 	    }
 
+	    /* Note (below) the case (dy == scale2), where */
+	    /* the LOS exactly meets the corner of a tile. */
 	    while (toX - p_x) {
 		if (cave[p_y][p_x].fval >= MIN_CLOSED_SPACE) return FALSE;
 		dy += m;
@@ -206,9 +224,11 @@ int los(int fromY, int fromX, int toY, int toX)
 		    p_y += ySign;
 		}
 	    }
-	    return TRUE;
 	}
     }
+
+    /* Assume los */
+    return TRUE;
 }
 
 
@@ -240,6 +260,10 @@ int no_light(void)
     if (!c_ptr->tl && !c_ptr->pl) return TRUE;
     return FALSE;
 }
+
+
+
+
 
 
 

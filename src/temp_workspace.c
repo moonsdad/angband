@@ -798,10 +798,10 @@ static void do_command(char com_val)
 	}
 	break;
       case '<':			/* (<) go down a staircase */
-	go_up();
+	do_cmd_go_up();
 	break;
       case '>':			/* (>) go up a staircase */
-	go_down();
+	do_cmd_go_down();
 	break;
       case '?':			/* (?) help with commands */
 	if (rogue_like_commands)
@@ -835,7 +835,7 @@ static void do_command(char com_val)
 	eat();
 	break;
       case 'F':			/* (F)ill lamp */
-	refill_lamp();
+	do_cmd_refill_lamp();
 	break;
       case 'G':			/* (G)ain magic spells */
 	gain_spells();
@@ -955,7 +955,7 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case 'P':			/* (P)eruse a book	(B)rowse in a book */
-	examine_book();
+	do_cmd_browse();
 	free_turn_flag = TRUE;
 	break;
       case 'c':			/* (c)lose an object */

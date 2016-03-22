@@ -459,131 +459,152 @@ typedef struct _player_type player_type;
 
 struct _player_type {
 
-  struct misc {
-      char name[27];		    /* Character name	*/
-    byte male;			/* Sex of character */
-      s32b au;			    /* Gold		*/
-      s32b max_exp;		    /* Max experience	*/
-      s32b exp;		    /* Cur experience	*/
-      u16b exp_frac;		    /* Cur exp fraction * 2^16	*/
+struct misc {
+  char name[27];		    /* Character name	*/
+
+  byte prace;			/* # of race	*/
+  byte pclass;			/* # of class	*/
+  byte male;			/* Sex of character */
+  byte hitdie;			/* Char hit die	*/
+  byte expfact;			/* Experience factor	*/
 
   u16b age;			/* Characters age	*/
   u16b ht;			/* Height		*/
   u16b wt;			/* Weight		*/
 
-      u16b lev;		    /* Level		*/
-      u16b max_dlv;		    /* Max level explored	*/
-      s16b srh;		    /* Chance in search */
-      s16b fos;		    /* Frenq of search	*/
-      s16b bth;		    /* Base to hit	*/
-      s16b bthb;		    /* BTH with bows	*/
-      s16b mana;		    /* Mana points	*/
-      s16b mhp;		    /* Max hit pts	*/
-      s16b ptohit;		    /* Plusses to hit	*/
-      s16b ptodam;		    /* Plusses to dam	*/
-      s16b pac;		    /* Total AC		*/
-      s16b ptoac;		    /* Magical AC	*/
-      s16b dis_th;		    /* Display +ToHit	*/
-      s16b dis_td;		    /* Display +ToDam	*/
-      s16b dis_ac;		    /* Display +ToAC	*/
-      s16b dis_tac;		    /* Display +ToTAC	*/
-      s16b disarm;		    /* % to Disarm	*/
-      s16b save;		    /* Saving throw	*/
-      s16b sc;			    /* Social Class	*/
-      s16b stl;		    /* Stealth factor	*/
-      byte pclass;		    /* # of class	*/
-      byte prace;		    /* # of race	*/
-      byte hitdie;		    /* Char hit die	*/
-      byte expfact;		    /* Experience factor	*/
-      s16b cmana;		    /* Cur mana pts		*/
-      u16b cmana_frac;	    /* Cur mana fraction * 2^16 */
-      s16b chp;		    /* Cur hit pts		*/
-      u16b chp_frac;		    /* Cur hit fraction * 2^16	*/
-      char history[4][60];	    /* History record		*/
-    } misc;
+  s32b au;			/* Gold		*/
+
+  s32b max_exp;			/* Max experience	*/
+  s32b exp;			/* Cur experience	*/
+  u16b exp_frac;		/* Cur exp fraction * 2^16	*/
+
+  u16b lev;			/* Level		*/
+
+  s16b mana;			/* Mana points	*/
+  s16b cmana;			/* Cur mana pts		*/
+  u16b cmana_frac;		/* Cur mana fraction * 2^16 */
+
+  s16b mhp;			/* Max hit pts	*/
+  s16b chp;			/* Cur hit pts		*/
+  u16b chp_frac;		/* Cur hit fraction * 2^16	*/
+
+  u16b max_dlv;			/* Max level explored	*/
+
+  s16b sc;			/* Social Class	*/
+  s16b stl;			/* Stealth factor	*/
+  s16b srh;			/* Chance in search */
+  s16b fos;			/* Frenq of search	*/
+  s16b disarm;			/* % to Disarm	*/
+  s16b save;			/* Saving throw	*/
+
+  s16b bth;			/* Base to hit	*/
+  s16b bthb;			/* BTH with bows	*/
+
+  s16b pac;			/* Total AC		*/
+  s16b ptoac;			/* Magical AC	*/
+  s16b ptohit;			/* Plusses to hit	*/
+  s16b ptodam;			/* Plusses to dam	*/
+
+  s16b dis_th;			/* Display +ToHit	*/
+  s16b dis_td;			/* Display +ToDam	*/
+  s16b dis_ac;			/* Display +ToAC	*/
+  s16b dis_tac;		/* Display +ToTAC	*/
+
+  char history[4][60];	    /* History record		*/
+} misc;
 
 /* Stats now kept in arrays, for more efficient access. -CJS- */
-  struct stats {
-      u16b max_stat[6];	    /* What is restored		    */
-      byte cur_stat[6];	    /* What is natural		    */
-      s16b mod_stat[6];	    /* What is modified, may be +/- */
-      u16b use_stat[6];	    /* What is used		    */
-    } stats;
-  struct flags {
-      u32b status;		    /* Status of player	   */
-      s16b rest;		    /* Rest counter	   */
-      s16b blind;		    /* Blindness counter   */
-      s16b paralysis;		    /* Paralysis counter   */
-      s16b confused;		    /* Confusion counter   */
-      s16b food;		    /* Food counter	   */
-      s16b food_digested;	    /* Food per round	   */
-      s16b protection;		    /* Protection fr. evil */
-      s16b speed;		    /* Cur speed adjust	   */
-      s16b fast;		    /* Temp speed change   */
-      s16b slow;		    /* Temp speed change   */
-      s16b afraid;		    /* Fear		   */
-      s16b cut;		    /* Wounds		   */
-      s16b stun;		    /* Stunned player	   */
-      s16b poisoned;		    /* Poisoned		   */
-      s16b image;		    /* Hallucinate	   */
-      s16b protevil;		    /* Protect VS evil	   */
-      s16b invuln;		    /* Increases AC	   */
-      s16b hero;		    /* Heroism		   */
-      s16b shero;		    /* Super Heroism	   */
-      s16b shield;		    /* Shield Spell	   */
-      s16b blessed;		    /* Blessed		   */
-      s16b resist_heat;	    /* Timed heat resist   */
-      s16b resist_cold;	    /* Timed cold resist   */
-      s16b resist_acid;	    /* Timed acid resist   */
-      s16b resist_light;	    /* Timed light resist  */
-      s16b resist_poison;	    /* Timed poison resist */
-      s16b detect_inv;		    /* Timed see invisible */
-      s16b word_recall;	    /* Timed teleport level*/
-      s16b see_infra;		    /* See warm creatures  */
-      s16b tim_infra;		    /* Timed infra vision  */
-      byte see_inv;		    /* Can see invisible   */
-      byte teleport;		    /* Random teleportation*/
-      byte free_act;		    /* Never paralyzed	   */
-      byte slow_digest;	    /* Lower food needs	   */
-      byte aggravate;		    /* Aggravate monsters  */
+struct stats {
+  u16b max_stat[6];	    /* What is restored		    */
+  byte cur_stat[6];	    /* What is natural		    */
+  s16b mod_stat[6];	    /* What is modified, may be +/- */
+  u16b use_stat[6];	    /* What is used		    */
+} stats;
 
-      byte fire_resist;	    /* Resistance to fire  */
-      byte cold_resist;	    /* Resistance to cold  */
-      byte acid_resist;	    /* Resistance to acid  */
-      byte regenerate;		    /* Regenerate hit pts  */
-      byte lght_resist;	    /* Resistance to light */
-      byte ffall;		    /* No damage falling   */
+struct flags {
+  byte new_spells;		    /* Number of spells can learn. */
 
-      byte sustain_str;	    /* Keep strength	   */
-      byte sustain_int;	    /* Keep intelligence   */
-      byte sustain_wis;	    /* Keep wisdom	   */
-      byte sustain_con;	    /* Keep constitution   */
-      byte sustain_dex;	    /* Keep dexterity	   */
-      byte sustain_chr;	    /* Keep charisma	   */
+  u32b status;		/* Status of player	   */
 
-      byte confuse_monster;	    /* Glowing hands.	   */
-      byte new_spells;		    /* Number of spells can learn. */
-      byte poison_resist;	    /* Resistance to poison	   */
-      byte hold_life;		    /* Immune to life draining	   */
-      byte telepathy;		    /* Gives telepathy	   */
-      byte fire_im;		    /* Immune to fire	   */
-      byte acid_im;		    /* Immune to acid	   */
-      byte poison_im;		    /* Immune to poison	   */
-      byte cold_im;		    /* Immune to cold	   */
-      byte light_im;		    /* Immune to lightning */
-      byte light;		    /* Permanent light	   */
-      byte confusion_resist;	    /* Resist confusion	   */
-      byte sound_resist;	    /* Resist sound	   */
-      byte light_resist;	    /* Resist light	   */
-      byte dark_resist;	    /* Resist darkness	   */
-      byte chaos_resist;	    /* Resist chaos	   */
-      byte disenchant_resist;	    /* Resist disenchant   */
-      byte shards_resist;	    /* Resist shards	   */
-      byte nexus_resist;	    /* Resist nexus	   */
-      byte blindness_resist;	    /* Resist blindness	   */
-      byte nether_resist;	    /* Resist nether	   */
-      byte fear_resist;	    /* Resist fear	   */
-    } flags;
+  s16b speed;			/* Cur speed adjust	   */
+  
+  s16b food;			/* Food counter	*/
+  s16b food_digested;		/* Food per round	*/
+
+  s16b rest;			/* Rest counter		*/
+  s16b blind;			/* Blindness counter	*/
+  s16b paralysis;		/* Paralysis counter	*/
+  s16b confused;		/* Confusion counter	*/
+  s16b protection;		/* Protection fr. evil	*/
+  s16b fast;			/* Temp speed change	*/
+  s16b slow;			/* Temp speed change	*/
+  s16b afraid;			/* Fear			*/
+  s16b cut;			/* Wounds		*/
+  s16b stun;			/* Stunned player	*/
+  s16b poisoned;		/* Poisoned		*/
+  s16b image;			/* Hallucinate		*/
+
+  s16b protevil;		/* Protect VS evil	   */
+  s16b invuln;			/* Increases AC	   */
+  s16b hero;			/* Heroism		   */
+  s16b shero;			/* Super Heroism	   */
+  s16b shield;			/* Shield Spell	   */
+  s16b blessed;		/* Blessed		   */
+  s16b detect_inv;		/* Timed see invisible */
+  s16b word_recall;		/* Timed teleport level*/
+  s16b see_infra;		/* See warm creatures  */
+  s16b tim_infra;		/* Timed infra vision  */
+
+  s16b resist_acid;		/* Timed acid resist   */
+  s16b resist_light;		/* Timed light resist  */
+  s16b resist_heat;		/* Timed heat resist   */
+  s16b resist_cold;		/* Timed cold resist   */
+  s16b resist_poison;		/* Timed poison resist */
+
+  byte acid_im;		/* Immune to acid	   */
+  byte light_im;		/* Immune to lightning     */
+  byte fire_im;		/* Immune to fire	   */
+  byte cold_im;		/* Immune to cold	   */
+  byte poison_im;		/* Immune to poison	   */
+
+  byte fire_resist;		/* Resistance to fire  */
+  byte cold_resist;		/* Resistance to cold */
+  byte acid_resist;		/* Resistance to acid  */
+  byte lght_resist;		/* Resistance to light */
+  byte poison_resist;		/* Resistance to poison	   */
+
+  byte confusion_resist;		/* Resist confusion	*/
+  byte sound_resist;		/* Resist sound		*/
+  byte light_resist;		/* Resist light		*/
+  byte dark_resist;		/* Resist darkness	*/
+  byte chaos_resist;		/* Resist chaos		*/
+  byte disenchant_resist;		/* Resist disenchant	*/
+  byte shards_resist;		/* Resist shards	*/
+  byte nexus_resist;		/* Resist nexus		*/
+  byte blindness_resist;		/* Resist blindness	*/
+  byte nether_resist;		/* Resist nether	*/
+  byte fear_resist;		/* Resist fear		*/
+
+  byte sustain_str;		/* Keep strength	*/
+  byte sustain_int;		/* Keep intelligence	*/
+  byte sustain_wis;		/* Keep wisdom		*/
+  byte sustain_dex;		/* Keep dexterity	*/
+  byte sustain_con;		/* Keep constitution	*/
+  byte sustain_chr;		/* Keep charisma	*/
+
+  byte aggravate;		/* Aggravate monsters	*/
+  byte teleport;		/* Random teleporting	*/
+
+  byte ffall;			/* No damage falling	*/
+  byte light;			/* Permanent light	*/
+  byte free_act;		/* Never paralyzed	*/
+  byte see_inv;			/* Can see invisible	*/
+  byte regenerate;		/* Regenerate hit pts	*/
+  byte hold_life;		/* Immune to drain-life	*/
+  byte telepathy;		/* Has telepathy	*/
+  byte slow_digest;		/* Lower food needs	*/
+  byte confuse_monster;		/* Glowing hands.	*/
+} flags;
 };
 
 

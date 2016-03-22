@@ -1105,7 +1105,9 @@ void msg_print(cptr str_buff)
     }
 }
 
-/* Used to verify a choice - user gets the chance to abort choice.  -CJS- */
+/*
+ * Used to verify a choice - user gets the chance to abort choice.  -CJS-
+ */
 int get_check(cptr prompt)
 {
     int res, y, x;
@@ -1137,27 +1139,32 @@ int get_check(cptr prompt)
 	res = inkey();
     }
     while (res == ' ');
+
+    /* Erase the prompt */
     erase_line(0, 0);
-    if (res == 'Y' || res == 'y')
-	return TRUE;
-    else
-	return FALSE;
+
+    if (res == 'Y' || res == 'y') return TRUE;
+    else return FALSE;
 }
 
-/* Prompts (optional) and returns ord value of input char	 */
-/* Function returns false if <ESCAPE> is input	 */
+
+/*
+ * Prompts (optional) and returns ord value of input char
+ * Function returns false if <ESCAPE> is input	
+ */
 int get_com(cptr prompt, char *command)
 {
     int res;
 
-    if (prompt)
-	prt(prompt, 0, 0);
+    if (prompt) prt(prompt, 0, 0);
+
     *command = inkey();
-    if (*command == 0 || *command == ESCAPE)
-	res = FALSE;
-    else
-	res = TRUE;
+
+    if (*command == 0 || *command == ESCAPE) res = FALSE;
+    else res = TRUE;
+
     erase_line(MSG_LINE, 0);
+
     return (res);
 }
 
@@ -1205,7 +1212,9 @@ int get_string(char *in_str, int row, int column, int slen)
     p = in_str;
     do {
 	i = inkey();
+
 	switch (i) {
+
 	  case ESCAPE:
 	    aborted = TRUE;
 	    break;
@@ -1222,9 +1231,11 @@ int get_string(char *in_str, int row, int column, int slen)
 		*--p = '\0';
 	    }
 	    break;
+
 	  default:
-	    if (!isprint(i) || column > end_col)
+	    if (!isprint(i) || column > end_col) {
 		bell();
+	    }
 	    else {
 #ifdef MACINTOSH
 		DSetScreenCursor(column, row);
@@ -1238,23 +1249,28 @@ int get_string(char *in_str, int row, int column, int slen)
 	    }
 	    break;
 	}
-    }
-    while ((!flag) && (!aborted));
-    if (aborted)
-	return (FALSE);
-/* Remove trailing blanks	 */
-    while (p > in_str && p[-1] == ' ')
-	p--;
+    } while ((!flag) && (!aborted));
+    if (aborted) return (FALSE);
+
+    /* Remove trailing blanks */
+    while (p > in_str && p[-1] == ' ') p--;
+
+    /* Terminate it */
     *p = '\0';
+
+    /* Return the result */
     return (TRUE);
 }
 
 
-/* Pauses for user response before returning		-RAK-	 */
+/*
+ * Pauses for user response before returning		-RAK-	 
+ */
 void pause_line(int prt_line)
 {
+    int i;
     prt("[Press any key to continue.]", prt_line, 23);
-    (void)inkey();
+    i = inkey();
     erase_line(prt_line, 0);
 }
 

@@ -25,7 +25,7 @@
 /*
  * Examine a Book					-RAK-	
  */
-static void examine_book(void)
+static void do_cmd_browse(void)
 {
     u32b               j1, j2;
     int                  i, k, item_val, flag;
@@ -36,62 +36,85 @@ static void examine_book(void)
 
     if (!find_range(TV_MAGIC_BOOK, TV_PRAYER_BOOK, &i, &k)) {
 	msg_print("You are not carrying any books.");
+	return;
     }
-    else if (p_ptr->flags.blind > 0) {
-	msg_print("You can't see to read your spell book!");
-    }
-    else if (no_light()) {
-	msg_print("You have no light to read by.");
-    }
-    else if (p_ptr->flags.confused > 0) {
-	msg_print("You are too confused.");
-    }
-    else if (get_item(&item_val, "Which Book?", i, k, 0)) {
-	flag = TRUE;
-	i_ptr = &inventory[item_val];
-	if (class[p_ptr->misc.pclass].spell == MAGE) {
-	    if (i_ptr->tval != TV_MAGIC_BOOK)
-		flag = FALSE;
-	} else if (class[p_ptr->misc.pclass].spell == PRIEST) {
-	    if (i_ptr->tval != TV_PRAYER_BOOK)
-		flag = FALSE;
-	} else
-	    flag = FALSE;
 
-	if (!flag)
-	    msg_print("You do not understand the language.");
-	else {
-	    i = 0;
-	    j1 = (u32b) inventory[item_val].flags;
-	    first_spell = bit_pos(&j1);	/* check which spell was first */
-	    j1 = (u32b) inventory[item_val].flags;	/* restore j1 value */
-	    while (j1) {
-		k = bit_pos(&j1);
-		s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k];
-		if (s_ptr->slevel < 99) {
-		    spell_index[i] = k;
-		    i++;
-		}
-	    }
-	    j2 = (u32b) inventory[item_val].flags2;
-	    if (first_spell == -1) {	/* if none from other set of flags */
-		first_spell = 32 + bit_pos(&j2);	/* get 1st spell # */
-		j2 = (u32b) inventory[item_val].flags2;	/* and restore j2 */
-	    }
-	    while (j2) {
-		k = bit_pos(&j2);
-		s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k + 32];
-		if (s_ptr->slevel < 99) {
-		    spell_index[i] = (k + 32);
-		    i++;
-		}
-	    }
-	    save_screen();
-	    print_spells(spell_index, i, TRUE, first_spell);
-	    pause_line(0);
-	    restore_screen();
+    if (p_ptr->flags.blind > 0) {
+	msg_print("You can't see to read your spell book!");
+	return;
+    }
+
+    if (no_light()) {
+	msg_print("You have no light to read by.");
+	return;
+    }
+
+    if (p_ptr->flags.confused > 0) {
+	msg_print("You are too confused.");
+	return;
+    }
+
+    
+    /* Get a book or stop checking */
+    if (!get_item(&item_val, "Which Book?", i, k, 0)) return;
+
+    flag = TRUE;
+
+    i_ptr = &inventory[item_val];
+
+    /* Check the language */
+    if (class[p_ptr->misc.pclass].spell == MAGE) {
+	if (i_ptr->tval != TV_MAGIC_BOOK) flag = FALSE;
+    }
+    else if (class[p_ptr->misc.pclass].spell == PRIEST) {
+	if (i_ptr->tval != TV_PRAYER_BOOK) flag = FALSE;
+    }
+    else flag = FALSE;
+
+    if (!flag) {
+	msg_print("You do not understand the language.");
+	return;
+    }
+
+    i = 0;
+
+    j1 = (u32b) inventory[item_val].flags;
+
+    /* check which spell was first */
+    first_spell = bit_pos(&j1);
+    j1 = (u32b) inventory[item_val].flags;	/* restore j1 value */
+
+    while (j1) {
+	k = bit_pos(&j1);
+	s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k];
+	if (s_ptr->slevel < 99) {
+	    spell_index[i] = k;
+	    i++;
 	}
     }
+
+    j2 = (u32b) inventory[item_val].flags2;
+
+    /* if none from other set of flags */
+    if (first_spell == -1) {
+	first_spell = 32 + bit_pos(&j2);	/* get 1st spell # */
+	j2 = (u32b) inventory[item_val].flags2;	/* and restore j2 */
+    }
+
+    while (j2) {
+	k = bit_pos(&j2);
+	s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k + 32];
+	if (s_ptr->slevel < 99) {
+	    spell_index[i] = (k + 32);
+	    i++;
+	}
+    }
+
+    /* Display the spells */
+    save_screen();
+    print_spells(spell_index, i, TRUE, first_spell);
+    pause_line(0);
+    restore_screen();
 }
 
 
@@ -100,7 +123,7 @@ static void examine_book(void)
 /*
  * Go up one level					-RAK-	
  */
-static void go_up()
+static void do_cmd_go_up()
 {
     cave_type *c_ptr;
     int        no_stairs = FALSE;
@@ -135,7 +158,7 @@ static void go_up()
 /*
  * Go down one level -RAK-
  */
-static void go_down()
+static void do_cmd_go_down()
 {
     cave_type *c_ptr;
     int        no_stairs = FALSE;
@@ -169,7 +192,7 @@ static void go_down()
 /*
  * Refill the players lamp	-RAK-
  */
-static void refill_lamp()
+static void do_cmd_refill_lamp()
 {
     int                  i, j;
     register int         k;
