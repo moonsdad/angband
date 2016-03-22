@@ -48,7 +48,6 @@ int create_up_stair = FALSE;
 int create_down_stair = FALSE;
 
 s16b log_index = (-1);		/* Index to log file. (<= 0 means no log) */
-int highscore_fd;		/* File descriptor to high score file */
 
 int death = FALSE;		/* True if player has died */
 int free_turn_flag;		/* Command is "free", do not move creatures */

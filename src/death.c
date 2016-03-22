@@ -39,7 +39,9 @@
 #endif
 
 
-typedef struct high_scores {
+typedef struct _high_score high_scores;
+
+struct _high_score {
   s32b points;
   u16b lev;
   u16b max_lev;
@@ -52,7 +54,16 @@ typedef struct high_scores {
   vtype died_from;
   byte pclass;
   byte prace;
-} high_scores;
+};
+
+
+
+
+/*
+ * The "highscore" file descriptor
+ */
+static int highscore_fd = -1;
+
 
 static void date(char *day)
 {

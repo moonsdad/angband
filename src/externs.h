@@ -239,7 +239,6 @@ extern int be_nasty;
 extern int monster_is_afraid;	/* redo monster fear messages -CWS */
 
 
-extern int highscore_fd;		/* High score file descriptor */
 extern int command_count;		/* Repetition of commands. -CJS- */
 extern int default_dir;			/* Use last direction in repeated commands */
 
