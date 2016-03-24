@@ -324,7 +324,7 @@ void set_options()
 		(options[i].o_var == &delay_spd))
 		bell();
 	    else {
-		put_buffer("yes ", i + 1, 40);
+		put_str("yes ", i + 1, 40);
 	    *options[i].o_var = TRUE;
 	    i = (i + 1) % max;
 	    }
@@ -334,10 +334,10 @@ void set_options()
 	    if (options[i].o_var == &delay_spd)
 		bell();
 	    else if (options[i].o_var == &hitpoint_warn) {
-		put_buffer("00%", i + 1, 40);
+		put_str("00%", i + 1, 40);
 		*options[i].o_var = 0;
 	    } else {
-		put_buffer("no  ", i + 1, 40);
+		put_str("no  ", i + 1, 40);
 		*options[i].o_var = FALSE;
 		i = (i + 1) % max;
 	    }
@@ -362,7 +362,7 @@ void set_options()
 		    sprintf(string, "%d0%%  ", ch);
 		else
 		    sprintf(string, "%d   ", ch);
-		put_buffer(string, i + 1, 40);
+		put_str(string, i + 1, 40);
 		i = (i + 1) % max;
 	    }
 	    break;

@@ -26,8 +26,8 @@ static cptr stat_names[] = {
  */
 void prt_field(cptr info, int row, int col)
 {
-    put_buffer(&blank_string[BLANK_LENGTH - 13], row, col);
-    put_buffer(info, row, col);
+    put_str(&blank_string[BLANK_LENGTH - 13], row, col);
+    put_str(info, row, col);
 }
 
 
@@ -65,8 +65,8 @@ void prt_stat(int stat)
     vtype out_val1;
 
     cnv_stat(p_ptr->stats.use_stat[stat], out_val1);
-    put_buffer(stat_names[stat], 5 + stat, STAT_COLUMN);
-    put_buffer(out_val1, 5 + stat, STAT_COLUMN + 6);
+    put_str(stat_names[stat], 5 + stat, STAT_COLUMN);
+    put_str(out_val1, 5 + stat, STAT_COLUMN + 6);
 }
 
 
@@ -297,13 +297,13 @@ void prt_depth()
 void prt_hunger()
 {
     if (PY_WEAK & p_ptr->flags.status) {
-	put_buffer("Weak  ", 23, 0);
+	put_str("Weak  ", 23, 0);
     }
     else if (PY_HUNGRY & p_ptr->flags.status) {
-	put_buffer("Hungry", 23, 0);
+	put_str("Hungry", 23, 0);
     }
     else {
-	put_buffer("      ", 23, 0);
+	put_str("      ", 23, 0);
     }
 }
 
@@ -314,10 +314,10 @@ void prt_hunger()
 void prt_blind(void)
 {
     if (PY_BLIND & p_ptr->flags.status) {
-	put_buffer("Blind", 23, 7);
+	put_str("Blind", 23, 7);
     }
     else {
-	put_buffer("     ", 23, 7);
+	put_str("     ", 23, 7);
     }
 }
 
@@ -328,10 +328,10 @@ void prt_blind(void)
 void prt_confused(void)
 {
     if (PY_CONFUSED & p_ptr->flags.status) {
-	put_buffer("Confused", 23, 13);
+	put_str("Confused", 23, 13);
     }
     else {
-	put_buffer("        ", 23, 13);
+	put_str("        ", 23, 13);
     }
 }
 
@@ -342,9 +342,9 @@ void prt_confused(void)
 void prt_afraid()
 {
     if (PY_FEAR & p_ptr->flags.status) {
-	put_buffer("Afraid", 23, 22);
+	put_str("Afraid", 23, 22);
     else {
-	put_buffer("      ", 23, 22);
+	put_str("      ", 23, 22);
     }
 }
 
@@ -355,10 +355,10 @@ void prt_afraid()
 void prt_poisoned()
 {
     if (PY_POISONED & p_ptr->flags.status) {
-	put_buffer("Poisoned", 23, 29);
+	put_str("Poisoned", 23, 29);
     }
     else {
-	put_buffer("        ", 23, 29);
+	put_str("        ", 23, 29);
     }
 }
 
@@ -375,7 +375,7 @@ void prt_state(void)
 
     /* Most important info is paralyzation */
     if (p_ptr->flags.paralysis > 1) {
-	put_buffer("Paralysed ", 23, 38);
+	put_str("Paralysed ", 23, 38);
     }
 
     /* Then comes resting */
@@ -389,7 +389,7 @@ void prt_state(void)
     else if (p_ptr->flags.rest == -2) {
 	    (void)sprintf(tmp, "Rest &&&&&");
     }
-	put_buffer(tmp, 23, 38);
+	put_str(tmp, 23, 38);
     }
 
     /* Then comes repeating */
@@ -400,17 +400,17 @@ void prt_state(void)
 	/* Hack -- we need to redraw this */
 	p_ptr->flags.status |= PY_REPEAT;
 
-	put_buffer(tmp, 23, 38);
+	put_str(tmp, 23, 38);
 
 	if (PY_SEARCH & p_ptr->flags.status)
-	    put_buffer("Search    ", 23, 38);
+	    put_str("Search    ", 23, 38);
     }
 
     else if (PY_SEARCH & p_ptr->flags.status) {
-	put_buffer("Searching ", 23, 38);
+	put_str("Searching ", 23, 38);
     }
     else			   /* "repeat 999" is 10 characters */
-	put_buffer("          ", 23, 38);
+	put_str("          ", 23, 38);
 }
 
 
@@ -425,23 +425,23 @@ void prt_speed()
 
 
     if (i > 2)
-	put_buffer("Extremely Slow", 23, 49);
+	put_str("Extremely Slow", 23, 49);
     else if (i == 2)
-	put_buffer("Very Slow     ", 23, 49);
+	put_str("Very Slow     ", 23, 49);
     else if (i == 1)
-	put_buffer("Slow          ", 23, 49);
+	put_str("Slow          ", 23, 49);
     else if (i == 0)
-	put_buffer("              ", 23, 49);
+	put_str("              ", 23, 49);
     else if (i == -1)
-	put_buffer("Fast          ", 23, 49);
+	put_str("Fast          ", 23, 49);
     else if (i == -2)
-	put_buffer("Very Fast     ", 23, 49);
+	put_str("Very Fast     ", 23, 49);
     else if (i == -3)
-	put_buffer("Extremely Fast", 23, 49);
+	put_str("Extremely Fast", 23, 49);
     else if (i == -4)
-	put_buffer("Deadly Speed  ", 23, 49);
+	put_str("Deadly Speed  ", 23, 49);
     else
-	put_buffer("Light Speed   ", 23, 49);
+	put_str("Light Speed   ", 23, 49);
 }
 
 
@@ -449,10 +449,10 @@ void prt_study()
 {
     p_ptr->flags.status &= ~PY_STUDY;
     if (p_ptr->flags.new_spells != 0) {
-	put_buffer("Study", 23, 64);
+	put_str("Study", 23, 64);
     }
     else {
-	put_buffer("     ", 23, 64);
+	put_str("     ", 23, 64);
     }
 }
 
@@ -462,21 +462,21 @@ void prt_cut()
     int c = p_ptr->flags.cut;
 
     if (c > 900)
-	put_buffer("Mortal wound", 21, 0);
+	put_str("Mortal wound", 21, 0);
     else if (c > 300)
-	put_buffer("Deep gash   ", 21, 0);
+	put_str("Deep gash   ", 21, 0);
     else if (c > 200)
-	put_buffer("Severe cut  ", 21, 0);
+	put_str("Severe cut  ", 21, 0);
     else if (c > 45)
-	put_buffer("Nasty cut   ", 21, 0);
+	put_str("Nasty cut   ", 21, 0);
     else if (c > 15)
-	put_buffer("Bad cut     ", 21, 0);
+	put_str("Bad cut     ", 21, 0);
     else if (c > 5)
-	put_buffer("Light cut   ", 21, 0);
+	put_str("Light cut   ", 21, 0);
     else if (c > 0)
-	put_buffer("Graze       ", 21, 0);
+	put_str("Graze       ", 21, 0);
     else
-	put_buffer("            ", 21, 0);
+	put_str("            ", 21, 0);
 }
 
 
@@ -487,16 +487,16 @@ void prt_stun(void)
 
     if (!p_ptr->flags.resist_sound) {
 	if (s > 100) {
-	    put_buffer("Knocked out ", 22, 0);
+	    put_str("Knocked out ", 22, 0);
 	}
 	else if (s > 50) {
-	    put_buffer("Heavy stun  ", 22, 0);
+	    put_str("Heavy stun  ", 22, 0);
 	}
 	else if (s > 0) {
-	    put_buffer("Stun        ", 22, 0);
+	    put_str("Stun        ", 22, 0);
 	}
 	else {
-	    put_buffer("            ", 22, 0);
+	    put_str("            ", 22, 0);
 	}
     }
 }
@@ -508,13 +508,13 @@ void prt_stun(void)
 void prt_winner(void)
 {
     if (wizard) {
-	put_buffer("Wizard", 20, 0);
+	put_str("Wizard", 20, 0);
     }
     else if (total_winner) {
-	put_buffer("Winner", 20, 0);
+	put_str("Winner", 20, 0);
     }
     else {
-	put_buffer("       ", 20, 0);
+	put_str("       ", 20, 0);
     }
 }
 
@@ -541,7 +541,7 @@ void prt_equippy_chars(void)
 
 	else out_val[0] = (int)(i_ptr->tchar);                
 
-	put_buffer(out_val, 4, j);
+	put_str(out_val, 4, j);
     }
 }
 
@@ -996,7 +996,7 @@ static void prt_lnum(cptr header, s32b num, int row, int col)
     vtype out_val;
 
     (void)sprintf(out_val, "%s%9ld", header, (long)num);
-    put_buffer(out_val, row, col);
+    put_str(out_val, row, col);
 }
 
 /*
@@ -1007,7 +1007,7 @@ static void prt_num(cptr header, int num, int row, int col)
     vtype out_val;
 
     (void)sprintf(out_val, "%s   %6d", header, num);
-    put_buffer(out_val, row, col);
+    put_str(out_val, row, col);
 }
 
 
@@ -1018,7 +1018,7 @@ static void prt_long(s32b num, int row, int col)
     vtype out_val;
 
     (void)sprintf(out_val, "%9ld", (long)num);
-    put_buffer(out_val, row, col);
+    put_str(out_val, row, col);
 }
 
 
@@ -1029,7 +1029,7 @@ static void prt_int(int num, int row, int col)
     vtype out_val;
 
     (void)sprintf(out_val, "%6d", num);
-    put_buffer(out_val, row, col);
+    put_str(out_val, row, col);
 }
 
 
@@ -1042,16 +1042,16 @@ void put_character()
 
     clear_screen();
 
-    put_buffer("Name        :", 2, 1);
-    put_buffer("Race        :", 3, 1);
-    put_buffer("Sex         :", 4, 1);
-    put_buffer("Class       :", 5, 1);
+    put_str("Name        :", 2, 1);
+    put_str("Race        :", 3, 1);
+    put_str("Sex         :", 4, 1);
+    put_str("Class       :", 5, 1);
 
     if (character_generated) {
-	put_buffer(m_ptr->name, 2, 15);
-	put_buffer(race[m_ptr->prace].trace, 3, 15);
-	put_buffer((m_ptr->male ? "Male" : "Female"), 4, 15);
-	put_buffer(class[m_ptr->pclass].title, 5, 15);
+	put_str(m_ptr->name, 2, 15);
+	put_str(race[m_ptr->prace].trace, 3, 15);
+	put_str((m_ptr->male ? "Male" : "Female"), 4, 15);
+	put_str(class[m_ptr->pclass].title, 5, 15);
     }
 }
 
@@ -1070,8 +1070,8 @@ void put_stats()
     for (i = 0; i < 6; i++) {
 
 	cnv_stat(p_ptr->stats.use_stat[i], buf);
-	put_buffer(stat_names[i], 2 + i, 61);
-	put_buffer(buf, 2 + i, 66);
+	put_str(stat_names[i], 2 + i, 61);
+	put_str(buf, 2 + i, 66);
 	if (p_ptr->stats.max_stat[i] > p_ptr->stats.cur_stat[i]) {
 	    /* this looks silly, but it happens because modify_stat() only
 	     * looks at cur_stat -CFT */
@@ -1079,7 +1079,7 @@ void put_stats()
 	    p_ptr->stats.cur_stat[i] = p_ptr->stats.max_stat[i];
 	    cnv_stat (modify_stat(i,p_ptr->stats.mod_stat[i]), buf);
 	    p_ptr->stats.cur_stat[i] = temp; /* DON'T MS2_FORGET! -CFT */
-	    put_buffer(buf, 2 + i, 73);
+	    put_str(buf, 2 + i, 73);
 	}
     }
     prt_num("+ To Hit    ", m_ptr->dis_th, 9, 1);
@@ -1161,7 +1161,7 @@ void put_misc2()
 	char                buf[40];
 
 	sprintf(buf, "%s%9s", "Exp to Adv.", "****");
-	put_buffer(buf, 12, 28);
+	put_str(buf, 12, 28);
     }
     else {
 	prt_lnum("Exp to Adv.", (s32b) (player_exp[m_ptr->lev - 1] * m_ptr->expfact / 100),
@@ -1209,34 +1209,34 @@ void put_misc3()
     /* Clear it */
     clear_from(14);
 
-    put_buffer("(Miscellaneous Abilities)", 15, 25);
+    put_str("(Miscellaneous Abilities)", 15, 25);
 
-    put_buffer("Fighting    :", 16, 1);
-    put_buffer(likert(xbth, 12), 16, 15);
+    put_str("Fighting    :", 16, 1);
+    put_str(likert(xbth, 12), 16, 15);
 
-    put_buffer("Bows/Throw  :", 17, 1);
-    put_buffer(likert(xbthb, 12), 17, 15);
+    put_str("Bows/Throw  :", 17, 1);
+    put_str(likert(xbthb, 12), 17, 15);
 
-    put_buffer("Saving Throw:", 18, 1);
-    put_buffer(likert(xsave, 6), 18, 15);
+    put_str("Saving Throw:", 18, 1);
+    put_str(likert(xsave, 6), 18, 15);
 
-    put_buffer("Stealth     :", 16, 28);
-    put_buffer(likert(xstl, 1), 16, 42);
+    put_str("Stealth     :", 16, 28);
+    put_str(likert(xstl, 1), 16, 42);
 
-    put_buffer("Disarming   :", 17, 28);
-    put_buffer(likert(xdis, 8), 17, 42);
+    put_str("Disarming   :", 17, 28);
+    put_str(likert(xdis, 8), 17, 42);
 
-    put_buffer("Magic Device:", 18, 28);
-    put_buffer(likert(xdev, 6), 18, 42);
+    put_str("Magic Device:", 18, 28);
+    put_str(likert(xdev, 6), 18, 42);
 
-    put_buffer("Perception  :", 16, 55);
-    put_buffer(likert(xfos, 3), 16, 69);
+    put_str("Perception  :", 16, 55);
+    put_str(likert(xfos, 3), 16, 69);
 
-    put_buffer("Searching   :", 17, 55);
-    put_buffer(likert(xsrh, 6), 17, 69);
+    put_str("Searching   :", 17, 55);
+    put_str(likert(xsrh, 6), 17, 69);
 
-    put_buffer("Infra-Vision:", 18, 55);
-    put_buffer(xinfra, 18, 69);
+    put_str("Infra-Vision:", 18, 55);
+    put_str(xinfra, 18, 69);
 }
 
 
@@ -1264,7 +1264,7 @@ void get_name()
 
     strcpy(tmp, p_ptr->misc.name);
     prt("Enter your player's name  [press <RETURN> when finished]", 21, 2);
-    put_buffer(&blank_string[BLANK_LENGTH - 15], 2, 15);
+    put_str(&blank_string[BLANK_LENGTH - 15], 2, 15);
 
 #ifdef MACINTOSH
 /*
@@ -1275,7 +1275,7 @@ void get_name()
 #else
     if (!get_string(p_ptr->misc.name, 2, 15, 15) || p_ptr->misc.name[0] == 0) {
 	strcpy(p_ptr->misc.name, tmp);
-	put_buffer(tmp, 2, 15);
+	put_str(tmp, 2, 15);
     }
 #endif
 
@@ -1610,8 +1610,8 @@ void print_spells(int *spell, int num, int comment, int nonconsec)
 
     offset = (class[p_ptr->misc.pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
     erase_line(1, col);
-    put_buffer("Name", 1, col + 5);
-    put_buffer("Lv Mana Fail", 1, col + 35);
+    put_str("Name", 1, col + 5);
+    put_str("Lv Mana Fail", 1, col + 35);
 
     /* only show the first 22 choices */
     if (num > 22) num = 22;
@@ -1811,7 +1811,7 @@ void prt_experience()
     if (p_ptr->misc.exp > p_ptr->misc.max_exp) p_ptr->misc.max_exp = p_ptr->misc.exp;
 
     (void) sprintf(out_val, "%8ld", (long)p_ptr->misc.exp);
-    put_buffer(out_val, 13, STAT_COLUMN+4);
+    put_str(out_val, 13, STAT_COLUMN+4);
 }
 
 

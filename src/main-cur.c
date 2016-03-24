@@ -23,6 +23,7 @@
 #ifdef USE_CUR
 
 
+#ifndef __MAKEDEPEND__
 
 
 # ifdef linux
@@ -99,6 +100,10 @@
 #  endif
 # endif /* MSDOS */
 
+#endif /* __MAKEDEPEND__ */
+
+
+
 extern char *getenv();
 
 #ifdef ATARIST_MWC
@@ -125,18 +130,15 @@ static int     curses_on = FALSE;
 
 
 
+
 /*
+ * Shut down curses 
  * Put the terminal in the original mode.			   -CJS-
  */
 void restore_term()
-#ifdef MACINTOSH
-/* Nothing to do on Mac */
 {
-}
-#else
-{
-    if (!curses_on)
-	return;
+    if (!curses_on) return;
+
     put_qio();			   /* Dump any remaining buffer */
 #ifdef MSDOS
     (void)sleep(2);		   /* And let it be read. */
@@ -144,7 +146,8 @@ void restore_term()
 #ifdef VMS
     pause_line(15);
 #endif
-/* this moves curses to bottom right corner */
+
+    /* this moves curses to bottom right corner */
     mvcur(curscr->_cury, curscr->_curx, LINES - 1, 0);
 #ifdef VMS
     pause_line(15);
@@ -172,18 +175,17 @@ void restore_term()
 
     curses_on = FALSE;
 }
-#endif
 
 
 
-#ifndef MACINTOSH
-#ifdef SIGTSTP
 /*
+ * Hack -- Suspend Curses
+ * See "signals.h" for usage
  * suspend()							   -CJS-
  * Handle the stop and start signals. This ensures that the log is up to
  * date, and that the terminal is fully reset and restored.  
  */
-int suspend()
+static void unix_suspend_curses(int go)
 {
 
 #ifdef USG
@@ -194,19 +196,28 @@ int suspend()
  */
 
 #else
-    struct sgttyb  tbuf;
-    struct ltchars lcbuf;
-    struct tchars  cbuf;
-    int            lbuf;
-    long           time();
 
+    static struct sgttyb  tbuf;
+    static struct ltchars lcbuf;
+    static struct tchars  cbuf;
+    static int            lbuf;
+    static long           time();
+
+    /* Step One */
+    if (go)
+    {
     p_ptr->misc.male |= 2;
 	(void)ioctl(0, TIOCGETP, (char *)&tbuf);
 	(void)ioctl(0, TIOCGETC, (char *)&cbuf);
 	(void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
 	(void)ioctl(0, TIOCLGET, (char *)&lbuf);
-    restore_term();
-    (void)kill(0, SIGSTOP);
+
+	unix_restore_curses();
+    }
+
+    /* Step 2 */
+    else
+    {
 	curses_on = TRUE;
 
 	(void)ioctl(0, TIOCSETP, (char *)&tbuf);
@@ -220,23 +231,19 @@ int suspend()
 	cbreak();
 	noecho();
     p_ptr->misc.male &= ~2;
+    }
+
 #endif
-    return 0;
+
 }
-#endif
-#endif
 
 
 /*
  * Set up the terminal into a suitable state for moria.	 -CJS-
  */
-void moriaterm()
-#ifdef MACINTOSH
-/* Nothing to do on Mac */
+static void moriaterm()
 {
-}
-#else
-{
+
 #if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
 #ifdef USG
 
@@ -317,7 +324,10 @@ void moriaterm()
 
 }
 
-#endif
+
+
+
+
 
 
 /*
@@ -335,52 +345,41 @@ void moriaterm()
  * accumulation reaches a certain point, sleep for a second. There would need
  * to be a way of resetting the count, with a call made for commands like run
  * or rest.
+ *
+ * Currently, miscrosec is zero, but we could use this in some kbhit()'s.
+ *
+ * Note: Was using: defined(BSD4_3) || defined(M_XENIX) || defined(linux)
+ * to test explicitly for the presense of the "FD_SET" macro.
  */
 static int check_input(int microsec)
 {
-#if defined(USG) && !defined(M_XENIX)
-    int                 arg, result;
+    int result = 0;
 
+#if defined(USG) && !defined(M_XENIX)
+    int                 arg;
 #else
     struct timeval      tbuf;
-    int                 ch;
 
-#if defined(BSD4_3) || defined(M_XENIX) || defined(linux)
+#ifdef FD_SET
     fd_set              smask;
-
+    fd_set		*no_fds = NULL;
 #else
     int                 smask;
-
+    int			*no_fds = NULL;
 #endif
+
 #endif
 
 /* Return true if a read on descriptor 1 will not block. */
-#if !defined(USG) || defined(M_XENIX)
-    tbuf.tv_sec = 0;
-    tbuf.tv_usec = microsec;
-#if defined(BSD4_3) || defined(M_XENIX) || defined(linux)
-    FD_ZERO(&smask);
-    FD_SET(fileno(stdin), &smask);
-    if (select(1, &smask, (fd_set *) 0, (fd_set *) 0, &tbuf) == 1)
-#else
-    smask = 1;			   /* i.e. (1 << 0) */
-    if (select(1, &smask, (int *)0, (int *)0, &tbuf) == 1)
-#endif
-    {
-	ch = getch();
-    /* check for EOF errors here, select sometimes works even when EOF */
-	if (ch == -1) {
-	    eof_flag++;
-	    return 0;
-	}
-	return 1;
-    } else
-	return 0;
-#else				   /* SYS V code follows */
-    /* mod 128, sleep one sec every 128 turns */
+
+#if defined(USG) && !defined(M_XENIX)
+
+    /*** SysV code (?) ***/
+
+    /* XXX Hack -- mod 128, sleep one sec every 128 turns */
     if (microsec != 0 && (turn & 0x7F) == 0) (void)sleep(1);
-    /* Can't check for input, but can do non-blocking read, so... */
-    /* Ugh! */
+
+    /* XXX Hack -- Can't check for input, but can do non-blocking read */
     arg = 0;
     arg = fcntl(0, F_GETFL, arg);
     arg |= O_NDELAY;
@@ -392,10 +391,39 @@ static int check_input(int microsec)
     arg = fcntl(0, F_GETFL, arg);
     arg &= ~O_NDELAY;
     (void)fcntl(0, F_SETFL, arg);
+
     if (result == -1) return 0;
-    else
-	return 1;
+
+#else
+
+    /*** Do a nice clean "select" ***/
+
+    tbuf.tv_sec = 0;
+    tbuf.tv_usec = microsec;
+
+#ifdef FD_SET
+    FD_ZERO(&smask);
+    FD_SET(fileno(stdin), &smask);
+#else
+    smask = 0x0001;		/* i.e. (1 << 0) */
 #endif
+
+    /* If we time out, no key ready */
+    if (select(1, &smask, no_fds, no_fds, &tbuf) != 1) return (0);
+
+    /* Get a key */
+    result = getch();
+
+    /* check for EOF errors here, select sometimes works even when EOF */
+    if (result == -1) {
+	    eof_flag++;
+	    return 0;
+	}
+
+#endif
+
+    /* There is a key ready, return it */
+    return (result);
 }
 
 
@@ -405,30 +433,28 @@ static int check_input(int microsec)
  * initializes curses routines
  */
 void init_curses(void)
-#ifdef MACINTOSH
+#ifndef MACINTOSH
 {
-/* Primary initialization is done in mac.c since game is restartable */
-/* Only need to clear the screen here */
-    Rect scrn;
+    int i, y, x, err;
+    
 
-    scrn.left = scrn.top = 0;
-    scrn.right = SCRN_COLS;
-    scrn.bottom = SCRN_ROWS;
-    EraseScreen(&scrn);
-    UpdateScreen();
-}
+#if defined(VMS) || defined(MSDOS) || \
+    defined(ATARIST_MWC) || defined(__MINT__)
+
+    /* Nothing */
+
 #else
-{
-    int i, y, x;
+#ifdef USG
 
-#ifndef USG
+    (void)ioctl(0, TCGETA, (char *)&save_termio);
+
+#else
+
     (void)ioctl(0, TIOCGLTC, (char *)&save_special_chars);
     (void)ioctl(0, TIOCGETP, (char *)&save_ttyb);
     (void)ioctl(0, TIOCGETC, (char *)&save_tchars);
     (void)ioctl(0, TIOCLGET, (char *)&save_local_chars);
-#else
-#if !defined(VMS) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    (void)ioctl(0, TCGETA, (char *)&save_termio);
+
 #endif
 #endif
 
@@ -436,28 +462,29 @@ void init_curses(void)
 #ifdef ATARIST_MWC
     WINDOW *newwin();
     initscr();
-    if (ERR)
+    err = (ERR)
 #else
 #if defined(USG) && !defined(PC_CURSES)	/* PC curses returns ERR */
-    if (initscr() == NULL)
+    err = (initscr() == NULL);
 #else
-    if (initscr() == ERR)
+    err = (initscr() == ERR);
 #endif
 #endif
-    {
-	(void)printf("Error allocating screen in curses package.\n");
-	exit(1);
-    }
-    if (LINES < 24 || COLS < 80) { /* Check we have enough screen. -CJS- */
-	(void)printf(
-	  "Your screen is too small for Angband; you need at least 80x24.\n");
-	exit(1);
-    }
+
+    /* Quit on error */
+    if (err) quit("failure initializing curses");
+
+    /* Check we have enough screen. -CJS- */
+    err = (LINES < 24 || COLS < 80);
+
+    /* Quit with message */
+    if (err) quit("screen too small (need at least 80x24)");
+
 #ifdef SIGTSTP
 #ifdef __MINT__
-    (void)signal(SIGTSTP, (__Sigfunc)suspend);
+    (void)signal(SIGTSTP, (__Sigfunc)unix_suspend_curses);
 #else
-    (void)signal(SIGTSTP, suspend);
+    (void)signal(SIGTSTP, unix_suspend_curses);
 #endif
 #endif
 
@@ -470,7 +497,9 @@ void init_curses(void)
 
     moriaterm();
 
-    /* check tab settings, exit with error if they are not 8 spaces apart */
+
+    /*** Check tab settings ***/
+
 #ifdef ATARIST_MWC
     move(0, 0);
 #else
@@ -491,23 +520,35 @@ void init_curses(void)
     }
 
     /* Verify tab stops */
-    if (i != 10) {
-	msg_print("Tabs must be set 8 spaces apart.");
-	exit_game();
-    }
+    if (i != 10) quit("must have 8-space tab-stops");
+}
+#else
+{
+/* Primary initialization is done in mac.c since game is restartable */
+/* Only need to clear the screen here */
+    Rect scrn;
+
+    scrn.left = scrn.top = 0;
+    scrn.right = SCRN_COLS;
+    scrn.bottom = SCRN_ROWS;
+    EraseScreen(&scrn);
+    UpdateScreen();
 }
 #endif
 
 
 
-void shell_out()
-#ifdef MACINTOSH
-{
-    alert_error("This command is not implemented on the Macintosh.");
-}
 
-#else
+
+
+#if 0
+
+/*
+ * Another unused function -- note the "curses" dependancies
+ */
+void shell_out()
 {
+#ifndef MACINTOSH
 #ifdef USG
 #if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
     struct termio       tbuf;
@@ -541,9 +582,9 @@ void shell_out()
     clear_screen();
 
 #ifndef ATARIST_MWC
-    put_buffer("[Entering shell, type 'exit' to resume your game.]\n", 0, 0);
+    put_str("[Entering shell, type 'exit' to resume your game.]\n", 0, 0);
 #else
-    put_buffer("[Escaping to shell]\n", 0, 0);
+    put_str("[Escaping to shell]\n", 0, 0);
 #endif
     put_qio();
 
@@ -577,9 +618,9 @@ void shell_out()
 
 #ifdef MSDOS			   /* { */
     if ((comspec = getenv("COMSPEC")) == NULL
-	|| spawnl(P_WAIT, comspec, comspec, (char *)NULL) < 0) {
+	|| spawnl(P_WAIT, comspec, comspec, C_NULL) < 0) {
 	clear_screen();		   /* BOSS key if shell failed */
-	put_buffer("M:\\> ", 0, 0);
+	put_str("M:\\> ", 0, 0);
 	do {
 	    key = inkey();
 	} while (key != '!');
@@ -605,19 +646,19 @@ void shell_out()
 
 	if ((str = getenv("SHELL")))
 #ifndef ATARIST_MWC
-	    (void)execl(str, str, (char *)0);
+	    (void)execl(str, str, C_NULL);
 #else
 	    system(str);
 #endif
 	else
 #ifndef ATARIST_MWC
-	    (void)execl("/bin/sh", "sh", (char *)0);
+	    (void)execl("/bin/sh", "sh", C_NULL);
 #endif
 	msg_print("Cannot execute shell.");
 #ifndef ATARIST_MWC
 
 	/* Actually abort everything */
-	exit(1);
+	quit(NULL);
     }
     if (val == -1) {
 	msg_print("Fork failed. Try again.");
@@ -662,10 +703,8 @@ void shell_out()
 #endif
 #endif
     (void)wrefresh(curscr);
-}
 #endif
-
-
+}
 
 
 #if 0

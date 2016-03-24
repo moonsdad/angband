@@ -363,7 +363,7 @@ void stair_creation()
 /* if no artifact here -CFT */
 	if (c_ptr->tptr != 0)
 	    (void)delete_object(char_row, char_col);
-	cur_pos = popt();
+	cur_pos = i_pop();
 	c_ptr->tptr = cur_pos;
 	if ((randint(2) == 1 || is_quest(dun_level)) && (dun_level > 0))
 	    invcopy(&t_list[cur_pos], OBJ_UP_STAIR);
@@ -398,7 +398,7 @@ int door_creation()
 			door = TRUE;
 			if (c_ptr->tptr != 0)
 			    (void)delete_object(i, j);
-			k = popt();
+			k = i_pop();
 			c_ptr->fval = BLOCKED_FLOOR;
 			c_ptr->tptr = k;
 			invcopy(&t_list[k], OBJ_CLOSED_DOOR);
@@ -468,7 +468,7 @@ int detect_invisible()
 }
 
 
-/* Split out of light_line.       -DGK */
+/* Split out of lite_line.       -DGK */
 void mon_light_dam(int y, int x, int dam)
 {
     register cave_type     *c_ptr;
@@ -500,7 +500,7 @@ void mon_light_dam(int y, int x, int dam)
 }
 
 
-int light_area(register int y, register int x, register int dam, register int rad)	   /* Expanded -DGK */
+int lite_area(register int y, register int x, register int dam, register int rad)	   /* Expanded -DGK */
 {
     register int i, j;
     int          min_i, max_i, min_j, max_j;
@@ -536,7 +536,7 @@ int light_area(register int y, register int x, register int dam, register int ra
 
 
 /* Darken an area, opposite of light area		-RAK-	 */
-int unlight_area(int y, int x)
+int unlite_area(int y, int x)
 {
     register int        i, j, unlight;
     register cave_type *c_ptr;
@@ -776,7 +776,7 @@ int detect_monsters()
 
 /* Leave a line of light in given dir, blue light can sometimes	 */
 /* hurt creatures.				       -RAK-   */
-void light_line(int dir,int y, int x)
+void lite_line(int dir,int y, int x)
 {
     register cave_type *c_ptr;
     int                 dist, flag;
@@ -816,7 +816,7 @@ void starlite(register int y, register int x)
 	msg_print("The end of the staff bursts into a blue shimmering light.");
     for (i = 1; i <= 9; i++)
 	if (i != 5)
-	    light_line(i, y, x);
+	    lite_line(i, y, x);
 }
 
 /* Disarms all traps/chests in a given direction	-RAK-	 */
@@ -2066,7 +2066,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 				msg_print("You are blinded by the flash!");
 				p_ptr->flags.blind += randint(6) + 3;
 			    }
-			    light_area(char_row, char_col, 0, max_dis);
+			    lite_area(char_row, char_col, 0, max_dis);
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_DARK:
@@ -2078,7 +2078,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 				    msg_print("The darkness prevents you from seeing!");
 				p_ptr->flags.blind += randint(5) + 2;
 			    }
-			    unlight_area(char_row, char_col);
+			    unlite_area(char_row, char_col);
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_TIME:	/* only some effects from
@@ -3567,7 +3567,7 @@ void warding_glyph(void)
 
     c_ptr = &cave[char_row][char_col];
     if (c_ptr->tptr == 0) {
-	i = popt();
+	i = i_pop();
 	c_ptr->tptr = i;
 	invcopy(&t_list[i], OBJ_SCARE_MON);
     }

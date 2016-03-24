@@ -794,7 +794,7 @@ int get_char(int *generate)
     /* Notify the player */
     clear_screen();
     (void)sprintf(temp, "Restoring Character.");
-    put_buffer(temp, 23, 0);
+    put_str(temp, 23, 0);
 
     /* Hack -- let the message get read */
     delay(1000);

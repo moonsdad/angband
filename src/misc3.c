@@ -119,7 +119,7 @@ static void compact_objects()
 /*
  * Gives pointer to next free space			-RAK-
  */
-int popt(void)
+int i_pop(void)
 {
     /* Compact if needed */
     if (i_max == MAX_I_IDX) compact_objects();
@@ -1980,7 +1980,7 @@ again:
     }
     if (strlen(str) > 0 && (wizard || peek))
 	msg_print(str);
-    cur_pos = popt();
+    cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
     invcopy(&t_list[cur_pos], tmp);
     t_list[cur_pos].timeout = 0;
@@ -2016,7 +2016,7 @@ void place_object(int y, int x)
     if (randint(MAX_OBJECTS)>SPECIAL_OBJ && randint(10)==1)
 	if (special_place_object(y,x)==(-1))
 	    return;
-    cur_pos = popt();
+    cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
 
     do {	   /* don't generate another chest if opening_chest is true -CWS */
@@ -2068,7 +2068,7 @@ void place_special(int y, int x, u32b good)
     if (randint(10) == 1)
 	if (special_place_object(y, x) == (-1))
 	    return;
-    cur_pos = popt();
+    cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
     do {
 	tmp = get_obj_num((object_level + 10), TRUE);
@@ -2226,7 +2226,7 @@ void place_trap(int y, int x, int sval)
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
-    cur_pos = popt();
+    cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
     invcopy(&t_list[cur_pos], OBJ_TRAP_LIST + sval);
 }
@@ -2257,7 +2257,7 @@ void place_rubble(int y, int x)
     /* Delete whatever is there */
     delete_object(y, x);
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_RUBBLE);
 
@@ -2304,7 +2304,7 @@ void place_gold(int y, int x)
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
-    cur_pos = popt();
+    cur_pos = i_pop();
 
     /* Pick a Treasure variety */
     i = ((randint(object_level + 2) + 2) / 2) - 1;

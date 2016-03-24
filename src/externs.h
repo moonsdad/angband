@@ -515,33 +515,36 @@ void ident_char(void);
 
 /* io.c */
 
-#ifdef SIGTSTP
-int suspend(void);
-#endif
-void init_curses(void);
-void moriaterm(void);
-void put_buffer(cptr, int, int);
+void bell(void);
+
+void move_cursor(int, int);
+
 void put_qio(void);
 void restore_term(void);
-void shell_out(void);
-char inkey(void);
+
 void flush(void);
+
+char inkey(void);
+
+void msg_print(cptr);
+
 void erase_line(int, int);
 void clear_screen(void);
 void clear_from(int);
+
 void move_cursor_relative(int, int);
 void count_msg_print(cptr);
+void put_str(cptr, int, int);
 void prt(cptr, int, int);
-void move_cursor(int, int);
-void msg_print(cptr);
+
+void save_screen(void);
+void restore_screen(void);
+
 int get_check(cptr);
 int get_com(cptr, char *);
 int get_string(char *, int, int, int);
 void pause_line(int);
 void pause_exit(int, int);
-void save_screen(void);
-void restore_screen(void);
-void bell(void);
 void screen_map(void);
 void print(int, int, int);
 
@@ -599,7 +602,7 @@ int get_nmons_num(int);
 int distance(int, int, int, int);
 
 /* misc3.c */
-int popt(void);
+int i_pop(void);
 void pusht(int);
 int magik(int);
 int m_bonus(int, int, int);
@@ -864,8 +867,8 @@ int detect_object(void);
 int detect_trap(void);
 int detect_sdoor(void);
 int detect_invisible(void);
-int light_area(int, int, int, int);
-int unlight_area(int, int);
+int lite_area(int, int, int, int);
+int unlite_area(int, int);
 void map_area(void);
 int ident_spell(void);
 int aggravate_monster(int);
@@ -874,7 +877,7 @@ int door_creation(void);
 int td_destroy(void);
 int detect_monsters(void);
 void mon_light_dam(int, int, int);
-void light_line(int, int, int);
+void lite_line(int, int, int);
 void frost_line(int, int, int, int);
 void starlite(int, int);
 int disarm_all(int, int, int);
@@ -970,9 +973,6 @@ int _new_log(void);
 #ifdef unix
 /* unix.c */
 int check_input(int);
-#if 0
-int system_cmd(char *);
-#endif
 #endif
 
 /* util.c */

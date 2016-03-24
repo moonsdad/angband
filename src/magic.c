@@ -689,7 +689,7 @@ void cast()
 	    break;
 
 	  case 4:
-	    (void)light_area(char_row, char_col,
+	    (void)lite_area(char_row, char_col,
 			    damroll(2, (p_ptr->misc.lev / 2)), (p_ptr->misc.lev / 10) + 1);
 	    break;
 
@@ -756,7 +756,7 @@ void cast()
 	  case 16:
 	    if (!get_dir(NULL, &dir)) return;
 	    msg_print("A line of blue shimmering light appears.");
-	    light_line(dir, char_row, char_col);
+	    lite_line(dir, char_row, char_col);
 	    break;
 
 	  case 17:
@@ -1140,7 +1140,7 @@ void pray()
 	    break;
 	    
 	  case 5:
-	    (void)light_area(char_row, char_col,
+	    (void)lite_area(char_row, char_col,
 		            damroll(2, (p_ptr->misc.lev / 2)), (p_ptr->misc.lev / 10) + 1);
 	    break;
 /* FIXME: hammer? */

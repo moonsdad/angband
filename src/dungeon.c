@@ -254,7 +254,7 @@ void dungeon(void)
 	      !(t_list[c_ptr->tptr].flags2 & TR_ARTIFACT)))) {
 	    if (c_ptr->tptr != 0)
 		(void)delete_object(char_row, char_col);
-	    cur_pos = popt();
+	    cur_pos = i_pop();
 	    c_ptr->tptr = cur_pos;
 	    if (create_up_stair)
 		invcopy(&t_list[cur_pos], OBJ_UP_STAIR);

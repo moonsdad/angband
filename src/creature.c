@@ -2709,7 +2709,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "gestures in shadow.");
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
-	    (void)unlight_area(char_row, char_col);
+	    (void)unlite_area(char_row, char_col);
 	    break;
 
 	  case 54:

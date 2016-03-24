@@ -734,7 +734,7 @@ void inven_drop(int item_val, int drop_all)
 
     if (cave[char_row][char_col].tptr != 0)
 	(void)delete_object(char_row, char_col);
-    i = popt();
+    i = i_pop();
     t_list[i] = *i_ptr;
     cave[char_row][char_col].tptr = i;
 

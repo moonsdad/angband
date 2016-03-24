@@ -91,20 +91,20 @@ static void get_sex(void)
     char        c;
 
     clear_from(20);
-    put_buffer("Choose a sex (? for Help):", 20, 2);
-    put_buffer("m) Male       f) Female", 21, 2);
+    put_str("Choose a sex (? for Help):", 20, 2);
+    put_str("m) Male       f) Female", 21, 2);
 
     while (1) {
 	move_cursor(20, 29);
 	c = inkey();
 	if (c == 'm' || c == 'M') {
 	    p_ptr->misc.male = TRUE;
-	    put_buffer("Male", 4, 15);
+	    put_str("Male", 4, 15);
 	    break;
 	}
 	else if (c == 'f' || c == 'F') {
 	    p_ptr->misc.male = FALSE;
-	    put_buffer("Female", 4, 15);
+	    put_str("Female", 4, 15);
 	    break;
 	}
 	else if (c == '?') {
@@ -130,11 +130,11 @@ static void choose_race(void)
     m = 21;
 
     clear_from(20);
-    put_buffer("Choose a race (? for Help):", 20, 2);
+    put_str("Choose a race (? for Help):", 20, 2);
 
     for (j = 0; j < MAX_RACES; j++) {
 	(void)sprintf(tmp_str, "%c) %s", j + 'a', race[j].trace);
-	put_buffer(tmp_str, m, l);
+	put_str(tmp_str, m, l);
 	l += 15;
 	if (l > 70) {
 	    l = 2;
@@ -148,7 +148,7 @@ static void choose_race(void)
 	j = s - 'a';
 	if ((j < MAX_RACES) && (j >= 0)) {
 	    p_ptr->misc.prace = j;
-	    put_buffer(race[j].trace, 3, 15);
+	    put_str(race[j].trace, 3, 15);
 	    break;
 	}
 	else if (s == '?') {
@@ -186,12 +186,12 @@ static void get_class_choice()
     /* No legal choices yet */
     for (j = 0; j < MAX_CLASS; j++) cl[j] = 0;
 
-    put_buffer("Choose a class (? for Help):", 20, 2);
+    put_str("Choose a class (? for Help):", 20, 2);
     /* Display the legal choices */
     for (j = 0; j < MAX_CLASS; j++) {
 	if (race[i].rtclass & mask) {
 	    sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
-	    put_buffer(tmp_str, m, l);
+	    put_str(tmp_str, m, l);
 	    cl[k++] = j;
 	    l += 15;
 	    if (l > 70) {
@@ -212,7 +212,7 @@ static void get_class_choice()
 	    p_ptr->misc.pclass = cl[j];
 	    c_ptr = &class[p_ptr->misc.pclass];
 	    clear_from(20);
-	    put_buffer(c_ptr->title, 5, 15);
+	    put_str(c_ptr->title, 5, 15);
 	    break;
 	}
 	else if (s == '?') {
@@ -460,11 +460,11 @@ static void put_auto_stats()
     /* Put the stats */
     for (i = 0; i < 6; i++) {
 	cnv_stat(p_ptr->stats.use_stat[i], buf);
-	put_buffer(stat_names[i], 2 + i, 61);
-	put_buffer(buf, 2 + i, 66);
+	put_str(stat_names[i], 2 + i, 61);
+	put_str(buf, 2 + i, 66);
 	if (p_ptr->stats.max_stat[i] > p_ptr->stats.cur_stat[i]) {
 	    cnv_stat(p_ptr->stats.max_stat[i], buf);
-	    put_buffer(buf, 2 + i, 73);
+	    put_str(buf, 2 + i, 73);
 	}
     }
 }
@@ -479,7 +479,7 @@ static void print_history()
 {
     register int        i;
 
-    put_buffer("Character Background", 14, 27);
+    put_str("Character Background", 14, 27);
     for (i = 0; i < 4; i++) {
 	prt(p_ptr->misc.history[i], i + 15, 10);
     }
@@ -791,7 +791,7 @@ void create_character()
  */
 
     /* Prompt for it */
-    put_buffer("Do you want to use automatic rolling? (? for Help) ", 20, 2);
+    put_str("Do you want to use automatic rolling? (? for Help) ", 20, 2);
 
     /* allow multiple key entry, so they can ask for help and still get back to this menu... -CFT */
     while (1) {
@@ -808,7 +808,7 @@ void create_character()
 	autoroll = TRUE;
 
 	clear_from(15);
-	put_buffer("Enter minimum attribute for: ", 15, 2);
+	put_str("Enter minimum attribute for: ", 15, 2);
 
 	/* Check the stats */
 	for (i = 0; i < 6; i++) {
@@ -845,7 +845,7 @@ void create_character()
 	    msstat = adjust_stat(17, msstat, TRUE);
 
 	    sprintf(inp, "%-12s (Max of %2d): ", stat_name[i], msstat);
-		put_buffer(inp, 16 + i, 5);
+		put_str(inp, 16 + i, 5);
 
 	    do {
 
@@ -896,7 +896,7 @@ void create_character()
 	    auto_round++;
 
 		sprintf(inp, "auto-rolling round #%lu.", (long)auto_round);
-		put_buffer(inp, 20, 2);
+		put_str(inp, 20, 2);
 
 #if defined(NICE)
 
@@ -943,10 +943,10 @@ void create_character()
 
 	    /* Prepare a prompt */
 	    if (previous_exists) {
-		put_buffer("Hit space: Reroll, ^P: Previous or ESC: Accept: ", 20, 2);
+		put_str("Hit space: Reroll, ^P: Previous or ESC: Accept: ", 20, 2);
 		move_cursor(20, 50);
 	    } else {
-		put_buffer("Hit space: Reroll, or ESC: Accept: ", 20, 2);
+		put_str("Hit space: Reroll, or ESC: Accept: ", 20, 2);
 		move_cursor(20, 37);
 	    }
 

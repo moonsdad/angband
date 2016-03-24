@@ -247,7 +247,7 @@ void erase_line(int row, int col)
 
 
 /* Dump IO to buffer					-RAK-	 */
-void put_buffer(cptr out_str, int row, int col)
+void put_str(cptr out_str, int row, int col)
 #ifdef MACINTOSH
 {
 /* The screen manager handles writes past the edge ok */
@@ -276,7 +276,7 @@ void put_buffer(cptr out_str, int row, int col)
 	abort();
     /* clear msg_flag to avoid problems with unflushed messages */
 	msg_flag = 0;
-	(void)sprintf(tmp_str, "error in put_buffer, row = %d col = %d\n",
+	(void)sprintf(tmp_str, "error in put_str, row = %d col = %d\n",
 		      row, col);
 	prt(tmp_str, 0, 0);
 	bell();
@@ -395,7 +395,7 @@ void prt(cptr str_buff, int row, int col)
     line.bottom = row + 1;
     DEraseScreen(&line);
 
-    put_buffer(str_buff, row, col);
+    put_str(str_buff, row, col);
 }
 #else
 {
@@ -403,24 +403,30 @@ void prt(cptr str_buff, int row, int col)
 	msg_print(NULL);
     (void)move(row, col);
     clrtoeol();
-    put_buffer(str_buff, row, col);
+    put_str(str_buff, row, col);
 }
 #endif
 
 
-/* Outputs message to top line of screen				 */
-/* These messages are kept for later reference.	 */
+/*
+ * Output a message to top line of screen.
+ *
+ * These messages are kept for later reference.	
+ */
 void msg_print(cptr str_buff)
 {
     char   in_char;
     static len = 0;
 
+
+    /* Old messages need verification */
     if (msg_flag) {
+
 	if (str_buff && (len + strlen(str_buff)) > 72) {
 	/* ensure that the complete -more- message is visible. */
 	    if (len > 73)
 		len = 73;
-	    put_buffer(" -more-", MSG_LINE, len);
+	    put_str(" -more-", MSG_LINE, len);
 	/* let sigint handler know that we are waiting for a space */
 	    wait_for_more = 1;
 	    do {
@@ -434,7 +440,7 @@ void msg_print(cptr str_buff)
 
 	/* Make the null string a special case.  -CJS- */
 	    if (str_buff) {
-		put_buffer(str_buff, MSG_LINE, 0);
+		put_str(str_buff, MSG_LINE, 0);
 		command_count = 0;
 		last_msg++;
 		if (last_msg >= MAX_SAVE_MSG)
@@ -451,7 +457,7 @@ void msg_print(cptr str_buff)
 	    if (!str_buff) {
 		if (len > 73)
 		    len = 73;
-		put_buffer(" -more-", MSG_LINE, len);
+		put_str(" -more-", MSG_LINE, len);
 	    /* let sigint handler know that we are waiting for a space */
 		wait_for_more = 1;
 		do {
@@ -464,7 +470,7 @@ void msg_print(cptr str_buff)
 		clrtoeol();
 		msg_flag = FALSE;
 	    } else {
-		put_buffer(str_buff, MSG_LINE, len);
+		put_str(str_buff, MSG_LINE, len);
 		len += strlen(str_buff) + 1;
 		command_count = 0;
 		last_msg++;
@@ -479,7 +485,7 @@ void msg_print(cptr str_buff)
 	(void)move(MSG_LINE, 0);
 	clrtoeol();
 	if (str_buff) {
-	    put_buffer(str_buff, MSG_LINE, 0);
+	    put_str(str_buff, MSG_LINE, 0);
 	    command_count = 0;
 	    len = strlen(str_buff) + 1;
 	    last_msg++;
@@ -616,7 +622,7 @@ int get_string(char *in_str, int row, int column, int slen)
 	  case CTRL('H'):
 	    if (column > start_col) {
 		column--;
-		put_buffer(" ", row, column);
+		put_str(" ", row, column);
 		move_cursor(row, column);
 		*--p = '\0';
 	    }

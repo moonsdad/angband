@@ -382,7 +382,7 @@ static void place_open_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_OPEN_DOOR);
@@ -399,7 +399,7 @@ static void place_broken_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_OPEN_DOOR);
@@ -419,7 +419,7 @@ static void place_closed_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
@@ -438,7 +438,7 @@ static void place_locked_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
@@ -460,7 +460,7 @@ static void place_stuck_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
@@ -482,7 +482,7 @@ static void place_secret_door(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_SECRET_DOOR);
 
@@ -532,7 +532,7 @@ static void place_up_stairs(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_UP_STAIR);
@@ -557,7 +557,7 @@ static void place_down_stairs(int y, int x)
     c_ptr = test_place_obj(y,x);
     if (!c_ptr) return;
 
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     i_ptr = &t_list[cur_pos];
     invcopy(i_ptr, OBJ_DOWN_STAIR);
@@ -2909,7 +2909,7 @@ static void build_store(int store_num, int y, int x)
 
     c_ptr = &cave[i][j];
     c_ptr->fval = CORR_FLOOR;
-    cur_pos = popt();
+    cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
     invcopy(&t_list[cur_pos], OBJ_STORE_DOOR + store_num);
 }

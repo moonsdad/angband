@@ -144,14 +144,14 @@ void display_scores(int from, int to)
 	if (k > 0) {
 	    sprintf(tmp_str, "\t\tAngband Hall of Fame (from position %d)",
 		    (k / 2) + 1);
-	    put_buffer(tmp_str, 0, 0);
+	    put_str(tmp_str, 0, 0);
 	} else {
-	    put_buffer("\t\tAngband Hall of Fame                     ", 0, 0);
+	    put_str("\t\tAngband Hall of Fame                     ", 0, 0);
 	}
-	put_buffer("     Score", 1, 0);
+	put_str("     Score", 1, 0);
 	l = 0;
 	for (j = k; j < i && j < (to * 2) && j < (k + 20); j++, l++)
-	    put_buffer(list[j], l + 2, 0);
+	    put_str(list[j], l + 2, 0);
 	k += 20;
 	if (!look_line(23)) {
 	/* What happens upon dying.				-RAK-	 */
@@ -253,7 +253,7 @@ void read_times(void)
 	if (file1) {
 	    clear_screen();
 	    for (i = 0; fgets(in_line, 80, file1); i++) {
-		put_buffer(in_line, i, 0);
+		put_str(in_line, i, 0);
 	    }
 	    (void)fclose(file1);
 	    pause_line(23);
@@ -267,7 +267,7 @@ void read_times(void)
     if ((file1 = my_tfopen(ANGBAND_MOR, "r")) != NULL) {
 	clear_screen();
 	for (i = 0; fgets(in_line, 80, file1) != NULL; i++)
-	    put_buffer(in_line, i, 0);
+	    put_str(in_line, i, 0);
 	pause_line(23);
 	(void)fclose(file1);
     }
@@ -298,7 +298,7 @@ void helpfile(cptr filename)
 	clear_screen();
 	for (i = 0; i < 23; i++) {
 	    if (fgets(tmp_str, BIGVTYPESIZ - 1, file)) {
-		put_buffer(tmp_str, i, 0);
+		put_str(tmp_str, i, 0);
 	    }
 	}
 
@@ -352,7 +352,7 @@ void print_objects()
 		(void)fprintf(file1, "*** For Level %d\n", level);
 		(void)fprintf(file1, "\n");
 		(void)fprintf(file1, "\n");
-		j = popt();
+		j = i_pop();
 		for (i = 0; i < nobj; i++) {
 		    if (randint(MAX_DUNGEON_OBJ) == 1) {
 			int                 tmp;
@@ -769,23 +769,23 @@ static void print_tomb()
 
     /* Draw a tombstone */
     clear_screen();
-    put_buffer("_______________________", 1, 15);
-    put_buffer("/", 2, 14);
-    put_buffer("\\         ___", 2, 38);
-    put_buffer("/", 3, 13);
-    put_buffer("\\ ___   /   \\      ___", 3, 39);
-    put_buffer("/            RIP            \\   \\  :   :     /   \\", 4, 12);
-    put_buffer("/", 5, 11);
-    put_buffer("\\  : _;,,,;_    :   :", 5, 41);
+    put_str("_______________________", 1, 15);
+    put_str("/", 2, 14);
+    put_str("\\         ___", 2, 38);
+    put_str("/", 3, 13);
+    put_str("\\ ___   /   \\      ___", 3, 39);
+    put_str("/            RIP            \\   \\  :   :     /   \\", 4, 12);
+    put_str("/", 5, 11);
+    put_str("\\  : _;,,,;_    :   :", 5, 41);
     (void)sprintf(str, "/%s\\,;_          _;,,,;_",
 		  center_string(tmp_str, p_ptr->misc.name));
-    put_buffer(str, 6, 10);
-    put_buffer("|               the               |   ___", 7, 9);
+    put_str(str, 6, 10);
+    put_str("|               the               |   ___", 7, 9);
     p = total_winner ? "Magnificent" : title_string();
     (void)sprintf(str, "| %s |  /   \\", center_string(tmp_str, p));
-    put_buffer(str, 8, 9);
-    put_buffer("|", 9, 9);
-    put_buffer("|  :   :", 9, 43);
+    put_str(str, 8, 9);
+    put_str("|", 9, 9);
+    put_str("|  :   :", 9, 43);
     if (!total_winner) {
 	p = class[p_ptr->misc.pclass].title;
     }
@@ -797,38 +797,38 @@ static void print_tomb()
     }
 
     (void)sprintf(str, "| %s | _;,,,;_   ____", center_string(tmp_str, p));
-    put_buffer(str, 10, 9);
+    put_str(str, 10, 9);
     (void)sprintf(str, "Level : %d", (int)p_ptr->misc.lev);
     (void)sprintf(str, "| %s |          /    \\", center_string(tmp_str, str));
-    put_buffer(str, 11, 9);
+    put_str(str, 11, 9);
     (void)sprintf(str, "%ld Exp", (long)p_ptr->misc.exp);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
-    put_buffer(str, 12, 9);
+    put_str(str, 12, 9);
     (void)sprintf(str, "%ld Au", (long)p_ptr->misc.au);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
-    put_buffer(str, 13, 9);
+    put_str(str, 13, 9);
     (void)sprintf(str, "Died on Level : %d", dun_level);
     (void)sprintf(str, "| %s |         _;,,,,;_", center_string(tmp_str, str));
-    put_buffer(str, 14, 9);
-    put_buffer("|            killed by            |", 15, 9);
+    put_str(str, 14, 9);
+    put_str("|            killed by            |", 15, 9);
     p = died_from;
     i = strlen(p);
     died_from[i] = '.';			   /* add a trailing period */
     died_from[i + 1] = '\0';
     (void)sprintf(str, "| %s |", center_string(tmp_str, p));
-    put_buffer(str, 16, 9);
+    put_str(str, 16, 9);
     died_from[i] = '\0';		   /* strip off the period */
     date(day);
     (void)sprintf(str, "| %s |", center_string(tmp_str, day));
-    put_buffer(str, 17, 9);
-    put_buffer("*|   *     *     *    *   *     *  | *", 18, 8);
-    put_buffer("________)/\\\\_)_/___(\\/___(//_\\)/_\\//__\\\\(/_|_)_______",
+    put_str(str, 17, 9);
+    put_str("*|   *     *     *    *   *     *  | *", 18, 8);
+    put_str("________)/\\\\_)_/___(\\/___(//_\\)/_\\//__\\\\(/_|_)_______",
 	       19, 0);
 
     flush();
 
-    put_buffer("(ESC to abort, return to print on screen, or file name)", 23, 0);
-    put_buffer("Character record?", 22, 0);
+    put_str("(ESC to abort, return to print on screen, or file name)", 23, 0);
+    put_str("Character record?", 22, 0);
 
     if (get_string(str, 22, 18, 60)) {
 
@@ -845,7 +845,7 @@ static void print_tomb()
     calc_bonuses();
     display_char();
 
-    put_buffer("Type ESC to skip the inventory:", 23, 0);
+    put_str("Type ESC to skip the inventory:", 23, 0);
 
     if (inkey() != ESCAPE) {
 	    clear_screen();
@@ -1111,26 +1111,26 @@ static void kingly()
 
     /* Let the player know that he did good.	 */
     clear_screen();
-    put_buffer("#", 1, 34);
-    put_buffer("#####", 2, 32);
-    put_buffer("#", 3, 34);
-    put_buffer(",,,  $$$  ,,,", 4, 28);
-    put_buffer(",,=$   \"$$$$$\"   $=,,", 5, 24);
-    put_buffer(",$$        $$$        $$,", 6, 22);
-    put_buffer("*>         <*>         <*", 7, 22);
-    put_buffer("$$         $$$         $$", 8, 22);
-    put_buffer("\"$$        $$$        $$\"", 9, 22);
-    put_buffer("\"$$       $$$       $$\"", 10, 23);
+    put_str("#", 1, 34);
+    put_str("#####", 2, 32);
+    put_str("#", 3, 34);
+    put_str(",,,  $$$  ,,,", 4, 28);
+    put_str(",,=$   \"$$$$$\"   $=,,", 5, 24);
+    put_str(",$$        $$$        $$,", 6, 22);
+    put_str("*>         <*>         <*", 7, 22);
+    put_str("$$         $$$         $$", 8, 22);
+    put_str("\"$$        $$$        $$\"", 9, 22);
+    put_str("\"$$       $$$       $$\"", 10, 23);
     p = "*#########*#########*";
-    put_buffer(p, 11, 24);
-    put_buffer(p, 12, 24);
-    put_buffer("Veni, Vidi, Vici!", 15, 26);
-    put_buffer("I came, I saw, I conquered!", 16, 21);
+    put_str(p, 11, 24);
+    put_str(p, 12, 24);
+    put_str("Veni, Vidi, Vici!", 15, 26);
+    put_str("I came, I saw, I conquered!", 16, 21);
     if (s_ptr->misc.male) {
-	put_buffer("All Hail the Mighty King!", 17, 22);
+	put_str("All Hail the Mighty King!", 17, 22);
     }
     else {
-	put_buffer("All Hail the Mighty Queen!", 17, 22);
+	put_str("All Hail the Mighty Queen!", 17, 22);
     }
     flush();
     pause_line(23);

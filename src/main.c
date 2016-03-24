@@ -166,8 +166,7 @@ int main(int argc, char * argv[])
 #if defined(SET_UID) && !defined(SECURE)
     /* Set the user id or quit */
     if (setuid(geteuid()) != 0) {
-	perror("Can't set permissions correctly!  Setuid call failed.\n");
-	exit(0);
+	quit("setuid(): cannot set permissions correctly!");
     }
 #endif
     
@@ -180,10 +179,7 @@ int main(int argc, char * argv[])
 #if !defined(MSDOS) && !defined(__MINT__)
     (void)gethostname(thishost, (sizeof thishost) - 1);	/* get host */
     fp = my_tfopen(ANGBAND_LOAD, "r");
-    if (!fp) {
-	perror("Can't get load-check.\n");
-	exit(0);
-    }
+    if (!fp) quit("cannot get load-check!");
 
     /* Find ourself */
     while (1) {
@@ -307,6 +303,7 @@ int main(int argc, char * argv[])
 #endif
 		puts("Each option must be listed separately (ie '-r -n', not '-rn')");
 	    }
+	    /* Actually abort the process */
 	    exit(1);
 	}
     }

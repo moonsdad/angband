@@ -459,7 +459,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			inven_type         *t_ptr;
 
 			crown = TRUE;
-			cur_pos = popt();
+			cur_pos = i_pop();
 			cave[j][k].tptr = cur_pos;
 			invcopy(&t_list[cur_pos], 98);
 			t_ptr = &t_list[cur_pos];
@@ -477,7 +477,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			inven_type         *t_ptr;
 
 			grond = TRUE;
-			cur_pos = popt();
+			cur_pos = i_pop();
 			cave[j][k].tptr = cur_pos;
 			invcopy(&t_list[cur_pos], 56);
 			t_ptr = &t_list[cur_pos];
@@ -726,7 +726,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 			    (void)delete_object(ty, tx);
 			ca_ptr = &cave[ty][tx];	/* put stairway here... */
 		    }
-		    cur_pos = popt();
+		    cur_pos = i_pop();
 		    ca_ptr->tptr = cur_pos;
 		    invcopy(&t_list[cur_pos], OBJ_DOWN_STAIR);
 		    msg_print("Well done!! Go for it!");
@@ -1247,7 +1247,7 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
     {
 	if (cave[i][j].tptr)	/* we must have crushed something; waste it -CFT */
 	    delete_object(i,j);
-	cur_pos = popt();
+	cur_pos = i_pop();
 	cave[i][j].tptr = cur_pos;
 	t_list[cur_pos] = *t_ptr;
 	lite_spot(i, j);

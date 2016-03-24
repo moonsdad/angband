@@ -1083,7 +1083,7 @@ void read_scroll(void)
 	    break;
 
 	  case 6:
-	    ident = light_area(char_row, char_col, damroll(2, 12), 2);
+	    ident = lite_area(char_row, char_col, damroll(2, 12), 2);
 	    break;
 
 	  case 7:
@@ -1190,7 +1190,7 @@ void read_scroll(void)
 	    break;
 
 	  case 27:
-	    ident = unlight_area(char_row, char_col);
+	    ident = unlite_area(char_row, char_col);
 	    if (!p_ptr->flags.resist_blind) {
 		p_ptr->flags.blind += 3 + randint(5);
 	    }
@@ -1543,7 +1543,7 @@ void aim(void)
 
 	case WD_LT:
 	    msg_print("A line of blue shimmering light appears.");
-	    light_line(dir, char_row, char_col);
+	    lite_line(dir, char_row, char_col);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -1908,7 +1908,7 @@ void use(void)
 	break;
 
       case ST_LIGHT:
-	ident = light_area(char_row, char_col, damroll(2, 10), 2);
+	ident = lite_area(char_row, char_col, damroll(2, 10), 2);
 	break;
 
       case ST_DR_LC:
@@ -2031,7 +2031,7 @@ void use(void)
 	break;
 
       case ST_DARK:
-	ident = unlight_area(char_row, char_col);
+	ident = unlite_area(char_row, char_col);
 	break;
 
       default:
@@ -2155,13 +2155,13 @@ void activate_rod(void)
       case RD_LT:
 	if (!direction(&dir)) goto no_charge;
 	msg_print("A line of blue shimmering light appears.");
-	light_line(dir, char_row, char_col);
+	lite_line(dir, char_row, char_col);
 	ident = TRUE;
 	i_ptr->timeout = 9;
 	break;
 
       case RD_ILLUME:
-	light_area(k, l, damroll(2, 8), 2);
+	lite_area(k, l, damroll(2, 8), 2);
 	ident = TRUE;
 	i_ptr->timeout = 30;
 	break;
@@ -3298,7 +3298,7 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 3):
 		msg_print("The phial wells with clear light...");
-		light_area(char_row, char_col, damroll(2, 15), 3);
+		lite_area(char_row, char_col, damroll(2, 15), 3);
 		inventory[i].timeout = 10 + randint(10);
 		break;
 	      case (SPECIAL_OBJ + 4):
