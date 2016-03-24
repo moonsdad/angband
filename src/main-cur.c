@@ -99,6 +99,8 @@
 #  endif
 # endif /* MSDOS */
 
+extern char *getenv();
+
 #ifdef ATARIST_MWC
 extern WINDOW *newwin();
 #endif
@@ -118,6 +120,204 @@ static int          save_local_chars;
 #endif
 
 
+static int     curses_on = FALSE;
+
+
+
+
+/*
+ * Put the terminal in the original mode.			   -CJS-
+ */
+void restore_term()
+#ifdef MACINTOSH
+/* Nothing to do on Mac */
+{
+}
+#else
+{
+    if (!curses_on)
+	return;
+    put_qio();			   /* Dump any remaining buffer */
+#ifdef MSDOS
+    (void)sleep(2);		   /* And let it be read. */
+#endif
+#ifdef VMS
+    pause_line(15);
+#endif
+/* this moves curses to bottom right corner */
+    mvcur(curscr->_cury, curscr->_curx, LINES - 1, 0);
+#ifdef VMS
+    pause_line(15);
+#endif
+    endwin();			   /* exit curses */
+
+    (void)fflush(stdout);
+#ifdef MSDOS
+    msdos_noraw();
+    (void)clear();
+#endif
+/* restore the saved values of the special chars */
+#ifdef USG
+# if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+    (void)ioctl(0, TCSETA, (char *)&save_termio);
+# endif
+#else
+# ifndef VMS
+    (void)ioctl(0, TIOCSLTC, (char *)&save_special_chars);
+    (void)ioctl(0, TIOCSETP, (char *)&save_ttyb);
+    (void)ioctl(0, TIOCSETC, (char *)&save_tchars);
+    (void)ioctl(0, TIOCLSET, (char *)&save_local_chars);
+# endif
+#endif
+
+    curses_on = FALSE;
+}
+#endif
+
+
+
+#ifndef MACINTOSH
+#ifdef SIGTSTP
+/*
+ * suspend()							   -CJS-
+ * Handle the stop and start signals. This ensures that the log is up to
+ * date, and that the terminal is fully reset and restored.  
+ */
+int suspend()
+{
+
+#ifdef USG
+
+/*
+ * for USG systems with BSDisms that have SIGTSTP defined,
+ * but don't actually implement it.  XXX What?
+ */
+
+#else
+    struct sgttyb  tbuf;
+    struct ltchars lcbuf;
+    struct tchars  cbuf;
+    int            lbuf;
+    long           time();
+
+    p_ptr->misc.male |= 2;
+	(void)ioctl(0, TIOCGETP, (char *)&tbuf);
+	(void)ioctl(0, TIOCGETC, (char *)&cbuf);
+	(void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
+	(void)ioctl(0, TIOCLGET, (char *)&lbuf);
+    restore_term();
+    (void)kill(0, SIGSTOP);
+	curses_on = TRUE;
+
+	(void)ioctl(0, TIOCSETP, (char *)&tbuf);
+	(void)ioctl(0, TIOCSETC, (char *)&cbuf);
+	(void)ioctl(0, TIOCSLTC, (char *)&lcbuf);
+	(void)ioctl(0, TIOCLSET, (char *)&lbuf);
+
+	(void)touchwin(curscr);
+	(void)wrefresh(curscr);
+
+	cbreak();
+	noecho();
+    p_ptr->misc.male &= ~2;
+#endif
+    return 0;
+}
+#endif
+#endif
+
+
+/*
+ * Set up the terminal into a suitable state for moria.	 -CJS-
+ */
+void moriaterm()
+#ifdef MACINTOSH
+/* Nothing to do on Mac */
+{
+}
+#else
+{
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+#ifdef USG
+
+    struct termio  tbuf;
+
+#else
+
+    struct ltchars lbuf;
+    struct tchars  buf;
+
+#endif
+#endif
+
+    curses_on = TRUE;
+
+#ifndef BSD4_3
+    crmode();
+#else
+    cbreak();
+#endif
+
+    noecho();
+
+    /* can not use nonl(), because some curses do not handle it correctly */
+
+#ifdef MSDOS
+    msdos_raw();
+#else
+
+#if !defined(ATARIST_MWC) && !defined(__MINT__)
+#ifdef USG
+
+    /* disable all of the normal special control characters */
+    (void)ioctl(0, TCGETA, (char *)&tbuf);
+    tbuf.c_cc[VINTR] = (char)3;	   /* control-C */
+    tbuf.c_cc[VQUIT] = (char)-1;
+    tbuf.c_cc[VERASE] = (char)-1;
+    tbuf.c_cc[VKILL] = (char)-1;
+    tbuf.c_cc[VEOF] = (char)-1;
+/* don't know what these are for */
+    tbuf.c_cc[VEOL] = (char)-1;
+    tbuf.c_cc[VEOL2] = (char)-1;
+/* stuff needed when !icanon, i.e. cbreak/raw mode */
+    tbuf.c_cc[VMIN] = 1;	   /* Input should wait for at least 1 char */
+    tbuf.c_cc[VTIME] = 0;	   /* no matter how long that takes. */
+    (void)ioctl(0, TCSETA, (char *)&tbuf);
+
+#else
+#ifndef VMS
+
+/*
+ * disable all of the special characters except the suspend char, interrupt
+ * char, and the control flow start/stop characters 
+ */
+
+    (void)ioctl(0, TIOCGLTC, (char *)&lbuf);
+    lbuf.t_suspc = (char)26;	   /* control-Z */
+    lbuf.t_dsuspc = (char)-1;
+    lbuf.t_rprntc = (char)-1;
+    lbuf.t_flushc = (char)-1;
+    lbuf.t_werasc = (char)-1;
+    lbuf.t_lnextc = (char)-1;
+    (void)ioctl(0, TIOCSLTC, (char *)&lbuf);
+
+    (void)ioctl(0, TIOCGETC, (char *)&buf);
+    buf.t_intrc = (char)3;	   /* control-C */
+    buf.t_quitc = (char)-1;
+    buf.t_startc = (char)17;	   /* control-Q */
+    buf.t_stopc = (char)19;	   /* control-S */
+    buf.t_eofc = (char)-1;
+    buf.t_brkc = (char)-1;
+    (void)ioctl(0, TIOCSETC, (char *)&buf);
+
+#endif
+#endif
+#endif
+#endif
+
+}
+
+#endif
 
 
 /*
@@ -177,10 +377,10 @@ static int check_input(int microsec)
     } else
 	return 0;
 #else				   /* SYS V code follows */
-    if (microsec != 0 && (turn & 0x7F) == 0)
-	(void)sleep(1);		   /* mod 128, sleep one sec every 128 turns */
-/* Can't check for input, but can do non-blocking read, so... */
-/* Ugh! */
+    /* mod 128, sleep one sec every 128 turns */
+    if (microsec != 0 && (turn & 0x7F) == 0) (void)sleep(1);
+    /* Can't check for input, but can do non-blocking read, so... */
+    /* Ugh! */
     arg = 0;
     arg = fcntl(0, F_GETFL, arg);
     arg |= O_NDELAY;
@@ -198,11 +398,280 @@ static int check_input(int microsec)
 #endif
 }
 
+
+
+
+/*
+ * initializes curses routines
+ */
+void init_curses(void)
+#ifdef MACINTOSH
+{
+/* Primary initialization is done in mac.c since game is restartable */
+/* Only need to clear the screen here */
+    Rect scrn;
+
+    scrn.left = scrn.top = 0;
+    scrn.right = SCRN_COLS;
+    scrn.bottom = SCRN_ROWS;
+    EraseScreen(&scrn);
+    UpdateScreen();
+}
+#else
+{
+    int i, y, x;
+
+#ifndef USG
+    (void)ioctl(0, TIOCGLTC, (char *)&save_special_chars);
+    (void)ioctl(0, TIOCGETP, (char *)&save_ttyb);
+    (void)ioctl(0, TIOCGETC, (char *)&save_tchars);
+    (void)ioctl(0, TIOCLGET, (char *)&save_local_chars);
+#else
+#if !defined(VMS) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+    (void)ioctl(0, TCGETA, (char *)&save_termio);
+#endif
+#endif
+
+
+#ifdef ATARIST_MWC
+    WINDOW *newwin();
+    initscr();
+    if (ERR)
+#else
+#if defined(USG) && !defined(PC_CURSES)	/* PC curses returns ERR */
+    if (initscr() == NULL)
+#else
+    if (initscr() == ERR)
+#endif
+#endif
+    {
+	(void)printf("Error allocating screen in curses package.\n");
+	exit(1);
+    }
+    if (LINES < 24 || COLS < 80) { /* Check we have enough screen. -CJS- */
+	(void)printf(
+	  "Your screen is too small for Angband; you need at least 80x24.\n");
+	exit(1);
+    }
+#ifdef SIGTSTP
+#ifdef __MINT__
+    (void)signal(SIGTSTP, (__Sigfunc)suspend);
+#else
+    (void)signal(SIGTSTP, suspend);
+#endif
+#endif
+
+    if ((savescr = newwin(0, 0, 0, 0)) == NULL) {
+	(void)printf("Out of memory in starting up curses.\n");
+	exit_game();
+    }
+    (void)clear();
+    (void)refresh();
+
+    moriaterm();
+
+    /* check tab settings, exit with error if they are not 8 spaces apart */
+#ifdef ATARIST_MWC
+    move(0, 0);
+#else
+    (void)move(0, 0);
+#endif
+
+    for (i = 1; i < 10; i++)
+    {
+
+#ifdef ATARIST_MWC
+	addch('\t');
+#else
+	(void)addch('\t');
+#endif
+
+	getyx(stdscr, y, x);
+	if (y != 0 || x != i * 8) break;
+    }
+
+    /* Verify tab stops */
+    if (i != 10) {
+	msg_print("Tabs must be set 8 spaces apart.");
+	exit_game();
+    }
+}
+#endif
+
+
+
+void shell_out()
+#ifdef MACINTOSH
+{
+    alert_error("This command is not implemented on the Macintosh.");
+}
+
+#else
+{
+#ifdef USG
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+    struct termio       tbuf;
+
+#endif
+#else
+    struct sgttyb       tbuf;
+    struct ltchars      lcbuf;
+    struct tchars       cbuf;
+    int                 lbuf;
+
+#endif
+#ifdef MSDOS
+    char               *comspec, key;
+
+#else
+#ifdef ATARIST_MWC
+    char                comstr[80];
+    char               *str;
+    extern char       **environ;
+
+#else
+    int                 val;
+    char               *str;
+
+#endif
+#endif
+
+    save_screen();
+/* clear screen and print 'exit' message */
+    clear_screen();
+
+#ifndef ATARIST_MWC
+    put_buffer("[Entering shell, type 'exit' to resume your game.]\n", 0, 0);
+#else
+    put_buffer("[Escaping to shell]\n", 0, 0);
+#endif
+    put_qio();
+
+#ifdef USG
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+    (void)ioctl(0, TCGETA, (char *)&tbuf);
+#endif
+#else
+#ifndef VMS
+    (void)ioctl(0, TIOCGETP, (char *)&tbuf);
+    (void)ioctl(0, TIOCGETC, (char *)&cbuf);
+    (void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
+    (void)ioctl(0, TIOCLGET, (char *)&lbuf);
+#endif
+#endif
+
+/* would call nl() here if could use nl()/nonl(), see moriaterm() */
+
+#ifndef BSD4_3
+    nocrmode();
+#else
+    nocbreak();
+#endif
+
+#ifdef MSDOS
+    msdos_noraw();
+#endif
+
+    echo();
+    ignore_signals();
+
+#ifdef MSDOS			   /* { */
+    if ((comspec = getenv("COMSPEC")) == NULL
+	|| spawnl(P_WAIT, comspec, comspec, (char *)NULL) < 0) {
+	clear_screen();		   /* BOSS key if shell failed */
+	put_buffer("M:\\> ", 0, 0);
+	do {
+	    key = inkey();
+	} while (key != '!');
+    }
+#else				   /* MSDOS }{ */
+#ifndef ATARIST_MWC
+    val = fork();
+    if (val == 0) {
+#endif
+	default_signals();
+#ifdef USG
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+	(void)ioctl(0, TCSETA, (char *)&save_termio);
+#endif
+#else
+#ifndef VMS
+	(void)ioctl(0, TIOCSLTC, (char *)&save_special_chars);
+	(void)ioctl(0, TIOCSETP, (char *)&save_ttyb);
+	(void)ioctl(0, TIOCSETC, (char *)&save_tchars);
+	(void)ioctl(0, TIOCLSET, (char *)&save_local_chars);
+#endif
+#endif
+
+	if ((str = getenv("SHELL")))
+#ifndef ATARIST_MWC
+	    (void)execl(str, str, (char *)0);
+#else
+	    system(str);
+#endif
+	else
+#ifndef ATARIST_MWC
+	    (void)execl("/bin/sh", "sh", (char *)0);
+#endif
+	msg_print("Cannot execute shell.");
+#ifndef ATARIST_MWC
+
+	/* Actually abort everything */
+	exit(1);
+    }
+    if (val == -1) {
+	msg_print("Fork failed. Try again.");
+	return;
+    }
+#ifdef USG
+    (void)wait((int *)(NULL));
+#else
+    (void)wait((union wait *)(NULL));
+#endif
+#endif				   /* ATARIST_MWC */
+#endif				   /* MSDOS } */
+
+    restore_signals();
+/* restore the cave to the screen */
+    restore_screen();
+
+#ifndef BSD4_3
+    crmode();
+#else
+    cbreak();
+#endif
+
+    noecho();
+
+/* would call nonl() here if could use nl()/nonl(), see moriaterm() */
+#ifdef MSDOS
+    msdos_raw();
+#endif
+/* disable all of the local special characters except the suspend char */
+/* have to disable ^Y for tunneling */
+#ifdef USG
+#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
+    (void)ioctl(0, TCSETA, (char *)&tbuf);
+#endif
+#else
+#ifndef VMS
+    (void)ioctl(0, TIOCSLTC, (char *)&lcbuf);
+    (void)ioctl(0, TIOCSETP, (char *)&tbuf);
+    (void)ioctl(0, TIOCSETC, (char *)&cbuf);
+    (void)ioctl(0, TIOCLSET, (char *)&lbuf);
+#endif
+#endif
+    (void)wrefresh(curscr);
+}
+#endif
+
+
+
+
 #if 0
 
 /*
  * This is not used.  It will only work on some systems.
- * this should be compared against shell_out in io.c 
  */
 
 /*

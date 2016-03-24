@@ -10,189 +10,8 @@
  * included in all such copies. 
  */
 
-#ifdef linux
-#include <bsd/sgtty.h>
-#endif
-
-#ifdef MSDOS
-#include <stdio.h>
-#include <process.h>
-#endif
-
-#if defined(NLS) && defined(lint)
-/* for AIX, don't let curses include the NL stuff */
-#undef NLS
-#endif
-
-#if !defined(GEMDOS)
-
-#ifdef MACINTOSH
-#include <scrnmgr.h>
-#else
-#ifdef linux
-#include <ncurses.h>
-#else
-#include <curses.h>
-#endif
-#endif
-
-#else
-#define ATARIST_MWC
-#include "curses.h"
-#include <osbind.h>
-long                wgetch();
-char               *getenv();
-#endif
 
 #include "angband.h"
-
-
-#if defined(SYS_V) && defined(lint)
-/*
- * for AIX, prevent hundreds of unnecessary lint errors, must define before
- * signal.h is included 
- */
-#define _h_IEEETRAP
-typedef struct {
-    int stuff;
-} fpvmach;
-
-#endif
-
-#if defined(MSDOS)
-#if defined(ANSI)
-#include "ms_ansi.h"
-#endif
-#else				   /* not msdos */
-#if !defined(ATARIST_MWC) && !defined(MACINTOSH)
-#ifndef VMS
-#include <sys/ioctl.h>
-#endif
-#include <signal.h>
-#endif
-#endif
-
-#ifndef USG
-/* only needed for Berkeley UNIX */
-#include <sys/param.h>
-#include <sys/file.h>
-#include <sys/types.h>
-#endif
-
-#ifdef USG
-#ifndef ATARIST_MWC
-#include <string.h>
-#else
-#include "string.h"
-#endif /* !ATARIST_MWC */
-#if !defined(MACINTOSH) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-#include <termio.h>
-#endif
-#else
-#ifndef VMS
-#include <strings.h>
-#include <sys/wait.h>
-#endif /* !VMS */
-#endif /* USG */
-
-/* ARGH!  This is driving me up the wall!  Brute force never hurt... [cjh] */
-#if defined(__MINT__) && !defined(_WAIT_H)
-#include <wait.h>
-#endif
-
-#if defined(SYS_V) && defined(lint)
-struct screen {
-    int                 dumb;
-};
-
-#endif
-
-/*
- * Fooling lint. Unfortunately, c defines all the TIO.	  -CJS- constants to
- * be long, and lint expects them to be int. Also, ioctl is sometimes called
- * with just two arguments. The following definition keeps lint happy. It may
- * need to be reset for different systems.	 
- */
-#ifndef MACINTOSH
-#ifdef lint
-#ifdef Pyramid
-/* Pyramid makes constants greater than 65535 into long! Gakk! -CJS- */
-/* ARGSUSED */
-/* VARARGS2 */
-static 
-    Ioctl(i, l, p) long l;
-    char               *p;
-{
-    return 0;
-}
-
-#else
-/* ARGSUSED */
-/* VARARGS2 */
-static 
-    Ioctl(i, l, p) char *p;
-{
-    return 0;
-}
-
-#endif
-#define ioctl	    Ioctl
-#endif
-
-#if !defined(USG) && defined(lint)
-/*
- * This use_value hack is for curses macros which return a value, but don't
- * shut up about it when you try to tell them (void).	 
- */
-/* only needed for Berkeley UNIX */
-int                 Use_value;
-
-#define use_value   Use_value +=
-#else
-#define use_value
-#endif
-
-#if defined(SYS_V) && defined(lint)
-/*
- * This use_value2 hack is for curses macros which use a conditional
- * expression, and which say null effect even if you cast to (void). 
- */
-/* only needed for SYS V */
-int                 Use_value2;
-
-#define use_value2  Use_value2 +=
-#else
-#define use_value2
-#endif
-
-#endif
-
-#ifndef MACINTOSH
-char *getenv();
-
-#endif
-
-#if !defined(MACINTOSH) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-#ifdef USG
-static struct termio save_termio;
-
-#else
-#ifndef VMS
-static struct ltchars save_special_chars;
-static struct sgttyb save_ttyb;
-static struct tchars save_tchars;
-static int          save_local_chars;
-
-#endif
-#endif
-#endif
-
-#ifndef MACINTOSH
-static int     curses_on = FALSE;
-static WINDOW *savescr;	   /* Spare window for saving the screen.
-				    * -CJS- */
-
-#endif
 
 #ifdef MACINTOSH
 /* Attributes of normal and hilighted characters */
@@ -200,487 +19,77 @@ static WINDOW *savescr;	   /* Spare window for saving the screen.
 #define ATTR_HILITED	attrReversed
 #endif
 
-#ifndef MACINTOSH
-#ifdef SIGTSTP
-/*
- * suspend()							   -CJS-
- * Handle the stop and start signals. This ensures that the log is up to
- * date, and that the terminal is fully reset and restored.  
+
+
+/* 
+ * Flush the screen, make a noise
  */
-int suspend()
+void bell()
 {
-#ifdef USG
-/*
- * for USG systems with BSDisms that have SIGTSTP defined, but don't actually
- * implement it 
- */
-#else
-    struct sgttyb  tbuf;
-    struct ltchars lcbuf;
-    struct tchars  cbuf;
-    int            lbuf;
-    long           time();
-
-    p_ptr->misc.male |= 2;
-    (void)ioctl(0, TIOCGETP, (char *)&tbuf);
-    (void)ioctl(0, TIOCGETC, (char *)&cbuf);
-    (void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
-    (void)ioctl(0, TIOCLGET, (char *)&lbuf);
-    restore_term();
-    (void)kill(0, SIGSTOP);
-    curses_on = TRUE;
-    (void)ioctl(0, TIOCSETP, (char *)&tbuf);
-    (void)ioctl(0, TIOCSETC, (char *)&cbuf);
-    (void)ioctl(0, TIOCSLTC, (char *)&lcbuf);
-    (void)ioctl(0, TIOCLSET, (char *)&lbuf);
-    (void)touchwin(curscr);
-    (void)wrefresh(curscr);
-    cbreak();
-    noecho();
-    p_ptr->misc.male &= ~2;
-#endif
-    return 0;
-}
-
-#endif
-#endif
-
-/* initializes curses routines */
-void init_curses()
-#ifdef MACINTOSH
-{
-/* Primary initialization is done in mac.c since game is restartable */
-/* Only need to clear the screen here */
-    Rect scrn;
-
-    scrn.left = scrn.top = 0;
-    scrn.right = SCRN_COLS;
-    scrn.bottom = SCRN_ROWS;
-    EraseScreen(&scrn);
-    UpdateScreen();
-}
-
-#else
-{
-    int i, y, x;
-
-#ifndef USG
-    (void)ioctl(0, TIOCGLTC, (char *)&save_special_chars);
-    (void)ioctl(0, TIOCGETP, (char *)&save_ttyb);
-    (void)ioctl(0, TIOCGETC, (char *)&save_tchars);
-    (void)ioctl(0, TIOCLGET, (char *)&save_local_chars);
-#else
-#if !defined(VMS) && !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    (void)ioctl(0, TCGETA, (char *)&save_termio);
-#endif
-#endif
-
-#ifdef ATARIST_MWC
-    WINDOW *newwin();
-
-    initscr();
-    if (ERR)
-#else
-#if defined(USG) && !defined(PC_CURSES)	/* PC curses returns ERR */
-    if (initscr() == NULL)
-#else
-    if (initscr() == ERR)
-#endif
-#endif
-    {
-	(void)printf("Error allocating screen in curses package.\n");
-	exit(1);
-    }
-    if (LINES < 24 || COLS < 80) { /* Check we have enough screen. -CJS- */
-	(void)printf(
-	  "Your screen is too small for Angband; you need at least 80x24.\n");
-	exit(1);
-    }
-#ifdef SIGTSTP
-#ifdef __MINT__
-    (void)signal(SIGTSTP, (__Sigfunc)suspend);
-#else
-    (void)signal(SIGTSTP, suspend);
-#endif
-#endif
-
-    if ((savescr = newwin(0, 0, 0, 0)) == NULL) {
-	(void)printf("Out of memory in starting up curses.\n");
-	exit_game();
-    }
-    (void)clear();
-    (void)refresh();
-    moriaterm();
-
-/* check tab settings, exit with error if they are not 8 spaces apart */
-#ifdef ATARIST_MWC
-    move(0, 0);
-#else
-    (void)move(0, 0);
-#endif
-    for (i = 1; i < 10; i++) {
-#ifdef ATARIST_MWC
-	addch('\t');
-#else
-	(void)addch('\t');
-#endif
-	getyx(stdscr, y, x);
-	if (y != 0 || x != i * 8)
-	    break;
-    }
-    if (i != 10) {
-	msg_print("Tabs must be set 8 spaces apart.");
-	exit_game();
-    }
-}
-
-#endif
-
-/* Set up the terminal into a suitable state for moria.	 -CJS- */
-void moriaterm()
-#ifdef MACINTOSH
-/* Nothing to do on Mac */
-{
-}
-
-#else
-{
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-#ifdef USG
-    struct termio  tbuf;
-
-#else
-    struct ltchars lbuf;
-    struct tchars  buf;
-
-#endif
-#endif
-
-    curses_on = TRUE;
-#ifndef BSD4_3
-    use_value crmode();
-
-#else
-    use_value cbreak();
-
-#endif
-    use_value noecho();
-
-/* can not use nonl(), because some curses do not handle it correctly */
-#ifdef MSDOS
-    msdos_raw();
-#else
-#if !defined(ATARIST_MWC) && !defined(__MINT__)
-#ifdef USG
-    (void)ioctl(0, TCGETA, (char *)&tbuf);
-/* disable all of the normal special control characters */
-    tbuf.c_cc[VINTR] = (char)3;	   /* control-C */
-    tbuf.c_cc[VQUIT] = (char)-1;
-    tbuf.c_cc[VERASE] = (char)-1;
-    tbuf.c_cc[VKILL] = (char)-1;
-    tbuf.c_cc[VEOF] = (char)-1;
-
-/* don't know what these are for */
-    tbuf.c_cc[VEOL] = (char)-1;
-    tbuf.c_cc[VEOL2] = (char)-1;
-
-/* stuff needed when !icanon, i.e. cbreak/raw mode */
-    tbuf.c_cc[VMIN] = 1;	   /* Input should wait for at least 1 char */
-    tbuf.c_cc[VTIME] = 0;	   /* no matter how long that takes. */
-
-    (void)ioctl(0, TCSETA, (char *)&tbuf);
-#else
-#ifndef VMS
-/*
- * disable all of the special characters except the suspend char, interrupt
- * char, and the control flow start/stop characters 
- */
-    (void)ioctl(0, TIOCGLTC, (char *)&lbuf);
-    lbuf.t_suspc = (char)26;	   /* control-Z */
-    lbuf.t_dsuspc = (char)-1;
-    lbuf.t_rprntc = (char)-1;
-    lbuf.t_flushc = (char)-1;
-    lbuf.t_werasc = (char)-1;
-    lbuf.t_lnextc = (char)-1;
-    (void)ioctl(0, TIOCSLTC, (char *)&lbuf);
-
-    (void)ioctl(0, TIOCGETC, (char *)&buf);
-    buf.t_intrc = (char)3;	   /* control-C */
-    buf.t_quitc = (char)-1;
-    buf.t_startc = (char)17;	   /* control-Q */
-    buf.t_stopc = (char)19;	   /* control-S */
-    buf.t_eofc = (char)-1;
-    buf.t_brkc = (char)-1;
-    (void)ioctl(0, TIOCSETC, (char *)&buf);
-#endif
-#endif
-#endif
-#endif
-}
-
-#endif
-
-
-/* Dump IO to buffer					-RAK-	 */
-void put_buffer(cptr out_str, int row, int col)
-
-#ifdef MACINTOSH
-{
-/* The screen manager handles writes past the edge ok */
-    DSetScreenCursor(col, row);
-    DWriteScreenStringAttr(out_str, ATTR_NORMAL);
-}
-
-#else
-{
-    vtype tmp_str;
-
-/*
- * truncate the string, to make sure that it won't go past right edge of
- * screen 
- */
-    if (col > 79)
-	col = 79;
-    (void)strncpy(tmp_str, out_str, 79 - col);
-    tmp_str[79 - col] = '\0';
-
-#ifndef ATARIST_MWC
-    if (mvaddstr(row, col, tmp_str) == ERR)
-#else
-    mvaddstr(row, col, out_str);
-    if (ERR)
-#endif
-    {
-	abort();
-    /* clear msg_flag to avoid problems with unflushed messages */
-	msg_flag = 0;
-	(void)sprintf(tmp_str, "error in put_buffer, row = %d col = %d\n",
-		      row, col);
-	prt(tmp_str, 0, 0);
-	bell();
-    /* wait so user can see error */
-	(void)sleep(2);
-    }
-}
-
-#endif
-
-
-/* Dump the IO buffer to terminal			-RAK-	 */
-void put_qio()
-{
-    screen_change = TRUE;	   /* Let inven_command know something has
-				    * changed. */
-    (void)refresh();
-}
-
-/* Put the terminal in the original mode.			   -CJS- */
-void restore_term()
-#ifdef MACINTOSH
-/* Nothing to do on Mac */
-{
-}
-
-#else
-{
-    if (!curses_on)
-	return;
-    put_qio();			   /* Dump any remaining buffer */
-#ifdef MSDOS
-    (void)sleep(2);		   /* And let it be read. */
-#endif
-#ifdef VMS
-    pause_line(15);
-#endif
-/* this moves curses to bottom right corner */
-    mvcur(curscr->_cury, curscr->_curx, LINES - 1, 0);
-#ifdef VMS
-    pause_line(15);
-#endif
-    endwin();			   /* exit curses */
-    (void)fflush(stdout);
-#ifdef MSDOS
-    msdos_noraw();
-    (void)clear();
-#endif
-/* restore the saved values of the special chars */
-#ifdef USG
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    (void)ioctl(0, TCSETA, (char *)&save_termio);
-#endif
-#else
-#ifndef VMS
-    (void)ioctl(0, TIOCSLTC, (char *)&save_special_chars);
-    (void)ioctl(0, TIOCSETP, (char *)&save_ttyb);
-    (void)ioctl(0, TIOCSETC, (char *)&save_tchars);
-    (void)ioctl(0, TIOCLSET, (char *)&save_local_chars);
-#endif
-#endif
-    curses_on = FALSE;
-}
-
-#endif
-
-
-void shell_out()
-#ifdef MACINTOSH
-{
-    alert_error("This command is not implemented on the Macintosh.");
-}
-
-#else
-{
-#ifdef USG
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    struct termio       tbuf;
-
-#endif
-#else
-    struct sgttyb       tbuf;
-    struct ltchars      lcbuf;
-    struct tchars       cbuf;
-    int                 lbuf;
-
-#endif
-#ifdef MSDOS
-    char               *comspec, key;
-
-#else
-#ifdef ATARIST_MWC
-    char                comstr[80];
-    char               *str;
-    extern char       **environ;
-
-#else
-    int                 val;
-    char               *str;
-
-#endif
-#endif
-
-    save_screen();
-/* clear screen and print 'exit' message */
-    clear_screen();
-#ifndef ATARIST_MWC
-    put_buffer("[Entering shell, type 'exit' to resume your game.]\n", 0, 0);
-#else
-    put_buffer("[Escaping to shell]\n", 0, 0);
-#endif
     put_qio();
-
-#ifdef USG
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    (void)ioctl(0, TCGETA, (char *)&tbuf);
-#endif
+#ifdef MACINTOSH
+    mac_beep();
 #else
-#ifndef VMS
-    (void)ioctl(0, TIOCGETP, (char *)&tbuf);
-    (void)ioctl(0, TIOCGETC, (char *)&cbuf);
-    (void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
-    (void)ioctl(0, TIOCLGET, (char *)&lbuf);
+    (void)write(1, "\007", 1);
 #endif
-#endif
-/* would call nl() here if could use nl()/nonl(), see moriaterm() */
-#ifndef BSD4_3
-    use_value           nocrmode();
-
-#else
-    use_value           nocbreak();
-
-#endif
-#ifdef MSDOS
-    use_value           msdos_noraw();
-
-#endif
-    use_value           echo();
-
-    ignore_signals();
-#ifdef MSDOS			   /* { */
-    if ((comspec = getenv("COMSPEC")) == NULL
-	|| spawnl(P_WAIT, comspec, comspec, (char *)NULL) < 0) {
-	clear_screen();		   /* BOSS key if shell failed */
-	put_buffer("M:\\> ", 0, 0);
-	do {
-	    key = inkey();
-	} while (key != '!');
-    }
-#else				   /* MSDOS }{ */
-#ifndef ATARIST_MWC
-    val = fork();
-    if (val == 0) {
-#endif
-	default_signals();
-#ifdef USG
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-	(void)ioctl(0, TCSETA, (char *)&save_termio);
-#endif
-#else
-#ifndef VMS
-	(void)ioctl(0, TIOCSLTC, (char *)&save_special_chars);
-	(void)ioctl(0, TIOCSETP, (char *)&save_ttyb);
-	(void)ioctl(0, TIOCSETC, (char *)&save_tchars);
-	(void)ioctl(0, TIOCLSET, (char *)&save_local_chars);
-#endif
-#endif
-	if ((str = getenv("SHELL")))
-#ifndef ATARIST_MWC
-	    (void)execl(str, str, (char *)0);
-#else
-	    system(str);
-#endif
-	else
-#ifndef ATARIST_MWC
-	    (void)execl("/bin/sh", "sh", (char *)0);
-#endif
-	msg_print("Cannot execute shell.");
-#ifndef ATARIST_MWC
-	exit(1);
-    }
-    if (val == -1) {
-	msg_print("Fork failed. Try again.");
-	return;
-    }
-#ifdef USG
-    (void)wait((int *)0);
-#else
-    (void)wait((union wait *) 0);
-#endif
-#endif				   /* ATARIST_MWC */
-#endif				   /* MSDOS } */
-    restore_signals();
-/* restore the cave to the screen */
-    restore_screen();
-#ifndef BSD4_3
-    use_value           crmode();
-
-#else
-    use_value           cbreak();
-
-#endif
-    use_value           noecho();
-
-/* would call nonl() here if could use nl()/nonl(), see moriaterm() */
-#ifdef MSDOS
-    msdos_raw();
-#endif
-/* disable all of the local special characters except the suspend char */
-/* have to disable ^Y for tunneling */
-#ifdef USG
-#if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
-    (void)ioctl(0, TCSETA, (char *)&tbuf);
-#endif
-#else
-#ifndef VMS
-    (void)ioctl(0, TIOCSLTC, (char *)&lcbuf);
-    (void)ioctl(0, TIOCSETP, (char *)&tbuf);
-    (void)ioctl(0, TIOCSETC, (char *)&cbuf);
-    (void)ioctl(0, TIOCLSET, (char *)&lbuf);
-#endif
-#endif
-    (void)wrefresh(curscr);
 }
 
+
+
+/*
+ * Move the cursor to a given y, x position
+ */
+void move_cursor(int row, int col)
+{
+#ifdef MACINTOSH
+    DSetScreenCursor(col, row);
+#else
+    (void)move(row, col);
 #endif
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+ * Flush the buffer					-RAK-	
+ */
+void flush(void)
+#ifdef MACINTOSH
+{
+/* Removed put_qio() call.  Reduces flashing.  Doesn't seem to hurt. */
+    FlushScreenKeys();
+}
+#else
+{
+#ifdef MSDOS
+    while (kbhit())
+	(void)getch();
+#else
+/*
+ * the code originally used ioctls, TIOCDRAIN, or TIOCGETP/TIOCSETP, or
+ * TCGETA/TCSETAF, however this occasionally resulted in loss of output, the
+ * happened especially often when rlogin from BSD to SYS_V machine, using
+ * check_input makes the desired effect a bit clearer 
+ */
+/* wierd things happen on EOF, don't try to flush input in that case */
+    if (!eof_flag)
+	while (check_input(0));
+#endif
+/* used to call put_qio() here to drain output, but it is not necessary */
+}
+#endif
+
 
 
 /*
@@ -689,7 +98,7 @@ void shell_out()
  * operation can always be performed at any input prompt.  inkey() never
  * returns ^R.	 
  */
-char inkey()
+char inkey(void)
 #ifdef MACINTOSH
 /* The Mac does not need ^R, so it just consumes it */
 /* This routine does nothing special with direction keys */
@@ -713,7 +122,6 @@ char inkey()
 
     return (ch);
 }
-
 #else
 {
     int i;
@@ -758,7 +166,6 @@ char inkey()
 	moriaterm();
     }
 }
-
 #endif
 
 
@@ -810,44 +217,12 @@ char inkeydir()
     }
     return (ch);
 }
-
 #endif
 
-
-/* Flush the buffer					-RAK-	 */
-void flush()
-#ifdef MACINTOSH
-{
-/* Removed put_qio() call.  Reduces flashing.  Doesn't seem to hurt. */
-    FlushScreenKeys();
-}
-
-#else
-{
-#ifdef MSDOS
-    while (kbhit())
-	(void)getch();
-#else
-/*
- * the code originally used ioctls, TIOCDRAIN, or TIOCGETP/TIOCSETP, or
- * TCGETA/TCSETAF, however this occasionally resulted in loss of output, the
- * happened especially often when rlogin from BSD to SYS_V machine, using
- * check_input makes the desired effect a bit clearer 
- */
-/* wierd things happen on EOF, don't try to flush input in that case */
-    if (!eof_flag)
-	while (check_input(0));
-#endif
-
-/* used to call put_qio() here to drain output, but it is not necessary */
-}
-
-#endif
 
 
 /* Clears given line of text				-RAK-	 */
 void erase_line(int row, int col)
-
 #ifdef MACINTOSH
 {
     Rect line;
@@ -861,7 +236,6 @@ void erase_line(int row, int col)
     line.bottom = row + 1;
     DEraseScreen(&line);
 }
-
 #else
 {
     if (row == MSG_LINE && msg_flag)
@@ -869,8 +243,57 @@ void erase_line(int row, int col)
     (void)move(row, col);
     clrtoeol();
 }
-
 #endif
+
+
+/* Dump IO to buffer					-RAK-	 */
+void put_buffer(cptr out_str, int row, int col)
+#ifdef MACINTOSH
+{
+/* The screen manager handles writes past the edge ok */
+    DSetScreenCursor(col, row);
+    DWriteScreenStringAttr(out_str, ATTR_NORMAL);
+}
+#else
+{
+    vtype tmp_str;
+/*
+ * truncate the string, to make sure that it won't go past right edge of
+ * screen 
+ */
+    if (col > 79)
+	col = 79;
+    (void)strncpy(tmp_str, out_str, 79 - col);
+    tmp_str[79 - col] = '\0';
+
+#ifndef ATARIST_MWC
+    if (mvaddstr(row, col, tmp_str) == ERR)
+#else
+    mvaddstr(row, col, out_str);
+    if (ERR)
+#endif
+    {
+	abort();
+    /* clear msg_flag to avoid problems with unflushed messages */
+	msg_flag = 0;
+	(void)sprintf(tmp_str, "error in put_buffer, row = %d col = %d\n",
+		      row, col);
+	prt(tmp_str, 0, 0);
+	bell();
+    /* wait so user can see error */
+	(void)sleep(2);
+    }
+}
+#endif
+
+
+/* Dump the IO buffer to terminal			-RAK-	 */
+void put_qio()
+{
+    screen_change = TRUE;	   /* Let inven_command know something has
+				    * changed. */
+    (void)refresh();
+}
 
 
 /* Clears screen */
@@ -887,7 +310,6 @@ void clear_screen()
     area.bottom = SCRN_ROWS;
     DEraseScreen(&area);
 }
-
 #else
 {
     if (msg_flag)
@@ -896,11 +318,9 @@ void clear_screen()
     (void)clear();
     refresh();
 }
-
 #endif
 
 void clear_from(int row)
-
 #ifdef MACINTOSH
 {
     Rect area;
@@ -911,14 +331,13 @@ void clear_from(int row)
     area.bottom = SCRN_ROWS;
     DEraseScreen(&area);
 }
-
 #else
 {
     (void)move(row, 0);
     clrtobot();
 }
-
 #endif
+
 
 /* Outputs a char to a given interpolated y, x position	-RAK-	 */
 /* sign bit of a character used to indicate standout mode. -CJS */
@@ -950,8 +369,6 @@ void print(int ch, int row, int col)
 
 
 
-
-
 /* Print a message so as not to interrupt a counted command. -CJS- */
 void count_msg_print(cptr p)
 {
@@ -965,7 +382,6 @@ void count_msg_print(cptr p)
 
 /* Outputs a line to a given y, x position		-RAK-	 */
 void prt(cptr str_buff, int row, int col)
-
 #ifdef MACINTOSH
 {
     Rect line;
@@ -981,7 +397,6 @@ void prt(cptr str_buff, int row, int col)
 
     put_buffer(str_buff, row, col);
 }
-
 #else
 {
     if (row == MSG_LINE && msg_flag)
@@ -990,23 +405,6 @@ void prt(cptr str_buff, int row, int col)
     clrtoeol();
     put_buffer(str_buff, row, col);
 }
-
-#endif
-
-
-/* move cursor to a given y, x position */
-void move_cursor(int row, int col)
-
-#ifdef MACINTOSH
-{
-    DSetScreenCursor(col, row);
-}
-
-#else
-{
-    (void)move(row, col);
-}
-
 #endif
 
 
@@ -1321,15 +719,7 @@ void restore_screen()
 
 #endif
 
-void bell()
-{
-    put_qio();
-#ifdef MACINTOSH
-    mac_beep();
-#else
-    (void)write(1, "\007", 1);
-#endif
-}
+
 
 /* definitions used by screen_map() */
 /* index into border character array */
