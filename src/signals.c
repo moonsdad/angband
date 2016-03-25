@@ -34,8 +34,41 @@
 #endif
 
 
-static int          error_sig = (-1);
-static int          signal_count = 0;
+/*
+ * suspend_handler_proc
+ *
+ * Note that the "raise()" function is not always available
+ */
+static void suspend_handler_proc(int sig)
+{
+
+#ifdef SIGSTOP
+
+    /* Flush the term */
+    Term_fresh();
+
+    /* Suspend the "Term" */
+    Term_xtra(TERM_XTRA_LEVEL, TERM_LEVEL_HARD_SHUT);
+
+    /* Suspend ourself */
+    (void)kill(0, SIGSTOP);
+
+    /* Resume the "Term" */
+    Term_xtra(TERM_XTRA_LEVEL, TERM_LEVEL_HARD_OPEN);
+
+    /* Redraw the term */
+    Term_redraw();
+
+    /* Flush the term */
+    Term_fresh();
+
+#endif
+
+    /* Have to restore handler. */
+    (void)signal(sig, suspend_handler);
+}
+
+
 
 /*
  * signal_handler_proc - Handle signals
@@ -52,12 +85,7 @@ static void signal_handler_proc(int sig)
 #if !defined(MACINTOSH) && !defined(_Windows)
 
     /* Ignore all second signals */
-    if (error_sig >= 0) {
-	if (++signal_count > 10)   /* Be safe. We will die if persistent enough. */
-	    (void)signal(sig, SIG_DFL);
-	return;
-    }
-    error_sig = sig;
+    (void)signal(sig, SIG_IGN);
 
 /* Allow player to think twice. Wizard may force a core dump. */
 #ifdef SIGINT
@@ -74,32 +102,34 @@ static void signal_handler_proc(int sig)
     if (simple) {
 
 	/* Only treat real characters specially */
-	if (death)
-	    (void)signal(sig, SIG_IGN);	/* Can't quit after death. */
-	else if (!character_saved && character_generated) {
+	if (!death && !character_saved && character_generated) {
+
+	    /* Save the screen */
+	    save_screen();
 
 	    /* Hack -- Allow player to think twice. */
 	    if (!get_check(total_winner ?
 			   "Do you want to retire?" :
 			   "Really commit *Suicide*?")) {
 
-		if (turn > 0) disturb(1, 0);
+		/* Restore the screen */
+		restore_screen();
 
-		erase_line(0, 0);
-		put_qio();
+		/* Disturb and clear */
+		Term_fresh();
 
-		error_sig = (-1);
+		/* Disturb */
+		disturb(1, 0);
 
 		/* Restore handler for later. */
 		(void)signal(sig, signal_handler);
 
-	    /* in case control-c typed during msg_print */
-		if (wait_for_more) put_str(" -more-", MSG_LINE, 0);
-		put_qio();
-
 		/* OK. We don't quit. */
 		return;
 	    }
+
+	    /* Restore the screen */
+	    restore_screen();
 
 	    /* Death */
 	    (void)strcpy(died_from, "Interrupting");
@@ -152,7 +182,8 @@ static void signal_handler_proc(int sig)
 	(void)_save_player(savefile);
     }
 
-    restore_term();
+    /* Shut down the terminal XXX XXX */
+    term_nuke(term_screen);
 
 #ifdef SET_UID
     /* generate a core dump if necessary */
@@ -175,21 +206,14 @@ void signals_ignore_tstp(void)
 #endif
 }
 
-void signals()
+/*
+ * signals_handle_tstp - Handle SIGTSTP (keyboard suspend)
+ */
+void signals_handle_tstp(void)
 {
-#if !defined(ATARIST_MWC)
 #ifdef SIGTSTP
-#ifdef __MINT__
-      (void)signal(SIGTSTP, (__Sigfunc)suspend);
-#else
-    (void)signal(SIGTSTP, suspend);
-#endif
-#ifndef USG
-    (void)sigsetmask(mask);
-#endif
-#endif
-    if (error_sig == 0)
-	error_sig = (-1);
+    /* Tell "suspend" to suspend */
+    (void)signal(SIGTSTP, suspend_handler);
 #endif
 }
 
@@ -202,6 +226,11 @@ void signals_init()
 #ifdef SIGHUP
     /* Ignore HANGUP, and let the EOF code take care of this case. */
     (void)signal(SIGHUP, SIG_IGN);
+#endif
+
+#ifdef SIGTSTP
+    /* Hack -- suspend gracefully */
+    (void)signal(SIGTSTP, suspend_handler);
 #endif
 
 #ifdef SIGINT
@@ -267,45 +296,6 @@ void signals_init()
 
 #ifdef SIGPWR   /* SYSV */
     (void)signal(SIGPWR, signal_handler);
-#endif
-}
- 
-
-
-void ignore_signals()
-{
-#if !defined(ATARIST_MWC)
-    (void)signal(SIGINT, SIG_IGN);
-#ifdef SIGQUIT
-    (void)signal(SIGQUIT, SIG_IGN);
-#endif
-#endif
-}
-
-void default_signals()
-{
-#if !defined(ATARIST_MWC)
-    (void)signal(SIGINT, SIG_DFL);
-#ifdef SIGQUIT
-    (void)signal(SIGQUIT, SIG_DFL);
-#endif
-#endif
-}
-
-void restore_signals()
-{
-#if !defined(ATARIST_MWC)
-#ifndef linux
-    (void)signal(SIGINT, signal_handler);
-#endif /* linux */
-
-#ifdef SIGQUIT
-#ifdef linux
-	(void) signal(SIGQUIT, (void (*)()) signal_handler);
-#else
-    (void)signal(SIGQUIT, signal_handler);
-#endif
-#endif
 #endif
 }
 

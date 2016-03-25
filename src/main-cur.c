@@ -128,37 +128,30 @@ static int          save_local_chars;
 static int     curses_on = FALSE;
 
 
+/*
+ * The main screen
+ */
+static term term_screen_body;
 
 
 
 /*
- * Shut down curses 
+ * Shut down curses (restore_term)
  * Put the terminal in the original mode.			   -CJS-
  */
-void restore_term()
+static void unix_restore_curses()
 {
     if (!curses_on) return;
 
-    put_qio();			   /* Dump any remaining buffer */
-#ifdef MSDOS
-    (void)sleep(2);		   /* And let it be read. */
-#endif
-#ifdef VMS
-    pause_line(15);
-#endif
+    (void)refresh();
 
     /* this moves curses to bottom right corner */
     mvcur(curscr->_cury, curscr->_curx, LINES - 1, 0);
-#ifdef VMS
-    pause_line(15);
-#endif
+
     endwin();			   /* exit curses */
 
     (void)fflush(stdout);
-#ifdef MSDOS
-    msdos_noraw();
-    (void)clear();
-#endif
+
 /* restore the saved values of the special chars */
 #ifdef USG
 # if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
@@ -206,7 +199,6 @@ static void unix_suspend_curses(int go)
     /* Step One */
     if (go)
     {
-    p_ptr->misc.male |= 2;
 	(void)ioctl(0, TIOCGETP, (char *)&tbuf);
 	(void)ioctl(0, TIOCGETC, (char *)&cbuf);
 	(void)ioctl(0, TIOCGLTC, (char *)&lcbuf);
@@ -230,7 +222,6 @@ static void unix_suspend_curses(int go)
 
 	cbreak();
 	noecho();
-    p_ptr->misc.male &= ~2;
     }
 
 #endif
@@ -283,7 +274,6 @@ static void moriaterm()
     tbuf.c_cc[VERASE] = (char)-1;
     tbuf.c_cc[VKILL] = (char)-1;
     tbuf.c_cc[VEOF] = (char)-1;
-/* don't know what these are for */
     tbuf.c_cc[VEOL] = (char)-1;
     tbuf.c_cc[VEOL2] = (char)-1;
 /* stuff needed when !icanon, i.e. cbreak/raw mode */
@@ -327,6 +317,95 @@ static void moriaterm()
 
 
 
+/*
+ * Nuke the "curses" system
+ */
+static void Term_nuke_cur(term *t)
+{
+    /* XXX Restore the terminal */
+    restore_term();
+}
+
+
+
+
+
+/*
+ * Actually MOVE the hardware cursor
+ */
+static errr Term_curs_cur(int x, int y, int z)
+{
+    /* Literally move the cursor */
+    move(y,x);
+
+    return (0);
+}
+
+/*
+ * Erase a grid of space
+ * Hack -- try to be "semi-efficient".
+ */
+static errr Term_wipe_cur(int x, int y, int w, int h)
+{
+    int dx, dy;
+
+    if (!x && !y && (w >= 80) && (h >= 24))
+    {
+	touchwin(stdscr);
+	(void)clear();
+    }
+
+    else if (!x && (h >= 24) && (w >= 80))
+    {
+	move(y,x);
+	clrtobot();
+    }
+
+    else if (w >= 80)
+    {
+	for (dy = 0; dy < h; ++dy)
+	{
+	    move(y+dy,x);
+	    clrtoeol();
+	}
+    }
+
+    else
+    {
+	for (dy = 0; dy < h; ++dy)
+	{
+	    move(y+dy,x);
+	    for (dx = 0; dx < w; ++dx) addch(' ');
+	}
+    }
+
+    /* Hack -- Fix the cursor */
+    move(y,x);
+
+    return (0);
+}
+
+
+/*
+ * Place some text on the screen using an attribute
+ * Unfortunately, the "attribute" is ignored...
+ */
+static errr Term_text_cur(int x, int y, int n, byte a, cptr s)
+{
+    int i;
+    char buf[81];
+
+    /* Hack -- force "termination" of the text */
+    if (n > 80) n = 80;
+    for (i = 0; (i < n) && s[i]; ++i) buf[i] = s[i];
+    buf[n]=0;
+
+    /* Move the cursor and dump the string */
+    move(y, x);
+    addstr(buf);
+
+    return (0);
+}
 
 
 
@@ -430,12 +509,110 @@ static int check_input(int microsec)
 
 
 /*
- * initializes curses routines
+ * Check for events
  */
-void init_curses(void)
-#ifndef MACINTOSH
+static errr Term_xtra_cur_check(int v)
+{
+    int i;
+    
+    /* Get a keypress */
+    i = check_input(0);
+
+    /* Nothing ready */
+    if (!i) return (1);
+
+    /* Enqueue the keypress */
+    Term_keypress(i);
+
+    /* Success */
+    return (0);
+}
+
+
+/*
+ * Wait for a keypress.
+ */
+static errr Term_xtra_cur_event(int v)
+{
+    int i;
+
+    /* Get a keypress */
+    i = getchar();
+
+    /* Broken input is special */
+    if (i == EOF) exit_game_panic();
+
+    /* Enqueue the keypress */
+    Term_keypress(i);
+
+    return (0);
+}
+
+
+/*
+ * Suspend/Resume
+ */
+static errr Term_xtra_cur_level(int v)
+{
+    switch (v)
+    {
+        case TERM_LEVEL_HARD_SHUT: unix_suspend_curses(1); break;
+
+	/* Come back from suspend */
+	case TERM_LEVEL_HARD_OPEN: unix_suspend_curses(0); break;
+    }
+    
+    return (0);
+}
+
+
+/*
+ * Handle a "special request"
+ */
+static errr Term_xtra_cur(int n, int v)
+{
+    /* Analyze the request */
+    switch (n)
+    {
+	/* Make a noise */
+	case TERM_XTRA_NOISE: (void)write(1, "\007", 1); return (0);
+
+	/* Flush the Curses buffer */
+	case TERM_XTRA_FLUSH: (void)refresh(); return (0);
+
+#ifdef SYS_V
+
+	/* XXX Make the cursor invisible */
+	case TERM_XTRA_INVIS: curs_set(0); return (0);
+
+	/* XXX Make the cursor visible */
+	case TERM_XTRA_BEVIS: curs_set(1); return (0);
+
+#endif
+
+	/* Suspend/Resume curses */
+	case TERM_XTRA_LEVEL: return (Term_xtra_cur_level(v));
+
+	/* Check for event */
+	case TERM_XTRA_CHECK: return (Term_xtra_cur_check(v));
+
+	/* Wait for event */
+	case TERM_XTRA_EVENT: return (Term_xtra_cur_event(v));
+    }
+
+    return (1);
+}
+
+
+/*
+ * Prepare "curses" for use by the file "term.c"
+ * Installs the "hook" functions defined above
+ */
+errr init_cur(void)
 {
     int i, y, x, err;
+
+    term *t = &term_screen_body;
     
 
 #if defined(VMS) || defined(MSDOS) || \
@@ -460,7 +637,6 @@ void init_curses(void)
 
 
 #ifdef ATARIST_MWC
-    WINDOW *newwin();
     initscr();
     err = (ERR)
 #else
@@ -488,10 +664,6 @@ void init_curses(void)
 #endif
 #endif
 
-    if ((savescr = newwin(0, 0, 0, 0)) == NULL) {
-	(void)printf("Out of memory in starting up curses.\n");
-	exit_game();
-    }
     (void)clear();
     (void)refresh();
 
@@ -521,20 +693,31 @@ void init_curses(void)
 
     /* Verify tab stops */
     if (i != 10) quit("must have 8-space tab-stops");
-}
-#else
-{
-/* Primary initialization is done in mac.c since game is restartable */
-/* Only need to clear the screen here */
-    Rect scrn;
 
-    scrn.left = scrn.top = 0;
-    scrn.right = SCRN_COLS;
-    scrn.bottom = SCRN_ROWS;
-    EraseScreen(&scrn);
-    UpdateScreen();
+
+    /* Initialize the term */
+    term_init(t, 80, 24, 64);
+
+    /* Hack -- shutdown hook */
+    t->nuke_hook = Term_nuke_cur;
+
+    /* Stick in some hooks */
+    t->text_hook = Term_text_cur;
+    t->wipe_hook = Term_wipe_cur;
+    t->curs_hook = Term_curs_cur;
+    t->xtra_hook = Term_xtra_cur;
+
+    /* Save the term */
+    term_screen = t;
+    
+    /* Activate it */
+    Term_activate(term_screen);
+
+
+    /* Success */
+    return (0);
 }
-#endif
+
 
 
 
@@ -586,7 +769,7 @@ void shell_out()
 #else
     put_str("[Escaping to shell]\n", 0, 0);
 #endif
-    put_qio();
+    Term_fresh();
 
 #ifdef USG
 #if !defined(MSDOS) && !defined(ATARIST_MWC) && !defined(__MINT__)
@@ -736,7 +919,12 @@ int system_cmd(cptr p)
     pid = fork();
     if (pid < 0) {
 	(void)sigsetmask(mask);
-	moriaterm();
+
+    xxx xxx xxx
+    /* No longer defined -- see "term.c" */
+    moriaterm();		   /* Terminal in moria mode. */
+    xxx xxx xxx
+
 	return (-1);
     }
     if (pid == 0) {
@@ -786,7 +974,12 @@ int system_cmd(cptr p)
     }
 
     (void)sigsetmask(mask);	   /* Interrupts on. */
+
+    /* XXX This is no longer defined -- use "term.c" */
+    xxx xxx xxx
     moriaterm();		   /* Terminal in moria mode. */
+    xxx xxx xxx
+
     return 0;
 }
 

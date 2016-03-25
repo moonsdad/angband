@@ -201,6 +201,14 @@ HOLHENNETH, AEGLIN, CAMLOST, NIMLOTH, NAR, BERUTHIEL, GORLIM, ELENDIL,
 THORIN, CELEBORN, THRAIN, GONDOR, THINGOL, THORONGIL, LUTHIEN, TUOR, ROHAN,
 TULKAS, NECKLACE, BARAHIR, CASPANION, RAZORBACK, BLADETURNER;
 
+/*
+ * Term window info
+ */
+extern term *term_screen;	/* The main screen */
+extern term *term_recall;	/* The recall window */
+extern term *term_choice;	/* The choice window */
+
+
 /* The current dungeon level */
 /* Was: extern cave_type cave[MAX_HEIGHT][MAX_WIDTH]; */
 extern cave_type *cave[MAX_HEIGHT];
@@ -519,9 +527,6 @@ void bell(void);
 
 void move_cursor(int, int);
 
-void put_qio(void);
-void restore_term(void);
-
 void flush(void);
 
 char inkey(void);
@@ -534,7 +539,10 @@ void clear_from(int);
 
 void move_cursor_relative(int, int);
 void count_msg_print(cptr);
+void c_put_str(byte, cptr, int, int);
 void put_str(cptr, int, int);
+
+void c_prt(byte, cptr, int, int);
 void prt(cptr, int, int);
 
 void save_screen(void);
@@ -543,6 +551,7 @@ void restore_screen(void);
 int get_check(cptr);
 int get_com(cptr, char *);
 int get_string(char *, int, int, int);
+int askfor(char *, int);
 void pause_line(int);
 void pause_exit(int, int);
 void screen_map(void);

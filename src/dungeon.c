@@ -991,8 +991,9 @@ void dungeon(void)
 	} else if (p_ptr->flags.paralysis > 0) {
 	    prt_state();
 	    p_ptr->flags.status |= PY_PARALYSED;
-	} else if (p_ptr->flags.rest > 0 || p_ptr->flags.rest == -1 || p_ptr->flags.rest == -2)
+	} else if (p_ptr->flags.rest > 0 || p_ptr->flags.rest == -1 || p_ptr->flags.rest == -2) {
 	    prt_state();
+	}
 
 	if ((p_ptr->flags.status & PY_ARMOR) != 0) {
 	    p_ptr->misc.dis_ac = p_ptr->misc.pac + p_ptr->misc.dis_tac;	/* use updated ac */
@@ -1182,7 +1183,7 @@ void dungeon(void)
 		    find_count--;
 		    if (find_count == 0)
 			end_find();
-		    put_qio();
+		    Term_fresh();
 		} else if (doing_inven)
 		    inven_command(doing_inven);
 		else {
@@ -1279,8 +1280,11 @@ void dungeon(void)
 		    }
 		/* Flash the message line. */
 		    erase_line(MSG_LINE, 0);
+		    /* Hack -- Hilite the player */
 		    move_cursor_relative(char_row, char_col);
-		    put_qio();
+
+		    /* Hack -- flush old output */
+		    Term_fresh();
 
 		    do_command(command);
 		/* Find is counted differently, as the command changes. */
@@ -1301,7 +1305,7 @@ void dungeon(void)
 	/* if paralyzed, resting, or dead, flush output */
 	/* but first move the cursor onto the player, for aesthetics */
 	    move_cursor_relative(char_row, char_col);
-	    put_qio();
+	    Term_fresh();
 	}
 
     /* Teleport?		       */

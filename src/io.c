@@ -13,11 +13,6 @@
 
 #include "angband.h"
 
-#ifdef MACINTOSH
-/* Attributes of normal and hilighted characters */
-#define ATTR_NORMAL	attrNormal
-#define ATTR_HILITED	attrReversed
-#endif
 
 
 
@@ -26,12 +21,14 @@
  */
 void bell()
 {
-    put_qio();
-#ifdef MACINTOSH
-    mac_beep();
-#else
-    (void)write(1, "\007", 1);
-#endif
+    /* Flush the output */
+    Term_fresh();
+
+    /* Make a bell noise (if allowed) */
+    if (ring_bell) Term_bell();
+
+    /* Flush the input */
+    flush();
 }
 
 
@@ -41,11 +38,7 @@ void bell()
  */
 void move_cursor(int row, int col)
 {
-#ifdef MACINTOSH
-    DSetScreenCursor(col, row);
-#else
-    (void)move(row, col);
-#endif
+    Term_gotoxy(col, row);
 }
 
 
@@ -55,42 +48,20 @@ void move_cursor(int row, int col)
 
 
 
-
-
-
-
-
-
 /*
- * Flush the buffer					-RAK-	
+ * Flush all input chars in the buffer -RAK-
  */
 void flush(void)
-#ifdef MACINTOSH
 {
-/* Removed put_qio() call.  Reduces flashing.  Doesn't seem to hurt. */
-    FlushScreenKeys();
+    /* Forget old keypresses */
+    Term_flush();
 }
-#else
-{
-#ifdef MSDOS
-    while (kbhit()) (void)getch();
-#else
-/*
- * the code originally used ioctls, TIOCDRAIN, or TIOCGETP/TIOCSETP, or
- * TCGETA/TCSETAF, however this occasionally resulted in loss of output, the
- * happened especially often when rlogin from BSD to SYS_V machine, using
- * check_input makes the desired effect a bit clearer 
- */
-/* wierd things happen on EOF, don't try to flush input in that case */
-    if (!eof_flag) while (check_input(0));
-#endif
-/* used to call put_qio() here to drain output, but it is not necessary */
-}
-#endif
+
 
 
 
 /*
+ * Get a keypress from the user. 
  * Returns a single character input from the terminal.	This silently -CJS-
  * consumes ^R to redraw the screen and reset the terminal, so that this
  * operation can always be performed at any input prompt.  inkey() never
@@ -107,7 +78,7 @@ char inkey(void)
     int  dir;
     int  shift_flag, ctrl_flag;
 
-    put_qio();
+    Term_fresh();
     command_count = 0;
 
     do {
@@ -124,7 +95,7 @@ char inkey(void)
 {
     int i;
 
-    put_qio();			   /* Dump IO buffer		 */
+    Term_fresh();			   /* Dump IO buffer		 */
     command_count = 0;		   /* Just to be safe -CJS- */
     while (TRUE) {
 #ifdef MSDOS
@@ -192,7 +163,7 @@ char inkeydir()
 	CTRL('Y'), CTRL('K'), CTRL('U')
     };
 
-    put_qio();
+    Term_fresh();
     command_count = 0;
 
     do {
@@ -345,191 +316,132 @@ void print(int ch, int row, int col)
 }
 
 
+
 /*
- * Erase a line
- * Clears given line of text				-RAK-	
+ * Erase a line (flush msg_print first)
  */
 void erase_line(int row, int col)
-#ifdef MACINTOSH
 {
-    Rect line;
+    if (msg_flag && (row == MSG_LINE)) msg_print(NULL);
 
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-
-    line.left = col;
-    line.top = row;
-    line.right = SCRN_COLS;
-    line.bottom = row + 1;
-    DEraseScreen(&line);
+    Term_erase(col, row, 80-1, row);
 }
-#else
-{
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-    (void)move(row, col);
-    clrtoeol();
-}
-#endif
-
 
 /*
- * Erase the screen  Clears screen
+ * Erase the screen (flush msg_print first)
  */
 void clear_screen(void)
-#ifdef MACINTOSH
 {
-    Rect area;
+    if (msg_flag) msg_print(NULL);
 
-    if (msg_flag)
-	msg_print(NULL);
-
-    area.left = area.top = 0;
-    area.right = SCRN_COLS;
-    area.bottom = SCRN_ROWS;
-    DEraseScreen(&area);
+    Term_clear();
 }
-#else
-{
-    if (msg_flag)
-	msg_print(NULL);
-    touchwin(stdscr);
-    (void)clear();
-    refresh();
-}
-#endif
 
 /*
  * Clear part of the screen
  */
 void clear_from(int row)
-#ifdef MACINTOSH
 {
-    Rect area;
+    if (msg_flag && (row <= MSG_LINE)) msg_print(NULL);
 
-    area.left = 0;
-    area.top = row;
-    area.right = SCRN_COLS;
-    area.bottom = SCRN_ROWS;
-    DEraseScreen(&area);
+    Term_erase(0, row, 80-1, 24-1);
 }
-#else
-{
-    (void)move(row, 0);
-    clrtobot();
-}
-#endif
 
 
 
 
 /*
- * Dump IO to buffer					-RAK-
+ * Move to a given location, and without clearing the line,
+ * Print a string, using a color (never multi-hued)
  */
-void put_str(cptr out_str, int row, int col)
-#ifdef MACINTOSH
+void c_put_str(byte attr, cptr str, int row, int col)
 {
-/* The screen manager handles writes past the edge ok */
-    DSetScreenCursor(col, row);
-    DWriteScreenStringAttr(out_str, ATTR_NORMAL);
-}
+    if (msg_flag && (row <= MSG_LINE)) msg_print(NULL);
+
+#ifdef USE_COLOR
+    if (!use_color) attr = TERM_WHITE;
 #else
+    attr = TERM_WHITE;
+#endif
+
+    Term_putstr(col, row, -1, attr, str);
+}
+
+void put_str(cptr str, int row, int col)
 {
-    vtype tmp_str;
+    c_put_str(TERM_WHITE, str, row, col);
+}
+
+
 /*
- * truncate the string, to make sure that it won't go past right edge of
- * screen 
- */
-    if (col > 79)
-	col = 79;
-    (void)strncpy(tmp_str, out_str, 79 - col);
-    tmp_str[79 - col] = '\0';
-
-#ifndef ATARIST_MWC
-    if (mvaddstr(row, col, tmp_str) == ERR)
-#else
-    mvaddstr(row, col, out_str);
-    if (ERR)
-#endif
-    {
-	abort();
-    /* clear msg_flag to avoid problems with unflushed messages */
-	msg_flag = 0;
-	(void)sprintf(tmp_str, "error in put_str, row = %d col = %d\n", row, col);
-	prt(tmp_str, 0, 0);
-	bell();
-    /* wait so user can see error */
-	(void)sleep(2);
-    }
-}
-#endif
-
-
-/* 
  * Outputs a line to a given y, x position		-RAK-	
+ * Clear a line at a given location, and, at the same location,
+ * Print a string, using a real attribute
+ * Hack -- Be sure to flush msg_print if necessary.
  */
-void prt(cptr str_buff, int row, int col)
-#ifdef MACINTOSH
+void c_prt(byte attr, cptr str, int row, int col)
 {
-    Rect line;
+    int x, y;
 
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-
-    line.left = col;
-    line.top = row;
-    line.right = SCRN_COLS;
-    line.bottom = row + 1;
-    DEraseScreen(&line);
-
-    put_str(str_buff, row, col);
-}
+#ifdef USE_COLOR
+    if (!use_color) attr = TERM_WHITE;
 #else
-{
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-    (void)move(row, col);
-    clrtoeol();
-    put_str(str_buff, row, col);
-}
+    attr = TERM_WHITE;
 #endif
+
+    if (msg_flag && (row == MSG_LINE)) msg_print(NULL);
+
+    /* Position the cursor */
+    Term_gotoxy(col, row);
+
+    /* Dump the text */
+    Term_addstr(-1, attr, str);
+
+    /* Clear the rest of the line */
+    if ((Term_locate(&x, &y) == 0) && (y == row)) Term_erase(x, y, 80-1, y);
+}
+
+void prt(cptr str, int row, int col)
+{
+    c_prt(TERM_WHITE, str, row, col);
+}
+
+
 
 
 
 /*
- * Used to verify a choice - user gets the chance to abort choice.  -CJS-
+ * Let the player verify a choice.  -CJS-
+ * Refuse to accept anything but y/n/Y/N/Escape
+ * Return TRUE on "yes", else FALSE
  */
 int get_check(cptr prompt)
 {
-    int res, y, x;
+    int res, x;
 
+    /* Hack -- no prompt? */
+    if (!prompt) prompt = "Yes or no?";
+
+    /* Display the prompt (and clear the line) */
     prt(prompt, 0, 0);
-#ifdef MACINTOSH
-    GetScreenCursor(&x, &y);
-#else
-    getyx(stdscr, y, x);
-#if defined(lint)
-/* prevent message 'warning: y is unused' */
-    x = y;
-#endif
-    res = y;
-#endif
 
-    if (x > 73)
-#ifdef ATARIST_MWC
-	move(0, 73);
-#else
-	(void)move(0, 73);
-#endif
-#ifdef MACINTOSH
-    DWriteScreenStringAttr(" [y/n]", ATTR_NORMAL);
-#else
-    (void)addstr(" [y/n]");
-#endif
-    do {
+    /* See how long the prompt is */
+    x = strlen(prompt) + 1;
+
+    /* Do NOT wrap */
+    if (x > 74) x = 74;
+
+    /* Ask the question */
+    Term_putstr(x, 0, -1, TERM_WHITE, "[y/n]");
+
+    /* Get an acceptable answer */
+    while (1) {
 	res = inkey();
+	if (quick_messages) break;
+	if (res == ESCAPE) break;
+	if (strchr("YyNn", res)) break;
+	bell();
     }
-    while (res == ' ');
 
     /* Erase the prompt */
     erase_line(0, 0);
@@ -540,23 +452,18 @@ int get_check(cptr prompt)
 
 
 /*
- * Prompts (optional) and returns ord value of input char
- * Function returns false if <ESCAPE> is input	
+ * Prompts (optional), then gets and stores a keypress
+ * Returns TRUE unless the character is "Escape"
  */
 int get_com(cptr prompt, char *command)
 {
-    int res;
-
     if (prompt) prt(prompt, 0, 0);
 
     *command = inkey();
 
-    if (*command == 0 || *command == ESCAPE) res = FALSE;
-    else res = TRUE;
+    if (prompt) erase_line(MSG_LINE, 0);
 
-    erase_line(MSG_LINE, 0);
-
-    return (res);
+    return (*command != ESCAPE);
 }
 
 #ifdef MACINTOSH
@@ -579,28 +486,30 @@ int get_comdir(char *prompt, char *command)
 #endif
 
 /*
- * Gets a string terminated by <RETURN>
+ * Gets a string terminated by <RETURN>, and return TRUE.
  * Function returns false if <ESCAPE> is input
  */
-int get_string(char *in_str, int row, int column, int slen)
+int get_string(char *buf, int row, int col, int len)
 {
-    register int start_col, end_col, i;
+    register int i, x1, x2;
     char        *p;
     int          flag, aborted;
 
     aborted = FALSE;
     flag = FALSE;
-    (void)move(row, column);
-    for (i = slen; i > 0; i--)
+    (void)move(row, col);
+    for (i = len; i > 0; i--)
 	(void)addch(' ');
-    (void)move(row, column);
-    start_col = column;
-    end_col = column + slen - 1;
-    if (end_col > 79) {
-	slen = 80 - column;
-	end_col = 79;
+    (void)move(row, col);
+
+    /* Find the box bounds */
+    x1 = col;
+    x2 = x1 + len - 1;
+    if (x2 >= 80) {
+	len = 80 - x1;
+	x2 = 80 - 1;
     }
-    p = in_str;
+    p = buf;
     do {
 	i = inkey();
 
@@ -615,28 +524,28 @@ int get_string(char *in_str, int row, int column, int slen)
 	    break;
 	  case DELETE:
 	  case CTRL('H'):
-	    if (column > start_col) {
-		column--;
-		put_str(" ", row, column);
-		move_cursor(row, column);
+	    if (col > x1) {
+		col--;
+		put_str(" ", row, col);
+		move_cursor(row, col);
 		*--p = '\0';
 	    }
 	    break;
 
 	  default:
-	    if (!isprint(i) || column > end_col) {
+	    if (!isprint(i) || col > x2) {
 		bell();
 	    }
 	    else {
 #ifdef MACINTOSH
-		DSetScreenCursor(column, row);
+		DSetScreenCursor(col, row);
 		DWriteScreenCharAttr((char)i, ATTR_NORMAL);
 #else
-		use_value2          mvaddch(row, column, (char)i);
+		use_value2          mvaddch(row, col, (char)i);
 
 #endif
 		*p++ = i;
-		column++;
+		col++;
 	    }
 	    break;
 	}
@@ -644,7 +553,7 @@ int get_string(char *in_str, int row, int column, int slen)
     if (aborted) return (FALSE);
 
     /* Remove trailing blanks */
-    while (p > in_str && p[-1] == ' ') p--;
+    while ((p > buf) && (p[-1] == ' ')) p--;
 
     /* Terminate it */
     *p = '\0';
@@ -655,12 +564,29 @@ int get_string(char *in_str, int row, int column, int slen)
 
 
 /*
+ * Ask for a string, at the current cursor location.
+ * Return "Was a legal answer entered?"
+ *
+ * Might be even better to give this routine a "prompt"
+ * and to ask the questions at (0,0) with the prompt...
+ */
+int askfor(char *buf, int len)
+{
+    int x, y;
+    Term_locate(&x, &y);
+    return (get_string(buf, y, x, len));
+}
+
+
+
+/*
  * Pauses for user response before returning		-RAK-	 
  */
 void pause_line(int prt_line)
 {
     int i;
-    prt("[Press any key to continue.]", prt_line, 23);
+    erase_line(prt_line, 0);
+    put_str("[Press any key to continue]", prt_line, 23);
     i = inkey();
     erase_line(prt_line, 0);
 }
@@ -695,30 +621,24 @@ void pause_exit(int prt_line, int delay)
     erase_line(prt_line, 0);
 }
 
-#ifdef MACINTOSH
+/*
+ * Save and restore the screen -- no flushing
+ */
+
 void save_screen()
 {
-    mac_save_screen();
+    if (msg_flag) msg_print(NULL);
+
+    Term_save();
 }
 
 void restore_screen()
 {
-    mac_restore_screen();
+    if (msg_flag) msg_print(NULL);
+
+    Term_load();
 }
 
-#else
-void save_screen()
-{
-    overwrite(stdscr, savescr);
-}
-
-void restore_screen()
-{
-    overwrite(savescr, stdscr);
-    touchwin(stdscr);
-}
-
-#endif
 
 
 
@@ -885,9 +805,3 @@ void count_msg_print(cptr p)
 }
 
 
-/* Dump the IO buffer to terminal			-RAK-	 */
-void put_qio()
-{
-    screen_change = TRUE;	   /* Let inven_command know something has changed. */
-    (void)refresh();
-}

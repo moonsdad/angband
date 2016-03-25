@@ -53,7 +53,7 @@ int death = FALSE;		/* True if player has died */
 int free_turn_flag;		/* Command is "free", do not move creatures */
 int find_flag;			/* Number of turns spent running */
 
-int msg_flag;			/* Set with first msg */
+int msg_flag;			/* Set with first msg Used in msg_print() for "buffering" */
 vtype old_msg[MAX_SAVE_MSG];	/* Last message */
 s16b last_msg = 0;		/* Where last is held */
 
@@ -129,6 +129,11 @@ int plain_descriptions = TRUE;	/* Plain descriptions */
 
 int hitpoint_warn = 1;		/* Hitpoint warning (0 to 9) */
 int delay_spd = 1;		/* Delay factor (0 to 9) */
+
+term *term_screen = NULL;	/* The main screen */
+term *term_recall = NULL;	/* The recall window */
+term *term_choice = NULL;	/* The choice window */
+
 
 int peek = FALSE;		/* Let user "see" internal stuff */
 

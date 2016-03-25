@@ -1512,7 +1512,7 @@ void do_cmd_fire()
 			    if (panel_contains(y, x) && (p_ptr->flags.blind < 1)
 				&& (c_ptr->tl || c_ptr->pl)) {
 				print(tchar, y, x);
-				put_qio();	/* show object moving */
+				Term_fresh();	/* show object moving */
 				delay(8 * delay_spd);	/* milliseconds */
 			    }
 			}
@@ -1595,7 +1595,7 @@ void rest(void)
 	prt_state();
 	p_ptr->flags.food_digested--;
 	prt("Press any key to stop resting...", 0, 0);
-	put_qio();
+	Term_fresh();
     }
 
     /* Rest was cancelled */    

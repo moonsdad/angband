@@ -62,7 +62,9 @@ cptr ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
  * Find the paths to all of our important files and directories...
  * Use the ANGBAND_PATH environment var if possible, else use DEFAULT_PATH,
  *
- *  If your system can't do "getenv()", you'll have to kludge this.  [cjh]
+ * Note that this function is called BEFORE Term_init().
+ *
+ * If your system can't do "getenv()", you'll have to kludge this.  [cjh]
  */
 void get_file_paths()
 {

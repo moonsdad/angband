@@ -150,7 +150,7 @@ void display_scores(int from, int to)
 	    flush();		   /* flush all input */
 	    signals_ignore_tstp();	   /* Can't interrupt or suspend. */
 	    (void)save_player();	   /* Save the memory at least. */
-	    restore_term();
+	    unix_restore_curses();
 	    exit(0);
 	}
 	clear_screen();
@@ -173,11 +173,19 @@ int look_line(int prt_line)
 
 /* Not touched for Mac port */
 /*
- *  Open the score file while we still have the setuid privileges.
+ * Note that this function is called BEFORE "Term_init()"
+ *
+ * Open the score file while we still have the setuid privileges.
  * Later when the score is being written out, you must be sure
  * to flock the file so we don't have multiple people trying to
  * write to it at the same time.
  * Craig Norborg (doc)		Mon Aug 10 16:41:59 EST 1987 
+ *
+ * Notice that a failure to open the high score file often indicates
+ * incorrect directory structure or starting directory or permissions.
+ *
+ * Note that a LOT of functions in this file assume that this
+ * function call will succeed, so if not, we quit.
  */
 void init_scorefile()
 {
@@ -232,7 +240,7 @@ void read_times(void)
     }
 
     else {
-	restore_term();
+	unix_restore_curses();
 	fprintf(stderr, "There is no hours file \"%s\".\nPlease inform the wizard, %s, so he can correct this!\n", ANGBAND_HOURS, WIZARD);
 	exit(1);
     }
@@ -336,7 +344,7 @@ void print_objects()
 	    if ((file1 = my_tfopen(filename1, "w")) != NULL) {
 		(void)sprintf(tmp_str, "%d", nobj);
 		prt(strcat(tmp_str, " random objects being produced..."), 0, 0);
-		put_qio();
+		Term_fresh();
 		(void)fprintf(file1, "*** Random Object Sampling:\n");
 		(void)fprintf(file1, "*** %d objects\n", nobj);
 		(void)fprintf(file1, "*** For Level %d\n", level);
@@ -545,7 +553,7 @@ int file_character(cptr filename1)
     if (file1) {
 
 	prt("Writing character sheet...", 0, 0);
-	put_qio();
+	Term_fresh();
 
 	colon = ":";
 	blank = " ";
@@ -942,7 +950,7 @@ static errr top_twenty(void)
     if (wizard || to_be_wizard) {
 	display_scores(0, 10);
 	(void)save_player();
-	restore_term();
+	unix_restore_curses();
 	exit(0);
     }
 
@@ -951,7 +959,7 @@ static errr top_twenty(void)
 	msg_print("Score not registered due to interruption.");
 	display_scores(0, 10);
 	(void)save_player();
-	restore_term();
+	unix_restore_curses();
 	exit(0);
     }
 
@@ -960,7 +968,7 @@ static errr top_twenty(void)
 	msg_print("Score not registered due to quitting.");
 	display_scores(0, 10);
 	(void)save_player();
-	restore_term();
+	unix_restore_curses();
 	exit(0);
     }
 
@@ -1200,10 +1208,14 @@ void exit_game(void)
     }
 
     i = log_index;
-   /* Save the memory at least. */
-    (void)save_player();
+
+	/* Save the memory at least. */
+	(void)save_player();
+
     if (i > 0) display_scores(0, 10);
     erase_line(23, 0);
-    restore_term();
-    exit(0);
+    unix_restore_curses();
+
+    /* Actually stop the process */
+    quit(NULL);
 }

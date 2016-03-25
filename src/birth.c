@@ -99,12 +99,12 @@ static void choose_sex(void)
 	c = inkey();
 	if (c == 'm' || c == 'M') {
 	    p_ptr->misc.male = TRUE;
-	    put_str("Male", 4, 15);
+	    c_put_str(TERM_L_BLUE, "Male", 4, 15);
 	    break;
 	}
 	else if (c == 'f' || c == 'F') {
 	    p_ptr->misc.male = FALSE;
-	    put_str("Female", 4, 15);
+	    c_put_str(TERM_L_BLUE, "Female", 4, 15);
 	    break;
 	}
 	else if (c == '?') {
@@ -148,7 +148,7 @@ static void choose_race(void)
 	j = s - 'a';
 	if ((j < MAX_RACES) && (j >= 0)) {
 	    p_ptr->misc.prace = j;
-	    put_str(race[j].trace, 3, 15);
+	    c_put_str(TERM_L_BLUE, race[j].trace, 3, 15);
 	    break;
 	}
 	else if (s == '?') {
@@ -212,7 +212,7 @@ static void choose_class()
 	    p_ptr->misc.pclass = cl[j];
 	    c_ptr = &class[p_ptr->misc.pclass];
 	    clear_from(20);
-	    put_str(c_ptr->title, 5, 15);
+	    c_put_str(TERM_L_BLUE, c_ptr->title, 5, 15);
 	    break;
 	}
 	else if (s == '?') {
@@ -479,9 +479,11 @@ static void put_history()
 {
     register int        i;
 
-    put_str("Character Background", 14, 27);
+    clear_from(15);
+    
+    put_str("Character Background", 15, 27);
     for (i = 0; i < 4; i++) {
-	prt(p_ptr->misc.history[i], i + 15, 10);
+	put_str(p_ptr->misc.history[i], i + 16, 10);
     }
 }
 
@@ -768,11 +770,11 @@ void player_birth()
 
     put_character();
 
-    /* Choose a race */
-    choose_race();
-
     /* Choose a sex */
     choose_sex();
+
+    /* Choose a race */
+    choose_race();
 
     /* Choose a class */
     choose_class();
@@ -866,7 +868,9 @@ void player_birth()
 		}
 	    } while (stat[stat_idx] > msstat || stat[stat_idx] < 3);
 	} /* for i 0 - 5 */
-	put_qio();
+
+	/* Dump results */
+	Term_fresh();
     }
 
 #endif				   /* AUTOROLLER - main setup code */
@@ -905,7 +909,9 @@ void player_birth()
 
 #endif
 
-		put_qio();
+	    /* Make sure they see everything */
+	    Term_fresh();
+
 	    } else
 		put_stats();
 	} while ((autoroll) &&

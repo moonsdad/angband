@@ -67,19 +67,15 @@ static bool is_wizard(int uid)
     /* Open the wizard file */
     fp = my_tfopen(ANGBAND_WIZ, "r");
 
-    if (!fp) {
-	fprintf(stderr, "Can't get wizard check...");
-	exit_game();
+    /* No wizard file, so no wizards */
+    if (!fp) return (FALSE);
+
+    /* Scan the wizard file */
+    while (!allow && fgets(buf, sizeof(buf), fp)) {
+	if (buf[0] == '#') continue;
+	if (sscanf(buf, "%d", &test) != 1) continue;
+	if (test == uid) allow = TRUE;
     }
-    do {
-	(void)fgets(buf, sizeof buf, fp);
-	if (sscanf(buf, "%d", &test)) {
-	    if (test == uid && buf[0] != '#') {
-		fclose(fp);
-		return TRUE;
-	    }
-	}
-    } while (!feof(fp));
 
     /* Close the file */
     fclose(fp);
@@ -91,32 +87,40 @@ static bool is_wizard(int uid)
 
 
 /*
- * Initialize, restore, and get the ball rolling.	-RAK-	
+ * A hook for "quit()".
+ * Close down, then fall back into "quit()".
  */
-int main(int argc, char * argv[])
+static void quit_hook(cptr s)
+{
+    /* Shut down the term windows */
+    if (term_choice) term_nuke(term_choice);
+    if (term_recall) term_nuke(term_recall);
+    if (term_screen) term_nuke(term_screen);
+}
+
+
+/*
+ * Initialize, restore, and get the ball rolling.	-RAK-	
+ * Studly machines can actually parse command line args
+ */
+int main(int argc, char *argv[])
 {
     int generate, i;
     int result = FALSE;
 
 #ifndef __MINT__
+#ifdef CHECK_LOAD
     FILE *fp;
     char temphost[MAXHOSTNAMELEN+1];
     char thishost[MAXHOSTNAMELEN+1];
     char discard[120];
+#endif
 #endif
     char string[80];
     struct rlimit rlp;
 
     /* Save the "program name" */
     argv0 = argv[0];
-    
-
-#if !defined(MSDOS) && !defined(HPUX)
-    /* Disable core dumps */
-    getrlimit(RLIMIT_CORE,&rlp);
-    rlp.rlim_cur=0;
-    setrlimit(RLIMIT_CORE,&rlp);
-#endif
     
     /* default command set defined in config.h file */
     rogue_like_commands = ROGUE_LIKE;
@@ -202,7 +206,7 @@ int main(int argc, char * argv[])
 #endif
 
     /* use curses */
-    init_curses();
+    init_cur();
 
     /* check for user interface option */
     for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv) {
@@ -230,7 +234,7 @@ int main(int argc, char * argv[])
 	    break;
 	  case 'S':
 	  case 's':
-	    init_curses();
+	    init_cur();
 	    if (isdigit((int)argv[0][2])) display_scores(0, atoi(&argv[0][2]));
 	    else display_scores(0, 10);
 	    exit_game();
@@ -264,6 +268,7 @@ int main(int argc, char * argv[])
 	  default:
 	  usage:
 
+	    /* Note -- the Term is NOT initialized */
 	    if (is_wizard(player_uid)) {
 #ifdef MSDOS
 		puts("Usage: angband [-afnorw] [-s<num>] [-d<num>] <file>");
@@ -304,12 +309,12 @@ int main(int argc, char * argv[])
 		puts("Each option must be listed separately (ie '-r -n', not '-rn')");
 	    }
 	    /* Actually abort the process */
-	    exit(1);
+	    quit(NULL);
 	}
     }
 
     /* catch those nasty signals */
-    /* must come after init_curses as some of the signal handlers use curses */
+    /* must come after init_cur as some of the signal handlers use curses */
     signals_init();
 
     /* Check operating hours			*/

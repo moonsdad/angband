@@ -630,17 +630,22 @@ int save_player()
     return TRUE;
 }
 
+
+/*
+ * Medium level player saver
+ */
 int _save_player(char *fnam)
 {
-    vtype temp;
     int   ok, fd;
+    vtype temp;
     byte char_tmp;
 
     if (log_index < 0) return TRUE;		   /* Nothing to save. */
 
+    /* Forbid suspend */
     signals_ignore_tstp();
 
-    put_qio();
+    Term_fresh();
     disturb(1, 0);		   /* Turn off resting and searching. */
 
     change_speed(-pack_heavy);	   /* Fix the speed */
@@ -648,47 +653,68 @@ int _save_player(char *fnam)
 
     /* Assume failure */
     ok = FALSE;
-#ifndef ATARIST_MWC
+
+#ifdef ATARIST_MWC
+
+    fff = my_tfopen(fnam, "wb");
+
+#else /* ATARIST_MWC */
+
     fd = (-1);
     fff = NULL;		   /* Do not assume it has been init'ed */
+
+#ifdef MACINTOSH
+    _ftype = 'SAVE';
+#endif
+    
 #ifdef SET_UID
-    fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL, 0600);
+    fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL | O_BINARY, 0600);
 #else
-    fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL, 0666);
+    fd = my_topen(fnam, O_RDWR | O_CREAT | O_EXCL | O_BINARY, 0666);
 #endif
 
-    if (fd < 0 && access(fnam, 0) >= 0 &&
+#ifdef MACINTOSH
+
+    if (fd < 0) {
+	msg_print("Cannot write to savefile!");
+    }
+
+#else
+
+    /* This might not work... */
+    if ((fd < 0) && (access(fnam, 0) >= 0) &&
 	(from_savefile ||
 	 (wizard && get_check("Can't make new savefile. Overwrite old?")))) {
 
 #ifdef SET_UID
 	(void)chmod(fnam, 0600);
-	fd = my_topen(fnam, O_RDWR | O_TRUNC, 0600);
+	fd = my_topen(fnam, O_RDWR | O_TRUNC | O_BINARY, 0600);
 #else
 	(void)chmod(fnam, 0666);
-	fd = my_topen(fnam, O_RDWR | O_TRUNC, 0666);
+	fd = my_topen(fnam, O_RDWR | O_TRUNC | O_BINARY, 0666);
 #endif
 
     }
+
+#endif
 
     if (fd >= 0) {
 
 	/* Close the "fd" */
 	(void)close(fd);
-#endif				   /* !ATARIST_MWC */
-    /* GCC for atari st defines atarist */
-#if defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS) || defined(__MINT__)
-	fff = my_tfopen(savefile, "wb");
-#else
-	fff = my_tfopen(savefile, "w");
+
+#ifdef MACINTOSH
+    _ftype = 'SAVE';
 #endif
-#ifndef ATARIST_MWC
+    
+	/* The save file is a binary file */
+	fff = my_tfopen(fnam, "wb");
     }
 
 #endif
 
     /* Successful open */
-    if (fff != NULL) {
+    if (fff) {
 
 #ifdef MSDOS
 	(void)setmode(fileno(fff), O_BINARY);
@@ -718,7 +744,8 @@ int _save_player(char *fnam)
 
 	if (fd >= 0) (void)unlink(fnam);
 
-	signals();
+	/* Allow suspend again */
+	signals_handle_tstp();
 
 	/* Oops */
 	if (fd >= 0) (void)sprintf(temp, "Error writing to savefile");
@@ -734,7 +761,7 @@ int _save_player(char *fnam)
     log_index = (-1);
 
     /* Allow suspend again */
-    signals();
+    signals_handle_tstp();
 
     /* Successful save */
     return TRUE;
@@ -782,7 +809,7 @@ int get_char(int *generate)
     if (access(savefile, 0) < 0) {
 
 	/* Allow suspend again */
-	signals();
+	signals_handle_tstp();
 
 	msg_print("Savefile does not exist.");
 	return FALSE;
@@ -803,8 +830,8 @@ int get_char(int *generate)
     /* but only if we can delete it. */
     /* Hence first try to read without doing a chmod. */
 
-    /* Open the savefile */
-    fd = my_topen(savefile, O_RDONLY, 0);
+    /* Open the BINARY savefile */
+    fd = my_topen(savefile, O_RDONLY | O_BINARY, 0);
 
     if (fd < 0) {
 	msg_print("Can't open file for reading.");
@@ -827,16 +854,12 @@ int get_char(int *generate)
 	(void)close(fd);
 
 
-    /* GCC for atari st defines atarist */
-#if defined(__MINT__) || defined(atarist) || defined(ATARIST_MWC) || defined(MSDOS)
+	/* The savefile is a binary file */
 	fff = my_tfopen(savefile, "rb");
-#else
-	fff = my_tfopen(savefile, "r");
-#endif
-	if (fff == NULL) goto error;
+	if (!fff) goto error;
 
 	prt("Restoring Memory...", 0, 0);
-	put_qio();
+	Term_fresh();
 
 	xor_byte = 0;
 	rd_byte(&version_maj);
@@ -864,7 +887,7 @@ int get_char(int *generate)
 		2, 0);
 	    goto error;
 	}
-	put_qio();
+	Term_fresh();
 	rd_long(&GROND);
 	rd_long(&RINGIL);
 	rd_long(&AEGLOS);
@@ -935,7 +958,7 @@ int get_char(int *generate)
 	rd_long(&TARATOL);
 	if (to_be_wizard)
 	    prt("Loaded Weapon Artifacts", 2, 0);
-	put_qio();
+	Term_fresh();
 
 
 	rd_long(&DOR_LOMIN);
@@ -984,7 +1007,7 @@ int get_char(int *generate)
 	rd_long(&BLADETURNER);
 	if (to_be_wizard)
 	    prt("Loaded Armour Artifacts", 3, 0);
-	put_qio();
+	Term_fresh();
 
 	for (i = 0; i < QUEST_MAX; i++)
 	    rd_long(&quests[i]);
@@ -995,7 +1018,7 @@ int get_char(int *generate)
 	    rd_unique(&u_list[i]);
 	if (to_be_wizard)
 	    prt("Loaded Unique Beasts", 5, 0);
-	put_qio();
+	Term_fresh();
 
 	rd_short(&int16u_tmp);
 	while (int16u_tmp != 0xFFFF) {
@@ -1016,7 +1039,7 @@ int get_char(int *generate)
 	}
 	if (to_be_wizard)
 	    prt("Loaded Recall Memory", 6, 0);
-	put_qio();
+	Term_fresh();
 	rd_short((u16b *) & log_index);
         rd_long(&l);
 	if ((version_maj >= 2) && (version_min >= 6)) {
@@ -1027,7 +1050,7 @@ int get_char(int *generate)
 
 	if (to_be_wizard)
 	    prt("Loaded Options Memory", 7, 0);
-	put_qio();
+	Term_fresh();
 
 	if (l & 1)
 	    find_cut = TRUE;
@@ -1363,7 +1386,7 @@ int get_char(int *generate)
 		turn = (-1);
 		old_turn = (-1);
 	    }
-	    put_qio();
+	    Term_fresh();
 	/* The log_index of the previous incarnation is here if later version
 	 * want to use it. For now, throw it away and get a new log. 
 	 */
@@ -1375,7 +1398,7 @@ int get_char(int *generate)
 	    goto error;
 	}
 	prt("Restoring Character...", 0, 0);
-	put_qio();
+	Term_fresh();
 
     /* only level specific info should follow, not present for dead characters */
 
@@ -1569,13 +1592,14 @@ error:
 
 closefiles:
 
-	if (fff != NULL) {
+	if (fff) {
 	    if (fclose(fff) < 0) ok = FALSE;
 	}
 	if (fd >= 0) (void)close(fd);
 
 	if (!ok) {
 	    msg_print("Error during reading of file.");
+	    msg_print(NULL);
 	}
 
 	else if (turn >= 0 && !_new_log())
@@ -1587,7 +1611,7 @@ closefiles:
 	    from_savefile = 1;
 
 	    /* Allow suspend again */
-	    signals();
+	    signals_handle_tstp();
 
 	    /* Only if a full restoration. */
 	    if (turn >= 0) {

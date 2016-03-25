@@ -912,7 +912,7 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 		update_mon((int)c_ptr->cptr);
 		c_ptr->pl = i;
 	    /* draw monster and clear previous bolt */
-		put_qio();
+		Term_fresh();
 
 		spell_hit_monster(m_ptr, typ, &dam, 0, &ny, &nx, TRUE);
 		c_ptr = &cave[ny][nx];	/* may be new location if teleported
@@ -937,7 +937,7 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 	    } else if (panel_contains(y, x) && (p_ptr->flags.blind < 1)) {
 		print(bolt_char, y, x);
 	    /* show the bolt */
-		put_qio();
+		Term_fresh();
 		delay(8 * delay_spd);	/* milliseconds */
 	    }
 	}
@@ -993,7 +993,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 	    if (c_ptr->fval <= MAX_OPEN_SPACE) {
 		if (panel_contains(i, j) && !(p_ptr->flags.status & PY_BLIND)) {
 		    print(bolt_char, i, j);
-		    put_qio();
+		    Term_fresh();
 		    delay(8 * delay_spd);	/* milliseconds */
 		    lite_spot(i, j);
 		}
@@ -1512,7 +1512,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 #endif
 			}
 		if (p_ptr->flags.blind < 1) {
-		    put_qio();
+		    Term_fresh();
 		    delay(25 * delay_spd);	/* milliseconds */
 		}
 
@@ -1527,7 +1527,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 			    panel_contains(i, j) && (p_ptr->flags.blind < 1)) {
 			    lite_spot(i, j);	/* draw what is below the '*' */
 			}
-		put_qio();
+		Term_fresh();
 
 	    /* First go over the area of effect, and destroy items...  Any
 	     * preexisting items will be affected, but items dropped by
@@ -1582,7 +1582,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 			    }
 			}
 	    /* show ball of whatever */
-		put_qio();
+		Term_fresh();
 
 	    /* End  explosion.                   */
 		if (tkill == 1) {
@@ -1599,7 +1599,7 @@ void fire_ball(int typ, int dir, int y, int x, int dam_hp, int max_dis)
 		    textcolor(bolt_color(typ));
 #endif
 		print(bolt_char, y, x);
-		put_qio();
+		Term_fresh();
 #ifdef TC_COLOR
 		if (!no_color_flag)
 		    textcolor(LIGHTGRAY);
@@ -1668,7 +1668,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			textcolor(LIGHTGRAY);	/* prob don't need here, but... -CFT */
 #endif
 		}
-	put_qio();
+	Term_fresh();
 	delay(25 * delay_spd);	   /* milliseconds */
  
 /* now erase the ball, since effects below may use msg_print, and pause
@@ -1680,7 +1680,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 		    los(y, x, i, j) && (cave[i][j].fval <= MAX_OPEN_SPACE) &&
 		    panel_contains(i, j))
 		    lite_spot(i, j);   /* draw what is below the '*' */
-	put_qio();
+	Term_fresh();
     }
 
 /* first, go over area of affect and destroy preexisting items. This change
@@ -2193,7 +2193,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 		}
 	    }
 /* show the ball of gas */
-    put_qio();
+    Term_fresh();
 
 /* erase ball and redraw */
     for (i = (y - max_dis); i <= (y + max_dis); i++)
@@ -2927,7 +2927,7 @@ int mass_genocide(int spell)
 	    if (spell) {
 		take_hit(randint(3), "the strain of casting Mass Genocide");
 		prt_chp();
-		put_qio();
+		Term_fresh();
 		delay(20* delay_spd);	/* milliseconds */
 	    }
 	    result = TRUE;
@@ -2958,7 +2958,7 @@ int genocide(int spell)
 		    if (spell) {
 			take_hit(randint(4), "the strain of casting Genocide");
 			prt_chp();
-			put_qio();
+			Term_fresh();
 			delay(20 * delay_spd);	/* milliseconds */
 		    }
 		    killed = TRUE;
@@ -4862,7 +4862,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 		    c_ptr->pl = TRUE;
 		    update_mon((int)c_ptr->cptr);
 		    c_ptr->pl = t;
-		    put_qio();	/* draw monster */
+		    Term_fresh();	/* draw monster */
 		}
 
 		/* check resists */
@@ -4883,7 +4883,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 			if (!no_color_flag) textcolor(LIGHTGRAY);
 #endif
 		    }
-		put_qio();	/* show line */
+		Term_fresh();	/* show line */
 		delay(8 * delay_spd);   
 	    } /* if !blind */
 	} /* if hit monster */
@@ -4904,7 +4904,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 #endif
 		}
 	    }
-	    put_qio();
+	    Term_fresh();
 	    delay(8 * delay_spd);
 	} /* for each piece */
     } /* if !blind */
