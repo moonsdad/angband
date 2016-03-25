@@ -48,7 +48,7 @@ cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
 cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
 
 cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-cptr ANGBAND_HOU;		/* was LIBDIR(files/hours)		*/
+cptr ANGBAND_HOURS;		/* was LIBDIR(files/hours)		*/
 cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
 cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
 
@@ -88,13 +88,13 @@ void get_file_paths()
     strcat( ANGBAND_TST, "test" );
     ANGBAND_TST = (char *)realloc( ANGBAND_TST, strlen( ANGBAND_TST ) + 1 );
 
-    ANGBAND_HOU = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_HOU, angband_path );
-    strcat( ANGBAND_HOU, PATH_SEP );
-    strcat( ANGBAND_HOU, "files" );
-    strcat( ANGBAND_HOU, PATH_SEP );
-    strcat( ANGBAND_HOU, "hours" );
-    ANGBAND_HOU = (char *)realloc( ANGBAND_HOU, strlen( ANGBAND_HOU ) + 1 );
+    ANGBAND_HOURS = (char *)malloc( MAXPATHLEN );
+    strcpy( ANGBAND_HOURS, angband_path );
+    strcat( ANGBAND_HOURS, PATH_SEP );
+    strcat( ANGBAND_HOURS, "files" );
+    strcat( ANGBAND_HOURS, PATH_SEP );
+    strcat( ANGBAND_HOURS, "hours" );
+    ANGBAND_HOURS = (char *)realloc( ANGBAND_HOU, strlen( ANGBAND_HOU ) + 1 );
 
     ANGBAND_MOR = (char *)malloc( MAXPATHLEN );
     strcpy( ANGBAND_MOR, angband_path );

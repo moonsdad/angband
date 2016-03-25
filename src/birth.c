@@ -42,7 +42,7 @@ static struct {
 /*
  * Save the current data for later
  */
-static void set_prev_stats()
+static void save_prev_data()
 {
     register int i;
 
@@ -58,7 +58,7 @@ static void set_prev_stats()
 /*
  * Load the previous data
  */
-static int get_prev_stats()
+static int load_prev_data()
 {
     register int        i;
 
@@ -86,7 +86,7 @@ static int get_prev_stats()
 /*
  * Choose the character's sex				-JWT-	 
  */
-static void get_sex(void)
+static void choose_sex(void)
 {
     char        c;
 
@@ -165,7 +165,7 @@ static void choose_race(void)
 /*
  * Gets a character class				-JWT-	 
  */
-static void get_class_choice()
+static void choose_class()
 {
     int         i, j, k, l, m;
     int          cl[MAX_CLASS];
@@ -475,7 +475,7 @@ static void put_auto_stats()
 /*
  * Will print the history of a character			-JWT-	 
  */
-static void print_history()
+static void put_history()
 {
     register int        i;
 
@@ -742,7 +742,7 @@ void rerate()
  * from continuously rolling up characters, which can be VERY
  * expensive CPU wise. -JWT-
  */
-void create_character()
+void player_birth()
 {
     char		c;
 
@@ -772,10 +772,10 @@ void create_character()
     choose_race();
 
     /* Choose a sex */
-    get_sex();
+    choose_sex();
 
     /* Choose a class */
-    get_class_choice();
+    choose_class();
 
     /* Access the race/class */
     cp_ptr = &class[p_ptr->misc.pclass];
@@ -845,7 +845,7 @@ void create_character()
 	    msstat = adjust_stat(17, msstat, TRUE);
 
 	    sprintf(inp, "%-12s (Max of %2d): ", stat_name[i], msstat);
-		put_str(inp, 16 + i, 5);
+	    put_str(inp, 16 + i, 5);
 
 	    do {
 
@@ -934,7 +934,7 @@ void create_character()
        get_ahw();
 
 	calc_bonuses();
-	print_history();
+	put_history();
 	put_misc1();
 	clear_from(20);
 
@@ -955,10 +955,10 @@ void create_character()
 
 	    if ((previous_exists) && (c == CTRL('P'))) {
 		previous_exists = FALSE;
-		if (get_prev_stats()) {
+		if (load_prev_data()) {
 		    get_prev_history();
 		    get_prev_ahw();
-		    print_history();
+		    put_history();
 		    put_misc1();
 		    calc_bonuses();
 		    put_stats();
@@ -969,7 +969,7 @@ void create_character()
 	} while ((c != ' ') && (c != ESCAPE));
 
 	/* Not going to waste space w/ a check here. So ESC takes a little longer. -SAC */
-	set_prev_stats();
+	save_prev_data();
 	set_prev_history();
 	set_prev_ahw();
 	previous_exists = TRUE;

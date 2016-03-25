@@ -44,7 +44,7 @@ static void do_cmd_browse(void)
 	return;
     }
 
-    if (no_light()) {
+    if (no_lite()) {
 	msg_print("You have no light to read by.");
 	return;
     }

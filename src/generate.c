@@ -79,6 +79,7 @@ static void rand_dir(int *rdir, int *cdir)
 
 
 /*
+ * Count corridors adjacent to given grid, which is in_bounds().
  * Checks all adjacent spots for corridors		-RAK-
  * note that y, x is always in_bounds(), hence no need to check that j, k are
  * in_bounds(), even if they are 0 or cur_x-1 is still works 
@@ -112,7 +113,13 @@ static int next_to_corr(int y, int x)
 
 
 /* 
- * Allocates an object for tunnels and rooms		-RAK-	
+ * Allocates an object for tunnels and rooms		-RAK-	 
+ *
+ * Type 1 is trap
+ * Type 2 is unused (was visible traps)
+ * Type 3 is rubble
+ * Type 4 is gold
+ * Type 5 is object
  */
 static void alloc_object(int (*alloc_set) (), int typ, int num)
 {
@@ -131,7 +138,7 @@ static void alloc_object(int (*alloc_set) (), int typ, int num)
 	while ((!(*alloc_set) (cave[y][x].fval)) ||
 	       (cave[y][x].tptr != 0) || (y == char_row && x == char_col));
 
-    if (typ < 4) {	   /* typ == 2 not used, used to be visible traps */
+	if (typ < 4) {
 	    if (typ == 1) {
 		place_trap(y, x, randint(MAX_TRAP) - 1);	/* typ == 1 */
 	    }
@@ -2153,7 +2160,7 @@ static void build_type5(int yval, int xval)
 		place_monster(y1, x1,
 			      get_nmons_num(dun_level + MON_SUMMON_ADJ + 7),
 			      TRUE);
-		place_special(y1, x1, 1);
+		place_good(y1, x1, 1);
 		c_ptr->lr = TRUE;
 		break;
 
@@ -2164,7 +2171,7 @@ static void build_type5(int yval, int xval)
 			      get_nmons_num(dun_level + MON_SUMMON_ADJ + 40),
 			      TRUE);
 		object_level = dun_level + MON_SUMMON_ADJ + 20;
-		place_special(y1, x1, SPECIAL);
+		place_good(y1, x1, SPECIAL);
 		object_level = dun_level + 7;
 		c_ptr->lr = TRUE;
 		break;

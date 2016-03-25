@@ -591,7 +591,7 @@ static void chest_trap(int y, int x)
 /*
  * Opens a closed door or closed chest.		-RAK-
  */
-void openobject()
+void do_cmd_open()
 {
     int				y, x, i, dir;
     int				flag, no_object;
@@ -736,7 +736,7 @@ void openobject()
 /*
  * Close an open door.
  */
-void closeobject()
+void do_cmd_close()
 {
     int                    y, x, dir, no_object;
     vtype                  out_val, m_name;
@@ -983,7 +983,7 @@ void tunnel(int dir)
 			msg_print("You have removed the rubble.");
 			if (randint(10) == 1) {
 			    place_object(y, x);
-			    if (test_light(y, x))
+			    if (test_lite(y, x))
 				msg_print("You have found something!");
 			}
 			lite_spot(y, x);
@@ -1016,7 +1016,7 @@ void tunnel(int dir)
 /*
  * Disarms a trap	-RAK-	
  */
-void disarm_trap()
+void do_cmd_disarm()
 {
     int                 y, x, level, tmp, dir, no_disarm;
     register int        tot, i;
@@ -1053,7 +1053,7 @@ void disarm_trap()
 	    tot = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
 		+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
 
-	    if ((p_ptr->flags.blind > 0) || (no_light())) {
+	    if ((p_ptr->flags.blind > 0) || (no_lite())) {
 		tot = tot / 10;
 	    }
 	    if (p_ptr->flags.confused > 0) {
@@ -1074,7 +1074,7 @@ void disarm_trap()
 		/* make sure we move onto the trap even if confused */
 		    tmp = p_ptr->flags.confused;
 		    p_ptr->flags.confused = 0;
-		    move_char(dir, FALSE);
+		    move_player(dir, FALSE);
 		    p_ptr->flags.confused = tmp;
 		    prt_experience();
 		}
@@ -1086,7 +1086,7 @@ void disarm_trap()
 		/* make sure we move onto the trap even if confused */
 		    tmp = p_ptr->flags.confused;
 		    p_ptr->flags.confused = 0;
-		    move_char(dir, FALSE);
+		    move_player(dir, FALSE);
 		    p_ptr->flags.confused += tmp;
 		}
 	    } else if (i == TV_CHEST) {
@@ -1220,7 +1220,7 @@ void bash()
 
 		    /* If not confused, fall through the door */
 		    if (p_ptr->flags.confused == 0) {
-			move_char(dir, FALSE);
+			move_player(dir, FALSE);
 		    }
 		    else
 			lite_spot(y, x);
@@ -1269,7 +1269,7 @@ void bash()
 /*
  * Jam a closed door -RAK-
  */
-static void jamdoor()
+static void do_cmd_spike()
 {
     int                  y, x, dir, i, j;
     register cave_type  *c_ptr;
@@ -1335,7 +1335,7 @@ static void jamdoor()
  * with correct weapon.  I.E.  wield bow and throw arrow.
  * Note: Some characters will now get multiple shots per turn -EAM
  */
-void throw_object()
+void do_cmd_fire()
 {
     int item_val, tbth, tpth, tdam, tdis;
     int y, x, oldy, oldx, cur_dis, dir;
@@ -1606,7 +1606,7 @@ void rest(void)
 }
 
 
-static void print_feeling()
+static void do_cmd_feeling()
 {
     /* No useful feeling in town */
     if (!dun_level) {
@@ -1957,7 +1957,7 @@ void artifact_check(void)
 }
 
 
-void check_uniques()
+void do_cmd_check_uniques()
 {
     int      i, j, k;
     bigvtype msg;

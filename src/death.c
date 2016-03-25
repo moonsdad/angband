@@ -10,7 +10,6 @@
  * included in all such copies. 
  */
 
-#include <signal.h>
 #include "angband.h"
 
 #ifndef USG
@@ -76,16 +75,7 @@ static void date(char *day)
     (void)strcpy(day, tmp);
 }
 
-/* Centers a string within a 31 character string		-JWT-	 */
-static char *center_string(char *centered_str, cptr in_str)
-{
-    register int i, j;
 
-    i = strlen(in_str);
-    j = 15 - i / 2;
-    (void)sprintf(centered_str, "%*s%s%*s", j, "", in_str, 31 - i - j, "");
-    return centered_str;
-}
 
 
 /* Not touched for Mac port */
@@ -158,8 +148,8 @@ void display_scores(int from, int to)
 	    msg_print(NULL);
 	    clear_screen();
 	    flush();		   /* flush all input */
-	    nosignals();	   /* Can't interrupt or suspend. */
-	    (void)save_char();	   /* Save the memory at least. */
+	    signals_ignore_tstp();	   /* Can't interrupt or suspend. */
+	    (void)save_player();	   /* Save the memory at least. */
 	    restore_term();
 	    exit(0);
 	}
@@ -218,7 +208,7 @@ void read_times(void)
 /* Attempt to read hours.dat.	 If it does not exist,	   */
 /* inform the user so he can tell the wizard about it	 */
 
-    file1 = my_tfopen(ANGBAND_HOU, "r");
+    file1 = my_tfopen(ANGBAND_HOURS, "r");
     if (file1) {
 	while (fgets(in_line, 80, file1)) {
 	    if (strlen(in_line) > 3) {
@@ -243,13 +233,13 @@ void read_times(void)
 
     else {
 	restore_term();
-	fprintf(stderr, "There is no hours file \"%s\".\nPlease inform the wizard, %s, so he can correct this!\n", ANGBAND_HOU, WIZARD);
+	fprintf(stderr, "There is no hours file \"%s\".\nPlease inform the wizard, %s, so he can correct this!\n", ANGBAND_HOURS, WIZARD);
 	exit(1);
     }
 
 /* Check the hours, if closed	then exit. */
     if (!check_time()) {
-	file1 = my_tfopen(ANGBAND_HOU, "r");
+	file1 = my_tfopen(ANGBAND_HOURS, "r");
 	if (file1) {
 	    clear_screen();
 	    for (i = 0; fgets(in_line, 80, file1); i++) {
@@ -505,22 +495,33 @@ int file_character(cptr filename1)
 {
     register int		i;
     int				j;
-    int				fd;
+    int				fd = -1;
     inven_type			*i_ptr;
     cptr			p;
-    cptr			colon;
-    cptr			blank;
+    cptr			colon = ":";
+    cptr			blank = " ";
 
     register FILE		*file1;
 
     int                 xbth, xbthb, xfos, xsrh;
     int			xstl, xdis, xsave, xdev;
-    vtype                 xinfra;
+    char                xinfra[32];
 
     register struct misc *p_ptr;
 
     vtype			out_val, prt1;
     bigvtype			prt2;
+
+
+#ifdef MACINTOSH
+
+    /* Global file type */
+    _ftype = 'TEXT';
+    
+    /* Open the file (already verified by mac_file_character) */
+    file1 = fopen(filename1, "w");
+
+#else
 
     fd = my_topen(filename1, O_WRONLY | O_CREAT | O_EXCL, 0644);
     if (fd < 0 && errno == EEXIST) {
@@ -539,6 +540,7 @@ int file_character(cptr filename1)
 	file1 = NULL;
     }
 
+#endif
     /* Dump a character sheet */
     if (file1) {
 
@@ -637,13 +639,12 @@ int file_character(cptr filename1)
 	}
 
 	/* Write out the equipment list.	     */
-	j = 0;
 	(void)fprintf(file1, "\n  [Character's Equipment List]\n\n");
 	if (!equip_ctr) {
 	    (void)fprintf(file1, "  Character has no equipment in use.\n");
 	}
 	else {
-	    for (i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
+	    for (j = 0, i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
 		i_ptr = &inventory[i];
 		if (i_ptr->tval != TV_NOTHING) {
 		    switch (i) {
@@ -736,8 +737,37 @@ int file_character(cptr filename1)
     }
 }
 
+
+
+
 /*
- * Prints the gravestone of the character		-RAK-	 
+ * Hack -- Calculates the total number of points earned		-JWT-	 
+ */
+long total_points(void)
+{
+    return (p_ptr->misc.max_exp + (100 * p_ptr->misc.max_dlv));
+}
+
+
+
+/*
+ * Centers a string within a 31 character string		-JWT-	 
+ */
+static char *center_string(char *centered_str, cptr in_str)
+{
+    register int i, j;
+
+    i = strlen(in_str);
+    j = 15 - i / 2;
+    (void)sprintf(centered_str, "%*s%s%*s", j, "", in_str, 31 - i - j, "");
+    return centered_str;
+}
+
+
+
+
+/*
+ * Prints the gravestone of the character  -RAK-
  */
 static void print_tomb()
 {
@@ -843,7 +873,7 @@ static void print_tomb()
     /* Show player */
     clear_screen();
     calc_bonuses();
-    display_char();
+    display_player();
 
     put_str("Type ESC to skip the inventory:", 23, 0);
 
@@ -892,11 +922,6 @@ static void print_tomb()
 }
 
 
-/* Calculates the total number of points earned		-JWT-	 */
-long total_points()
-{
-    return (p_ptr->misc.max_exp + (100 * p_ptr->misc.max_dlv));
-}
 
 
 
@@ -916,7 +941,7 @@ static errr top_twenty(void)
     /* Wizard-mode pre-empts scoring */
     if (wizard || to_be_wizard) {
 	display_scores(0, 10);
-	(void)save_char();
+	(void)save_player();
 	restore_term();
 	exit(0);
     }
@@ -925,7 +950,7 @@ static errr top_twenty(void)
     if (!total_winner && !stricmp(died_from, "Interrupting")) {
 	msg_print("Score not registered due to interruption.");
 	display_scores(0, 10);
-	(void)save_char();
+	(void)save_player();
 	restore_term();
 	exit(0);
     }
@@ -934,7 +959,7 @@ static errr top_twenty(void)
     if (!total_winner && !stricmp(died_from, "Quitting")) {
 	msg_print("Score not registered due to quitting.");
 	display_scores(0, 10);
-	(void)save_char();
+	(void)save_player();
 	restore_term();
 	exit(0);
     }
@@ -1158,7 +1183,7 @@ void exit_game(void)
     flush();
 
     /* Can't interrupt or suspend. */
-    nosignals();
+    signals_ignore_tstp();
 
     if (turn >= 0) {
 
@@ -1176,7 +1201,7 @@ void exit_game(void)
 
     i = log_index;
    /* Save the memory at least. */
-    (void)save_char();
+    (void)save_player();
     if (i > 0) display_scores(0, 10);
     erase_line(23, 0);
     restore_term();

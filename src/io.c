@@ -73,8 +73,7 @@ void flush(void)
 #else
 {
 #ifdef MSDOS
-    while (kbhit())
-	(void)getch();
+    while (kbhit()) (void)getch();
 #else
 /*
  * the code originally used ioctls, TIOCDRAIN, or TIOCGETP/TIOCSETP, or
@@ -83,8 +82,7 @@ void flush(void)
  * check_input makes the desired effect a bit clearer 
  */
 /* wierd things happen on EOF, don't try to flush input in that case */
-    if (!eof_flag)
-	while (check_input(0));
+    if (!eof_flag) while (check_input(0));
 #endif
 /* used to call put_qio() here to drain output, but it is not necessary */
 }
@@ -152,7 +150,7 @@ char inkey(void)
 	    /* just in case, to make sure that the process eventually dies */
 		panic_save = 1;
 		(void)strcpy(died_from, "(end of input: panic saved)");
-		if (!save_char()) {
+		if (!save_player()) {
 		    (void)strcpy(died_from, "panic: unexpected eof");
 		    death = TRUE;
 		}
@@ -221,191 +219,6 @@ char inkeydir()
 
 
 
-/* Clears given line of text				-RAK-	 */
-void erase_line(int row, int col)
-#ifdef MACINTOSH
-{
-    Rect line;
-
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-
-    line.left = col;
-    line.top = row;
-    line.right = SCRN_COLS;
-    line.bottom = row + 1;
-    DEraseScreen(&line);
-}
-#else
-{
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-    (void)move(row, col);
-    clrtoeol();
-}
-#endif
-
-
-/* Dump IO to buffer					-RAK-	 */
-void put_str(cptr out_str, int row, int col)
-#ifdef MACINTOSH
-{
-/* The screen manager handles writes past the edge ok */
-    DSetScreenCursor(col, row);
-    DWriteScreenStringAttr(out_str, ATTR_NORMAL);
-}
-#else
-{
-    vtype tmp_str;
-/*
- * truncate the string, to make sure that it won't go past right edge of
- * screen 
- */
-    if (col > 79)
-	col = 79;
-    (void)strncpy(tmp_str, out_str, 79 - col);
-    tmp_str[79 - col] = '\0';
-
-#ifndef ATARIST_MWC
-    if (mvaddstr(row, col, tmp_str) == ERR)
-#else
-    mvaddstr(row, col, out_str);
-    if (ERR)
-#endif
-    {
-	abort();
-    /* clear msg_flag to avoid problems with unflushed messages */
-	msg_flag = 0;
-	(void)sprintf(tmp_str, "error in put_str, row = %d col = %d\n",
-		      row, col);
-	prt(tmp_str, 0, 0);
-	bell();
-    /* wait so user can see error */
-	(void)sleep(2);
-    }
-}
-#endif
-
-
-/* Dump the IO buffer to terminal			-RAK-	 */
-void put_qio()
-{
-    screen_change = TRUE;	   /* Let inven_command know something has
-				    * changed. */
-    (void)refresh();
-}
-
-
-/* Clears screen */
-void clear_screen()
-#ifdef MACINTOSH
-{
-    Rect area;
-
-    if (msg_flag)
-	msg_print(NULL);
-
-    area.left = area.top = 0;
-    area.right = SCRN_COLS;
-    area.bottom = SCRN_ROWS;
-    DEraseScreen(&area);
-}
-#else
-{
-    if (msg_flag)
-	msg_print(NULL);
-    touchwin(stdscr);
-    (void)clear();
-    refresh();
-}
-#endif
-
-void clear_from(int row)
-#ifdef MACINTOSH
-{
-    Rect area;
-
-    area.left = 0;
-    area.top = row;
-    area.right = SCRN_COLS;
-    area.bottom = SCRN_ROWS;
-    DEraseScreen(&area);
-}
-#else
-{
-    (void)move(row, 0);
-    clrtobot();
-}
-#endif
-
-
-/* Outputs a char to a given interpolated y, x position	-RAK-	 */
-/* sign bit of a character used to indicate standout mode. -CJS */
-void print(int ch, int row, int col)
-{
-    row -= panel_row_prt;	   /* Real co-ords convert to screen positions */
-    col -= panel_col_prt;
-#if 0
-    if (ch & 0x80)
-	standout();
-#endif
-    if (mvaddch(row, col, ch) == ERR) {
-	vtype               tmp_str;
-
-    /* clear msg_flag to avoid problems with unflushed messages */
-	msg_flag = 0;
-	(void)sprintf(tmp_str, "error in print, row = %d col = %d\n", row, col);
-	prt(tmp_str, 0, 0);
-	bell();
-    /* wait so user can see error */
-	(void)sleep(2);
-	abort();
-    }
-#if 0
-    if (ch & 0x80)
-	standend();
-#endif
-}
-
-
-
-/* Print a message so as not to interrupt a counted command. -CJS- */
-void count_msg_print(cptr p)
-{
-    int i;
-
-    i = command_count;
-    msg_print(p);
-    command_count = i;
-}
-
-
-/* Outputs a line to a given y, x position		-RAK-	 */
-void prt(cptr str_buff, int row, int col)
-#ifdef MACINTOSH
-{
-    Rect line;
-
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-
-    line.left = col;
-    line.top = row;
-    line.right = SCRN_COLS;
-    line.bottom = row + 1;
-    DEraseScreen(&line);
-
-    put_str(str_buff, row, col);
-}
-#else
-{
-    if (row == MSG_LINE && msg_flag)
-	msg_print(NULL);
-    (void)move(row, col);
-    clrtoeol();
-    put_str(str_buff, row, col);
-}
-#endif
 
 
 /*
@@ -501,6 +314,188 @@ void msg_print(cptr str_buff)
     }
 }
 
+
+
+/* Outputs a char to a given interpolated y, x position	-RAK-	 */
+/* sign bit of a character used to indicate standout mode. -CJS */
+void print(int ch, int row, int col)
+{
+    row -= panel_row_prt;	   /* Real co-ords convert to screen positions */
+    col -= panel_col_prt;
+#if 0
+    if (ch & 0x80)
+	standout();
+#endif
+    if (mvaddch(row, col, ch) == ERR) {
+	vtype               tmp_str;
+
+    /* clear msg_flag to avoid problems with unflushed messages */
+	msg_flag = 0;
+	(void)sprintf(tmp_str, "error in print, row = %d col = %d\n", row, col);
+	prt(tmp_str, 0, 0);
+	bell();
+    /* wait so user can see error */
+	(void)sleep(2);
+	abort();
+    }
+#if 0
+    if (ch & 0x80)
+	standend();
+#endif
+}
+
+
+/*
+ * Erase a line
+ * Clears given line of text				-RAK-	
+ */
+void erase_line(int row, int col)
+#ifdef MACINTOSH
+{
+    Rect line;
+
+    if (row == MSG_LINE && msg_flag)
+	msg_print(NULL);
+
+    line.left = col;
+    line.top = row;
+    line.right = SCRN_COLS;
+    line.bottom = row + 1;
+    DEraseScreen(&line);
+}
+#else
+{
+    if (row == MSG_LINE && msg_flag)
+	msg_print(NULL);
+    (void)move(row, col);
+    clrtoeol();
+}
+#endif
+
+
+/*
+ * Erase the screen  Clears screen
+ */
+void clear_screen(void)
+#ifdef MACINTOSH
+{
+    Rect area;
+
+    if (msg_flag)
+	msg_print(NULL);
+
+    area.left = area.top = 0;
+    area.right = SCRN_COLS;
+    area.bottom = SCRN_ROWS;
+    DEraseScreen(&area);
+}
+#else
+{
+    if (msg_flag)
+	msg_print(NULL);
+    touchwin(stdscr);
+    (void)clear();
+    refresh();
+}
+#endif
+
+/*
+ * Clear part of the screen
+ */
+void clear_from(int row)
+#ifdef MACINTOSH
+{
+    Rect area;
+
+    area.left = 0;
+    area.top = row;
+    area.right = SCRN_COLS;
+    area.bottom = SCRN_ROWS;
+    DEraseScreen(&area);
+}
+#else
+{
+    (void)move(row, 0);
+    clrtobot();
+}
+#endif
+
+
+
+
+/*
+ * Dump IO to buffer					-RAK-
+ */
+void put_str(cptr out_str, int row, int col)
+#ifdef MACINTOSH
+{
+/* The screen manager handles writes past the edge ok */
+    DSetScreenCursor(col, row);
+    DWriteScreenStringAttr(out_str, ATTR_NORMAL);
+}
+#else
+{
+    vtype tmp_str;
+/*
+ * truncate the string, to make sure that it won't go past right edge of
+ * screen 
+ */
+    if (col > 79)
+	col = 79;
+    (void)strncpy(tmp_str, out_str, 79 - col);
+    tmp_str[79 - col] = '\0';
+
+#ifndef ATARIST_MWC
+    if (mvaddstr(row, col, tmp_str) == ERR)
+#else
+    mvaddstr(row, col, out_str);
+    if (ERR)
+#endif
+    {
+	abort();
+    /* clear msg_flag to avoid problems with unflushed messages */
+	msg_flag = 0;
+	(void)sprintf(tmp_str, "error in put_str, row = %d col = %d\n", row, col);
+	prt(tmp_str, 0, 0);
+	bell();
+    /* wait so user can see error */
+	(void)sleep(2);
+    }
+}
+#endif
+
+
+/* 
+ * Outputs a line to a given y, x position		-RAK-	
+ */
+void prt(cptr str_buff, int row, int col)
+#ifdef MACINTOSH
+{
+    Rect line;
+
+    if (row == MSG_LINE && msg_flag)
+	msg_print(NULL);
+
+    line.left = col;
+    line.top = row;
+    line.right = SCRN_COLS;
+    line.bottom = row + 1;
+    DEraseScreen(&line);
+
+    put_str(str_buff, row, col);
+}
+#else
+{
+    if (row == MSG_LINE && msg_flag)
+	msg_print(NULL);
+    (void)move(row, col);
+    clrtoeol();
+    put_str(str_buff, row, col);
+}
+#endif
+
+
+
 /*
  * Used to verify a choice - user gets the chance to abort choice.  -CJS-
  */
@@ -539,8 +534,8 @@ int get_check(cptr prompt)
     /* Erase the prompt */
     erase_line(0, 0);
 
-    if (res == 'Y' || res == 'y') return TRUE;
-    else return FALSE;
+    /* Extract the answer */
+    return (strchr("Yy", res) ? TRUE : FALSE);
 }
 
 
@@ -876,4 +871,23 @@ void screen_map()
 #endif
     (void)inkey();
     restore_screen();
+}
+
+
+/* Print a message so as not to interrupt a counted command. -CJS- */
+void count_msg_print(cptr p)
+{
+    int i;
+
+    i = command_count;
+    msg_print(p);
+    command_count = i;
+}
+
+
+/* Dump the IO buffer to terminal			-RAK-	 */
+void put_qio()
+{
+    screen_change = TRUE;	   /* Let inven_command know something has changed. */
+    (void)refresh();
 }

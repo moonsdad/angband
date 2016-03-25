@@ -1243,7 +1243,7 @@ void put_misc3()
 /*
  * Used to display the character on the screen.		-RAK-
  */
-void display_char()
+void display_player()
 {
     put_character();
     put_misc1();
@@ -1298,7 +1298,7 @@ void change_name()
     register int  flag;
     vtype         temp;
 
-    display_char();
+    display_player();
 
     for (flag = FALSE; !flag; ) {
 

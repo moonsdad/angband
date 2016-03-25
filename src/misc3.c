@@ -38,7 +38,7 @@ int delete_object(int y, int x)
 
     lite_spot(y, x);
 
-    if (test_light(y, x)) delete = TRUE;
+    if (test_lite(y, x)) delete = TRUE;
     else delete = FALSE;
 
     return (delete);
@@ -2047,7 +2047,7 @@ void place_object(int y, int x)
 /*
  * Places a "GOOD" object at given row, column co-ordinate ~Ludwig 
  */
-void place_special(int y, int x, u32b good)
+void place_good(int y, int x, u32b good)
 {
     register int cur_pos, tmp;
     int          tv, is_good = FALSE;
@@ -2189,9 +2189,9 @@ void special_random_object(int y, int x, int num)
 	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
 		if (randint(5) == 1) {
 		    if (!special_place_object(j, k))
-			place_special(j, k, SPECIAL);
+			place_good(j, k, SPECIAL);
 		} else {
-		    place_special(j, k, SPECIAL);
+		    place_good(j, k, SPECIAL);
 		}
 
 	    /* Placement accomplished */

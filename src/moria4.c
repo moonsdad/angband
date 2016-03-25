@@ -494,7 +494,7 @@ void search(int y, int x, int chance)
     register inven_type   *i_ptr;
     bigvtype               tmp_str, tmp_str2;
 
-    if ((p_ptr->flag.blind > 0) || no_light()) chance = chance / 10;
+    if ((p_ptr->flag.blind > 0) || no_lite()) chance = chance / 10;
     if (p_ptr->flag.confused > 0) chance = chance / 10;
     if (p_ptr->flag.image > 0) chance = chance / 10;
 
@@ -882,7 +882,7 @@ static void area_affect(int dir, int y, int x)
  *
  * Note: This routine has been pre-declared; see that for argument
  */
-void move_char(int dir, int do_pickup)
+void move_player(int dir, int do_pickup)
 {
     int                 old_row, old_col, old_find_flag;
     int                 y, x;
@@ -1149,7 +1149,7 @@ void find_run(void)
 	end_find();
     }
 
-     else move_char(find_direction, TRUE);
+     else move_player(find_direction, TRUE);
 }
 
 
@@ -1237,7 +1237,7 @@ void find_init(int dir)
 	print(loc_symbol(char_row, char_col), char_row, char_col);
 #endif
 
-    move_char(dir, TRUE);
+    move_player(dir, TRUE);
     if (find_flag == FALSE)
 	command_count = 0;
 }

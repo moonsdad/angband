@@ -233,7 +233,7 @@ extern char doing_inven;		/* Track inventory commands */
 extern int screen_change;		/* Notice disturbing of inventory */
 
 extern int character_generated;		/* Character generation complete */
-extern int character_saved;		/* prevents save on kill after save_char() */
+extern int character_saved;		/* prevents save on kill after save_player() */
 extern int peek;			/* Peek like a wizard */
 extern int be_nasty;
 extern int monster_is_afraid;	/* redo monster fear messages -CWS */
@@ -420,7 +420,7 @@ extern cptr ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
 extern cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
 
 extern cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-extern cptr ANGBAND_HOU;		/* was LIBDIR(files/hours)			*/
+extern cptr ANGBAND_HOURS;		/* was LIBDIR(files/hours)			*/
 extern cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
 extern cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
 
@@ -441,7 +441,7 @@ extern cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
 #ifdef __STDC__
 
 /* birth.c */
-void create_character(void);
+void player_birth(void);
 
 /* creature.c */
 void update_mon(int);
@@ -656,18 +656,18 @@ cptr likert(int, int);
 void put_misc1(void);
 void put_misc2(void);
 void put_misc3(void);
-void display_char(void);
+void display_player(void);
 void get_name(void);
 void change_name(void);
 void inven_destroy(int);
 void take_one_item(struct inven_type *, struct inven_type *);
 void inven_drop(int, int);
 int inven_damage(int (*)(), int);
-int weight_limit(void);
 int inven_check_num(inven_type *);
+int inven_carry(struct inven_type *);
+int weight_limit(void);
 int inven_check_weight(struct inven_type *);
 void check_strength(void);
-int inven_carry(struct inven_type *);
 int spell_chance(int);
 void print_spells(int *, int, int, int);
 int get_spell(int *, int, int *, int *, cptr, int);
@@ -687,7 +687,7 @@ int player_saves(void);
 int find_range(int, int, int *, int *);
 void teleport(int);
 void check_view(void);
-void place_special(int, int, u32b);
+void place_good(int, int, u32b);
 int place_ghost(void);
 void prt_cut(void);
 void prt_stun(void);
@@ -705,11 +705,11 @@ cptr describe_use(int);
 void calc_bonuses(void);
 int show_inven(int, int, int, int, int ());
 int show_equip(int, int);
-void takeoff(int, int);
+void inven_takeoff(int, int);
 int verify(cptr, int);
 void inven_command(int);
 int get_item(int *, cptr, int, int, int ());
-int no_light(void);
+int no_lite(void);
 void light_room(int, int);
 void move_light(int, int, int, int);
 int test_hit(int, int, int, int, int);
@@ -740,15 +740,19 @@ int mon_take_hit(int, int, int);
 
 /* moria3.c */
 void look(void);
-void openobject(void);
-void closeobject(void);
+void do_cmd_open(void);
+void do_cmd_close(void);
 int twall(int, int, int, int);
 void tunnel(int);
-void disarm_trap(void);
-void throw_object(void);
+void do_cmd_disarm(void);
+void do_cmd_spike(void);
+void do_cmd_fire(void);
 void bash(void);
 void rest(void);
-
+void do_cmd_feeling(void);
+void artifact_check(void);
+void artifact_check_no_file(void);
+void do_cmd_check_uniques(void);
 
 /* moria4.c */
 int target_at(int, int); /* target fns stolen from Morgul -CFT */
@@ -756,36 +760,16 @@ void target(void); /* target fns stolen from Morgul -CFT */
 void mmove2(int *, int *, int, int, int, int);
 int get_alldir(cptr, int *);
 int get_dir(cptr, int *);
+void disturb(int, int);
 void search_on(void);
 void search_off(void);
-void disturb(int, int);
 void search(int, int, int);
 void rest_off(void);
 void carry(int, int, int);
-void move_char(int, int);
+void move_player(int, int);
 void find_run(void);
 void find_init(int);
 void end_find(void);
-
-#ifdef MSDOS
-/* ms_misc.c */
-char *getlogin(void);
-#ifdef __TURBOC__
-void sleep(int);
-#else
-unsigned int sleep(int );
-#endif
-void error(char *, ...);
-void warn(char *, ...);
-void msdos_init(void);
-void msdos_raw(void);
-void msdos_noraw(void);
-int bios_getch(void);
-int msdos_getch(void);
-void bios_clear(void);
-void msdos_intro(void);
-void bios_clear(void);
-#endif
 
 /* potions.c */
 void quaff(void);
@@ -813,11 +797,11 @@ void activate_rod(void);
 
 /* save.c */
 #ifdef MACINTOSH
-int save_char(int);
+int save_player(int);
 #else
-int save_char(void);
+int save_player(void);
 #endif
-int _save_char(char *);
+int _save_player(char *);
 int get_char(int *);
 
 /* scrolls.c */
@@ -851,7 +835,7 @@ int store_buy(int, int);
 #endif
 
 /* signals.c */
-void nosignals(void);
+void signals_ignore_tstp(void);
 void signals(void);
 void signals_init(void);
 void ignore_signals(void);
@@ -990,12 +974,9 @@ FILE *my_tfopen(cptr, cptr);
 void aim(void);
 
 /* wizard.c */
-void wizard_light(int);
+void wiz_lite(int);
 void change_character(void);
 void wizard_create(void);
-void artifact_check(void);
-void artifact_check_no_file(void);
-void check_uniques(void);
 int is_wizard(int);
 
 #endif      /* __STDC__ */

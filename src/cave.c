@@ -242,7 +242,7 @@ int los(int fromY, int fromX, int toY, int toX)
 /*
  * Tests a spot for light or field mark status		-RAK-	
  */
-int test_light(int y, int x)
+int test_lite(int y, int x)
 {
     register cave_type *cave_ptr= &cave[y][x];
 
@@ -254,7 +254,7 @@ int test_light(int y, int x)
 /*
  * Returns true if player has no light -RAK-
  */
-int no_light(void)
+int no_lite(void)
 {
     register cave_type *c_ptr = &cave[char_row][char_col];
     if (!c_ptr->tl && !c_ptr->pl) return TRUE;
@@ -503,9 +503,9 @@ void darken_room(int y, int x)
 
 
 /*
- * Light up the dungeon -RAK-
+ * Light up the dungeon. -RAK-
  */
-void wizard_light(int light)
+void wiz_lite(int light)
 {
     register cave_type *c_ptr;
     register int        k, l, i, j;
@@ -529,6 +529,7 @@ void wizard_light(int light)
 			if (!flag)
 			    c_ptr->fm = FALSE;
 		    }
+    /* Redraw the map */    
     prt_map();
 }
 

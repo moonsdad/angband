@@ -665,7 +665,7 @@ static void do_command(char com_val)
 	break;
       case CTRL('F'):		/* Repeat (^F)eeling */
 	free_turn_flag = TRUE;
-	print_feeling();
+	do_cmd_feeling();
 	break;
       case CTRL('W'):		/* (^W)izard mode */
 	if (wizard) {
@@ -686,7 +686,7 @@ static void do_command(char com_val)
 	} else {
 	    (void)strcpy(died_from, "(saved)");
 	    msg_print("Saving game...");
-	    if (save_char())
+	    if (save_player())
 		exit_game();
 	    msg_print("Save failed...");
 	    (void)strcpy(died_from, "(alive and well)");
@@ -739,28 +739,28 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case 'b':			/* (b) down, left	(1) */
-	move_char(1, do_pickup);
+	move_player(1, do_pickup);
 	break;
       case 'j':			/* (j) down		(2) */
-	move_char(2, do_pickup);
+	move_player(2, do_pickup);
 	break;
       case 'n':			/* (n) down, right	(3) */
-	move_char(3, do_pickup);
+	move_player(3, do_pickup);
 	break;
       case 'h':			/* (h) left		(4) */
-	move_char(4, do_pickup);
+	move_player(4, do_pickup);
 	break;
       case 'l':			/* (l) right		(6) */
-	move_char(6, do_pickup);
+	move_player(6, do_pickup);
 	break;
       case 'y':			/* (y) up, left		(7) */
-	move_char(7, do_pickup);
+	move_player(7, do_pickup);
 	break;
       case 'k':			/* (k) up		(8) */
-	move_char(8, do_pickup);
+	move_player(8, do_pickup);
 	break;
       case 'u':			/* (u) up, right	(9) */
-	move_char(9, do_pickup);
+	move_player(9, do_pickup);
 	break;
       case 'B':			/* (B) run down, left	(. 1) */
 	find_init(1);
@@ -791,7 +791,7 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case '.':			/* (.) stay in one place (5) */
-	move_char(5, do_pickup);
+	move_player(5, do_pickup);
 	if (command_count > 1) {
 	    command_count--;
 	    rest();
@@ -829,7 +829,7 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case 'D':			/* (D)isarm trap */
-	disarm_trap();
+	do_cmd_disarm();
 	break;
       case 'E':			/* (E)at food */
 	eat();
@@ -848,7 +848,7 @@ static void do_command(char com_val)
 	    free_turn_flag = TRUE;
 	break;
       case 'W':			/* (W)here are we on the map	(L)ocate on map */
-	if ((p_ptr->flags.blind > 0) || no_light())
+	if ((p_ptr->flags.blind > 0) || no_lite())
 	    msg_print("You can't see your map.");
 	else {
 	    int                 cy, cx, p_y, p_x;
@@ -959,7 +959,7 @@ static void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;
       case 'c':			/* (c)lose an object */
-	closeobject();
+	do_cmd_close();
 	break;
       case 'd':			/* (d)rop something */
 	inven_command('d');
@@ -968,13 +968,13 @@ static void do_command(char com_val)
 	inven_command('e');
 	break;
       case 't':			/* (t)hrow something	(f)ire something */
-	throw_object();
+	do_cmd_fire();
 	break;
       case 'i':			/* (i)nventory list */
 	inven_command('i');
 	break;
       case 'S':			/* (S)pike a door	(j)am a door */
-	jamdoor();
+	do_cmd_spike();
 	break;
       case 'x':			/* e(x)amine surrounds	(l)ook about */
 	look();
@@ -984,7 +984,7 @@ static void do_command(char com_val)
 	cast();
 	break;
       case 'o':			/* (o)pen something */
-	openobject();
+	do_cmd_open();
 	break;
       case 'p':			/* (p)ray */
 	pray();
@@ -1025,7 +1025,7 @@ static void do_command(char com_val)
 #endif
 #ifdef ALLOW_CHECK_UNIQUES /* -CWS */
       case '|':
-	check_uniques();
+	do_cmd_check_uniques();
 	break;
 #endif
       default:
@@ -1123,13 +1123,13 @@ static void do_command(char com_val)
 		artifact_check_no_file();
 		break;
 	      case '|':
-		check_uniques();
+		do_cmd_check_uniques();
 		break;
 	      case '@':
 		wizard_create();
 		break;
 	      case '$':	   /* $ = wiz light */
-		wizard_light(TRUE);
+		wiz_lite(TRUE);
 		break;
 	      case '%':	   /* self-knowledge */
 		self_knowledge();

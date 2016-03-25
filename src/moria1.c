@@ -421,6 +421,9 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 
 /*
  * Recalculate the effect of all the stuff we use.		  -CJS- 
+ * Calculate the players current "state", taking into account
+ * not only race/class intrinsics, but also objects being worn
+ * and temporary spell effects.  See also calc_mana/hitpoints().
  * Also initialise race intrinsics    SM
  */
 void calc_bonuses()

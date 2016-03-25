@@ -348,7 +348,7 @@ int main(int argc, char * argv[])
 
     if (FIDDLE) {
 	if (get_char(&generate))
-	    save_char();
+	    save_player();
 	exit_game();
     }
 
@@ -487,7 +487,7 @@ int main(int argc, char * argv[])
 	/* Unique Monster Flags */
 	for (i=0; i<MAX_R_IDX; i++)
 	    u_list[i].exist=0, u_list[i].dead=0;
-	create_character();
+	player_birth();
 
 	/* if we're creating a new character, change the savefile name */
     (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, p_ptr->misc.name);
@@ -545,7 +545,7 @@ int main(int argc, char * argv[])
 	if (eof_flag)
 	{
 	    (void) strcpy(died_from, "(end of input: saved)");
-	    if (!save_char())
+	    if (!save_player())
 	    {
 		(void) strcpy(died_from, "unexpected eof");
 	    }

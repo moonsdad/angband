@@ -44,15 +44,12 @@ static int          signal_count = 0;
  * allow the user to rethink.  We don't want to kill a character because
  * of a stupid typo.
  */
-#ifdef USG
-static void signal_handler(int sig)
-#else
-static void signal_handler(int sig, int code, struct sigcontext  *scp)
-#endif
-{
-    int                 smask;
 
-    smask = sigsetmask(0) | (1 << sig);
+static void signal_handler_proc(int sig)
+{
+    int simple = FALSE;
+
+#if !defined(MACINTOSH) && !defined(_Windows)
 
     /* Ignore all second signals */
     if (error_sig >= 0) {
@@ -63,32 +60,41 @@ static void signal_handler(int sig, int code, struct sigcontext  *scp)
     error_sig = sig;
 
 /* Allow player to think twice. Wizard may force a core dump. */
-    if (sig == SIGINT
-#ifndef MSDOS
-	|| sig == SIGQUIT
+#ifdef SIGINT
+    /* Simple "Ctrl-C" interupt */
+    if (sig == SIGINT) simple = TRUE;
 #endif
-	) {
+
+#ifdef SIGQUIT
+    /* Simple "Quit" key */
+    if (sig == SIGQUIT) simple = TRUE;
+#endif
+
+    /* Handle simple interrupt */
+    if (simple) {
+
+	/* Only treat real characters specially */
 	if (death)
 	    (void)signal(sig, SIG_IGN);	/* Can't quit after death. */
 	else if (!character_saved && character_generated) {
-	    if ((!total_winner) ? (!get_check("Really commit *Suicide*?"))
-		: (!get_check("Do you want to retire?"))) {
-		if (turn > 0)
-		    disturb(1, 0);
+
+	    /* Hack -- Allow player to think twice. */
+	    if (!get_check(total_winner ?
+			   "Do you want to retire?" :
+			   "Really commit *Suicide*?")) {
+
+		if (turn > 0) disturb(1, 0);
+
 		erase_line(0, 0);
 		put_qio();
+
 		error_sig = (-1);
 
 		/* Restore handler for later. */
-#ifdef USG
 		(void)signal(sig, signal_handler);
-#else
-		(void)sigsetmask(smask);
-#endif
 
 	    /* in case control-c typed during msg_print */
-		if (wait_for_more)
-		    put_str(" -more-", MSG_LINE, 0);
+		if (wait_for_more) put_str(" -more-", MSG_LINE, 0);
 		put_qio();
 
 		/* OK. We don't quit. */
@@ -110,31 +116,40 @@ static void signal_handler(int sig, int code, struct sigcontext  *scp)
 
 	/* Save and exit */
 	exit_game();
+
+	/* Just in case */
+	quit("interrupted");
     }
 
+#endif /* !MACINTOSH */
+
     /* Die. */
-    prt("OH NO!!!!!!  A gruesome software bug LEAPS out at you. There is NO defense!", 23, 0);
+    prt("OH NO!!!!!!  A gruesome software bug LEAPS out at you!", 21, 0);
 
     /* Try to save anyway */
     if (!death && !character_saved && character_generated) {
 
 	/* Try a panic save */
 	panic_save = 1;
-	prt("Your guardian angel is trying to save you.", 0, 0);
+	prt("Your guardian angel is trying to save you.", 22, 0);
+	prt("", 23, 0);
 
 	/* Attempt to save */
 	(void)sprintf(died_from, "(panic save %d)", sig);
-	if (!save_char()) {
+	if (save_player()) quit("panic save succeeded");
+
 	/* Oops */
 	(void)strcpy(died_from, "software bug");
 	death = TRUE;
-	turn = (-1);
-	}
+	turn = 0;
     }
     else {
 	death = TRUE;
-	/* Quietly save the memory anyway. */
-	(void)_save_char(savefile);
+	prt("There is NO defense!", 22, 0);
+	prt("", 23, 0);
+
+	/* Low level access -- Quietly save the memory anyway. */
+	(void)_save_player(savefile);
     }
 
     restore_term();
@@ -147,26 +162,16 @@ static void signal_handler(int sig, int code, struct sigcontext  *scp)
 #endif
 
     /* Quit anyway */
-    exit(1);
+    quit(NULL);
 }
 
-
-
-void nosignals()
+/*
+ * signals_ignore_tstp - Ignore SIGTSTP signals.
+ */
+void signals_ignore_tstp(void)
 {
-#if !defined(ATARIST_MWC)
 #ifdef SIGTSTP
-#ifdef linux
-  (void) signal(SIGTSTP, (void (*)()) suspend);
-#else
     (void)signal(SIGTSTP, SIG_IGN);
-#endif
-#ifndef USG
-    mask = sigsetmask(0);
-#endif
-#endif
-    if (error_sig < 0)
-	error_sig = 0;
 #endif
 }
 

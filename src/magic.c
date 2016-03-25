@@ -266,7 +266,7 @@ void gain_spells(void)
 	return;
     }
 
-    if (no_light()) {
+    if (no_lite()) {
 	msg_print("You have no light to read by.");
 	return;
     }
@@ -620,7 +620,7 @@ void cast()
 	return;
     }
 
-    if (no_light()) {
+    if (no_lite()) {
 	msg_print("You have no light to read by.");
 	return;
     }
@@ -1065,7 +1065,7 @@ void pray()
 	return;
     }
 
-    if (no_light()) {
+    if (no_lite()) {
 	msg_print("You have no light to read by.");
 	return;
     }
@@ -1320,7 +1320,7 @@ void pray()
 	    break;
 	    
 	  case 36:	   /* Clairvoyance */
-	    wizard_light(TRUE);
+	    wiz_lite(TRUE);
 	    break;
 	    
 	  case 37:

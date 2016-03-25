@@ -751,7 +751,7 @@ void quaff(void)
 	    break;
 
 	  case 48:
-	    wizard_light(TRUE);
+	    wiz_lite(TRUE);
 	    if (!res_stat(A_WIS)) inc_stat(A_WIS);
 	    if (!res_stat(A_INT)) inc_stat(A_INT);
 	    msg_print("You feel more enlightened! ");
@@ -838,7 +838,7 @@ void quaff(void)
 
 	  case 54:
 	    msg_print("An image of your surroundings forms in your mind...");
-	    wizard_light(TRUE);
+	    wiz_lite(TRUE);
 	    ident = TRUE;
 	    break;
 
@@ -931,7 +931,7 @@ void read_scroll(void)
 	return;
     }
 
-    if (no_light()) {
+    if (no_lite()) {
 	msg_print("You have no light to read by.");
 	return;
     }
@@ -1428,7 +1428,7 @@ void read_scroll(void)
 	    break;
 
 	  case 43:
-	    place_special(char_row, char_col, SPECIAL);
+	    place_good(char_row, char_col, SPECIAL);
 	    prt_map();
 	    ident = TRUE;
 	    break;
@@ -3320,7 +3320,7 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 7):
 		msg_print("The stone glows a deep green");
-		wizard_light(TRUE);
+		wiz_lite(TRUE);
 		(void)detect_sdoor();
 		(void)detect_trap();
 		inventory[i].timeout = 100 + randint(100);

@@ -397,17 +397,17 @@ static int summon_object(int y, int x, int num, int typ, s32b  ood)
 		    }
 		    if (real_typ == 1) {
 			if (good)
-			    place_special(j, k, good);
+			    place_good(j, k, good);
 			else
 			    place_object(j, k);
 		    } else {
 			if (good)
-			    place_special(j, k, good);
+			    place_good(j, k, good);
 			else
 			    place_gold(j, k);
 		    }
 		    lite_spot(j, k);
-		    if (test_light(j, k))
+		    if (test_lite(j, k))
 			res += real_typ;
 		    i = 20;
 		}

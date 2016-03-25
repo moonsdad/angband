@@ -601,7 +601,7 @@ static int sv_write()
     return TRUE;
 }
 
-int save_char()
+int save_player()
 {
     vtype temp;
     char *tmp2;
@@ -612,7 +612,7 @@ int save_char()
     if (death && NO_SAVE)
 	return TRUE;
 
-    if (_save_char(savefile)) {
+    if (_save_player(savefile)) {
 
 	tmp2 = basename(savefile);
 
@@ -630,7 +630,7 @@ int save_char()
     return TRUE;
 }
 
-int _save_char(char *fnam)
+int _save_player(char *fnam)
 {
     vtype temp;
     int   ok, fd;
@@ -638,7 +638,7 @@ int _save_char(char *fnam)
 
     if (log_index < 0) return TRUE;		   /* Nothing to save. */
 
-    nosignals();
+    signals_ignore_tstp();
 
     put_qio();
     disturb(1, 0);		   /* Turn off resting and searching. */
@@ -760,7 +760,7 @@ int get_char(int *generate)
     free_turn_flag = TRUE;	   /* So a feeling isn't generated upon reloading -DGK */
 
     /* Forbid suspend */
-    nosignals();
+    signals_ignore_tstp();
 
     /* Assume a cave must be generated */
     *generate = TRUE;

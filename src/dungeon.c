@@ -184,6 +184,10 @@ static void regen_monsters(void)
 
 /*
  * Main procedure for dungeon.			-RAK-
+ * This is the main function of this file -- it places the user on the
+ * current level and processes user input until the level is completed,
+ * the user dies, or the game is terminated.
+ *
  * Note: There is a lot of preliminary magic going on here at first
  */
 void dungeon(void)
@@ -289,7 +293,7 @@ void dungeon(void)
     /* FIXME: figure this out */
     if (((turn - old_turn) > randint(50) + 50) && dun_level) {
 	unfelt = FALSE;
-	print_feeling();
+	do_cmd_feeling();
     }
     old_turn = turn;
 
@@ -308,7 +312,7 @@ void dungeon(void)
 	    if (closing_flag > 2) {
 		msg_print("The gates to ANGBAND are now closed.");
 		(void)strcpy(died_from, "(closing gate: saved)");
-		if (!save_char()) {
+		if (!save_player()) {
 		(void)strcpy(died_from, "a slammed gate");
 		death = TRUE;
 		}
