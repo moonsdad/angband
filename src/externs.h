@@ -538,7 +538,6 @@ void clear_screen(void);
 void clear_from(int);
 
 void move_cursor_relative(int, int);
-void count_msg_print(cptr);
 void c_put_str(byte, cptr, int, int);
 void put_str(cptr, int, int);
 
@@ -554,7 +553,6 @@ int get_string(char *, int, int, int);
 int askfor(char *, int);
 void pause_line(int);
 void pause_exit(int, int);
-void screen_map(void);
 void print(int, int, int);
 
 /* magic.c */

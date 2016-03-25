@@ -1262,4 +1262,21 @@ void end_find()
 
 
 
+#ifdef MACINTOSH
+/* Same as get_com(), but translates direction keys from keypad */
+int get_comdir(char *prompt, char *command)
+{
+    int res;
 
+    if (prompt)
+	prt(prompt, 0, 0);
+    *command = inkeydir();
+    if (*command == 0 || *command == ESCAPE)
+	res = FALSE;
+    else
+	res = TRUE;
+    erase_line(MSG_LINE, 0);
+    return (res);
+}
+
+#endif

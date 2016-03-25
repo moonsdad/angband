@@ -44,6 +44,222 @@ void move_cursor(int row, int col)
 
 
 
+/*
+ * Convert a decimal to a single digit octal number
+ */
+static char octify(uint i)
+{
+    if (i < 8) return ('0' + i);
+    return ('0');
+}
+
+/*
+ * Convert a decimal to a single digit hex number
+ */
+static char hexify(uint i)
+{
+    if (i < 10) return ('0' + i);
+    if (i < 16) return ('A' + i - 10);
+    return ('0');
+}
+
+
+/*
+ * Convert a hex-digit into a decimal
+ */
+static int deoct(char c)
+{
+    return (c - '0');
+}
+
+/*
+ * Convert a hex-digit into a decimal
+ */
+static int dehex(char c)
+{
+    return ((c>='a') ? (10+c-'a') : (c>='A') ? (10+c-'A') : (c-'0'));
+}
+
+
+/*
+ * Hack -- convert a printable string into real ascii
+ *
+ * I have no clue if this function correctly handles, for example,
+ * parsing "\xFF" into a (signed) char.  Whoever thought of making
+ * the "sign" of a "char" undefined is a complete moron.  Oh well.
+ */
+void text_to_ascii(char *buf, cptr str)
+{
+    char *s = buf;
+
+    /* Analyze the "ascii" string */
+    while (*str) {
+
+	/* Backslash codes */
+	if (*str == '\\') {
+
+	    /* Skip the backslash */
+	    str++;
+
+	    /* Hex-mode XXX */
+	    if (*str == 'x') {
+		*s = 16 * dehex(*++str);
+		*s++ += dehex(*++str);
+	    }
+
+	    /* Hack -- simple way to specify "backslash" */
+	    else if (*str == '\\') {
+		*s++ = '\\';
+	    }
+	    
+	    /* Hack -- simple way to specify "caret" */
+	    else if (*str == '^') {
+		*s++ = '^';
+	    }
+	    
+	    /* Hack -- simple way to specify "space" */
+	    else if (*str == 's') {
+		*s++ = ' ';
+	    }
+	    
+	    /* Hack -- simple way to specify Escape */
+	    else if (*str == 'e') {
+		*s++ = ESCAPE;
+	    }
+
+	    /* Backspace */
+	    else if (*str == 'b') {
+		*s++ = '\b';
+	    }
+	    
+	    /* Newline */
+	    else if (*str == 'n') {
+		*s++ = '\n';
+	    }
+
+	    /* Return */
+	    else if (*str == 'r') {
+		*s++ = '\r';
+	    }
+
+	    /* Tab */
+	    else if (*str == 't') {
+		*s++ = '\t';
+	    }
+
+	    /* Octal-mode */
+	    else if (*str == '0') {
+		*s = 8 * deoct(*++str);
+		*s++ += deoct(*++str);
+	    }
+
+	    /* Octal-mode */
+	    else if (*str == '1') {
+		*s = 64 + 8 * deoct(*++str);
+		*s++ += deoct(*++str);
+	    }
+
+	    /* Octal-mode */
+	    else if (*str == '2') {
+		*s = 64 * 2 + 8 * deoct(*++str);
+		*s++ += deoct(*++str);
+	    }
+
+	    /* Octal-mode */
+	    else if (*str == '3') {
+		*s = 64 * 3 + 8 * deoct(*++str);
+		*s++ += deoct(*++str);
+	    }
+
+	    /* Skip the final char */
+	    str++;
+	}
+
+	/* Normal Control codes */
+	else if (*str == '^') {
+	    str++;
+	    *s++ = (*str++ & 037);
+	}
+
+	/* Normal chars */
+	else {
+	    *s++ = *str++;
+	}
+    }
+
+    /* Terminate */
+    *s = '\0';
+}
+
+
+/*
+ * Hack -- convert a string into a printable form
+ */
+void ascii_to_text(char *buf, cptr str)
+{
+    char *s = buf;
+
+    /* Analyze the "ascii" string */
+    while (*str) {
+
+	uint i = *str++;
+	
+	if (i == ESCAPE) {
+	    *s++ = '\\';
+	    *s++ = 'e';
+	}
+	else if (i == ' ') {
+	    *s++ = '\\';
+	    *s++ = 's';
+	}
+	else if (i == '\b') {
+	    *s++ = '\\';
+	    *s++ = 'b';
+	}
+	else if (i == '\t') {
+	    *s++ = '\\';
+	    *s++ = 't';
+	}
+	else if (i == '\n') {
+	    *s++ = '\\';
+	    *s++ = 'n';
+	}
+	else if (i == '\r') {
+	    *s++ = '\\';
+	    *s++ = 'r';
+	}
+	else if (i == '^') {
+	    *s++ = '\\';
+	    *s++ = '^';
+	}
+	else if (i == '\\') {
+	    *s++ = '\\';
+	    *s++ = '\\';
+	}
+	else if (i < 32) {
+	    *s++ = '^';
+	    *s++ = i + 64;
+	}
+	else if (i < 127) {
+	    *s++ = i;
+	}
+	else if (i < 64) {
+	    *s++ = '\\';
+	    *s++ = '0';
+	    *s++ = octify(i / 8);
+	    *s++ = octify(i % 8);
+	}
+	else {
+	    *s++ = '\\';
+	    *s++ = 'x';
+	    *s++ = hexify(i / 16);
+	    *s++ = hexify(i % 16);
+	}
+    }
+
+    /* Terminate */
+    *s = '\0';
+}
 
 
 
@@ -78,7 +294,10 @@ char inkey(void)
     int  dir;
     int  shift_flag, ctrl_flag;
 
+    
+    /* Flush the output */
     Term_fresh();
+
     command_count = 0;
 
     do {
@@ -89,6 +308,7 @@ char inkey(void)
     if (dir != -1)
 	ch = '0' + dir;
 
+    /* Return the keypress */
     return (ch);
 }
 #else
@@ -197,7 +417,7 @@ char inkeydir()
  *
  * These messages are kept for later reference.	
  */
-void msg_print(cptr str_buff)
+void msg_print(cptr msg)
 {
     char   in_char;
     static len = 0;
@@ -206,39 +426,42 @@ void msg_print(cptr str_buff)
     /* Old messages need verification */
     if (msg_flag) {
 
-	if (str_buff && (len + strlen(str_buff)) > 72) {
+	if (msg && (len + strlen(msg)) > 72) {
+
 	/* ensure that the complete -more- message is visible. */
-	    if (len > 73)
-		len = 73;
+	    if (len > 73) len = 73;
 	    put_str(" -more-", MSG_LINE, len);
+
 	/* let sigint handler know that we are waiting for a space */
 	    wait_for_more = 1;
+
 	    do {
 		in_char = inkey();
 	    } while ((in_char != ' ') && (in_char != ESCAPE) && (in_char != '\n') &&
 		     (in_char != '\r') && (!quick_messages));
+
 	    len = 0;
 	    wait_for_more = 0;
 	    (void)move(MSG_LINE, 0);
 	    clrtoeol();
 
 	/* Make the null string a special case.  -CJS- */
-	    if (str_buff) {
-		put_str(str_buff, MSG_LINE, 0);
+	    if (msg) {
+		put_str(msg, MSG_LINE, 0);
 		command_count = 0;
 		last_msg++;
 		if (last_msg >= MAX_SAVE_MSG)
 		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], str_buff, VTYPESIZ);
+		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
 		old_msg[last_msg][VTYPESIZ - 1] = '\0';
-		len = strlen(str_buff) + 1;
+		len = strlen(msg) + 1;
 		msg_flag = TRUE;
 	    } else {
 		len = 0;
 		msg_flag = FALSE;
 	    }
 	} else {
-	    if (!str_buff) {
+	    if (!msg) {
 		if (len > 73)
 		    len = 73;
 		put_str(" -more-", MSG_LINE, len);
@@ -254,13 +477,13 @@ void msg_print(cptr str_buff)
 		clrtoeol();
 		msg_flag = FALSE;
 	    } else {
-		put_str(str_buff, MSG_LINE, len);
-		len += strlen(str_buff) + 1;
+		put_str(msg, MSG_LINE, len);
+		len += strlen(msg) + 1;
 		command_count = 0;
 		last_msg++;
 		if (last_msg >= MAX_SAVE_MSG)
 		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], str_buff, VTYPESIZ);
+		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
 		old_msg[last_msg][VTYPESIZ - 1] = '\0';
 		msg_flag = TRUE;
 	    }
@@ -268,14 +491,14 @@ void msg_print(cptr str_buff)
     } else {
 	(void)move(MSG_LINE, 0);
 	clrtoeol();
-	if (str_buff) {
-	    put_str(str_buff, MSG_LINE, 0);
+	if (msg) {
+	    put_str(msg, MSG_LINE, 0);
 	    command_count = 0;
-	    len = strlen(str_buff) + 1;
+	    len = strlen(msg) + 1;
 	    last_msg++;
 	    if (last_msg >= MAX_SAVE_MSG)
 		last_msg = 0;
-	    (void)strncpy(old_msg[last_msg], str_buff, VTYPESIZ);
+	    (void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
 	    old_msg[last_msg][VTYPESIZ - 1] = '\0';
 	    msg_flag = TRUE;
 	} else {
@@ -466,37 +689,18 @@ int get_com(cptr prompt, char *command)
     return (*command != ESCAPE);
 }
 
-#ifdef MACINTOSH
-/* Same as get_com(), but translates direction keys from keypad */
-int get_comdir(char *prompt, char *command)
-{
-    int res;
-
-    if (prompt)
-	prt(prompt, 0, 0);
-    *command = inkeydir();
-    if (*command == 0 || *command == ESCAPE)
-	res = FALSE;
-    else
-	res = TRUE;
-    erase_line(MSG_LINE, 0);
-    return (res);
-}
-
-#endif
 
 /*
  * Gets a string terminated by <RETURN>, and return TRUE.
- * Function returns false if <ESCAPE> is input
+ * Function returns false if <ESCAPE> is input.
+ * Hack -- force legal col and len values
  */
 int get_string(char *buf, int row, int col, int len)
 {
-    register int i, x1, x2;
-    char        *p;
-    int          flag, aborted;
+    register int i, k, x1, x2;
+    int done;
 
-    aborted = FALSE;
-    flag = FALSE;
+
     (void)move(row, col);
     for (i = len; i > 0; i--)
 	(void)addch(' ');
@@ -509,54 +713,52 @@ int get_string(char *buf, int row, int col, int len)
 	len = 80 - x1;
 	x2 = 80 - 1;
     }
-    p = buf;
-    do {
+
+    /* Erase the "answer box" and place the cursor */
+    Term_erase(x1, row, x2, row);
+
+    /* Assume no answer (yet) */
+    buf[0] = '\0';
+
+    /* Process input */    
+    for (k = 0, done = 0; !done; ) {
+
 	i = inkey();
 
 	switch (i) {
 
 	  case ESCAPE:
-	    aborted = TRUE;
-	    break;
+	    return (FALSE);
 	  case CTRL('J'):
 	  case CTRL('M'):
-	    flag = TRUE;
+	    done = TRUE;
 	    break;
-	  case DELETE:
 	  case CTRL('H'):
-	    if (col > x1) {
-		col--;
-		put_str(" ", row, col);
-		move_cursor(row, col);
-		*--p = '\0';
+	  case DELETE:
+	    if (k > 0) {
+		buf[--k] = '\0';
+		Term_erase(x1 + k, row, x2, row);
 	    }
 	    break;
 
 	  default:
-	    if (!isprint(i) || col > x2) {
-		bell();
+	    if ((k < len) && (isprint(i))) {
+		Term_putch(x1 + k, row, TERM_WHITE, i);
+		buf[k++] = i;
+		buf[k] = '\0';
 	    }
 	    else {
-#ifdef MACINTOSH
-		DSetScreenCursor(col, row);
-		DWriteScreenCharAttr((char)i, ATTR_NORMAL);
-#else
-		use_value2          mvaddch(row, col, (char)i);
-
-#endif
-		*p++ = i;
-		col++;
+		bell();
 	    }
 	    break;
 	}
-    } while ((!flag) && (!aborted));
-    if (aborted) return (FALSE);
+    }
 
     /* Remove trailing blanks */
-    while ((p > buf) && (p[-1] == ' ')) p--;
+    while ((k > 0) && (buf[k-1] == ' ')) k--;
 
     /* Terminate it */
-    *p = '\0';
+    buf[k] = '\0';
 
     /* Return the result */
     return (TRUE);
@@ -592,34 +794,7 @@ void pause_line(int prt_line)
 }
 
 
-/* Pauses for user response before returning		-RAK-	 */
-/* NOTE: Delay is for players trying to roll up "perfect"	 */
-/* characters.  Make them wait a bit.			 */
-void pause_exit(int prt_line, int delay)
-{
-    char dummy;
 
-    prt("[Press any key to continue, or Q to exit.]", prt_line, 10);
-    dummy = inkey();
-    if (dummy == 'Q') {
-	erase_line(prt_line, 0);
-#ifndef MSDOS			   /* PCs are slow enough as is  -dgk */
-	if (delay > 0)
-	    (void)sleep((unsigned)delay);
-#else
-    /* prevent message about delay unused */
-	dummy = delay;
-#endif
-#ifdef MACINTOSH
-	enablefilemenu(FALSE);
-	exit_game();
-	enablefilemenu(TRUE);
-#else
-	exit_game();
-#endif
-    }
-    erase_line(prt_line, 0);
-}
 
 /*
  * Save and restore the screen -- no flushing
@@ -640,168 +815,5 @@ void restore_screen()
 }
 
 
-
-
-/* definitions used by screen_map() */
-/* index into border character array */
-#define TL 0			   /* top left */
-#define TR 1
-#define BL 2
-#define BR 3
-#define HE 4			   /* horizontal edge */
-#define VE 5
-
-/* character set to use */
-#ifdef MSDOS
-# ifdef ANSI
-#   define CH(x)	(ansi ? screen_border[0][x] : screen_border[1][x])
-# else
-#   define CH(x)	(screen_border[1][x])
-# endif
-#else
-#   define CH(x)	(screen_border[0][x])
-#endif
-
-/* Display highest priority object in the RATIO by RATIO area */
-#define	RATIO 3
-
-void screen_map()
-{
-    register int i, j;
-    static byte screen_border[2][6] = {
-    {'+', '+', '+', '+', '-', '|'},	/* normal chars */
-    {201, 187, 200, 188, 205, 186}	/* graphics chars */
-    };
-    byte map[MAX_WIDTH / RATIO + 1];
-    byte tmp;
-    int   priority[256];
-    int   row, orow, col, myrow = 0, mycol = 0;
-
-#ifndef MACINTOSH
-    char  prntscrnbuf[80];
-
-#endif
-
-    for (i = 0; i < 256; i++)
-	priority[i] = 0;
-    priority['<'] = 5;
-    priority['>'] = 5;
-    priority['@'] = 10;
-#ifdef MSDOS
-    priority[wallsym] = (-5);
-    priority[floorsym] = (-10);
-    priority['±'] = (-1);
-#else
-    priority['#'] = (-5);
-    priority['.'] = (-10);
-    priority['x'] = (-1);
-#endif
-    priority['\''] = (-3);
-    priority[' '] = (-15);
-
-    save_screen();
-    clear_screen();
-#ifdef MACINTOSH
-    DSetScreenCursor(0, 0);
-    DWriteScreenCharAttr(CH(TL), ATTR_NORMAL);
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	DWriteScreenCharAttr(CH(HE), ATTR_NORMAL);
-    DWriteScreenCharAttr(CH(TR), ATTR_NORMAL);
-#else
-    use_value2          mvaddch(0, 0, CH(TL));
-
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	(void)addch(CH(HE));
-    (void)addch(CH(TR));
-#endif
-    orow = (-1);
-    map[MAX_WIDTH / RATIO] = '\0';
-    for (i = 0; i < MAX_HEIGHT; i++) {
-	row = i / RATIO;
-	if (row != orow) {
-	    if (orow >= 0) {
-#ifdef MACINTOSH
-		DSetScreenCursor(0, orow + 1);
-		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-		DWriteScreenString(map);
-		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-#else
-	    /* can not use mvprintw() on ibmpc, because PC-Curses is horribly
-	     * written, and mvprintw() causes the fp emulation library to be
-	     * linked with PC-Moria, makes the program 10K bigger 
-	     */
-		(void)sprintf(prntscrnbuf, "%c%s%c",
-			      CH(VE), map, CH(VE));
-		use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
-
-#endif
-	    }
-	    for (j = 0; j < MAX_WIDTH / RATIO; j++)
-		map[j] = ' ';
-	    orow = row;
-	}
-	for (j = 0; j < MAX_WIDTH; j++) {
-	    col = j / RATIO;
-	    tmp = loc_symbol(i, j);
-	    if (priority[map[col]] < priority[tmp])
-		map[col] = tmp;
-	    if (map[col] == '@') {
-		mycol = col + 1;   /* account for border */
-		myrow = row + 1;
-	    }
-	}
-    }
-    if (orow >= 0) {
-#ifdef MACINTOSH
-	DSetScreenCursor(0, orow + 1);
-	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-	DWriteScreenString(map);
-	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-#else
-	(void)sprintf(prntscrnbuf, "%c%s%c",
-		      CH(VE), map, CH(VE));
-	use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
-
-#endif
-    }
-#ifdef MACINTOSH
-    DSetScreenCursor(0, orow + 2);
-    DWriteScreenCharAttr(CH(BL), ATTR_NORMAL);
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	DWriteScreenCharAttr(CH(HE), ATTR_NORMAL);
-    DWriteScreenCharAttr(CH(BR), ATTR_NORMAL);
-#else
-    use_value2          mvaddch(orow + 2, 0, CH(BL));
-
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	(void)addch(CH(HE));
-    (void)addch(CH(BR));
-#endif
-
-#ifdef MACINTOSH
-    DSetScreenCursor(23, 23);
-    DWriteScreenStringAttr("Hit any key to continue", ATTR_NORMAL);
-    if (mycol > 0)
-	DSetScreenCursor(mycol, myrow);
-#else
-    use_value2          mvaddstr(23, 23, "Hit any key to continue");
-
-    if (mycol > 0)
-	(void)move(myrow, mycol);
-#endif
-    (void)inkey();
-    restore_screen();
-}
-
-
-/* Print a message so as not to interrupt a counted command. -CJS- */
-void count_msg_print(cptr p)
-{
-    int i;
-
-    i = command_count;
-    msg_print(p);
-    command_count = i;
-}
 
 

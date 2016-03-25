@@ -1991,3 +1991,13 @@ void do_cmd_check_uniques()
 
 
 
+
+/* Print a message so as not to interrupt a counted command. -CJS- */
+void count_msg_print(cptr p)
+{
+    int i;
+
+    i = command_count;
+    msg_print(p);
+    command_count = i;
+}
