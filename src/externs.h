@@ -736,7 +736,7 @@ void corrode_gas(cptr);
 void poison_gas(int, cptr);
 void fire_dam(int, cptr);
 void cold_dam(int, cptr);
-void light_dam(int, cptr);
+void elec_dam(int, cptr);
 void acid_dam(int, cptr);
 void darken_player(int, int);
 

@@ -905,7 +905,7 @@ void move_player(int dir, int do_pickup)
     if (mmove(dir, &y, &x)) {	   /* Legal move?	      */
 
     /* Examine the destination */    
-	c_ptr = &cave[y][x];
+    c_ptr = &cave[y][x];
 
     /* if there is no creature, or an unlit creature in the walls then... */
     /* disallow attacks against unlit creatures in walls because moving into

@@ -2843,7 +2843,7 @@ void lite_line(int dir, int y, int x)
 	}
     /* set pl in case tl was true above */
 	c_ptr->pl = TRUE;
-	mon_light_dam(y, x, damroll(6, 8));
+	mon_elec_dam(y, x, damroll(6, 8));
 	(void)mmove(dir, &y, &x);
     }
     while (!flag);
@@ -3465,7 +3465,7 @@ int lite_area(int y, int x, int dam, int rad)	   /* Expanded -DGK */
 		cave[i][j].pl = TRUE;
 		lite_spot(i, j);
 		if (dam)
-		    mon_light_dam(i, j, dam / (rad == 0 ? 1 : rad));
+		    mon_elec_dam(i, j, dam / (rad == 0 ? 1 : rad));
 	    }
     return (TRUE);
 }
@@ -3617,7 +3617,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		      case GF_ELEC:
 			if (blind)
 			    msg_print("You are hit by electricity!");
-			light_dam(dam_hp, ddesc);
+			elec_dam(dam_hp, ddesc);
 			break;
 		      case GF_POIS:
 			if (blind)
@@ -4120,7 +4120,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    dam = 1600;
 			switch (typ) {
 			  case GF_ELEC:
-			    light_dam(dam, ddesc);
+			    elec_dam(dam, ddesc);
 			    break;
 			  case GF_POIS:
 			    poison_gas(dam, ddesc);

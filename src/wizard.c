@@ -808,7 +808,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Light? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_RES_LT;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_RES_LITE;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Dark? [yn]: ", &ch)) {
@@ -820,7 +820,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Disenchantment? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_RES_DISENCHANT;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_RES_DISEN;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Shards? [yn]: ", &ch)) {

@@ -254,9 +254,9 @@ static void get_moves(int m_idx, int *mm)
  */
 
     /* Apply fear if possible and necessary */
-    if (((s16b)(p_ptr->misc.lev - 34 - r_list[(m_list[monptr]).mptr].level +
-		 ((m_list[monptr].maxhp) % 8)) > 0)
-	|| m_list[monptr].monfear) { /* Run away!  Run away! -DGK */
+    if (((s16b)(p_ptr->misc.lev - 34 - r_list[(m_list[m_idx]).mptr].level +
+		 ((m_list[m_idx].maxhp) % 8)) > 0)
+	|| m_list[m_idx].monfear) { /* Run away!  Run away! -DGK */
     
 	/* XXX Not very "bright" */
 	y = (-y);     /* FIXME: make monsters running away more intelligent */
@@ -641,6 +641,7 @@ static void br_wall(int mon_y, int mon_x)
 	if (!kill) break;
     }
 
+    /* Random message */
     switch (randint(3)) {
       case 1:
 	msg_print("The cave ceiling collapses!");
@@ -725,14 +726,14 @@ static void br_wall(int mon_y, int mon_x)
 /*
  * Make an attack on the player (chuckle.)		-RAK-	 
  */
-static void make_attack(int monptr)
+static void make_attack(int m_idx)
 {
     int                    attype, adesc, adice, asides;
     int                    i, j, damage, flag, attackn, notice, visible;
     int                    shatter = FALSE;
-    int                    CUT = FALSE, STUN = FALSE;
+    int                    do_cut, do_stun;
     s32b                  gold;
-    u16b                   *attstr, *attstr_orig;
+    u16b                  *ap, *ap_orig;
     vtype                  cdesc, tmp_str, ddesc;
 
     register monster_race	*r_ptr;
@@ -747,7 +748,7 @@ static void make_attack(int monptr)
     /* don't beat a dead body! */
     if (death) return;
 
-    m_ptr = &m_list[monptr];
+    m_ptr = &m_list[m_idx];
     r_ptr = &r_list[m_ptr->mptr];
 
     if (r_ptr->cdefense & MF2_DESTRUCT) shatter = TRUE;
@@ -771,17 +772,17 @@ static void make_attack(int monptr)
     /* End DIED_FROM		   */
 
     attackn = 0;
-    attstr = r_ptr->damage;
-    attstr_orig = attstr;
+    ap = r_ptr->damage;
+    ap_orig = ap;
 
-    /* if has no attacks (*attstr starts off 0), still loop once */
+    /* if has no attacks (*ap starts off 0), still loop once */
     /* to accumulate notices that it has no attacks - dbd */
-    while ((*attstr != 0 || attstr == attstr_orig) && !death && !blinked) {
-	attype = a_list[*attstr].attack_type;
-	adesc = a_list[*attstr].attack_desc;
-	adice = a_list[*attstr].attack_dice;
-	asides = a_list[*attstr].attack_sides;
-	attstr++;
+    while ((*ap != 0 || ap == ap_orig) && !death && !blinked) {
+	attype = a_list[*ap].attack_type;
+	adesc = a_list[*ap].attack_desc;
+	adice = a_list[*ap].attack_dice;
+	asides = a_list[*ap].attack_sides;
+	ap++;
 	flag = FALSE;
 
 	/* Random (100) + level > 50 chance for stop any attack added */
@@ -793,6 +794,7 @@ static void make_attack(int monptr)
 	    attype = 99;
 	    adesc = 99;
 	}
+
 	switch (attype) {
 	  case 1:		   /* Normal attack  */
 	    if (test_hit(60, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
@@ -942,21 +944,21 @@ static void make_attack(int monptr)
 	    (void)strcpy(tmp_str, cdesc);
 
 	    /* No cut or stun yet */
-	    CUT = STUN = FALSE;
+	    do_cut = do_stun = 0;
 
 	    switch (adesc) {
 	      case 1:
 		msg_print(strcat(tmp_str, "hits you."));
-		CUT = TRUE;
-		STUN = TRUE;
+		do_cut = 1;
+		do_stun = 1;
 		break;
 	      case 2:
 		msg_print(strcat(tmp_str, "bites you."));
-		CUT = TRUE;
+		do_cut = 1;
 		break;
 	      case 3:
 		msg_print(strcat(tmp_str, "claws you."));
-		CUT = TRUE;
+		do_cut = 1;
 		break;
 	      case 4:
 		msg_print(strcat(tmp_str, "stings you."));
@@ -1000,7 +1002,7 @@ static void make_attack(int monptr)
 		break;
 	      case 17:
 		msg_print(strcat(tmp_str, "tramples you."));
-		STUN = TRUE;
+		do_stun = 1;
 		break;
 	      case 18:
 		msg_print(strcat(tmp_str, "drools on you."));
@@ -1038,11 +1040,11 @@ static void make_attack(int monptr)
 		break;
 	      case 20:
 		msg_print(strcat(tmp_str, "butts you."));
-		STUN = TRUE;
+		do_stun = 1;
 		break;
 	      case 21:
 		msg_print(strcat(tmp_str, "charges you."));
-		STUN = TRUE;
+		do_stun = 1;
 		break;
 	      case 22:
 		msg_print(strcat(tmp_str, "engulfs you."));
@@ -1186,7 +1188,7 @@ static void make_attack(int monptr)
 	      /* Lightning attack */
 	      case 8:
 		msg_print("Lightning strikes you!");
-		light_dam(damage, ddesc);
+		elec_dam(damage, ddesc);
 		break;
 
 	      /* Corrosion attack */
@@ -1253,7 +1255,7 @@ static void make_attack(int monptr)
 		if (rand_int(2)) {
 		    msg_print("There is a puff of smoke!");
 		    blinked = 1;   /* added -CFT */
-		    teleport_away(monptr, MAX_SIGHT);
+		    teleport_away(m_idx, MAX_SIGHT);
 		}
 		break;
 
@@ -1297,7 +1299,7 @@ static void make_attack(int monptr)
 		if (randint(3) == 1) {
 		    msg_print("There is a puff of smoke!");
 		    blinked = 1;   /* added -CFT */
-		    teleport_away(monptr, MAX_SIGHT);
+		    teleport_away(m_idx, MAX_SIGHT);
 		}
 
 		break;
@@ -1555,45 +1557,45 @@ static void make_attack(int monptr)
 		break;
 	    }
 
-	    if (CUT && STUN) {
+	    if (do_cut && do_stun) {
 		switch (randint(2)) {
 		  case 1:
-		    CUT = FALSE;
+		    do_cut = FALSE;
 		    break;
 		  case 2:
-		    STUN = FALSE;
+		    do_stun = FALSE;
 		    break;
 		}
 	    }
 	    switch (monster_critical(adice, asides, damage)) {
 	      case 0: break;
 	      case 1:
-		if (CUT) cut_player(randint(5));
-		else if (STUN)  stun_player(randint(5));
+		if (do_cut) cut_player(randint(5));
+		else if (do_stun)  stun_player(randint(5));
 		break;
 	      case 2:
-		if (CUT) cut_player(randint(5) + 5);
-		else if (STUN)  stun_player(randint(5) + 5);
+		if (do_cut) cut_player(randint(5) + 5);
+		else if (do_stun)  stun_player(randint(5) + 5);
 		break;
 	      case 3:
-		if (CUT) cut_player(randint(30) + 20);
-		else if (STUN) stun_player(randint(20) + 10);
+		if (do_cut) cut_player(randint(30) + 20);
+		else if (do_stun) stun_player(randint(20) + 10);
 		break;
 	      case 4:
-		if (CUT) cut_player(randint(70) + 30);
-		else if (STUN) stun_player(randint(40) + 30);
+		if (do_cut) cut_player(randint(70) + 30);
+		else if (do_stun) stun_player(randint(40) + 30);
 		break;
 	      case 5:
-		if (CUT) cut_player(randint(250) + 50);
-		else if (STUN) stun_player(randint(50) + 40);
+		if (do_cut) cut_player(randint(250) + 50);
+		else if (do_stun) stun_player(randint(50) + 40);
 		break;
 	      case 6:
-		if (CUT) cut_player(300);
-		else if (STUN) stun_player(randint(60) + 57);
+		if (do_cut) cut_player(300);
+		else if (do_stun) stun_player(randint(60) + 57);
 		break;
 	      default:
-		if (CUT) cut_player(5000);
-		else if (STUN) stun_player(100 + randint(10));
+		if (do_cut) cut_player(5000);
+		else if (do_stun) stun_player(100 + randint(10));
 		break;
 	    }
 
@@ -1658,19 +1660,20 @@ static void make_attack(int monptr)
 /*
  * Make the move if possible, five choices		-RAK-	
  */
-static void make_move(int monptr, int *mm, u32b *rcmove)
+static void make_move(int m_idx, int *mm, u32b *rcmove)
 {
     u32b                movebits;
     register cave_type    *c_ptr;
+    register inven_type   *i_ptr;
     register monster_type *m_ptr;
-    register inven_type   *t_ptr;
+    register monster_race *r_ptr;
 
     int                   i, newy, newx;
 
-    int stuck_door;
+    bool stuck_door = FALSE;
 
-    int do_move = FALSE;
-    int do_turn = FALSE;
+    bool do_turn = FALSE;
+    bool do_move = FALSE;
 
 
 
@@ -1681,7 +1684,9 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 
     i = 0;
 
-    m_ptr = &m_list[monptr];
+    /* Access the monster */
+    m_ptr = &m_list[m_idx];
+    r_ptr = &r_list[m_ptr->mptr];
     movebits = r_list[m_ptr->mptr].cmove;
 
     do {
@@ -1696,7 +1701,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 
 	if ((i == 4) && (m_ptr->monfear) &&  /* cornered (or things in the way!) -CWS */
 	    ((c_ptr->fval > MAX_OPEN_SPACE) || (c_ptr->cptr > 1))) {
-	    monster_race      *r_ptr = &r_list[m_ptr->mptr];
+
 	    vtype               m_name, out_val;
 	    
 	    m_ptr->monfear = 0;
@@ -1708,6 +1713,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 	    break;		/* don't try to actually do anything -CWS */
 	}
 
+	/* XXX Ignore requests to move through boundary walls */
 	if (c_ptr->fval != BOUNDARY_WALL) {
 
 	/* Floor is open? */
@@ -1726,18 +1732,19 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 	/* Crunch up those Walls Morgoth and Umber Hulks!!!! */
 	else if (r_list[m_ptr->mptr].cdefense & MF2_BREAK_WALL) {
 
-		t_ptr = &t_list[c_ptr->tptr];
+		i_ptr = &t_list[c_ptr->tptr];
 	    do_move = TRUE;
 
+	    /* XXX Hack -- assume the player can see it */
 		l_list[m_ptr->mptr].r_cdefense |= MF2_BREAK_WALL;
 
 	    /* Hack -- break open doors */
-	    if ((t_ptr->tval == TV_CLOSED_DOOR) ||
-		(t_ptr->tval == TV_SECRET_DOOR)) {
+	    if ((i_ptr->tval == TV_CLOSED_DOOR) ||
+		(i_ptr->tval == TV_SECRET_DOOR)) {
 
 		/* Hack -- break the door */
-		invcopy(t_ptr, OBJ_OPEN_DOOR);
-		t_ptr->p1 = (-1);          /* make it broken, not just open */
+		invcopy(i_ptr, OBJ_OPEN_DOOR);
+		i_ptr->p1 = (-1);          /* make it broken, not just open */
 		c_ptr->fval = CORR_FLOOR;	        /* change floor setting */
 
 		/* Redraw door */
@@ -1756,39 +1763,39 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 
 	/* Creature can open doors? */
 	else if (c_ptr->tptr != 0) {
-		t_ptr = &t_list[c_ptr->tptr];
+		i_ptr = &t_list[c_ptr->tptr];
 
 	    /* Creature can open doors. */
 	    if (movebits & CM_OPEN_DOOR) {
 
 		stuck_door = FALSE;
 
-		if (t_ptr->tval == TV_CLOSED_DOOR) {
+		if (i_ptr->tval == TV_CLOSED_DOOR) {
 
 		    do_turn = TRUE;
 
 		    /* XXX Hack -- scared monsters can open locked/stuck doors */
-		    if ((m_ptr->monfear) && randint(2) == 1) {
-			t_ptr->p1 = 0;
+		    if ((m_ptr->monfear) && rand_int(2)) {
+			i_ptr->p1 = 0;
 		    }
 
 		    /* Closed door */
-		    if (t_ptr->p1 == 0) {
+		    if (i_ptr->p1 == 0) {
 			do_move = TRUE;
 		    }
 
 		    /* Locked doors */
-		    else if (t_ptr->p1 > 0) {
-			if (randint((m_ptr->hp + 1) * (50 + t_ptr->p1)) <
-			    40 * (m_ptr->hp - 10 - t_ptr->p1)) {
-			    t_ptr->p1 = 0;
+		    else if (i_ptr->p1 > 0) {
+			if (randint((m_ptr->hp + 1) * (50 + i_ptr->p1)) <
+			    40 * (m_ptr->hp - 10 - i_ptr->p1)) {
+			    i_ptr->p1 = 0;
 			}
 		    }
 
 		    /* Stuck doors */
-		    else if (t_ptr->p1 < 0) {
-			if (randint((m_ptr->hp + 1) * (50 - t_ptr->p1)) <
-			    40 * (m_ptr->hp - 10 + t_ptr->p1)) {
+		    else if (i_ptr->p1 < 0) {
+			if (randint((m_ptr->hp + 1) * (50 - i_ptr->p1)) <
+			    40 * (m_ptr->hp - 10 + i_ptr->p1)) {
 			    msg_print("You hear a door burst open!");
 			    disturb(1, 0);
 			    stuck_door = TRUE;
@@ -1798,7 +1805,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 		}
 
 		/* Hack -- monsters open secret doors */
-		else if (t_ptr->tval == TV_SECRET_DOOR) {
+		else if (i_ptr->tval == TV_SECRET_DOOR) {
 		    do_turn = TRUE;
 		    do_move = TRUE;
 		}
@@ -1808,10 +1815,10 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 		if (do_move) {
 
 		    /* XXX Should create a new object XXX */
-		    invcopy(t_ptr, OBJ_OPEN_DOOR);
+		    invcopy(i_ptr, OBJ_OPEN_DOOR);
 
 		    /* 50% chance of breaking door */
-		    if (stuck_door) t_ptr->p1 = 1 - randint(2);
+		    if (stuck_door) i_ptr->p1 = 1 - randint(2);
 
 			c_ptr->fval = CORR_FLOOR;
 
@@ -1828,16 +1835,16 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 	    /* Creature can not open doors, must bash them   */
 	    else {
 
-		if (t_ptr->tval == TV_CLOSED_DOOR) {
+		if (i_ptr->tval == TV_CLOSED_DOOR) {
 		    do_turn = TRUE;
-		    if (randint((m_ptr->hp + 1) * (80 + MY_ABS(t_ptr->p1))) <
-			40 * (m_ptr->hp - 20 - MY_ABS(t_ptr->p1))) {
+		    if (randint((m_ptr->hp + 1) * (80 + MY_ABS(i_ptr->p1))) <
+			40 * (m_ptr->hp - 20 - MY_ABS(i_ptr->p1))) {
 
 			/* XXX Should create a new object XXX */
-			invcopy(t_ptr, OBJ_OPEN_DOOR);
+			invcopy(i_ptr, OBJ_OPEN_DOOR);
 
 			/* 50% chance of breaking door */
-			t_ptr->p1 = 0 - rand_int(2);
+			i_ptr->p1 = 0 - rand_int(2);
 
 			c_ptr->fval = CORR_FLOOR;
 
@@ -1880,8 +1887,8 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 		 * next to character this same turn 
 		 */
 		    if (!m_ptr->ml)
-			update_mon(monptr);
-		    make_attack(monptr);
+			update_mon(m_idx);
+		    make_attack(m_idx);
 		    do_move = FALSE;
 		    do_turn = TRUE;
 		}
@@ -1905,7 +1912,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
     			    *rcmove |= CM_EATS_OTHER;
 #endif
 			/* It ate an already processed monster. Handle normally. */
-			if (monptr < c_ptr->cptr)
+			if (m_idx < c_ptr->cptr)
 			    delete_monster((int)c_ptr->cptr);
 		    /*
 		     * If it eats this monster, an already processed monster
@@ -1974,7 +1981,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
 			    vtype               m_name, out_val, i_name;
 			    int                 ii, split = (-1);
 
-			    update_mon(monptr);	/* make sure ml see right -CFT */
+			    update_mon(m_idx);	/* make sure ml see right -CFT */
 			    if ((m_ptr->ml) && los(char_row, char_col, m_ptr->fy,
 						   m_ptr->fx)) {
 			    /* if we can see it, tell us what happened -CFT */
@@ -2018,7 +2025,7 @@ static void make_move(int monptr, int *mm, u32b *rcmove)
  * cast_spell = true if creature changes position
  * took_turn  = true if creature casts a spell		 
  */
-static void mon_cast_spell(int monptr, int *took_turn)
+static void mon_cast_spell(int m_idx, int *took_turn)
 {
     u32b		i;
     int			y, x;
@@ -2042,7 +2049,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
     if (death) return;
 
     /* Access the monster */
-    m_ptr = &m_list[monptr];
+    m_ptr = &m_list[m_idx];
     r_ptr = &r_list[m_ptr->mptr];
     sex = r_ptr->gender;
 
@@ -2070,7 +2077,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	*took_turn = TRUE;
 
     /* Check to see if monster should be lit. */
-	update_mon(monptr);
+	update_mon(m_idx);
 
     /* Describe the attack */
 	if (m_ptr->ml) {
@@ -2126,13 +2133,13 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	  case 5:		   /* Teleport Short */
 	    (void)strcat(cdesc, "blinks away.");
 	    msg_print(cdesc);
-	    teleport_away(monptr, 5);
+	    teleport_away(m_idx, 5);
 	    break;
 
 	  case 6:		   /* Teleport Long */
 	    (void)strcat(cdesc, "teleports away.");
 	    msg_print(cdesc);
-	    teleport_away(monptr, MAX_SIGHT);
+	    teleport_away(m_idx, MAX_SIGHT);
 	    break;
 
 	  case 7:		   /* Teleport To	 */
@@ -2230,8 +2237,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
-	    hack_m_idx = monptr;
+	/* in case compact_monster() is called,it needs m_idx */
+	    hack_m_idx = m_idx;
 	    (void)summon_monster(&y, &x, FALSE);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
@@ -2243,8 +2250,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
-	    hack_m_idx = monptr;
+	/* in case compact_monster() is called,it needs m_idx */
+	    hack_m_idx = m_idx;
 	    (void)summon_undead(&y, &x);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
@@ -2296,8 +2303,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
-	    hack_m_idx = monptr;
+	/* in case compact_monster() is called,it needs m_idx */
+	    hack_m_idx = m_idx;
 	    (void)summon_demon(r_list[m_ptr->mptr].level, &y, &x);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
@@ -2309,8 +2316,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
-	    hack_m_idx = monptr;
+	/* in case compact_monster() is called,it needs m_idx */
+	    hack_m_idx = m_idx;
 	    (void)summon_dragon(&y, &x);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
@@ -2322,7 +2329,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_ELEC, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 21:		   /* Breath Gas	 */
@@ -2330,7 +2337,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you inhale noxious gases.");
 	    msg_print(cdesc);
 	    breath(GF_POIS, char_row, char_col,
-		((m_ptr->hp / 3) > 800 ? 800 : (m_ptr->hp / 3)), ddesc, monptr);
+		((m_ptr->hp / 3) > 800 ? 800 : (m_ptr->hp / 3)), ddesc, m_idx);
 	    break;
 
 	  case 22:		   /* Breath Acid	 */
@@ -2339,7 +2346,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_ACID, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 23:		   /* Breath Frost */
@@ -2348,7 +2355,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_COLD, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 24:		   /* Breath Fire	 */
@@ -2357,7 +2364,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_FIRE, char_row, char_col,
 		   ((m_ptr->hp / 3) > 1600 ? 1600 : (m_ptr->hp / 3)),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 25:		   /* Fire Bolt */
@@ -2366,7 +2373,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_FIRE, char_row, char_col,
 		 damroll(9, 8) + (r_list[m_ptr->mptr].level / 3)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 26:		   /* Frost Bolt */
@@ -2375,7 +2382,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_COLD, char_row, char_col,
 		 damroll(6, 8) + (r_list[m_ptr->mptr].level / 3)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 27:		   /* Acid Bolt */
@@ -2384,7 +2391,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_ACID, char_row, char_col,
 		 damroll(7, 8) + (r_list[m_ptr->mptr].level / 3)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 28:		   /* Magic Missiles */
@@ -2393,7 +2400,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
 		 damroll(2, 6) + (r_list[m_ptr->mptr].level / 3)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 29:		   /* Critical Wound	 */
@@ -2414,7 +2421,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_FIRE, char_row, char_col,
 		   randint((r_list[m_ptr->mptr].level * 7) / 2) + 10,
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 31:		   /* Frost Ball */
@@ -2423,7 +2430,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_COLD, char_row, char_col,
 		   randint((r_list[m_ptr->mptr].level * 3) / 2) + 10,
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 32:		   /* Mana Bolt */
@@ -2432,7 +2439,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
 		 randint((r_list[m_ptr->mptr].level * 7) / 2) + 50, ddesc, m_ptr,
-		 monptr);
+		 m_idx);
 	    break;
 
 	  case 33:
@@ -2440,7 +2447,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you feel a strange flux.");
 	    msg_print(cdesc);
 	    breath(GF_CHAOS, char_row, char_col,
-		   ((m_ptr->hp / 6) > 600 ? 600 : (m_ptr->hp / 6)), ddesc, monptr);
+		   ((m_ptr->hp / 6) > 600 ? 600 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 34:
@@ -2448,7 +2455,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and sharp fragments cut you.");
 	    msg_print(cdesc);
 	    breath(GF_SHARDS, char_row, char_col,
-		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 35:
@@ -2456,7 +2463,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you are deafened.");
 	    msg_print(cdesc);
 	    breath(GF_SOUND, char_row, char_col,
-		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 36:
@@ -2464,7 +2471,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you feel dizzy.");
 	    msg_print(cdesc);
 	    breath(GF_CONFUSION, char_row, char_col,
-		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 37:
@@ -2472,7 +2479,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and your equipment seems less powerful.");
 	    msg_print(cdesc);
 	    breath(GF_DISENCHANT, char_row, char_col,
-		((m_ptr->hp / 6) > 500 ? 500 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 500 ? 500 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 38:
@@ -2480,7 +2487,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you feel an unholy aura.");
 	    msg_print(cdesc);
 	    breath(GF_NETHER, char_row, char_col,
-		   ((m_ptr->hp / 6) > 550 ? 550 : (m_ptr->hp / 6)), ddesc, monptr);
+		   ((m_ptr->hp / 6) > 550 ? 550 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 39:
@@ -2489,7 +2496,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_ELEC, char_row, char_col,
 		 damroll(4, 8) + (r_list[m_ptr->mptr].level / 3)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 40:
@@ -2497,7 +2504,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you get zapped.");
 	    msg_print(cdesc);
 	    breath(GF_ELEC, char_row, char_col,
-		randint((r_list[m_ptr->mptr].level * 3) / 2) + 8, ddesc, monptr);
+		randint((r_list[m_ptr->mptr].level * 3) / 2) + 8, ddesc, m_idx);
 	    break;
 
 	  case 41:
@@ -2505,7 +2512,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and your skin is burning.");
 	    msg_print(cdesc);
 	    breath(GF_ACID, char_row, char_col,
-		   randint(r_list[m_ptr->mptr].level * 3) + 15, ddesc, monptr);
+		   randint(r_list[m_ptr->mptr].level * 3) + 15, ddesc, m_idx);
 	    break;
 
 	  case 42:
@@ -2660,7 +2667,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 		(void)strcat(cdesc, "sounds like it threw something.");
 	    msg_print(cdesc);
 	    bolt(GF_ARROW, char_row, char_col,
-		 damroll(6, 7), ddesc, m_ptr, monptr);
+		 damroll(6, 7), ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 49:
@@ -2669,7 +2676,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_PLASMA, char_row, char_col,
 		 10 + damroll(8, 7) + (r_list[m_ptr->mptr].level),
-		 ddesc, m_ptr, monptr);
+		 ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 50:
@@ -2678,9 +2685,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
+	/* in case compact_monster() is called,it needs m_idx */
 	    for (k = 0; k < 8; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_monster(&y, &x, FALSE);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -2693,7 +2700,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_NETHER, char_row, char_col,
 		 30 + damroll(5, 5) + (r_list[m_ptr->mptr].level * 3) / 2,
-		 ddesc, m_ptr, monptr);
+		 ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 52:
@@ -2702,7 +2709,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_COLD, char_row, char_col,
 		 damroll(6, 6) + (r_list[m_ptr->mptr].level)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 53:
@@ -2780,7 +2787,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you smell a foul odor.");
 	    msg_print(cdesc);
 	    breath(GF_POIS, char_row, char_col,
-		   damroll(12, 2), ddesc, monptr);
+		   damroll(12, 2), ddesc, m_idx);
 	    break;
 
 	  case 57:
@@ -2813,7 +2820,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    bolt(GF_WATER, char_row, char_col,
 		 damroll(10, 10) + (r_list[m_ptr->mptr].level)
-		 ,ddesc, m_ptr, monptr);
+		 ,ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 59:
@@ -2823,7 +2830,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print("You are engulfed in a whirlpool.");
 	    breath(GF_WATER, char_row, char_col,
 		   randint((r_list[m_ptr->mptr].level * 5) / 2) + 50,
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 60:
@@ -2832,7 +2839,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_NETHER, char_row, char_col,
 		   (50 + damroll(10, 10) + (r_list[m_ptr->mptr].level)),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 61:
@@ -2841,8 +2848,8 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
-	    hack_m_idx = monptr;
+	/* in case compact_monster() is called,it needs m_idx */
+	    hack_m_idx = m_idx;
 	    (void)summon_angel(&y, &x);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
@@ -2854,9 +2861,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
+	/* in case compact_monster() is called,it needs m_idx */
 	    for (k = 0; k < 6; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_spider(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -2869,9 +2876,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called,it needs monptr */
+	/* in case compact_monster() is called,it needs m_idx */
 	    for (k = 0; k < 8; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_hound(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -2883,7 +2890,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you feel strange.");
 	    msg_print(cdesc);
 	    breath(GF_NEXUS, char_row, char_col,
-		((m_ptr->hp / 3) > 250 ? 250 : (m_ptr->hp / 3)), ddesc, monptr);
+		((m_ptr->hp / 3) > 250 ? 250 : (m_ptr->hp / 3)), ddesc, m_idx);
 	    break;
 
 	  case 65:
@@ -2900,7 +2907,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else {
 		breath(GF_FORCE, char_row, char_col,
 		       ((m_ptr->hp / 6) > 200 ? 200 : (m_ptr->hp / 6)),
-		       ddesc, monptr);
+		       ddesc, m_idx);
 	    }
 	    break;
 
@@ -2909,7 +2916,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
 	    breath(GF_INERTIA, char_row, char_col,
-		   ((m_ptr->hp / 6) > 200 ? 200 : (m_ptr->hp / 6)), ddesc, monptr);
+		   ((m_ptr->hp / 6) > 200 ? 200 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 67:
@@ -2917,7 +2924,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
 	    breath(GF_LIGHT, char_row, char_col,
-		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 68:
@@ -2925,7 +2932,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
 	    breath(GF_TIME, char_row, char_col,
-		((m_ptr->hp / 3) > 150 ? 150 : (m_ptr->hp / 3)), ddesc, monptr);
+		((m_ptr->hp / 3) > 150 ? 150 : (m_ptr->hp / 3)), ddesc, m_idx);
 	    break;
 
 	  case 69:		   /* gravity */
@@ -2933,7 +2940,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes, and you feel heavy.");
 	    msg_print(cdesc);
 	    breath(GF_GRAVITY, char_row, char_col,
-		((m_ptr->hp / 3) > 200 ? 200 : (m_ptr->hp / 3)), ddesc, monptr);
+		((m_ptr->hp / 3) > 200 ? 200 : (m_ptr->hp / 3)), ddesc, m_idx);
 	    break;
 
 	  case 70:		   /* darkness */
@@ -2941,7 +2948,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
 	    breath(GF_DARK, char_row, char_col,
-		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 71:		   /* plasma */
@@ -2949,7 +2956,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
 	    breath(GF_PLASMA, char_row, char_col,
-		((m_ptr->hp / 6) > 150 ? 150 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 150 ? 150 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 72:
@@ -2960,7 +2967,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else {
 		msg_print("You hear the 'twang' of a bowstring.");
 	    }
-	    bolt(GF_ARROW, char_row, char_col, damroll(1, 6), ddesc, m_ptr, monptr);
+	    bolt(GF_ARROW, char_row, char_col, damroll(1, 6), ddesc, m_ptr, m_idx);
 	    break;
 
 	  case 73:
@@ -2969,15 +2976,15 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 10; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_wraith(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    for (k = 0; k < 7; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_gundead(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -2989,7 +2996,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles powerfully.");
 	    msg_print(cdesc);
 	    breath(GF_DARK, char_row, char_col,
-		((m_ptr->hp / 6) > 500 ? 500 : (m_ptr->hp / 6)), ddesc, monptr);
+		((m_ptr->hp / 6) > 500 ? 500 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 
 	  case 75:		   /* Mana storm */
@@ -2998,7 +3005,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    breath(GF_MANA, char_row, char_col,
 		   (r_list[m_ptr->mptr].level * 5) + damroll(10, 10),
-		   ddesc, monptr);
+		   ddesc, m_idx);
 	    break;
 
 	  case 76:		   /* Summon reptiles */
@@ -3007,9 +3014,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 8; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_reptile(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -3022,9 +3029,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 7; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_ant(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -3037,15 +3044,15 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 5; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_unique(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
 	    }
 	    for (k = 0; k < 4; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_jabberwock(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -3058,9 +3065,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 8; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_gundead(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -3073,9 +3080,9 @@ static void mon_cast_spell(int monptr, int *took_turn)
 	    msg_print(cdesc);
 	    y = char_row;
 	    x = char_col;
-	/* in case compact_monster() is called, it needs monptr */
+	/* in case compact_monster() is called, it needs m_idx */
 	    for (k = 0; k < 5; k++) {
-		hack_m_idx = monptr;
+		hack_m_idx = m_idx;
 		(void)summon_ancientd(&y, &x);
 		hack_m_idx = (-1);
 		update_mon((int)cave[y][x].cptr);
@@ -3117,7 +3124,7 @@ static void mon_cast_spell(int monptr, int *took_turn)
  * Let the given monster attempt to reproduce.
  * Note that "reproduction" REQUIRES empty space.
  */
-int multiply_monster(int y, int x, int cr_index, int monptr)
+int multiply_monster(int y, int x, int cr_index, int m_idx)
 {
     register int        i, j, k;
     register cave_type *c_ptr;
@@ -3150,7 +3157,7 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 			&& r_list[cr_index].mexp >=
 			r_list[m_list[c_ptr->cptr].mptr].mexp) {
 		    /* It ate an already processed monster.Handle normally. */
-			if (monptr < c_ptr->cptr)
+			if (m_idx < c_ptr->cptr)
 			    delete_monster((int)c_ptr->cptr);
 		    /*
 		     * If it eats this monster, an already processed mosnter
@@ -3160,8 +3167,8 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 			else
 			    fix1_delete_monster((int)c_ptr->cptr);
 
-		    /* in case compact_monster() is called,it needs monptr */
-			hack_m_idx = monptr;
+		    /* in case compact_monster() is called,it needs m_idx */
+			hack_m_idx = m_idx;
 			result = place_monster(j, k, cr_index, FALSE);
 			hack_m_idx = (-1);
 			if (!result)
@@ -3172,8 +3179,8 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 		} else
 		/* All clear,  place a monster	  */
 		{
-		/* in case compact_monster() is called,it needs monptr */
-		    hack_m_idx = monptr;
+		/* in case compact_monster() is called,it needs m_idx */
+		    hack_m_idx = m_idx;
 		    result = place_monster(j, k, cr_index, FALSE);
 		    hack_m_idx = (-1);
 		    if (!result)
@@ -3194,7 +3201,7 @@ int multiply_monster(int y, int x, int cr_index, int monptr)
 /*
  * Move the critters about the dungeon			-RAK-	
  */
-static void mon_move(int monptr, u32b *rcmove)
+static void mon_move(int m_idx, u32b *rcmove)
 {
     register int           i, j;
     int                    k, move_test, dir;
@@ -3203,7 +3210,7 @@ static void mon_move(int monptr, u32b *rcmove)
     int                    mm[9];
     bigvtype               out_val, m_name;
 
-    m_ptr = &m_list[monptr];
+    m_ptr = &m_list[m_idx];
     r_ptr = &r_list[m_ptr->mptr];
 
 /* reduce fear, tough monsters can unfear faster -CFT, hacked by DGK */
@@ -3236,7 +3243,7 @@ static void mon_move(int monptr, u32b *rcmove)
 	    k++;
 	if ((k < 4) && (randint(k * MON_MULT_ADJ) == 1))
 	    if (multiply_monster((int)m_ptr->fy, (int)m_ptr->fx,
-				 (int)m_ptr->mptr, monptr))
+				 (int)m_ptr->mptr, m_idx))
 		*rcmove |= CM_MULTIPLY;
     }
     move_test = FALSE;
@@ -3269,7 +3276,7 @@ static void mon_move(int monptr, u32b *rcmove)
 	    i = mm[0];
 	    mm[0] = mm[dir];
 	    mm[dir] = i;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	/* this can only fail if mm[0] has a rune of protection */
 	}
 
@@ -3278,8 +3285,8 @@ static void mon_move(int monptr, u32b *rcmove)
 /* in case the monster dies, may need to call fix1_delete_monster()
  * instead of delete_monsters() 
  */
-	    hack_m_idx = monptr;
-	    i = mon_take_hit(monptr, damroll(8, 8), FALSE);
+	    hack_m_idx = m_idx;
+	    i = mon_take_hit(m_idx, damroll(8, 8), FALSE);
 	    hack_m_idx = (-1);
 	    if (i >= 0)
 		msg_print("You hear a scream muffled by rock!");
@@ -3298,7 +3305,7 @@ static void mon_move(int monptr, u32b *rcmove)
 /* don't move him if he is not supposed to move! */
 	if (!(r_ptr->cmove & CM_ATTACK_ONLY)) {
 	    *rcmove |= CM_ATTACK_ONLY;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	}
 
 /* reduce conf, tough monsters can unconf faster -CFT */
@@ -3315,7 +3322,7 @@ static void mon_move(int monptr, u32b *rcmove)
 
 /* Creature may cast a spell */
     else if (r_ptr->spells != 0) {
-	mon_cast_spell(monptr, &move_test);
+	mon_cast_spell(m_idx, &move_test);
     }
     if (!move_test) {
     /* 75% random movement */
@@ -3326,7 +3333,7 @@ static void mon_move(int monptr, u32b *rcmove)
 	    mm[3] = randint(9);
 	    mm[4] = randint(9);
 	    *rcmove |= CM_75_RANDOM;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	}
     /* 40% random movement */
 	else if ((r_ptr->cmove & CM_40_RANDOM) && (randint(100) < 40)) {
@@ -3336,7 +3343,7 @@ static void mon_move(int monptr, u32b *rcmove)
 	    mm[3] = randint(9);
 	    mm[4] = randint(9);
 	    *rcmove |= CM_40_RANDOM;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	}
     /* 20% random movement */
 	else if ((r_ptr->cmove & CM_20_RANDOM) && (randint(100) < 20)) {
@@ -3346,7 +3353,7 @@ static void mon_move(int monptr, u32b *rcmove)
 	    mm[3] = randint(9);
 	    mm[4] = randint(9);
 	    *rcmove |= CM_20_RANDOM;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	}
     /* Normal movement */
 	else if (r_ptr->cmove & CM_MOVE_NORMAL) {
@@ -3357,15 +3364,15 @@ static void mon_move(int monptr, u32b *rcmove)
 		mm[3] = randint(9);
 		mm[4] = randint(9);
 	    } else
-		get_moves(monptr, mm);
+		get_moves(m_idx, mm);
 	    *rcmove |= CM_MOVE_NORMAL;
-	    make_move(monptr, mm, rcmove);
+	    make_move(m_idx, mm, rcmove);
 	}
     /* Attack, but don't move */
 	else if ((r_ptr->cmove & CM_ATTACK_ONLY) && (m_ptr->cdis < 2)) {
 	    *rcmove |= CM_ATTACK_ONLY;
-	    get_moves(monptr, mm);
-	    make_move(monptr, mm, rcmove);
+	    get_moves(m_idx, mm);
+	    make_move(m_idx, mm, rcmove);
 	} else if ((r_ptr->cmove & CM_ALL_MV_FLAGS) == 0 &&
 		   (m_ptr->cdis < 2)) {
 

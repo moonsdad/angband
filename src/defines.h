@@ -139,7 +139,7 @@
 
 /* Treasure constants                                           */
 #define MAX_OBJ_LEVEL   255     /* Maximum level of magic in dungeon      */
-#define OBJ_GREAT        11     /* 1/n Chance of item being a Great Item  */
+#define GREAT_OBJ        11     /* 1/n Chance of item being a Great Item  */
 
 /* Number of dungeon objects */
 #define MAX_DUNGEON_OBJ  423
@@ -856,10 +856,10 @@
 #define TR2_IM_POIS    0x00004000L
 #define TR2_RES_CONF     0x00008000L
 #define TR2_RES_SOUND    0x00010000L
-#define TR2_RES_LT       0x00020000L
+#define TR2_RES_LITE       0x00020000L
 #define TR2_RES_DARK     0x00040000L
 #define TR2_RES_CHAOS    0x00080000L
-#define TR2_RES_DISENCHANT       0x00100000L
+#define TR2_RES_DISEN       0x00100000L
 #define TR2_RES_SHARDS   0x00200000L
 #define TR2_RES_NEXUS    0x00400000L
 #define TR2_RES_BLIND    0x00800000L

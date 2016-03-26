@@ -503,19 +503,22 @@ void unlite_room(int y, int x)
 void map_area(void)
 {
     register cave_type *c_ptr;
-    register int        i7, i8, n, m;
-    int                 i, j, k, l;
+    register int        i7, i8, x, y;
+    int                 y1, y2, x1, x2;
 
     /* Pick an area to map */
-    i = panel_row_min - randint(10);
-    j = panel_row_max + randint(10);
-    k = panel_col_min - randint(20);
-    l = panel_col_max + randint(20);
-    for (m = i; m <= j; m++)
-	for (n = k; n <= l; n++)
-	    if (in_bounds(m, n) && (cave[m][n].fval <= MAX_CAVE_FLOOR))
-		for (i7 = m - 1; i7 <= m + 1; i7++)
-		    for (i8 = n - 1; i8 <= n + 1; i8++) {
+    y1 = panel_row_min - randint(10);
+    y2 = panel_row_max + randint(10);
+    x1 = panel_col_min - randint(20);
+    x2 = panel_col_max + randint(20);
+
+    /* Scan that area */
+    for (y = y1; y <= y2; y++) {
+	for (x = x1; x <= x2; x++) {
+
+	    if (in_bounds(y, x) && (cave[y][x].fval <= MAX_CAVE_FLOOR))
+		for (i7 = y - 1; i7 <= y + 1; i7++)
+		    for (i8 = x - 1; i8 <= x + 1; i8++) {
 			c_ptr = &cave[i7][i8];
 			if (c_ptr->fval >= MIN_CAVE_WALL)
 			    c_ptr->pl = TRUE;
@@ -524,10 +527,11 @@ void map_area(void)
 			       (t_list[c_ptr->tptr].tval <= TV_MAX_VISIBLE))
 			    c_ptr->fm = TRUE;
 		    }
+	}
+    }
     /* Redraw the map */
     prt_map();
 }
-
 
 
 
@@ -726,17 +730,8 @@ void screen_map(void)
     (void)addch(CH(BR));
 #endif
 
-#ifdef MACINTOSH
-    DSetScreenCursor(23, 23);
-    DWriteScreenStringAttr("Hit any key to continue", ATTR_NORMAL);
-    if (mycol > 0)
-	DSetScreenCursor(mycol, myrow);
-#else
-    use_value2          mvaddstr(23, 23, "Hit any key to continue");
-
-    if (mycol > 0)
-	(void)move(myrow, mycol);
-#endif
+    /* Wait for it */
+    put_str("Hit any key to continue", 23, 23);
 
     /* Get any key */
     inkey();

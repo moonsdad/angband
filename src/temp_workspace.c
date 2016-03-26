@@ -479,7 +479,7 @@ static void ball_destroy(int typ, int (**destroy) ())
 
 
 /* Split out of lite_line.       -DGK */
-void mon_light_dam(int y, int x, int dam)
+void mon_elec_dam(int y, int x, int dam)
 {
     register cave_type     *c_ptr;
     register monster_type  *m_ptr;

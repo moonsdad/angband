@@ -36,7 +36,7 @@ int unique_armour(inven_type *t_ptr)
 	t_ptr->flags |= (TR2_RES_FIRE | TR_RES_COLD | TR2_RES_ACID | TR_POISON |
 			 TR2_RES_LIGHT | TR2_FREE_ACT | TR_SEE_INVIS | TR1_INT |
 			 TR1_WIS | TR1_STEALTH | TR_AGGRAVATE);
-	t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR2_IM_LIGHT | TR2_RES_LT |
+	t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR2_IM_LIGHT | TR2_RES_LITE |
 			  TR_ARTIFACT);
 	t_ptr->ident |= ID_NOSHOW_TYPE;
 	t_ptr->toac = 25;
@@ -224,7 +224,7 @@ int unique_armour(inven_type *t_ptr)
 	    else
 		good_item_flag = TRUE;
 	    t_ptr->flags |= (TR_SUST_STAT | TR2_FREE_ACT);
-	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR2_RES_LT | TR_ARTIFACT);
+	    t_ptr->flags2 |= (TR_ACTIVATE | TR_LIGHT | TR2_RES_LITE | TR_ARTIFACT);
 	    t_ptr->name2 = SN_CAMMITHRIM;
 	    t_ptr->ident |= ID_NOSHOW_P1;
 	    t_ptr->p1 = 5;
@@ -336,7 +336,7 @@ int unique_armour(inven_type *t_ptr)
 	t_ptr->weight = 250;
 	t_ptr->flags |= (TR2_RES_ACID | TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
 			 TR1_STR | TR1_CHR);
-	t_ptr->flags2 |= (TR_ACTIVATE | TR2_RES_DISENCHANT | TR_RES_DARK | TR_ARTIFACT);
+	t_ptr->flags2 |= (TR_ACTIVATE | TR2_RES_DISEN | TR_RES_DARK | TR_ARTIFACT);
 	t_ptr->name2 = SN_CELEBORN;
 	t_ptr->p1 = 4;
 	t_ptr->toac = 25;
@@ -462,7 +462,7 @@ int unique_armour(inven_type *t_ptr)
 	    good_item_flag = TRUE;
 	t_ptr->weight = 60;
 	t_ptr->flags |= (TR2_RES_ACID | TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT);
-	t_ptr->flags2 |= (TR2_RES_LT | TR_RES_DARK | TR_ARTIFACT);
+	t_ptr->flags2 |= (TR2_RES_LITE | TR_RES_DARK | TR_ARTIFACT);
 	t_ptr->name2 = SN_CELEGORM;
 	t_ptr->toac = 20;
 	t_ptr->cost = 12000L;
@@ -493,7 +493,7 @@ int unique_armour(inven_type *t_ptr)
 		good_item_flag = TRUE;
 	    t_ptr->flags |= (TR2_RES_ACID | TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
 			     TR1_CON | TR1_DEX | TR1_STR | TR_SEE_INVIS);
-	    t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR2_RES_LT | TR_RES_BLIND
+	    t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR2_RES_LITE | TR_RES_BLIND
 			      | TR_ARTIFACT);
 	    t_ptr->name2 = SN_DOR_LOMIN;
 	    t_ptr->p1 = 4;
@@ -547,7 +547,7 @@ int unique_armour(inven_type *t_ptr)
 	t_ptr->name2 = SN_GONDOR;
 	t_ptr->flags = (TR1_STR | TR1_CON | TR1_WIS | TR_SEE_INVIS | TR_REGEN
 			| TR2_RES_ACID | TR2_RES_FIRE);
-	t_ptr->flags2 = (TR_ACTIVATE | TR_LIGHT | TR2_RES_LT | TR_RES_BLIND |
+	t_ptr->flags2 = (TR_ACTIVATE | TR_LIGHT | TR2_RES_LITE | TR_RES_BLIND |
 			 TR_ARTIFACT);
 	t_ptr->p1 = 3;
 	t_ptr->toac = 15;

@@ -140,7 +140,7 @@ void acid_dam(int dam, cptr kb_str)
 /*
  * Lightning bolt the sucker away.			-RAK-
  */
-void light_dam(int dam, cptr kb_str)
+void elec_dam(int dam, cptr kb_str)
 {
     if (p_ptr->flags.oppose_elec) dam = dam / 3;
     if (p_ptr->flags.resist_elec) dam = dam / 3;

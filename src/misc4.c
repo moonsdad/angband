@@ -19,10 +19,17 @@ static cptr stat_names[] = {
     "STR: ", "INT: ", "WIS: ", "DEX: ", "CON: ", "CHR: "
 };
 
+static cptr stat_names_reduced[] = {
+    "Str: ", "Int: ", "Wis: ", "Dex: ", "Con: ", "Chr: "
+};
+
+
+
 
 /*
  * Print character info in given row, column   -RAK-
  * the longest title is 13 characters, so only pad to 13
+ * XXX There has got to be a cleaner way
  */
 void prt_field(cptr info, int row, int col)
 {
@@ -710,7 +717,7 @@ u16b modify_stat(int stat, int amount)
 
     tmp_stat = p_ptr->stats.cur_stat[stat];
 
-    loop = (amount < 0 ? -amount : amount);
+    loop = ABS(amount);
 
     for (i = 0; i < loop; i++) {
 	if (amount > 0) {
@@ -1068,15 +1075,15 @@ void put_character()
     clear_screen();
 
     put_str("Name        :", 2, 1);
-    put_str("Race        :", 3, 1);
-    put_str("Sex         :", 4, 1);
+    put_str("Sex         :", 3, 1);
+    put_str("Race        :", 4, 1);
     put_str("Class       :", 5, 1);
 
     if (character_generated) {
-	put_str(m_ptr->name, 2, 15);
-	put_str(race[m_ptr->prace].trace, 3, 15);
-	put_str((m_ptr->male ? "Male" : "Female"), 4, 15);
-	put_str(class[m_ptr->pclass].title, 5, 15);
+    c_put_str(TERM_L_BLUE, m_ptr->name, 2, 15);
+    c_put_str(TERM_L_BLUE, (m_ptr->male ? "Male" : "Female"), 4, 15);
+    c_put_str(TERM_L_BLUE, race[m_ptr->prace].trace, 3, 15);
+    c_put_str(TERM_L_BLUE, class[m_ptr->pclass].title, 5, 15);
     }
 }
 
@@ -1115,42 +1122,57 @@ void put_stats()
 
 
 /*
+ * Used to pass color info around
+ */
+static byte likert_color;
+
+/*
  * Returns a "rating" of x depending on y			-JWT-
  */
 cptr likert(int x, int y)
 {
     if ((x/y) < 0) {
+	likert_color = TERM_RED;
 	return ("Very Bad");
     }
 
     switch ((x / y)) {
       case 0:
       case 1:
+	likert_color = TERM_RED;
 	return ("Bad");
       case 2:
+	likert_color = TERM_RED;
 	return ("Poor");
       case 3:
       case 4:
+	likert_color = TERM_YELLOW;
 	return ("Fair");
       case 5:
+	likert_color = TERM_YELLOW;
 	return ("Good");
       case 6:
+	likert_color = TERM_YELLOW;
 	return ("Very Good");
       case 7:
       case 8:
+	likert_color = TERM_L_GREEN;
 	return ("Excellent");
       case 9:
       case 10:
       case 11:
       case 12:
       case 13:
+	likert_color = TERM_L_GREEN;
 	return ("Superb");
       case 14:
       case 15:
       case 16:
       case 17:
+	likert_color = TERM_L_GREEN;
 	return ("Heroic");
       default:
+	likert_color = TERM_L_GREEN;
 	return ("Legendary");
     }
 }
@@ -1202,12 +1224,15 @@ void put_misc2()
 
 /*
  * Prints ratings on certain abilities			-RAK-
+ *
+ * This code is "repeated" elsewhere to "dump" a character sheet.
  */
 void put_misc3()
 {
     int			xbth, xbthb, xfos, xsrh;
     int			xstl, xdis, xsave, xdev;
     vtype                 xinfra;
+    cptr		desc;
 
     /* XXX XXX XXX Skill with current weapon */
     xbth = p_ptr->misc.bth + p_ptr->misc.ptohit * BTH_PLUS_ADJ +
@@ -1237,28 +1262,36 @@ void put_misc3()
     put_str("(Miscellaneous Abilities)", 15, 25);
 
     put_str("Fighting    :", 16, 1);
-    put_str(likert(xbth, 12), 16, 15);
+    desc=likert(xbth, 12);
+    c_put_str(likert_color, desc, 16, 15);
 
     put_str("Bows/Throw  :", 17, 1);
-    put_str(likert(xbthb, 12), 17, 15);
+    desc=likert(xbthb, 12);
+    c_put_str(likert_color, desc, 17, 15);
 
     put_str("Saving Throw:", 18, 1);
-    put_str(likert(xsave, 6), 18, 15);
+    desc=likert(xsave, 6);
+    c_put_str(likert_color, desc, 18, 15);
 
     put_str("Stealth     :", 16, 28);
-    put_str(likert(xstl, 1), 16, 42);
+    desc=likert(xstl, 1);
+    c_put_str(likert_color, desc, 16, 42);
 
     put_str("Disarming   :", 17, 28);
-    put_str(likert(xdis, 8), 17, 42);
+    desc=likert(xdis, 8);
+    c_put_str(likert_color, desc, 17, 42);
 
     put_str("Magic Device:", 18, 28);
-    put_str(likert(xdev, 6), 18, 42);
+    desc=likert(xdev, 6);
+    c_put_str(likert_color, desc, 18, 42);
 
     put_str("Perception  :", 16, 55);
-    put_str(likert(xfos, 3), 16, 69);
+    desc=likert(xfos, 3);
+    c_put_str(likert_color, desc, 16, 69);
 
     put_str("Searching   :", 17, 55);
-    put_str(likert(xsrh, 6), 17, 69);
+    desc=likert(xsrh, 6);
+    c_put_str(likert_color, desc, 17, 69);
 
     put_str("Infra-Vision:", 18, 55);
     put_str(xinfra, 18, 69);
@@ -1271,8 +1304,8 @@ void put_misc3()
 void display_player()
 {
     put_character();
-    put_misc1();
     put_stats();
+    put_misc1();
     put_misc2();
     put_misc3();
 }
@@ -1288,7 +1321,10 @@ void get_name()
     char tmp[100];
 
     strcpy(tmp, p_ptr->misc.name);
+
+    /* Prompt and ask */
     prt("Enter your player's name  [press <RETURN> when finished]", 21, 2);
+
     put_str(&blank_string[BLANK_LENGTH - 15], 2, 15);
 
 #ifdef MACINTOSH
@@ -1433,10 +1469,11 @@ int inven_check_num(inven_type *t_ptr)
  */
 int inven_carry(inven_type *i_ptr)
 {
-    register int         locn = 0, i;
+    register int         slot, i;
     register int         typ, subt;
     register inven_type *t_ptr;
     int                  known1p, always_known1p;
+
     int                  tval_tmp;  /* used to make magic books before pray books if magicuser */
     int                  stacked = FALSE;
 
@@ -1453,8 +1490,8 @@ int inven_carry(inven_type *i_ptr)
  * a place to stack, w/o assuming the inventory is sorted. -CFT 
  */
     if (subt >= ITEM_SINGLE_STACK_MIN) {
-	for (locn = 0; locn < inven_ctr; locn++) {
-	    t_ptr = &inventory[locn];
+	for (slot = 0; slot < inven_ctr; slot++) {
+	    t_ptr = &inventory[slot];
 	    if (t_ptr->tval == typ &&
 		t_ptr->sval == subt &&
 	/* make sure the number field doesn't overflow */
@@ -1462,7 +1499,7 @@ int inven_carry(inven_type *i_ptr)
 	/* they always stack (sval < 192), or else they have same p1 */
 		((subt < ITEM_GROUP_MIN) || (t_ptr->p1 == i_ptr->p1))
 	/* only stack if both or neither are identified */
-		&& (known1_p(&inventory[locn]) == known1p)) {
+		&& (known1_p(&inventory[slot]) == known1p)) {
 		stacked = TRUE;	   /* note that we did process the item -CFT */
 		t_ptr->number += i_ptr->number;
 
@@ -1481,8 +1518,8 @@ int inven_carry(inven_type *i_ptr)
     /* either it doesn't stack anyway, or it didn't match anything in the inventory.
      * Now try to insert. -CFT */
 
-	for (locn = 0;; locn++) {
-	    t_ptr = &inventory[locn];
+	for (slot = 0;; slot++) {
+	    t_ptr = &inventory[slot];
 
 	/* For items which are always known1p, i.e. never have a 'color',
 	 * insert them into the inventory in sorted order.  
@@ -1504,10 +1541,17 @@ int inven_carry(inven_type *i_ptr)
 		 (typ == tval_tmp) &&	/* then by inc sval */
 		 ((i_ptr->level < t_ptr->level) ||
 	     ((i_ptr->level == t_ptr->level) && (subt < t_ptr->sval))))) {
-		for (i = inven_ctr - 1; i >= locn; i--)
+
+		for (i = inven_ctr - 1; i >= slot; i--) {
 		    inventory[i + 1] = inventory[i];
-		inventory[locn] = *i_ptr;
+    }
+
+    /* Structure copy to insert the new item */
+		inventory[slot] = *i_ptr;
+
+    /* One more item present now */
 		inven_ctr++;
+
 		break;
 	    }
 	}
@@ -1519,7 +1563,7 @@ int inven_carry(inven_type *i_ptr)
     p_ptr->flags.status |= PY_STR_WGT;
 
     /* Say where it went */
-    return locn;
+    return slot;
 }
 
 
@@ -2055,67 +2099,81 @@ int tot_dam(inven_type *i_ptr, int tdam, int monster)
 	    tdam *= 5;
 	}
 
-    /* Execute Dragon */
-	else if ((m_ptr->cdefense & DRAGON) && (i_ptr->flags & TR1_KILL_DRAGON)) {
+	/* Execute Dragon */
+	else if ((m_ptr->cdefense & DRAGON) &&
+	    (i_ptr->flags & TR1_KILL_DRAGON)) {
+
 	    tdam *= 5;
 	    r_ptr->r_cdefense |= DRAGON;
 	}
 
-    /* Slay Dragon  */
-	else if ((m_ptr->cdefense & DRAGON) && (i_ptr->flags & TR1_SLAY_DRAGON)) {
+	/* Slay Dragon  */
+	else if ((m_ptr->cdefense & DRAGON) &&
+	    (i_ptr->flags & TR1_SLAY_DRAGON)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= DRAGON;
 	}
 
-    /* Slay Undead  */
-	else if ((m_ptr->cdefense & UNDEAD) && (i_ptr->flags & TR1_SLAY_UNDEAD)) {
+	/* Slay Undead */
+	else if ((m_ptr->cdefense & UNDEAD) &&
+	    (i_ptr->flags & TR1_SLAY_UNDEAD)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= UNDEAD;
 	}
 
-    /* Slay ORC     */
-	else if ((m_ptr->cdefense & ORC) && (i_ptr->flags2 & TR1_SLAY_ORC)) {
+	/* Slay Orc */
+	else if ((m_ptr->cdefense & ORC) &&
+	    (i_ptr->flags2 & TR1_SLAY_ORC)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= ORC;
 	}
 
-    /* Slay MF2_TROLL     */
-	else if ((m_ptr->cdefense & MF2_TROLL) && (i_ptr->flags2 & TR1_SLAY_TROLL)) {
+	/* Slay MF2_TROLL */
+	else if ((m_ptr->cdefense & MF2_TROLL) &&
+	    (i_ptr->flags2 & TR1_SLAY_TROLL)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= MF2_TROLL;
 	}
 
-    /* Slay GIANT     */
-	else if ((m_ptr->cdefense & MF2_GIANT) && (i_ptr->flags2 & TR1_SLAY_GIANT)) {
+	/* Slay Giant */
+	else if ((m_ptr->cdefense & MF2_GIANT) &&
+	    (i_ptr->flags2 & TR1_SLAY_GIANT)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= MF2_GIANT;
 	}
 
-    /* Slay DEMON     */
-	else if ((m_ptr->cdefense & DEMON) && (i_ptr->flags2 & TR1_SLAY_DEMON)) {
+	/* Slay Demon */
+	else if ((m_ptr->cdefense & DEMON) &&
+	    (i_ptr->flags2 & TR1_SLAY_DEMON)) {
+
 	    tdam *= 3;
 	    r_ptr->r_cdefense |= DEMON;
 	}
 
-    /* Frost	       */
+	/* Frost */
 	else if ((!(m_ptr->cdefense & MF2_IM_COLD))
 		 && (i_ptr->flags & TR1_BRAND_COLD)) {
 	    tdam *= 3;
 	}
 
-    /* Fire	      */
+	/* Fire	 */
 	else if ((!(m_ptr->cdefense & MF2_IM_FIRE))
 		 && (i_ptr->flags & TR1_BRAND_FIRE)) {
 	    tdam *= 3;
 	}
 
-    /* Slay Evil     */
+	/* Slay Evil */
 	else if ((m_ptr->cdefense & EVIL) && (i_ptr->flags & TR1_SLAY_EVIL)) {
 	    tdam *= 2;
 	    r_ptr->r_cdefense |= EVIL;
 	}
 
-    /* Slay Animal  */
+	/* Slay Animal */
 	else if ((m_ptr->cdefense & MF2_ANIMAL) && (i_ptr->flags & TR1_SLAY_ANIMAL)) {
 	    tdam *= 2;
 	    r_ptr->r_cdefense |= MF2_ANIMAL;
