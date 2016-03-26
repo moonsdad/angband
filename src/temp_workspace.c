@@ -1,3 +1,565 @@
+
+#define NO_RES 0
+#define SOME_RES 1
+#define RESIST 2
+#define IMMUNE 3
+#define SUSCEPT 4
+#define CHANGED 5
+#define CONFUSED 6
+#define MORE_CONF 7
+#define DAZED 8
+#define MORE_DAZED 16
+#define DEAD 32
+
+/*
+ * This function will process a bolt/ball/breath spell hitting a monster.
+ * It checks for resistances, and reduces damage accordingly, and also
+ * adds in what "special effects" apply to the monsters.  'rad' is used to
+ * indicate the distance from "ground 0" for ball spells.  For bolts, rad
+ * should be a 0 (this flags off some of the messages).  dam is changed
+ * to reflect resistances and range. -CFT
+ */
+
+static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, int *y, int *x, byte by_player)
+{
+    register monster_race *r_ptr;
+    int blind = (p_ptr->flags.status & PY_BLIND) ? 1 : 0;
+    int res;			/* controls messages, using above #defines -CFT */
+    vtype cdesc, outval;
+
+    if (rad)
+	*dam /= rad;		/* adjust damage for range... */
+
+    *y = m_ptr->fy;		/* these only change if mon gets teleported */
+    *x = m_ptr->fx; 
+    r_ptr = &r_list[m_ptr->mptr];
+    if (m_ptr->ml){
+	if (r_ptr->cdefense & MF2_UNIQUE)
+	    sprintf(cdesc, "%s ", r_ptr->name);
+	else
+	    sprintf(cdesc, "The %s ", r_ptr->name);
+    }
+    else
+	strcpy(cdesc, "It ");
+
+    res = NO_RES;		/* assume until we know different -CFT */
+    switch ( typ ){		/* check for resists... */
+      case GF_MAGIC_MISSILE:	/* pure damage, no resist possible */
+	break;
+      case GF_ELEC:
+	if (r_ptr->cdefense & MF2_IM_ELEC) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ELEC;
+        }
+	break;
+      case GF_POIS:
+	if (r_ptr->cdefense & MF2_IM_POIS) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_POIS;
+        }
+	break;
+      case GF_ACID:
+	if (r_ptr->cdefense & MF2_IM_ACID) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ACID;
+        }
+	break;
+      case GF_COLD:
+	if (r_ptr->cdefense & MF2_IM_COLD) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
+        }
+	break;
+      case GF_FIRE:
+	if (r_ptr->cdefense & MF2_IM_FIRE) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_FIRE;
+        }
+	break;
+      case GF_HOLY_ORB:
+	if (r_ptr->cdefense & EVIL) {
+	    *dam *= 2;
+	    res = SUSCEPT;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= EVIL;
+        }
+	break;
+      case GF_ARROW:		/* for now, no defense... maybe it should have a
+				   chance of missing? -CFT */
+	break;
+      case GF_PLASMA:		/* maybe MF2_IM_ELEC (ball lightning is supposed
+				   to be plasma) or MF2_IM_FIRE (since it's hot)? -CFT */
+	if (!strncmp("Plasma", r_ptr->name, 6) ||
+	    (r_ptr->spells3 & MS3_BR_PLAS)){ /* if is a "plasma" monster,
+					      or can breathe plasma, then
+					      we assume it should be immune.
+					      plasma bolts don't count, since
+					      mage-types could have them, and
+					      not deserve plasma-resist -CFT */
+	    res = RESIST;
+	    *dam *= 3;		/* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+	}
+	break;
+      case GF_NETHER:		/* I assume nether is an evil, necromantic force,
+				   so it doesn't hurt undead, and hurts evil less -CFT */
+	if (r_ptr->cdefense & UNDEAD) {
+	    res = IMMUNE;
+	    *dam = 0;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= UNDEAD;
+        }
+	else if (r_ptr->spells2 & MS2_BR_LIFE) { /* if can breath nether, should get
+						  good resist to damage -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+	}
+	else if (r_ptr->cdefense & EVIL) {
+	    *dam /= 2;	/* evil takes *2 for holy, so /2 for this... -CFT */
+	    res = SOME_RES;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= EVIL;
+        }
+	break;
+      case GF_WATER:	/* water elementals should resist.  anyone else? -CFT */
+	if ((r_ptr->cchar == 'E') && (r_ptr->name[0] == 'W')){
+	    res = IMMUNE;
+	    *dam = 0; /* water spirit, water ele, and Waldern -CFT */
+        }
+	break;
+      case GF_CHAOS:
+	if (r_ptr->spells2 & MS2_BR_CHAO){ /* assume anything that breathes
+					    choas is chaotic enough to deserve resistance... -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	if ((*dam <= m_ptr->hp) && /* don't bother if it's gonna die */
+	    !(r_ptr->spells2 & MS2_BR_CHAO) &&
+	    !(r_ptr->cdefense & MF2_UNIQUE) &&
+	    (randint(90) > r_ptr->level)) { /* then we'll polymorph it -CFT */
+	    res = CHANGED;
+	    if (poly(cave[*y][*x].cptr))
+		*dam = 0; /* new monster was not hit by choas breath.  This also
+			     makes things easier to handle */
+	} /* end of choas-poly.  If was poly-ed don't bother confuse... it's
+	     too hectic to keep track of... -CFT */
+	else if (!(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+		 !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
+		 !(r_ptr->spells2 & MS2_BR_CONF)){   /* so are bronze dragons */
+	    if (m_ptr->confused > 0) { 
+		res = MORE_CONF;
+		if (m_ptr->confused < 240){ /* make sure not to overflow -CFT */
+		    m_ptr->confused += 7/(rad>0 ? rad : 1);
+		}
+	    }
+	    else {
+		res = CONFUSED;
+		m_ptr->confused = (randint(11)+5)/(rad>0 ? rad : 1);
+	    }
+	}
+	break;
+      case GF_SHARDS:
+	if (r_ptr->spells2 & MS2_BR_SHAR){ /* shard breathers resist -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	break;
+      case GF_SOUND:
+      if (r_ptr->spells2 & MS2_BR_SOUN){ /* ditto for sound -CFT */
+	  res = RESIST;
+	  *dam *= 2;
+	  *dam /= (randint(6)+6);
+      }
+	if ((*dam <= m_ptr->hp) && /* don't bother if it's dead */
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)) { /* sound and impact breathers
+	  					should not stun -CFT */
+	    if (m_ptr->confused > 0) { 
+		res = MORE_DAZED;
+		if (m_ptr->confused < 220){ /* make sure not to overflow -CFT */
+		    m_ptr->confused += (randint(5)*2)/(rad>0 ? rad : 1);
+		}
+	    }
+	    else {
+		res = DAZED;
+		m_ptr->confused = (randint(15)+10)/(rad>0 ? rad : 1);
+	    }
+  	}
+	break;
+      case GF_CONFUSION:
+	if (r_ptr->spells2 & MS2_BR_CONF){ 
+	    res = RESIST;
+	    *dam *= 2;
+	    *dam /= (randint(6)+6);
+        }
+	else if (r_ptr->cdefense & MF2_CHARM_SLEEP){
+	    res = SOME_RES;
+	    *dam /= 2; /* only some resist, but they also avoid confuse -CFT */
+        }
+	if ((*dam <= m_ptr->hp) && /* don't bother if it's dead */
+	    !(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+	    !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
+	    !(r_ptr->spells2 & MS2_BR_CONF)) {  /* so are bronze dragons */
+	    if (m_ptr->confused > 0) { 
+		res = MORE_CONF;
+		if (m_ptr->confused < 240){ /* make sure not to overflow -CFT */
+		    m_ptr->confused += 7/(rad>0 ? rad : 1);
+		}
+	    }
+	    else {
+		res = CONFUSED;
+		m_ptr->confused = (randint(11)+5)/(rad>0 ? rad : 1);
+	    }
+	}
+        break;
+      case GF_DISENCHANT:
+	if ((r_ptr->spells2 & MS2_BR_DISE) ||
+	    !strncmp("Disen", r_ptr->name, 5)) {
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	break;
+      case GF_NEXUS:
+	if ((r_ptr->spells2 & MS2_BR_NETH) ||
+	    !strncmp("Nexus", r_ptr->name, 5)) {
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	break;
+      case GF_FORCE:
+	if (r_ptr->spells3 & MS3_BR_WALL){ /* breath ele force resists
+					    ele force -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	if ((*dam <= m_ptr->hp) &&
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)){ /* sound and impact breathers
+					       should not stun -CFT */
+	    if (m_ptr->confused > 0) { 
+		res = MORE_DAZED;
+		if (m_ptr->confused < 220){ /* make sure not to overflow -CFT */
+		    m_ptr->confused += (randint(5)+1)/(rad>0 ? rad : 1);
+		}
+	    }
+	    else {
+		res = DAZED;
+		m_ptr->confused = randint(15)/(rad>0 ? rad : 1);
+	    }
+	}
+	break;
+      case GF_INERTIA:
+	if (r_ptr->spells3 & MS3_BR_SLOW){ /* if can breath inertia, then
+					    resist it. */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	break;
+      case GF_LIGHT:
+	if (r_ptr->spells3 & MS3_BR_LITE){ /* breathe light to res light */
+	    res = RESIST;
+	    *dam *= 2;
+	    *dam /= (randint(6)+6);
+        }
+	else if (r_ptr->cdefense & MF2_HURT_LITE){
+	    res = SUSCEPT;
+	    *dam *= 2; /* hurt bad by light */
+        }
+	else if (r_ptr->spells3 & MS3_BR_DARK){ /* breathe dark gets hurt */
+	    res = SUSCEPT;
+	    *dam = (*dam * 3)/2;
+        }
+	break;
+      case GF_DARK:
+	if (r_ptr->spells2 & MS3_BR_DARK){ /* shard breathers resist -CFT */
+	    res = RESIST;
+	    *dam *= 2;
+	    *dam /= (randint(6)+6);
+        }
+	else if (r_ptr->cdefense & MF2_HURT_LITE){
+	    res = SOME_RES;
+	    *dam /= 2; /* hurt bad by light, so not hurt bad by dark */
+        }
+	else if (r_ptr->spells3 & MS3_BR_LITE){ /* breathe light gets hurt */
+	    res = SUSCEPT;
+	    *dam = (*dam * 3)/2;
+        }
+	break;
+      case GF_TIME:
+	if (r_ptr->spells3 & MS3_BR_TIME){ /* time breathers resist -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	break;
+      case GF_GRAVITY:
+	if (r_ptr->spells3 & MS3_BR_GRAV){ /* breathers resist -CFT */
+	    res = RESIST;
+	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
+	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
+        }
+	else {
+	    if (*dam <= m_ptr->hp) {
+		teleport_away(cave[m_ptr->fy][m_ptr->fx].cptr, 5);
+		*y = m_ptr->fy; /* teleported, so let outside world know monster moved! */
+		*x = m_ptr->fx; 
+	    }
+        }
+	break;
+      case GF_MANA: /* raw blast of power. no way to resist, is there? */
+	break;
+      case GF_METEOR: /* GF_METEOR is basically a powerful magic-missile
+			 ball spell.  I only made it a different type
+			 so I could make it a different color -CFT */
+	break;
+      case GF_ICE: /* ice is basically frost + cuts + stun -CFT */
+	if (r_ptr->cdefense & MF2_IM_COLD) {
+	    res = RESIST;
+	    *dam /= 9;
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
+        }
+	if ((*dam <= m_ptr->hp) &&
+	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
+	    !(r_ptr->spells3 & MS3_BR_WALL)){  /* sound and impact breathers
+	  					should not stun -CFT */
+	    if (m_ptr->confused > 0) { 
+		res += MORE_DAZED;
+		if (m_ptr->confused < 220){ /* make sure not to overflow -CFT */
+		    m_ptr->confused += (randint(5)+1)/(rad>0 ? rad : 1);
+		}
+	    }
+	    else {
+		res += DAZED;
+		m_ptr->confused = randint(15)/(rad>0 ? rad : 1);
+	    }
+	}
+	break;
+      default:
+	msg_print("Unknown typ in spell_hit_monster.  This may mean trouble.");
+    } /* end switch for saving throws and extra effects */
+    
+    if (res == CHANGED)
+	sprintf(outval, "%schanges!",cdesc);
+    else if ((*dam > m_ptr->hp) &&
+	     (by_player || !(r_list[m_ptr->mptr].cdefense & MF2_UNIQUE))) {
+	res = DEAD;
+	if ((r_list[m_ptr->mptr].cdefense & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+	    (r_list[m_ptr->mptr].cchar == 'E') ||
+	    (r_list[m_ptr->mptr].cchar == 'v') ||
+	    (r_list[m_ptr->mptr].cchar == 'g') ||
+	    (r_list[m_ptr->mptr].cchar == 'X'))
+	    sprintf(outval, "%sis destroyed.", cdesc);
+	else
+	    sprintf(outval, "%sdies.", cdesc);
+    }
+    else switch (res) {
+      case NO_RES:
+	sprintf(outval, "%sis hit.",cdesc);
+	break;
+      case SOME_RES:
+	sprintf(outval, "%sresists somewhat.",cdesc);
+	break;
+      case RESIST:
+	sprintf(outval, "%sresists.",cdesc);
+	break;
+      case IMMUNE:
+	sprintf(outval, "%sis immune.",cdesc);
+	break;
+      case SUSCEPT:
+	sprintf(outval, "%sis hit hard.",cdesc);
+	break;
+      case CONFUSED:
+	sprintf(outval, "%sis confused.",cdesc);
+	break;
+      case MORE_CONF:
+	sprintf(outval, "%sis more confused.",cdesc);
+	break;
+      case DAZED:
+	sprintf(outval, "%sis dazed.",cdesc);
+	break;
+      case MORE_DAZED:
+	sprintf(outval, "%sis more dazed.",cdesc);
+	break;
+      case (DAZED+RESIST):
+	  sprintf(outval, "%sresists, but is dazed anyway.",cdesc);
+	break;
+      case (MORE_DAZED+RESIST):
+	  sprintf(outval, "%sresists, but still is more dazed.",cdesc);
+	break;
+      default:
+	sprintf(outval,"%sis affected in a mysterious way.",cdesc);
+    }
+    if (rad || (res != NO_RES)) { /* don't show normal hit msgs for bolts -CFT */
+	if (!blind)
+	    msg_print(outval);
+    }	
+}
+
+
+
+
+/*
+ * add new destroys?  maybe GF_FORCE destroy potions, GF_PLASMA as lightning,
+ * GF_SHARDS and GF_ICE maybe break things (potions?), and GF_METEOR breaks
+ * potions and burns scrolls?  not yet, but it's an idea... -CFT 
+ */
+static void ball_destroy(int typ, int (**destroy) ())
+{
+    switch (typ) {
+      case GF_FIRE:
+	*destroy = set_fire_destroy;
+	break;
+      case GF_ACID:
+	*destroy = set_acid_destroy;
+	break;
+      case GF_COLD:
+      case GF_SHARDS:
+      case GF_ICE:
+      case GF_FORCE:
+      case GF_SOUND:
+	*destroy = set_frost_destroy;	/* just potions and flasks -DGK */
+	break;
+      case GF_ELEC:
+	*destroy = set_lightning_destroy;
+	break;
+      case GF_PLASMA:		   /* DGK */
+	*destroy = set_plasma_destroy;	/* fire+lightning -DGK */
+	break;
+      case GF_METEOR:		   /* DGK */
+	*destroy = set_meteor_destroy;	/* fire+shards -DGK */
+	break;
+      case GF_MANA:		   /* DGK */
+	*destroy = set_mana_destroy;	/* everything -DGK */
+	break;
+      case GF_HOLY_ORB:	   /* DGK */
+	*destroy = set_holy_destroy;	/* cursed stuff -DGK */
+	break;
+      case GF_MAGIC_MISSILE:
+      case GF_POIS:
+      case GF_ARROW:
+      case GF_NETHER:
+      case GF_WATER:
+      case GF_CHAOS:
+      case GF_CONFUSION:
+      case GF_DISENCHANT:
+      case GF_NEXUS:
+      case GF_INERTIA:
+      case GF_LIGHT:
+      case GF_DARK:
+      case GF_TIME:
+      case GF_GRAVITY:
+	*destroy = set_null;
+	break;
+      default:
+	msg_print("Unknown typ in ball_destroy().  This may mean trouble.");
+	*destroy = set_null;
+	break;
+    }
+}
+
+
+
+
+/* Split out of lite_line.       -DGK */
+void mon_light_dam(int y, int x, int dam)
+{
+    register cave_type     *c_ptr;
+    register monster_type  *m_ptr;
+    register monster_race *r_ptr;
+    vtype                   out_val, m_name;
+    int                     i;
+
+    c_ptr = &cave[y][x];
+    if (c_ptr->cptr > 1) {
+	m_ptr = &m_list[c_ptr->cptr];
+	r_ptr = &r_list[m_ptr->mptr];
+	monster_name(m_name, m_ptr, r_ptr);
+	m_ptr->csleep = 0;
+	if (MF2_HURT_LITE & r_ptr->cdefense) {
+	    if (m_ptr->ml)
+		l_list[m_ptr->mptr].r_cdefense |= MF2_HURT_LITE;
+	    i = mon_take_hit((int)c_ptr->cptr, dam, FALSE);
+	    if (i >= 0) {
+		(void)sprintf(out_val, "%s shrivels away in the light!", m_name);
+		msg_print(out_val);
+		prt_experience();
+	    } else {
+		(void)sprintf(out_val, "%s cringes from the light!", m_name);
+		msg_print(out_val);
+	    }
+	}
+    }
+}
+
+
+
+
+/* this fn only exists to avoid duplicating this code in the selfknowledge fn. -CFT */
+static void pause_if_screen_full(int *i, int j)
+{
+    int t;
+
+    if (*i == 22) {		   /* is screen full? */
+	prt("-- more --", *i, j);
+	inkey();
+	for (t = 2; t < 23; t++)
+	    erase_line(t, j);	   /* don't forget to erase extra */
+	prt("Your Attributes: (continued)", 1, j + 5);
+	*i = 2;
+    }
+}
+
+
+
+
+int detect_enchantment()
+{
+    register int i, j, detect, tv;
+    register cave_type *c_ptr;
+    
+    detect = FALSE;
+    for (i = panel_row_min; i <= panel_row_max; i++)
+	for (j = panel_col_min; j <= panel_col_max; j++) {
+	    c_ptr = &cave[i][j];
+	    tv = t_list[c_ptr->tptr].tval;
+	    if ((c_ptr->tptr != 0) && !test_lite(i, j) &&
+		( ((tv > TV_MAX_ENCHANT) && (tv < TV_FLASK)) || /* misc items */
+		 (tv == TV_MAGIC_BOOK) || (tv == TV_PRAYER_BOOK) || /* books */
+		 ((tv >= TV_MIN_WEAR) && (tv <= TV_MAX_ENCHANT) && /* armor/weap */
+		  ((t_list[c_ptr->tptr].flags2 & TR_ARTIFACT) || /* if Art., or */
+		   (t_list[c_ptr->tptr].tohit>0) || /* has pluses, then show */
+		   (t_list[c_ptr->tptr].todam>0) ||
+		   (t_list[c_ptr->tptr].toac>0))) )){
+		c_ptr->fm = TRUE;
+		lite_spot(i, j);
+		detect = TRUE;
+	    }
+	}
+
+    /* Return result */    
+    return (detect);
+}
+
+
+
 /* 
  * I may have written the town level code, but I'm not exactly	 */
 /* proud of it.	 Adding the stores required some real slucky	 */
@@ -131,62 +693,6 @@ void bst_stat(int stat, int amount)
 }
 
 
-/*
- * Are we strong enough for the current pack and weapon?  -CJS-	 */
-void check_strength()
-{
-    register int         i;
-    register inven_type *i_ptr;
-    static int           notlike = FALSE;
-
-    i_ptr = &inventory[INVEN_WIELD];
-    if (i_ptr->tval != TV_NOTHING
-	&& (p_ptr->stats.use_stat[A_STR] * 15 < i_ptr->weight)) {
-	if (weapon_heavy == FALSE) {
-	    msg_print("You have trouble wielding such a heavy weapon.");
-	    weapon_heavy = TRUE;
-	    calc_bonuses();
-	}
-    } else if (weapon_heavy == TRUE) {
-	weapon_heavy = FALSE;
-	if (i_ptr->tval != TV_NOTHING)
-	    msg_print("You are strong enough to wield your weapon.");
-	else
-	    msg_print("You feel relieved to put down your heavy weapon.");
-	calc_bonuses();
-    }
-    i = weight_limit();
-    if (i < inven_weight)
-	i = inven_weight / (i + 1);
-    else
-	i = 0;
-    if (pack_heavy != i) {
-	if (pack_heavy < i)
-	    msg_print("Your pack is so heavy that it slows you down.");
-	else
-	    msg_print("You move more easily under the weight of your pack.");
-	change_speed(i - pack_heavy);
-	pack_heavy = i;
-    }
-    p_ptr->flags.status &= ~PY_STR_WGT;
-
-    if (p_ptr->misc.pclass == 2 && !notlike) {
-        if ((i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
-            && ((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
-            notlike = TRUE;
-            msg_print("You do not feel comfortable with your weapon.");
-        }
-    } else if (p_ptr->misc.pclass == 2 && notlike) {
-        if (i_ptr->tval == TV_NOTHING) {
-            notlike = FALSE;
-            msg_print("You feel comfortable again after removing that weapon.");
-        } else if (!(i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
-		   || !((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
-            notlike = FALSE;
-            msg_print("You feel comfortable with your weapon once more.");
-        }
-    }
-}
 
 
 /*
@@ -698,7 +1204,7 @@ static void do_command(char com_val)
 	    msg_print("You cannot be sure what is real and what is not!");
 	else {
 	    draw_cave();
-	    creatures(FALSE);	  /* draw monsters */
+	    process_monsters(FALSE);	  /* draw monsters */
 	    prt_equippy_chars();  /* redraw equippy chars */
 	}
 	free_turn_flag = TRUE;
@@ -1138,7 +1644,7 @@ static void do_command(char com_val)
 		y = char_row;
 		x = char_col;
 		(void)summon_monster(&y, &x, TRUE);
-		creatures(FALSE);
+		process_monsters(FALSE);
 		break;
 	      case '*':		/* '*' = identify all up to a level */
 		prt("Identify objects upto which level (0-200) ? ", 0, 0);
@@ -1279,29 +1785,4 @@ static int valid_countcommand(char c)
 }
 
 
-int ruin_stat(register int stat)
-{
-    register int tmp_stat;
-
-    tmp_stat = p_ptr->stats.cur_stat[stat];
-    if (tmp_stat > 3) {
-	if (tmp_stat > 6) {
-	    if (tmp_stat < 19) {
-		tmp_stat -= 3;
-	    } else {
-		tmp_stat /= 2;
-		if (tmp_stat < 18)
-		    tmp_stat = 18;
-	    }
-	} else
-	    tmp_stat--;
-
-	p_ptr->stats.cur_stat[stat] = tmp_stat;
-	p_ptr->stats.max_stat[stat] = tmp_stat;
-	set_use_stat(stat);
-	prt_stat(stat);
-	return TRUE;
-    } else
-	return FALSE;
-}
 

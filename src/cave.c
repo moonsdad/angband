@@ -1,5 +1,7 @@
 /* File: cave.c */
 
+/* Purpose: mid-level graphics -- colors and symbols and such */
+
 /*
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
  *
@@ -150,7 +152,7 @@ int los(int fromY, int fromX, int toY, int toX)
 	 * m = d_y / d_x * 2 * (d_y * d_x) = 2 * d_y * d_y. 
 	 */
 
-	    dy = d_y * d_y;
+	    dy = a_y * a_y;
 	    m = dy << 1;
 	    p_x = fromX + xSign;
 
@@ -192,7 +194,7 @@ int los(int fromY, int fromX, int toY, int toX)
 	
 	    register int        dx;	/* "fractional" x position	 */
 
-	    dx = d_x * d_x;
+	    dx = a_x * a_x;
 	    m = dx << 1;
 
 	    p_y = fromY + ySign;
@@ -279,32 +281,8 @@ void move_cursor_relative(int row, int col)
     row -= panel_row_prt;
     col -= panel_col_prt;
 
-#ifdef MACINTOSH
-
-    DSetScreenCursor(col, row);
-
-#else
-	{
-
-    vtype tmp_str;
-
-
-    if (move(row, col) == ERR) {
-	abort();
-    /* clear msg_flag to avoid problems with unflushed messages */
-	msg_flag = 0;
-	(void)sprintf(tmp_str,
-		      "error in move_cursor_relative, row = %d col = %d\n",
-		      row, col);
-	prt(tmp_str, 0, 0);
-	bell();
-    /* wait so user can see error */
-	(void)sleep(2);
-    }
-
-	}
-#endif
-
+    /* Go there */
+    Term_gotoxy(col, row);
 }
 
 
@@ -325,20 +303,34 @@ void lite_spot(int y, int x)
  */
 void prt_map(void)
 {
-    register int x, y, k;
+    register int x, y;
+
     register unsigned char tmp_char;
 
-    k = 0;
-    for (y = panel_row_min; y <= panel_row_max; y++) {	/* Top to bottom */
-	k++;
-	erase_line(k, 13);
+    int okay;
 
+    /* Hide the cursor */
+    okay = Term_hide_cursor();
+
+    /* Dump the map */    
+    for (y = panel_row_min; y <= panel_row_max; y++) {	/* Top to bottom */
+
+	/* Erase the map line (needed?) */
+	erase_line(1+y-panel_row_min, 13);
+
+	/* Scan the columns of row "y" */
 	for (x = panel_col_min; x <= panel_col_max; x++) {	/* Left to right */
+
+	    /* Determine what is there */
 	    tmp_char = loc_symbol(y, x);
-	    if (tmp_char != ' ')
-		print(tmp_char, y, x);
+
+	    /* Redraw that grid of the map */
+	    if (tmp_char != ' ') print(tmp_char, y, x);
 	}
     }
+
+    /* Show the cursor (if necessary) */
+    if (!okay) Term_show_cursor();
 }
 
 
@@ -367,7 +359,7 @@ void prt_map(void)
  */
 void check_view(void)
 {
-    int        i, j;
+    int i, j;
     cave_type *c_ptr, *d_ptr;
 
     c_ptr = &cave[char_row][char_col];
@@ -380,7 +372,7 @@ void check_view(void)
 
     /* A room of light should be lit.	 */
     if (c_ptr->fval == LIGHT_FLOOR) {
-		if ((p_ptr->flags.blind < 1) && !c_ptr->pl) light_room(char_row, char_col);
+		if ((p_ptr->flags.blind < 1) && !c_ptr->pl) lite_room(char_row, char_col);
     }
 
     /* In doorway of light-room?		   */
@@ -388,7 +380,7 @@ void check_view(void)
 	for (i = (char_row - 1); i <= (char_row + 1); i++)
 	    for (j = (char_col - 1); j <= (char_col + 1); j++) {
 		d_ptr = &cave[i][j];
-		if ((d_ptr->fval == LIGHT_FLOOR) && !d_ptr->pl) light_room(i, j);
+		if ((d_ptr->fval == LIGHT_FLOOR) && !d_ptr->pl) lite_room(i, j);
 	    }
     }
 }
@@ -397,12 +389,12 @@ void check_view(void)
 /*
  * Illuminate any room containing the given location.
  */
-void light_room(int y, int x)
+void lite_room(int y1, int x1)
 {
     register cave_type *c_ptr;
     register monster_type  *m_ptr;
 
-    c_ptr = &cave[y][x];
+    c_ptr = &cave[y1][x1];
     if (!c_ptr->pl && c_ptr->lr) {
 	c_ptr->pl = TRUE;
 	m_ptr = &m_list[c_ptr->cptr];
@@ -420,45 +412,45 @@ void light_room(int y, int x)
 	else if (c_ptr->fval == DARK_FLOOR)
 	    c_ptr->fval = LIGHT_FLOOR;
 #ifdef MSDOS
-	lite_spot(y, x);	   /* this does all that; plus color-safe -CFT */
+	lite_spot(y1, x1);	   /* this does all that; plus color-safe -CFT */
 #else
-	if ((y - panel_row_prt) < 23 && (y - panel_row_prt) > 0 &&
-	    (x - panel_col_prt) > 12 && (x - panel_col_prt) < 80)
-	    print(loc_symbol(y, x), y, x);
+	if ((y1 - panel_row_prt) < 23 && (y1 - panel_row_prt) > 0 &&
+	    (x1 - panel_col_prt) > 12 && (x1 - panel_col_prt) < 80)
+	    print(loc_symbol(y1, x1), y1, x1);
 #endif
     
 	if (c_ptr->fval < MIN_CLOSED_SPACE) {
-	    c_ptr = &cave[y + 1][x];
+	    c_ptr = &cave[y1 + 1][x1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y + 1, x);
+		lite_room(y1 + 1, x1);
 	    
-	    c_ptr = &cave[y - 1][x];
+	    c_ptr = &cave[y1 - 1][x1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y - 1, x);
+		lite_room(y1 - 1, x1);
 
-	    c_ptr = &cave[y][x + 1];
+	    c_ptr = &cave[y1][x1 + 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y, x + 1);
+		lite_room(y1, x1 + 1);
 	    
-	    c_ptr = &cave[y][x - 1];
+	    c_ptr = &cave[y1][x1 - 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y, x - 1);
+		lite_room(y1, x1 - 1);
 	    
-	    c_ptr = &cave[y + 1][x + 1];
+	    c_ptr = &cave[y1 + 1][x1 + 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y + 1, x + 1);
+		lite_room(y1 + 1, x1 + 1);
 	    
-	    c_ptr = &cave[y - 1][x - 1];
+	    c_ptr = &cave[y1 - 1][x1 - 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y - 1, x - 1);
+		lite_room(y1 - 1, x1 - 1);
 	    
-	    c_ptr = &cave[y - 1][x + 1];
+	    c_ptr = &cave[y1 - 1][x1 + 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y - 1, x + 1);
+		lite_room(y1 - 1, x1 + 1);
 	    
-	    c_ptr = &cave[y + 1][x - 1];
+	    c_ptr = &cave[y1 + 1][x1 - 1];
 	    if ((!c_ptr->pl) && (c_ptr->lr))
-		light_room(y + 1, x - 1);
+		lite_room(y1 + 1, x1 - 1);
 	}
     }     
 }
@@ -466,7 +458,7 @@ void light_room(int y, int x)
 /*
  * Darken all rooms containing the given location
  */
-void darken_room(int y, int x)
+void unlite_room(int y, int x)
 {
     register cave_type *c_ptr;
 
@@ -486,17 +478,54 @@ void darken_room(int y, int x)
 	    if (c_ptr->fval < MIN_CLOSED_SPACE) {
 #endif
 		c_ptr->pl = FALSE;
-		darken_room(y + 1, x);
-		darken_room(y - 1, x);
-		darken_room(y, x + 1);
-		darken_room(y, x - 1);
-		darken_room(y + 1, x + 1);
-		darken_room(y - 1, x - 1);
-		darken_room(y - 1, x + 1);
-		darken_room(y + 1, x - 1);
+		unlite_room(y + 1, x);
+		unlite_room(y - 1, x);
+		unlite_room(y, x + 1);
+		unlite_room(y, x - 1);
+		unlite_room(y + 1, x + 1);
+		unlite_room(y - 1, x - 1);
+		unlite_room(y - 1, x + 1);
+		unlite_room(y + 1, x - 1);
 	    }
 	print(loc_symbol(y, x), y, x);
     }
+}
+
+
+
+
+
+
+
+/*
+ * Map the current area plus some			-RAK-	
+ */
+void map_area(void)
+{
+    register cave_type *c_ptr;
+    register int        i7, i8, n, m;
+    int                 i, j, k, l;
+
+    /* Pick an area to map */
+    i = panel_row_min - randint(10);
+    j = panel_row_max + randint(10);
+    k = panel_col_min - randint(20);
+    l = panel_col_max + randint(20);
+    for (m = i; m <= j; m++)
+	for (n = k; n <= l; n++)
+	    if (in_bounds(m, n) && (cave[m][n].fval <= MAX_CAVE_FLOOR))
+		for (i7 = m - 1; i7 <= m + 1; i7++)
+		    for (i8 = n - 1; i8 <= n + 1; i8++) {
+			c_ptr = &cave[i7][i8];
+			if (c_ptr->fval >= MIN_CAVE_WALL)
+			    c_ptr->pl = TRUE;
+			else if ((c_ptr->tptr != 0) &&
+			     (t_list[c_ptr->tptr].tval >= TV_MIN_VISIBLE) &&
+			       (t_list[c_ptr->tptr].tval <= TV_MAX_VISIBLE))
+			    c_ptr->fm = TRUE;
+		    }
+    /* Redraw the map */
+    prt_map();
 }
 
 
@@ -509,6 +538,7 @@ void wiz_lite(int light)
 {
     register cave_type *c_ptr;
     register int        yy, xx, y, x;
+
     int                 flag;
 
     if (!light) {
@@ -585,18 +615,20 @@ void wiz_lite(int light)
 void screen_map(void)
 {
     register int i, j;
+
     static byte screen_border[2][6] = {
     {'+', '+', '+', '+', '-', '|'},	/* normal chars */
     {201, 187, 200, 188, 205, 186}	/* graphics chars */
     };
     byte map[MAX_WIDTH / RATIO + 1];
     byte tmp;
-    int   priority[256];
+
     int   row, orow, col, myrow = 0, mycol = 0;
+
+    int   priority[256];
 
 #ifndef MACINTOSH
     char  prntscrnbuf[80];
-
 #endif
 
     for (i = 0; i < 256; i++)
@@ -618,6 +650,7 @@ void screen_map(void)
 
     save_screen();
     clear_screen();
+
 #ifdef MACINTOSH
     DSetScreenCursor(0, 0);
     DWriteScreenCharAttr(CH(TL), ATTR_NORMAL);
@@ -626,17 +659,18 @@ void screen_map(void)
     DWriteScreenCharAttr(CH(TR), ATTR_NORMAL);
 #else
     use_value2          mvaddch(0, 0, CH(TL));
-
     for (i = 0; i < MAX_WIDTH / RATIO; i++)
 	(void)addch(CH(HE));
     (void)addch(CH(TR));
 #endif
+
     orow = (-1);
     map[MAX_WIDTH / RATIO] = '\0';
     for (i = 0; i < MAX_HEIGHT; i++) {
 	row = i / RATIO;
 	if (row != orow) {
 	    if (orow >= 0) {
+
 #ifdef MACINTOSH
 		DSetScreenCursor(0, orow + 1);
 		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
@@ -647,10 +681,8 @@ void screen_map(void)
 	     * written, and mvprintw() causes the fp emulation library to be
 	     * linked with PC-Moria, makes the program 10K bigger 
 	     */
-		(void)sprintf(prntscrnbuf, "%c%s%c",
-			      CH(VE), map, CH(VE));
+		(void)sprintf(prntscrnbuf, "%c%s%c", CH(VE), map, CH(VE));
 		use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
-
 #endif
 	    }
 	    for (j = 0; j < MAX_WIDTH / RATIO; j++)
@@ -675,8 +707,7 @@ void screen_map(void)
 	DWriteScreenString(map);
 	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
 #else
-	(void)sprintf(prntscrnbuf, "%c%s%c",
-		      CH(VE), map, CH(VE));
+	(void)sprintf(prntscrnbuf, "%c%s%c", CH(VE), map, CH(VE));
 	use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
 
 #endif

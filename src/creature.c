@@ -581,7 +581,7 @@ static void shatter_quake(int mon_y, int mon_x)
 			char_col = x;
 			check_view();
 		    /* light creatures */
-			creatures(FALSE);
+			process_monsters(FALSE);
 		    }
 		    take_hit(damage, "an Earthquake");
 		}
@@ -713,7 +713,7 @@ static void br_wall(int mon_y, int mon_x)
     check_view();
 
 	/* light creatures */
-    creatures(FALSE);
+    process_monsters(FALSE);
     lite_spot(char_row, char_col);
 
     /* Take some damage */
@@ -3383,7 +3383,7 @@ static void mon_move(int monptr, u32b *rcmove)
 /*
  * Creatures movement and attacking are done from here	-RAK-
  */
-void creatures(int attack)
+void process_monsters(int attack)
 {
     register int          i, k;
     register monster_type *m_ptr;

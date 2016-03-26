@@ -768,13 +768,17 @@ int _save_player(char *fnam)
 }
 
 
-/* Certain checks are ommitted for the wizard. -CJS- */
+/* 
+ * Certain checks are ommitted for the wizard. -CJS-
+ */
 
-int get_char(int *generate)
+int load_player(int *generate)
 {
     int                    i, j, fd, c, ok, total_count;
     u32b                 l, age, time_saved;
-    vtype                  temp;
+
+    vtype temp;
+
     u16b                 int16u_tmp;
     register cave_type    *c_ptr;
     register monster_lore  *r_ptr;

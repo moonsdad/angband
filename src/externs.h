@@ -117,7 +117,7 @@ extern int NO_SAVE;
 /*
  * Note that "hack_m_idx" is not nearly as horrible a hack as before.
  * Needed because compact_monster() can be called from within
- * creatures() via place_monster() and summon_monster() 
+ * process_monsters() via place_monster() and summon_monster() 
  */
 
 extern int hack_m_idx;			/* The "current" monster, if any */
@@ -455,9 +455,10 @@ void player_birth(void);
 void update_mon(int);
 int movement_rate(int);
 int multiply_monster(int, int, int, int);
-void creatures(int);
+void process_monsters(int);
 
 /* death.c */
+void init_scorefile(void);
 void display_scores(int, int);
 void delete_entry(int);
 long total_points(void);
@@ -477,10 +478,10 @@ int store_bought_p(inven_type *);
 void sample(struct inven_type *);
 void identify(int *);
 void unmagic_name(inven_type *);
-void objdes(char *, struct inven_type *, int);
 void scribe_object(void);
 void add_inscribe(inven_type *, int);
 void inscribe(inven_type *, cptr);
+void objdes(char *, struct inven_type *, int);
 void invcopy(inven_type *, int);
 void desc_charges(int);
 void desc_remain(int);
@@ -493,22 +494,16 @@ void dungeon(void);
 int special_check(inven_type *);
 int is_quest(int);
 void rerate(void);
-int ruin_stat(int);
 
 /* effects.c */
 void eat(void);
 
 /* files.c */
-void init_scorefile(void);
 void init_files(void);
 void read_times(void);
 void helpfile(cptr);
-void print_objects(void);
-#ifdef MACINTOSH
-int file_character(void)
-#else
-int file_character(char *);
-#endif
+int file_character(cptr);
+int mac_file_character(void);
 
 /* generate.c */
 void generate_cave(void);
@@ -517,6 +512,16 @@ void generate_cave(void);
 
 int los(int, int, int, int);
 int test_lite(int, int);
+int no_lite(void);
+
+void lite_room(int, int);
+void unlite_room(int, int);
+
+void move_cursor_relative(int, int);
+
+void lite_spot(int, int);
+
+void screen_map(void);
 
 /* help.c */
 void ident_char(void);
@@ -526,6 +531,9 @@ void ident_char(void);
 void bell(void);
 
 void move_cursor(int, int);
+
+void text_to_ascii(char *buf, cptr str);
+void ascii_to_text(char *buf, cptr str);
 
 void flush(void);
 
@@ -537,7 +545,6 @@ void erase_line(int, int);
 void clear_screen(void);
 void clear_from(int);
 
-void move_cursor_relative(int, int);
 void c_put_str(byte, cptr, int, int);
 void put_str(cptr, int, int);
 
@@ -556,6 +563,8 @@ void pause_exit(int, int);
 void print(int, int, int);
 
 /* magic.c */
+int door_creation(void);
+void stair_creation(void);
 void cast(void);
 
 /* arrays.c */
@@ -580,6 +589,7 @@ void prt_map(void);
 void add_food(int);
 
 /* misc2.c */
+void delete_monster(int);
 int compact_monsters(void);
 int m_pop(void);
 int max_hp(byte *);
@@ -610,6 +620,7 @@ int distance(int, int, int, int);
 
 /* misc3.c */
 int i_pop(void);
+int delete_object(int, int);
 void pusht(int);
 int magik(int);
 int m_bonus(int, int, int);
@@ -650,7 +661,6 @@ void set_use_stat(int);
 int inc_stat(int);
 int dec_stat(int);
 int res_stat(int);
-void bst_stat(int, int);
 int tohit_adj(void);
 int toac_adj(void);
 int todis_adj(void);
@@ -716,8 +726,6 @@ void inven_takeoff(int, int);
 int verify(cptr, int);
 void inven_command(int);
 int get_item(int *, cptr, int, int, int ());
-int no_lite(void);
-void light_room(int, int);
 void move_light(int, int, int, int);
 int test_hit(int, int, int, int, int);
 void take_hit(int, cptr);
@@ -733,28 +741,27 @@ void acid_dam(int, cptr);
 void darken_player(int, int);
 
 /* moria2.c */
+int ruin_stat(int);
 void move_rec(int, int, int, int);
 int cast_spell(cptr ,int, int *, int *);
-void check_unique(monster_type *);
-void delete_unique(void);
-void delete_monster(int);
-void fix1_delete_monster(int);
-void fix2_delete_monster(int);
-int delete_object(int, int);
 u32b monster_death(int, int, u32b, u32b, u32b);
 int mon_take_hit(int, int, int);
+void check_unique(monster_type *);
+void delete_unique(void);
+void fix1_delete_monster(int);
+void fix2_delete_monster(int);
 
 
 /* moria3.c */
+int twall(int, int, int, int);
 void look(void);
 void do_cmd_open(void);
 void do_cmd_close(void);
-int twall(int, int, int, int);
 void tunnel(int);
 void do_cmd_disarm(void);
+void bash(void);
 void do_cmd_spike(void);
 void do_cmd_fire(void);
-void bash(void);
 void rest(void);
 void do_cmd_feeling(void);
 void artifact_check(void);
@@ -803,13 +810,9 @@ char *setstate(char *);
 void activate_rod(void);
 
 /* save.c */
-#ifdef MACINTOSH
-int save_player(int);
-#else
 int save_player(void);
-#endif
 int _save_player(char *);
-int get_char(int *);
+int load_player(int *);
 
 /* scrolls.c */
 void read_scroll(void);
@@ -843,7 +846,7 @@ int store_buy(int, int);
 
 /* signals.c */
 void signals_ignore_tstp(void);
-void signals(void);
+void signals_handle_tstp(void);
 void signals_init(void);
 void ignore_signals(void);
 void default_signals(void);
@@ -851,9 +854,9 @@ void restore_signals(void);
 
 /* spells.c */
 void monster_name(char *, struct monster_type *, struct monster_race *);
-void lower_monster_name(char *, struct monster_type *, struct monster_race *);
 int sleep_monsters1(int, int);
 int detect_treasure(void);
+int detect_magic(void);
 int detect_object(void);
 int detect_trap(void);
 int detect_sdoor(void);
@@ -862,20 +865,21 @@ int lite_area(int, int, int, int);
 int unlite_area(int, int);
 void map_area(void);
 int ident_spell(void);
+void identify_pack(void);
 int aggravate_monster(int);
 int trap_creation(void);
 int door_creation(void);
+void stair_creation(void);
 int td_destroy(void);
 int detect_monsters(void);
-void mon_light_dam(int, int, int);
 void lite_line(int, int, int);
-void frost_line(int, int, int, int);
 void starlite(int, int);
 int disarm_all(int, int, int);
+void bolt(int, int, int, int, char *, monster_type *, int);
 void get_flags(int, u32b *, u32b *, int (**)());
+void breath(int, int, int, int, char *, int);
 void fire_bolt(int, int, int, int, int);
 void fire_ball(int, int, int, int, int, int);
-void breath(int, int, int, int, char *, int);
 int recharge(int);
 int hp_monster(int, int, int, int);
 int drain_life(int, int, int, int);
@@ -926,15 +930,14 @@ void self_knowledge(void);
 int probing(void);
 int detection(void);
 void starball(int,int);
-void bolt(int, int, int, int, char *, monster_type *, int);
+void spell_hit_monster(monster_type *, int, int *, int, int *, int *, int);
+void wiz_lite(int);
 int lose_all_info(void);
 void tele_level(void);
 void identify_pack(void);
 int fear_monster(int, int, int, int);
 int banish_creature(u32b, int);
 int remove_all_curse(void);
-void darken_room(int, int);
-void lite_spot(int, int);
 cptr pain_message(int, int);
 void line_spell(int, int, int, int, int);
 
@@ -958,7 +961,6 @@ void enter_store(int);
 /* treasur2.c */
 
 /* undef.c */
-void init_files(void);
 int _new_log(void);
 
 #ifdef unix
@@ -981,7 +983,6 @@ FILE *my_tfopen(cptr, cptr);
 void aim(void);
 
 /* wizard.c */
-void wiz_lite(int);
 void change_character(void);
 void wizard_create(void);
 int is_wizard(int);

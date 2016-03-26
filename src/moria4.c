@@ -466,7 +466,7 @@ void search_off(void)
  * The first arg indicates a major disturbance, which affects search.
  *
  */
-void disturb(int stop_search, int light change)
+void disturb(int stop_search, int light_change)
 {
     command_count = 0;
 
@@ -509,23 +509,26 @@ void search(int y, int x, int chance)
 		i_ptr = &t_list[c_ptr->tptr];
 
 	    /* Search for hidden objects */
-		if (c_ptr->tptr != 0) {
+		if (c_ptr->tptr == 0) {
+		    /* Nothing */
+		}
 
 		/* Trap on floor? */
-		    if (i_ptr->tval == TV_INVIS_TRAP) {
-			objdes(tmp_str2, i_ptr, TRUE);
-			(void)sprintf(tmp_str, "You have found %s.", tmp_str2);
-			msg_print(tmp_str);
-			change_trap(i, j);
-			end_find();
-		    }
+		else if (i_ptr->tval == TV_INVIS_TRAP) {
+		    objdes(tmp_str2, i_ptr, TRUE);
+		    (void)sprintf(tmp_str, "You have found %s.", tmp_str2);
+		    msg_print(tmp_str);
+		    change_trap(i, j);
+		    end_find();
+		}
 
 		/* Secret door?	*/
-		    else if (i_ptr->tval == TV_SECRET_DOOR) {
-			msg_print("You have found a secret door.");
+		else if (i_ptr->tval == TV_SECRET_DOOR) {
+		    msg_print("You have found a secret door.");
+
 			change_trap(i, j);
 			end_find();
-		    }
+		}
 
 		/* Chest is trapped? */
 		else if (i_ptr->tval == TV_CHEST) {
@@ -643,7 +646,7 @@ void carry(int y, int x, int pickup)
 static int cycle[] = {1, 2, 3, 6, 9, 8, 7, 4, 1, 2, 3, 6, 9, 8, 7, 4, 1};
 static int chome[] = {-1, 8, 9, 10, 7, -1, 11, 6, 5, 4};
 static int find_openarea, find_breakright, find_breakleft, find_prevdir;
-static int find_direction;/* Keep a record of which way we are going. */
+static int command_dir;/* Keep a record of which way we are going. */
 
 
 /*
@@ -826,7 +829,7 @@ static void area_affect(int dir, int y, int x)
 	    /* potential corners and never cut known corners, so you step */
 	    /* into the straight option. */
 	    if (option2 == 0 || (find_examine && !find_cut)) {
-		if (option != 0) find_direction = option;
+		if (option != 0) command_dir = option;
 		if (option2 == 0) find_prevdir = option;
 		else find_prevdir = option2;
 	    }
@@ -847,7 +850,7 @@ static void area_affect(int dir, int y, int x)
 		    /* are  turning, assume that it is a potential corner. */
 		    if (find_examine && see_nothing(option, row, col) &&
 			see_nothing(option2, row, col)) {
-			find_direction = option;
+			command_dir = option;
 			find_prevdir = option2;
 		    }
 
@@ -859,14 +862,14 @@ static void area_affect(int dir, int y, int x)
 
 		/* This corner is seen to be enclosed; we cut the corner. */
 		else if (find_cut) {
-		    find_direction = option2;
+		    command_dir = option2;
 		    find_prevdir = option2;
 		}
 
 		/* This corner is seen to be enclosed, and we */
 		/* deliberately go the long way. */
 		else {
-		    find_direction = option;
+		    command_dir = option;
 		    find_prevdir = option2;
 		}
 	    }
@@ -935,11 +938,11 @@ void move_player(int dir, int do_pickup)
 		if ((c_ptr->fval == LIGHT_FLOOR) ||
 		    (c_ptr->fval == NT_LIGHT_FLOOR)) {
 		    if (!c_ptr->pl && !p_ptr->flags.blind)
-			light_room(char_row, char_col);
+			lite_room(char_row, char_col);
 		}
 	    /* In doorway of light-room?	       */
 		else if (c_ptr->lr && (p_ptr->flags.blind < 1)) {
-		    byte lit = FALSE;	/* only call light_room once... -CFT */
+		    byte lit = FALSE;	/* only call lite_room once... -CFT */
 
 		    for (i = (char_row - 1); !lit && i <= (char_row + 1); i++)
 			for (j = (char_col - 1); !lit && j <= (char_col + 1); j++) {
@@ -949,7 +952,7 @@ void move_player(int dir, int do_pickup)
 				(!d_ptr->pl)) {
 			    /* move light 1st, or corridor may be perm lit */
 				move_light(old_row, old_col, char_row, char_col);
-				light_room(char_row, char_col);
+				lite_room(char_row, char_col);
 				lit = TRUE;	/* okay, we can stop now... -CFT */
 			    }
 			}
@@ -1141,6 +1144,11 @@ void move_player(int dir, int do_pickup)
 
 
 
+/*
+ * Note that move_player() may modify command_dir via "area_affect"
+ * Note that the "running" routines now use "command_dir" instead
+ * of "find_direction"
+ */
 void find_run(void)
 {
     /* prevent infinite loops in find mode, will stop after moving 100 times */
@@ -1149,7 +1157,7 @@ void find_run(void)
 	end_find();
     }
 
-     else move_player(find_direction, TRUE);
+     else move_player(command_dir, TRUE);
 }
 
 
@@ -1172,7 +1180,7 @@ void find_init(int dir)
     if (!mmove(dir, &row, &col)) find_flag = FALSE;
 
     else {
-	find_direction = dir;
+	command_dir = dir;
 	find_flag = 1;
 	find_breakright = find_breakleft = FALSE;
 	find_prevdir = dir;
@@ -1252,7 +1260,7 @@ void end_find()
     if (find_flag) {
 
 	/* Cancel the running */
-	find_flag = FALSE;
+	find_flag = 0;
 
 	cur_lite = old_lite;
 	move_light(char_row, char_col, char_row, char_col);

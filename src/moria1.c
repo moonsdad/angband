@@ -61,6 +61,7 @@ cptr describe_use(int i)
       case INVEN_FEET:  p = "wearing on your feet"; break;
       default:          p = "carrying in your pack"; break;
     }
+    /* Return the result */
     return p;
 }
 
@@ -147,7 +148,7 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
 
 
 /*
- * Displays equipment items from r1 to end   -RAK-
+ * Displays (all) equipment items from r1 to end   -RAK-
  * Keep display as far right as possible. -CJS-
  */
 int show_equip(int weight, int col)
@@ -675,6 +676,62 @@ void calc_bonuses()
     }
 }
 
+/*
+ * Are we strong enough for the current pack and weapon?  -CJS-	 */
+void check_strength()
+{
+    register int         i;
+    register inven_type *i_ptr;
+    static int           notlike = FALSE;
+
+    i_ptr = &inventory[INVEN_WIELD];
+    if (i_ptr->tval != TV_NOTHING
+	&& (p_ptr->stats.use_stat[A_STR] * 15 < i_ptr->weight)) {
+	if (weapon_heavy == FALSE) {
+	    msg_print("You have trouble wielding such a heavy weapon.");
+	    weapon_heavy = TRUE;
+	    calc_bonuses();
+	}
+    } else if (weapon_heavy == TRUE) {
+	weapon_heavy = FALSE;
+	if (i_ptr->tval != TV_NOTHING)
+	    msg_print("You are strong enough to wield your weapon.");
+	else
+	    msg_print("You feel relieved to put down your heavy weapon.");
+	calc_bonuses();
+    }
+    i = weight_limit();
+    if (i < inven_weight)
+	i = inven_weight / (i + 1);
+    else
+	i = 0;
+    if (pack_heavy != i) {
+	if (pack_heavy < i)
+	    msg_print("Your pack is so heavy that it slows you down.");
+	else
+	    msg_print("You move more easily under the weight of your pack.");
+	change_speed(i - pack_heavy);
+	pack_heavy = i;
+    }
+    p_ptr->flags.status &= ~PY_STR_WGT;
+
+    if (p_ptr->misc.pclass == 2 && !notlike) {
+        if ((i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
+            && ((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
+            notlike = TRUE;
+            msg_print("You do not feel comfortable with your weapon.");
+        }
+    } else if (p_ptr->misc.pclass == 2 && notlike) {
+        if (i_ptr->tval == TV_NOTHING) {
+            notlike = FALSE;
+            msg_print("You feel comfortable again after removing that weapon.");
+        } else if (!(i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
+		   || !((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
+            notlike = FALSE;
+            msg_print("You feel comfortable with your weapon once more.");
+        }
+    }
+}
 
 
 

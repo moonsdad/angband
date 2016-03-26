@@ -221,10 +221,10 @@ void dungeon(void)
     if ((dun_level >= 0) && ((unsigned) dun_level > p_ptr->misc.max_dlv))
 	p_ptr->misc.max_dlv = dun_level;
 
-    /* Reset flags and initialize variables  (most of it is overkill)  */
-    new_level_flag = FALSE;
-    teleport_flag  = FALSE;
-    find_flag      = FALSE;
+    /* Reset flags and initialize variables (most of it is overkill) */
+    new_level_flag	= FALSE;
+    teleport_flag	= FALSE;
+    find_flag		= 0;
     eof_flag       = FALSE;
     opening_chest  = FALSE;
 
@@ -251,6 +251,7 @@ void dungeon(void)
 	register int        cur_pos;
 
 	c_ptr = &cave[char_row][char_col];
+
 	if ((c_ptr->tptr == 0) ||
 	    ((t_list[c_ptr->tptr].tval != TV_STORE_DOOR) && /* if not store */
 	     ((t_list[c_ptr->tptr].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
@@ -285,7 +286,7 @@ void dungeon(void)
     if (p_ptr->flags.status & PY_SEARCH)
 	search_off();
 /* Light,  but do not move critters	    */
-    creatures(FALSE);
+    process_monsters(FALSE);
 
     /* Print the depth */
     prt_depth();
@@ -312,10 +313,9 @@ void dungeon(void)
 	    if (closing_flag > 2) {
 		msg_print("The gates to ANGBAND are now closed.");
 		(void)strcpy(died_from, "(closing gate: saved)");
-		if (!save_player()) {
+		if (save_player()) quit(NULL);
 		(void)strcpy(died_from, "a slammed gate");
 		death = TRUE;
-		}
 		exit_game();
 	    }
 	    else {
@@ -328,13 +328,17 @@ void dungeon(void)
 #endif				   /* CHECK_HOURS */
 
 	/*** Update the Stores ***/
+	
     /* turn over the store contents every, say, 1000 turns */
+	/* Perhaps only/always do this at dawn? */
 	/* Update the stores once a day */
-	if ((dun_level != 0) && ((turn % 1000) == 0)) {
+	if ((dun_level) && ((turn % 1000) == 0)) {
 
-	/* if (peek) msg_print("Store update: "); */
+	    if (peek) msg_print("Updating Stores...");
+
 	    store_maint();
-	/* if (peek) msg_print("Complete "); */
+
+	    if (peek) msg_print("Done");
 	}
 
 
@@ -351,18 +355,21 @@ void dungeon(void)
 
 	/*** Handle the Lights ***/
 
-	/* Check light status */
+	/* Check for light being wielded */
 	i_ptr = &inventory[INVEN_LITE];
 
 	if (player_light)
 	    if (i_ptr->p1 > 0) {
-		if (!(i_ptr->flags2 & TR_LIGHT))
-		    i_ptr->p1--;   /* don't dec if perm light -CFT */
+		if (!(i_ptr->flags2 & TR_LIGHT))   /* don't dec if perm light -CFT */
+		/* Decrease life-span */
+		    i_ptr->p1--;
+
+		/* The light is now out */
 		if (i_ptr->p1 == 0) {
 		    player_light = FALSE;
 		    disturb(0, 1);
 		/* unlight creatures */
-		    creatures(FALSE);
+		    process_monsters(FALSE);
 		    msg_print("Your light has gone out!");
 		}
 
@@ -378,7 +385,7 @@ void dungeon(void)
 		    player_light = FALSE;
 		    disturb(0, 1);
 		/* unlight creatures */
-		    creatures(FALSE);
+		    process_monsters(FALSE);
 		}
 	    }
 	else if (i_ptr->p1 > 0 || p_ptr->flags.light) {
@@ -387,7 +394,7 @@ void dungeon(void)
 	    player_light = TRUE;
 	    disturb(0, 1);
 	/* light creatures */
-	    creatures(FALSE);
+	    process_monsters(FALSE);
 	}
 
 	/*** Check the Food, and Regenerate ***/
@@ -437,6 +444,8 @@ void dungeon(void)
 
 	/* Digest some food */
 	p_ptr->flags.food -= p_ptr->flags.food_digested;
+
+	/* Starve to death */
 	if (p_ptr->flags.food < 0) {
 	    take_hit(-p_ptr->flags.food / 16, "starvation");	/* -CJS- */
 	    disturb(1, 0);
@@ -453,13 +462,14 @@ void dungeon(void)
 	    regen_amount = regen_amount * 2;
 	}
 
-	if ((p_ptr->flags.poisoned < 1) && (p_ptr->flags.cut < 1) &&
-	    (p_ptr->misc.chp < p_ptr->misc.mhp))
-	    regenhp(regen_amount);
-
 	/* Regenerate the mana (even if poisoned or cut (?)) */
 	if (p_ptr->misc.cmana < p_ptr->misc.mana) {
 	    regenmana(regen_amount);
+	}
+
+	if ((p_ptr->flags.poisoned < 1) && (p_ptr->flags.cut < 1) &&
+	    (p_ptr->misc.chp < p_ptr->misc.mhp)) {
+	    regenhp(regen_amount);
 	}
 
 
@@ -473,7 +483,7 @@ void dungeon(void)
 		prt_blind();
 		disturb(0, 1);
 	    /* unlight creatures */
-		creatures(FALSE);
+		process_monsters(FALSE);
 	    }
 	    p_ptr->flags.blind--;
 	    if (p_ptr->flags.blind == 0) {
@@ -482,7 +492,7 @@ void dungeon(void)
 		prt_map();
 	    /* light creatures */
 		disturb(0, 1);
-		creatures(FALSE);
+		process_monsters(FALSE);
 		msg_print("The veil of darkness lifts.");
 	    }
 	}
@@ -503,25 +513,31 @@ void dungeon(void)
 	    }
 	}
 
-	/* Afraid */
-	if (p_ptr->flags.afraid > 0) {
-	    if ((PY_FEAR & p_ptr->flags.status) == 0) {
-		if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
-		    p_ptr->flags.afraid = 0;
-		else {
-		    p_ptr->flags.status |= PY_FEAR;
-		    prt_afraid();
-		}
-	    } else if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
-		p_ptr->flags.afraid = 1;
-	    p_ptr->flags.afraid--;
-	    if (p_ptr->flags.afraid == 0) {
-		p_ptr->flags.status &= ~PY_FEAR;
-		prt_afraid();
-		msg_print("You feel bolder now.");
-		disturb(0, 0);
+	/* Stun */
+	if (p_ptr->flags.stun > 0) {
+	    int                 oldstun = p_ptr->flags.stun;
+
+	    p_ptr->flags.stun -= (con_adj() <= 0 ? 1 : (con_adj() / 2 + 1));
+				/* fixes endless stun if bad con. -CFT */
+	    if ((oldstun > 50) && (p_ptr->flags.stun <= 50)) { 
+				/* if crossed 50 mark... */
+		p_ptr->misc.ptohit += 15;
+		p_ptr->misc.ptodam += 15;
+		p_ptr->misc.dis_th += 15;
+		p_ptr->misc.dis_td += 15;
+	    }
+	    if (p_ptr->flags.stun <= 0) {
+		p_ptr->flags.stun = 0;
+		msg_print("Your head stops stinging.");
+		p_ptr->misc.ptohit += 5;
+		p_ptr->misc.ptodam += 5;
+		p_ptr->misc.dis_th += 5;
+		p_ptr->misc.dis_td += 5;
 	    }
 	}
+
+	/* Hack -- Always redraw the stun */
+	prt_stun();
 
 	/* Cut */
 	if (p_ptr->flags.cut > 0) {
@@ -554,32 +570,6 @@ void dungeon(void)
 
 	/* Always redraw "cuts" */
 	prt_cut();
-
-	/* Stun */
-	if (p_ptr->flags.stun > 0) {
-	    int                 oldstun = p_ptr->flags.stun;
-
-	    p_ptr->flags.stun -= (con_adj() <= 0 ? 1 : (con_adj() / 2 + 1));
-				/* fixes endless stun if bad con. -CFT */
-	    if ((oldstun > 50) && (p_ptr->flags.stun <= 50)) { 
-				/* if crossed 50 mark... */
-		p_ptr->misc.ptohit += 15;
-		p_ptr->misc.ptodam += 15;
-		p_ptr->misc.dis_th += 15;
-		p_ptr->misc.dis_td += 15;
-	    }
-	    if (p_ptr->flags.stun <= 0) {
-		p_ptr->flags.stun = 0;
-		msg_print("Your head stops stinging.");
-		p_ptr->misc.ptohit += 5;
-		p_ptr->misc.ptodam += 5;
-		p_ptr->misc.dis_th += 5;
-		p_ptr->misc.dis_td += 5;
-	    }
-	}
-
-	/* Hack -- Always redraw the stun */
-	prt_stun();
 
 	/* Poisoned */
 	if (p_ptr->flags.poisoned > 0) {
@@ -618,6 +608,27 @@ void dungeon(void)
 		disturb(1, 0);
 	    }
 	}
+
+	/* Afraid */
+	if (p_ptr->flags.afraid > 0) {
+	    if ((PY_FEAR & p_ptr->flags.status) == 0) {
+		if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
+		    p_ptr->flags.afraid = 0;
+		else {
+		    p_ptr->flags.status |= PY_FEAR;
+		    prt_afraid();
+		}
+	    } else if ((p_ptr->flags.shero + p_ptr->flags.hero + p_ptr->flags.resist_fear) > 0)
+		p_ptr->flags.afraid = 1;
+	    p_ptr->flags.afraid--;
+	    if (p_ptr->flags.afraid == 0) {
+		p_ptr->flags.status &= ~PY_FEAR;
+		prt_afraid();
+		msg_print("You feel bolder now.");
+		disturb(0, 0);
+	    }
+	}
+
 
 	/*** Check the Speed ***/
 
@@ -845,12 +856,57 @@ void dungeon(void)
 	    }
 	}
 
+	/* Detect Invisible */
+	if (p_ptr->flags.detect_inv > 0) {
+	    if ((PY_DET_INV & p_ptr->flags.status) == 0) {
+		p_ptr->flags.status |= PY_DET_INV;
+		p_ptr->flags.see_inv = TRUE;
+	    /* light but don't move creatures */
+		process_monsters(FALSE);
+	    }
+	    p_ptr->flags.detect_inv--;
+	    if (p_ptr->flags.detect_inv == 0) {
+		p_ptr->flags.status &= ~PY_DET_INV;
+	    /* may still be able to see_inv if wearing magic item */
+		if (p_ptr->misc.prace == 9)
+		    p_ptr->flags.see_inv = TRUE;
+		else {
+		    p_ptr->flags.see_inv = FALSE;	/* unless item grants it */
+		    for (i = INVEN_WIELD; i <= INVEN_LITE; i++)
+			if (TR_SEE_INVIS & inventory[i].flags)
+			    p_ptr->flags.see_inv = TRUE;
+		}
+	    /* unlight but don't move creatures */
+		process_monsters(FALSE);
+	    }
+	}
+
+	/* Timed infra-vision */
+	if (p_ptr->flags.tim_infra > 0) {
+	    if ((PY_TIM_INFRA & p_ptr->flags.status) == 0) {
+		p_ptr->flags.status |= PY_TIM_INFRA;
+		p_ptr->flags.see_infra++;
+	    /* light but don't move creatures */
+		process_monsters(FALSE);
+	    }
+	    p_ptr->flags.tim_infra--;
+	    if (p_ptr->flags.tim_infra == 0) {
+		p_ptr->flags.status &= ~PY_TIM_INFRA;
+		p_ptr->flags.see_infra--;
+	    /* unlight but don't move creatures */
+		process_monsters(FALSE);
+	    }
+	}
+
+
 	/*** Timed resistance must end eventually ***/
+
+	/* XXX Technically, should check "immune" flag as well */
 
     /* Resist Heat   */
 	if (p_ptr->flags.oppose_fire > 0) {
 	    p_ptr->flags.oppose_fire--;
-	    if (p_ptr->flags.oppose_fire == 0) {
+	    if (!p_ptr->flags.oppose_fire ) {
 		msg_print("You no longer feel safe from flame.");
 	    }
 	}
@@ -908,46 +964,7 @@ void dungeon(void)
 	    }
 	}
 
-    /* Detect Invisible      */
-	if (p_ptr->flags.detect_inv > 0) {
-	    if ((PY_DET_INV & p_ptr->flags.status) == 0) {
-		p_ptr->flags.status |= PY_DET_INV;
-		p_ptr->flags.see_inv = TRUE;
-	    /* light but don't move creatures */
-		creatures(FALSE);
-	    }
-	    p_ptr->flags.detect_inv--;
-	    if (p_ptr->flags.detect_inv == 0) {
-		p_ptr->flags.status &= ~PY_DET_INV;
-	    /* may still be able to see_inv if wearing magic item */
-		if (p_ptr->misc.prace == 9)
-		    p_ptr->flags.see_inv = TRUE;
-		else {
-		    p_ptr->flags.see_inv = FALSE;	/* unless item grants it */
-		    for (i = INVEN_WIELD; i <= INVEN_LITE; i++)
-			if (TR_SEE_INVIS & inventory[i].flags)
-			    p_ptr->flags.see_inv = TRUE;
-		}
-	    /* unlight but don't move creatures */
-		creatures(FALSE);
-	    }
-	}
-    /* Timed infra-vision    */
-	if (p_ptr->flags.tim_infra > 0) {
-	    if ((PY_TIM_INFRA & p_ptr->flags.status) == 0) {
-		p_ptr->flags.status |= PY_TIM_INFRA;
-		p_ptr->flags.see_infra++;
-	    /* light but don't move creatures */
-		creatures(FALSE);
-	    }
-	    p_ptr->flags.tim_infra--;
-	    if (p_ptr->flags.tim_infra == 0) {
-		p_ptr->flags.status &= ~PY_TIM_INFRA;
-		p_ptr->flags.see_infra--;
-	    /* unlight but don't move creatures */
-		creatures(FALSE);
-	    }
-	}
+
 
 	/*** Involuntary Movement ***/
 
@@ -1157,7 +1174,7 @@ void dungeon(void)
      * monster list is nearly full.  This helps to avoid problems in
      * creature.c when monsters try to multiply.  Compact_monsters() is much
      * more likely to succeed if called from here, than if called from within
-     * creatures().  
+     * process_monsters().  
      */
 	if (MAX_M_IDX - mfptr < 10)
 	    (void)compact_monsters();
@@ -1313,7 +1330,7 @@ void dungeon(void)
 	    teleport(100);
     /* Move the creatures	       */
 	if (!new_level_flag)
-	    creatures(TRUE);
+	    process_monsters(TRUE);
     /* Exit when new_level_flag is set   */
     }
     while (!new_level_flag && !eof_flag);

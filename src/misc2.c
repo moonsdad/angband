@@ -89,7 +89,7 @@ void delete_monster(int j)
 
 /*
  * The following two procedures implement the same function as delete
- * monster. However, they are used within creatures(), because deleting a
+ * monster. However, they are used within process_monsters(), because deleting a
  * monster while scanning the m_list causes two problems, monsters might get
  * two turns, and m_ptr/monptr might be invalid after the delete_monster.
  * Hence the delete is done in two steps. 
@@ -132,7 +132,7 @@ void fix1_delete_monster(int j)
 
 /*
  * fix2_delete_monster does everything in delete_monster that wasn't done by
- * fix1_monster_delete above, this is only called in creatures() 
+ * fix1_monster_delete above, this is only called in process_monsters() 
  */
 void fix2_delete_monster(int j)
 {
@@ -192,8 +192,8 @@ int compact_monsters(void)
 		/* do nothing */
 		    ;
 
-	    /* in case this is called from within creatures(), this is a
-	     * horrible hack, the m_list/creatures() code needs to be
+	    /* in case this is called from within process_monsters(), this is a
+	     * horrible hack, the m_list/process_monsters() code needs to be
 	     * rewritten 
 	     */
 		else if (hack_m_idx < i) {
@@ -1158,20 +1158,20 @@ again:
 }
 
 
-void place_group(int y, int x, int mon, int slp)
+void place_group(int y, int x, int r_idx, int slp)
 {
     /* prevent level rating from skyrocketing if they are out of depth... */
     int old = rating;
     int extra = 0;
 
     /* reduce size of group if out-of-depth */
-    if (r_list[mon].level > (unsigned) dun_level) {
-	extra = (-randint(r_list[mon].level - dun_level));
+    if (r_list[r_idx].level > (unsigned) dun_level) {
+	extra = 0 - randint(r_list[r_idx].level - dun_level);
     }
 
     /* if monster is deeper than normal, then travel in bigger packs -CFT */
-    else if (r_list[mon].level < (unsigned) dun_level) {
-	extra = randint(dun_level - r_list[mon].level);
+    else if (r_list[r_idx].level < (unsigned) dun_level) {
+	extra = randint(dun_level - r_list[r_idx].level);
     }
 
     /* put an upper bounds on it... -CFT */
@@ -1179,57 +1179,57 @@ void place_group(int y, int x, int mon, int slp)
 
     switch (randint(13) + extra) {
       case 25:
-	place_monster(y, x - 3, mon, 0);
+	place_monster(y, x - 3, r_idx, 0);
       case 24:
-	place_monster(y, x + 3, mon, 0);
+	place_monster(y, x + 3, r_idx, 0);
       case 23:
-	place_monster(y - 3, x, mon, 0);
+	place_monster(y - 3, x, r_idx, 0);
       case 22:
-	place_monster(y + 3, x, mon, 0);
+	place_monster(y + 3, x, r_idx, 0);
       case 21:
-	place_monster(y - 2, x + 1, mon, 0);
+	place_monster(y - 2, x + 1, r_idx, 0);
       case 20:
-	place_monster(y + 2, x - 1, mon, 0);
+	place_monster(y + 2, x - 1, r_idx, 0);
       case 19:
-	place_monster(y + 2, x + 1, mon, 0);
+	place_monster(y + 2, x + 1, r_idx, 0);
       case 18:
-	place_monster(y - 2, x - 1, mon, 0);
+	place_monster(y - 2, x - 1, r_idx, 0);
       case 17:
-	place_monster(y + 1, x + 2, mon, 0);
+	place_monster(y + 1, x + 2, r_idx, 0);
       case 16:
-	place_monster(y - 1, x - 2, mon, 0);
+	place_monster(y - 1, x - 2, r_idx, 0);
       case 15:
-	place_monster(y + 1, x - 2, mon, 0);
+	place_monster(y + 1, x - 2, r_idx, 0);
       case 14:
-	place_monster(y - 1, x + 2, mon, 0);
+	place_monster(y - 1, x + 2, r_idx, 0);
       case 13:
-	place_monster(y, x - 2, mon, 0);
+	place_monster(y, x - 2, r_idx, 0);
       case 12:
-	place_monster(y, x + 2, mon, 0);
+	place_monster(y, x + 2, r_idx, 0);
       case 11:
-	place_monster(y + 2, x, mon, 0);
+	place_monster(y + 2, x, r_idx, 0);
       case 10:
-	place_monster(y - 2, x, mon, 0);
+	place_monster(y - 2, x, r_idx, 0);
       case 9:
-	place_monster(y + 1, x + 1, mon, 0);
+	place_monster(y + 1, x + 1, r_idx, 0);
       case 8:
-	place_monster(y + 1, x - 1, mon, 0);
+	place_monster(y + 1, x - 1, r_idx, 0);
       case 7:
-	place_monster(y - 1, x - 1, mon, 0);
+	place_monster(y - 1, x - 1, r_idx, 0);
       case 6:
-	place_monster(y - 1, x + 1, mon, 0);
+	place_monster(y - 1, x + 1, r_idx, 0);
       case 5:
-	place_monster(y, x + 1, mon, 0);
+	place_monster(y, x + 1, r_idx, 0);
       case 4:
-	place_monster(y, x - 1, mon, 0);
+	place_monster(y, x - 1, r_idx, 0);
       case 3:
-	place_monster(y + 1, x, mon, 0);
+	place_monster(y + 1, x, r_idx, 0);
       case 2:
-	place_monster(y - 1, x, mon, 0);
+	place_monster(y - 1, x, r_idx, 0);
 	rating = old;
       case 1:
       default:			   /* just in case I screwed up -CFT */
-	place_monster(y, x, mon, 0);
+	place_monster(y, x, r_idx, 0);
     }
 }
 
@@ -1242,7 +1242,7 @@ void place_group(int y, int x, int mon, int slp)
 void alloc_monster(int num, int dis, int slp)
 {
     register int y, x, i;
-    int          mon;
+    int          r_idx;
 
     for (i = 0; i < num; i++) {
 
@@ -1256,37 +1256,37 @@ void alloc_monster(int num, int dis, int slp)
 	       (distance(y, x, char_row, char_col) <= dis));
 
 	do {
-	    mon = get_mons_num(dun_level);
-	} while (randint(r_list[mon].rarity) > 1);
+	    r_idx = get_mons_num(dun_level);
+	} while (randint(r_list[r_idx].rarity) > 1);
 
     /*
      * to give the player a sporting chance, any monster that appears in
      * line-of-sight and can cast spells or breathe, should be asleep. This
      * is an extension of Um55's sleeping dragon code... 
      */
-	if (((r_list[mon].spells & (MS1_CAUSE_1 | MS1_CAUSE_2 | MS1_HOLD |
+	if (((r_list[r_idx].spells & (MS1_CAUSE_1 | MS1_CAUSE_2 | MS1_HOLD |
 			    MS1_BLIND | MS1_CONF | FEAR | SLOW | MS1_BR_ELEC |
 			       MS1_BR_POIS | MS1_BR_ACID | MS1_BR_COLD | MS1_BR_FIRE |
 			     MS1_BO_FIRE | MS1_BO_COLD | MS1_BO_ACID | MAG_MISS |
 			   MS1_CAUSE_3 | MS1_BA_FIRE | MS1_BA_COLD | MS1_BO_MANA))
-	     || (r_list[mon].spells2 & (MS2_BR_CHAO | MS2_BR_SHAR | MS2_BR_SOUN | MS2_BR_CONF |
+	     || (r_list[r_idx].spells2 & (MS2_BR_CHAO | MS2_BR_SHAR | MS2_BR_SOUN | MS2_BR_CONF |
 			   MS2_BR_DISE | MS2_BR_LIFE | MS2_BO_ELEC | MS2_BA_ELEC |
 			      MS2_BA_ACID | MS2_TRAP_CREATE | RAZOR | MS2_MIND_BLAST |
 			    MISSILE | MS2_BO_PLAS | MS2_BO_NETH | MS2_BO_ICEE |
 				MS2_FORGET | MS2_BRAIN_SMASH | ST_CLOUD | MS2_TELE_LEVEL |
 			 MS2_BO_WATE | MS2_BA_WATE | MS2_BA_NETH | MS2_BR_NETH))
-	     || (r_list[mon].spells3 & (MS3_BR_WALL | MS3_BR_SLOW | MS3_BR_LITE | MS3_BR_TIME |
+	     || (r_list[r_idx].spells3 & (MS3_BR_WALL | MS3_BR_SLOW | MS3_BR_LITE | MS3_BR_TIME |
 				 MS3_BR_GRAV | MS3_BR_DARK | MS3_BR_PLAS | ARROW |
 					MS3_DARK_STORM | MS3_MANA_STORM)))
 	    && (los(y, x, char_row, char_col))) {
 	    slp = TRUE;
 	}
 
-	if (!(r_list[mon].cdefense & MF2_GROUP)) {
-	    place_monster(y, x, mon, slp);
+	if (!(r_list[r_idx].cdefense & MF2_GROUP)) {
+	    place_monster(y, x, r_idx, slp);
 	}
 	else {
-	    place_group(y, x, mon, slp);
+	    place_group(y, x, r_idx, slp);
 	}
     }
 }
@@ -1297,7 +1297,7 @@ void alloc_monster(int num, int dis, int slp)
  * We modify the given location to hold the location used, if any.
  * We return TRUE if a monster (or group of monsters) was summoned.
  */
-int summon_monster(int *y, int *x, int slp)
+int summon_monster(int *yp, int *xp, int slp)
 {
     register int        i, j, k;
     int                 l, summon;
@@ -1309,8 +1309,8 @@ int summon_monster(int *y, int *x, int slp)
     do {
 
 	/* Pick a nearby location */
-	j = *y - 2 + randint(3);
-	k = *x - 2 + randint(3);
+	j = *yp - 2 + randint(3);
+	k = *xp - 2 + randint(3);
 
 	/* Require legal grid */
 	if (in_bounds(j, k)) {
@@ -1331,8 +1331,8 @@ int summon_monster(int *y, int *x, int slp)
 		i = 9;
 
 	/* Save the location */
-	*y = j;
-	*x = k;
+	*yp = j;
+	*xp = k;
 		
 	}
 	}
@@ -1982,4 +1982,32 @@ int summon_jelly(int *y, int *x)
     } while (!summon);
     return (summon);
 }
+
+void monster_name(char *m_name, monster_type *m_ptr, monster_race *r_ptr)
+{
+    if (!m_ptr->ml)
+	(void)strcpy(m_name, "It");
+    else {
+	if (r_ptr->cdefense & MF2_UNIQUE)
+	    (void)sprintf(m_name, "%s", r_ptr->name);
+	else
+	    (void)sprintf(m_name, "The %s", r_ptr->name);
+    }
+}
+
+
+
+void lower_monster_name(char *m_name, monster_type *m_ptr, monster_race *r_ptr)
+{
+    if (!m_ptr->ml)
+	(void)strcpy(m_name, "it");
+    else {
+	if (r_ptr->cdefense & MF2_UNIQUE)
+	    (void)sprintf(m_name, "%s", r_ptr->name);
+	else
+	    (void)sprintf(m_name, "the %s", r_ptr->name);
+    }
+}
+
+
 
