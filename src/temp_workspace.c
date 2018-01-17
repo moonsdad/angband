@@ -612,7 +612,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 	if (magik(5*special/2)||(good==666))
 	    switch(randint(11)) {
 	      case 1: case 2: case 3:
-		t_ptr->name2 = SN_WOUNDING; /* swapped with slaying -CFT */
+		t_ptr->name2 = EGO_WOUNDING; /* swapped with slaying -CFT */
 		t_ptr->tohit += 5;
 		t_ptr->todam += 5;
 		t_ptr->dd ++; /* added -CFT */
@@ -623,7 +623,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->flags |= (TR1_BRAND_FIRE|TR2_RES_FIRE); /* RF so won't burn */
 		t_ptr->tohit += 2;
 		t_ptr->todam += 4;
-		t_ptr->name2 = SN_FIRE;
+		t_ptr->name2 = EGO_FIRE;
 		t_ptr->cost += 25;
 		rating += 6;
 		break;
@@ -631,7 +631,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->flags |= TR1_SLAY_EVIL;
 		t_ptr->tohit += 3;
 		t_ptr->todam += 3;
-		t_ptr->name2 = SN_SLAY_EVIL;
+		t_ptr->name2 = EGO_SLAY_EVIL;
 		t_ptr->cost += 25;
 		rating += 7;
 		break;
@@ -639,7 +639,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->flags |= TR1_SLAY_ANIMAL;
 		t_ptr->tohit += 2;
 		t_ptr->todam += 2;
-		t_ptr->name2 = SN_SLAY_ANIMAL;
+		t_ptr->name2 = EGO_SLAY_ANIMAL;
 		t_ptr->cost += 30;
 		rating += 5;
 		break;
@@ -647,14 +647,14 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 		t_ptr->flags |= TR1_SLAY_DRAGON;
 		t_ptr->tohit += 3;
 		t_ptr->todam += 3;
-		t_ptr->name2 = SN_DRAGON_SLAYING;
+		t_ptr->name2 = EGO_DRAGON_SLAYING;
 		t_ptr->cost += 35;
 		rating += 9;
 		break;
 	      case 11:
 		t_ptr->tohit += 10; /* reduced because of dice bonus -CFT */
 		t_ptr->todam += 10;
-		t_ptr->name2 = SN_SLAYING; /* swapped w/ wounding -CFT */
+		t_ptr->name2 = EGO_SLAYING; /* swapped w/ wounding -CFT */
 		t_ptr->dd += 2; /* added -CFT */
 		t_ptr->cost += 45;
 		rating += 10;
@@ -671,7 +671,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 	t_ptr->flags |= TR_CURSED;
 	t_ptr->cost = 0;
 	if (randint(5)==1) {
-	    t_ptr->name2 = SN_BACKBITING;
+	    t_ptr->name2 = EGO_BACKBITING;
 	    t_ptr->tohit -= 20;
 	    t_ptr->todam -= 20;
 	}

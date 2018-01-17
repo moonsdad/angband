@@ -829,19 +829,19 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 
 		else if (p1_use == FLAGS) {
 		    if ((i_ptr->flags & TR1_SPEED) &&
-			     (i_ptr->name2 != SN_SPEED))
+			     (i_ptr->name2 != EGO_SPEED))
 			(void)sprintf(tmp_str, " (%c%d to speed)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
 		    else if (i_ptr->flags & TR1_SEARCH)
-			/*			&& (i_ptr->name2 != SN_SEARCH)) */
+			/*			&& (i_ptr->name2 != EGO_SLAY_EARCH)) */
 			(void)sprintf(tmp_str, " (%c%d to searching)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
 		    else if ((i_ptr->flags & TR1_STEALTH) &&
-			     (i_ptr->name2 != SN_STEALTH))
+			     (i_ptr->name2 != EGO_STEALTH))
 			(void)sprintf(tmp_str, " (%c%d to stealth)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
 		    else if ((i_ptr->flags & TR_INFRA) &&
-			     (i_ptr->name2 != SN_INFRAVISION))
+			     (i_ptr->name2 != EGO_INFRAVISION))
 			(void)sprintf(tmp_str, " (%c%d to infravision)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
 		    else if (i_ptr->flags2 & TR_ATTACK_SPD) {

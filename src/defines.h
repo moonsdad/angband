@@ -545,223 +545,232 @@
 #define ID_NOSHOW_P1    0x40    /* don't show (+x) even if p1 != 0 -CWS   */
 #define ID_NOSHOW_TYPE  0x80    /* don't show (+x of yyy), just (+x) -CWS */
 
-/* indexes into the special name table */
+/*
+ * Ego-Item indexes
+ *
+ * indexes into the special name table */
 #define SN_NULL                 0
-#define SN_R                    1
-#define SN_RA                   2
-#define SN_RF                   3
-#define SN_RC                   4
-#define SN_RL                   5
-#define SN_HA                   6
-#define SN_DF                   7
-#define SN_SA                   8
-#define SN_SD                   9
-#define SN_SE                   10
-#define SN_SU                   11
-#define SN_FT                   12
-#define SN_FB                   13
-#define SN_FREE_ACTION          14
-#define SN_SLAYING              15
+
+#define EGO_R			1
+#define EGO_RESIST_A		2
+#define EGO_RESIST_F		3
+#define EGO_RESIST_C		4
+#define EGO_RESIST_E		5
+#define EGO_HA			6
+#define EGO_DF			7
+#define EGO_SLAY_A		8
+#define EGO_SLAY_D		9
+#define EGO_SLAY_E		10
+#define EGO_SLAY_U		11
+#define EGO_FT			12
+#define EGO_FB			13
+#define EGO_FREE_ACTION		14
+#define EGO_SLAYING		15
+
+#define EGO_SLOW_DESCENT	18
+#define EGO_SPEED		19
+#define EGO_STEALTH		20
+
+#define EGO_INTELLIGENCE	24
+#define EGO_WISDOM		25
+#define EGO_INFRAVISION		26
+#define EGO_MIGHT		27
+#define EGO_LORDLINESS		28
+#define EGO_MAGI		29
+#define EGO_BEAUTY		30
+#define EGO_SEEING		31
+#define EGO_REGENERATION	32
+
+#define EGO_PROTECTION		39
+
+#define EGO_FIRE		43
+#define EGO_SLAY_EVIL		44
+#define EGO_DRAGON_SLAYING	45
+
+#define EGO_SLAY_ANIMAL		55
+
+#define EGO_ACCURACY		65
+
+#define EGO_SLAY_O		67
+
+#define EGO_WEST		71
+#define EGO_BLESS_BLADE		72
+#define EGO_SLAY_DEMON		73
+#define EGO_SLAY_T		74
+
+#define EGO_WOUNDING		77
+
+#define EGO_LITE		81
+#define EGO_AGILITY		82
+
+#define EGO_SLAY_G		85
+#define EGO_TELEPATHY		86
+
+#define EGO_ELVENKIND		97
+
+#define EGO_ATTACKS		79
+
+#define EGO_AMAN		91
 
 
-#define SN_SLOW_DESCENT         18
-#define SN_SPEED                19
-#define SN_STEALTH              20
+#define EGO_WEAKNESS		17
+#define EGO_STUPIDITY		33
+#define EGO_DULLNESS		34
+#define EGO_CLUMSINESS		16
+#define EGO_UGLINESS		38
+#define EGO_TELEPORTATION	37
 
-#define SN_INTELLIGENCE         24
-#define SN_WISDOM               25
-#define SN_INFRAVISION          26
-#define SN_MIGHT                27
-#define SN_LORDLINESS           28
-#define SN_MAGI                 29
-#define SN_BEAUTY               30
-#define SN_SEEING               31
-#define SN_REGENERATION         32
+#define EGO_IRRITATION           40
+#define EGO_VULNERABILITY        41
+#define EGO_ENVELOPING           42
 
-#define SN_PROTECTION           39
+#define EGO_SLOWNESS             21
+#define EGO_NOISE                22
+#define EGO_GREAT_MASS           23
 
-#define SN_FIRE                 43
-#define SN_SLAY_EVIL            44
-#define SN_DRAGON_SLAYING       45
+#define EGO_BACKBITING           83
 
-#define SN_SLAY_ANIMAL          55
+#define EGO_MORGUL		61
 
-#define SN_ACCURACY             65
-
-#define SN_SO                   67
-
-#define SN_WEST                 71
-#define SN_BLESS_BLADE          72
-#define SN_SDEM                 73
-#define SN_ST                   74
-
-#define SN_WOUNDING             77
-
-#define SN_LIGHT                81
-#define SN_AGILITY              82
-
-#define SN_SG                   85
-#define SN_TELEPATHY            86
-
-#define SN_ELVENKIND            97
-
-#define SN_ATTACKS             179
-
-#define SN_AMAN                 91
+#define EGO_SHATTERED           177
+#define EGO_BLASTED             178
 
 
-#define SN_WEAKNESS             17
-#define SN_STUPIDITY            33
-#define SN_DULLNESS             34
-#define SN_CLUMSINESS           16
-#define SN_UGLINESS             38
-#define SN_TELEPORTATION        37
 
-#define SN_IRRITATION           40
-#define SN_VULNERABILITY        41
-#define SN_ENVELOPING           42
-
-#define SN_SLOWNESS             21
-#define SN_NOISE                22
-#define SN_GREAT_MASS           23
-
-#define SN_BACKBITING           83
-
-#define SN_MORGUL		61
-
-#define SN_SHATTERED           177
-#define SN_BLASTED             178
+/*
+ * Artifact indexes
+ */
 
 	/* Rings */
-#define SN_NARYA                89
-#define SN_NENYA                88
-#define SN_VILYA                90
-#define SN_POWER                68
+#define ART_NARYA                89
+#define ART_NENYA                88
+#define ART_VILYA                90
+#define ART_POWER                68
 
 	/* Dragon Scale */
-#define SN_RAZORBACK           175
-#define SN_BLADETURNER         176
+#define ART_RAZORBACK           175
+#define ART_BLADETURNER         176
 
 	/* Hard Armour */
-#define SN_SOULKEEPER           98
-#define SN_ISILDUR              95
-#define SN_ROHAN               134
-#define SN_BELEGENNON           92
-#define SN_CELEBORN            158
-#define SN_ARVEDUI             148
-#define SN_CASPANION           170
+#define ART_SOULKEEPER           98
+#define ART_ISILDUR              95
+#define ART_ROHIRRIM               134
+#define ART_BELEGENNON           92
+#define ART_CELEBORN            158
+#define ART_ARVEDUI             148
+#define ART_CASPANION           170
 
 	/* Soft Armour */
-#define SN_HITHLOMIR           146
-#define SN_THALKETTOTH         147
+#define ART_HITHLOMIR           146
+#define ART_THALKETTOTH         147
 
 	/* Shields */
-#define SN_THORIN              157
-#define SN_CELEGORM            152
-#define SN_ANARION              94
+#define ART_THORIN              157
+#define ART_CELEGORM            152
+#define ART_ANARION              94
 
 	/* Helms */
-#define SN_MORGOTH             100
-#define SN_BERUTHIEL           114
-#define SN_THRANDUIL           149
-#define SN_THENGEL             150
-#define SN_HAMMERHAND          151
-#define SN_DOR_LOMIN            99
-#define SN_HOLHENNETH          108
-#define SN_GORLIM              115
-#define SN_GONDOR              161
+#define ART_MORGOTH             100
+#define ART_BERUTHIEL           114
+#define ART_THRANDUILM           149
+#define ART_THENGEL             150
+#define ART_HAMMERHAND          151
+#define ART_DOR            99
+#define ART_HOLHENNETH          108
+#define ART_GORLIM              115
+#define ART_GONDOR              161
 
 	/* Cloaks */
-#define SN_COLLUIN             128
-#define SN_HOLCOLLETH          129
-#define SN_THINGOL             163
-#define SN_THORONGIL           164
-#define SN_COLANNON            145
-#define SN_LUTHIEN             165
-#define SN_TUOR                166
+#define ART_COLLUIN             128
+#define ART_HOLCOLLETH          129
+#define ART_THINGOL             163
+#define ART_THORONGIL           164
+#define ART_COLANNON            145
+#define ART_LUTHIEN             165
+#define ART_TUOR                166
 
 	/* Gloves */
-#define SN_CAMBELEG            107
-#define SN_CAMMITHRIM          106
-#define SN_PAURHACH		103
-#define SN_PAURNIMMEN          104
-#define SN_PAURAEGEN           105
-#define SN_PAURNEN             109
-#define SN_CAMLOST             111
-#define SN_FINGOLFIN            96
+#define ART_CAMBELEG            107
+#define ART_CAMMITHRIM          106
+#define ART_PAURHACH		103
+#define ART_PAURNIMMEN          104
+#define ART_PAURAEGEN           105
+#define ART_PAURNEN             109
+#define ART_CAMLOST             111
+#define ART_FINGOLFIN            96
 
 	/* Boots */
-#define SN_FEANOR               93
-#define SN_DAL                 102
-#define SN_THROR               153
+#define ART_FEANOR               93
+#define ART_DAL                 102
+#define ART_THROR               153
 
 
 	/* Swords */
-#define SN_MAEDHROS            154
-#define SN_ANGRIST              62
-#define SN_NARTHANC            116
-#define SN_NIMTHANC            117
-#define SN_DETHANC             118
-#define SN_RILIA               120
-#define SN_BELANGIL            121
-#define SN_CALRIS               64
-#define SN_ARUNRUTH             59
-#define SN_GLAMDRING            79
-#define SN_AEGLIN              110
-#define SN_ORCRIST              78
-#define SN_GURTHANG             63
-#define SN_ZARCUTHRA           141
-#define SN_MORMEGIL             60
-#define SN_GONDRICAM           140
-#define SN_CRISDURIAN          144
-#define SN_AGLARANG            133
-#define SN_RINGIL               57
-#define SN_ANDURIL              66
-#define SN_ANGUIREL            156
-#define SN_ELVAGIL             132
-#define SN_FORASGIL            143
-#define SN_CARETH              142
-#define SN_STING                80
-#define SN_HARADEKKET          138
-#define SN_GILETTAR            119
-#define SN_DOOMCALLER           84
+#define ART_MAEDHROS            154
+#define ART_ANGRIST              62
+#define ART_NARTHANC            116
+#define ART_NIMTHANC            117
+#define ART_DETHANC             118
+#define ART_RILIA               120
+#define ART_BELANGIL            121
+#define ART_CALRIS               64
+#define ART_ARUNRUTH             59
+#define ART_GLAMDRING            79
+#define ART_AEGLIN              110
+#define ART_ORCRIST              78
+#define ART_GURTHANG             63
+#define ART_ZARCUTHRA           141
+#define ART_MORMEGIL             60
+#define ART_GONDRICAM           140
+#define ART_CRISDURIAN          144
+#define ART_AGLARANG            133
+#define ART_RINGIL               57
+#define ART_ANDURIL              66
+#define ART_ANGUIREL            156
+#define ART_ELVAGIL             132
+#define ART_FORASGIL            143
+#define ART_CARETH              142
+#define ART_STING                80
+#define ART_HARADEKKET          138
+#define ART_GILETTAR            119
+#define ART_DOOMCALLER           84
 
 	/* Polearms */
-#define SN_THEODEN             162
-#define SN_PAIN                131
-#define SN_OSONDIR             168
-#define SN_TIL                 171
-#define SN_AEGLOS               58
-#define SN_OROME               159
-#define SN_NIMLOTH             112
-#define SN_EORLINGAS           135
-#define SN_DURIN                69
-#define SN_EONWE               160
-#define SN_BALLI               122
-#define SN_LOTHARANG           123
-#define SN_MUNDWINE            139
-#define SN_BARUKKHELED         136
-#define SN_WRATH               137
-#define SN_ULMO                167
-#define SN_AVAVIR              173
+#define ART_THEODEN             162
+#define ART_PAIN                131
+#define ART_OSONDIR             168
+#define ART_TIL                 171
+#define ART_AEGLOS               58
+#define ART_OROME               159
+#define ART_NIMLOTH             112
+#define ART_EORLINGAS           135
+#define ART_DURIN                69
+#define ART_EONWE               160
+#define ART_BALLI               122
+#define ART_LOTHARANG           123
+#define ART_MUNDWINE            139
+#define ART_BARUKKHELED         136
+#define ART_WRATH               137
+#define ART_ULMO                167
+#define ART_AVAVIR              173
 
 	/* Hafted */
-#define SN_GROND                56
-#define SN_TOTILA              130
-#define SN_THUNDERFIST          76
-#define SN_BLOODSPIKE           75
-#define SN_FIRESTAR            124
-#define SN_TARATOL             174
-#define SN_AULE                 70
-#define SN_NAR                 113
-#define SN_ERIRIL              125
-#define SN_OLORIN              155
-#define SN_DEATHWREAKER        172
-#define SN_TURMIL              169
+#define ART_GROND                56
+#define ART_TOTILA              130
+#define ART_THUNDERFIST          76
+#define ART_BLOODSPIKE           75
+#define ART_FIRESTAR            124
+#define ART_TARATOL             174
+#define ART_AULE                 70
+#define ART_NAR                 113
+#define ART_ERIRIL              125
+#define ART_OLORIN              155
+#define ART_DEATHWREAKER        172
+#define ART_TURMIL              169
 
 	/* Bows */
-#define SN_BARD                127
-#define SN_CUBRAGOL		126
+#define ART_BARD                127
+#define ART_CUBRAGOL		126
 
 #define SN_BELEG               101
 #define SN_BLINDNESS            35
@@ -773,7 +782,6 @@
 #define SN_LOCKED               47
 #define SN_MULTIPLE_TRAPS       52
 #define SN_POISON_NEEDLE        48
-#define SN_PROTECTION           39
 #define SN_SUMMONING_RUNES      51
 #define SN_TIMIDNESS            36
 #define SN_UNLOCKED             54

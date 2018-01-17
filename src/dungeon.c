@@ -54,30 +54,30 @@ static cptr value_check(inven_type *i_ptr)
 	return "average";
     if (i_ptr->name2 == SN_NULL)
 	return "good";
-    if ((i_ptr->name2 == SN_R) || (i_ptr->name2 == SN_RA) ||
-	(i_ptr->name2 == SN_RF) || (i_ptr->name2 == SN_RC) ||
-	(i_ptr->name2 == SN_RL) || (i_ptr->name2 == SN_SE) ||
-	(i_ptr->name2 == SN_HA) || (i_ptr->name2 == SN_FT) ||
-	(i_ptr->name2 == SN_DF) || (i_ptr->name2 == SN_FB) ||
-	(i_ptr->name2 == SN_SA) || (i_ptr->name2 == SN_FREE_ACTION) ||
-	(i_ptr->name2 == SN_SD) || (i_ptr->name2 == SN_SLAYING) ||
-	(i_ptr->name2 == SN_SU) || (i_ptr->name2 == SN_SLOW_DESCENT) ||
-	(i_ptr->name2 == SN_SPEED) || (i_ptr->name2 == SN_STEALTH) ||
-	(i_ptr->name2 == SN_INTELLIGENCE) || (i_ptr->name2 == SN_WISDOM) ||
-	(i_ptr->name2 == SN_INFRAVISION) || (i_ptr->name2 == SN_MIGHT) ||
-	(i_ptr->name2 == SN_LORDLINESS) || (i_ptr->name2 == SN_MAGI) ||
-	(i_ptr->name2 == SN_BEAUTY) || (i_ptr->name2 == SN_SEEING) ||
-     (i_ptr->name2 == SN_REGENERATION) || (i_ptr->name2 == SN_PROTECTION) ||
-	(i_ptr->name2 == SN_FIRE) || (i_ptr->name2 == SN_SLAY_EVIL) ||
-	(i_ptr->name2 == SN_DRAGON_SLAYING) || (i_ptr->name2 == SN_SLAY_ANIMAL) ||
-	(i_ptr->name2 == SN_ACCURACY) || (i_ptr->name2 == SN_SO) ||
-	(i_ptr->name2 == SN_POWER) || (i_ptr->name2 == SN_WEST) ||
-	(i_ptr->name2 == SN_SDEM) || (i_ptr->name2 == SN_ST) ||
-	(i_ptr->name2 == SN_LIGHT) || (i_ptr->name2 == SN_AGILITY) ||
-	(i_ptr->name2 == SN_SG) || (i_ptr->name2 == SN_TELEPATHY) ||
-	(i_ptr->name2 == SN_DRAGONKIND) || (i_ptr->name2 == SN_AMAN) ||
-	(i_ptr->name2 == SN_ELVENKIND) || (i_ptr->name2 == SN_WOUNDING) ||
-	(i_ptr->name2 == SN_BLESS_BLADE) || (i_ptr->name2 == SN_ATTACKS))
+    if ((i_ptr->name2 == EGO_R) || (i_ptr->name2 == EGO_RESIST_A) ||
+	(i_ptr->name2 == EGO_RESIST_F) || (i_ptr->name2 == EGO_RESIST_C) ||
+	(i_ptr->name2 == EGO_RESIST_E) || (i_ptr->name2 == EGO_SE) ||
+	(i_ptr->name2 == EGO_HA) || (i_ptr->name2 == EGO_FT) ||
+	(i_ptr->name2 == EGO_DF) || (i_ptr->name2 == EGO_FB) ||
+	(i_ptr->name2 == EGO_SLAY_A) || (i_ptr->name2 == EGO_FREE_ACTION) ||
+	(i_ptr->name2 == EGO_SLAY_D) || (i_ptr->name2 == EGO_SLAYING) ||
+	(i_ptr->name2 == EGO_SLAY_U) || (i_ptr->name2 == EGO_SLOW_DESCENT) ||
+	(i_ptr->name2 == EGO_SPEED) || (i_ptr->name2 == EGO_STEALTH) ||
+	(i_ptr->name2 == EGO_INTELLIGENCE) || (i_ptr->name2 == EGO_WISDOM) ||
+	(i_ptr->name2 == EGO_INFRAVISION) || (i_ptr->name2 == EGO_MIGHT) ||
+	(i_ptr->name2 == EGO_LORDLINESS) || (i_ptr->name2 == EGO_MAGI) ||
+	(i_ptr->name2 == EGO_BEAUTY) || (i_ptr->name2 == EGO_SEEING) ||
+     (i_ptr->name2 == EGO_REGENERATION) || (i_ptr->name2 == EGO_PROTECTION) ||
+	(i_ptr->name2 == EGO_FIRE) || (i_ptr->name2 == EGO_SLAY_EVIL) ||
+	(i_ptr->name2 == EGO_DRAGON_SLAYING) || (i_ptr->name2 == EGO_SLAY_ANIMAL) ||
+	(i_ptr->name2 == EGO_ACCURACY) || (i_ptr->name2 == EGO_SLAY_O) ||
+	(i_ptr->name2 == ART_POWER) || (i_ptr->name2 == EGO_WEST) ||
+	(i_ptr->name2 == EGO_SLAY_DEMON) || (i_ptr->name2 == EGO_SLAY_T) ||
+	(i_ptr->name2 == EGO_LITE) || (i_ptr->name2 == EGO_AGILITY) ||
+	(i_ptr->name2 == EGO_SLAY_G) || (i_ptr->name2 == EGO_TELEPATHY) ||
+	(i_ptr->name2 == SN_DRAGONKIND) || (i_ptr->name2 == EGO_AMAN) ||
+	(i_ptr->name2 == EGO_ELVENKIND) || (i_ptr->name2 == EGO_WOUNDING) ||
+	(i_ptr->name2 == EGO_BLESS_BLADE) || (i_ptr->name2 == EGO_ATTACKS))
 	return "excellent";
     return "special";
 }
