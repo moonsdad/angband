@@ -46,7 +46,7 @@ static cptr value_check(inven_type *i_ptr)
     if (i_ptr->flags & TR_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
     if ((i_ptr->tval == TV_DIGGING) &&  /* also, good digging tools -CFT */
 	(i_ptr->flags & TR_TUNNEL) &&
-	(i_ptr->p1 > object_list[i_ptr->index].p1)) /* better than normal for this
+	(i_ptr->p1 > objeci_list[i_ptr->index].p1)) /* better than normal for this
 						       type of shovel/pick? -CFT */
 	return "good";
     if ((i_ptr->tohit<=0 && i_ptr->todam<=0 && i_ptr->toac<=0) &&
@@ -253,18 +253,18 @@ void dungeon(void)
 	c_ptr = &cave[char_row][char_col];
 
 	if ((c_ptr->tptr == 0) ||
-	    ((t_list[c_ptr->tptr].tval != TV_STORE_DOOR) && /* if not store */
-	     ((t_list[c_ptr->tptr].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
-	      (t_list[c_ptr->tptr].tval > TV_MIN_WEAR) ||
-	      !(t_list[c_ptr->tptr].flags2 & TR_ARTIFACT)))) {
+	    ((i_list[c_ptr->tptr].tval != TV_STORE_DOOR) && /* if not store */
+	     ((i_list[c_ptr->tptr].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
+	      (i_list[c_ptr->tptr].tval > TV_MIN_WEAR) ||
+	      !(i_list[c_ptr->tptr].flags2 & TR_ARTIFACT)))) {
 	    if (c_ptr->tptr != 0)
 		(void)delete_object(char_row, char_col);
 	    cur_pos = i_pop();
 	    c_ptr->tptr = cur_pos;
 	    if (create_up_stair)
-		invcopy(&t_list[cur_pos], OBJ_UP_STAIR);
+		invcopy(&i_list[cur_pos], OBJ_UP_STAIR);
 	    else if (create_down_stair && !is_quest(dun_level))
-		invcopy(&t_list[cur_pos], OBJ_DOWN_STAIR);
+		invcopy(&i_list[cur_pos], OBJ_DOWN_STAIR);
 	} else
 	    msg_print("The object resists your attempt to transform it into a stairway.");
 
@@ -949,7 +949,7 @@ void dungeon(void)
 		if (i_ptr->timeout > 0)
 		    i_ptr->timeout--;
 		if ((i_ptr->tval == TV_RING) &&
-		    (!stricmp(object_list[i_ptr->index].name, "Power")) &&
+		    (!stricmp(objeci_list[i_ptr->index].name, "Power")) &&
 		    (randint(20) == 1) && (p_ptr->misc.exp > 0))
 		    p_ptr->misc.exp--, p_ptr->misc.max_exp--, prt_experience();
 	    }
@@ -1130,7 +1130,7 @@ void dungeon(void)
 		    char                out_val[100], tmp[100], *ptr;
 		    int                 sp;
 
-		    (void)strcpy(tmp, object_list[i_ptr->index].name);
+		    (void)strcpy(tmp, objeci_list[i_ptr->index].name);
 
 		    ptr = tmp;
 		    sp = 0;

@@ -360,12 +360,12 @@ extern inven_type inventory[INVEN_TOTAL];
 
 /*** Item Information ***/
 
-/* Treasure heap pointer (used with t_list) */
+/* Treasure heap pointer (used with i_list) */
 extern s16b i_max;
 
-extern inven_type t_list[MAX_I_IDX];
+extern inven_type i_list[MAX_I_IDX];
 
-extern inven_kind object_list[MAX_OBJECTS];
+extern inven_kind objeci_list[MAX_OBJECTS];
 
 extern byte object_ident[OBJECT_IDENT_SIZE];
 

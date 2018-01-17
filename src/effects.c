@@ -2522,7 +2522,7 @@ static void activate(void)
 		break;
 	    }
 	    if (p_ptr->stats.use_stat[A_INT] < randint(18) &&
-	     randint(object_list[inventory[i].index].level) > p_ptr->misc.lev) {
+	     randint(objeci_list[inventory[i].index].level) > p_ptr->misc.lev) {
 		msg_print("You fail to activate it properly.");
 		break;
 	    }

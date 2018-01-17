@@ -523,8 +523,8 @@ void map_area(void)
 			if (c_ptr->fval >= MIN_CAVE_WALL)
 			    c_ptr->pl = TRUE;
 			else if ((c_ptr->tptr != 0) &&
-			     (t_list[c_ptr->tptr].tval >= TV_MIN_VISIBLE) &&
-			       (t_list[c_ptr->tptr].tval <= TV_MAX_VISIBLE))
+			     (i_list[c_ptr->tptr].tval >= TV_MIN_VISIBLE) &&
+			       (i_list[c_ptr->tptr].tval <= TV_MAX_VISIBLE))
 			    c_ptr->fm = TRUE;
 		    }
 	}

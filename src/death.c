@@ -360,53 +360,53 @@ void print_objects()
 			    (SPECIAL_OBJ - 1) - 1;
 			switch (tmp) {
 			  case (SPECIAL_OBJ - 1):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("*Remove Curse*");
 			    break;
 			  case (SPECIAL_OBJ):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Resistance of Scarabtarices]");
 			    break;
 			  case (SPECIAL_OBJ + 1):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Mordenkainen's Escapes]");
 			    break;
 			  case (SPECIAL_OBJ + 2):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Kelek's Grimoire of Power]");
 			    break;
 			  case (SPECIAL_OBJ + 3):
 			    if (randint(2) == 1)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Tenser's Transformations]");
 			    break;
 			  case (SPECIAL_OBJ + 4):
 			    if (randint(2) == 1)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Raal's Tome of Destruction]");
 			    break;
 			  case (SPECIAL_OBJ + 5):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Ethereal Openings]");
 			    break;
 			  case (SPECIAL_OBJ + 6):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Godly Insights]");
 			    break;
 			  case (SPECIAL_OBJ + 7):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Purifications and Healing]");
 			    break;
 			  case (SPECIAL_OBJ + 8):
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Wrath of God]");
 			    break;
 			  case (SPECIAL_OBJ + 9):
 			    if (randint(2) > 1)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("[Holy Infusions]");
 			    break; /* End of Books */
 			  case (SPECIAL_OBJ + 10):	/* Narya */
@@ -414,7 +414,7 @@ void print_objects()
 				goto again;
 			    if (NARYA)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Narya");
 			    NARYA = TRUE;
 			    break;
@@ -423,7 +423,7 @@ void print_objects()
 				goto again;
 			    if (NENYA)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Nenya");
 			    NENYA = TRUE;
 			    break;
@@ -432,7 +432,7 @@ void print_objects()
 				goto again;
 			    if (VILYA)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Vilya");
 			    VILYA = TRUE;
 			    break;
@@ -441,7 +441,7 @@ void print_objects()
 				goto again;
 			    if (POWER)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Power (The One Ring)");
 			    POWER = TRUE;
 			    break;
@@ -454,30 +454,30 @@ void print_objects()
 			  case (SPECIAL_OBJ + 20):
 			    if (randint(2) > 1)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Dragon Scale Mail");
 			    break;
 			  case (SPECIAL_OBJ + 23):	/* Multi-Hued Dragon
 							 * Scale Mail */
 			    if (randint(3) > 1)
 				goto again;
-			    if (object_list[tmp].level <= level)
+			    if (objeci_list[tmp].level <= level)
 				msg_print("Multi-Hued Dragon Scale Mail");
 			    break;
 			}
-			if (object_list[tmp].level > level)
+			if (objeci_list[tmp].level > level)
 			    continue;
-			invcopy(&t_list[j], tmp);
-			if (object_list[t_list[j].index].tval == TV_HARD_ARMOR)
-			    t_list[j].toac += 10 + randint(10);
-			i_ptr = &t_list[j];
+			invcopy(&i_list[j], tmp);
+			if (objeci_list[t_list[j].index].tval == TV_HARD_ARMOR)
+			    i_list[j].toac += 10 + randint(10);
+			i_ptr = &i_list[j];
 			store_bought(i_ptr);
 			objdes(tmp_str, i_ptr, TRUE);
 		    } else {
-			invcopy(&t_list[j],
+			invcopy(&i_list[j],
 				sorted_objects[get_obj_num(level, FALSE)]);
 			magic_treasure(j, level, 0, FALSE);
-			i_ptr = &t_list[j];
+			i_ptr = &i_list[j];
 			store_bought(i_ptr);
 			if (i_ptr->flags & TR_CURSED)
 			    add_inscribe(i_ptr, ID_DAMD);

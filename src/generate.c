@@ -100,7 +100,7 @@ static int next_to_corr(int y, int x)
 	    if (c_ptr->fval != CORR_FLOOR) continue;
 
 	    /* should fail if there is already a door present */
-	    if (c_ptr->tptr == 0 || t_list[c_ptr->tptr].tval < TV_MIN_DOORS))
+	    if (c_ptr->tptr == 0 || i_list[c_ptr->tptr].tval < TV_MIN_DOORS))
 	    
 	    /* Count these grids */
 	    i++;
@@ -336,9 +336,9 @@ static void place_destroyed()
 		/* Do not destroy important (or illegal) stuff */
 		if (in_bounds(y, x) && (cave[y][x].fval != BOUNDARY_WALL) &&
 		    ((cave[y][x].tptr == 0) ||	/* DGK */
-		     ((t_list[cave[y][x].tptr].tval != TV_UP_STAIR) &&
-		      (t_list[cave[y][x].tptr].tval != TV_DOWN_STAIR) &&
-		      (!(t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT))))) {
+		     ((i_list[cave[y][x].tptr].tval != TV_UP_STAIR) &&
+		      (i_list[cave[y][x].tptr].tval != TV_DOWN_STAIR) &&
+		      (!(i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT))))) {
 		    k = distance(y, x, y1, x1);
 		    if (y == char_row && x == char_col) repl_spot(y, x, 1);
 		    else if (k < 13) repl_spot(y, x, (int)randint(6));
@@ -364,11 +364,11 @@ static cave_type *test_place_obj(int y, int x)
     if (!in_bounds(y,x)) return NULL;
 
     t = &cave[y][x];
-    tv = t_list[t->tptr].tval;
+    tv = i_list[t->tptr].tval;
     
     if (t->tptr != 0)
 	if (((tv <= TV_MAX_WEAR) && (tv >= TV_MIN_WEAR) &&
-	     (t_list[t->tptr].flags2 & TR_ARTIFACT)) ||
+	     (i_list[t->tptr].flags2 & TR_ARTIFACT)) ||
 	    (tv == TV_UP_STAIR) || (tv == TV_DOWN_STAIR) ||
 	    (tv == TV_STORE_DOOR)) return (NULL);
 
@@ -391,7 +391,7 @@ static void place_open_door(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_OPEN_DOOR);
     c_ptr->fval = CORR_FLOOR;
 }
@@ -408,12 +408,12 @@ static void place_broken_door(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_OPEN_DOOR);
 
     /* Hack -- nuke any walls */
     c_ptr->fval = CORR_FLOOR;
-    t_list[cur_pos].p1 = 1;
+    i_list[cur_pos].p1 = 1;
 }
 
 
@@ -428,7 +428,7 @@ static void place_closed_door(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
@@ -447,7 +447,7 @@ static void place_locked_door(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
@@ -469,7 +469,7 @@ static void place_stuck_door(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_CLOSED_DOOR);
 
     /* Hack -- nuke any walls */
@@ -490,7 +490,7 @@ static void place_secret_door(int y, int x)
     if (!c_ptr) return;
 
     cur_pos = i_pop();
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_SECRET_DOOR);
 
     /* Put the object in the cave */
@@ -541,7 +541,7 @@ static void place_up_stairs(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_UP_STAIR);
 }
 
@@ -566,7 +566,7 @@ static void place_down_stairs(int y, int x)
 
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_DOWN_STAIR);
 
     /* on town level -CWS */
@@ -2918,7 +2918,7 @@ static void build_store(int store_num, int y, int x)
     c_ptr->fval = CORR_FLOOR;
     cur_pos = i_pop();
     c_ptr->tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_STORE_DOOR + store_num);
+    invcopy(&i_list[cur_pos], OBJ_STORE_DOOR + store_num);
 }
 
 
@@ -2930,7 +2930,7 @@ static void tlink()
     register int i;
 
     for (i = 0; i < MAX_I_IDX; i++)
-	invcopy(&t_list[i], OBJ_NOTHING);
+	invcopy(&i_list[i], OBJ_NOTHING);
     i_max = MIN_I_IDX;
 }
 

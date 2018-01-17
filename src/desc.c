@@ -463,7 +463,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
     bigvtype             tmp_val;
 
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    basenm = object_list[i_ptr->index].name;
+    basenm = objeci_list[i_ptr->index].name;
     modstr = NULL;
 
     /* Start with no damage string */
@@ -700,12 +700,12 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_VIS_TRAP:
       case TV_UP_STAIR:
       case TV_DOWN_STAIR:
-	(void)strcpy(out_val, object_list[i_ptr->index].name);
+	(void)strcpy(out_val, objeci_list[i_ptr->index].name);
     /* (void) strcat(out_val, "."); avoid ".." bug -CWS */
 	return;
 
       case TV_STORE_DOOR:
-	sprintf(out_val, "the entrance to the %s", object_list[i_ptr->index].name);
+	sprintf(out_val, "the entrance to the %s", objeci_list[i_ptr->index].name);
 	return;
 
       /* Used in the "inventory" routine */
@@ -727,7 +727,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
     /* Append the "kind name" to the "base name" */
     if (append_name) {
 	(void)strcat(tmp_val, " of ");
-	(void)strcat(tmp_val, object_list[i_ptr->index].name);
+	(void)strcat(tmp_val, objeci_list[i_ptr->index].name);
     }
 
 
@@ -962,7 +962,7 @@ void invcopy(register inven_type *to, int from_index)
 {
     register inven_kind *from;
 
-    from = &object_list[from_index];
+    from = &objeci_list[from_index];
     to->index = from_index;
     to->name2 = SN_NULL;
     to->inscrip[0] = '\0';

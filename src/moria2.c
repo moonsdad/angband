@@ -59,7 +59,7 @@ void hit_trap(int y, int x)
     c_ptr = &cave[y][x];
 
     /* Get the trap */
-    i_ptr = &t_list[c_ptr->tptr];
+    i_ptr = &i_list[c_ptr->tptr];
 
     /* Roll for damage */
     dam = pdamroll(i_ptr->damage);
@@ -461,8 +461,8 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			crown = TRUE;
 			cur_pos = i_pop();
 			cave[j][k].tptr = cur_pos;
-			invcopy(&t_list[cur_pos], 98);
-			t_ptr = &t_list[cur_pos];
+			invcopy(&i_list[cur_pos], 98);
+			t_ptr = &i_list[cur_pos];
 			t_ptr->flags |= (TR1_STR | TR1_DEX | TR1_CON | TR1_INT | TR1_WIS | TR1_CHR |
 				       TR_SEE_INVIS | TR_CURSED | TR_INFRA);
 			t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR_ARTIFACT);
@@ -479,8 +479,8 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			grond = TRUE;
 			cur_pos = i_pop();
 			cave[j][k].tptr = cur_pos;
-			invcopy(&t_list[cur_pos], 56);
-			t_ptr = &t_list[cur_pos];
+			invcopy(&i_list[cur_pos], 56);
+			t_ptr = &i_list[cur_pos];
 			t_ptr->name2 = ART_GROND;
 			t_ptr->tohit = 5;
 			t_ptr->todam = 25;
@@ -710,9 +710,9 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 			int                 ty = m_ptr->fy, tx = m_ptr->fx, ny, nx;
 
 			while ((cave[ty][tx].tptr != 0) &&
-			  (t_list[cave[ty][tx].tptr].tval >= TV_MIN_WEAR) &&
-			  (t_list[cave[ty][tx].tptr].tval <= TV_MAX_WEAR) &&
-			 (t_list[cave[ty][tx].tptr].flags2 & TR_ARTIFACT)) {
+			  (i_list[cave[ty][tx].tptr].tval >= TV_MIN_WEAR) &&
+			  (i_list[cave[ty][tx].tptr].tval <= TV_MAX_WEAR) &&
+			 (i_list[cave[ty][tx].tptr].flags2 & TR_ARTIFACT)) {
 			    do { /* pick new possible spot */
 				ny = ty + (byte) randint(3) - 2;
 				nx = tx + (byte) randint(3) - 2;
@@ -728,7 +728,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 		    }
 		    cur_pos = i_pop();
 		    ca_ptr->tptr = cur_pos;
-		    invcopy(&t_list[cur_pos], OBJ_DOWN_STAIR);
+		    invcopy(&i_list[cur_pos], OBJ_DOWN_STAIR);
 		    msg_print("Well done!! Go for it!");
 		    msg_print("A magical stairway appears...");
 		} /* if-else for stairway */
@@ -1228,8 +1228,8 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
 	    k++;
 	    if (!(cur_pos = cave[i][j].tptr) || (k>64))
 		flag = TRUE;
-	    if (flag && (((t_list[cur_pos].flags2 & TR_ARTIFACT) &&
-			  ((cur_pos = t_list[cur_pos].tval) >= TV_MIN_WEAR) &&
+	    if (flag && (((i_list[cur_pos].flags2 & TR_ARTIFACT) &&
+			  ((cur_pos = i_list[cur_pos].tval) >= TV_MIN_WEAR) &&
 			  (cur_pos <= TV_MAX_WEAR)) ||
 			 (cur_pos == TV_STORE_DOOR) ||
 			 (cur_pos == TV_UP_STAIR) ||
@@ -1249,7 +1249,7 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
 	    delete_object(i,j);
 	cur_pos = i_pop();
 	cave[i][j].tptr = cur_pos;
-	t_list[cur_pos] = *t_ptr;
+	i_list[cur_pos] = *t_ptr;
 	lite_spot(i, j);
     }
     else {

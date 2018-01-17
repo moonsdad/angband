@@ -237,7 +237,7 @@
  * level generation, although it is extremely rare
  */
 
-#define MIN_I_IDX           1   /* Minimum t_list index used                */
+#define MIN_I_IDX           1   /* Minimum i_list index used                */
 #define MAX_I_IDX         400   /* Max objects per level                    */
 
 #define MIN_M_IDX           2   /* Minimum index in m_list (1=player, 0=no mon) */

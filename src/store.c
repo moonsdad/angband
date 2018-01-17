@@ -328,7 +328,7 @@ s32b item_value(inven_type *i_ptr)
     else if (((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) ||
 	     ((i_ptr->tval >= TV_BOOTS) && (i_ptr->tval <= TV_SOFT_ARMOR))) {
 
-	if (!known2_p(i_ptr)) value = object_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = objeci_list[i_ptr->index].cost;
 
 	else if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -345,7 +345,7 @@ s32b item_value(inven_type *i_ptr)
 
 	else if (((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
 	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
-	if (!known2_p(i_ptr)) value = object_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = objeci_list[i_ptr->index].cost;
 
 	else {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -377,7 +377,7 @@ s32b item_value(inven_type *i_ptr)
 	/* player knows what type of ring, but does not know whether it is
 	 * cursed or not, if refuse to buy cursed objects here, then player
 	 * can use this to 'identify' cursed objects  */
-	    value = object_list[i_ptr->index].cost;
+	    value = objeci_list[i_ptr->index].cost;
 
 				/* Wands and staffs */
     } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
@@ -392,7 +392,7 @@ s32b item_value(inven_type *i_ptr)
 				/* picks and shovels */
     else if (i_ptr->tval == TV_DIGGING) {
 	if (!known2_p(i_ptr))
-	    value = object_list[i_ptr->index].cost;
+	    value = objeci_list[i_ptr->index].cost;
 
 	else {
 	    if (i_ptr->p1 < 0) value = 0;
@@ -636,9 +636,9 @@ static void store_create(int store_num)
     do {
 	if (store_num != 6) {
 	    i = store_choice[store_num][randint(STORE_CHOICES) - 1];
-	    invcopy(&t_list[cur_pos], i);
+	    invcopy(&i_list[cur_pos], i);
 	    magic_treasure(cur_pos, OBJ_TOWN_LEVEL, FALSE, TRUE);
-	    t_ptr = &t_list[cur_pos];
+	    t_ptr = &i_list[cur_pos];
 	    if (store_check_num(t_ptr, store_num)) {
 		if ((t_ptr->cost > 0) &&	/* Item must be good	 */
 		    (t_ptr->cost < owners[s_ptr->owner].max_cost)) {
@@ -653,9 +653,9 @@ static void store_create(int store_num)
 	    tries++;
 	} else {
 	    i = get_obj_num(40, FALSE);
-	    invcopy(&t_list[cur_pos], i);
+	    invcopy(&i_list[cur_pos], i);
 	    magic_treasure(cur_pos, 40, FALSE, TRUE);
-	    t_ptr = &t_list[cur_pos];
+	    t_ptr = &i_list[cur_pos];
 	    if (store_check_num(t_ptr, store_num)) {
 		if (t_ptr->cost > 0) {	/* Item must be good	 */
 		/*

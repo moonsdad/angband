@@ -539,15 +539,15 @@ int detect_enchantment()
     for (i = panel_row_min; i <= panel_row_max; i++)
 	for (j = panel_col_min; j <= panel_col_max; j++) {
 	    c_ptr = &cave[i][j];
-	    tv = t_list[c_ptr->tptr].tval;
+	    tv = i_list[c_ptr->tptr].tval;
 	    if ((c_ptr->tptr != 0) && !test_lite(i, j) &&
 		( ((tv > TV_MAX_ENCHANT) && (tv < TV_FLASK)) || /* misc items */
 		 (tv == TV_MAGIC_BOOK) || (tv == TV_PRAYER_BOOK) || /* books */
 		 ((tv >= TV_MIN_WEAR) && (tv <= TV_MAX_ENCHANT) && /* armor/weap */
-		  ((t_list[c_ptr->tptr].flags2 & TR_ARTIFACT) || /* if Art., or */
-		   (t_list[c_ptr->tptr].tohit>0) || /* has pluses, then show */
-		   (t_list[c_ptr->tptr].todam>0) ||
-		   (t_list[c_ptr->tptr].toac>0))) )){
+		  ((i_list[c_ptr->tptr].flags2 & TR_ARTIFACT) || /* if Art., or */
+		   (i_list[c_ptr->tptr].tohit>0) || /* has pluses, then show */
+		   (i_list[c_ptr->tptr].todam>0) ||
+		   (i_list[c_ptr->tptr].toac>0))) )){
 		c_ptr->fm = TRUE;
 		lite_spot(i, j);
 		detect = TRUE;
@@ -738,15 +738,15 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
     if (TR1_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
-		     object_list[t_ptr->index].name) &&
+		     objeci_list[t_ptr->index].name) &&
 	    (t_ptr->p1 > 0))
 	    if ((inventory[INVEN_RIGHT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 object_list[inventory[INVEN_RIGHT].index].name) &&
+			 objeci_list[inventory[INVEN_RIGHT].index].name) &&
 		(inventory[INVEN_RIGHT].p1 > 0) &&
 		(inventory[INVEN_LEFT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 object_list[inventory[INVEN_LEFT].index].name) &&
+			 objeci_list[inventory[INVEN_LEFT].index].name) &&
 		(inventory[INVEN_RIGHT].p1 > 0))
 		return;
 	change_speed(-amount);
@@ -926,7 +926,7 @@ static void sub1_move_light(int y1, register int x1, int y2, register int x2)
 		if (c_ptr->fval >= MIN_CAVE_WALL)
 		    c_ptr->pl = TRUE;
 		else if (!c_ptr->fm && c_ptr->tptr != 0) {
-		    tval = t_list[c_ptr->tptr].tval;
+		    tval = i_list[c_ptr->tptr].tval;
 		    if ((tval >= TV_MIN_VISIBLE) && (tval <= TV_MAX_VISIBLE))
 			c_ptr->fm = TRUE;
 		}
@@ -1015,15 +1015,15 @@ void change_trap(register int y, register int x)
     register inven_type *t_ptr;
 
     c_ptr = &cave[y][x];
-    t_ptr = &t_list[c_ptr->tptr];
+    t_ptr = &i_list[c_ptr->tptr];
     if (t_ptr->tval == TV_INVIS_TRAP) {
 	t_ptr->tval = TV_VIS_TRAP;
 	lite_spot(y, x);
     } else if (t_ptr->tval == TV_SECRET_DOOR) {
     /* change secret door to closed door */
 	t_ptr->index = OBJ_CLOSED_DOOR;
-	t_ptr->tval = object_list[OBJ_CLOSED_DOOR].tval;
-	t_ptr->tchar = object_list[OBJ_CLOSED_DOOR].tchar;
+	t_ptr->tval = objeci_list[OBJ_CLOSED_DOOR].tval;
+	t_ptr->tchar = objeci_list[OBJ_CLOSED_DOOR].tchar;
 	lite_spot(y, x);
     }
 }
@@ -1658,7 +1658,7 @@ static void do_command(char com_val)
 		    inven_type          inv;
 
 		    for (temp = 0; temp < MAX_DUNGEON_OBJ; temp++) {
-			if (object_list[temp].level <= i) {
+			if (objeci_list[temp].level <= i) {
 			    invcopy(&inv, temp);
 			    known1(&inv);
 			}

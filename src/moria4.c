@@ -506,7 +506,7 @@ void search(int y, int x, int chance)
 	    if (randint(100) < chance) {
 
 		c_ptr = &cave[i][j];
-		i_ptr = &t_list[c_ptr->tptr];
+		i_ptr = &i_list[c_ptr->tptr];
 
 	    /* Search for hidden objects */
 		if (c_ptr->tptr == 0) {
@@ -581,8 +581,8 @@ void carry(int y, int x, int pickup)
     register inven_type *i_ptr;
 
     c_ptr = &cave[y][x];
-    i_ptr = &t_list[c_ptr->tptr];
-    i = t_list[c_ptr->tptr].tval;
+    i_ptr = &i_list[c_ptr->tptr];
+    i = i_list[c_ptr->tptr].tval;
 
     if (i <= TV_MAX_PICK_UP) {
 	end_find();
@@ -725,7 +725,7 @@ static void area_affect(int dir, int y, int x)
 
 		if (c_ptr->tptr != 0) {
 
-		    t = t_list[c_ptr->tptr].tval;
+		    t = i_list[c_ptr->tptr].tval;
 
 		    if (t != TV_INVIS_TRAP && t != TV_SECRET_DOOR
 		    && (t != TV_OPEN_DOOR || !find_ignore_doors)) {
@@ -961,7 +961,7 @@ void move_player(int dir, int do_pickup)
 		move_light(old_row, old_col, char_row, char_col);
 	    /* An object is beneath him.	     */
 		if (c_ptr->tptr != 0) {
-		    i = t_list[c_ptr->tptr].tval;
+		    i = i_list[c_ptr->tptr].tval;
 		    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
 			|| i == TV_STORE_DOOR || !prompt_carry_flag
 			|| i == TV_GOLD)
@@ -971,7 +971,7 @@ void move_player(int dir, int do_pickup)
 			inven_type         *i_ptr;
 			bigvtype            tmp_str, tmp2_str;
 
-			i_ptr = &t_list[cave[char_row][char_col].tptr];
+			i_ptr = &i_list[cave[char_row][char_col].tptr];
 			objdes(tmp_str, i_ptr, TRUE);
 			sprintf(tmp2_str, "You see %s.", tmp_str);
 			msg_print(tmp2_str);
@@ -979,7 +979,7 @@ void move_player(int dir, int do_pickup)
 		/* if stepped on falling rock trap, and space contains
 		 * rubble, then step back into a clear area 
 		 */
-		    if (t_list[c_ptr->tptr].tval == TV_RUBBLE) {
+		    if (i_list[c_ptr->tptr].tval == TV_RUBBLE) {
 			move_rec(char_row, char_col, old_row, old_col);
 			move_light(char_row, char_col, old_row, old_col);
 			char_row = old_row;
@@ -987,7 +987,7 @@ void move_player(int dir, int do_pickup)
 	/* check to see if we have stepped back onto another trap, if so, set it off */
 			c_ptr = &cave[char_row][char_col];
 			if (c_ptr->tptr != 0) {
-			    i = t_list[c_ptr->tptr].tval;
+			    i = i_list[c_ptr->tptr].tval;
 			    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
 				|| i == TV_STORE_DOOR)
 				hit_trap(char_row, char_col);
@@ -996,9 +996,9 @@ void move_player(int dir, int do_pickup)
 		}
 	    } else {		   /* Can't move onto floor space */
 		if (!find_flag && (c_ptr->tptr != 0)) {
-		    if (t_list[c_ptr->tptr].tval == TV_RUBBLE)
+		    if (i_list[c_ptr->tptr].tval == TV_RUBBLE)
 			msg_print("There is rubble blocking your way.");
-		    else if (t_list[c_ptr->tptr].tval == TV_CLOSED_DOOR)
+		    else if (i_list[c_ptr->tptr].tval == TV_CLOSED_DOOR)
 			msg_print("There is a closed door blocking your way.");
 		} else
 		    end_find();

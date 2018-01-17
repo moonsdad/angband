@@ -75,7 +75,7 @@ static void compact_objects()
 		    && (distance(i, j, char_row, char_col) > cur_dis)) {
 
 		/* Every object gets a "saving throw" */
-		    switch (t_list[c_ptr->tptr].tval) {
+		    switch (i_list[c_ptr->tptr].tval) {
 		      case TV_VIS_TRAP:
 			chance = 15;
 			break;
@@ -94,9 +94,9 @@ static void compact_objects()
 			chance = 3;
 			break;
 		    default:
-			if ((t_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			    (t_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			    (t_list[c_ptr->tptr].flags2 & TR_ARTIFACT))
+			if ((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
+			    (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
+			    (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT))
 			    chance = 0;	/* don't compact artifacts -CFT */
 			else
 			    chance = 10;
@@ -140,7 +140,7 @@ void pusht(int my_x)
     register int i, j;
 
     if (x != i_max - 1) {
-	t_list[x] = t_list[i_max - 1];
+	i_list[x] = t_list[i_max - 1];
 
     /* must change the tptr in the cave of the object just moved */
 	for (i = 0; i < cur_height; i++)
@@ -149,7 +149,7 @@ void pusht(int my_x)
 		    cave[i][j].tptr = x;
     }
     i_max--;
-    invcopy(&t_list[i_max], OBJ_NOTHING);
+    invcopy(&i_list[i_max], OBJ_NOTHING);
 }
 
 
@@ -243,7 +243,7 @@ static void give_1_hi_resist(inven_type *i_ptr)
  * Chance of treasure having magic abilities		-RAK-
  * Chance increases with each dungeon level			 
  *
- * some objects appear multiple times in the object_list with different
+ * some objects appear multiple times in the objeci_list with different
  * levels, this is to make the object occur more often, however, for
  * consistency, must set the level of these duplicates to be the same as the
  * object with the lowest level 
@@ -264,7 +264,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
     /* Extract the "chance" of ickiness (approx range 11-54 percent) */
     cursed = (10 * chance) / OBJ_DIV_CURSED;
 
-    i_ptr = &t_list[x];
+    i_ptr = &i_list[x];
 
     /* Depending on treasure type, it can have certain magical properties */
     switch (i_ptr->tval) {
@@ -298,7 +298,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	else if (magik(chance) || good) {
 
 	    i_ptr->toac += randint(3) + m_bonus(0, 5, level);
-	    if (!stricmp(object_list[i_ptr->index].name, "& Robe") &&
+	    if (!stricmp(objeci_list[i_ptr->index].name, "& Robe") &&
 		((magik(special) && randint(30) == 1)
 		 || (good == 666 && magik(special)))) {
 		i_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD | TR2_RES_ACID |
@@ -346,9 +346,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if ((randint(3) == 1 || good == 666) && !not_unique &&
 			unique_armour(i_ptr))
 			break;
-		    if (!strncmp(object_list[i_ptr->index].name,
+		    if (!strncmp(objeci_list[i_ptr->index].name,
 				 "Mithril", 7) ||
-			!strncmp(object_list[i_ptr->index].name,
+			!strncmp(objeci_list[i_ptr->index].name,
 				 "Adamantite", 10))
 			break;
 		    if (peek) msg_print("Resist Acid");
@@ -417,7 +417,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	 * number of ego weapons same as before, see also missiles 
 	 */
 	    if (magik(3*special/2)||good==666) { /* was 2 */
-		if (!stricmp("& Whip", object_list[i_ptr->index].name)
+		if (!stricmp("& Whip", objeci_list[i_ptr->index].name)
 		    && randint(2)==1) {
 		    if (peek) msg_print("Whip of Fire");
 		    rating += 20;
@@ -686,7 +686,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    switch (randint(15)) {
 	      case 1: case 2: case 3:
 		if (((randint(3)==1)||(good==666)) && !not_unique &&
-		    !stricmp(object_list[i_ptr->index].name, "& Long Bow") &&
+		    !stricmp(objeci_list[i_ptr->index].name, "& Long Bow") &&
 		    (((i=randint(2))==1 && !BELEG) || (i==2 && !BARD))) {
 		    switch (i) {
 		    case 1:
@@ -728,7 +728,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    break;
 		}
 		if (((randint(5) == 1) || (good == 666)) && !not_unique &&
-		    !stricmp(object_list[i_ptr->index].name, "& Light Crossbow")
+		    !stricmp(objeci_list[i_ptr->index].name, "& Light Crossbow")
 		    && !CUBRAGOL) {
 		    if (CUBRAGOL)
 			break;
@@ -802,15 +802,15 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	if (magik(chance) || good) {
 	    i_ptr->toac = randint(3) + m_bonus(0, 10, level);
 	    if ((((randint(2) == 1) && magik(5 * special / 2)) || (good == 666)) &&
-		!stricmp(object_list[i_ptr->index].name,
+		!stricmp(objeci_list[i_ptr->index].name,
 			 "& Set of Leather Gloves") &&
 		!not_unique && unique_armour(i_ptr));
 	    else if ((((randint(4) == 1) && magik(special)) || (good == 666))
-		     && !stricmp(object_list[i_ptr->index].name,
+		     && !stricmp(objeci_list[i_ptr->index].name,
 				 "& Set of Gauntlets") &&
 		     !not_unique && unique_armour(i_ptr));
 	    else if ((((randint(5) == 1) && magik(special)) || (good == 666))
-		     && !stricmp(object_list[i_ptr->index].name,
+		     && !stricmp(objeci_list[i_ptr->index].name,
 				 "& Set of Cesti") &&
 		     !not_unique && unique_armour(i_ptr));
 
@@ -906,7 +906,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->cost += 300000L;
 		    }
 		} else if (stricmp("& Pair of Metal Shod Boots",
-				   object_list[i_ptr->index].name))	/* not metal */
+				   objeci_list[i_ptr->index].name))	/* not metal */
 		    if (tmp > 6) {
 			i_ptr->flags |= TR_FFALL;
 			rating += 7;
@@ -1493,7 +1493,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    i_ptr->toac += 1 + m_bonus(0, 20, level);
 	    if (magik(special) || (good == 666)) {
 		if (!not_unique &&
-		    !stricmp(object_list[i_ptr->index].name, "& Cloak")
+		    !stricmp(objeci_list[i_ptr->index].name, "& Cloak")
 		    && randint(10) == 1) {
 		    switch (randint(9)) {
 		      case 1:
@@ -1586,7 +1586,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    }
 
 		} else if (!not_unique &&
-			   !stricmp(object_list[i_ptr->index].name,
+			   !stricmp(objeci_list[i_ptr->index].name,
 				    "& Shadow Cloak")
 			   && randint(20) == 1) {
 		    switch (randint(2)) {
@@ -1794,12 +1794,12 @@ int special_place_object(int y, int x)
     if (!in_bounds(y, x)) return 0;		   /* abort! -CFT */
 
     if (cave[y][x].tptr != 0)
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return 0;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -1816,9 +1816,9 @@ again:
 	    goto again;
 	if (NARYA)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Narya");
@@ -1832,9 +1832,9 @@ again:
 	    goto again;
 	if (NENYA)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Nenya");
@@ -1848,9 +1848,9 @@ again:
 	    goto again;
 	if (VILYA)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(70) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(70) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Vilya");
@@ -1864,9 +1864,9 @@ again:
 	    goto again;
 	if (POWER)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(100) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(100) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Power (The One Ring)");
@@ -1878,9 +1878,9 @@ again:
 	done++;
 	if (PHIAL)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(30) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(30) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Phial of Galadriel");
@@ -1894,9 +1894,9 @@ again:
 	    goto again;
 	if (INGWE)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Amulet of Ingwe");
@@ -1910,9 +1910,9 @@ again:
 	    goto again;
 	if (CARLAMMAS)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(35) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(35) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Amulet of Carlammas");
@@ -1926,9 +1926,9 @@ again:
 	    goto again;
 	if (ELENDIL)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(30) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(30) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Star of Elendil");
@@ -1942,9 +1942,9 @@ again:
 	    goto again;
 	if (THRAIN)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Arkenstone of Thrain");
@@ -1958,9 +1958,9 @@ again:
 	    goto again;
 	if (TULKAS)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(65) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(65) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Ring of Tulkas");
@@ -1974,9 +1974,9 @@ again:
 	    goto again;
 	if (NECKLACE)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Necklace of the Dwarves");
@@ -1990,9 +1990,9 @@ again:
 	    goto again;
 	if (BARAHIR)
 	    goto again;
-	if ((object_list[tmp].level - 40) > object_level)
+	if ((objeci_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((object_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Ring of Barahir");
@@ -2005,11 +2005,11 @@ again:
 	msg_print(str);
     cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
-    invcopy(&t_list[cur_pos], tmp);
-    t_list[cur_pos].timeout = 0;
-    t_list[cur_pos].ident |= ID_NOSHOW_TYPE; /* don't show (+x of yyy) for these */
-    if (object_list[tmp].level > object_level) {
-	rating += 2 * (object_list[sorted_objects[tmp]].level - object_level);
+    invcopy(&i_list[cur_pos], tmp);
+    i_list[cur_pos].timeout = 0;
+    i_list[cur_pos].ident |= ID_NOSHOW_TYPE; /* don't show (+x of yyy) for these */
+    if (objeci_list[tmp].level > object_level) {
+	rating += 2 * (objeci_list[sorted_objects[tmp]].level - object_level);
     }
     if (cave[y][x].cptr == 1)
 	msg_print("You feel something roll beneath your feet.");
@@ -2026,12 +2026,12 @@ void place_object(int y, int x)
 
     if (!in_bounds(y,x)) return; /* abort! -CFT */
     if (cave[y][x].tptr != 0)
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return; /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y,x);
@@ -2044,21 +2044,21 @@ void place_object(int y, int x)
 
     do {	   /* don't generate another chest if opening_chest is true -CWS */
 	tmp = get_obj_num(dun_level, FALSE);
-    } while (opening_chest && (object_list[sorted_objects[tmp]].tval == TV_CHEST));
+    } while (opening_chest && (objeci_list[sorted_objects[tmp]].tval == TV_CHEST));
 	
-    invcopy(&t_list[cur_pos], sorted_objects[tmp]);
+    invcopy(&i_list[cur_pos], sorted_objects[tmp]);
     magic_treasure(cur_pos, dun_level, FALSE, 0);
-    if (object_list[sorted_objects[tmp]].level > dun_level)
-	rating += object_list[sorted_objects[tmp]].level - dun_level;
+    if (objeci_list[sorted_objects[tmp]].level > dun_level)
+	rating += objeci_list[sorted_objects[tmp]].level - dun_level;
     if (peek) {
-	if (object_list[sorted_objects[tmp]].level > dun_level) {
+	if (objeci_list[sorted_objects[tmp]].level > dun_level) {
 	    char buf[200];
 	    byte temp;
 	    
-	    temp=t_list[cur_pos].ident;
-	    t_list[cur_pos].ident |= ID_STOREBOUGHT;
-	    objdes(buf, &t_list[cur_pos], TRUE);
-	    t_list[cur_pos].ident = temp;
+	    temp=i_list[cur_pos].ident;
+	    i_list[cur_pos].ident |= ID_STOREBOUGHT;
+	    objdes(buf, &i_list[cur_pos], TRUE);
+	    i_list[cur_pos].ident = temp;
 	    msg_print(buf);
 	}
     }
@@ -2078,12 +2078,12 @@ void place_good(int y, int x, u32b good)
     if (!in_bounds(y, x))
 	return;			   /* abort! -CFT */
     if (cave[y][x].tptr != 0)
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -2095,7 +2095,7 @@ void place_good(int y, int x, u32b good)
     cave[y][x].tptr = cur_pos;
     do {
 	tmp = get_obj_num((object_level + 10), TRUE);
-	tv = object_list[sorted_objects[tmp]].tval;
+	tv = objeci_list[sorted_objects[tmp]].tval;
 
 	if ((tv == TV_HELM) || (tv == TV_SHIELD) || (tv == TV_CLOAK) ||
 	    (tv == TV_HAFTED) || (tv == TV_POLEARM) ||
@@ -2104,39 +2104,39 @@ void place_good(int y, int x, u32b good)
 	    is_good = TRUE;
 
 	if ((tv == TV_SWORD) &&
-	    strncmp("& Broken", object_list[sorted_objects[tmp]].name, 8))
+	    strncmp("& Broken", objeci_list[sorted_objects[tmp]].name, 8))
 	    is_good = TRUE;	   /* broken swords/daggers are NOT good!
 				    * -CFT */
 	if ((tv == TV_HARD_ARMOR) &&
-	    strncmp("Rusty", object_list[sorted_objects[tmp]].name, 5))
+	    strncmp("Rusty", objeci_list[sorted_objects[tmp]].name, 5))
 	    is_good = TRUE;	   /* rusty chainmail is NOT good! -CFT */
 	if ((tv == TV_SOFT_ARMOR) &&
-	 stricmp("some filthy rags", object_list[sorted_objects[tmp]].name))
+	 stricmp("some filthy rags", objeci_list[sorted_objects[tmp]].name))
 	    is_good = TRUE;	   /* nor are rags! -CFT */
 	if ((tv == TV_MAGIC_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Raal's */
-	    (object_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
+	    (objeci_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
 	if ((tv == TV_PRAYER_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Wrath of
 					 * God */
-	    (object_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
+	    (objeci_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
     } while (!is_good);
 
-    invcopy(&t_list[cur_pos], sorted_objects[tmp]);
+    invcopy(&i_list[cur_pos], sorted_objects[tmp]);
     magic_treasure(cur_pos, object_level, (good & SPECIAL) ? 666 : 1, 0);
 
 	/* Hack -- look at it */
 	if (peek) {
 	    char buf[200];
-	    if (object_list[sorted_objects[tmp]].level > object_level) {
+	    if (objeci_list[sorted_objects[tmp]].level > object_level) {
 	    byte               t;
 
-	    t = t_list[cur_pos].ident;
-	    t_list[cur_pos].ident |= ID_STOREBOUGHT;
-	    objdes(buf, &t_list[cur_pos], TRUE);
-	    t_list[cur_pos].ident = t;
+	    t = i_list[cur_pos].ident;
+	    i_list[cur_pos].ident |= ID_STOREBOUGHT;
+	    objdes(buf, &i_list[cur_pos], TRUE);
+	    i_list[cur_pos].ident = t;
 	    msg_print(buf);
 	}
     }
@@ -2240,18 +2240,18 @@ void place_trap(int y, int x, int sval)
 	return;	       /* don't put rubble under monsters, it's annoying -CFT */
 
     if (cave[y][x].tptr != 0)
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
     cur_pos = i_pop();
     cave[y][x].tptr = cur_pos;
-    invcopy(&t_list[cur_pos], OBJ_TRAP_LIST + sval);
+    invcopy(&i_list[cur_pos], OBJ_TRAP_LIST + sval);
 }
 
 
@@ -2269,19 +2269,19 @@ void place_rubble(int y, int x)
     if (cave[y][x].tptr != 0)
 
    /* don't replace stairs, stores, artifacts */
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return;
 	else
     /* Delete whatever is there */
     delete_object(y, x);
 
     cur_pos = i_pop();
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_RUBBLE);
 
     /* Put the rubble in the cave */
@@ -2318,12 +2318,12 @@ void place_gold(int y, int x)
     if (!in_bounds(y, x))
 	return;			   /* abort! -CFT */
     if (cave[y][x].tptr != 0)
-	if ((t_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (t_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((t_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (t_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (t_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -2345,7 +2345,7 @@ void place_gold(int y, int x)
 
     /* Make it */
     cave[y][x].tptr = cur_pos;
-    i_ptr = &t_list[cur_pos];
+    i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_GOLD_LIST + i);
 
     /* Determine the "cost" */
@@ -2353,7 +2353,7 @@ void place_gold(int y, int x)
 
     /* Hack -- average the values to make sure "creeping coins" are not too valuable */
     if (coin_type) {
-	i_ptr->cost = ((8L * (long)randint((int)object_list[OBJ_GOLD_LIST + i].cost))
+	i_ptr->cost = ((8L * (long)randint((int)objeci_list[OBJ_GOLD_LIST + i].cost))
 		       + (i_ptr->cost)) >> 1;
     }
 
@@ -2397,14 +2397,14 @@ int get_obj_num(int level, int good)
 		if (i < j) i = j;
 		j = rand_int(t_level[level]);
 		if (i < j) i = j;
-		j = object_list[sorted_objects[i]].level;
+		j = objeci_list[sorted_objects[i]].level;
 		if (j == 0) i = rand_int(t_level[0]);
 		else i = randint(t_level[j] - t_level[j - 1]) - 1 + t_level[j - 1];
 	    }
 	}
-    } while (((object_list[sorted_objects[i]].rare ?
-	       (randint(object_list[sorted_objects[i]].rare) - 1) : 0) && !good)
-	     || (object_list[sorted_objects[i]].rare == 255));
+    } while (((objeci_list[sorted_objects[i]].rare ?
+	       (randint(objeci_list[sorted_objects[i]].rare) - 1) : 0) && !good)
+	     || (objeci_list[sorted_objects[i]].rare == 255));
 
     /* Accept that object */
     return (i);

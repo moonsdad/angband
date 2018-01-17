@@ -229,7 +229,7 @@ typedef struct _inven_type inven_type;
 
 struct _inven_type {
 
-  u16b index;			/* Index to object_list	*/
+  u16b index;			/* Index to objeci_list	*/
 
   byte level;			/* Level item first found	*/
 

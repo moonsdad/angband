@@ -586,12 +586,12 @@ static void shatter_quake(int mon_y, int mon_x)
 		    take_hit(damage, "an Earthquake");
 		}
 		if (c_ptr->tptr != 0)
-		    if (((t_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			 (t_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			 (t_list[c_ptr->tptr].flags2 & TR_ARTIFACT)) ||
-			(t_list[c_ptr->tptr].tval == TV_UP_STAIR) ||
-			(t_list[c_ptr->tptr].tval == TV_DOWN_STAIR) ||
-			(t_list[c_ptr->tptr].tval == TV_STORE_DOOR))
+		    if (((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
+			 (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
+			 (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT)) ||
+			(i_list[c_ptr->tptr].tval == TV_UP_STAIR) ||
+			(i_list[c_ptr->tptr].tval == TV_DOWN_STAIR) ||
+			(i_list[c_ptr->tptr].tval == TV_STORE_DOOR))
 			continue;  /* don't kill artifacts... */
 		    else
 			(void)delete_object(i, j);
@@ -685,12 +685,12 @@ static void br_wall(int mon_y, int mon_x)
 
     /* don't destroy floor if stairs, shop, or artifact... */
 	if ((c_ptr->fval <= MAX_CAVE_FLOOR) &&
-	((c_ptr->tptr == 0) || ((t_list[c_ptr->tptr].tval != TV_UP_STAIR) &&
-			      (t_list[c_ptr->tptr].tval != TV_DOWN_STAIR) &&
-			      (t_list[c_ptr->tptr].tval != TV_STORE_DOOR) &&
-			      !((t_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-				(t_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			    (t_list[c_ptr->tptr].flags2 & TR_ARTIFACT))))) {
+	((c_ptr->tptr == 0) || ((i_list[c_ptr->tptr].tval != TV_UP_STAIR) &&
+			      (i_list[c_ptr->tptr].tval != TV_DOWN_STAIR) &&
+			      (i_list[c_ptr->tptr].tval != TV_STORE_DOOR) &&
+			      !((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
+				(i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
+			    (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT))))) {
 	    if (c_ptr->tptr) delete_object(char_row, char_col);
 	    tmp = randint(10);
 	    if (tmp < 6) c_ptr->fval = QUARTZ_WALL;
@@ -1732,7 +1732,7 @@ static void make_move(int m_idx, int *mm, u32b *rcmove)
 	/* Crunch up those Walls Morgoth and Umber Hulks!!!! */
 	else if (r_list[m_ptr->mptr].cdefense & MF2_BREAK_WALL) {
 
-		i_ptr = &t_list[c_ptr->tptr];
+		i_ptr = &i_list[c_ptr->tptr];
 	    do_move = TRUE;
 
 	    /* XXX Hack -- assume the player can see it */
@@ -1763,7 +1763,7 @@ static void make_move(int m_idx, int *mm, u32b *rcmove)
 
 	/* Creature can open doors? */
 	else if (c_ptr->tptr != 0) {
-		i_ptr = &t_list[c_ptr->tptr];
+		i_ptr = &i_list[c_ptr->tptr];
 
 	    /* Creature can open doors. */
 	    if (movebits & CM_OPEN_DOOR) {
@@ -1860,7 +1860,7 @@ static void make_move(int m_idx, int *mm, u32b *rcmove)
 
 	/* Hack -- check for Glyph of Warding */
 	if (do_move && (c_ptr->tptr != 0) &&
-	    (t_list[c_ptr->tptr].tval == TV_VIS_TRAP) && (t_list[c_ptr->tptr].sval == 99)) {
+	    (i_list[c_ptr->tptr].tval == TV_VIS_TRAP) && (t_list[c_ptr->tptr].sval == 99)) {
 
 	    /* Break the ward */
 	    if (randint(OBJ_BREAK_GLYPH) < r_list[m_ptr->mptr].level) {
@@ -1950,30 +1950,30 @@ static void make_move(int m_idx, int *mm, u32b *rcmove)
 		    c_ptr = &cave[newy][newx];
 
 		    if ((c_ptr->tptr != 0)
-			&& (t_list[c_ptr->tptr].tval <= TV_MAX_OBJECT)) {
+			&& (i_list[c_ptr->tptr].tval <= TV_MAX_OBJECT)) {
 #ifdef ATARIST_MWC
 			*rcmove |= holder;
 #else
 			*rcmove |= CM_PICKS_UP;
 #endif
 			t = 0L;
-			if ((t_list[c_ptr->tptr].flags & TR1_SLAY_DRAGON) ||
-			    (t_list[c_ptr->tptr].flags & TR1_KILL_DRAGON))
+			if ((i_list[c_ptr->tptr].flags & TR1_SLAY_DRAGON) ||
+			    (i_list[c_ptr->tptr].flags & TR1_KILL_DRAGON))
 			    t |= DRAGON;
-			if (t_list[c_ptr->tptr].flags & TR1_SLAY_UNDEAD)
+			if (i_list[c_ptr->tptr].flags & TR1_SLAY_UNDEAD)
 			    t |= UNDEAD;
-			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_DEMON)
+			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_DEMON)
 			    t |= DEMON;
-			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_TROLL)
+			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_TROLL)
 			    t |= MF2_TROLL;
-			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_GIANT)
+			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_GIANT)
 			    t |= MF2_GIANT;
-			if (t_list[c_ptr->tptr].flags2 & TR1_SLAY_ORC)
+			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_ORC)
 			    t |= ORC;
 		    /* if artifact, or wearable & hurts this monster -CWS */
-			if ((t_list[c_ptr->tptr].flags2 & TR_ARTIFACT) ||
-			    ( (t_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			      (t_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
+			if ((i_list[c_ptr->tptr].flags2 & TR_ARTIFACT) ||
+			    ( (i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
+			      (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
 			      (r_list[m_ptr->mptr].cdefense & t) )) {
 
 /* FIXME: should use new line-splitting code */
@@ -1986,7 +1986,7 @@ static void make_move(int m_idx, int *mm, u32b *rcmove)
 						   m_ptr->fx)) {
 			    /* if we can see it, tell us what happened -CFT */
 				monster_name(m_name, m_ptr, &(r_list[m_ptr->mptr]));
-				objdes(i_name, &(t_list[c_ptr->tptr]), TRUE);
+				objdes(i_name, &(i_list[c_ptr->tptr]), TRUE);
 				sprintf(out_val,
 					"%s tries to pick up %s, but stops suddenly!",
 					m_name, i_name);

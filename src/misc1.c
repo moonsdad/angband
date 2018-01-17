@@ -380,8 +380,8 @@ unsigned char loc_symbol(int y, int x)
     if (!cave_ptr->pl && !cave_ptr->tl && !cave_ptr->fm)
 	return ' ';
     if ((cave_ptr->tptr != 0)
-	&& (t_list[cave_ptr->tptr].tval != TV_INVIS_TRAP))
-	return t_list[cave_ptr->tptr].tchar;
+	&& (i_list[cave_ptr->tptr].tval != TV_INVIS_TRAP))
+	return i_list[cave_ptr->tptr].tchar;
     if (cave_ptr->fval <= MAX_CAVE_FLOOR)
 	return '.';
     if (cave_ptr->fval == GRANITE_WALL || cave_ptr->fval == BOUNDARY_WALL

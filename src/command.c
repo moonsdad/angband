@@ -131,7 +131,7 @@ static void do_cmd_go_up()
     c_ptr = &cave[char_row][char_col];
 
     if (c_ptr->tptr != 0)
-	if (t_list[c_ptr->tptr].tval == TV_UP_STAIR) {
+	if (i_list[c_ptr->tptr].tval == TV_UP_STAIR) {
 	    if (dun_level == Q_PLANE) {
 		dun_level = 0;
 		new_level_flag = TRUE;
@@ -166,7 +166,7 @@ static void do_cmd_go_down()
     c_ptr = &cave[char_row][char_col];
 
     if (c_ptr->tptr != 0)
-	if (t_list[c_ptr->tptr].tval == TV_DOWN_STAIR) {
+	if (i_list[c_ptr->tptr].tval == TV_DOWN_STAIR) {
 	    if (dun_level == Q_PLANE) {
 		dun_level = 0;
 		new_level_flag = TRUE;

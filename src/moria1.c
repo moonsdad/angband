@@ -94,7 +94,7 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
     k = 0;
     for (i = r1; i <= r2; i++) {
 	if (test) {
-	    if ((*test) (object_list[inventory[i].index].tval)) {
+	    if ((*test) (objeci_list[inventory[i].index].tval)) {
 		objdes(tmp_val, &inventory[i], TRUE);
 		tmp_val[lim] = 0;  /* Truncate if too long. */
 		(void)sprintf(out_val[i], "  %c) %s", 'a' + i, tmp_val);
@@ -277,7 +277,7 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
      */
 
     c_ptr = &cave[char_row][char_col];
-    ih = t_list[c_ptr->tptr].tval;
+    ih = i_list[c_ptr->tptr].tval;
     on_floor = ( (strcmp("Item you wish identified?",pmt) == 0) &&
 		 !( (c_ptr->tptr == 0) || ih == TV_NOTHING
 		    || ih > TV_MAX_PICK_UP) );
@@ -806,7 +806,7 @@ void inven_drop(int item_val, int drop_all)
     if (cave[char_row][char_col].tptr != 0)
 	(void)delete_object(char_row, char_col);
     i = i_pop();
-    t_list[i] = *i_ptr;
+    i_list[i] = *i_ptr;
     cave[char_row][char_col].tptr = i;
 
     if (item_val >= INVEN_WIELD)
@@ -822,11 +822,11 @@ void inven_drop(int item_val, int drop_all)
 	    invcopy(&inventory[inven_ctr], OBJ_NOTHING);
 	}
     else {
-	    t_list[i].number = 1;
+	    i_list[i].number = 1;
 	    inven_weight -= i_ptr->weight;
 	    i_ptr->number--;
 	}
-	objdes(prt1, &t_list[i], TRUE);
+	objdes(prt1, &i_list[i], TRUE);
 	(void)sprintf(prt2, "Dropped %s.", prt1);
 	msg_print(prt2);
     }
