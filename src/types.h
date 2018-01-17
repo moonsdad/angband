@@ -96,7 +96,7 @@ struct _monster_race {
   u32b cflags1;		/* Bit field		*/
   u32b cflags2;		/* Bit field		*/
 
-  u32b spells;		/* Creature spells		*/
+  u32b spells1;		/* Creature spells		*/
   u32b spells2;		/* More creature spells		*/
   u32b spells3;		/* Yes! even More creature spells		*/
 };

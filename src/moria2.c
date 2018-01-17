@@ -617,7 +617,7 @@ static int fearless(monster_race *c_ptr)
     }
 
     if (c_ptr->cflags2 & UNDEAD) {
-	if (c_ptr->spells ||	   /* if undead, check to see if it's */
+	if (c_ptr->spells1 ||	   /* if undead, check to see if it's */
 	    c_ptr->spells2 ||	   /* "mindless", ie has no spells */
 	    c_ptr->spells3)
 	    flag = FALSE;	   /* found a spell, so not mindless   */
@@ -1477,7 +1477,7 @@ void take_hit(int damage, cptr hit_from)
 	}
 
 	/* Dead */
-	    new_level_flag = TRUE;
+	new_level_flag = TRUE;
     }
 
     /* Display the hitpoints */

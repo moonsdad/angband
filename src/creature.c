@@ -2054,7 +2054,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
     sex = r_ptr->gender;
 
     /* Hack -- extract the "1 in x" chance of casting spell */
-    chance = (int)(r_ptr->spells & CS_FREQ);
+    chance = (int)(r_ptr->spells1 & CS1_FREQ);
 
     if (chance == 0) {
 	msg_print("CHANCE == 0");
@@ -2093,8 +2093,8 @@ static void mon_cast_spell(int m_idx, int *took_turn)
     /* Extract all possible spells into spell_choice */
     if ((r_ptr->cflags2 & MF2_INTELLIGENT) &&
 	(m_ptr->hp < ((r_ptr->hd[0] * r_ptr->hd[1]) / 10)) &&
-	(r_ptr->spells & CS_INT1 || r_ptr->spells2 & CS_INT2 ||
-	 r_ptr->spells3 & CS_INT3) && randint(2) == 1) {
+	(r_ptr->spells1 & CS1_INT || r_ptr->spells2 & CS2_INT ||
+	 r_ptr->spells3 & CS3_INT) && randint(2) == 1) {
 
 	desperate = TRUE;
 	l_list[m_ptr->mptr].r_cflags2 |= MF2_INTELLIGENT;
@@ -2104,18 +2104,18 @@ static void mon_cast_spell(int m_idx, int *took_turn)
     k = 0;
 
     /* Extract the first set of spells */
-    i = (r_ptr->spells & ~CS_FREQ);
-    if (desperate) i &= CS_INT1;
+    i = (r_ptr->spells1 & ~CS1_FREQ);
+    if (desperate) i &= CS1_INT;
     while (i) spell_choice[k++] = bit_pos(&i);
 
     /* Extract the second set of spells */
     i = r_ptr->spells2;
-    if (desperate) i &= CS_INT2;
+    if (desperate) i &= CS2_INT;
     while (i) spell_choice[k++] = bit_pos(&i) + 32;
 
     /* Extract the third set of spells */
     i = r_ptr->spells3;
-    if (desperate) i &= CS_INT3;
+    if (desperate) i &= CS3_INT;
     while (i) spell_choice[k++] = bit_pos(&i) + 64;
 
     /* Choose a spell to cast */
@@ -3110,7 +3110,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 		l_list[m_ptr->mptr].r_spells3 |= 1L << (thrown_spell - 65);
 	    }
 
-	    if ((l_list[m_ptr->mptr].r_spells1 & CS_FREQ) != CS_FREQ)
+	    if ((l_list[m_ptr->mptr].r_spells1 & CS1_FREQ) != CS_FREQ)
 		l_list[m_ptr->mptr].r_spells1++;
 
 		if (death && l_list[m_ptr->mptr].r_deaths < MAX_SHORT)
@@ -3321,7 +3321,7 @@ static void mon_move(int m_idx, u32b *rcflags1)
     }
 
 /* Creature may cast a spell */
-    else if (r_ptr->spells != 0) {
+    else if (r_ptr->spells1 != 0) {
 	mon_cast_spell(m_idx, &move_test);
     }
     if (!move_test) {
@@ -3400,7 +3400,7 @@ void process_monsters(int attack)
     vtype                 cdesc;
 
 /* Process the monsters  */
-    for (i = mfptr - 1; i >= MIN_M_IDX && !death; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX && !death; i--) {
 	m_ptr = &m_list[i];
     /* Get rid of an eaten/breathed on monster.  Note: Be sure not to process
      * this monster. This is necessary because we can't delete monsters while

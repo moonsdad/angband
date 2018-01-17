@@ -55,32 +55,37 @@ void target()
 
 #ifdef TARGET
 
-    int monptr,exit,exit2;
+    int m_idx,exit,exit2;
     char query;
     vtype desc;
 
     exit = FALSE;
     exit2 = FALSE;
+
     if (p_ptr->flags.blind > 0)
 	msg_print("You can't see anything to target!");
-    /* Check monsters first */
     else {
-	target_mode = FALSE;
-	for (monptr = 0; (monptr<mfptr) && (!exit); monptr++) {
-	    if (m_list[monptr].cdis<MAX_SIGHT) {
-		if ((m_list[monptr].ml)&&
-		    (los(char_row,char_col,m_list[monptr].fy,m_list[monptr].fx))) {
-		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
+
+    /* Go ahead and turn off target mode */
+    target_mode = FALSE;
+
+    /* Check monsters first */
+	for (m_idx = 0; (m_idx < m_max) && (!exit); m_idx++) {
+
+	    if (m_list[m_idx].cdis<MAX_SIGHT) {
+		if ((m_list[m_idx].ml)&&
+		    (los(char_row,char_col,m_list[m_idx].fy,m_list[m_idx].fx))) {
+		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 		    (void) sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
-				   r_list[m_list[monptr].mptr].name);
+				   r_list[m_list[m_idx].mptr].name);
 		    prt(desc,0,0);
-		    move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
+		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 		    query = inkey();
 		    while ((query == 'r')||(query == 'R')) {
 			save_screen();
-			query = roff_recall(m_list[monptr].mptr);
+			query = roff_recall(m_list[m_idx].mptr);
 			restore_screen();
-			move_cursor_relative(m_list[monptr].fy,m_list[monptr].fx);
+			move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 			query = inkey();
 		    }
 		    switch (query) {
@@ -88,13 +93,12 @@ void target()
 			exit = TRUE;
 			exit2 = TRUE;
 			break;
-		    case '.':	/* for NetHack players, '.' is used to select a target,
-				   so I'm changing this... -CFT */
+		    case '.':	/* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
 		    case 't': case 'T':
 			target_mode = TRUE;
-			target_mon  = monptr;
-			target_row  = m_list[monptr].fy;
-			target_col  = m_list[monptr].fx;
+			target_mon  = m_idx;
+			target_row  = m_list[m_idx].fy;
+			target_col  = m_list[m_idx].fx;
 			exit2 = TRUE;
 		    case 'l': case'L':
 			exit = TRUE;
@@ -149,8 +153,7 @@ void target()
 		case 'Q':
 		    exit = TRUE;
 		    break;
-		case '.':	/* for NetHack players, '.' is used to select a target,
-				   so I'm changing this... -CFT */
+		case '.':	/* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
 		case 't':
 		case 'T':
 		    if (distance(char_row,char_col,target_row,target_col)>MAX_SIGHT)
@@ -656,8 +659,8 @@ static int see_wall(int dir, int y, int x)
 {
     char c;
 
-   /* check to see if movement there possible */
-    if (!mmove(dir, &y, &x)) return TRUE;
+    /* Attempt to move from (x,y) along dir */
+    if (!mmove(dir, &y, &x)) return (TRUE);
 
 #ifdef MSDOS
     if ((c = loc_symbol(y, x)) == wallsym || c == '%')
@@ -679,7 +682,7 @@ static int see_wall(int dir, int y, int x)
  */
 static int see_nothing(int dir, int y, int x)
 {
-    /* check to see if movement there possible */
+    /* Attempt to move from (x,y) along dir */
     if (!mmove(dir, &y, &x)) return FALSE;
 
     if (loc_symbol(y, x) == ' ') return (TRUE);

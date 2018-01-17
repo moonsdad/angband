@@ -32,33 +32,35 @@
  */
 static int poly(int mnum)
 {
-    register monster_race *c_ptr;
+    register monster_type *m_ptr;
+    register monster_race *r_ptr;
 
-    int y, x,i,j,k;
+    int y, x, r_idx,j,k;
 
     /* Get the initial monster and race */
-    c_ptr = &r_list[m_list[mnum].mptr];
+    m_ptr = &m_list[mnum];
+    r_ptr = &r_list[m_ptr->mptr];
 
-    if (c_ptr->cflags2 & MF2_UNIQUE) return (FALSE);
+    if (r_ptr->cflags2 & MF2_UNIQUE) return (FALSE);
 
     /* Save the monster location */
-    y = m_list[mnum].fy;
-    x = m_list[mnum].fx;
+    y = m_ptr->fy;
+    x = m_ptr->fx;
 
-    i = (randint(20)/randint(9))+1;
-    k = j = c_ptr->level;
-    if ((j -=i)<0) j = 0;
-    if ((k +=i)>MAX_R_LEV) k = MAX_MONS_LEVEL;
+    r_idx = (randint(20)/randint(9))+1;
+    k = j = r_ptr->level;
+    if ((j -=r_idx)<0) j = 0;
+    if ((k +=r_idx)>MAX_R_LEV) k = MAX_R_LEV;
 
     /* "Kill" the monster */
     delete_monster(mnum);
 
     do {
-	i = randint(m_level[k]-m_level[j])-1+m_level[j];  /* new creature index */
+	r_idx = randint(m_level[k]-m_level[j])-1+m_level[j];  /* new creature index */
     } while (r_list[i].cflags2 & MF2_UNIQUE);
 
     /* Place the new monster where the old one was */
-    place_monster(y,x,i,FALSE);
+    place_monster(y,x,r_idx,FALSE);
 
     /* Success */
     return (TRUE);
@@ -122,8 +124,7 @@ int build_wall(int dir, int y, int x)
     dist = 0;
 
     /* Go till done */
-    flag = FALSE;
-    do {
+    for (flag = FALSE; !flag; ) {
 	(void)mmove(dir, &y, &x);
 	dist++;
 	c_ptr = &cave[y][x];
@@ -184,7 +185,7 @@ int build_wall(int dir, int y, int x)
 	    build = TRUE;
 	}
     }
-    while (!flag);
+    /* Success? */    
     return (build);
 }
 
@@ -193,12 +194,12 @@ int build_wall(int dir, int y, int x)
 /*
  * Move the creature record to a new location		-RAK-	 
  */
-void teleport_away(int monptr, int dis)
+void teleport_away(int m_idx, int dis)
 {
     register int           yn, xn, ctr;
     register monster_type *m_ptr;
 
-    m_ptr = &m_list[monptr];
+    m_ptr = &m_list[m_idx];
     ctr = 0;
     do {
 	do {
@@ -225,7 +226,7 @@ void teleport_away(int monptr, int dis)
     m_ptr->cdis = distance(char_row, char_col, yn, xn);
 
     /* Update the monster */
-    update_mon(monptr);
+    update_mon(m_idx);
 }
 
 
@@ -277,7 +278,8 @@ int mass_genocide(int spell)
     register monster_race *r_ptr;
 
     result = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
+
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
 	if (((m_ptr->cdis <= MAX_SIGHT) &&
@@ -320,7 +322,7 @@ int genocide(int spell)
 
     if (get_com("Which type of creature do you wish exterminated?", &typ))
 
-	for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+	for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 
 	    m_ptr = &m_list[i];
 	    r_ptr = &r_list[m_ptr->mptr];
@@ -367,7 +369,7 @@ int speed_monsters(int spd)
     vtype               out_val, m_name;
 
     speed = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
 	monster_name(m_name, m_ptr, r_ptr);
@@ -420,7 +422,7 @@ int sleep_monsters2(void)
     vtype               out_val, m_name;
 
     sleep = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
 	monster_name(m_name, m_ptr, r_ptr);
@@ -469,7 +471,7 @@ int mass_poly()
     register monster_race *r_ptr;
 
     mass = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (m_ptr->cdis <= MAX_SIGHT) {
 	    r_ptr = &r_list[m_ptr->mptr];
@@ -492,7 +494,7 @@ int detect_evil(void)
     register monster_type *m_ptr;
 
     flag = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
 	    (EVIL & r_list[m_ptr->mptr].cflags2)) {
@@ -781,7 +783,7 @@ int banish_creature(u32b cflag, int dist)
     register monster_type *m_ptr;
 
     dispel = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if ((cflag & r_list[m_ptr->mptr].cflags2) &&
 	    (m_ptr->cdis <= MAX_SIGHT) &&
@@ -801,15 +803,15 @@ int probing(void)
     int                     probe;
     register monster_type  *m_ptr;
     register monster_race *r_ptr;
-    register monster_lore   *mp;
+    register monster_lore   *l_ptr;
     vtype                   out_val, m_name;
 
     msg_print("Probing...");
     probe = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
-	mp = &l_list[m_ptr->mptr];
+	l_ptr = &l_list[m_ptr->mptr];
 
 	if ((m_ptr->cdis <= MAX_SIGHT) &&
 	    los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx) && 
@@ -823,8 +825,8 @@ int probing(void)
 	    msg_print(out_val);
 
 	    /* let's make probing do good things to the monster memory -CWS */
-	    mp->r_cflags2 = r_ptr->cdefense;
-	    mp->r_cflags1 = (r_ptr->cmove & ~CM_TREASURE);
+	    l_ptr->r_cflags2 = r_ptr->cdefense;
+	    l_ptr->r_cflags1 = (r_ptr->cmove & ~CM_TREASURE);
 
 	    /* Probe worked */
 	    probe = TRUE;
@@ -858,7 +860,7 @@ int dispel_creature(int cflag, int damage)
     dispel = FALSE;
 
     /* Affect all nearby monsters within line of sight */
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 
 	/* Get the monster */
 	m_ptr = &m_list[i];
@@ -902,7 +904,7 @@ int turn_undead(void)
     vtype                   out_val, m_name;
 
     turn_und = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 
 	m_ptr = &m_list[i];
 
@@ -1890,7 +1892,7 @@ int detect_treasure(void)
  */
 int detect_magic()
 {
-    register int i, j, detect, Tval;
+    register int i, j, detect, tv;
     register cave_type *c_ptr;
     register inven_type *t_ptr;
 
@@ -1910,16 +1912,16 @@ int detect_magic()
 		t_ptr = &i_list[c_ptr->tptr];
 
 	    /* Examine the tval */            
-		Tval = t_ptr->tval;
+		tv = t_ptr->tval;
 
 	    /* Is it a weapon or armor or light? */
 	    /* If so, check for plusses on weapons and armor ... */
 	    /* ... and check whether it is an artifact! ;)  */
 	    /* Is it otherwise magical? */
-	    if (((Tval > 9) && (Tval < 39)) &&
+	    if (((tv > 9) && (tv < 39)) &&
 	    (((t_ptr->tohit > 0) || (t_ptr->todam) || (t_ptr->toac) || 
 	    (t_ptr->flags2 & TR_ARTIFACT)) || 
-	    ((Tval > 39) && (Tval < 77)))) {
+	    ((tv > 39) && (tv < 77)))) {
 
 		c_ptr->fm = TRUE;
 
@@ -1951,7 +1953,7 @@ int detection(void)
 
     /* Illuminate all monsters in the current panel */
     detect = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx)) {
 
@@ -2129,7 +2131,7 @@ int detect_invisible()
     register monster_type *m_ptr;
 
     flag = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
 	    (CM_INVISIBLE & r_list[m_ptr->mptr].cflags1)) {
@@ -2248,7 +2250,7 @@ int aggravate_monster(int dis_affect)
     register monster_type *m_ptr;
 
     aggravate = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	m_ptr->csleep = 0;
 	if ((m_ptr->cdis <= dis_affect) && (m_ptr->mspeed < 2)) {
@@ -2272,7 +2274,8 @@ int detect_monsters(void)
     register monster_type *m_ptr;
 
     detect = FALSE;
-    for (i = mfptr - 1; i >= MIN_M_IDX; i--) {
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) {
+
 	m_ptr = &m_list[i];
 
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&

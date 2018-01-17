@@ -237,7 +237,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,7,10,20,10,11,'p',{7,4},{4,0,0,0},2,1,'m'},
 
 {"Novice mage"		    ,(MF1_CARRY_OBJ|CARRY_GOLD|MF1_HAS_60|MF1_THRO_DR|
-			      MF1_MV_ATT_NORM),(0xCL|MS1_CONF|MAG_MISS|MS1_BLINK)
+			      MF1_MV_ATT_NORM),(0xCL|MS1_CONF|MS1_ARROW_1|MS1_BLINK)
 			    ,(NONE8),(NONE8),(NONE8)
 			    ,7,5,20,6,11,'p',{6,4},{3,0,0,0},2,1,'m'},
 
@@ -360,7 +360,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,8,80,8,16,11,'R',{3,6},{28,0,0,0},4,1,'n'},
 
 {"Novice ranger"	    ,(MF1_CARRY_OBJ|CARRY_GOLD|MF1_HAS_60|MF1_THRO_DR|
-			      MF1_MV_ATT_NORM),(0x9L|MAG_MISS)
+			      MF1_MV_ATT_NORM),(0x9L|MS1_ARROW_1)
 			    ,(NONE8),(NONE8),(NONE8)
 			    ,18,5,20,6,11,'p',{6,8},{4,4,0,0},4,1,'m'},
 
@@ -396,7 +396,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,90,10,16,8,12,'h',{8,8},{5,149,148,0},5,3,'m'},
 
 {"Novice mage"		    ,(MF1_CARRY_OBJ|CARRY_GOLD|MF1_HAS_60|MF1_THRO_DR|
-			      MF1_MV_ATT_NORM),(0xCL|MS1_CONF|MAG_MISS|MS1_BLINK|
+			      MF1_MV_ATT_NORM),(0xCL|MS1_CONF|MS1_ARROW_1|MS1_BLINK|
 			      MS1_BLIND),(MF2_GROUP),(NONE8),(NONE8)
 			    ,7,20,20,6,11,'p',{6,4},{3,0,0,0},5,1,'m'},
 
@@ -545,7 +545,7 @@ creature_type r_list[MAX_R_IDX] = {
 			     (MF1_MV_ATT_NORM|MF1_THRO_DR|MF1_CARRY_OBJ|MF1_HAS_1D2)
 			    ,(0x5L|MS1_BO_COLD|SLOW)
 			    ,(EVIL|MF2_MAX_HP|MF2_UNIQUE|SPECIAL)
-			    ,(MS2_TRAP_CREATE|HEAL|ST_CLOUD),(NONE8)
+			    ,(MS2_TRAP_CREATE|HEAL|MS2_BA_POIS),(NONE8)
 			    ,150,20,20,30,11,'p',{25,10},{4,4,148,0},8,1,'m'},
 
 {"Lagduf, the Snaga"	    ,(MF1_MV_ATT_NORM|MF1_THRO_DR|MF1_CARRY_OBJ|MF1_HAS_1D2)
@@ -558,7 +558,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,11,10,18,18,11,'y',{4,8},{5,0,0,0},8,1,'n'},
 
 {"Novice ranger"	    ,(MF1_CARRY_OBJ|CARRY_GOLD|MF1_HAS_60|MF1_THRO_DR|
-			     MF1_MV_ATT_NORM),(0x9L|MAG_MISS),(MF2_GROUP)
+			     MF1_MV_ATT_NORM),(0x9L|MS1_ARROW_1),(MF2_GROUP)
 			    ,(NONE8),(NONE8)
 			    ,18,5,20,6,11,'p',{6,8},{4,4,0,0},8,1,'m'},
 
@@ -609,7 +609,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,19,10,16,22,12,'H',{3,8},{50,50,26,0},9,1,'f'},
 
 {"Orc shaman"		    ,(MF1_CARRY_OBJ|CARRY_GOLD|MF1_HAS_90|MF1_THRO_DR|MF1_MV_ATT_NORM)
-			    ,(0x8L|MAG_MISS|MS1_CAUSE_1|MS1_BLINK)
+			    ,(0x8L|MS1_ARROW_1|MS1_CAUSE_1|MS1_BLINK)
 			    ,(EVIL|ORC|MF2_HURT_LITE)
 			    ,(NONE8),(NONE8)
 			    ,30,20,20,15,11,'o',{9,8},{5,5,0,0},9,1,'n'},
@@ -655,9 +655,9 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,35,80,8,16,11,'S',{10,10},{32,156,156,32},10,2,'n'},
 
 {"Dark elven mage"	    ,(MF1_CARRY_OBJ|MF1_HAS_1D2|MF1_THRO_DR|MF1_MV_ATT_NORM)
-			    ,(0x5L|MS1_BLIND|MAG_MISS|MS1_CONF)
+			    ,(0x5L|MS1_BLIND|MS1_ARROW_1|MS1_CONF)
 			    ,(EVIL|MF2_IM_POIS|MF2_HURT_LITE)
-			    ,(ST_CLOUD|MS2_DARKNESS),(NONE8)
+			    ,(MS2_BA_POIS|MS2_DARKNESS),(NONE8)
 			    ,50,20,20,16,12,'h',{7,10},{5,5,0,0},10,1,'m'},
 
 {"Orfax, Son of Boldor"    ,(MF1_CARRY_OBJ|MF1_HAS_90|MF1_THRO_DR|MF1_MV_ATT_NORM)
@@ -766,7 +766,7 @@ creature_type r_list[MAX_R_IDX] = {
 
 {"Master yeek"		    ,(MF1_CARRY_GOLD|CARRY_OBJ|MF1_HAS_60|MF1_THRO_DR|
 			     MF1_MV_ATT_NORM),(0x4L|MS1_BLINK|TELE|MS1_S_MONSTER|
-			     MS1_BLIND|SLOW),(MF2_ANIMAL|EVIL),(ST_CLOUD),(NONE8)
+			     MS1_BLIND|SLOW),(MF2_ANIMAL|EVIL),(MS2_BA_POIS),(NONE8)
 			    ,28,10,18,24,11,'y',{12,9},{7,0,0,0},12,2,'n'},
 
 {"Priest"		    ,(MF1_HAS_1D2|MF1_CARRY_GOLD|CARRY_OBJ|MF1_MV_ATT_NORM|
@@ -903,7 +903,7 @@ creature_type r_list[MAX_R_IDX] = {
 
 {"Wererat"		    ,(MF1_MV_ATT_NORM|MF1_CARRY_GOLD|MF1_HAS_60|MF1_THRO_DR)
 			    ,(0x9L|MS1_CAUSE_2|MS1_BLINK|MS1_BO_COLD)
-			    ,(EVIL|MF2_ANIMAL),(ST_CLOUD),(NONE8)
+			    ,(EVIL|MF2_ANIMAL),(MS2_BA_POIS),(NONE8)
 			    ,45,10,10,10,11,'r',{20,8},{54,54,36,0},15,2,'n'},
 
 {"Black ogre"		    ,(MF1_HAS_60|MF1_CARRY_GOLD|CARRY_OBJ|MF1_THRO_DR
@@ -1328,7 +1328,7 @@ creature_type r_list[MAX_R_IDX] = {
 			    ,85,50,20,40,11,'T',{23,10},{5,5,41,0},25,1,'m'},
 
 {"Troll priest"		    ,(MF1_MV_ATT_NORM|MF1_THRO_DR|MF1_CARRY_GOLD|CARRY_OBJ|
-			     MF1_HAS_90),(0x5L|MS1_CAUSE_1|MS1_BLINK|FEAR|MAG_MISS)
+			     MF1_HAS_90),(0x5L|MS1_CAUSE_1|MS1_BLINK|FEAR|MS1_ARROW_1)
 			    ,(MF2_TROLL|EVIL|MF2_HURT_LITE|MF2_CHARM_SLEEP|MF2_MAX_HP)
 			    ,(MS2_DARKNESS),(NONE8)
 			    ,100,30,20,50,11,'T',{23,13},{7,7,41,0},25,1,'m'},
@@ -1447,7 +1447,7 @@ creature_type r_list[MAX_R_IDX] = {
 
 {"5-headed hydra"	    ,(MF1_MV_ATT_NORM|MF1_CARRY_GOLD|MF1_HAS_4D2|HAS_1D2)
 			    ,(0x5L|FEAR),(MF2_ANIMAL|MF2_IM_POIS)
-			    ,(ST_CLOUD),(NONE8)
+			    ,(MS2_BA_POIS),(NONE8)
 		       ,350,20,20,80,12,'R',{100,8},{163,163,163,163},28,2,'n'},
 
 {"Black knight"		   ,(MF1_HAS_1D2|MF1_CARRY_OBJ|MF1_THRO_DR|MF1_MV_ATT_NORM|CARRY_GOLD)
@@ -2179,7 +2179,7 @@ creature_type r_list[MAX_R_IDX] = {
 
 {"7-headed hydra"	    ,(MF1_MV_ATT_NORM|MF1_CARRY_GOLD|MF1_HAS_4D2|HAS_2D2)
 			    ,(0x5L|FEAR|MS1_BR_POIS)
-			    ,(MF2_ANIMAL|MF2_IM_POIS),(ST_CLOUD),(NONE8)
+			    ,(MF2_ANIMAL|MF2_IM_POIS),(MS2_BA_POIS),(NONE8)
 		     ,2000,20,20,90,12,'R',{100,10},{162,162,162,144},39,2,'n'},
 
 {"Night mare"		    ,(MF1_MV_ATT_NORM|MF1_THRO_DR|MF1_HAS_2D2|MF1_CARRY_GOLD)
@@ -2703,7 +2703,7 @@ creature_type r_list[MAX_R_IDX] = {
 			     MS1_BR_FIRE|MS1_BR_POIS)
 			    ,(MF2_CHARM_SLEEP|MF2_IM_FIRE|MF2_IM_POIS|MF2_UNIQUE|MF2_ANIMAL|
 			     MF2_INTELLIGENT|MF2_MAX_HP)
-			    ,(MS2_BO_PLAS|ST_CLOUD),(MS3_S_REPTILE)
+			    ,(MS2_BO_PLAS|MS2_BA_POIS),(MS3_S_REPTILE)
 		    ,20000,20,20,140,12,'R',{100,43},{250,250,251,251},55,2,'n'},
 
 {"Thuringwethil"	    ,(MF1_MV_ATT_NORM|MF1_THRO_DR|MF1_HAS_4D2|HAS_2D2|HAS_1D2|

@@ -426,16 +426,13 @@
 
 
 /* definitions for creatures, cflags1 field */
-#define CM_ALL_MV_FLAGS 0x0000001FL
 #define CM_ATTACK_ONLY  0x00000001L
 #define CM_MOVE_NORMAL  0x00000002L
 
-#define CM1_RANDOM_MOVE  0x0000001CL
 #define CM_20_RANDOM    0x00000004L
 #define CM_40_RANDOM    0x00000008L
 #define CM_75_RANDOM    0x00000010L
 
-#define CM_SPECIAL      0x003F0000L
 #define CM_INVISIBLE    0x00010000L
 #define CM_OPEN_DOOR    0x00020000L
 #define CM_PHASE        0x00040000L
@@ -445,8 +442,6 @@
 
 #define CM_CARRY_OBJ    0x01000000L
 #define CM_CARRY_GOLD   0x02000000L
-#define CM_TREASURE     0x7C000000L
-#define CM_TR_SHIFT     26              /* used for recall of treasure */
 #define CM_60_RANDOM    0x04000000L
 #define CM_90_RANDOM    0x08000000L
 #define CM_1D2_OBJ      0x10000000L
@@ -455,7 +450,6 @@
 #define CM_WIN          0x80000000L
 
 /* creature spell definitions */
-#define CS_FREQ         0x0000000FL
 #define CS_SPELLS       0xFF07FFF0L
 #define CS_TEL_SHORT    0x00000010L
 #define CS_TEL_LONG     0x00000020L
@@ -471,12 +465,6 @@
 #define CS_SLOW_PER     0x00008000L
 #define CS_DRAIN_MANA   0x00010000L
 
-#define CS_INT1         0x0006FC30L     /* was 0x80060020L -DGK */
-#define CS_INT2         0x71027200L     /* was 0x51023400L -DGK */
-#define CS_INT3         0x0000F900L     /* was 0x00000000L -DGK */
-#define CS_BREATHE      0x00F80000L
-#define CS_BREATHE2     0x8000003FL
-#define CS_BREATHE3     0x0000007FL
 #define CS_BR_LIGHT     0x00080000L
 #define CS_BR_GAS       0x00100000L
 #define CS_BR_ACID      0x00200000L
@@ -1171,7 +1159,7 @@
 #define MS1_BO_FIRE   		0x01000000L
 #define MS1_BO_COLD		0x02000000L
 #define MS1_BO_ACID     	0x04000000L
-#define MAG_MISS      	0x08000000L
+#define MS1_ARROW_1      	0x08000000L
 #define MS1_CAUSE_3    		0x10000000L
 #define MS1_BA_FIRE     	0x20000000L
 #define MS1_BA_COLD    		0x40000000L
@@ -1201,7 +1189,7 @@
 #define MS2_DARKNESS     	0x00100000L
 #define MS2_FORGET       	0x00200000L
 #define MS2_BRAIN_SMASH  	0x00400000L
-#define ST_CLOUD     	0x00800000L
+#define MS2_BA_POIS     	0x00800000L
 #define MS2_TELE_LEVEL     	0x01000000L
 #define MS2_BO_WATE   		0x02000000L
 #define MS2_BA_WATE   		0x04000000L
@@ -1233,4 +1221,35 @@
  * Eight bits of zeros
  */
 #define NONE8			0x00000000L
+
+
+/*
+ * The "recall" of monster memory is a MESS
+ */
+
+/* Hack -- scan for "movement" */
+#define CM_ALL_MV_FLAGS 0x0000001FL
+#define CM1_RANDOM_MOVE  0x0000001CL
+
+/* Hack -- scan for "special movement" */
+#define CM_SPECIAL      0x003F0000L
+
+/* Hack -- used to "count" treasures */
+#define CM_TREASURE     0x7C000000L
+#define CM_TR_SHIFT     26              /* used for recall of treasure */
+
+
+/* Hack -- used to "count" spell attacks */
+#define CS1_FREQ         0x0000000FL
+
+/* Hack -- separate out the "breath" spells */
+#define CS1_BREATHE      0x00F80000L
+#define CS2_BREATHE     0x8000003FL
+#define CS3_BREATHE     0x0000007FL
+
+/* Hack -- take note of "intelligent" spells */
+#define CS1_INT         0x0006FC30L     /* was 0x80060020L -DGK */
+#define CS2_INT         0x71027200L     /* was 0x51023400L -DGK */
+#define CS3_INT         0x0000F900L     /* was 0x00000000L -DGK */
+
 
