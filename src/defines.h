@@ -562,14 +562,12 @@
 #define SN_FB                   13
 #define SN_FREE_ACTION          14
 #define SN_SLAYING              15
-#define SN_CLUMSINESS           16
-#define SN_WEAKNESS             17
+
+
 #define SN_SLOW_DESCENT         18
 #define SN_SPEED                19
 #define SN_STEALTH              20
-#define SN_SLOWNESS             21
-#define SN_NOISE                22
-#define SN_GREAT_MASS           23
+
 #define SN_INTELLIGENCE         24
 #define SN_WISDOM               25
 #define SN_INFRAVISION          26
@@ -579,153 +577,208 @@
 #define SN_BEAUTY               30
 #define SN_SEEING               31
 #define SN_REGENERATION         32
-#define SN_STUPIDITY            33
-#define SN_DULLNESS             34
-#define SN_BLINDNESS            35
-#define SN_TIMIDNESS            36
-#define SN_TELEPORTATION        37
-#define SN_UGLINESS             38
+
 #define SN_PROTECTION           39
-#define SN_IRRITATION           40
-#define SN_VULNERABILITY        41
-#define SN_ENVELOPING           42
+
 #define SN_FIRE                 43
 #define SN_SLAY_EVIL            44
 #define SN_DRAGON_SLAYING       45
-#define SN_EMPTY                46
-#define SN_LOCKED               47
-#define SN_POISON_NEEDLE        48
-#define SN_GAS_TRAP             49
-#define SN_EXPLOSION_DEVICE     50
-#define SN_SUMMONING_RUNES      51
-#define SN_MULTIPLE_TRAPS       52
-#define SN_DISARMED             53
-#define SN_UNLOCKED             54
+
 #define SN_SLAY_ANIMAL          55
-#define SN_GROND                56
-#define SN_RINGIL               57
-#define SN_AEGLOS               58
-#define SN_ARUNRUTH             59
-#define SN_MORMEGIL             60
-#define SN_MORGUL               61
-#define SN_ANGRIST              62
-#define SN_GURTHANG             63
-#define SN_CALRIS               64
+
 #define SN_ACCURACY             65
-#define SN_ANDURIL              66
+
 #define SN_SO                   67
-#define SN_POWER                68
-#define SN_DURIN                69
-#define SN_AULE                 70
+
 #define SN_WEST                 71
 #define SN_BLESS_BLADE          72
 #define SN_SDEM                 73
 #define SN_ST                   74
-#define SN_BLOODSPIKE           75
-#define SN_THUNDERFIST          76
+
 #define SN_WOUNDING             77
-#define SN_ORCRIST              78
-#define SN_GLAMDRING            79
-#define SN_STING                80
+
 #define SN_LIGHT                81
 #define SN_AGILITY              82
-#define SN_BACKBITING           83
-#define SN_DOOMCALLER           84
+
 #define SN_SG                   85
 #define SN_TELEPATHY            86
-#define SN_DRAGONKIND           87
-#define SN_NENYA                88
-#define SN_NARYA                89
-#define SN_VILYA                90
-#define SN_AMAN                 91
-#define SN_BELEGENNON           92
-#define SN_FEANOR               93
-#define SN_ANARION              94
-#define SN_ISILDUR              95
-#define SN_FINGOLFIN            96
+
 #define SN_ELVENKIND            97
+
+#define SN_ATTACKS             179
+
+#define SN_AMAN                 91
+
+
+#define SN_WEAKNESS             17
+#define SN_STUPIDITY            33
+#define SN_DULLNESS             34
+#define SN_CLUMSINESS           16
+#define SN_UGLINESS             38
+#define SN_TELEPORTATION        37
+
+#define SN_IRRITATION           40
+#define SN_VULNERABILITY        41
+#define SN_ENVELOPING           42
+
+#define SN_SLOWNESS             21
+#define SN_NOISE                22
+#define SN_GREAT_MASS           23
+
+#define SN_BACKBITING           83
+
+#define SN_MORGUL		61
+
+#define SN_SHATTERED           177
+#define SN_BLASTED             178
+
+	/* Rings */
+#define SN_NARYA                89
+#define SN_NENYA                88
+#define SN_VILYA                90
+#define SN_POWER                68
+
+	/* Dragon Scale */
+#define SN_RAZORBACK           175
+#define SN_BLADETURNER         176
+
+	/* Hard Armour */
 #define SN_SOULKEEPER           98
-#define SN_DOR_LOMIN            99
-#define SN_MORGOTH             100
-#define SN_BELEG               101
-#define SN_DAL                 102
-#define SN_PAURHACH            103
-#define SN_PAURNIMMEN          104
-#define SN_PAURAEGEN           105
-#define SN_CAMMITHRIM          106
-#define SN_CAMBELEG            107
-#define SN_HOLHENNETH          108
-#define SN_PAURNEN             109
-#define SN_AEGLIN              110
-#define SN_CAMLOST             111
-#define SN_NIMLOTH             112
-#define SN_NAR                 113
-#define SN_BERUTHIEL           114
-#define SN_GORLIM              115
-#define SN_NARTHANC            116
-#define SN_NIMTHANC            117
-#define SN_DETHANC             118
-#define SN_GILETTAR            119
-#define SN_RILIA               120
-#define SN_BELANGIL            121
-#define SN_BALLI               122
-#define SN_LOTHARANG           123
-#define SN_FIRESTAR            124
-#define SN_ERIRIL              125
-#define SN_CUBRAGOL            126
-#define SN_BARD                127
-#define SN_COLLUIN             128
-#define SN_HOLCOLLETH          129
-#define SN_TOTILA              130
-#define SN_PAIN                131
-#define SN_ELVAGIL             132
-#define SN_AGLARANG            133
+#define SN_ISILDUR              95
 #define SN_ROHAN               134
-#define SN_EORLINGAS           135
-#define SN_BARUKKHELED         136
-#define SN_WRATH               137
-#define SN_HARADEKKET          138
-#define SN_MUNDWINE            139
-#define SN_GONDRICAM           140
-#define SN_ZARCUTHRA           141
-#define SN_CARETH              142
-#define SN_FORASGIL            143
-#define SN_CRISDURIAN          144
-#define SN_COLANNON            145
+#define SN_BELEGENNON           92
+#define SN_CELEBORN            158
+#define SN_ARVEDUI             148
+#define SN_CASPANION           170
+
+	/* Soft Armour */
 #define SN_HITHLOMIR           146
 #define SN_THALKETTOTH         147
-#define SN_ARVEDUI             148
+
+	/* Shields */
+#define SN_THORIN              157
+#define SN_CELEGORM            152
+#define SN_ANARION              94
+
+	/* Helms */
+#define SN_MORGOTH             100
+#define SN_BERUTHIEL           114
 #define SN_THRANDUIL           149
 #define SN_THENGEL             150
 #define SN_HAMMERHAND          151
-#define SN_CELEGORM            152
-#define SN_THROR               153
-#define SN_MAEDHROS            154
-#define SN_OLORIN              155
-#define SN_ANGUIREL            156
-#define SN_THORIN              157
-#define SN_CELEBORN            158
-#define SN_OROME               159
-#define SN_EONWE               160
+#define SN_DOR_LOMIN            99
+#define SN_HOLHENNETH          108
+#define SN_GORLIM              115
 #define SN_GONDOR              161
-#define SN_THEODEN             162
+
+	/* Cloaks */
+#define SN_COLLUIN             128
+#define SN_HOLCOLLETH          129
 #define SN_THINGOL             163
 #define SN_THORONGIL           164
+#define SN_COLANNON            145
 #define SN_LUTHIEN             165
 #define SN_TUOR                166
-#define SN_ULMO                167
+
+	/* Gloves */
+#define SN_CAMBELEG            107
+#define SN_CAMMITHRIM          106
+#define SN_PAURHACH		103
+#define SN_PAURNIMMEN          104
+#define SN_PAURAEGEN           105
+#define SN_PAURNEN             109
+#define SN_CAMLOST             111
+#define SN_FINGOLFIN            96
+
+	/* Boots */
+#define SN_FEANOR               93
+#define SN_DAL                 102
+#define SN_THROR               153
+
+
+	/* Swords */
+#define SN_MAEDHROS            154
+#define SN_ANGRIST              62
+#define SN_NARTHANC            116
+#define SN_NIMTHANC            117
+#define SN_DETHANC             118
+#define SN_RILIA               120
+#define SN_BELANGIL            121
+#define SN_CALRIS               64
+#define SN_ARUNRUTH             59
+#define SN_GLAMDRING            79
+#define SN_AEGLIN              110
+#define SN_ORCRIST              78
+#define SN_GURTHANG             63
+#define SN_ZARCUTHRA           141
+#define SN_MORMEGIL             60
+#define SN_GONDRICAM           140
+#define SN_CRISDURIAN          144
+#define SN_AGLARANG            133
+#define SN_RINGIL               57
+#define SN_ANDURIL              66
+#define SN_ANGUIREL            156
+#define SN_ELVAGIL             132
+#define SN_FORASGIL            143
+#define SN_CARETH              142
+#define SN_STING                80
+#define SN_HARADEKKET          138
+#define SN_GILETTAR            119
+#define SN_DOOMCALLER           84
+
+	/* Polearms */
+#define SN_THEODEN             162
+#define SN_PAIN                131
 #define SN_OSONDIR             168
-#define SN_TURMIL              169
-#define SN_CASPANION           170
 #define SN_TIL                 171
-#define SN_DEATHWREAKER        172
+#define SN_AEGLOS               58
+#define SN_OROME               159
+#define SN_NIMLOTH             112
+#define SN_EORLINGAS           135
+#define SN_DURIN                69
+#define SN_EONWE               160
+#define SN_BALLI               122
+#define SN_LOTHARANG           123
+#define SN_MUNDWINE            139
+#define SN_BARUKKHELED         136
+#define SN_WRATH               137
+#define SN_ULMO                167
 #define SN_AVAVIR              173
+
+	/* Hafted */
+#define SN_GROND                56
+#define SN_TOTILA              130
+#define SN_THUNDERFIST          76
+#define SN_BLOODSPIKE           75
+#define SN_FIRESTAR            124
 #define SN_TARATOL             174
-#define SN_RAZORBACK           175
-#define SN_BLADETURNER         176
-#define SN_SHATTERED           177
-#define SN_BLASTED             178
-#define SN_ATTACKS             179
+#define SN_AULE                 70
+#define SN_NAR                 113
+#define SN_ERIRIL              125
+#define SN_OLORIN              155
+#define SN_DEATHWREAKER        172
+#define SN_TURMIL              169
+
+	/* Bows */
+#define SN_BARD                127
+#define SN_CUBRAGOL		126
+
+#define SN_BELEG               101
+#define SN_BLINDNESS            35
+#define SN_DISARMED             53
+#define SN_DRAGONKIND           87
+#define SN_EMPTY                46
+#define SN_EXPLOSION_DEVICE     50
+#define SN_GAS_TRAP             49
+#define SN_LOCKED               47
+#define SN_MULTIPLE_TRAPS       52
+#define SN_POISON_NEEDLE        48
+#define SN_PROTECTION           39
+#define SN_SUMMONING_RUNES      51
+#define SN_TIMIDNESS            36
+#define SN_UNLOCKED             54
+
+	/* Number of entries */
 #define SN_ARRAY_SIZE          180 /* must be at end of this list */
 
 
