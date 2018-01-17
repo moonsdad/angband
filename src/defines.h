@@ -425,7 +425,7 @@
 #define PY_MANA         0x80000000L
 
 
-/* definitions for creatures, cmove field */
+/* definitions for creatures, cflags1 field */
 #define CM_ALL_MV_FLAGS 0x0000001FL
 #define CM_ATTACK_ONLY  0x00000001L
 #define CM_MOVE_NORMAL  0x00000002L

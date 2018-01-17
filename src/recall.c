@@ -222,8 +222,8 @@ int bool_roff_recall(int r_idx)
 
     l_ptr = &l_list[r_idx];
 
-    if (l_ptr->r_cmove || l_ptr->r_cdefense ||
-	l_ptr->r_spells || l_ptr->r_spells2 || l_ptr->r_spells3 ||
+    if (l_ptr->r_cflags1 || l_ptr->r_cflags2 ||
+	l_ptr->r_spells1 || l_ptr->r_spells2 || l_ptr->r_spells3 ||
 	l_ptr->r_kills || l_ptr->r_deaths) {
 	return TRUE;
     }
@@ -252,8 +252,8 @@ int roff_recall(int r_idx)
     u16b                  *pu;
 
     int                 mspeed;
-    u32b              rcdefense;
-    u32b              rcmove, rspells, rspells2, rspells3;
+    u32b              rcflags2;
+    u32b              rcflags1, rspells, rspells2, rspells3;
     int                 breath = FALSE, magic = FALSE;
     char			sex;
 
@@ -278,16 +278,16 @@ int roff_recall(int r_idx)
 	l_ptr->r_wake = l_ptr->r_ignore = MAX_UCHAR;
 
 	/* Count the total possible treasures */
-	j = (((r_ptr->cmove & CM_4D2_OBJ) != 0) * 8) +
-			 (((r_ptr->cmove & CM_2D2_OBJ) != 0) * 4) +
-			 (((r_ptr->cmove & CM_1D2_OBJ) != 0) * 2) +
-			 ((r_ptr->cmove & CM_90_RANDOM) != 0) +
-			 ((r_ptr->cmove & CM_60_RANDOM) != 0);
+	j = (((r_ptr->cflags1 & CM_4D2_OBJ) != 0) * 8) +
+			 (((r_ptr->cflags1 & CM_2D2_OBJ) != 0) * 4) +
+			 (((r_ptr->cflags1 & CM_1D2_OBJ) != 0) * 2) +
+			 ((r_ptr->cflags1 & CM_90_RANDOM) != 0) +
+			 ((r_ptr->cflags1 & CM_60_RANDOM) != 0);
 
 	/* Full "flag" knowledge */
-	l_ptr->r_cmove = (r_ptr->cmove & ~CM_TREASURE) | (j << CM_TR_SHIFT);
-	l_ptr->r_cdefense = r_ptr->cdefense;
-	l_ptr->r_spells = r_ptr->spells | CS_FREQ;
+	l_ptr->r_cflags1 = (r_ptr->cmove & ~CM_TREASURE) | (j << CM_TR_SHIFT);
+	l_ptr->r_cflags2 = r_ptr->cdefense;
+	l_ptr->r_spells1 = r_ptr->spells | CS_FREQ;
 	l_ptr->r_spells2 = r_ptr->spells2;
 	l_ptr->r_spells3 = r_ptr->spells3;
 
@@ -305,14 +305,14 @@ int roff_recall(int r_idx)
     roffp = roffbuf;
 
     /* Load the various flags */
-    rspells = l_ptr->r_spells & r_ptr->spells & ~CS_FREQ;
+    rspells = l_ptr->r_spells1 & r_ptr->spells & ~CS_FREQ;
     rspells2 = l_ptr->r_spells2 & r_ptr->spells2;
     rspells3 = l_ptr->r_spells3 & r_ptr->spells3;
 
     /* the CM_WIN property is always known, set it if a win monster */
-    rcmove = l_ptr->r_cmove | (CM_WIN & r_ptr->cmove);
-    rcdefense = l_ptr->r_cdefense & r_ptr->cdefense;
-    if ((r_ptr->cdefense & MF2_UNIQUE) || (sex == 'p'))
+    rcflags1 = l_ptr->r_cmove | (CM_WIN & r_ptr->cmove);
+    rcflags2 = l_ptr->r_cdefense & r_ptr->cdefense;
+    if ((r_ptr->cflags2 & MF2_UNIQUE) || (sex == 'p'))
 	(void)sprintf(temp, "%s:\n", r_ptr->name);
     else
 	(void)sprintf(temp, "The %s:\n", r_ptr->name);
@@ -323,7 +323,7 @@ int roff_recall(int r_idx)
 	/* changed to act better for unique monsters -CFT */
 
     /* Treat unique differently... -CFT */
-    if (r_ptr->cdefense & MF2_UNIQUE) {
+    if (r_ptr->cflags2 & MF2_UNIQUE) {
 
 	/* We've been killed... */
 	if (l_ptr->r_deaths) {
@@ -431,7 +431,7 @@ int roff_recall(int r_idx)
     mspeed = r_ptr->speed - 10;
 
     /* Describe movement, if any observed */
-    if ((rcmove & CM_ALL_MV_FLAGS) || (rcmove & CM1_RANDOM_MOVE)) {
+    if ((rcflags1 & CM_ALL_MV_FLAGS) || (rcmove & CM1_RANDOM_MOVE)) {
 	if (k) {
 	    roff(", and ");
 	}
@@ -441,15 +441,15 @@ int roff_recall(int r_idx)
 	    k = TRUE;
 	}
 	roff((sex == 'p' ? " move" : " moves"));
-	if (rcmove & CM1_RANDOM_MOVE) {
-	    roff(desc_howmuch[(rcmove & CM1_RANDOM_MOVE) >> 3]);
+	if (rcflags1 & CM1_RANDOM_MOVE) {
+	    roff(desc_howmuch[(rcflags1 & CM1_RANDOM_MOVE) >> 3]);
 	    roff(" erratically");
 	}
 	if (mspeed == 1) {
 	    roff(" at normal speed");
 	}
 	else {
-	    if (rcmove & CM1_RANDOM_MOVE) {
+	    if (rcflags1 & CM1_RANDOM_MOVE) {
 		roff(", and");
 	    }
 	    if (mspeed <= 0) {
@@ -466,7 +466,7 @@ int roff_recall(int r_idx)
     }
 
     /* The code above includes "attack speed" */
-    if (rcmove & CM_ATTACK_ONLY) {
+    if (rcflags1 & CM_ATTACK_ONLY) {
 	if (k) {
 	    roff(", but ");
 	}
@@ -488,7 +488,7 @@ int roff_recall(int r_idx)
     /* (evil, undead, monsterous).  The quality of being a dragon is obvious. */
     if (l_ptr->r_kills) {
 
-	if (r_ptr->cdefense & MF2_UNIQUE) {
+	if (r_ptr->cflags2 & MF2_UNIQUE) {
 	    roff("Killing this");
 	}
 	else {
@@ -496,18 +496,18 @@ int roff_recall(int r_idx)
 	}
 
 	/* Describe the "quality" */
-	if (r_ptr->cdefense & MF2_ANIMAL) roff(" natural");
-	if (r_ptr->cdefense & EVIL) roff(" evil");
-	if (r_ptr->cdefense & UNDEAD) roff(" undead");
+	if (r_ptr->cflags2 & MF2_ANIMAL) roff(" natural");
+	if (r_ptr->cflags2 & EVIL) roff(" evil");
+	if (r_ptr->cflags2 & UNDEAD) roff(" undead");
 
 	/* XXX Plural "specials" will yield stupid message */
 
 	roff(" ");
-	if (r_ptr->cdefense & MF2_GIANT) roff("giant");
-	else if (r_ptr->cdefense & ORC) roff("orc");
-	else if (r_ptr->cdefense & DRAGON) roff("dragon");
-	else if (r_ptr->cdefense & DEMON) roff("demon");
-	else if (r_ptr->cdefense & MF2_TROLL) roff("troll");
+	if (r_ptr->cflags2 & MF2_GIANT) roff("giant");
+	else if (r_ptr->cflags2 & ORC) roff("orc");
+	else if (r_ptr->cflags2 & DRAGON) roff("dragon");
+	else if (r_ptr->cflags2 & DEMON) roff("demon");
+	else if (r_ptr->cflags2 & MF2_TROLL) roff("troll");
 	else roff((sex == 'p' ? "creatures" : "creature"));
 
 	/* calculate the integer exp part */
@@ -545,7 +545,7 @@ int roff_recall(int r_idx)
 
 
     /* Note that "group" flag should be obvious */
-    if (r_ptr->cdefense & MF2_GROUP) {
+    if (r_ptr->cflags2 & MF2_GROUP) {
 	sprintf(temp, "%s usually appears in groups.  ",
 		(sex == 'm' ? "He" : sex == 'f' ? "She" : sex == 'p' ? "They" : "It"));
 	roff(temp);
@@ -657,7 +657,7 @@ int roff_recall(int r_idx)
 		    roff((sex == 'm' ? "He is" : sex == 'f' ? "She is" :
 			  sex == 'p' ? "They are" : "It is"));
 		}
-		if (l_ptr->r_cdefense & MF2_INTELLIGENT) {
+		if (l_ptr->r_cflags2 & MF2_INTELLIGENT) {
 		    roff(" magical, casting spells intelligently which ");
 		}
 		else {
@@ -735,7 +735,7 @@ int roff_recall(int r_idx)
 	/* XXX Could offset by level (?) */
 
 	/* Describe the spell frequency */
-	if ((l_ptr->r_spells & CS_FREQ) > 5) {	/* Could offset by level */
+	if ((l_ptr->r_spells1 & CS_FREQ) > 5) {	/* Could offset by level */
 	    (void)sprintf(temp, "; 1 time in %lu", r_ptr->spells & CS_FREQ);
 	    roff(temp);
 	}
@@ -748,7 +748,7 @@ int roff_recall(int r_idx)
     /* Do we know how hard they are to kill? Armor class, hit die. */
     /* hasten learning of uniques -CFT */
     if (knowarmor(r_ptr->level, l_ptr->r_kills) ||
-	((r_ptr->cdefense & MF2_UNIQUE) &&
+	((r_ptr->cflags2 & MF2_UNIQUE) &&
 	 knowuniqarmor(r_ptr->level, l_ptr->r_kills))) {
 
 	(void)sprintf(temp, "%s an armor rating of %d",
@@ -757,13 +757,13 @@ int roff_recall(int r_idx)
 		      r_ptr->ac);
 	roff(temp);
 	(void)sprintf(temp, " and a%s life rating of %dd%d.  ",
-		      ((r_ptr->cdefense & MF2_MAX_HP) ? " maximized" : ""),
+		      ((r_ptr->cflags2 & MF2_MAX_HP) ? " maximized" : ""),
 		      r_ptr->hd[0], r_ptr->hd[1]);
 	roff(temp);
     }
 
     /* I wonder why this wasn't here before? -CFT */
-    if (rcdefense & MF2_BREAK_WALL) {  /* I wonder why this wasn't here before? -CFT */
+    if (rcflags2 & MF2_BREAK_WALL) {  /* I wonder why this wasn't here before? -CFT */
 	roff((sex == 'm' ? "He can bore through rock" :
 	      sex == 'f' ? "She can bore through rock" :
 	      sex == 'p' ? "They can bore through rock" :
@@ -773,7 +773,7 @@ int roff_recall(int r_idx)
 
     /* Do we know how clever they are? Special abilities. */
     k = TRUE;
-    j = rcmove;
+    j = rcflags1;
 
     for (i = 0; j & CM_SPECIAL; i++) {
 	if (j & (CM_INVISIBLE << i)) {
@@ -796,9 +796,9 @@ int roff_recall(int r_idx)
 	roff(".  ");
     }
 
-    /* Do we know its special weaknesses? Most cdefense flags. */
+    /* Do we know its special weaknesses? Most cflags2 flags. */
     k = TRUE;
-    j = rcdefense;
+    j = rcflags2;
 
     if (j & MF2_HURT_LITE) {
 	if (k) {
@@ -829,7 +829,7 @@ int roff_recall(int r_idx)
 	roff(".  ");
     }
 
-    /* Do we know its special weaknesses? Most cdefense flags. */
+    /* Do we know its special weaknesses? Most cflags2 flags. */
     k = TRUE;
 
     /* Mega-Hack */
@@ -856,14 +856,14 @@ int roff_recall(int r_idx)
 	roff(".  ");
     }
 
-    if (rcdefense & MF2_NO_INFRA) {
+    if (rcflags2 & MF2_NO_INFRA) {
 	roff((sex == 'm' ? "He is cold blooded" :
 	      sex == 'f' ? "She is cold blooded" :
 	      sex == 'p' ? "They are cold blooded" :
 	      "It is cold blooded"));
     }
-    if (rcdefense & MF2_CHARM_SLEEP) {
-	if (rcdefense & MF2_NO_INFRA) {
+    if (rcflags2 & MF2_CHARM_SLEEP) {
+	if (rcflags2 & MF2_NO_INFRA) {
 	    roff(", and");
 	}
 	else {
@@ -872,7 +872,7 @@ int roff_recall(int r_idx)
 	}
 	roff(" cannot be charmed or slept");
     }
-    if (rcdefense & (MF2_CHARM_SLEEP | MF2_NO_INFRA)) {
+    if (rcflags2 & (MF2_CHARM_SLEEP | MF2_NO_INFRA)) {
 	roff(".  ");
     }
 
@@ -926,9 +926,9 @@ int roff_recall(int r_idx)
 
 
     /* Do we know what it might carry? */
-    if (rcmove & (CM_CARRY_OBJ | CM_CARRY_GOLD)) {
+    if (rcflags1 & (CM_CARRY_OBJ | CM_CARRY_GOLD)) {
 
-	j = (rcmove & CM_TREASURE) >> CM_TR_SHIFT;
+	j = (rcflags1 & CM_TREASURE) >> CM_TR_SHIFT;
 
 	roff((sex == 'm' ? "He may" : sex == 'f' ? "She may" :
 	      sex == 'p' ? "They may" : "It may"));
@@ -936,7 +936,7 @@ int roff_recall(int r_idx)
 
 	/* Only one treasure observed */
 	if (j == 1) {
-	    if ((r_ptr->cmove & CM_TREASURE) == CM_60_RANDOM) {
+	    if ((r_ptr->cflags1 & CM_TREASURE) == CM_60_RANDOM) {
 		roff(" sometimes");
 	    }
 	    else {
@@ -946,7 +946,7 @@ int roff_recall(int r_idx)
 
 	/* Only two treasures observed */
 	else if ((j == 2) &&
-		 ((r_ptr->cmove & CM_TREASURE) ==
+		 ((r_ptr->cflags1 & CM_TREASURE) ==
 		  (CM_60_RANDOM | CM_90_RANDOM))) {
 	    roff(" often");
 	}
@@ -955,9 +955,9 @@ int roff_recall(int r_idx)
 	roff(" carry");
 
 
-	if (r_ptr->cdefense & SPECIAL) /* it'll tell you who has better treasure -CFT */
+	if (r_ptr->cflags2 & SPECIAL) /* it'll tell you who has better treasure -CFT */
 	    p = (j==1?"n exceptional object":" exceptional objects");
-	else if (r_ptr->cdefense & MF2_GOOD)
+	else if (r_ptr->cflags2 & MF2_GOOD)
 	    p = (j==1?" good object":" good objects");
 	else
 	    p = (j==1?"n object":" objects");
@@ -974,9 +974,9 @@ int roff_recall(int r_idx)
 	    roff(temp);
 	}
 
-	if (rcmove & CM_CARRY_OBJ) {
+	if (rcflags1 & CM_CARRY_OBJ) {
 	    roff(p);
-	    if (rcmove & CM_CARRY_GOLD) {
+	    if (rcflags1 & CM_CARRY_GOLD) {
 		roff(" or treasure");
 		if (j > 1) roff("s");
 	    }
@@ -1047,7 +1047,7 @@ int roff_recall(int r_idx)
 
 		/* Hack -- do we KNOW the damage? */
 		if (knowdamage(r_ptr->level, l_ptr->r_attacks[i], (int)d1 * (int)d2) ||
-		    ((r_ptr->cdefense & MF2_UNIQUE) &&	/* learn uniques faster -CFT */
+		    ((r_ptr->cflags2 & MF2_UNIQUE) &&	/* learn uniques faster -CFT */
 		     knowuniqdamage(r_ptr->level, l_ptr->r_attacks[i], (int)d1 * (int)d2))) {
 
 		    /* Hack -- Loss of experience */
@@ -1092,7 +1092,7 @@ int roff_recall(int r_idx)
 
 
     /* XXX Hack -- Always know the win creature. */
-    if (r_ptr->cmove & CM_WIN) {
+    if (r_ptr->cflags1 & CM_WIN) {
 	roff("  Killing him wins the game!");
     }
 

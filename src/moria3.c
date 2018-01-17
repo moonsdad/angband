@@ -96,14 +96,14 @@ static cptr look_mon_desc(int mnum)
     byte         living;
     s32b         thp, tmax, perc;
 
-    living = !((r_list[m_ptr->mptr].cdefense & (UNDEAD|DEMON)) ||
+    living = !((r_list[m_ptr->mptr].cflags2 & (UNDEAD|DEMON)) ||
 	       ((r_list[m_ptr->mptr].cchar == 'E') ||
 		(r_list[m_ptr->mptr].cchar == 'g') ||
 		(r_list[m_ptr->mptr].cchar == 'v') ||
 		(r_list[m_ptr->mptr].cchar == 'X')));
     
     if (m_ptr->maxhp == 0) {	   /* then we're just going to fix it! -CFT */
-	if ((r_list[m_ptr->mptr].cdefense & MF2_MAX_HP) || be_nasty)
+	if ((r_list[m_ptr->mptr].cflags2 & MF2_MAX_HP) || be_nasty)
 	    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
 	else
 	    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
@@ -187,7 +187,7 @@ static int look_see(int x, int y, int *transparent)
 
 	j = m_list[c_ptr->cptr].mptr;
 
-	if (r_list[j].cdefense & MF2_UNIQUE) {
+	if (r_list[j].cflags2 & MF2_UNIQUE) {
 
 	    /* Describe */
 	    (void)sprintf(out_val, "%s %s (%s).  [(r)ecall]",
@@ -619,7 +619,7 @@ void do_cmd_open()
 	     || i_list[c_ptr->tptr].tval == TV_CHEST)) {
 	    m_ptr = &m_list[c_ptr->cptr];
 	    if (m_ptr->ml) {
-		if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
+		if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
 		    (void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 		else
 		    (void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
@@ -769,7 +769,7 @@ void do_cmd_close()
 		else {
 		    m_ptr = &m_list[c_ptr->cptr];
 		    if (m_ptr->ml) {
-			if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
+			if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
 			    (void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 			else
 			    (void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
@@ -914,7 +914,7 @@ void tunnel(int dir)
     if (c_ptr->cptr > 1) {
 	m_ptr = &m_list[c_ptr->cptr];
 	if (m_ptr->ml) {
-	    if (r_list[m_ptr->mptr].cdefense & MF2_UNIQUE)
+	    if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
 		(void)sprintf(m_name, "%s", r_list[m_ptr->mptr].name);
 	    else
 		(void)sprintf(m_name, "The %s", r_list[m_ptr->mptr].name);
@@ -1452,7 +1452,7 @@ void do_cmd_fire()
 					   "The %s finds a mark.", tmp_str);
 				    visible = FALSE;
 				} else {
-				    if (r_list[i].cdefense & MF2_UNIQUE)
+				    if (r_list[i].cflags2 & MF2_UNIQUE)
 					(void)sprintf(out_val, "The %s hits %s.",
 						   tmp_str, r_list[i].name);
 				    else
@@ -1475,7 +1475,7 @@ void do_cmd_fire()
 				    char                buf[100];
 				    char                cdesc[100];
 				    if (visible) {
-					if (r_list[i].cdefense & MF2_UNIQUE)
+					if (r_list[i].cflags2 & MF2_UNIQUE)
 					    sprintf(cdesc, "%s", r_list[m_ptr->mptr].name);
 					else
 					    sprintf(cdesc, "The %s", r_list[m_ptr->mptr].name);
@@ -1490,7 +1490,7 @@ void do_cmd_fire()
 				    if (!visible)
 					msg_print("You have killed something!");
 				    else {
-					if (r_list[i].cdefense & MF2_UNIQUE)
+					if (r_list[i].cflags2 & MF2_UNIQUE)
 					    (void)sprintf(out_val, "You have killed %s.",
 							  r_list[i].name);
 					else
@@ -1972,7 +1972,7 @@ void do_cmd_check_uniques()
     prt("Uniques:", i++, j + 5);
 
     for (k = 0; k < (MAX_R_IDX - 1); k++) {
-	if ((strlen(r_list[k].name) > 0) && (r_list[k].cdefense & MF2_UNIQUE)) {
+	if ((strlen(r_list[k].name) > 0) && (r_list[k].cflags2 & MF2_UNIQUE)) {
 	    if (wizard) {
 		sprintf(msg, "%s is %s.", r_list[k].name,
 			(u_list[k].dead) ? "dead" : "alive");            

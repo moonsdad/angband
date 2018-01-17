@@ -2095,107 +2095,107 @@ int tot_dam(inven_type *i_ptr, int tdam, int monster)
 	m_ptr = &r_list[monster];
 	r_ptr = &l_list[monster];
     /* Mjollnir? :-> */
-	if (!(m_ptr->cdefense & MF2_IM_ELEC) && (i_ptr->flags2 & TR_LIGHTNING)) {
+	if (!(m_ptr->cflags2 & MF2_IM_ELEC) && (i_ptr->flags2 & TR_LIGHTNING)) {
 	    tdam *= 5;
 	}
 
 	/* Execute Dragon */
-	else if ((m_ptr->cdefense & DRAGON) &&
+	else if ((m_ptr->cflags2 & DRAGON) &&
 	    (i_ptr->flags & TR1_KILL_DRAGON)) {
 
 	    tdam *= 5;
-	    r_ptr->r_cdefense |= DRAGON;
+	    r_ptr->r_cflags2 |= DRAGON;
 	}
 
 	/* Slay Dragon  */
-	else if ((m_ptr->cdefense & DRAGON) &&
+	else if ((m_ptr->cflags2 & DRAGON) &&
 	    (i_ptr->flags & TR1_SLAY_DRAGON)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= DRAGON;
+	    r_ptr->r_cflags2 |= DRAGON;
 	}
 
 	/* Slay Undead */
-	else if ((m_ptr->cdefense & UNDEAD) &&
+	else if ((m_ptr->cflags2 & UNDEAD) &&
 	    (i_ptr->flags & TR1_SLAY_UNDEAD)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= UNDEAD;
+	    r_ptr->r_cflags2 |= UNDEAD;
 	}
 
 	/* Slay Orc */
-	else if ((m_ptr->cdefense & ORC) &&
+	else if ((m_ptr->cflags2 & ORC) &&
 	    (i_ptr->flags2 & TR1_SLAY_ORC)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= ORC;
+	    r_ptr->r_cflags2 |= ORC;
 	}
 
 	/* Slay MF2_TROLL */
-	else if ((m_ptr->cdefense & MF2_TROLL) &&
+	else if ((m_ptr->cflags2 & MF2_TROLL) &&
 	    (i_ptr->flags2 & TR1_SLAY_TROLL)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= MF2_TROLL;
+	    r_ptr->r_cflags2 |= MF2_TROLL;
 	}
 
 	/* Slay Giant */
-	else if ((m_ptr->cdefense & MF2_GIANT) &&
+	else if ((m_ptr->cflags2 & MF2_GIANT) &&
 	    (i_ptr->flags2 & TR1_SLAY_GIANT)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= MF2_GIANT;
+	    r_ptr->r_cflags2 |= MF2_GIANT;
 	}
 
 	/* Slay Demon */
-	else if ((m_ptr->cdefense & DEMON) &&
+	else if ((m_ptr->cflags2 & DEMON) &&
 	    (i_ptr->flags2 & TR1_SLAY_DEMON)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cdefense |= DEMON;
+	    r_ptr->r_cflags2 |= DEMON;
 	}
 
 	/* Frost */
-	else if ((!(m_ptr->cdefense & MF2_IM_COLD))
+	else if ((!(m_ptr->cflags2 & MF2_IM_COLD))
 		 && (i_ptr->flags & TR1_BRAND_COLD)) {
 	    tdam *= 3;
 	}
 
 	/* Fire	 */
-	else if ((!(m_ptr->cdefense & MF2_IM_FIRE))
+	else if ((!(m_ptr->cflags2 & MF2_IM_FIRE))
 		 && (i_ptr->flags & TR1_BRAND_FIRE)) {
 	    tdam *= 3;
 	}
 
 	/* Slay Evil */
-	else if ((m_ptr->cdefense & EVIL) && (i_ptr->flags & TR1_SLAY_EVIL)) {
+	else if ((m_ptr->cflags2 & EVIL) && (i_ptr->flags & TR1_SLAY_EVIL)) {
 	    tdam *= 2;
-	    r_ptr->r_cdefense |= EVIL;
+	    r_ptr->r_cflags2 |= EVIL;
 	}
 
 	/* Slay Animal */
-	else if ((m_ptr->cdefense & MF2_ANIMAL) && (i_ptr->flags & TR1_SLAY_ANIMAL)) {
+	else if ((m_ptr->cflags2 & MF2_ANIMAL) && (i_ptr->flags & TR1_SLAY_ANIMAL)) {
 	    tdam *= 2;
-	    r_ptr->r_cdefense |= MF2_ANIMAL;
+	    r_ptr->r_cflags2 |= MF2_ANIMAL;
 	}
 
 				/* let's do the resistances */
-	if (((m_ptr->cdefense & MF2_IM_COLD)) && (i_ptr->flags & TR1_BRAND_COLD)) {
-	    r_ptr->r_cdefense |= MF2_IM_COLD;
+	if (((m_ptr->cflags2 & MF2_IM_COLD)) && (i_ptr->flags & TR1_BRAND_COLD)) {
+	    r_ptr->r_cflags2 |= MF2_IM_COLD;
 	    tdam = (tdam * 3) / 4;
 	    reduced = TRUE;
 	}
 
-	if (((m_ptr->cdefense & MF2_IM_FIRE)) && (i_ptr->flags & TR1_BRAND_FIRE)) {
-	    r_ptr->r_cdefense |= MF2_IM_FIRE;
+	if (((m_ptr->cflags2 & MF2_IM_FIRE)) && (i_ptr->flags & TR1_BRAND_FIRE)) {
+	    r_ptr->r_cflags2 |= MF2_IM_FIRE;
 	    if (!reduced) {
 		tdam = (tdam * 3) / 4;
 		reduced = TRUE;
 	    }
 	}
 
-	if (((m_ptr->cdefense & MF2_IM_ELEC)) && (i_ptr->flags2 & TR_LIGHTNING)) {
-	    r_ptr->r_cdefense |= MF2_IM_ELEC;
+	if (((m_ptr->cflags2 & MF2_IM_ELEC)) && (i_ptr->flags2 & TR_LIGHTNING)) {
+	    r_ptr->r_cflags2 |= MF2_IM_ELEC;
 	    if (!reduced) {
 		tdam = (tdam * 3) / 4;
 		reduced = TRUE;

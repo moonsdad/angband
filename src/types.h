@@ -93,8 +93,8 @@ struct _monster_race {
 
   u16b damage[4];		/* Type attack and damage	*/
 
-  u32b cmove;		/* Bit field		*/
-  u32b cdefense;		/* Bit field		*/
+  u32b cflags1;		/* Bit field		*/
+  u32b cflags2;		/* Bit field		*/
 
   u32b spells;		/* Creature spells		*/
   u32b spells2;		/* More creature spells		*/
@@ -115,15 +115,15 @@ typedef struct _monster_lore monster_lore;
 
 struct _monster_lore {
 
-    u32b r_cmove;
-    u32b r_spells;
+    u32b r_cflags1;
+    u32b r_spells1;
     u32b r_spells2;
     u32b r_spells3;
 
     u16b r_kills;		/* Count player killing monster */
     u16b r_deaths;		/* Count monster killing player */
 
-    u32b r_cdefense;
+    u32b r_cflags2;
     byte r_attacks[MAX_MON_NATTACK];
 
     byte r_wake;		/* Number of times woken up (?) */

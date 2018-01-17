@@ -167,7 +167,7 @@ static void regen_monsters(void)
 
 	if (m_ptr->hp >= 0) {
 	    if (m_ptr->maxhp == 0) {	/* then we're just going to fix it!  -CFT */
-		if ((r_list[m_ptr->mptr].cdefense & MF2_MAX_HP) || be_nasty)
+		if ((r_list[m_ptr->mptr].cflags2 & MF2_MAX_HP) || be_nasty)
 		    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
 		else
 		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);

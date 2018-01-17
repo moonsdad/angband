@@ -402,8 +402,8 @@ void lite_room(int y1, int x1)
 /* Monsters that are intelligent wake up all the time; non-MINDLESS monsters wake
  * up 1/3 the time, and MINDLESS monsters wake up 1/10 the time -CWS
  */
-	if ((r_list[m_ptr->mptr].cdefense & MF2_INTELLIGENT) ||
-	    (!(r_list[m_ptr->mptr].cdefense & MF2_MINDLESS) && (randint(3) == 1)) ||
+	if ((r_list[m_ptr->mptr].cflags2 & MF2_INTELLIGENT) ||
+	    (!(r_list[m_ptr->mptr].cflags2 & MF2_MINDLESS) && (randint(3) == 1)) ||
 	    (randint(10) == 1))
 	    m_ptr->csleep = 0;
 

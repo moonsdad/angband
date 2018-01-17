@@ -34,7 +34,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     *x = m_ptr->fx; 
     r_ptr = &r_list[m_ptr->mptr];
     if (m_ptr->ml){
-	if (r_ptr->cdefense & MF2_UNIQUE)
+	if (r_ptr->cflags2 & MF2_UNIQUE)
 	    sprintf(cdesc, "%s ", r_ptr->name);
 	else
 	    sprintf(cdesc, "The %s ", r_ptr->name);
@@ -47,51 +47,51 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
       case GF_MAGIC_MISSILE:	/* pure damage, no resist possible */
 	break;
       case GF_ELEC:
-	if (r_ptr->cdefense & MF2_IM_ELEC) {
+	if (r_ptr->cflags2 & MF2_IM_ELEC) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ELEC;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_ELEC;
         }
 	break;
       case GF_POIS:
-	if (r_ptr->cdefense & MF2_IM_POIS) {
+	if (r_ptr->cflags2 & MF2_IM_POIS) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_POIS;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_POIS;
         }
 	break;
       case GF_ACID:
-	if (r_ptr->cdefense & MF2_IM_ACID) {
+	if (r_ptr->cflags2 & MF2_IM_ACID) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_ACID;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_ACID;
         }
 	break;
       case GF_COLD:
-	if (r_ptr->cdefense & MF2_IM_COLD) {
+	if (r_ptr->cflags2 & MF2_IM_COLD) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_COLD;
         }
 	break;
       case GF_FIRE:
-	if (r_ptr->cdefense & MF2_IM_FIRE) {
+	if (r_ptr->cflags2 & MF2_IM_FIRE) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_FIRE;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_FIRE;
         }
 	break;
       case GF_HOLY_ORB:
-	if (r_ptr->cdefense & EVIL) {
+	if (r_ptr->cflags2 & EVIL) {
 	    *dam *= 2;
 	    res = SUSCEPT;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= EVIL;
+		l_list[m_ptr->mptr].r_cflags2 |= EVIL;
         }
 	break;
       case GF_ARROW:		/* for now, no defense... maybe it should have a
@@ -113,11 +113,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	break;
       case GF_NETHER:		/* I assume nether is an evil, necromantic force,
 				   so it doesn't hurt undead, and hurts evil less -CFT */
-	if (r_ptr->cdefense & UNDEAD) {
+	if (r_ptr->cflags2 & UNDEAD) {
 	    res = IMMUNE;
 	    *dam = 0;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= UNDEAD;
+		l_list[m_ptr->mptr].r_cflags2 |= UNDEAD;
         }
 	else if (r_ptr->spells2 & MS2_BR_LIFE) { /* if can breath nether, should get
 						  good resist to damage -CFT */
@@ -125,11 +125,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
 	}
-	else if (r_ptr->cdefense & EVIL) {
+	else if (r_ptr->cflags2 & EVIL) {
 	    *dam /= 2;	/* evil takes *2 for holy, so /2 for this... -CFT */
 	    res = SOME_RES;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= EVIL;
+		l_list[m_ptr->mptr].r_cflags2 |= EVIL;
         }
 	break;
       case GF_WATER:	/* water elementals should resist.  anyone else? -CFT */
@@ -147,7 +147,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	if ((*dam <= m_ptr->hp) && /* don't bother if it's gonna die */
 	    !(r_ptr->spells2 & MS2_BR_CHAO) &&
-	    !(r_ptr->cdefense & MF2_UNIQUE) &&
+	    !(r_ptr->cflags2 & MF2_UNIQUE) &&
 	    (randint(90) > r_ptr->level)) { /* then we'll polymorph it -CFT */
 	    res = CHANGED;
 	    if (poly(cave[*y][*x].cptr))
@@ -155,7 +155,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 			     makes things easier to handle */
 	} /* end of choas-poly.  If was poly-ed don't bother confuse... it's
 	     too hectic to keep track of... -CFT */
-	else if (!(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+	else if (!(r_ptr->cflags2 & MF2_CHARM_SLEEP) &&
 		 !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
 		 !(r_ptr->spells2 & MS2_BR_CONF)){   /* so are bronze dragons */
 	    if (m_ptr->confused > 0) { 
@@ -205,12 +205,12 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & MF2_CHARM_SLEEP){
+	else if (r_ptr->cflags2 & MF2_CHARM_SLEEP){
 	    res = SOME_RES;
 	    *dam /= 2; /* only some resist, but they also avoid confuse -CFT */
         }
 	if ((*dam <= m_ptr->hp) && /* don't bother if it's dead */
-	    !(r_ptr->cdefense & MF2_CHARM_SLEEP) &&
+	    !(r_ptr->cflags2 & MF2_CHARM_SLEEP) &&
 	    !(r_ptr->spells2 & MS2_BR_CHAO) && /* choatics hard to confuse */
 	    !(r_ptr->spells2 & MS2_BR_CONF)) {  /* so are bronze dragons */
 	    if (m_ptr->confused > 0) { 
@@ -278,7 +278,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & MF2_HURT_LITE){
+	else if (r_ptr->cflags2 & MF2_HURT_LITE){
 	    res = SUSCEPT;
 	    *dam *= 2; /* hurt bad by light */
         }
@@ -293,7 +293,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 2;
 	    *dam /= (randint(6)+6);
         }
-	else if (r_ptr->cdefense & MF2_HURT_LITE){
+	else if (r_ptr->cflags2 & MF2_HURT_LITE){
 	    res = SOME_RES;
 	    *dam /= 2; /* hurt bad by light, so not hurt bad by dark */
         }
@@ -330,11 +330,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 			 so I could make it a different color -CFT */
 	break;
       case GF_ICE: /* ice is basically frost + cuts + stun -CFT */
-	if (r_ptr->cdefense & MF2_IM_COLD) {
+	if (r_ptr->cflags2 & MF2_IM_COLD) {
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_IM_COLD;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_COLD;
         }
 	if ((*dam <= m_ptr->hp) &&
 	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
@@ -359,9 +359,9 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     if (res == CHANGED)
 	sprintf(outval, "%schanges!",cdesc);
     else if ((*dam > m_ptr->hp) &&
-	     (by_player || !(r_list[m_ptr->mptr].cdefense & MF2_UNIQUE))) {
+	     (by_player || !(r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE))) {
 	res = DEAD;
-	if ((r_list[m_ptr->mptr].cdefense & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+	if ((r_list[m_ptr->mptr].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
 	    (r_list[m_ptr->mptr].cchar == 'E') ||
 	    (r_list[m_ptr->mptr].cchar == 'v') ||
 	    (r_list[m_ptr->mptr].cchar == 'g') ||
@@ -493,9 +493,9 @@ void mon_elec_dam(int y, int x, int dam)
 	r_ptr = &r_list[m_ptr->mptr];
 	monster_name(m_name, m_ptr, r_ptr);
 	m_ptr->csleep = 0;
-	if (MF2_HURT_LITE & r_ptr->cdefense) {
+	if (MF2_HURT_LITE & r_ptr->cflags2) {
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cdefense |= MF2_HURT_LITE;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_HURT_LITE;
 	    i = mon_take_hit((int)c_ptr->cptr, dam, FALSE);
 	    if (i >= 0) {
 		(void)sprintf(out_val, "%s shrivels away in the light!", m_name);
