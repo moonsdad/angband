@@ -156,12 +156,14 @@
 
 #define OBJ_RUINED_CHEST        (MAX_DUNGEON_OBJ+76)
 
+
 #define OBJ_RUBBLE              (MAX_DUNGEON_OBJ+54)
 #define OBJ_OPEN_DOOR           (MAX_DUNGEON_OBJ+23)
 #define OBJ_CLOSED_DOOR         (MAX_DUNGEON_OBJ+24)
 #define OBJ_SECRET_DOOR         (MAX_DUNGEON_OBJ+25)
 #define OBJ_UP_STAIR            (MAX_DUNGEON_OBJ+26)
 #define OBJ_DOWN_STAIR          (MAX_DUNGEON_OBJ+27)
+
 
 #define OBJ_STORE_DOOR          (MAX_DUNGEON_OBJ+28)
 #define OBJ_TRAP_LIST           (MAX_DUNGEON_OBJ+36)
@@ -363,8 +365,8 @@
 
 #define MIN_CAVE_WALL   12
 #define GRANITE_WALL	12	/* Granite */
-#define MAGMA_WALL	13	/* Magma */
 #define QUARTZ_WALL	14	/* Quartz */
+#define MAGMA_WALL	13	/* Magma */
 #define BOUNDARY_WALL	15	/* Permanent */
 
 /* Column for stats    */
@@ -533,10 +535,11 @@
 #define OD_KNOWN1       0x2
 
 /* id's used for item description, stored in i_ptr->ident */
+
 #define ID_MAGIK        0x1
 #define ID_DAMD         0x2
-#define ID_EMPTY        0x4
-#define ID_KNOWN2       0x8
+#define ID_EMPTY        0x4	/* Item is now "empty" */
+#define ID_KNOWN2       0x8	/* Item is fully "known" */
 #define ID_STOREBOUGHT  0x10
 #define ID_SHOW_HITDAM  0x20
 #define ID_NOSHOW_P1    0x40    /* don't show (+x) even if p1 != 0 -CWS   */
@@ -740,14 +743,14 @@
  */
 
 #define TV_NEVER        -1	/* used by find_range() for non-search */
-#define TV_NOTHING       0
+#define TV_NOTHING       0	/* Nothing */
 #define TV_MISC          1
 #define TV_SPIKE         3	/* Spikes ('~') */
 #define TV_CHEST         2	/* Chests ('~') */
 #define TV_MIN_WEAR     10	/* Min tval for "wearable" items */
 #define TV_MIN_ENCHANT  10
-#define TV_LITE        15	/* Torches, Lanterns, Specials */
-#define TV_SHOT   10	/* Ammo for slings */
+#define TV_LITE         15	/* Torches, Lanterns, Specials */
+#define TV_SHOT		10	/* Ammo for slings */
 #define TV_ARROW        12	/* Ammo for bows */
 #define TV_BOLT         11	/* Ammo for x-bows */
 #define TV_BOW          20	/* Slings/Bows/Xbows */
@@ -782,17 +785,18 @@
 #define TV_MAX_PICK_UP  100     /* This is the max TV players pick up */
 #define TV_INVIS_TRAP   101	/* Invisible traps -- see visible traps */
 #define TV_MIN_VISIBLE  102	/* This is the first "visible landmark" */
-#define TV_VIS_TRAP     102     /* Visible traps
-#define TV_RUBBLE       103
+#define TV_VIS_TRAP     102     /* Visible traps */
+#define TV_RUBBLE       103	/* Rubble pile -- treated as a "wall" */
 /* following objects are never deleted when trying to create another one
    during level generation */
+#define TV_OPEN_DOOR    104	/* Open doorway */
+#define TV_UP_STAIR     107	/* Staircase up */
+#define TV_DOWN_STAIR   108	/* Staircase down */
+#define TV_STORE_DOOR   110	/* Entrance to store */
+#define TV_SECRET_DOOR  109	/* Secret door -- treated as a "wall" */
+#define TV_CLOSED_DOOR  105	/* Closed door -- treated as a "wall" */
+
 #define TV_MIN_DOORS    104
-#define TV_OPEN_DOOR    104
-#define TV_CLOSED_DOOR  105
-#define TV_UP_STAIR     107
-#define TV_DOWN_STAIR   108
-#define TV_SECRET_DOOR  109
-#define TV_STORE_DOOR   110
 #define TV_MAX_VISIBLE  110
 
 
@@ -803,71 +807,77 @@
  */
 
 #define TR_STATS        0x0000003FL /* the stats must be the low 6 bits */
-#define TR1_STR			0x00000001L
-#define TR1_INT			0x00000002L
-#define TR1_WIS			0x00000004L
-#define TR1_DEX			0x00000008L
-#define TR1_CON			0x00000010L
-#define TR1_CHR			0x00000020L
-#define TR1_STEALTH		0x00000100L
-#define TR1_SEARCH		0x00000040L
-#define TR_SLOW_DIGEST  0x00000080L
-#define TR_AGGRAVATE    0x00000200L
-#define TR_TELEPORT     0x00000400L
-#define TR_REGEN        0x00000800L
-#define TR1_SPEED        0x00001000L
-#define TR_EGO_WEAPON   0x0007E000L
+#define TR1_STR			0x00000001L	/* Uses "pval" */
+#define TR1_INT			0x00000002L	/* Uses "pval" */
+#define TR1_WIS			0x00000004L	/* Uses "pval" */
+#define TR1_DEX			0x00000008L	/* Uses "pval" */
+#define TR1_CON			0x00000010L	/* Uses "pval" */
+#define TR1_CHR			0x00000020L	/* Uses "pval" */
+#define TR1_STEALTH		0x00000100L	/* Uses "pval" */
+#define TR1_SEARCH		0x00000040L	/* Uses "pval" */
+#define TR_INFRA		0x40000000L
+#define TR_TUNNEL		0x20000000L
+#define TR1_SPEED		0x00001000L
+#define TR_ATTACK_SPD		0x08000000L	/* extra attacks/round -DGK */
 #define TR1_SLAY_ANIMAL		0x00004000L
 #define TR1_SLAY_EVIL		0x00008000L
-#define TR1_SLAY_UNDEAD  0x00010000L
-#define TR1_SLAY_DRAGON  0x00002000L
-#define TR1_KILL_DRAGON        0x08000000L
-#define TR1_BRAND_FIRE 0x00040000L
-#define TR1_BRAND_COLD  0x00020000L
+#define TR1_SLAY_UNDEAD		0x00010000L
+#define TR1_SLAY_DEMON		0x00000001L
+#define TR1_SLAY_ORC		0x00000010L
+#define TR1_SLAY_TROLL		0x00000002L
+#define TR1_SLAY_GIANT		0x00000004L
+#define TR1_SLAY_DRAGON		0x00002000L
+#define TR1_KILL_DRAGON		0x08000000L
+#define TR1_BRAND_FIRE		0x00040000L
+#define TR1_BRAND_COLD		0x00020000L
 
-#define TR2_RES_FIRE     0x00080000L
-#define TR2_RES_ACID     0x00100000L
-#define TR2_RES_COLD     0x00200000L
 #define TR_SUST_STAT    0x00400000L
-#define TR2_FREE_ACT     0x00800000L	/* Free Action */
-#define TR_SEE_INVIS    0x01000000L
-#define TR2_RES_LIGHT    0x02000000L
-#define TR_FFALL        0x04000000L
-#define TR_POISON       0x10000000L
-#define TR_TUNNEL       0x20000000L
-#define TR_INFRA        0x40000000L
-#define TR_CURSED       0x80000000L
-
-/* flags for flags2 */
-#define TR1_SLAY_DEMON   0x00000001L
-#define TR1_SLAY_TROLL   0x00000002L
-#define TR1_SLAY_GIANT   0x00000004L
-#define TR_HOLD_LIFE    0x00000008L
-#define TR1_SLAY_ORC     0x00000010L
-#define TR_TELEPATHY    0x00000020L
-#define TR2_IM_FIRE      0x00000040L
-#define TR2_IM_COLD      0x00000080L
-#define TR2_IM_ACID      0x00000100L
+#define TR2_IM_ACID		0x00000100L
+#define TR2_IM_FIRE		0x00000040L
+#define TR2_IM_COLD		0x00000080L
+#define TR2_IM_POIS		0x00004000L
 #define TR2_IM_LIGHT     0x00000200L
-#define TR_LIGHT        0x00000400L
-#define TR_ACTIVATE     0x00000800L
-#define TR_LIGHTNING    0x00001000L
-#define TR1_IMPACT       0x00002000L
-#define TR2_IM_POIS    0x00004000L
-#define TR2_RES_CONF     0x00008000L
-#define TR2_RES_SOUND    0x00010000L
+#define TR2_FREE_ACT		0x00800000L	/* Free Action */
+
+#define TR2_RES_ACID		0x00100000L
+#define TR2_RES_FIRE		0x00080000L
+#define TR2_RES_COLD		0x00200000L
+#define TR_POISON		0x10000000L
+#define TR2_RES_LIGHT		0x02000000L
+#define TR2_RES_DARK		0x00040000L
+
+#define TR2_RES_BLIND		0x00800000L
+#define TR2_RES_CONF		0x00008000L
+#define TR2_RES_SOUND		0x00010000L
+#define TR2_RES_SHARDS		0x00200000L
+
+#define TR2_RES_NETHER		0x01000000L
+#define TR2_RES_NEXUS		0x00400000L
+#define TR2_RES_CHAOS		0x00080000L
+#define TR2_RES_DISEN		0x00100000L
+
+
+#define TR_HOLD_LIFE    0x00000008L
+#define TR_EGO_WEAPON   0x0007E000L
+#define TR_ARTIFACT		0x02000000L	/* means "is an artifact" -CFT */
+#define TR_FFALL        0x04000000L
 #define TR2_RES_LITE       0x00020000L
-#define TR2_RES_DARK     0x00040000L
-#define TR2_RES_CHAOS    0x00080000L
-#define TR2_RES_DISEN       0x00100000L
-#define TR2_RES_SHARDS   0x00200000L
-#define TR2_RES_NEXUS    0x00400000L
-#define TR2_RES_BLIND    0x00800000L
-#define TR2_RES_NETHER   0x01000000L
-#define TR_ARTIFACT     0x02000000L /* means "is an artifact" -CFT */
-#define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/
-#define TR_ATTACK_SPD   0x08000000L /* extra attacks/round -DGK */
+#define TR_LIGHTNING    0x00001000L
+#define TR_SEE_INVIS		0x01000000L
+#define TR_TELEPATHY		0x00000020L
+#define TR_SLOW_DIGEST		0x00000080L
+#define TR_REGEN		0x00000800L
+#define TR_ACTIVATE		0x00000800L
+#define TR1_IMPACT       0x00002000L
 #define TR2_RES_FEAR     0x10000000L
+#define TR_LIGHT        0x00000400L
+#define TR_TELEPORT     0x00000400L
+#define TR_AGGRAVATE    0x00000200L
+#define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/
+#define TR_CURSED		0x80000000L
+
+
+
 /* definitions for objects that can be worn */
 
 /* Mask for chest traps (flags2) */
@@ -894,26 +904,26 @@
 #define GF_ACID         3
 #define GF_COLD         4
 #define GF_FIRE         5
-#define GF_HOLY_ORB     6
 #define GF_ARROW        7
 #define GF_PLASMA       8
-#define GF_NETHER       9
+#define GF_HOLY_ORB     6
 #define GF_WATER        10
-#define GF_CHAOS        11
+#define GF_LIGHT        19
+#define GF_DARK         20
 #define GF_SHARDS       12
 #define GF_SOUND        13
 #define GF_CONFUSION    14
-#define GF_DISENCHANT   15
-#define GF_NEXUS        16
 #define GF_FORCE        17
 #define GF_INERTIA      18
-#define GF_LIGHT        19
-#define GF_DARK         20
-#define GF_TIME         21
-#define GF_GRAVITY      22
 #define GF_MANA         23
 #define GF_METEOR       24
 #define GF_ICE          25
+#define GF_CHAOS        11
+#define GF_NETHER       9
+#define GF_DISENCHANT   15
+#define GF_NEXUS        16
+#define GF_TIME         21
+#define GF_GRAVITY      22
 
 #define WD_LT           1L
 #define WD_LT_BLTS      2L
