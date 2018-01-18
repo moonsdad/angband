@@ -1,6 +1,6 @@
 
                         ***********************
-                        **   Angband 2.6.1   **
+                        **   Angband 2.XXX   **
                         ***********************
 
         Based on Umoria: Copyright (c) 1985 Robert Alan Koeneke
@@ -9,13 +9,15 @@
         Hacked By:          Alex Cutler, Andy Astrand
         Further Hacks By:   Sean Marsh, Geoff Hill
         Bug fixes:          Geoff Hill, Charles Teague, David Kahane
-        Current Maintainer: Charles Swiger
+        Mac/X11 Ports:      Keith Randall, Ben Harrison
+        Recent Maintainer:  Charles Swiger
+        
+        Current Maintainer: Ben Harrison
+        Email Address:      benh@linc.cis.upenn.edu
 
-News:
         This is a beta version of Angband which includes a number of bug
 fixes from the net and from PC Angband 1.40.  Previous versions (2.5.x) have
 used code from UMoria 5.5, PC Angband 1.3x, and FAngband.  Consult the file
 "FIXES" in the source directory for details.
 
-Bugs:
-        Please email problems (& hopefully patches) to "cs4w+@andrew.cmu.edu".
+This version "works" on Macintosh/Unix/Linux/Curses/X11/IBM/etc.

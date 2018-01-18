@@ -164,7 +164,7 @@ void get_file_paths()
     ANGBAND_WIZ = string_make(path);
     strcpy(tail, "hours.txt");
     ANGBAND_HOURS = string_make(path);
-    strcpy(tail, "loadcheck.txt");
+    strcpy(tail, "load.txt");
     ANGBAND_LOAD = string_make(path);
     strcpy(tail, "ANGBAND.log" );
     ANGBAND_LOG =  string_make(path);

@@ -1,1 +1,15 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
+
+Rewrite of the "pathname constructor" code.
+Made it easy to add a "screen manager" for any "platform".
+Added "screen managers" for X11, Curses, and Macintosh
+Cleaned up the header files (a lot).
+Separated out some generic "non-angband" files (like random.c).
+Renamed a LOT of variables/fields to more "consistent" forms.
+Reorganized the source to make the files more "self-contained".
+
+Put "XXX" and "Hack" in the code to label areas of future work.
+
+
+
+
