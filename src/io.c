@@ -264,6 +264,30 @@ void ascii_to_text(char *buf, cptr str)
 
 
 
+
+
+
+/*
+ * Help get a keypress.
+ *
+ * Returns a single character input from the terminal.	This silently -CJS-
+ * consumes ^R to redraw the screen and reset the terminal, so that this
+ * operation can always be performed at any input prompt.  inkey() never
+ * returns ^R.	 
+ */
+static char inkey_aux(void)
+{
+    int i;
+
+    /* Wait for a new keypress from the current term */
+    i = Term_inkey();
+
+    return (i);
+}
+
+
+
+
 /*
  * Flush all input chars in the buffer -RAK-
  */
@@ -278,137 +302,57 @@ void flush(void)
 
 /*
  * Get a keypress from the user. 
- * Returns a single character input from the terminal.	This silently -CJS-
- * consumes ^R to redraw the screen and reset the terminal, so that this
- * operation can always be performed at any input prompt.  inkey() never
- * returns ^R.	 
+ *
  */
 char inkey(void)
-#ifdef MACINTOSH
-/* The Mac does not need ^R, so it just consumes it */
-/* This routine does nothing special with direction keys */
-/* Just returns their keypad ascii value (e.g. '0'-'9') */
-/* Compare with inkeydir() below */
-{
-    char ch;
-    int  dir;
-    int  shift_flag, ctrl_flag;
-
-    
-    /* Flush the output */
-    Term_fresh();
-
-    command_count = 0;
-
-    do {
-	macgetkey(&ch, FALSE);
-    } while (ch == CTRL('R'));
-
-    dir = extractdir(ch, &shift_flag, &ctrl_flag);
-    if (dir != -1)
-	ch = '0' + dir;
-
-    /* Return the keypress */
-    return (ch);
-}
-#else
 {
     int i;
+    
+    /* Flush the output */
+    Term_fresh(); /* Dump IO buffer */
 
-    Term_fresh();			   /* Dump IO buffer		 */
     command_count = 0;		   /* Just to be safe -CJS- */
-    while (TRUE) {
-#ifdef MSDOS
-	i = msdos_getch();
-#else
-	i = getch();
-#endif
 
-    /* some machines may not sign extend. */
-	if (i == EOF) {
-	    eof_flag++;
-	/*
-	 * avoid infinite loops while trying to call inkey() for a -more-
-	 * prompt. 
-	 */
-	    msg_flag = FALSE;
+    /* Get a keypress */
+    for (i = 0; !i; i = inkey_aux());
 
-	    (void)refresh();
-	    if (!character_generated || character_saved)
-		exit_game();
-	    disturb(1, 0);
-	    if (eof_flag > 100) {
-	    /* just in case, to make sure that the process eventually dies */
-		panic_save = 1;
-		(void)strcpy(died_from, "(end of input: panic saved)");
-		if (!save_player()) {
-		    (void)strcpy(died_from, "panic: unexpected eof");
-		    death = TRUE;
-		}
-		exit_game();
-	    }
-	    return ESCAPE;
-	}
-	if (i != CTRL('R'))
-	    return (char)i;
-	(void)wrefresh(curscr);
-	moriaterm();
-    }
+
+    /* Return the keypress */
+    return (i);
 }
-#endif
 
 
-#ifdef MACINTOSH
-char inkeydir()
-/* The Mac does not need ^R, so it just consumes it */
-/* This routine translates the direction keys in rogue-like mode */
-/* Compare with inkeydir() below */
+
+
+/*
+ * Get a "more" message (on the message line)
+ * Then erase the entire message line
+ * Leave the cursor on the message line.
+ */
+void msg_more(int x)
 {
-    char        ch;
-    int         dir;
-    int         shift_flag, ctrl_flag;
-    static char tab[9] = {
-	'b', 'j', 'n',
-	'h', '.', 'l',
-	'y', 'k', 'u'
-    };
-    static char shifttab[9] = {
-	'B', 'J', 'N',
-	'H', '.', 'L',
-	'Y', 'K', 'U'
-    };
-    static char ctrltab[9] = {
-	CTRL('B'), CTRL('J'), CTRL('N'),
-	CTRL('H'), '.', CTRL('L'),
-	CTRL('Y'), CTRL('K'), CTRL('U')
-    };
+    char   in_char;
 
-    Term_fresh();
-    command_count = 0;
+    /* ensure that the complete -more- message is visible. */
+    if (x > 73) x = 73;
 
+    /* Print a message */
+    put_str(" -more-", MSG_LINE, x);
+
+	/* let sigint handler know that we are waiting for a space */
+	    wait_for_more = 1;
+
+    /* Get an acceptable keypress */
     do {
-	macgetkey(&ch, FALSE);
-    } while (ch == CTRL('R'));
+		in_char = inkey();
+	} while ((in_char != ' ') && (in_char != ESCAPE)
+	&& (in_char != '\n') &&(in_char != '\r') && (!quick_messages));
+	    wait_for_more = 0;
 
-    dir = extractdir(ch, &shift_flag, &ctrl_flag);
-
-    if (dir != -1) {
-	if (!rogue_like_commands) {
-	    ch = '0' + dir;
-	} else {
-	    if (ctrl_flag)
-		ch = ctrltab[dir - 1];
-	    else if (shift_flag)
-		ch = shifttab[dir - 1];
-	    else
-		ch = tab[dir - 1];
-	}
-    }
-    return (ch);
+    /* Note -- Do *NOT* call erase_line() */
+    (void)move(MSG_LINE, 0);
+    clrtoeol();
 }
-#endif
-
-
 
 
 
@@ -419,80 +363,86 @@ char inkeydir()
  */
 void msg_print(cptr msg)
 {
-    char   in_char;
     static len = 0;
 
 
     /* Old messages need verification */
     if (msg_flag) {
 
-	if (msg && (len + strlen(msg)) > 72) {
+	/* Special case: flush */
+	if (!msg) {
 
-	/* ensure that the complete -more- message is visible. */
-	    if (len > 73) len = 73;
-	    put_str(" -more-", MSG_LINE, len);
+	    /* Wait for it... */
+	    msg_more(len);
 
-	/* let sigint handler know that we are waiting for a space */
-	    wait_for_more = 1;
-
-	    do {
-		in_char = inkey();
-	    } while ((in_char != ' ') && (in_char != ESCAPE) && (in_char != '\n') &&
-		     (in_char != '\r') && (!quick_messages));
-
+	    /* Forget it */
 	    len = 0;
-	    wait_for_more = 0;
+	    msg_flag = FALSE;
+	}
+
+	/* We must start a new line */
+	else if ((len + strlen(msg)) > 72) {
+
+	    /* Wait for it */
+	    msg_more(len);
+
+	    /* Display the new message */
+	    put_str(msg, MSG_LINE, 0);
+
+		command_count = 0;
+		last_msg++;
+		if (last_msg >= MAX_SAVE_MSG)
+		    last_msg = 0;
+		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
+		old_msg[last_msg][VTYPESIZ - 1] = '\0';
+
+	    /* Let other messages share the line */
+	    len = strlen(msg) + 1;
+	    msg_flag = TRUE;
+
+	}
+
+	/* The message fits */
+	else {
+
+	    /* Display the new message */
+	    put_str(msg, MSG_LINE, len);
+
+	    /* Let other messages share the line */
+	    len += strlen(msg) + 1;
+		command_count = 0;
+		last_msg++;
+		if (last_msg >= MAX_SAVE_MSG)
+		    last_msg = 0;
+		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
+		old_msg[last_msg][VTYPESIZ - 1] = '\0';
+	    msg_flag = TRUE;
+	    
+	}
+    }
+
+
+    /* Ignore old messages */
+    else {
+
+	/* Make the null string a special case.  -CJS- */
+	if (!msg) {
+	    /* Forget the message */
+	    len = 0;
+	    msg_flag = FALSE;
+	}
+
+	/* Display the message */
+	else {
+
+	    /* Clear the line */
 	    (void)move(MSG_LINE, 0);
 	    clrtoeol();
 
-	/* Make the null string a special case.  -CJS- */
-	    if (msg) {
-		put_str(msg, MSG_LINE, 0);
-		command_count = 0;
-		last_msg++;
-		if (last_msg >= MAX_SAVE_MSG)
-		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
-		old_msg[last_msg][VTYPESIZ - 1] = '\0';
-		len = strlen(msg) + 1;
-		msg_flag = TRUE;
-	    } else {
-		len = 0;
-		msg_flag = FALSE;
-	    }
-	} else {
-	    if (!msg) {
-		if (len > 73)
-		    len = 73;
-		put_str(" -more-", MSG_LINE, len);
-	    /* let sigint handler know that we are waiting for a space */
-		wait_for_more = 1;
-		do {
-		    in_char = inkey();
-		} while ((in_char != ' ') && (in_char != ESCAPE)
-			 && (in_char != '\n') && (in_char != '\r') && (!quick_messages));
-		wait_for_more = 0;
-		len = 0;
-		(void)move(MSG_LINE, 0);
-		clrtoeol();
-		msg_flag = FALSE;
-	    } else {
-		put_str(msg, MSG_LINE, len);
-		len += strlen(msg) + 1;
-		command_count = 0;
-		last_msg++;
-		if (last_msg >= MAX_SAVE_MSG)
-		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
-		old_msg[last_msg][VTYPESIZ - 1] = '\0';
-		msg_flag = TRUE;
-	    }
-	}
-    } else {
-	(void)move(MSG_LINE, 0);
-	clrtoeol();
-	if (msg) {
+	    /* Display it */
 	    put_str(msg, MSG_LINE, 0);
+
+	    /* Let other messages share the line */
 	    command_count = 0;
 	    len = strlen(msg) + 1;
 	    last_msg++;
@@ -501,9 +451,6 @@ void msg_print(cptr msg)
 	    (void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
 	    old_msg[last_msg][VTYPESIZ - 1] = '\0';
 	    msg_flag = TRUE;
-	} else {
-	    msg_flag = FALSE;
-	    len = 0;
 	}
     }
 }

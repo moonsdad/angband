@@ -1,11 +1,17 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
 
 Rewrite of the "pathname constructor" code.
+Added extra "options", for "color", "disturb", and others
+Wrote a true "output buffer" for I/O, no longer depends on Curses
 Made it easy to add a "screen manager" for any "platform".
 Added "screen managers" for X11, Curses, and Macintosh
+Made it easy to add a "recall window" to any "platform".
+Incorporated the "color" code from MacAngband 2.6.1
+Cleaned up the "screen layout update" code.
 Cleaned up the header files (a lot).
 Separated out some generic "non-angband" files (like random.c).
 Renamed a LOT of variables/fields to more "consistent" forms.
+Fixed a few old bugs based in misplacement of certain flags.
 Reorganized the source to make the files more "self-contained".
 
 Put "XXX" and "Hack" in the code to label areas of future work.

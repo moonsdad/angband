@@ -352,11 +352,7 @@ int get_alldir(cptr prompt, int *dir)
     char command;
 
     for (;;) {
-#ifdef MACINTOSH
-	if (!get_comdir(prompt, &command))
-#else
 	if (!get_com(prompt, &command))
-#endif
 	{
 	    free_turn_flag = TRUE;
 	    return FALSE;
@@ -410,11 +406,7 @@ int get_dir(cptr prompt, int *dir)
 	prompt = "Which direction?";
     for (;;) {
 	save = command_count;	   /* Don't end a counted command. -CJS- */
-#ifdef MACINTOSH
-	if (!get_comdir(prompt, &command))
-#else
 	if (!get_com(prompt, &command))
-#endif
 	{
 	    free_turn_flag = TRUE;
 	    return FALSE;
@@ -437,7 +429,7 @@ int get_dir(cptr prompt, int *dir)
 
 
 /* 
- * Search Mode enhancement				-RAK-
+ * Search Mode enhancement -RAK-
  */
 void search_on()
 {
@@ -751,7 +743,7 @@ static void area_affect(int dir, int y, int x)
 		inv = FALSE;
 	    }
 
-	    else inv = TRUE;		/* Square unseen. Treat as open. */
+	    else inv = TRUE; /* Square unseen. Treat as open. */
 	    if (inv || c_ptr->fval <= MAX_OPEN_SPACE) {
 
 		/* Certain somethings */
@@ -1255,7 +1247,7 @@ void find_init(int dir)
 
 
 /*
- * Switch off the run flag - and get the light correct. -CJS-
+ * Switch off the run flag. Hack -- fix the lights. -CJS-
  */
 void end_find()
 {
@@ -1273,21 +1265,4 @@ void end_find()
 
 
 
-#ifdef MACINTOSH
-/* Same as get_com(), but translates direction keys from keypad */
-int get_comdir(char *prompt, char *command)
-{
-    int res;
 
-    if (prompt)
-	prt(prompt, 0, 0);
-    *command = inkeydir();
-    if (*command == 0 || *command == ESCAPE)
-	res = FALSE;
-    else
-	res = TRUE;
-    erase_line(MSG_LINE, 0);
-    return (res);
-}
-
-#endif
