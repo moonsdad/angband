@@ -81,6 +81,30 @@
 								to reduce the tedium for handling food. -CWS */
 
 
+/*
+ * OPTION: Compile in all necessary color code.  Undefining either of
+ * these will result in a decrease in code size and an increase in
+ * execution speed.
+ */
+#define USE_COLOR		/* Include full support for color terminals */
+#define USE_MULTIHUED		/* Include full "MULTIHUED" support */
+
+
+/*
+ * OPTION: Hack -- something for Windows
+ */
+#if defined(_Windows)
+# define USE_ITSYBITSY
+#endif
+
+
+/*
+ * OPTION: Hack -- "Raybould's Amiga curses" has broken colors (?)
+ */
+#if defined(AMIGA)
+# undef USE_COLOR
+#endif
+
 
 /*
  * OPTION: Set the "default" path to the angband "lib" directory.
@@ -125,6 +149,19 @@
 #define ROGUE_LIKE TRUE
 
 
+/*
+ * OPTION: For some brain-dead computers with no command line interface,
+ * namely Macintosh, there has to be some way of "naming" your savefiles.
+ * The current "Macintosh" hack is to make it so whenever the character
+ * name changes, the savefile is renamed accordingly.  But on normal
+ * machines, once you manage to "load" a savefile, it stays that way.
+ * Macintosh is particularly weird because you can load savefiles that
+ * are not contained in the "lib:save:" folder, and if you change the
+ * player's name, it will then save the savefile elsewhere.
+ */
+#if defined(MACINTOSH) || defined(_Windows) || defined(AMIGA)
+# define SAVEFILE_MUTABLE
+#endif
 
 
 /*
@@ -133,11 +170,75 @@
 #define CAPITALIZE_USER_NAME
 
 
-#ifdef MACINTOSH
-/* Screen dimensions */
-#define SCRN_ROWS	24
-#define SCRN_COLS	80
+/*
+ * OPTION: See the Makefile, where several options may be declared.
+ * These options control the choice of which graphic systems to
+ * compile support for, and include "USE_X11", "USE_NCU", "USE_GCU",
+ * and the more or less obsolete "USE_CUR".  Note that "USE_NCU"
+ * is geared more towards linux/sys-v machines, and "USE_GCU" is
+ * geared more towards general case machines.
+ *
+ * Several other such options are available for non-unix machines,
+ * in particular, "MACINTOSH", and "USE_IBM", "USE_EMX", "USE_WIN".
+ *
+ * In addition, "SPECIAL_BSD" can be defined for using certain versions
+ * of "BSD" unix that use a slightly odd version of Curses (main-gcu.c).
+ */
+
+
+/*
+ * OPTION: Use the POSIX "termios" methods in "main-gcu.c"
+ */
+/* #define USE_TPOSIX */
+
+/*
+ * OPTION: Use the "termio" methods in "main-gcu.c"
+ */
+/* #define USE_TERMIO */
+
+/*
+ * OPTION: Use the icky BSD "tchars" methods in "main-gcu.c"
+ */
+/* #define USE_TCHARS */
+
+
+/*
+ * OPTION: Use "blocking getch() calls" in "main-gcu.c".
+ * Hack -- Note that this option will NOT work on many BSD machines
+ * Currently used whenever available, if you get a warning about
+ * "nodelay()" undefined, then make sure to undefine this.
+ */
+#if defined(SYS_V) || defined(AMIGA)
+# define USE_GETCH
 #endif
+
+
+/*
+ * OPTION: Use the "curs_set()" call in "main-gcu.c".
+ * Hack -- This option will not work on most BSD machines
+ */
+#ifdef SYS_V
+# define USE_CURS_SET
+#endif
+
+
+
+/*
+ * OPTION: Allow the use of a "Recall Window", if supported
+ */
+#define GRAPHIC_RECALL
+
+
+/*
+ * OPTION: Allow the use of a "Choice Window", if supported
+ */
+#define GRAPHIC_CHOICE
+
+
+/*
+ * OPTION: This is the "Default" font when using X11.
+ */
+#define DEFAULT_X11_FONT	"9x15"
 
 
 

@@ -13,6 +13,16 @@
 #include "angband.h"
 
 
+/*
+ * Hack -- note that "TERM_MULTI" is now just "TERM_VIOLET"
+ * We will have to find a cleaner method for "MULTI_HUED" later.
+ * There were only two multi-hued "flavors" (one potion, one food).
+ * Plus five multi-hued "base-objects" (3 dragon scales, one blade
+ * of chaos, and one something else).
+ */
+#define TERM_MULTI	TERM_VIOLET
+
+
 /* Following are arrays for descriptive pieces
  *
  * Color adjectives and colors, for potions.
@@ -35,6 +45,20 @@ static cptr potion_adj[MAX_COLORS] = {
     "Shimmering","Coagulated Crimson"
 };
 
+static byte potion_col[MAX_COLORS] = {
+    TERM_GREEN,TERM_L_UMBER,TERM_WHITE,TERM_L_BLUE,TERM_BLUE,
+    TERM_BLUE,TERM_D_GRAY,TERM_UMBER,TERM_UMBER,TERM_L_GRAY,
+    TERM_RED,TERM_WHITE,TERM_L_UMBER,TERM_RED,TERM_L_BLUE,
+    TERM_BLUE,TERM_GREEN,TERM_RED,TERM_YELLOW,TERM_GREEN,
+    TERM_GREEN,TERM_GRAY,TERM_GRAY,TERM_L_GRAY,TERM_VIOLET,
+    TERM_L_BLUE,TERM_L_GREEN,TERM_RED,TERM_BLUE,TERM_RED,
+    TERM_GREEN,TERM_VIOLET,TERM_L_GRAY,TERM_ORANGE,TERM_ORANGE,
+    TERM_L_RED,TERM_L_RED,TERM_VIOLET,TERM_VIOLET,TERM_VIOLET,
+    TERM_RED,TERM_RED,TERM_L_GRAY,TERM_D_GRAY,TERM_ORANGE,
+    TERM_VIOLET,TERM_RED,TERM_WHITE,TERM_YELLOW,TERM_VIOLET,
+    TERM_L_RED,TERM_RED,TERM_L_RED,TERM_YELLOW,TERM_GREEN,
+    TERM_MULTI,TERM_RED
+};
 
 
 /*
@@ -47,6 +71,14 @@ static cptr food_adj[MAX_SHROOM] = {
     "Grey","Light Blue","Light Green","Plaid","Red",
     "Slimy","Tan","White","White Spotted","Wooden",
     "Wrinkled",/*"Yellow","Shaggy","Red Spotted","Pale Blue","Dark Orange"*/
+};
+
+static byte food_col[MAX_SHROOM] = {
+    TERM_BLUE,TERM_D_GRAY,TERM_D_GRAY,TERM_UMBER,TERM_BLUE,
+    TERM_GREEN,TERM_RED,TERM_YELLOW,TERM_L_GRAY,TERM_GREEN,
+    TERM_GRAY,TERM_L_BLUE,TERM_L_GREEN,TERM_MULTI,TERM_RED,
+    TERM_GRAY,TERM_L_UMBER,TERM_WHITE,TERM_WHITE,TERM_UMBER,
+    TERM_UMBER,/*TERM_YELLOW,???,TERM_RED,TERM_L_BLUE,TERM_ORANGE*/
 };
 
 
@@ -64,6 +96,16 @@ static cptr staff_adj[MAX_WOODS] = {
     "Golden","Ashen"/*,"Gnarled","Ivory","Decorative","Willow"*/
 };
 
+static byte staff_col[MAX_WOODS] = {
+    TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,
+    TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,
+    TERM_L_UMBER,TERM_L_UMBER,TERM_UMBER,TERM_L_UMBER,TERM_UMBER,
+    TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_RED,
+    TERM_RED,TERM_L_UMBER,TERM_L_UMBER,TERM_L_UMBER,TERM_UMBER,
+    TERM_GREEN,TERM_L_UMBER,TERM_L_UMBER,TERM_L_GRAY,TERM_UMBER,
+    TERM_YELLOW,TERM_GRAY,/*???,???,???,???*/
+};
+
 
 /*
  * Metal adjectives and colors, for wands
@@ -77,6 +119,45 @@ static cptr wand_adj[MAX_METALS] = {
     "Nickel-Plated","Silver-Plated","Steel-Plated","Tin-Plated","Zinc-Plated",
     "Mithril-Plated","Mithril","Runed","Bronze","Brass",
     "Platinum","Lead"/*,"Lead-Plated","Ivory","Pewter"*/
+};
+
+static byte wand_col[MAX_METALS] = {
+    TERM_L_BLUE,TERM_D_GRAY,TERM_WHITE,TERM_L_UMBER,TERM_YELLOW,
+    TERM_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_L_UMBER,TERM_RED,
+    TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_WHITE,TERM_WHITE,
+    TERM_L_GRAY,TERM_L_GRAY,TERM_L_BLUE,TERM_L_UMBER,TERM_YELLOW,
+    TERM_L_UMBER,TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,
+    TERM_L_BLUE,TERM_L_BLUE,TERM_UMBER,TERM_L_UMBER,TERM_L_UMBER,
+    TERM_WHITE,TERM_GRAY,/*TERM_GRAY,TERM_WHITE,TERM_GRAY*/
+};
+
+
+/*
+ * Another copy of the metal adjectives and colors, for rods
+ * We do not want rods and wands to be identical, its too easy to "cheat".
+ * However, the two arrays start out identical.  They are scrambled later.
+ * We could actually copy them directly, but this lets us change the
+ * bounds on the arrays, and change the distributions, etc.
+ */
+
+static cptr rod_adj[MAX_METALS] = {
+    "Aluminum","Cast Iron","Chromium","Copper","Gold",
+    "Iron","Magnesium","Molybdenum","Nickel","Rusty",
+    "Silver","Steel","Tin","Titanium","Tungsten",
+    "Zirconium","Zinc","Aluminum-Plated","Copper-Plated","Gold-Plated",
+    "Nickel-Plated","Silver-Plated","Steel-Plated","Tin-Plated","Zinc-Plated",
+    "Mithril-Plated","Mithril","Runed","Bronze","Brass",
+    "Platinum","Lead"/*,"Lead-Plated","Ivory","Pewter"*/
+};
+
+static byte rod_col[MAX_METALS] = {
+    TERM_L_BLUE,TERM_D_GRAY,TERM_WHITE,TERM_L_UMBER,TERM_YELLOW,
+    TERM_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_L_UMBER,TERM_RED,
+    TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_WHITE,TERM_WHITE,
+    TERM_L_GRAY,TERM_L_GRAY,TERM_L_BLUE,TERM_L_UMBER,TERM_YELLOW,
+    TERM_L_UMBER,TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,TERM_L_GRAY,
+    TERM_L_BLUE,TERM_L_BLUE,TERM_UMBER,TERM_L_UMBER,TERM_L_UMBER,
+    TERM_WHITE,TERM_GRAY,/*TERM_GRAY,TERM_WHITE,TERM_GRAY*/
 };
 
 
@@ -96,6 +177,18 @@ static cptr ring_adj[MAX_ROCKS] = {
     "Engagement","Adamantite"
 };
 
+static byte ring_col[MAX_ROCKS] = {
+    TERM_GREEN,TERM_VIOLET,TERM_L_BLUE,TERM_L_BLUE,TERM_L_GREEN,
+    TERM_RED,TERM_WHITE,TERM_RED,TERM_GRAY,TERM_WHITE,
+    TERM_GREEN,TERM_L_GREEN,TERM_RED,TERM_L_GRAY,TERM_L_GREEN,
+    TERM_UMBER,TERM_BLUE,TERM_GREEN,TERM_WHITE,TERM_L_GRAY,
+    TERM_L_RED,TERM_L_GRAY,TERM_WHITE,TERM_L_GRAY,TERM_L_GRAY,
+    TERM_L_RED,TERM_RED,TERM_BLUE,TERM_YELLOW,TERM_YELLOW,
+    TERM_L_BLUE,TERM_L_UMBER,TERM_WHITE,TERM_L_UMBER,TERM_YELLOW,
+    TERM_D_GRAY,TERM_L_GRAY,TERM_UMBER,TERM_L_BLUE,TERM_D_GRAY,
+    TERM_YELLOW,TERM_L_GREEN
+};
+
 
 /*
  * Amulet adjectives and colors, for amulets
@@ -106,6 +199,13 @@ static cptr amulet_adj[MAX_AMULETS] = {
     "Obsidian","Bone","Brass","Bronze","Pewter",
     "Tortoise Shell","Golden","Azure","Crystal","Silver",
     "Copper"
+};
+
+static byte amulet_col[MAX_AMULETS] = {
+    TERM_YELLOW,TERM_L_UMBER,TERM_WHITE,TERM_L_GRAY,TERM_WHITE,
+    TERM_D_GRAY,TERM_WHITE,TERM_L_UMBER,TERM_L_UMBER,TERM_GRAY,
+    TERM_UMBER,TERM_YELLOW,TERM_L_BLUE,TERM_WHITE,TERM_L_GRAY,
+    TERM_L_UMBER
 };
 
 
@@ -139,9 +239,12 @@ static cptr syllables[MAX_SYLLABLES] = {
 
 /*
  * Hold the titles of scrolls, ten characters each
+ * Also keep an array of scroll colors, all WHITE for now
  */
 
 static char scroll_adj[MAX_TITLES][10];
+
+static byte scroll_col[MAX_TITLES];
 
 
 

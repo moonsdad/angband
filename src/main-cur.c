@@ -464,14 +464,14 @@ static int check_input(int microsec)
     arg |= O_NDELAY;
     (void)fcntl(0, F_SETFL, arg);
 
-    result = getch();
+    result = getchar();
 
     arg = 0;
     arg = fcntl(0, F_GETFL, arg);
     arg &= ~O_NDELAY;
     (void)fcntl(0, F_SETFL, arg);
 
-    if (result == -1) return 0;
+    if (result == EOF) return 0;
 
 #else
 
@@ -482,7 +482,7 @@ static int check_input(int microsec)
 
 #ifdef FD_SET
     FD_ZERO(&smask);
-    FD_SET(fileno(stdin), &smask);
+    FD_SET(0, &smask);		/* standard input is bit 0 */
 #else
     smask = 0x0001;		/* i.e. (1 << 0) */
 #endif
@@ -491,13 +491,10 @@ static int check_input(int microsec)
     if (select(1, &smask, no_fds, no_fds, &tbuf) != 1) return (0);
 
     /* Get a key */
-    result = getch();
+    result = getchar();
 
-    /* check for EOF errors here, select sometimes works even when EOF */
-    if (result == -1) {
-	    eof_flag++;
-	    return 0;
-	}
+    /* See "EOF" handling below */
+    if (result == EOF) exit_game_panic();
 
 #endif
 

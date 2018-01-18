@@ -9,10 +9,17 @@
 #       don't bother to add them.
 
 OBJS = \
+  main.o main-emx.o \
+  signals.o util.o io.o arrays.o save.o save-old.o death.o \
+  generate.o birth.o creature.o effects.o magic.o dungeon.o command.o \
+  misc1.o misc2.o misc3.o misc4.o moria1.o moria2.o moria3.o moria4.o \
+  spells1.o spells2.o cave.o desc.o tables.o variable.o \
+  store.o recall.o wizard.o borg.o \
+  term.o random.o z-util.o z-virt.o z-form.o
 
 CC = gcc
 CFLAGS = -O2 -DUSE_EMX
-LIBS = 
+LIBS = -lvideo
 
 .c.o:
     $(CC) $(CFLAGS) -c $*.c
@@ -20,3 +27,7 @@ LIBS =
 angband.exe: $(OBJS)
     $(CC) $(CFLAGS)  -o angband.exe $(OBJS) $(LIBS)
     + move angband.exe ..
+
+# At least *my* part of the source should compile without any warnings. -EK-
+main-emx.o:     main-emx.c
+    $(CC) $(CFLAGS) -Wall -c $*.c

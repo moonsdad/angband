@@ -77,9 +77,9 @@ void get_file_paths()
     char *angband_path = NULL;
 
 
-    angband_path = getenv( "ANGBAND_PATH" );
+    /* Get the environment variable */
+    angband_path = getenv("ANGBAND_PATH");
     if (angband_path == NULL) {
-
 	angband_path = (char *)malloc( strlen( DEFAULT_PATH ) + 1 );
 	strcpy( angband_path, DEFAULT_PATH );
     }
@@ -212,68 +212,105 @@ void get_file_paths()
 
 
 
+/*
+ * Hack -- let the various systems "breathe"
+ */
+static void gasp()
+{
+
+#if defined(MACINTOSH) || defined(_Windows)
+
+    /* Don't hog the processor */
+    Term_xtra(TERM_XTRA_CHECK, -999);
+
+#endif
+
+}
 
 
 
+/*
+ * Convert a "color letter" into an actual color
+ * The colors are: dwsorgbuDWvyRGBU, see below
+ * No longer includes MULTI or CLEAR
+ */
+static int color_char_to_attr(char c)
+{
+    switch (c) {
+
+	case 'd': return (TERM_BLACK);
+	case 'w': return (TERM_WHITE);
+	case 's': return (TERM_GRAY);
+	case 'o': return (TERM_ORANGE);
+	case 'r': return (TERM_RED);
+	case 'g': return (TERM_GREEN);
+	case 'b': return (TERM_BLUE);
+	case 'u': return (TERM_UMBER);
+
+	case 'D': return (TERM_D_GRAY);
+	case 'W': return (TERM_L_GRAY);
+	case 'v': return (TERM_VIOLET);
+	case 'y': return (TERM_YELLOW);
+	case 'R': return (TERM_L_RED);
+	case 'G': return (TERM_L_GREEN);
+	case 'B': return (TERM_L_BLUE);
+	case 'U': return (TERM_L_UMBER);
+    }
+
+    return (-1);
+}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-static char original_commands(char com_val)
+static char original_commands(char command)
 {
     int dir_val;
+    
+    /* Process the command */
+    switch (command) {
 
-    switch (com_val) {
-      case CTRL('K'):		/* ^K = exit    */
-	com_val = 'Q';
-	break;
-      case CTRL('J'):		/* not used */
-      case CTRL('M'):		/* not used */
-        com_val = ' ';
-	break;
+	/* White space */
+	case CTRL('J'):		/* not used */
+	case CTRL('M'):		/* not used */
+	    command = ' ';
+	case ' ':
+	    break;
+
+	/* Suicide */
+	case CTRL('K'):		/* ^K = exit    */
+	    command = 'Q';
+	    break;
+
+	/* Locate */
+	case 'L':
+	    command = 'W';
+	    break;
+
+	/* Search mode */
+	case 'S':
+	    command = '#';
+	    break;
+
+	/* Browse */
+	case 'b':
+	    command = 'P';
+	    break;
+
+	/* Help */
+	case 'h':
+	    command = '?';
+	    break;
+
+	/* Spike */
+	case 'j':
+	    command = 'S';
+	    break;
+
       case CTRL('F'):		/* ^F = repeat feeling */
       case CTRL('R'):		/* ^R = redraw screen  */
       case CTRL('P'):		/* ^P = repeat  */
       case CTRL('W'):		/* ^W = enter wizard mode */
       case CTRL('X'):		/* ^X = save    */
-      case ' ':
-	break;
       case '.': {
 #ifdef TARGET
 /* If in target_mode, player will not be given a chance to pick a direction.
@@ -284,35 +321,35 @@ static char original_commands(char com_val)
 	  if (get_dir(NULL, &dir_val))
 	    switch (dir_val) {
 	      case 1:
-		com_val = 'B';
+		command = 'B';
 		break;
 	      case 2:
-		com_val = 'J';
+		command = 'J';
 		break;
 	      case 3:
-		com_val = 'N';
+		command = 'N';
 		break;
 	      case 4:
-		com_val = 'H';
+		command = 'H';
 		break;
 	      case 6:
-		com_val = 'L';
+		command = 'L';
 		break;
 	      case 7:
-		com_val = 'Y';
+		command = 'Y';
 		break;
 	      case 8:
-		com_val = 'K';
+		command = 'K';
 		break;
 	      case 9:
-		com_val = 'U';
+		command = 'U';
 		break;
 	      default:
-		com_val = ' ';
+		command = ' ';
 		break;
 	    }
 	else
-	    com_val = ' ';
+	    command = ' ';
 #ifdef TARGET
 	  target_mode = temp; /* restore old target code ... -CFT */
 #endif
@@ -328,34 +365,34 @@ static char original_commands(char com_val)
       case 'A':
 	break;
       case '1':
-	com_val = 'b';
+	command = 'b';
 	break;
       case '2':
-	com_val = 'j';
+	command = 'j';
 	break;
       case '3':
-	com_val = 'n';
+	command = 'n';
 	break;
       case '4':
-	com_val = 'h';
+	command = 'h';
 	break;
       case '5':			/* Rest one turn */
-	com_val = '.';
+	command = '.';
 	break;
       case '6':
-	com_val = 'l';
+	command = 'l';
 	break;
       case '7':
-	com_val = 'y';
+	command = 'y';
 	break;
       case '8':
-	com_val = 'k';
+	command = 'k';
 	break;
       case '9':
-	com_val = 'u';
+	command = 'u';
 	break;
       case 'B':
-	com_val = 'f';
+	command = 'f';
 	break;
       case 'C':
       case 'D':
@@ -364,14 +401,8 @@ static char original_commands(char com_val)
       case 'G':
       case 'g':
 	break;
-      case 'L':
-	com_val = 'W';
-	break;
       case 'M':
       case 'R':
-	break;
-      case 'S':
-	com_val = '#';
 	break;
       case 'T': {
 #ifdef TARGET
@@ -384,63 +415,54 @@ static char original_commands(char com_val)
 	if (get_dir(NULL, &dir_val))
 	    switch (dir_val) {
 	      case 1:
-		com_val = CTRL('B');
+		command = CTRL('B');
 		break;
 	      case 2:
-		com_val = CTRL('J');
+		command = CTRL('J');
 		break;
 	      case 3:
-		com_val = CTRL('N');
+		command = CTRL('N');
 		break;
 	      case 4:
-		com_val = CTRL('H');
+		command = CTRL('H');
 		break;
 	      case 6:
-		com_val = CTRL('L');
+		command = CTRL('L');
 		break;
 	      case 7:
-		com_val = CTRL('Y');
+		command = CTRL('Y');
 		break;
 	      case 8:
-		com_val = CTRL('K');
+		command = CTRL('K');
 		break;
 	      case 9:
-		com_val = CTRL('U');
+		command = CTRL('U');
 		break;
 	      default:
-		com_val = ' ';
+		command = ' ';
 		break;
 	    }
 	else
-	    com_val = ' ';
+	    command = ' ';
 #ifdef TARGET
 	  target_mode = temp;
 #endif
         }
 	break;
       case 'a':
-	com_val = 'z';
-	break;
-      case 'b':
-	com_val = 'P';
+	command = 'z';
 	break;
       case 'c':
       case 'd':
       case 'e':
 	break;
       case 'f':
-	com_val = 't';
-	break;
-      case 'h':
-	com_val = '?';
+	command = 't';
 	break;
       case 'i':
 	break;
-      case 'j':
-	com_val = 'S';
-	break;
       case 'l':
-	com_val = 'x';
+	command = 'x';
 	break;
       case 'm':
       case 'o':
@@ -450,20 +472,20 @@ static char original_commands(char com_val)
       case 's':
 	break;
       case 't':
-	com_val = 'T';
+	command = 'T';
 	break;
       case 'u':
-	com_val = 'Z';
+	command = 'Z';
 	break;
       case 'z':
-	com_val = 'a';
+	command = 'a';
 	break;
       case 'v':
       case 'V':
       case 'w':
 	break;
       case 'x':
-	com_val = 'X';
+	command = 'X';
 	break;
 
     /* wizard mode commands follow */
@@ -489,9 +511,9 @@ static char original_commands(char com_val)
       case '|':			/* check uniques - cba */
 	break;
       default:
-	com_val = '(';		/* Anything illegal. */
+	command = '(';		/* Anything illegal. */
 	break;
     }
-    return com_val;
+    return command;
 }
 
