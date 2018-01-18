@@ -950,8 +950,9 @@ int place_ghost()
 	if (p_ptr->misc.lev < 5 || randint(10) > 1) return 0;
 
 	/* Look for a proper bones file */
-	sprintf(tmp, "%s/%d", ANGBAND_BONES, p_ptr->misc.lev);
-	if ((fp = my_tfopen(tmp, "r")) != NULL) {
+	sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, p_ptr->misc.lev);
+	fp = my_tfopen(tmp, "r");
+	if (!fp) return (0);
 
 	/* Read the bones info */
 	if (fscanf(fp, "%[^\n]\n%d\n%d\n%d", name, &i, &gr, &gc) < 4) {
@@ -971,9 +972,6 @@ int place_ghost()
 	    r_ptr->hd[0] = i;	   /* set_ghost may adj for race/class/lv */
 	    r_ptr->hd[1] = j;
 	    level = p_ptr->misc.lev;
-	} else {
-	    return 0;
-	}
     }
 
     /* In the dungeon, ghosts have the same level as the level */    
@@ -983,11 +981,12 @@ int place_ghost()
 	if (14 > randint((dun_level / 2) + 11)) return 0;
 
 	/* Or rather, 1/3 of that often :-) */
-	if (randint(3) == 1) {
+	if (randint(3) != 1) return (0);
 
 	/* Open the bones file */
-	sprintf(tmp, "%s/%d", ANGBAND_BONES, dun_level);
-	if ((fp = my_tfopen(tmp, "r")) != NULL) {
+	sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, dun_level);
+	fp = my_tfopen(tmp, "r");
+	if (!fp) return (0);
 
 	if (fscanf(fp, "%[^\n]\n%d\n%d\n%d", name, &i, &gr, &gc) < 4) {
 	    fclose(fp);
@@ -1009,8 +1008,6 @@ int place_ghost()
     r_ptr->hd[1] = j;
 
 		level = dun_level;
-	    } else return 0;
-	} else return 0;
     }
 
     /* Set up the ghost */
@@ -1030,6 +1027,7 @@ int place_ghost()
 	x = randint(cur_width - 2);
     } while ((cave[y][x].fval >= MIN_CLOSED_SPACE) || (cave[y][x].cptr != 0)
 	     || (cave[y][x].tptr != 0) ||
+	/* Accept far away grids */
 	     (distance(y, x, char_row, char_col) <= MAX_SIGHT));
 
     m_ptr->fy = y;

@@ -419,25 +419,28 @@ extern char	moriatop[], moriasav[];
 /*
  * The FILEPATH's to various files, see "arrays.c"
  */
-extern cptr ANGBAND_BONES;		/* was LIBDIR(bones)				*/
-extern cptr ANGBAND_SAV;		/* was LIBDIR(save)					*/
-extern cptr ANGBAND_TST;		/* was LIBDIR(test)					*/
 
-extern cptr ANGBAND_MOR;		/* was LIBDIR(files/news)			*/
-extern cptr ANGBAND_WELCOME;	/* was LIBDIR(files/welcome.hlp)	*/
-extern cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
+extern cptr ANGBAND_DIR_FILES;		/* Dir: ascii files  */
+extern cptr ANGBAND_DIR_BONES;		/* Dir: ascii bones files was LIBDIR(bones) */
+extern cptr ANGBAND_DIR_SAVE;		/* Dir: binary save files was LIBDIR(save) */
+extern cptr ANGBAND_TST;		/* was LIBDIR(test) */
+extern cptr ANGBAND_DIR_DATA;		/* Dir: system dependant files */
 
-extern cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-extern cptr ANGBAND_HOURS;		/* was LIBDIR(files/hours)			*/
-extern cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-extern cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+extern cptr ANGBAND_NEWS;		/* News file  was LIBDIR(files/news) */
+extern cptr ANGBAND_WELCOME;		/* Player generation help was LIBDIR(files/welcome.hlp) */
+extern cptr ANGBAND_VERSION;		/* Version information was LIBDIR(files/version.hlp) */
 
-extern cptr ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
-extern cptr ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
-extern cptr ANGBAND_WIZ_HELP;	/* was LIBDIR(files/rwizcmds.hlp)	*/
-extern cptr ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
+extern cptr ANGBAND_WIZ;		/* Acceptable wizard uid's was LIBDIR(files/wizards) */
+extern cptr ANGBAND_HOURS;		/* Hours of operation was LIBDIR(files/hours) */
+extern cptr ANGBAND_LOAD;		/* Load information was LIBDIR(files/loadcheck) */
+extern cptr ANGBAND_LOG;		/* Log file of some form was LIBDIR(files/ANGBAND.log) */
 
-extern cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+extern cptr ANGBAND_R_HELP;		/* Roguelike command help was LIBDIR(files/roglcmds.hlp) */
+extern cptr ANGBAND_O_HELP;		/* Original command help was LIBDIR(files/origcmds.hlp) */
+extern cptr ANGBAND_W_HELP;		/* Wizard command help was LIBDIR(files/rwizcmds.hlp) */
+extern cptr ANGBAND_OWIZ_HELP;		/* was LIBDIR(files/owizcmds.hlp) */
+
+extern cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores) */
 
 
 /*

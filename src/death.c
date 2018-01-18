@@ -260,13 +260,18 @@ void read_times(void)
     }
 #endif				   /* CHECK_HOURS */
 
-/* Print the introduction message, news, etc.		 */
-/* Attempt to open the intro file			-RAK-	 */
-    if ((file1 = my_tfopen(ANGBAND_MOR, "r")) != NULL) {
+/* Attempt to open, and display, the intro "news" file		-RAK- */
+    file1 = my_tfopen(ANGBAND_NEWS, "r");
+
+    /* Error? */
+    if (!file1) {
+
 	clear_screen();
 	for (i = 0; fgets(in_line, 80, file1) != NULL; i++)
-	    put_str(in_line, i, 0);
+	put_str(in_line, i, 0);
 	pause_line(23);
+
+        /* Close */
 	(void)fclose(file1);
     }
 }
@@ -786,7 +791,7 @@ static void print_tomb()
     FILE                *fp;
 
     if (stricmp(died_from, "Interrupting") && !wizard) {
-	sprintf(str, "%s/%d", ANGBAND_BONES, dun_level);
+	sprintf(str, "%s/%d", ANGBAND_DIR_BONES, dun_level);
 	if ((fp = my_tfopen(str, "r")) == NULL && (dun_level > 1)) {
 	    if ((fp = my_tfopen(str, "w")) != NULL) {
 #ifndef __MINT__

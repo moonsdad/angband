@@ -680,16 +680,16 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	/* Delete ghost file */
 	if (m_ptr->mptr == (MAX_R_IDX-1)) {
 
-	    char                temp[100];
+	    char                tmp[100];
 
 	    if (!dun_level) {
-		sprintf(temp, "%s/%d", ANGBAND_BONES, r_list[m_ptr->mptr].level);
+		sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, r_list[m_ptr->mptr].level);
 	    }
 	    else {
-		sprintf(temp, "%s/%d", ANGBAND_BONES, dun_level);
+		sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, dun_level);
 	    }
 
-	    unlink(temp);
+	    unlink(tmp);
 	}
 
 	if (r_list[m_ptr->mptr].cflags2 & MF2_QUESTOR) {

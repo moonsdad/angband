@@ -399,6 +399,11 @@ int main(int argc, char *argv[])
     /* XXX XXX Verify the "player name" */
     if (streq(player_name, "")) strcpy(player_name, "PLAYER");
 
+#ifndef MACINTOSH
+    /* On Mac, if -n is passed, no savefile is used */
+    /* If -n is not passed, the calling routine will know savefile name,
+       hence, this code is not necessary */
+#endif
 #ifdef SAVEFILE_USE_UID
     /* Load the savefile name */
     (void)sprintf(savefile, "%s%s%d%s",
@@ -482,15 +487,6 @@ void play_game()
 
     /* Grab a random seed from the clock          */
     init_seeds();
-
-
-
-#ifndef MACINTOSH
-    /* On Mac, if -n is passed, no savefile is used */
-    /* If -n is not passed, the calling routine will know savefile name,
-       hence, this code is not necessary */
-#endif
-    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, p_ptr->misc.name);
 
     /* Load and re-save a player's character (only Unix) */
     if (fiddle) {
@@ -649,9 +645,6 @@ void play_game()
 
 	/* Roll up a new character */
 	player_birth();
-
-	/* if we're creating a new character, change the savefile name */
-    (void) sprintf(savefile, "%s/%d%s", ANGBAND_SAV, player_uid, p_ptr->misc.name);
 
 	/* Force "level generation" */
 	generate = TRUE;

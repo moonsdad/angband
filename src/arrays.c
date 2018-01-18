@@ -25,189 +25,149 @@
 /*
  * Prepare the ANGBAND_xxx filepath "constants".
  *
- * This is done first in main.c, so I'll rudely drop it into the front
- * of files.c...  If NEW_FILEPATHS is defined, we'll look for the ANGBAND_PATH
- * environment variable, and then look for the files in there.  This is
- * much nicer than having explicit paths, and should help us make things
- * more portable.  Now, if only someone would graft on the NetHack display
- * code...
+ * First, we'll look for the ANGBAND_PATH environment variable,
+ * and then look for the files in there.  If that doesn't work,
+ * we'll try the DEFAULT_PATH constant.  So be sure that one of
+ * these two things works...
  *
- * This is rather inelegant code; no checks are made for malloc() or
- * realloc() failures.  If you malloc/realloc are broken, you're in
- * trouble, and your compiler vendor needs a good swift kick in the
- * forehead. [cjh]
+ * The code is now a lot cleaner, with no realloc calls. -BEN-
+ * And it is no longer optional, everyone must use it.  If you
+ * wish to reinstate "constant paths", please do so by giving
+ * the variables below constant "initial values".
  */
 
-cptr ANGBAND_BONES;		/* was LIBDIR(bones)			*/
-cptr ANGBAND_SAV;		/* was LIBDIR(save)			*/
-cptr ANGBAND_TST;		/* was LIBDIR(test)			*/
+cptr ANGBAND_DIR_FILES = NULL;		/* Dir: ascii files  */
+cptr ANGBAND_DIR_BONES = NULL;		/* Dir: ascii bones files was LIBDIR(bones) */
+cptr ANGBAND_DIR_SAVE = NULL;		/* Dir: binary save files was LIBDIR(save) */
+cptr ANGBAND_TST = NULL;		/* was LIBDIR(test) */
+cptr ANGBAND_DIR_DATA = NULL;		/* Dir: system dependant files */
 
-cptr ANGBAND_MOR;		/* was LIBDIR(files/news)		*/
-cptr ANGBAND_WELCOME;		/* was LIBDIR(files/welcome.hlp)	*/
-cptr ANGBAND_VER;		/* was LIBDIR(files/version.hlp)	*/
-cptr ANGBAND_TOP;		/* was LIBDIR(files/newscores)		*/
+cptr ANGBAND_NEWS = NULL;		/* News file was LIBDIR(files/news) */
+cptr ANGBAND_WELCOME = NULL;		/* Player generation help  was LIBDIR(files/welcome.hlp) */
+cptr ANGBAND_VERSION = NULL;		/* Version information was LIBDIR(files/version.hlp) */
+cptr ANGBAND_TOP = NULL;		/* was LIBDIR(files/newscores) */
 
-cptr ANGBAND_WIZ;		/* was LIBDIR(files/wizards)		*/
-cptr ANGBAND_HOURS;		/* was LIBDIR(files/hours)		*/
-cptr ANGBAND_LOAD;		/* was LIBDIR(files/loadcheck)		*/
-cptr ANGBAND_LOG;		/* was LIBDIR(files/ANGBAND.log)	*/
+cptr ANGBAND_WIZ = NULL;		/* Acceptable wizard uid's was LIBDIR(files/wizards) */
+cptr ANGBAND_HOURS = NULL;		/* Hours of operation was LIBDIR(files/hours) */
+cptr ANGBAND_LOAD = NULL;		/* Load information was LIBDIR(files/loadcheck) */
+cptr ANGBAND_LOG = NULL;		/* Log file of some form was LIBDIR(files/ANGBAND.log) */
 
-cptr ANGBAND_HELP;		/* was LIBDIR(files/roglcmds.hlp)	*/
-cptr ANGBAND_ORIG_HELP;	/* was LIBDIR(files/origcmds.hlp)	*/
-cptr ANGBAND_WIZ_HELP;		/* was LIBDIR(files/rwizcmds.hlp)	*/
-cptr ANGBAND_OWIZ_HELP;	/* was LIBDIR(files/owizcmds.hlp)	*/
+cptr ANGBAND_R_HELP = NULL;		/* Roguelike command help was LIBDIR(files/roglcmds.hlp) */
+cptr ANGBAND_O_HELP = NULL;		/* Original command help was LIBDIR(files/origcmds.hlp) */
+cptr ANGBAND_W_HELP = NULL;		/* Wizard command help *was LIBDIR(files/rwizcmds.hlp) */
+cptr ANGBAND_OWIZ_HELP = NULL;		/* was LIBDIR(files/owizcmds.hlp) */
+
 
 
 /*
  * Find the paths to all of our important files and directories...
  * Use the ANGBAND_PATH environment var if possible, else use DEFAULT_PATH,
+ * and then branch off appropriately from there (see below).
  *
  * Note that this function is called BEFORE Term_init().
  *
  * If your system can't do "getenv()", you'll have to kludge this.  [cjh]
+ * For example, on "MACINTOSH", we set a global "folder pointer" based on
+ * where the "lib" folder was last time, and if we cannot use that one,
+ * we ask the user to interactively "reset" it.  See "main-mac.c".
  */
 void get_file_paths()
 {
-#ifndef MAXPATHLEN
-#define BOZO_MAXPATHLEN
-#define MAXPATHLEN 512
-#endif
+    /* The current path (and "workspace") */
+    char path[1024];
+
+    /* Pointer to the "end" of the workspace */
+    char *tail;
 
     /* Grab the base "path" */
     char *angband_path = NULL;
 
 
+#ifdef MACINTOSH
+
+    /* Hack -- The Macintosh uses a "system" path-prefix */
+    strcpy(path, PATH_SEP);
+
+#else
+
+# ifdef _Windows
+
+    /* Hack -- The Windows system also uses a special prefix */
+    strcpy(path, get_lib_path());
+
+# else
+
+#  ifdef AMIGA
+
+    /* The Amiga uses a special method */
+    strcpy(path, "Angband:");
+
+#  else
+
     /* Get the environment variable */
     angband_path = getenv("ANGBAND_PATH");
-    if (angband_path == NULL) {
-	angband_path = (char *)malloc( strlen( DEFAULT_PATH ) + 1 );
-	strcpy( angband_path, DEFAULT_PATH );
-    }
 
-    ANGBAND_TST = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_TST, angband_path );
-    strcat( ANGBAND_TST, PATH_SEP );
-    strcat( ANGBAND_TST, "test" );
-    ANGBAND_TST = (char *)realloc( ANGBAND_TST, strlen( ANGBAND_TST ) + 1 );
+    /* Use the angband_path, or a default */
+    strcpy(path, angband_path ? angband_path : DEFAULT_PATH);
 
-    ANGBAND_HOURS = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_HOURS, angband_path );
-    strcat( ANGBAND_HOURS, PATH_SEP );
-    strcat( ANGBAND_HOURS, "files" );
-    strcat( ANGBAND_HOURS, PATH_SEP );
-    strcat( ANGBAND_HOURS, "hours" );
-    ANGBAND_HOURS = (char *)realloc( ANGBAND_HOU, strlen( ANGBAND_HOU ) + 1 );
+    /* Be sure not to duplicate any "Path separator" */
+    if (!suffix(path,PATH_SEP)) strcat(path, PATH_SEP);
 
-    ANGBAND_MOR = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_MOR, angband_path );
-    strcat( ANGBAND_MOR, PATH_SEP );
-    strcat( ANGBAND_MOR, "files" );
-    strcat( ANGBAND_MOR, PATH_SEP );
-    strcat( ANGBAND_MOR, "news" );
-    ANGBAND_MOR = (char *)realloc( ANGBAND_MOR, strlen( ANGBAND_MOR ) + 1 );
+#  endif
 
-    ANGBAND_TOP = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_TOP, angband_path );
-    strcat( ANGBAND_TOP, PATH_SEP );
-    strcat( ANGBAND_TOP, "files" );
-    strcat( ANGBAND_TOP, PATH_SEP );
-    strcat( ANGBAND_TOP, "newscores" );
-    ANGBAND_TOP = (char *)realloc( ANGBAND_TOP, strlen( ANGBAND_TOP ) + 1 );
+# endif
 
-    ANGBAND_BONES = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_BONES, angband_path );
-    strcat( ANGBAND_BONES, PATH_SEP );
-    strcat( ANGBAND_BONES, "bones" );
-    ANGBAND_BONES = (char *)realloc( ANGBAND_BONES, strlen( ANGBAND_BONES ) + 1 );
+#endif
 
-    ANGBAND_HELP = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_HELP, angband_path );
-    strcat( ANGBAND_HELP, PATH_SEP );
-    strcat( ANGBAND_HELP, "files" );
-    strcat( ANGBAND_HELP, PATH_SEP );
-    strcat( ANGBAND_HELP, "roglcmds.hlp" );
-    ANGBAND_HELP = (char *)realloc( ANGBAND_HELP, strlen( ANGBAND_HELP ) + 1 );
 
-    ANGBAND_ORIG_HELP = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_ORIG_HELP, angband_path );
-    strcat( ANGBAND_ORIG_HELP, PATH_SEP );
-    strcat( ANGBAND_ORIG_HELP, "files" );
-    strcat( ANGBAND_ORIG_HELP, PATH_SEP );
-    strcat( ANGBAND_ORIG_HELP, "origcmds.hlp" );
-    ANGBAND_ORIG_HELP = (char *)realloc(ANGBAND_ORIG_HELP,
-					strlen( ANGBAND_ORIG_HELP ) + 1 );
+    /* Prepare to append to the Base Path */
+    tail = path + strlen(path);
 
-    ANGBAND_WIZ_HELP = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_WIZ_HELP, angband_path );
-    strcat( ANGBAND_WIZ_HELP, PATH_SEP );
-    strcat( ANGBAND_WIZ_HELP, "files" );
-    strcat( ANGBAND_WIZ_HELP, PATH_SEP );
-    strcat( ANGBAND_WIZ_HELP, "rwizcmds.hlp" );
-    ANGBAND_WIZ_HELP = (char *)realloc(ANGBAND_WIZ_HELP,
-				       strlen( ANGBAND_WIZ_HELP ) + 1 );
+    /* Find some directory names */
+    strcpy(tail, "data");
+    ANGBAND_DIR_DATA = string_make(path);
+    strcpy(tail, "save");
+    ANGBAND_DIR_SAVE = string_make(path);
+    strcpy(tail, "bones");
+    ANGBAND_DIR_BONES = string_make(path);
+    strcpy(tail, "files");
+    ANGBAND_DIR_FILES = string_make(path);
 
-    ANGBAND_OWIZ_HELP = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_OWIZ_HELP, angband_path );
-    strcat( ANGBAND_OWIZ_HELP, PATH_SEP );
-    strcat( ANGBAND_OWIZ_HELP, "files" );
-    strcat( ANGBAND_OWIZ_HELP, PATH_SEP );
-    strcat( ANGBAND_OWIZ_HELP, "owizcmds.hlp" );
-    ANGBAND_OWIZ_HELP = (char *)realloc(ANGBAND_OWIZ_HELP,
-					strlen( ANGBAND_OWIZ_HELP ) + 1 );
+    /* Add a path separator */
+    strcat(tail, PATH_SEP);
 
-    ANGBAND_WELCOME = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_WELCOME, angband_path );
-    strcat( ANGBAND_WELCOME, PATH_SEP );
-    strcat( ANGBAND_WELCOME, "files" );
-    strcat( ANGBAND_WELCOME, PATH_SEP );
-    strcat( ANGBAND_WELCOME, "welcome.hlp" );
-    ANGBAND_WELCOME = (char *)realloc( ANGBAND_WELCOME, strlen( ANGBAND_WELCOME ) + 1 );
+    /* Use the "files" directory (from above) */
+    tail = tail + strlen(tail);
 
-    ANGBAND_LOG = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_LOG, angband_path );
-    strcat( ANGBAND_LOG, PATH_SEP );
-    strcat( ANGBAND_LOG, "files" );
-    strcat( ANGBAND_LOG, PATH_SEP );
-    strcat( ANGBAND_LOG, "ANGBAND.log" );
-    ANGBAND_LOG = (char *)realloc( ANGBAND_LOG, strlen( ANGBAND_LOG ) + 1 );
+    /* The basic info files */
+    strcpy(tail, "news.hlp");
+    ANGBAND_NEWS = string_make(path);
+    strcpy(tail, "welcome.hlp");
+    ANGBAND_WELCOME = string_make(path);
+    strcpy(tail, "version.hlp");
+    ANGBAND_VERSION = string_make(path);
+    strcpy(tail, "newscores" );
+    ANGBAND_TOP = string_make(path);
 
-    ANGBAND_VER = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_VER, angband_path );
-    strcat( ANGBAND_VER, PATH_SEP );
-    strcat( ANGBAND_VER, "files" );
-    strcat( ANGBAND_VER, PATH_SEP );
-    strcat( ANGBAND_VER, "version.hlp" );
-    ANGBAND_VER = (char *)realloc( ANGBAND_VER, strlen( ANGBAND_VER ) + 1 );
+    /* The command help files */
+    strcpy(tail, "cmds_r.hlp");
+    ANGBAND_R_HELP = string_make(path);
+    strcpy(tail, "cmds_o.hlp");
+    ANGBAND_O_HELP = string_make(path);
+    strcpy(tail, "cmds_w.hlp");
+    ANGBAND_W_HELP = string_make(path);
+    strcpy(tail,"owizcmds.hlp";
+    ANGBAND_OWIZ_HELP = string_make(path);
 
-    ANGBAND_LOAD = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_LOAD, angband_path );
-    strcat( ANGBAND_LOAD, PATH_SEP );
-    strcat( ANGBAND_LOAD, "files" );
-    strcat( ANGBAND_LOAD, PATH_SEP );
-    strcat( ANGBAND_LOAD, "loadcheck" );
-    ANGBAND_LOAD = (char *)realloc( ANGBAND_LOAD, strlen( ANGBAND_LOAD ) + 1 );
-
-    ANGBAND_WIZ = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_WIZ, angband_path );
-    strcat( ANGBAND_WIZ, PATH_SEP );
-    strcat( ANGBAND_WIZ, "files" );
-    strcat( ANGBAND_WIZ, PATH_SEP );
-    strcat( ANGBAND_WIZ, "wizards" );
-    ANGBAND_WIZ = (char *)realloc( ANGBAND_WIZ, strlen( ANGBAND_WIZ ) + 1 );
-
-    ANGBAND_SAV = (char *)malloc( MAXPATHLEN );
-    strcpy( ANGBAND_SAV, angband_path );
-    strcat( ANGBAND_SAV, PATH_SEP );
-    strcat( ANGBAND_SAV, "save" );
-    ANGBAND_SAV = (char *)realloc( ANGBAND_SAV, strlen( ANGBAND_SAV ) + 1 );
-
-    return;
-#ifdef BOZO_MAXPATHLEN
-#undef BOZO_MAXPATHLEN
-#undef MAXPATHLEN
-#endif /* BOZO_MAXPATHLEN */
-
-#endif /* NEW_FILEPATHS */
+    /* Some parsable text files */
+    strcpy(tail, "wizards.txt");
+    ANGBAND_WIZ = string_make(path);
+    strcpy(tail, "hours.txt");
+    ANGBAND_HOURS = string_make(path);
+    strcpy(tail, "loadcheck.txt");
+    ANGBAND_LOAD = string_make(path);
+    strcpy(tail, "ANGBAND.log" );
+    ANGBAND_LOG =  string_make(path);
 }
 
 
@@ -227,6 +187,17 @@ static void gasp()
 
 }
 
+
+
+/*
+ * Hack -- return the "buffer length" of a string
+ * This is "zero" for NULL and "strlen(str)+1" otherwise.
+ */
+static uint string_size(cptr str)
+{
+    if (!str) return (0);
+    return (strlen(str) + 1);
+}
 
 
 /*
@@ -272,39 +243,32 @@ static char original_commands(char command)
 	/* White space */
 	case CTRL('J'):		/* not used */
 	case CTRL('M'):		/* not used */
-	    command = ' ';
 	case ' ':
-	    break;
+	    return (' ');
 
 	/* Suicide */
 	case CTRL('K'):		/* ^K = exit    */
-	    command = 'Q';
-	    break;
+	    return ('Q');
 
 	/* Locate */
 	case 'L':
-	    command = 'W';
-	    break;
+	    return ('W');
 
 	/* Search mode */
 	case 'S':
-	    command = '#';
-	    break;
+	    return ('#');
 
 	/* Browse */
 	case 'b':
-	    command = 'P';
-	    break;
+	    return ('P');
 
 	/* Help */
 	case 'h':
-	    command = '?';
-	    break;
+	    return ('?');
 
 	/* Spike */
 	case 'j':
-	    command = 'S';
-	    break;
+	    return ('S');
 
       case CTRL('F'):		/* ^F = repeat feeling */
       case CTRL('R'):		/* ^R = redraw screen  */
