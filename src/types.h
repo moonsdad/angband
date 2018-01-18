@@ -590,7 +590,7 @@ struct flags {
   byte hold_life;		/* Immune to drain-life	*/
   byte telepathy;		/* Has telepathy	*/
   byte slow_digest;		/* Lower food needs	*/
-  byte confuse_monster;		/* Glowing hands.	*/
+  byte confusing;		/* Glowing hands.	*/
 } flags;
 };
 

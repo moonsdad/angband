@@ -435,7 +435,7 @@ static int summon_object(int y, int x, int num, int typ, s32b  ood)
  */
 s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 {
-    register int			i, number;
+    int			i, number;
     s32b       dump, res;
 
 #if defined(ATARIST_MWC)
@@ -509,52 +509,52 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	while (!grond && i < 50);
     }
 #if !defined(ATARIST_MWC)
-    if (flags & CM_CARRY_OBJ)
+    if (flags & MF1_CARRY_OBJ)
 	i = 1;
     else
 	i = 0;
-    if (flags & CM_CARRY_GOLD)
+    if (flags & MF1_CARRY_GOLD)
 	i += 2;
 
     number = 0;
-    if ((flags & CM_60_RANDOM) && (randint(100) < 60))
+    if ((flags & MF1_HAS_60) && (randint(100) < 60))
 	number++;
-    if ((flags & CM_90_RANDOM) && (randint(100) < 90))
+    if ((flags & MF1_HAS_90) && (randint(100) < 90))
 	number++;
-    if (flags & CM_1D2_OBJ)
+    if (flags & MF1_HAS_1D2)
 	number += randint(2);
-    if (flags & CM_2D2_OBJ)
+    if (flags & MF1_HAS_2D2)
 	number += damroll(2, 2);
-    if (flags & CM_4D2_OBJ)
+    if (flags & MF1_HAS_4D2)
 	number += damroll(4, 2);
     if (number > 0)
 	dump = summon_object(y, x, number, i, good);
     else
 	dump = 0;
 #else
-    holder = CM_CARRY_OBJ;
+    holder = MF1_CARRY_OBJ;
     if (flags & holder)
 	i = 1;
     else
 	i = 0;
-    holder = CM_CARRY_GOLD;
+    holder = MF1_CARRY_GOLD;
     if (flags & holder)
 	i += 2;
 
     number = 0;
-    holder = CM_60_RANDOM;
+    holder = MF1_HAS_60;
     if ((flags & holder) && (randint(100) < 60))
 	number++;
-    holder = CM_90_RANDOM;
+    holder = MF1_HAS_90;
     if ((flags & holder) && (randint(100) < 90))
 	number++;
-    holder = CM_1D2_OBJ;
+    holder = MF1_HAS_1D2;
     if (flags & holder)
 	number += randint(2);
-    holder = CM_2D2_OBJ;
+    holder = MF1_HAS_2D2;
     if (flags & holder)
 	number += damroll(2, 2);
-    holder = CM_4D2_OBJ;
+    holder = MF1_HAS_4D2;
     if (flags & holder)
 	number += damroll(4, 2);
     if (number > 0)
@@ -566,10 +566,10 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 #endif
 
 #if defined(ATARIST_MWC)
-    holder = CM_WIN;
+    holder = MF1_WINNER;
     if (flags & holder)
 #else
-    if (flags & CM_WIN)
+    if (flags & MF1_WINNER)
 #endif
     {
 	total_winner = TRUE;
@@ -582,23 +582,23 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	if (dump & 255)
 #ifdef ATARIST_MWC
 	{
-	    holder = CM_CARRY_OBJ;
+	    holder = MF1_CARRY_OBJ;
 	    res |= holder;
 	}
 #else
-	    res |= CM_CARRY_OBJ;
+	    res |= MF1_CARRY_OBJ;
 #endif
 	if (dump >= 256)
 #ifdef ATARIST_MWC
 	{
-	    holder = CM_CARRY_GOLD;
+	    holder = MF1_CARRY_GOLD;
 	    res |= holder;
 	}
 #else
-	    res |= CM_CARRY_GOLD;
+	    res |= MF1_CARRY_GOLD;
 #endif
 	dump = (dump % 256) + (dump / 256);	/* number of items */
-	res |= dump << CM_TR_SHIFT;
+	res |= dump << CM1_TR_SHIFT;
     } else
 	res = 0;
 
@@ -608,34 +608,37 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 /*
  * return whether a monster is "fearless" and will never run away. -CWS
  */
-static int fearless(monster_race *c_ptr)
+static int fearless(monster_race *r_ptr)
 {
     int flag = FALSE;
 
-    if (c_ptr->cflags2 & MF2_MINDLESS) {
+    /* NoMind --> NoFear */
+    if (r_ptr->cflags2 & MF2_MINDLESS) {
 	flag = TRUE;
     }
 
-    if (c_ptr->cflags2 & UNDEAD) {
-	if (c_ptr->spells1 ||	   /* if undead, check to see if it's */
-	    c_ptr->spells2 ||	   /* "mindless", ie has no spells */
-	    c_ptr->spells3)
-	    flag = FALSE;	   /* found a spell, so not mindless   */
-	else
-	    flag = TRUE;	   /* "mindless" undead */
+    /* Undead --> (Spells = Mind --> Fear) + (NoSpells = NoMind --> NoFear) */
+    if (r_ptr->cflags2 & MF2_UNDEAD) {
+	flag = (!(r_ptr->spells1 || r_ptr->spells2 || r_ptr->spells3));
     }
 
-    if (c_ptr->cchar == 'E' || c_ptr->cchar == 'g' || c_ptr->cflags2 & DEMON) {
+    /* The 'E' and 'g' monsters have NoFear */
+    if (r_ptr->cchar == 'E' || r_ptr->cchar == 'g') {
+	flag = TRUE;
+    }
+
+    /* Demons have NoFear */
+    if (r_ptr->cflags2 & DEMON) {
 	flag = TRUE;
     }
 
     /* catch intelligent monsters */
-    if (c_ptr->cflags2 & MF2_INTELLIGENT) {
+    if (r_ptr->cflags2 & MF2_INTELLIGENT) {
 	flag = FALSE;
     }
 
     /* it can't run away */
-    if (!(c_ptr->cflags1 & CM_MOVE_NORMAL)) {
+    if (!(r_ptr->cflags1 & MF1_MV_ATT_NORM)) {
 	flag = TRUE;
     }
 
@@ -743,15 +746,15 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 			  (r_list[m_ptr->mptr].cflags1 & MF1_WINNER));
 	coin_type = 0;
 	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
-	    (r_list[m_ptr->mptr].cflags1 & CM_WIN) ||
+	    (r_list[m_ptr->mptr].cflags1 & MF1_WINNER) ||
 	    (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)) {
 	    /* recall even invisible uniques */
 
-	    tmp = (l_list[m_ptr->mptr].r_cflags1 & CM_TREASURE) >> CM_TR_SHIFT;
-	    if (tmp > ((i & CM_TREASURE) >> CM_TR_SHIFT))
-		i = (i & ~CM_TREASURE) | (tmp << CM_TR_SHIFT);
+	    tmp = (l_list[m_ptr->mptr].r_cflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
+	    if (tmp > ((i & CM1_TREASURE) >> CM1_TR_SHIFT))
+		i = (i & ~CM1_TREASURE) | (tmp << CM1_TR_SHIFT);
 	    l_list[m_ptr->mptr].r_cflags1 =
-		(l_list[m_ptr->mptr].r_cflags1 & ~CM_TREASURE) | i;
+		(l_list[m_ptr->mptr].r_cflags1 & ~CM1_TREASURE) | i;
 	    if (l_list[m_ptr->mptr].r_kills < MAX_SHORT)
 		l_list[m_ptr->mptr].r_kills++;
 	}
@@ -860,24 +863,24 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 void py_attack(int y, int x)
 {
     register int        k, blows;
-    int                 crptr, monptr, tot_tohit, base_tohit;
+    int                 cr_idx, r_idx, tot_tohit, base_tohit;
     vtype               m_name, out_val;
     register inven_type    *i_ptr;
     register struct misc   *p_ptr;
 
-    crptr = cave[y][x].cptr;
-    monptr = m_list[crptr].mptr;
+    cr_idx = cave[y][x].cptr;
+    r_idx = m_list[cr_idx].mptr;
 
-    m_list[crptr].csleep = 0;
+    m_list[cr_idx].csleep = 0;
     i_ptr = &inventory[INVEN_WIELD];
 
     /* Does the player know what he's fighting?	   */
-    if (!m_list[crptr].ml) (void)strcpy(m_name, "it");
+    if (!m_list[cr_idx].ml) (void)strcpy(m_name, "it");
     else {
-	if (r_list[monptr].cflags2 & MF2_UNIQUE)
-	    (void)sprintf(m_name, "%s", r_list[monptr].name);
+	if (r_list[r_idx].cflags2 & MF2_UNIQUE)
+	    (void)sprintf(m_name, "%s", r_list[r_idx].name);
 	else
-	    (void)sprintf(m_name, "the %s", r_list[monptr].name);
+	    (void)sprintf(m_name, "the %s", r_list[r_idx].name);
     }
 
     /* Proper weapon */
@@ -903,7 +906,7 @@ void py_attack(int y, int x)
     tot_tohit += p_ptr->misc.ptohit;
 
     /* If creature is lit, use base rates, else, make it harder to hit */
-    if (m_list[crptr].ml) {
+    if (m_list[cr_idx].ml) {
 	base_tohit = p_ptr->misc.bth;
     }
     else {
@@ -919,7 +922,7 @@ void py_attack(int y, int x)
 
 	/* We hit it! */
 	if (test_hit(base_tohit, (int)p_ptr->misc.lev, tot_tohit,
-		     (int)r_list[monptr].ac, CLA_BTH)) {
+		     (int)r_list[r_idx].ac, CLA_BTH)) {
 
 	    if (!wizard) {
 		(void) sprintf(out_val, "You hit %s.", m_name);
@@ -928,7 +931,7 @@ void py_attack(int y, int x)
 
 	    if (i_ptr->tval != TV_NOTHING) {
 		k = pdamroll(i_ptr->damage);
-		k = tot_dam(i_ptr, k, monptr);
+		k = tot_dam(i_ptr, k, r_idx);
 		k = critical_blow((int)i_ptr->weight, tot_tohit, k, CLA_BTH);
 	    }
 
@@ -944,7 +947,7 @@ void py_attack(int y, int x)
 	    if (wizard) {
 		(void)sprintf(out_val,
 			      "You hit %s with %d hp, doing %d+%d damage.",
-			      m_name, m_list[crptr].hp, (k - p_ptr->misc.ptodam),
+			      m_name, m_list[cr_idx].hp, (k - p_ptr->misc.ptodam),
 			      p_ptr->misc.ptodam);
 		msg_print(out_val);
 	    }
@@ -952,36 +955,36 @@ void py_attack(int y, int x)
 	    if (k < 0) k = 0;
 
 	    /* Confusion attack */
-	    if (p_ptr->flags.confuse_monster) {
-		p_ptr->flags.confuse_monster = FALSE;
+	    if (p_ptr->flags.confusing) {
+		p_ptr->flags.confusing = FALSE;
 		msg_print("Your hands stop glowing.");
-		if ((r_list[monptr].cflags2 & MF2_CHARM_SLEEP) ||
-		    (randint(MAX_R_LEV) < r_list[monptr].level)) {
+		if ((r_list[r_idx].cflags2 & MF2_CHARM_SLEEP) ||
+		    (randint(MAX_R_LEV) < r_list[r_idx].level)) {
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
 		}
 		else {
 		    (void)sprintf(out_val, "%s appears confused.", m_name);
-		    m_list[crptr].confused = TRUE;
+		    m_list[cr_idx].confused = TRUE;
 		}
 
 		/* Uppercase and display the sentence */
 		if ((out_val[0] >= 'a') && (out_val[0] <= 'z')) out_val[0] -= 32;
 		msg_print(out_val);
 
-		if (m_list[crptr].ml && randint(4) == 1) {
-		    l_list[monptr].r_cflags2 |=
-			r_list[monptr].cflags2 & MF2_CHARM_SLEEP;
+		if (m_list[cr_idx].ml && randint(4) == 1) {
+		    l_list[r_idx].r_cflags2 |=
+			r_list[r_idx].cflags2 & MF2_CHARM_SLEEP;
 		}
 	    }
 	    if (k < 0) k = 0;		   /* no neg damage! */
 
 	    /* See if we done it in.  */
-	    if (mon_take_hit(crptr, k, FALSE) >= 0) {	/* never print msgs -CWS */
+	    if (mon_take_hit(cr_idx, k, FALSE) >= 0) {	/* never print msgs -CWS */
 
-		if ((r_list[monptr].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
-		    (r_list[monptr].cchar == 'E') ||
-		    (r_list[monptr].cchar == 'v') ||
-		    (r_list[monptr].cchar == 'g')) {
+		if ((r_list[r_idx].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+		    (r_list[r_idx].cchar == 'E') ||
+		    (r_list[r_idx].cchar == 'v') ||
+		    (r_list[r_idx].cchar == 'g')) {
 		    (void)sprintf(out_val, "You have destroyed %s.", m_name);
 		}
 		else {
@@ -1018,13 +1021,13 @@ void py_attack(int y, int x)
 
     /* redo fear messages to only print at the end -CWS */
 
-    if (!m_list[crptr].ml)
+    if (!m_list[cr_idx].ml)
 	(void)strcpy(m_name, "It");
     else {
-	if (r_list[monptr].cflags2 & MF2_UNIQUE)
-	    (void)sprintf(m_name, "%s", r_list[monptr].name);
+	if (r_list[r_idx].cflags2 & MF2_UNIQUE)
+	    (void)sprintf(m_name, "%s", r_list[r_idx].name);
 	else
-	    (void)sprintf(m_name, "The %s", r_list[monptr].name);
+	    (void)sprintf(m_name, "The %s", r_list[r_idx].name);
     }
 
     if (monster_is_afraid == 1) {
@@ -1032,7 +1035,7 @@ void py_attack(int y, int x)
 	msg_print(out_val);
     }
     if (monster_is_afraid == -1) {
-	char                sex = r_list[monptr].gender;
+	char                sex = r_list[r_idx].gender;
 
 	sprintf(out_val, "%s recovers %s courage.", m_name,
 		(sex == 'm' ? "his" : sex == 'f' ? "her" :

@@ -191,7 +191,7 @@ int compact_monsters(void)
 	    mon_ptr = &m_list[i];
 	    if ((cur_dis < mon_ptr->cdis) && (randint(3) == 1)) {
 	    /* Don't compact Melkor! */
-		if (r_list[mon_ptr->mptr].cflags1 & CM_WIN)
+		if (r_list[mon_ptr->mptr].cflags1 & MF1_WINNER)
 		/* do nothing */
 		    ;
 
@@ -1369,7 +1369,7 @@ int summon_undead(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if ((r_list[m].cflags2 & UNDEAD) && !(r_list[m].cdefense & MF2_UNIQUE) &&
+	    if ((r_list[m].cflags2 & UNDEAD) && !(r_list[m].cflags2 & MF2_UNIQUE) &&
 		(r_list[m].level < dun_level + 5)) {
 		ctr = 20;
 		l = 0;
@@ -1415,7 +1415,7 @@ int summon_demon(int lev, int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (r_list[m].cflags2 & DEMON && !(r_list[m].cdefense & MF2_UNIQUE) &&
+	    if (r_list[m].cflags2 & DEMON && !(r_list[m].cflags2 & MF2_UNIQUE) &&
 		(r_list[m].level <= lev)) {
 		ctr = 20;
 		l = 0;
@@ -1461,7 +1461,7 @@ int summon_dragon(int *y, int *x)
 	m = randint(l) - 1;
 	ctr = 0;
 	do {
-	    if (r_list[m].cflags2 & DRAGON && !(r_list[m].cdefense & MF2_UNIQUE)) {
+	    if (r_list[m].cflags2 & DRAGON && !(r_list[m].cflags2 & MF2_UNIQUE)) {
 		ctr = 20;
 		l = 0;
 	    } else {

@@ -211,6 +211,44 @@ static int          roffpline;	   /* Place to print line now being loaded. */
 
 
 /*
+ * Print out strings, filling up lines as we go. 
+ */
+static void roff(register cptr p)
+{
+    register char *q, *r;
+    register int   linesize;
+
+    linesize = sizeof(roffbuf);
+    if (linesize > 80)
+	linesize = 80;
+
+    while (*p) {
+	*roffp = *p;
+	if (*p == '\n' || roffp >= roffbuf + linesize) {
+	    q = roffp;
+	    if (*p != '\n') {
+		if (*q == ' ')
+		    q--;
+		if (*q == ' ')
+		    q--;
+		while (*q != ' ')
+		    q--;
+	    }
+	    *q = 0;
+	    prt(roffbuf, roffpline, 0);
+	    roffpline++;
+	    r = roffbuf;
+	    while (q < roffp)
+		*r++ = *++q;
+	    roffp = r;
+	} else
+	    roffp++;
+	p++;
+    }
+}
+
+
+/*
  * Do we know anything special about this monster? 
  */
 int bool_roff_recall(int r_idx)
@@ -252,8 +290,8 @@ int roff_recall(int r_idx)
     u16b                  *pu;
 
     int                 mspeed;
-    u32b              rcflags2;
-    u32b              rcflags1, rspells, rspells2, rspells3;
+    u32b              rcflags1, rcflags2;
+    u32b              rspells1, rspells2, rspells3;
     int                 breath = FALSE, magic = FALSE;
     char			sex;
 
@@ -278,15 +316,15 @@ int roff_recall(int r_idx)
 	l_ptr->r_wake = l_ptr->r_ignore = MAX_UCHAR;
 
 	/* Count the total possible treasures */
-	j = (((r_ptr->cflags1 & CM_4D2_OBJ) != 0) * 8) +
-			 (((r_ptr->cflags1 & CM_2D2_OBJ) != 0) * 4) +
-			 (((r_ptr->cflags1 & CM_1D2_OBJ) != 0) * 2) +
-			 ((r_ptr->cflags1 & CM_90_RANDOM) != 0) +
-			 ((r_ptr->cflags1 & CM_60_RANDOM) != 0);
+	j = (((r_ptr->cflags1 & MF1_HAS_4D2) ? 8 : 0) +
+			 ((r_ptr->cflags1 & MF1_HAS_2D2) ? 4 : 0) +
+			 ((r_ptr->cflags1 & MF1_HAS_1D2) ? 2 : 0) +
+			 ((r_ptr->cflags1 & MF1_HAS_90)  ? 1 : 0) +
+			 ((r_ptr->cflags1 & MF1_HAS_60)  ? 1 : 0));
 
 	/* Full "flag" knowledge */
-	l_ptr->r_cflags1 = (r_ptr->cmove & ~CM_TREASURE) | (j << CM_TR_SHIFT);
-	l_ptr->r_cflags2 = r_ptr->cdefense;
+	l_ptr->r_cflags1 = (r_ptr->cflags1 & ~CM1_TREASURE) | (j << CM1_TR_SHIFT);
+	l_ptr->r_cflags2 = r_ptr->cflags2;
 	l_ptr->r_spells1 = r_ptr->spells1 | CS1_FREQ;
 	l_ptr->r_spells2 = r_ptr->spells2;
 	l_ptr->r_spells3 = r_ptr->spells3;
@@ -305,13 +343,13 @@ int roff_recall(int r_idx)
     roffp = roffbuf;
 
     /* Load the various flags */
-    rspells = l_ptr->r_spells1 & r_ptr->spells1 & ~CS1_FREQ;
+    rspells1 = l_ptr->r_spells1 & r_ptr->spells1 & ~CS1_FREQ;
     rspells2 = l_ptr->r_spells2 & r_ptr->spells2;
     rspells3 = l_ptr->r_spells3 & r_ptr->spells3;
 
-    /* the CM_WIN property is always known, set it if a win monster */
-    rcflags1 = l_ptr->r_cmove | (CM_WIN & r_ptr->cmove);
-    rcflags2 = l_ptr->r_cdefense & r_ptr->cdefense;
+    /* the MF1_WINNER property is always known, set it if a win monster */
+    rcflags1 = l_ptr->r_cflags1 | (MF1_WINNER & r_ptr->cflags1);
+    rcflags2 = l_ptr->r_cflags2 & r_ptr->cflags2;
     if ((r_ptr->cflags2 & MF2_UNIQUE) || (sex == 'p'))
 	(void)sprintf(temp, "%s:\n", r_ptr->name);
     else
@@ -322,7 +360,7 @@ int roff_recall(int r_idx)
 	/* Conflict history. */
 	/* changed to act better for unique monsters -CFT */
 
-    /* Treat unique differently... -CFT */
+    /* Treat uniques differently... -CFT */
     if (r_ptr->cflags2 & MF2_UNIQUE) {
 
 	/* We've been killed... */
@@ -388,20 +426,16 @@ int roff_recall(int r_idx)
 	roff("No battles to the death are recalled.  ");
     }
 
-#if 0
-    for (k = 0; k < MAX_R_IDX; k++) {
-	if (!stricmp(desc_list[k].name, r_ptr->name)) {
-	    if (strlen(desc_list[k].desc) != 0)
-		roff(desc_list[k].desc);
-	    break;
-	}
+
+    /* Hack -- Describe the ghost (first time is weird) */
+    if (r_idx == MAX_R_IDX-1) {
+	roff("You feel you know it, and it knows you.  ");
+	roff("This can only mean trouble.  ");
     }
-#endif
-    k = r_idx;
-    if (k == MAX_R_IDX - 1)
-	roff("You feel you know it, and it knows you.  This can only mean trouble.  ");
+
+    /* Describe a "normal" monster */
     else {
-	roff(desc_list[k].desc);
+	roff(desc_list[r_idx].desc);
 	roff("  ");
     }
 
@@ -431,7 +465,7 @@ int roff_recall(int r_idx)
     mspeed = r_ptr->speed - 10;
 
     /* Describe movement, if any observed */
-    if ((rcflags1 & CM_ALL_MV_FLAGS) || (rcmove & CM1_RANDOM_MOVE)) {
+    if ((rcflags1 & CM1_ALL_MV_FLAGS) || (rcflags1 & CM1_RANDOM_MOVE)) {
 	if (k) {
 	    roff(", and ");
 	}
@@ -466,7 +500,7 @@ int roff_recall(int r_idx)
     }
 
     /* The code above includes "attack speed" */
-    if (rcflags1 & CM_ATTACK_ONLY) {
+    if (rcflags1 & MF1_MV_ONLY_ATT) {
 	if (k) {
 	    roff(", but ");
 	}
@@ -560,7 +594,7 @@ int roff_recall(int r_idx)
     k = TRUE;
 
     /* First, handle (and forget!) the "breath" */
-    if ((rspells & CS1_BREATHE) ||
+    if ((rspells1 & CS1_BREATHE) ||
 	(rspells2 & CS2_BREATHE) ||
 	(rspells3 & CS3_BREATHE)) {
 
@@ -568,8 +602,8 @@ int roff_recall(int r_idx)
 	breath = TRUE;
 
 	/* Process the "breath" and remove it */
-	j = rspells & CS1_BREATHE;
-	rspells &= ~CS1_BREATHE;
+	j = rspells1 & CS1_BREATHE;
+	rspells1 &= ~CS1_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		sprintf(temp, "%s can breathe ",
@@ -615,7 +649,7 @@ int roff_recall(int r_idx)
 
 	/* Process the "breath" and remove it */
 	j = rspells3 & CS3_BREATHE;
-	rspells &= ~CS3_BREATHE;
+	rspells1 &= ~CS3_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		sprintf(temp, "%s can breathe ",
@@ -641,13 +675,13 @@ int roff_recall(int r_idx)
     k = TRUE;
 
     /* Dump the normal spells */
-    if (rspells || rspells2 || rspells3) {
+    if (rspells1 || rspells2 || rspells3) {
 
 	/* Note that spells exist */
 	magic = TRUE;
 
 	/* Describe the spells */
-	j = rspells & ~CS1_BREATHE;
+	j = rspells1 & ~CS1_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		if (breath) {
@@ -775,15 +809,15 @@ int roff_recall(int r_idx)
     k = TRUE;
     j = rcflags1;
 
-    for (i = 0; j & CM_SPECIAL; i++) {
-	if (j & (CM_INVISIBLE << i)) {
-	    j &= ~(CM_INVISIBLE << i);
+    for (i = 0; j & CM1_SPECIAL; i++) {
+	if (j & (MF1_MV_INVIS << i)) {
+	    j &= ~(MF1_MV_INVIS << i);
 	    if (k) {
 		roff((sex == 'm' ? "He can " : sex == 'f' ? "She can " :
 		      sex == 'p' ? "They can " : "It can "));
 		k = FALSE;
 	    }
-	    else if (j & CM_SPECIAL) {
+	    else if (j & CM1_SPECIAL) {
 		roff(", ");
 	    }
 	    else {
@@ -926,9 +960,9 @@ int roff_recall(int r_idx)
 
 
     /* Do we know what it might carry? */
-    if (rcflags1 & (CM_CARRY_OBJ | CM_CARRY_GOLD)) {
+    if (rcflags1 & (MF1_CARRY_OBJ | MF1_CARRY_GOLD)) {
 
-	j = (rcflags1 & CM_TREASURE) >> CM_TR_SHIFT;
+	j = (rcflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
 
 	roff((sex == 'm' ? "He may" : sex == 'f' ? "She may" :
 	      sex == 'p' ? "They may" : "It may"));
@@ -936,7 +970,7 @@ int roff_recall(int r_idx)
 
 	/* Only one treasure observed */
 	if (j == 1) {
-	    if ((r_ptr->cflags1 & CM_TREASURE) == CM_60_RANDOM) {
+	    if ((r_ptr->cflags1 & CM1_TREASURE) == MF1_HAS_60) {
 		roff(" sometimes");
 	    }
 	    else {
@@ -946,8 +980,8 @@ int roff_recall(int r_idx)
 
 	/* Only two treasures observed */
 	else if ((j == 2) &&
-		 ((r_ptr->cflags1 & CM_TREASURE) ==
-		  (CM_60_RANDOM | CM_90_RANDOM))) {
+		 ((r_ptr->cflags1 & CM1_TREASURE) ==
+		  (MF1_HAS_60 | MF1_HAS_90))) {
 	    roff(" often");
 	}
 
@@ -974,9 +1008,9 @@ int roff_recall(int r_idx)
 	    roff(temp);
 	}
 
-	if (rcflags1 & CM_CARRY_OBJ) {
+	if (rcflags1 & MF1_CARRY_OBJ) {
 	    roff(p);
-	    if (rcflags1 & CM_CARRY_GOLD) {
+	    if (rcflags1 & MF1_CARRY_GOLD) {
 		roff(" or treasure");
 		if (j > 1) roff("s");
 	    }
@@ -1092,7 +1126,7 @@ int roff_recall(int r_idx)
 
 
     /* XXX Hack -- Always know the win creature. */
-    if (r_ptr->cflags1 & CM_WIN) {
+    if (r_ptr->cflags1 & MF1_WINNER) {
 	roff("  Killing him wins the game!");
     }
 
@@ -1110,39 +1144,3 @@ int roff_recall(int r_idx)
 }
 
 
-/*
- * Print out strings, filling up lines as we go. 
- */
-static void roff(register cptr p)
-{
-    register char *q, *r;
-    register int   linesize;
-
-    linesize = sizeof(roffbuf);
-    if (linesize > 80)
-	linesize = 80;
-
-    while (*p) {
-	*roffp = *p;
-	if (*p == '\n' || roffp >= roffbuf + linesize) {
-	    q = roffp;
-	    if (*p != '\n') {
-		if (*q == ' ')
-		    q--;
-		if (*q == ' ')
-		    q--;
-		while (*q != ' ')
-		    q--;
-	    }
-	    *q = 0;
-	    prt(roffbuf, roffpline, 0);
-	    roffpline++;
-	    r = roffbuf;
-	    while (q < roffp)
-		*r++ = *++q;
-	    roffp = r;
-	} else
-	    roffp++;
-	p++;
-    }
-}

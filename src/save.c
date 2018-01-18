@@ -401,7 +401,7 @@ static int sv_write()
     wr_byte(f_ptr->sustain_con);
     wr_byte(f_ptr->sustain_dex);
     wr_byte(f_ptr->sustain_chr);
-    wr_byte(f_ptr->confuse_monster);
+    wr_byte(f_ptr->confusing);
     wr_byte(f_ptr->new_spells);
     wr_byte(f_ptr->resist_pois);
     wr_byte(f_ptr->hold_life);
@@ -1238,7 +1238,7 @@ int load_player(int *generate)
 	    rd_byte(&f_ptr->sustain_con);
 	    rd_byte(&f_ptr->sustain_dex);
 	    rd_byte(&f_ptr->sustain_chr);
-	    rd_byte(&f_ptr->confuse_monster);
+	    rd_byte(&f_ptr->confusing);
 	    rd_byte(&f_ptr->new_spells);
 	    rd_byte(&f_ptr->resist_pois);
 	    rd_byte(&f_ptr->hold_life);

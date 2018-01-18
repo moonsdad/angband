@@ -1110,9 +1110,9 @@ void read_scroll(void)
 	    break;
 
 	  case 11:
-	    if (p_ptr->flags.confuse_monster == 0) {
+	    if (p_ptr->flags.confusing == 0) {
 		msg_print("Your hands begin to glow.");
-		p_ptr->flags.confuse_monster = TRUE;
+		p_ptr->flags.confusing = TRUE;
 		ident = TRUE;
 	    }
 	    break;

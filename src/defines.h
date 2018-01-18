@@ -425,69 +425,7 @@
 #define PY_MANA         0x80000000L
 
 
-/* definitions for creatures, cflags1 field */
-#define CM_ATTACK_ONLY  0x00000001L
-#define CM_MOVE_NORMAL  0x00000002L
 
-#define CM_20_RANDOM    0x00000004L
-#define CM_40_RANDOM    0x00000008L
-#define CM_75_RANDOM    0x00000010L
-
-#define CM_INVISIBLE    0x00010000L
-#define CM_OPEN_DOOR    0x00020000L
-#define CM_PHASE        0x00040000L
-#define CM_EATS_OTHER   0x00080000L
-#define CM_PICKS_UP     0x00100000L
-#define CM_MULTIPLY     0x00200000L
-
-#define CM_CARRY_OBJ    0x01000000L
-#define CM_CARRY_GOLD   0x02000000L
-#define CM_60_RANDOM    0x04000000L
-#define CM_90_RANDOM    0x08000000L
-#define CM_1D2_OBJ      0x10000000L
-#define CM_2D2_OBJ      0x20000000L
-#define CM_4D2_OBJ      0x40000000L
-#define CM_WIN          0x80000000L
-
-/* creature spell definitions */
-#define CS_SPELLS       0xFF07FFF0L
-#define CS_TEL_SHORT    0x00000010L
-#define CS_TEL_LONG     0x00000020L
-#define CS_TEL_TO       0x00000040L
-#define CS_LGHT_WND     0x00000080L
-#define CS_SER_WND      0x00000100L
-#define CS_HOLD_PER     0x00000200L
-#define CS_BLIND        0x00000400L
-#define CS_CONFUSE      0x00000800L
-#define CS_FEAR         0x00001000L
-#define CS_SUMMON_MON   0x00002000L
-#define CS_SUMMON_UND   0x00004000L
-#define CS_SLOW_PER     0x00008000L
-#define CS_DRAIN_MANA   0x00010000L
-
-#define CS_BR_LIGHT     0x00080000L
-#define CS_BR_GAS       0x00100000L
-#define CS_BR_ACID      0x00200000L
-#define CS_BR_FROST     0x00400000L
-#define CS_BR_FIRE      0x00800000L
-
-/* creature defense flags */
-#define CD_DRAGON       0x0001
-#define CD_ANIMAL       0x0002
-#define CD_EVIL         0x0004
-#define CD_UNDEAD       0x0008
-#define CD_WEAKNESS     0x03F0
-#define CD_FROST        0x0010
-#define CD_FIRE         0x0020
-#define CD_POISON       0x0040
-#define CD_ACID         0x0080
-#define CD_LIGHT        0x0100
-#define CD_STONE        0x0200
-
-#define CD_NO_SLEEP     0x1000
-#define CD_INFRA        0x2000
-#define CD_MAX_HP       0x4000
-#define CD_ORC          0x8000
 
 
 /* inventory stacking svals
@@ -1084,7 +1022,7 @@
  */
 
 
-
+/* definitions for creatures, cflags1 field */
 #define MF1_MV_ONLY_ATT		0x00000001L /* The monster does not move */
 #define MF1_MV_ATT_NORM 	0x00000002L /* The monster moves normally */
 #define MF1_MV_20	        0x00000004L /* 20% random */
@@ -1228,22 +1166,21 @@
  */
 
 /* Hack -- scan for "movement" */
-#define CM_ALL_MV_FLAGS 0x0000001FL
+#define CM1_ALL_MV_FLAGS 0x0000001FL
 #define CM1_RANDOM_MOVE  0x0000001CL
 
 /* Hack -- scan for "special movement" */
-#define CM_SPECIAL      0x003F0000L
+#define CM1_SPECIAL      0x003F0000L
 
 /* Hack -- used to "count" treasures */
-#define CM_TREASURE     0x7C000000L
-#define CM_TR_SHIFT     26              /* used for recall of treasure */
-
+#define CM1_TREASURE     0x7C000000L
+#define CM1_TR_SHIFT     26              /* used for recall of treasure */
 
 /* Hack -- used to "count" spell attacks */
-#define CS1_FREQ         0x0000000FL
+#define CS1_FREQ        0x0000000FL
 
 /* Hack -- separate out the "breath" spells */
-#define CS1_BREATHE      0x00F80000L
+#define CS1_BREATHE     0x00F80000L
 #define CS2_BREATHE     0x8000003FL
 #define CS3_BREATHE     0x0000007FL
 

@@ -140,10 +140,10 @@ int build_wall(int dir, int y, int x)
 		/* stop the wall building */
 		flag = TRUE;
 
-		if (!(r_ptr->cflags1 & CM_PHASE)) {
+		if (!(r_ptr->cflags1 & MF1_THRO_WALL)) {
 
 		    /* monster does not move, can't escape the wall */
-		    if (r_ptr->cflags1 & CM_ATTACK_ONLY) {
+		    if (r_ptr->cflags1 & MF1_MV_ONLY_ATT) {
 			damage = 250;
 		    }
 		    else {
@@ -283,7 +283,7 @@ int mass_genocide(int spell)
 	m_ptr = &m_list[i];
 	r_ptr = &r_list[m_ptr->mptr];
 	if (((m_ptr->cdis <= MAX_SIGHT) &&
-	     ((r_ptr->cflags1 & CM_WIN) == 0) &&
+	     ((r_ptr->cflags1 & MF1_WINNER) == 0) &&
 	     (!(r_ptr->cflags2 & MF2_UNIQUE))) ||
 	    (wizard && (m_ptr->cdis <= MAX_SIGHT))) {
 
@@ -329,7 +329,7 @@ int genocide(int spell)
 
 	    if ((unsigned) typ == r_list[m_ptr->mptr].cchar)
 
-		if ((r_ptr->cflags1 & CM_WIN) == 0) {
+		if ((r_ptr->cflags1 & MF1_WINNER) == 0) {
 		    /* Delete the monster */
 		    delete_monster(i);
 
@@ -435,7 +435,7 @@ int sleep_monsters2(void)
 
 	if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-	    (r_ptr->cflags2 & MF2_UNIQUE) || (r_ptr->cdefense & MF2_CHARM_SLEEP)) {
+	    (r_ptr->cflags2 & MF2_UNIQUE) || (r_ptr->cflags2 & MF2_CHARM_SLEEP)) {
 	    if (m_ptr->ml) {
 		if (r_ptr->cflags2 & MF2_CHARM_SLEEP) {
 		    l_list[m_ptr->mptr].r_cflags2 |= MF2_CHARM_SLEEP;
@@ -475,7 +475,7 @@ int mass_poly()
 	m_ptr = &m_list[i];
 	if (m_ptr->cdis <= MAX_SIGHT) {
 	    r_ptr = &r_list[m_ptr->mptr];
-	    if (((r_ptr->cflags1 & CM_WIN) == 0) && !(r_ptr->cflags2 & MF2_UNIQUE)) {
+	    if (((r_ptr->cflags1 & MF1_WINNER) == 0) && !(r_ptr->cflags2 & MF2_UNIQUE)) {
 		mass = poly(i);
 	    }
 	}
@@ -674,11 +674,11 @@ void earthquake(void)
 		    m_ptr = &m_list[c_ptr->cptr];
 		    r_ptr = &r_list[m_ptr->mptr];
 
-		    if (!(r_ptr->cflags1 & CM_PHASE) &&
+		    if (!(r_ptr->cflags1 & MF1_THRO_WALL) &&
 			!(r_ptr->cflags2 & MF2_BREAK_WALL)) {
 
 			/* monster can not move to escape the wall */
-			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cflags1 & CM_ATTACK_ONLY)) {
+			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cflags1 & MF1_MV_ONLY_ATT)) {
 			    kill = TRUE;
 			}
 
@@ -825,8 +825,8 @@ int probing(void)
 	    msg_print(out_val);
 
 	    /* let's make probing do good things to the monster memory -CWS */
-	    l_ptr->r_cflags2 = r_ptr->cdefense;
-	    l_ptr->r_cflags1 = (r_ptr->cmove & ~CM_TREASURE);
+	    l_ptr->r_cflags2 = r_ptr->cflags2;
+	    l_ptr->r_cflags1 = (r_ptr->cflags1 & ~CM1_TREASURE);
 
 	    /* Probe worked */
 	    probe = TRUE;
@@ -1479,7 +1479,7 @@ void self_knowledge()
 	prt("You are protected by a mystic shield.", i++, j);
     if (p_ptr->flags.invuln > 0)
 	prt("You are temporarily invulnerable.", i++, j);
-    if (p_ptr->flags.confuse_monster)
+    if (p_ptr->flags.confusing)
 	prt("Your hands are glowing dull red.", i++, j);
     if (p_ptr->flags.new_spells > 0)
 	prt("You can learn some more spells.", i++, j);
@@ -1819,7 +1819,7 @@ int sleep_monsters1(int y, int x)
 
 		if ((r_ptr->level >
 		     randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-		    (MF2_CHARM_SLEEP & r_ptr->cflags2) || (r_ptr->cdefense & MF2_UNIQUE)) {
+		    (MF2_CHARM_SLEEP & r_ptr->cflags2) || (r_ptr->cflags2 & MF2_UNIQUE)) {
 		    if (m_ptr->ml && (r_ptr->cflags2 & MF2_CHARM_SLEEP))
 			l_list[m_ptr->mptr].r_cflags2 |= MF2_CHARM_SLEEP;
 		    (void)sprintf(out_val, "%s is unaffected.", m_name);
@@ -2134,7 +2134,7 @@ int detect_invisible()
     for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
-	    (CM_INVISIBLE & r_list[m_ptr->mptr].cflags1)) {
+	    (MF1_MV_INVIS & r_list[m_ptr->mptr].cflags1)) {
 
 	    /* Draw the monster (even if invisible) */
 	    m_ptr->ml = TRUE;
@@ -2279,7 +2279,7 @@ int detect_monsters(void)
 	m_ptr = &m_list[i];
 
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
-	    ((CM_INVISIBLE & r_list[m_ptr->mptr].cflags1) == 0)) {
+	    ((MF1_MV_INVIS & r_list[m_ptr->mptr].cflags1) == 0)) {
 
 	    /* Draw the monster (unless invisible) */
 	    m_ptr->ml = TRUE;
@@ -3280,7 +3280,7 @@ int sleep_monster(int dir, int y, int x)
 	    monster_name(m_name, m_ptr, r_ptr);
 	    if ((r_ptr->level >
 	    randint((p_ptr->misc.lev - 10) < 1 ? 1 : (p_ptr->misc.lev - 10)) + 10) ||
-	    (r_ptr->cflags2 & MF2_UNIQUE) || (r_ptr->cdefense & MF2_CHARM_SLEEP)) {
+	    (r_ptr->cflags2 & MF2_UNIQUE) || (r_ptr->cflags2 & MF2_CHARM_SLEEP)) {
 		if (m_ptr->ml && (r_ptr->cflags2 & MF2_CHARM_SLEEP))
 		    l_list[m_ptr->mptr].r_cflags2 |= MF2_CHARM_SLEEP;
 		(void)sprintf(out_val, "%s is unaffected.", m_name);
@@ -3595,12 +3595,12 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 					      r_ptr->cflags1, 0, 0);
 			coin_type = 0;
 			if (m_ptr->ml || (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)) {
-			    tmp = (l_list[m_ptr->mptr].r_cflags1 & CM_TREASURE)
-				>> CM_TR_SHIFT;
-			    if (tmp > ((treas & CM_TREASURE) >> CM_TR_SHIFT))
-				treas = (treas & ~CM_TREASURE) | (tmp << CM_TR_SHIFT);
+			    tmp = (l_list[m_ptr->mptr].r_cflags1 & CM1_TREASURE)
+				>> CM1_TR_SHIFT;
+			    if (tmp > ((treas & CM1_TREASURE) >> CM1_TR_SHIFT))
+				treas = (treas & ~CM1_TREASURE) | (tmp << CM1_TR_SHIFT);
 			    l_list[m_ptr->mptr].r_cflags1 = treas |
-				(l_list[m_ptr->mptr].r_cflags1 & ~CM_TREASURE);
+				(l_list[m_ptr->mptr].r_cflags1 & ~CM1_TREASURE);
 			}
 			if (monptr < c_ptr->cptr)
 			    delete_monster((int)c_ptr->cptr);
@@ -4095,12 +4095,12 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 				coin_type = 0;
 				/* recall even invisible uniques -CWS */
 			    if (m_ptr->ml || (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)) {
-				tmp = (l_list[m_ptr->mptr].r_cflags1 & CM_TREASURE)
-				    >> CM_TR_SHIFT;
-				if (tmp > ((treas & CM_TREASURE) >> CM_TR_SHIFT))
-				    treas = (treas & ~CM_TREASURE) | (tmp << CM_TR_SHIFT);
+				tmp = (l_list[m_ptr->mptr].r_cflags1 & CM1_TREASURE)
+				    >> CM1_TR_SHIFT;
+				if (tmp > ((treas & CM1_TREASURE) >> CM1_TR_SHIFT))
+				    treas = (treas & ~CM1_TREASURE) | (tmp << CM1_TR_SHIFT);
 				l_list[m_ptr->mptr].r_cflags1 = treas |
-				    (l_list[m_ptr->mptr].r_cflags1 & ~CM_TREASURE);
+				    (l_list[m_ptr->mptr].r_cflags1 & ~CM1_TREASURE);
 			    }
 			/* It ate an already processed monster.  Handle normally. */
 			    if (monptr < c_ptr->cptr)
