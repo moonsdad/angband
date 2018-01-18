@@ -1206,7 +1206,7 @@ void read_scroll(void)
 	    break;
 
 	  case 30:
-	    ident = dispel_creature(UNDEAD, 60);
+	    ident = dispel_creature(MF2_UNDEAD, 60);
 	    break;
 
 	  case 31:
@@ -1428,7 +1428,7 @@ void read_scroll(void)
 	    break;
 
 	  case 43:
-	    place_good(char_row, char_col, SPECIAL);
+	    place_good(char_row, char_col, MF2_SPECIAL);
 	    prt_map();
 	    ident = TRUE;
 	    break;
@@ -1860,7 +1860,7 @@ void use(void)
 	break;
 
       case ST_HOLYNESS:
-	dispel_creature(EVIL, 120);
+	dispel_creature(MF2_EVIL, 120);
 	protect_evil();
 	cure_poison();
 	remove_fear();
@@ -2027,7 +2027,7 @@ void use(void)
 	break;
 
       case ST_DSP_EVI:
-	ident = dispel_creature(EVIL, 60);
+	ident = dispel_creature(MF2_EVIL, 60);
 	break;
 
       case ST_DARK:
@@ -3303,7 +3303,7 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 4):
 		msg_print("An aura of good floods the area...");
-		dispel_creature(EVIL, (int)(5 * p_ptr->misc.lev));
+		dispel_creature(MF2_EVIL, (int)(5 * p_ptr->misc.lev));
 		inventory[i].timeout = 444 + randint(222);
 		break;
 	      case (SPECIAL_OBJ + 5):

@@ -132,9 +132,9 @@
 #define MAX_STORES        8     /* Number of different stores            */
 #define STORE_INVEN_MAX  24     /* Max number of discrete objs in inven  */
 #define STORE_CHOICES    30     /* NUMBER of items to choose stock from  */
-#define STORE_MIN_INVEN  10     /* Min diff objs in stock for auto sell  */
-#define STORE_MAX_INVEN  18     /* Max diff objs in stock for auto buy   */
-#define STORE_TURN_AROUND 9     /* Amount of buying and selling normally */
+#define STORE_MIN_KEEP  10     /* Min diff objs in stock for auto sell  */
+#define STORE_MAX_KEEP  18     /* Max diff objs in stock for auto buy   */
+#define STORE_TURNOVER 9     /* Amount of buying and selling normally */
 #define COST_ADJ         100    /* Adjust prices for buying and selling  */
 
 /* Treasure constants                                           */
@@ -802,10 +802,10 @@
 #define TR1_CHR			0x00000020L	/* Uses "pval" */
 #define TR1_STEALTH		0x00000100L	/* Uses "pval" */
 #define TR1_SEARCH		0x00000040L	/* Uses "pval" */
-#define TR_INFRA		0x40000000L
-#define TR_TUNNEL		0x20000000L
+#define TR1_INFRA		0x40000000L
+#define TR1_TUNNEL		0x20000000L
 #define TR1_SPEED		0x00001000L
-#define TR_ATTACK_SPD		0x08000000L	/* extra attacks/round -DGK */
+#define TR1_ATTACK_SPD		0x08000000L	/* extra attacks/round -DGK */
 #define TR1_SLAY_ANIMAL		0x00004000L
 #define TR1_SLAY_EVIL		0x00008000L
 #define TR1_SLAY_UNDEAD		0x00010000L
@@ -850,16 +850,16 @@
 #define TR_FFALL        0x04000000L
 #define TR2_RES_LITE       0x00020000L
 #define TR_LIGHTNING    0x00001000L
-#define TR_SEE_INVIS		0x01000000L
-#define TR_TELEPATHY		0x00000020L
-#define TR_SLOW_DIGEST		0x00000080L
-#define TR_REGEN		0x00000800L
+#define TR3_SEE_INVIS		0x01000000L
+#define TR3_TELEPATHY		0x00000020L
+#define TR3_SLOW_DIGEST		0x00000080L
+#define TR3_REGEN		0x00000800L
 #define TR_ACTIVATE		0x00000800L
 #define TR1_IMPACT       0x00002000L
 #define TR2_RES_FEAR     0x10000000L
 #define TR_LIGHT        0x00000400L
-#define TR_TELEPORT     0x00000400L
-#define TR_AGGRAVATE    0x00000200L
+#define TR3_TELEPORT		0x00000400L
+#define TR3_AGGRAVATE		0x00000200L
 #define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/
 #define TR_CURSED		0x80000000L
 
@@ -1046,11 +1046,11 @@
 #define MF1_WINNER		0x80000000L
 
 #define MF2_ANIMAL		0x00000001L
-#define EVIL		0x00000002L
-#define ORC			0x00000004L
-#define UNDEAD		0x00000008L
-#define DRAGON		0x00000010L
-#define DEMON		0x00000020L
+#define MF2_EVIL		0x00000002L
+#define MF2_ORC			0x00000004L
+#define MF2_UNDEAD		0x00000008L
+#define MF2_DRAGON		0x00000010L
+#define MF2_DEMON		0x00000020L
 #define MF2_HURT_LITE		0x00000040L
 #define	MF2_HURT_ROCK		0x00000080L
 #define MF2_CHARM_SLEEP		0x00000100L
@@ -1063,7 +1063,7 @@
 #define MF2_IM_ACID		0x00008000L
 #define MF2_TROLL		0x00010000L
 #define MF2_GIANT		0x00020000L
-#define SPECIAL       	0x00040000L
+#define MF2_SPECIAL       	0x00040000L
 #define MF2_GROUP         	0x00080000L
 #define MF2_GOOD           	0x00100000L
 #define MF2_BREAK_WALL		0x00200000L
@@ -1082,10 +1082,10 @@
 #define MS1_HOLD		0x00000200L
 #define MS1_BLIND		0x00000400L
 #define MS1_CONF		0x00000800L
-#define FEAR		0x001000L
+#define MS1_FEAR		0x001000L
 #define MS1_S_MONSTER		0x00002000L
 #define MS1_S_UNDEAD		0x00004000L
-#define SLOW		0x00008000L
+#define MS1_SLOW		0x00008000L
 #define MS1_MANA_DRAIN		0x00010000L
 #define MS1_S_DEMON		0x00020000L
 #define MS1_S_DRAGON		0x00040000L
@@ -1114,14 +1114,14 @@
 #define MS2_BA_ELEC   		0x00000080L
 #define MS2_BA_ACID    		0x00000100L
 #define MS2_TRAP_CREATE  	0x00000200L
-#define RAZOR        	0x00000400L
+#define MS2_RAZOR        	0x00000400L
 #define MS2_MIND_BLAST   	0x00000800L
 #define MS2_TELE_AWAY    	0x00001000L
-#define HEAL         	0x00002000L
+#define MS2_HEAL         	0x00002000L
 #define MS2_HASTE        	0x00004000L
-#define MISSILE      	0x00008000L
+#define MS2_ARROW_2      	0x00008000L
 #define MS2_BO_PLAS  		0x00010000L
-#define SUMMON       	0x00020000L
+#define MS2_S_SUMMON       	0x00020000L
 #define MS2_BO_NETH  		0x00040000L
 #define MS2_BO_ICEE     	0x00080000L
 #define MS2_DARKNESS     	0x00100000L
@@ -1145,7 +1145,7 @@
 #define MS3_BR_GRAV    		0x00000010L /* Gravity */
 #define MS3_BR_DARK    		0x00000020L /* Darkness */
 #define MS3_BR_PLAS    		0x00000040L /* Plasma */
-#define ARROW        	0x00000080L /* fires an arrow */
+#define MS3_ARROW_3        	0x00000080L /* fires an arrow */
 #define MS3_S_WRAITH     	0x00000100L /* Summon ringwraiths */
 #define MS3_DARK_STORM   	0x00000200L /* Big darkness breath */
 #define MS3_MANA_STORM   	0x00000400L /* Mana storm */

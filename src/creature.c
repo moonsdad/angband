@@ -786,11 +786,11 @@ static void make_attack(int m_idx)
 	flag = FALSE;
 
 	/* Random (100) + level > 50 chance for stop any attack added */
-	if (((p_ptr->flags.protevil > 0) && (r_ptr->cflags2 & EVIL) &&
+	if (((p_ptr->flags.protevil > 0) && (r_ptr->cflags2 & MF2_EVIL) &&
 	     ((p_ptr->misc.lev + 1) > r_ptr->level)) &&
 	    (randint(100) + (p_ptr->misc.lev) > 50)) {
 
-	    if (m_ptr->ml) l_list[m_ptr->mptr].r_cflags2 |= EVIL;
+	    if (m_ptr->ml) l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
 	    attype = 99;
 	    adesc = 99;
 	}
@@ -1959,17 +1959,17 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 			t = 0L;
 			if ((i_list[c_ptr->tptr].flags & TR1_SLAY_DRAGON) ||
 			    (i_list[c_ptr->tptr].flags & TR1_KILL_DRAGON))
-			    t |= DRAGON;
+			    t |= MF2_DRAGON;
 			if (i_list[c_ptr->tptr].flags & TR1_SLAY_UNDEAD)
-			    t |= UNDEAD;
+			    t |= MF2_UNDEAD;
 			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_DEMON)
-			    t |= DEMON;
+			    t |= MF2_DEMON;
 			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_TROLL)
 			    t |= MF2_TROLL;
 			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_GIANT)
 			    t |= MF2_GIANT;
 			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_ORC)
-			    t |= ORC;
+			    t |= MF2_ORC;
 		    /* if artifact, or wearable & hurts this monster -CWS */
 			if ((i_list[c_ptr->tptr].flags2 & TR_ARTIFACT) ||
 			    ( (i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&

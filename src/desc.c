@@ -840,11 +840,11 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 			     (i_ptr->name2 != EGO_STEALTH))
 			(void)sprintf(tmp_str, " (%c%d to stealth)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
-		    else if ((i_ptr->flags & TR_INFRA) &&
+		    else if ((i_ptr->flags & TR1_INFRA) &&
 			     (i_ptr->name2 != EGO_INFRAVISION))
 			(void)sprintf(tmp_str, " (%c%d to infravision)",
 				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
-		    else if (i_ptr->flags2 & TR_ATTACK_SPD) {
+		    else if (i_ptr->flags2 & TR1_ATTACK_SPD) {
 			if (MY_ABS(i_ptr->p1) == 1)
 			    (void)sprintf(tmp_str, " (%c%d attack)",
 					  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));

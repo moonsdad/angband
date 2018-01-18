@@ -45,7 +45,7 @@ static cptr value_check(inven_type *i_ptr)
     if (i_ptr->flags & TR_CURSED && i_ptr->name2 == SN_NULL) return "worthless";
     if (i_ptr->flags & TR_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
     if ((i_ptr->tval == TV_DIGGING) &&  /* also, good digging tools -CFT */
-	(i_ptr->flags & TR_TUNNEL) &&
+	(i_ptr->flags & TR1_TUNNEL) &&
 	(i_ptr->p1 > objeci_list[i_ptr->index].p1)) /* better than normal for this
 						       type of shovel/pick? -CFT */
 	return "good";
@@ -873,7 +873,7 @@ void dungeon(void)
 		else {
 		    p_ptr->flags.see_inv = FALSE;	/* unless item grants it */
 		    for (i = INVEN_WIELD; i <= INVEN_LITE; i++)
-			if (TR_SEE_INVIS & inventory[i].flags)
+			if (TR3_SEE_INVIS & inventory[i].flags)
 			    p_ptr->flags.see_inv = TRUE;
 		}
 	    /* unlight but don't move creatures */

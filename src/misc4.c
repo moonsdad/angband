@@ -2053,7 +2053,7 @@ int attack_blows(int weight, int *wtohit)
 
 	s = 0;				/* do Weapons of Speed */
 	for (d = INVEN_WIELD; d < INVEN_AUX; d++)
-	    if (inventory[d].flags2 & TR_ATTACK_SPD)
+	    if (inventory[d].flags2 & TR1_ATTACK_SPD)
 		s += inventory[d].p1;
 
 	d = (int)blows_table[str_index][dex_index];
@@ -2100,35 +2100,35 @@ int tot_dam(inven_type *i_ptr, int tdam, int monster)
 	}
 
 	/* Execute Dragon */
-	else if ((m_ptr->cflags2 & DRAGON) &&
+	else if ((m_ptr->cflags2 & MF2_DRAGON) &&
 	    (i_ptr->flags & TR1_KILL_DRAGON)) {
 
 	    tdam *= 5;
-	    r_ptr->r_cflags2 |= DRAGON;
+	    r_ptr->r_cflags2 |= MF2_DRAGON;
 	}
 
 	/* Slay Dragon  */
-	else if ((m_ptr->cflags2 & DRAGON) &&
+	else if ((m_ptr->cflags2 & MF2_DRAGON) &&
 	    (i_ptr->flags & TR1_SLAY_DRAGON)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cflags2 |= DRAGON;
+	    r_ptr->r_cflags2 |= MF2_DRAGON;
 	}
 
 	/* Slay Undead */
-	else if ((m_ptr->cflags2 & UNDEAD) &&
+	else if ((m_ptr->cflags2 & MF2_UNDEAD) &&
 	    (i_ptr->flags & TR1_SLAY_UNDEAD)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cflags2 |= UNDEAD;
+	    r_ptr->r_cflags2 |= MF2_UNDEAD;
 	}
 
 	/* Slay Orc */
-	else if ((m_ptr->cflags2 & ORC) &&
+	else if ((m_ptr->cflags2 & MF2_ORC) &&
 	    (i_ptr->flags2 & TR1_SLAY_ORC)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cflags2 |= ORC;
+	    r_ptr->r_cflags2 |= MF2_ORC;
 	}
 
 	/* Slay MF2_TROLL */
@@ -2148,11 +2148,11 @@ int tot_dam(inven_type *i_ptr, int tdam, int monster)
 	}
 
 	/* Slay Demon */
-	else if ((m_ptr->cflags2 & DEMON) &&
+	else if ((m_ptr->cflags2 & MF2_DEMON) &&
 	    (i_ptr->flags2 & TR1_SLAY_DEMON)) {
 
 	    tdam *= 3;
-	    r_ptr->r_cflags2 |= DEMON;
+	    r_ptr->r_cflags2 |= MF2_DEMON;
 	}
 
 	/* Frost */
@@ -2168,9 +2168,9 @@ int tot_dam(inven_type *i_ptr, int tdam, int monster)
 	}
 
 	/* Slay Evil */
-	else if ((m_ptr->cflags2 & EVIL) && (i_ptr->flags & TR1_SLAY_EVIL)) {
+	else if ((m_ptr->cflags2 & MF2_EVIL) && (i_ptr->flags & TR1_SLAY_EVIL)) {
 	    tdam *= 2;
-	    r_ptr->r_cflags2 |= EVIL;
+	    r_ptr->r_cflags2 |= MF2_EVIL;
 	}
 
 	/* Slay Animal */

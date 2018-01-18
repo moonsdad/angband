@@ -614,13 +614,13 @@ void calc_bonuses()
     }
 
     /* Process the item flags */
-    if (TR_SLOW_DIGEST & item_flags) p_ptr->flags.slow_digest = TRUE;
-    if (TR_AGGRAVATE & item_flags) p_ptr->flags.aggravate = TRUE;
-    if (TR_TELEPORT & item_flags) p_ptr->flags.teleport = TRUE;
-    if (TR_REGEN & item_flags) p_ptr->flags.regenerate = TRUE;
-    if (TR_TELEPATHY & item_flags2) p_ptr->flags.telepathy = TRUE;
+    if (TR3_SLOW_DIGEST & item_flags) p_ptr->flags.slow_digest = TRUE;
+    if (TR3_AGGRAVATE & item_flags) p_ptr->flags.aggravate = TRUE;
+    if (TR3_TELEPORT & item_flags) p_ptr->flags.teleport = TRUE;
+    if (TR3_REGEN & item_flags) p_ptr->flags.regenerate = TRUE;
+    if (TR3_TELEPATHY & item_flags2) p_ptr->flags.telepathy = TRUE;
     if (TR_LIGHT & item_flags2) _ptr->light = TRUE;
-    if (TR_SEE_INVIS & item_flags) p_ptr->flags.see_inv = TRUE;
+    if (TR3_SEE_INVIS & item_flags) p_ptr->flags.see_inv = TRUE;
     if (TR_FFALL & item_flags) p_ptr->flags.ffall = TRUE;
     if (TR2_FREE_ACT & item_flags) p_ptr->flags.free_act = TRUE;
     if (TR_HOLD_LIFE & item_flags2) ptr->hold_life = TRUE;

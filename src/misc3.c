@@ -441,7 +441,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Holy Avenger");
 			rating += 30;
-			i_ptr->flags |= (TR_SEE_INVIS | TR_SUST_STAT |
+			i_ptr->flags |= (TR3_SEE_INVIS | TR_SUST_STAT |
 				      TR1_SLAY_UNDEAD | TR1_SLAY_EVIL | TR1_WIS);
 			i_ptr->flags2 |= (TR1_SLAY_DEMON | TR_BLESS_BLADE);
 			i_ptr->tohit += 5;
@@ -462,9 +462,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Defender");
 			rating += 23;
-			i_ptr->flags |= (TR_FFALL | TR2_RES_LIGHT | TR_SEE_INVIS
+			i_ptr->flags |= (TR_FFALL | TR2_RES_LIGHT | TR3_SEE_INVIS
 				   | TR2_FREE_ACT | TR2_RES_COLD | TR2_RES_ACID
-				     | TR2_RES_FIRE | TR_REGEN | TR1_STEALTH);
+				     | TR2_RES_FIRE | TR3_REGEN | TR1_STEALTH);
 			i_ptr->tohit += 3;
 			i_ptr->todam += 3;
 			i_ptr->toac += 5 + randint(5);
@@ -544,7 +544,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		      case 13:
 		      case 14:	   /* Slay Undead	  */
-			i_ptr->flags |= (TR_SEE_INVIS | TR1_SLAY_UNDEAD);
+			i_ptr->flags |= (TR3_SEE_INVIS | TR1_SLAY_UNDEAD);
 			if (randint(3) == 1) {
 			    i_ptr->flags2 |= (TR_HOLD_LIFE);
 			    i_ptr->cost += 1000;
@@ -612,7 +612,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Westernesse");
 			rating += 20;
-			i_ptr->flags |= (TR_SEE_INVIS | TR1_DEX | TR1_CON | TR1_STR |
+			i_ptr->flags |= (TR3_SEE_INVIS | TR1_DEX | TR1_CON | TR1_STR |
 					 TR2_FREE_ACT);
 			i_ptr->flags2 |= TR1_SLAY_ORC;
 			i_ptr->tohit += randint(5) + 3;
@@ -648,7 +648,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			rating += 20;
 			i_ptr->tohit += randint(5);
 			i_ptr->todam += randint(3);
-			i_ptr->flags2 = TR_ATTACK_SPD;
+			i_ptr->flags2 = TR1_ATTACK_SPD;
 			if (i_ptr->weight <= 80)
 			    i_ptr->p1 = randint(3);
 			else if (i_ptr->weight <= 130)
@@ -668,7 +668,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    i_ptr->flags |= TR_CURSED;
 	    if (level > (20 + randint(15)) && randint(10) == 1) {
 		i_ptr->name2 = EGO_MORGUL;
-		i_ptr->flags |= (TR_SEE_INVIS | TR_AGGRAVATE);
+		i_ptr->flags |= (TR3_SEE_INVIS | TR3_AGGRAVATE);
 		i_ptr->tohit -= 15;
 		i_ptr->todam -= 15;
 		i_ptr->toac = -10;
@@ -947,7 +947,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		i_ptr->name2 = EGO_SLOWNESS;
 		i_ptr->p1 = -1;
 	    } else if (tmp == 2) {
-		i_ptr->flags |= TR_AGGRAVATE;
+		i_ptr->flags |= TR3_AGGRAVATE;
 		i_ptr->name2 = EGO_NOISE;
 	    } else {
 		i_ptr->name2 = EGO_GREAT_MASS;
@@ -998,7 +998,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			      unique_armour(i_ptr))) {
 			    i_ptr->p1 = 1 + randint(4);
 			    rating += 11;
-			    i_ptr->flags |= TR_INFRA;
+			    i_ptr->flags |= TR1_INFRA;
 			    i_ptr->name2 = EGO_INFRAVISION;
 			    i_ptr->cost += i_ptr->p1 * 250;
 			}
@@ -1017,7 +1017,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			      unique_armour(i_ptr))) {
 			    if (peek)
 				msg_print("Helm of Seeing");
-			    i_ptr->flags |= TR_SEE_INVIS;
+			    i_ptr->flags |= TR3_SEE_INVIS;
 			    i_ptr->flags2 |= TR2_RES_BLIND;
 			    rating += 8;
 			    i_ptr->name2 = EGO_SEEING;
@@ -1029,7 +1029,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    if (peek)
 				msg_print("Telepathy");
 			    rating += 20;
-			    i_ptr->flags2 |= TR_TELEPATHY;
+			    i_ptr->flags2 |= TR3_TELEPATHY;
 			    i_ptr->name2 = EGO_TELEPATHY;
 			    i_ptr->cost += 50000L;
 			}
@@ -1082,12 +1082,12 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Seeing");
 			rating += 8;
 			i_ptr->p1 = 5 * (1 + randint(4));
-			i_ptr->flags |= (TR_SEE_INVIS | TR1_SEARCH);
+			i_ptr->flags |= (TR3_SEE_INVIS | TR1_SEARCH);
 			i_ptr->name2 = EGO_SEEING;
 			i_ptr->cost += 1000 + i_ptr->p1 * 100;
 			break;
 		      case 6:
-			i_ptr->flags |= TR_REGEN;
+			i_ptr->flags |= TR3_REGEN;
 			rating += 10;
 			if (peek)
 			    msg_print("Regeneration");
@@ -1125,7 +1125,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->name2 = EGO_WEAKNESS;
 		    break;
 		  case 6:
-		    i_ptr->flags |= TR_TELEPORT;
+		    i_ptr->flags |= TR3_TELEPORT;
 		    i_ptr->name2 = EGO_TELEPORTATION;
 		    break;
 		  case 7:
@@ -1559,7 +1559,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			i_ptr->name2 = ART_THORONGIL;
 			i_ptr->toac = 10;
-			i_ptr->flags = (TR_SEE_INVIS | TR2_FREE_ACT |
+			i_ptr->flags = (TR3_SEE_INVIS | TR2_FREE_ACT |
 					TR2_RES_ACID);
 			i_ptr->flags2 |= (TR_ARTIFACT);
 			i_ptr->cost = 8000L;
@@ -1617,7 +1617,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->name2 = ART_TUOR;
 			i_ptr->toac = 12;
 			i_ptr->flags = (TR1_STEALTH |
-				  TR2_FREE_ACT | TR_SEE_INVIS | TR2_RES_ACID);
+				  TR2_FREE_ACT | TR3_SEE_INVIS | TR2_RES_ACID);
 			i_ptr->flags2 |= (TR2_IM_ACID | TR_ARTIFACT);
 			i_ptr->p1 = 4;
 			i_ptr->cost = 35000L;
@@ -1652,7 +1652,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	} else if (magik(cursed)) {
 	    tmp = randint(3);
 	    if (tmp == 1) {
-		i_ptr->flags |= TR_AGGRAVATE;
+		i_ptr->flags |= TR3_AGGRAVATE;
 		i_ptr->name2 = EGO_IRRITATION;
 		i_ptr->toac -= m_bonus(1, 10, level);
 		i_ptr->ident |= ID_SHOW_HITDAM;
@@ -2115,17 +2115,17 @@ void place_good(int y, int x, u32b good)
 	    is_good = TRUE;	   /* nor are rags! -CFT */
 	if ((tv == TV_MAGIC_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Raal's */
-	    (objeci_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
+	    (objeci_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
 	if ((tv == TV_PRAYER_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Wrath of
 					 * God */
-	    (objeci_list[sorted_objects[tmp]].sval > ((good & SPECIAL) ? 71 : 67)))
+	    (objeci_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
     } while (!is_good);
 
     invcopy(&i_list[cur_pos], sorted_objects[tmp]);
-    magic_treasure(cur_pos, object_level, (good & SPECIAL) ? 666 : 1, 0);
+    magic_treasure(cur_pos, object_level, (good & MF2_SPECIAL) ? 666 : 1, 0);
 
 	/* Hack -- look at it */
 	if (peek) {
@@ -2212,9 +2212,9 @@ void special_random_object(int y, int x, int num)
 	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
 		if (randint(5) == 1) {
 		    if (!special_place_object(j, k))
-			place_good(j, k, SPECIAL);
+			place_good(j, k, MF2_SPECIAL);
 		} else {
-		    place_good(j, k, SPECIAL);
+		    place_good(j, k, MF2_SPECIAL);
 		}
 
 	    /* Placement accomplished */

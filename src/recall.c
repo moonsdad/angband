@@ -531,16 +531,16 @@ int roff_recall(int r_idx)
 
 	/* Describe the "quality" */
 	if (r_ptr->cflags2 & MF2_ANIMAL) roff(" natural");
-	if (r_ptr->cflags2 & EVIL) roff(" evil");
-	if (r_ptr->cflags2 & UNDEAD) roff(" undead");
+	if (r_ptr->cflags2 & MF2_EVIL) roff(" evil");
+	if (r_ptr->cflags2 & MF2_UNDEAD) roff(" undead");
 
 	/* XXX Plural "specials" will yield stupid message */
 
 	roff(" ");
 	if (r_ptr->cflags2 & MF2_GIANT) roff("giant");
-	else if (r_ptr->cflags2 & ORC) roff("orc");
-	else if (r_ptr->cflags2 & DRAGON) roff("dragon");
-	else if (r_ptr->cflags2 & DEMON) roff("demon");
+	else if (r_ptr->cflags2 & MF2_ORC) roff("orc");
+	else if (r_ptr->cflags2 & MF2_DRAGON) roff("dragon");
+	else if (r_ptr->cflags2 & MF2_DEMON) roff("demon");
 	else if (r_ptr->cflags2 & MF2_TROLL) roff("troll");
 	else roff((sex == 'p' ? "creatures" : "creature"));
 
@@ -989,7 +989,7 @@ int roff_recall(int r_idx)
 	roff(" carry");
 
 
-	if (r_ptr->cflags2 & SPECIAL) /* it'll tell you who has better treasure -CFT */
+	if (r_ptr->cflags2 & MF2_SPECIAL) /* it'll tell you who has better treasure -CFT */
 	    p = (j==1?"n exceptional object":" exceptional objects");
 	else if (r_ptr->cflags2 & MF2_GOOD)
 	    p = (j==1?" good object":" good objects");

@@ -87,11 +87,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
         }
 	break;
       case GF_HOLY_ORB:
-	if (r_ptr->cflags2 & EVIL) {
+	if (r_ptr->cflags2 & MF2_EVIL) {
 	    *dam *= 2;
 	    res = SUSCEPT;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= EVIL;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
         }
 	break;
       case GF_ARROW:		/* for now, no defense... maybe it should have a
@@ -113,11 +113,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	break;
       case GF_NETHER:		/* I assume nether is an evil, necromantic force,
 				   so it doesn't hurt undead, and hurts evil less -CFT */
-	if (r_ptr->cflags2 & UNDEAD) {
+	if (r_ptr->cflags2 & MF2_UNDEAD) {
 	    res = IMMUNE;
 	    *dam = 0;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= UNDEAD;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_UNDEAD;
         }
 	else if (r_ptr->spells2 & MS2_BR_LIFE) { /* if can breath nether, should get
 						  good resist to damage -CFT */
@@ -125,11 +125,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 3;  /* these 2 lines give avg dam of .33, ranging */
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
 	}
-	else if (r_ptr->cflags2 & EVIL) {
+	else if (r_ptr->cflags2 & MF2_EVIL) {
 	    *dam /= 2;	/* evil takes *2 for holy, so /2 for this... -CFT */
 	    res = SOME_RES;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= EVIL;
+		l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
         }
 	break;
       case GF_WATER:	/* water elementals should resist.  anyone else? -CFT */
@@ -361,7 +361,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     else if ((*dam > m_ptr->hp) &&
 	     (by_player || !(r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE))) {
 	res = DEAD;
-	if ((r_list[m_ptr->mptr].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+	if ((r_list[m_ptr->mptr].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
 	    (r_list[m_ptr->mptr].cchar == 'E') ||
 	    (r_list[m_ptr->mptr].cchar == 'v') ||
 	    (r_list[m_ptr->mptr].cchar == 'g') ||
@@ -751,7 +751,7 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 		return;
 	change_speed(-amount);
     }
-    if (TR_INFRA & t_ptr->flags)
+    if (TR1_INFRA & t_ptr->flags)
 	p_ptr->flags.see_infra += amount;
 }
 
@@ -1059,7 +1059,7 @@ int special_check(register inven_type *t_ptr)
 	return 1;
     if ((t_ptr->tval == TV_DIGGING) && /* digging tools will pseudo ID, either
 					  as {good} or {average} -CFT */
-	(t_ptr->flags & TR_TUNNEL))
+	(t_ptr->flags & TR1_TUNNEL))
 	return 1;
 
     return 0;

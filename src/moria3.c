@@ -96,7 +96,7 @@ static cptr look_mon_desc(int mnum)
     byte         living;
     s32b         thp, tmax, perc;
 
-    living = !((r_list[m_ptr->mptr].cflags2 & (UNDEAD|DEMON)) ||
+    living = !((r_list[m_ptr->mptr].cflags2 & (MF2_UNDEAD|MF2_DEMON)) ||
 	       ((r_list[m_ptr->mptr].cchar == 'E') ||
 		(r_list[m_ptr->mptr].cchar == 'g') ||
 		(r_list[m_ptr->mptr].cchar == 'v') ||
@@ -929,7 +929,7 @@ void tunnel(int dir)
 	else
 	    msg_print("You are too afraid!");
     } else if (i_ptr->tval != TV_NOTHING) {
-	if (TR_TUNNEL & i_ptr->flags)
+	if (TR1_TUNNEL & i_ptr->flags)
 	    tabil += 25 + i_ptr->p1 * 50;
 	else {
 	    tabil += (i_ptr->dd * i_ptr->ds) + i_ptr->tohit

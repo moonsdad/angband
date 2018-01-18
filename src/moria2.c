@@ -464,8 +464,8 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			invcopy(&i_list[cur_pos], 98);
 			t_ptr = &i_list[cur_pos];
 			t_ptr->flags |= (TR1_STR | TR1_DEX | TR1_CON | TR1_INT | TR1_WIS | TR1_CHR |
-				       TR_SEE_INVIS | TR_CURSED | TR_INFRA);
-			t_ptr->flags2 |= (TR_TELEPATHY | TR_LIGHT | TR_ARTIFACT);
+				       TR3_SEE_INVIS | TR_CURSED | TR1_INFRA);
+			t_ptr->flags2 |= (TR3_TELEPATHY | TR_LIGHT | TR_ARTIFACT);
 			t_ptr->ident |= ID_NOSHOW_TYPE;
 			t_ptr->name2 = ART_MORGOTH;
 			t_ptr->p1 = 125;
@@ -487,12 +487,12 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 			t_ptr->dd = 10;
 			t_ptr->ds = 8;
 			t_ptr->weight = 600;
-			t_ptr->flags = (TR_SEE_INVIS | TR1_SLAY_EVIL | TR1_SLAY_UNDEAD |
+			t_ptr->flags = (TR3_SEE_INVIS | TR1_SLAY_EVIL | TR1_SLAY_UNDEAD |
 					TR2_RES_FIRE | TR_RES_COLD | TR_RES_LIGHT |
 					TR2_RES_ACID | TR1_SLAY_ANIMAL | TR1_SPEED |
-					TR1_KILL_DRAGON | TR_AGGRAVATE);
-			t_ptr->flags2 = (TR1_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_ORC |
-				    TR1_IMPACT | TR_TELEPATHY | TR_ARTIFACT);
+					TR1_KILL_DRAGON | TR3_AGGRAVATE);
+			t_ptr->flags2 = (TR1_SLAY_DEMON | TR_SLAY_TROLL | TR_SLAY_MF2_ORC |
+				    TR1_IMPACT | TR3_TELEPATHY | TR_ARTIFACT);
 			t_ptr->p1 = (-1);
 			t_ptr->toac = 10;
 			t_ptr->cost = 500000L;
@@ -628,7 +628,7 @@ static int fearless(monster_race *r_ptr)
     }
 
     /* Demons have NoFear */
-    if (r_ptr->cflags2 & DEMON) {
+    if (r_ptr->cflags2 & MF2_DEMON) {
 	flag = TRUE;
     }
 
@@ -742,7 +742,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	get_coin_type(r_ptr);
 	i = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
 			  r_list[m_ptr->mptr].cflags1,
-			  (r_list[m_ptr->mptr].cflags2 & (SPECIAL | MF2_GOOD)),
+			  (r_list[m_ptr->mptr].cflags2 & (MF2_SPECIAL | MF2_GOOD)),
 			  (r_list[m_ptr->mptr].cflags1 & MF1_WINNER));
 	coin_type = 0;
 	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
@@ -981,7 +981,7 @@ void py_attack(int y, int x)
 	    /* See if we done it in.  */
 	    if (mon_take_hit(cr_idx, k, FALSE) >= 0) {	/* never print msgs -CWS */
 
-		if ((r_list[r_idx].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+		if ((r_list[r_idx].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
 		    (r_list[r_idx].cchar == 'E') ||
 		    (r_list[r_idx].cchar == 'v') ||
 		    (r_list[r_idx].cchar == 'g')) {
@@ -1368,7 +1368,7 @@ void py_bash(int y, int x)
 	if (mon_take_hit(monster, k, TRUE) >= 0) {
 
 	    /* Appropriate message */
-	    if ((r_list[r_idx].cflags2 & (DEMON|UNDEAD|MF2_MINDLESS)) ||
+	    if ((r_list[r_idx].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
 		(r_list[r_idx].cchar == 'E') ||
 		(r_list[r_idx].cchar == 'v') ||
 		(r_list[r_idx].cchar == 'g')) {

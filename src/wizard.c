@@ -760,7 +760,7 @@ again:
 	} else if (ch == '\033')  goto end;
 
 	if (get_com("Slow Digestion? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SLOW_DIGEST;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR3_SLOW_DIGEST;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Stealth? [yn]: ", &ch)) {
@@ -768,11 +768,11 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Aggravate Monsters? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_AGGRAVATE;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR3_AGGRAVATE;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Regeneration? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_REGEN;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR3_REGEN;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Speed? [yn]: ", &ch)) {
@@ -844,7 +844,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("See invisible? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_SEE_INVIS;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR3_SEE_INVIS;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Free Action? [yn]: ", &ch)) {
@@ -856,11 +856,11 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Tunneling? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_TUNNEL;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR1_TUNNEL;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Infra-vision? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_INFRA;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR1_INFRA;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist life level loss? [yn]: ", &ch)) {
@@ -868,7 +868,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Telepathy? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_TELEPATHY;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR3_TELEPATHY;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Immune to Fire? [yn]: ", &ch)) {

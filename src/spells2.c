@@ -497,7 +497,7 @@ int detect_evil(void)
     for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
 	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
-	    (EVIL & r_list[m_ptr->mptr].cflags2)) {
+	    (MF2_EVIL & r_list[m_ptr->mptr].cflags2)) {
 
 	    /* Draw the monster (even if invisible) */
 	    m_ptr->ml = TRUE;
@@ -909,7 +909,7 @@ int turn_undead(void)
 	m_ptr = &m_list[i];
 
 	r_ptr = &r_list[m_ptr->mptr];
-	if ((UNDEAD & r_ptr->cflags2)
+	if ((MF2_UNDEAD & r_ptr->cflags2)
 	    && (m_ptr->cdis <= MAX_SIGHT)
 	    && (los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx))) {
 	    monster_name(m_name, m_ptr, r_ptr);
@@ -919,7 +919,7 @@ int turn_undead(void)
 		    (void)sprintf(out_val, "%s runs frantically!", m_name);
 		    msg_print(out_val);
 		    turn_und = TRUE;
-		    l_list[m_ptr->mptr].r_cflags2 |= UNDEAD;
+		    l_list[m_ptr->mptr].r_cflags2 |= MF2_UNDEAD;
 		}
 		m_ptr->monfear = randint(p_ptr->misc.lev) * 2;
 	    }
@@ -1678,8 +1678,8 @@ void self_knowledge()
 	prt("You will not become less popular.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (inventory[INVEN_LEFT].flags2 & TR_ATTACK_SPD ||
-	inventory[INVEN_RIGHT].flags2 & TR_ATTACK_SPD) {
+    if (inventory[INVEN_LEFT].flags2 & TR1_ATTACK_SPD ||
+	inventory[INVEN_RIGHT].flags2 & TR1_ATTACK_SPD) {
 	prt("You can strike at your foes with uncommon speed.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -1705,7 +1705,7 @@ void self_knowledge()
 	    prt("Your weapon is accursed.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR_TUNNEL) {
+    if (f & TR1_TUNNEL) {
 	prt("Your weapon is an effective digging tool.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -1713,7 +1713,7 @@ void self_knowledge()
 	prt("Your weapon has been blessed by the gods.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f2 & TR_ATTACK_SPD) {
+    if (f2 & TR1_ATTACK_SPD) {
 	prt("Your weapon strikes with uncommon speed.", i++, j);
 	pause_if_screen_full(&i, j);
     }
@@ -2875,8 +2875,8 @@ int drain_life(int dir, int y, int x, int dam)
 	    flag = TRUE;
 	    m_ptr = &m_list[c_ptr->cptr];
 	    r_ptr = &r_list[m_ptr->mptr];
-	    if (((r_ptr->cflags2 & UNDEAD) == 0) &&
-		((r_ptr->cflags2 & DEMON) == 0) &&
+	    if (((r_ptr->cflags2 & MF2_UNDEAD) == 0) &&
+		((r_ptr->cflags2 & MF2_DEMON) == 0) &&
 		(r_ptr->cchar != 'E' && r_ptr->cchar != 'g' && r_ptr->cchar != 'v')) {
 		drain = TRUE;
 		monster_name(m_name, m_ptr, r_ptr);
@@ -2891,10 +2891,10 @@ int drain_life(int dir, int y, int x, int dam)
 		    msg_print(out_val);
 		}
 	    } else {
-		if (r_ptr->cflags2 & UNDEAD)
-		    l_list[m_ptr->mptr].r_cflags2 |= UNDEAD;
+		if (r_ptr->cflags2 & MF2_UNDEAD)
+		    l_list[m_ptr->mptr].r_cflags2 |= MF2_UNDEAD;
 		else
-		    l_list[m_ptr->mptr].r_cflags2 |= DEMON;
+		    l_list[m_ptr->mptr].r_cflags2 |= MF2_DEMON;
 	    }
 	}
     }
