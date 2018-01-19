@@ -428,6 +428,27 @@ int get_dir(cptr prompt, int *dir)
 
 
 
+
+
+int direction(int *dir)
+{
+    if (get_dir(NULL, dir)) {
+	if (p_ptr->flags.confused > 0) {
+	    msg_print("You are confused.");
+	    do {
+		*dir = randint(9);
+	    } while (*dir == 5);
+	}
+	return 1;
+    }
+    return 0;
+}
+
+
+
+
+
+
 /* 
  * Search Mode enhancement -RAK-
  */

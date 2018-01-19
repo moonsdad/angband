@@ -1449,9 +1449,9 @@ void read_scroll(void)
 	i_ptr = &inventory[item_val];
     if (ident) {
 	    if (!known1_p(i_ptr)) {
-	    /* round half-way case up */
-		p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
-		prt_experience();
+	/* round half-way case up */
+	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	prt_experience();
 
 		identify(&item_val);
 		i_ptr = &inventory[item_val];
@@ -1459,13 +1459,12 @@ void read_scroll(void)
 	} else if (!known1_p(i_ptr))
 	    sample(i_ptr);
 
-    /* Allow certain scrolls to be "preserved" */
-    if (used_up) {
+    /* Hack -- allow certain scrolls to be "preserved" */
+    if (!used_up) return;
 
     /* Destroy the scroll */
-	    desc_remain(item_val);
-	    inven_destroy(item_val);
-	}
+    desc_remain(item_val);
+    inven_destroy(item_val);
     }
 }
 
@@ -1473,13 +1472,13 @@ void read_scroll(void)
 
 
 /*
- * Aim a wand.
+ * Aim a wand (use a single charge).
  */
 void do_cmd_aim_wand(void)
 {
-    u32b                i;
-    int			ident, chance, dir, l;
-    int			item_val, done_effect, i1, k;
+    u32b                sval;
+    int			ident, chance, dir;
+    int			item_val, done_effect, i1, i2, y, x;
     inven_type		*i_ptr;
 
     free_turn_flag = TRUE;
@@ -1489,26 +1488,28 @@ void do_cmd_aim_wand(void)
 	return;
     }
 
-    if (!find_range(TV_WAND, TV_NEVER, &i1, &k)) {
+    if (!find_range(TV_WAND, TV_NEVER, &i1, &i2)) {
 	msg_print("You are not carrying any wands.");
 	return;
     }
 
     /* Get a wand */
-    if (get_item(&item_val, "Aim which wand?", i1, k, 0)) {
+    if (!get_item(&item_val, "Aim which wand? ", i1, i2, 0)) return;
 
     /* Get the item */
     i_ptr = &inventory[item_val];
 
-	free_turn_flag = FALSE;
-	if (get_dir(NULL, &dir)) {
-	    if (p_ptr->flags.confused > 0) {
-		msg_print("You are confused.");
-		do {
-		    dir = randint(9);
-		} while (dir == 5);
-	    }
-	    ident = FALSE;
+    /* The turn is not free */
+    free_turn_flag = FALSE;
+
+    if (!get_dir(NULL, &dir)) return;
+    if (p_ptr->flags.confused > 0) {
+	msg_print("You are confused.");
+	do {
+	    dir = randint(9);
+	} while (dir == 5);
+    }
+
 
     /* Chance of success */
     chance = (p_ptr->misc.save + stat_adj(A_INT) - (int)(i_ptr->level>42?42:i_ptr->level) +
@@ -1528,54 +1529,66 @@ void do_cmd_aim_wand(void)
 	return;
     }
 
-    if (i_ptr->pval > 0) {
-	i = i_ptr->flags;
-	done_effect = 0;
-	(i_ptr->pval)--;
-	while (!done_effect) {
+    /* The wand is already empty! */
+    if (i_ptr->pval <= 0) {
+	msg_print("The wand has no charges left.");
+	if (!known2_p(i_ptr)) {
+	    add_inscribe(i_ptr, ID_EMPTY);
+	}
+	return;
+    }
+
+    /* Not identified yet */
+    ident = FALSE;
+
+    /* Extract the "sval" effect */
+    sval = i_ptr->flags;
+
+    done_effect = 0;
+    while (!done_effect) {
 
     /* Start at the player */
-    k = char_row;
-    l = char_col;
+    y = char_row;
+    x = char_col;
 
     /* Various effects */
-    switch (i) {
+    switch (sval) {
 
-	case WD_LT:
+	case SV_WAND_LITE:
 	    msg_print("A line of blue shimmering light appears.");
 	    lite_line(dir, char_row, char_col);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_DRG_FIRE:
-	    fire_ball(GF_FIRE, dir, k, l, 100, 3);
+	case SV_WAND_DRAGON_FIRE:
+	    fire_ball(GF_FIRE, dir, y, x, 100, 3);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-    case WD_DRG_FRST:
-	    fire_ball(GF_COLD, dir, k, l, 80, 3);
+    case SV_WAND_DRAGON_COLD:
+	    fire_ball(GF_COLD, dir, y, x, 80, 3);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_DRG_BREA:
+	case SV_WAND_DRAGON_BREATH:
 		switch (randint(5)) {
 		  case 1:
-		    fire_ball(GF_FIRE, dir, k, l, 100, 3);
+		    fire_ball(GF_FIRE, dir, y, x, 100, 3);
 		    break;
 		  case 2:
-		    fire_ball(GF_COLD, dir, k, l, 80, 3);
+		    fire_ball(GF_COLD, dir, y, x, 80, 3);
 		    break;
 		  case 3:
-		    fire_ball(GF_ACID, dir, k, l, 90, 3);
+		    fire_ball(GF_ACID, dir, y, x, 90, 3);
 		    break;
 		  case 4:
-		    fire_ball(GF_ELEC, dir, k, l, 70, 3);
+		    fire_ball(GF_ELEC, dir, y, x, 70, 3);
 		    break;
 		  default:
-		    fire_ball(GF_POIS, dir, k, l, 70, 3);
+		    fire_ball(GF_POIS, dir, y, x, 70, 3);
 		    break;
 		}
 	    ident = TRUE;
@@ -1584,151 +1597,151 @@ void do_cmd_aim_wand(void)
 
 	case WD_AC_BLTS:	/* Acid , New */
 		if (randint(5)==1)
-		    line_spell(GF_ACID,dir,k,l,damroll(5,8));
+		    line_spell(GF_ACID,dir,y,x,damroll(5,8));
 		else
-		    fire_bolt(GF_ACID,dir,k,l,damroll(5,8));
+		    fire_bolt(GF_ACID,dir,y,x,damroll(5,8));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_LT_BLTS:	/* Lightning */
+	case SV_WAND_LITE_BLTS:	/* Lightning */
 		if (randint(6)==1)
-		    line_spell(GF_ELEC,dir,k,l,damroll(3,8));
+		    line_spell(GF_ELEC,dir,y,x,damroll(3,8));
 		else
-		    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
+		    fire_bolt(GF_ELEC, dir, y, x, damroll(3, 8));
 		ident = TRUE;
 		done_effect = 1;
 	    break;
 
 	case WD_FT_BLTS:	/* Frost */
 		if (randint(6)==1)
-		    line_spell(GF_ELEC,dir,k,l,damroll(3,8));
+		    line_spell(GF_ELEC,dir,y,x,damroll(3,8));
 		else
-		    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
+		    fire_bolt(GF_ELEC, dir, y, x, damroll(3, 8));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
 	case WD_FR_BLTS:	/* Fire */
 		if (randint(4)==1)
-		    line_spell(GF_FIRE,dir,k,l,damroll(6,8));
+		    line_spell(GF_FIRE,dir,y,x,damroll(6,8));
 		else
-		    fire_bolt(GF_FIRE, dir, k, l, damroll(6, 8));
+		    fire_bolt(GF_FIRE, dir, y, x, damroll(6, 8));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_ST_MUD:
-	    ident = wall_to_mud(dir, k, l);
+	case SV_WAND_STONE_TO_MUD:
+	    ident = wall_to_mud(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_POLY:
-	    ident = poly_monster(dir, k, l);
+	case SV_WAND_POLYMORPH:
+	    ident = poly_monster(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_HEAL_MN:
-	    ident = hp_monster(dir, k, l, -damroll(4, 6));
+	case SV_WAND_HEAL_MONSTER:
+	    ident = hp_monster(dir,y,x, -damroll(4, 6));
 		done_effect = 1;
 	    break;
 
-	case WD_HAST_MN:
-	    ident = speed_monster(dir, k, l, 1);
+	case SV_WAND_HASTE_MONSTER:
+	    ident = speed_monster(dir,y,x, 1);
 		done_effect = 1;
 	    break;
 
-	case WD_SLOW_MN:
-	    ident = speed_monster(dir, k, l, -1);
+	case SV_WAND_SLOW_MONSTER:
+	    ident = speed_monster(dir,y,x, -1);
 		done_effect = 1;
 	    break;
 
-	case WD_CONF_MN:
-	    ident = confuse_monster(dir, k, l, 10);
+	case SV_WAND_CONFUSE_MONSTER:
+	    ident = confuse_monster(dir,y,x,10);
 		done_effect = 1;
 	    break;
 
-	case WD_SLEE_MN:
-	    ident = sleep_monster(dir, k, l);
+	case SV_WAND_SLEEP_MONSTER:
+	    ident = sleep_monster(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_DRAIN:
-	    ident = drain_life(dir, k, l, 75);
+	case SV_WAND_DRAIN_LIFE:
+	    ident = drain_life(dir,y,x,75);
 		done_effect = 1;
 	    break;
 
-	case WD_ANHIL:
-	    ident = drain_life(dir, k, l, 125);
+	case SV_WAND_ANNIHILATION:
+	    ident = drain_life(dir,y,x,125);
 		done_effect = 1;
 	    break;
 
-	case WD_TR_DEST:
-	    ident = td_destroy2(dir, k, l);
+	case SV_WAND_TRAP_DOOR_DEST:
+	    ident = td_destroy2(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_MAG_MIS:
+	case SV_WAND_MAGIC_MISSILE:
 		if (randint(6)==1)
-		    line_spell(GF_MAGIC_MISSILE,dir,k,l,damroll(2,6));
+		    line_spell(GF_MAGIC_MISSILE,dir,y,x,damroll(2,6));
 		else
-		    fire_bolt(GF_MAGIC_MISSILE, dir, k, l, damroll(2, 6));
+		    fire_bolt(GF_MAGIC_MISSILE, dir,y,x, damroll(2,6));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_FEAR_MN:	/* Fear Monster */
-	    ident = fear_monster(dir, k, l, 10);
+	case SV_WAND_FEAR_MONSTER:
+	    ident = fear_monster(dir,y,x,10);
 		done_effect = 1;
 	    break;
 
-	case WD_CLONE:
-	    ident = clone_monster(dir, k, l);
+	case SV_WAND_CLONE_MONSTER:
+	    ident = clone_monster(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_TELE:
-	    ident = teleport_monster(dir, k, l);
+	case SV_WAND_TELEPORT_AWAY:
+	    ident = teleport_monster(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_DISARM:
-	    ident = disarm_all(dir, k, l);
+	case SV_WAND_DISARMING:
+	    ident = disarm_all(dir,y,x);
 		done_effect = 1;
 	    break;
 
-	case WD_LT_BALL:
-	    fire_ball(GF_ELEC, dir, k, l, 32, 2);
+	case SV_WAND_ELEC_BALL:
+	    fire_ball(GF_ELEC, dir,y,x,32,2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_CD_BALL:
-	    fire_ball(GF_COLD, dir, k, l, 48, 2);
+	case SV_WAND_COLD_BALL:
+	    fire_ball(GF_COLD,dir,y,x,48,2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_FR_BALL:
-	    fire_ball(GF_FIRE, dir, k, l, 72, 2);
+	case SV_WAND_FIRE_BALL:
+	    fire_ball(GF_FIRE,dir,y,x,72,2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_ST_CLD:
-	    fire_ball(GF_POIS, dir, k, l, 12, 2);
+	case SV_WAND_STINKING_CLOUD:
+	    fire_ball(GF_POIS,dir,y,x,12,2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_AC_BALL:
-		fire_ball(GF_ACID, dir, k, l, 60, 2);
+	case SV_WAND_ACID_BALL:
+	    fire_ball(GF_ACID,dir,y,x,60,2);
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case WD_WONDER:
-		i = randint(23);
+	case SV_WAND_WONDER:
+	    sval = randint(23);
 	    break;
 
 	default:
@@ -1739,28 +1752,22 @@ void do_cmd_aim_wand(void)
 	}
 
     /* Apply identification */
-	    if (ident) {
-		    if (!known1_p(i_ptr)) {
-		    /* round half-way case up */
-			p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
-			prt_experience();
+    if (ident) {
+	if (!known1_p(i_ptr)) {
+	/* round half-way case up */
+	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	prt_experience();
+	identify(&item_val);
+	i_ptr = &inventory[item_val];
+	}
+    } else if (!known1_p(i_ptr)) sample(i_ptr);
 
-			identify(&item_val);
-			i_ptr = &inventory[item_val];
-		    }
-		} else if (!known1_p(i_ptr))
-		    sample(i_ptr);
+
+    /* Use a single charge */
+    i_ptr->pval--;
 
     /* Describe the remaining charges */
-		inven_item_charges(item_val);
-	    } else {
-    /* The wand is already empty! */
-		msg_print("The wand has no charges left.");
-		if (!known2_p(i_ptr))
-		    add_inscribe(i_ptr, ID_EMPTY);
-	    }
-	}
-    }
+    inven_item_charges(item_val);
 }
 
 
@@ -1768,12 +1775,13 @@ void do_cmd_aim_wand(void)
 
 /*
  * Use a staff.			-RAK-	
+ *
+ * One charge of one staff disappears.
  */
 void use(void)
 {
-    u32b                i;
-    int			  ident, chance, k, j;
-    int                   item_val, x, y;
+    int			  ident, chance, k;
+    int                   item_val, i1, i2, x, y;
     register inven_type  *i_ptr;
 
     free_turn_flag = TRUE;
@@ -1783,19 +1791,19 @@ void use(void)
 	return;
     }
 
-    if (!find_range(TV_STAFF, TV_NEVER, &j, &k)) {
+    if (!find_range(TV_STAFF, TV_NEVER, &i1, &i2)) {
 	msg_print("You are not carrying any staffs.");
 	return;
     }
     
     /* Get a staff */
-    if (get_item(&item_val, "Use which staff?", j, k, 0)) {
+    if (!get_item(&item_val, "Use which staff? ", i1, i2, 0)) return;
 
     
     /* Get the item */
     i_ptr = &inventory[item_val];
 
-	free_turn_flag = FALSE;
+    free_turn_flag = FALSE;
 
     /* Chance of success */
     chance = p_ptr->misc.save + stat_adj(A_INT) - (int)(i_ptr->level > 50 ? 50 : i_ptr->level) +
@@ -1814,15 +1822,17 @@ void use(void)
 	return;
     }
 
-    if (i_ptr->pval > 0) {
-    i = i_ptr->flags;
+    if (i_ptr->pval <= 0) {
+	msg_print("The staff has no charges left.");
+	if (!known2_p(i_ptr)) add_inscribe(i_ptr, ID_EMPTY);
+	return;
+    }
 
     ident = FALSE;
-    (i_ptr->pval)--;
 
-    switch (i) {
+    switch (i_ptr->flags;) {
 
-      case ST_HEALING:
+      case SV_STAFF_HEALING:
 	ident = hp_player(300);
 	if (p_ptr->flags.stun > 0) {
 		    if (p_ptr->flags.stun > 50) {
@@ -1843,23 +1853,23 @@ void use(void)
 		}
 		break;
 
-      case ST_GENOCIDE:
+      case SV_STAFF_GENOCIDE:
 	genocide(FALSE);
 	ident = TRUE;
 	break;
 
-      case ST_PROBE:
+      case SV_STAFF_PROBING:
 	probing();
 	ident = TRUE;
 	break;
 
-      case ST_IDENTIFY:
+      case SV_STAFF_IDENTIFY:
 
     ident_spell();
 	ident = TRUE;
 	break;
 
-      case ST_HOLYNESS:
+      case SV_STAFF_HOLINESS:
 	dispel_creature(MF2_EVIL, 120);
 	protect_evil();
 	cure_poison();
@@ -1885,7 +1895,7 @@ void use(void)
 	ident = TRUE;
 	break;
 
-      case ST_MAGI:
+      case SV_STAFF_THE_MAGI:
 	if (res_stat(A_INT)) {
 	    msg_print("You have a warm feeling.");
 	    ident = TRUE;
@@ -1898,46 +1908,46 @@ void use(void)
 	}
 	break;
 
-      case ST_POWER:
+      case SV_STAFF_POWER:
 	dispel_creature(0xFFFFFFFFL, 120);
 	break;
 
-      case ST_SURROUND:
+      case SV_STAFF_MAPPING:
 	map_area();
 	ident = TRUE;
 	break;
 
-      case ST_LIGHT:
+      case SV_STAFF_LITE:
 	ident = lite_area(char_row, char_col, damroll(2, 10), 2);
 	break;
 
-      case ST_DR_LC:
+      case SV_STAFF_DOOR_STAIR_LOC:
 	ident = detect_sdoor();
 	break;
 
-      case ST_TRP_LC:
+      case SV_STAFF_TRAP_LOC:
 	ident = detect_trap();
 	break;
 
-      case ST_TRE_LC:
+      case SV_STAFF_TREASURE_LOC:
 	ident = detect_treasure();
 	break;
 
-      case ST_OBJ_LC:
+      case SV_STAFF_OBJECT_LOC:
 	ident = detect_object();
 	break;
 
-      case ST_TELE:
+      case SV_STAFF_TELEPORTATION:
 	teleport(100);
 	ident = TRUE;
 	break;
 
-      case ST_EARTH:
-	ident = TRUE;
+      case SV_STAFF_EARTHQUAKES:
 	earthquake();
+	ident = TRUE;
 	break;
 
-      case ST_SUMMON:
+      case SV_STAFF_SUMMONING:
 	ident = FALSE;
 	for (k = 0; k < randint(4); k++) {
 	    y = char_row;
@@ -1946,37 +1956,37 @@ void use(void)
 	}
 	break;
 
-      case ST_DEST:
-	ident = TRUE;
+      case SV_STAFF_DESTRUCTION:
 	destroy_area(char_row, char_col);
-	break;
-
-      case ST_STAR:
 	ident = TRUE;
-	starlite(char_row, char_col);
 	break;
 
-      case ST_HAST_MN:
+      case SV_STAFF_STARLITE:
+	starlite(char_row, char_col);
+	ident = TRUE;
+	break;
+
+      case SV_STAFF_HASTE_MONSTERS:
 	ident = speed_monsters(1);
 	break;
 
-      case ST_SLOW_MN:
+      case SV_STAFF_SLOW_MONSTERS:
 	ident = speed_monsters(-1);
 	break;
 
-      case ST_SLEE_MN:
+      case SV_STAFF_SLEEP_MONSTERS:
 	ident = sleep_monsters2();
 	break;
 
-      case ST_CURE_LT:
+      case SV_STAFF_CURE_LIGHT:
 	ident = hp_player(randint(8));
 	break;
 
-      case ST_DET_INV:
+      case SV_STAFF_DETECT_INVIS:
 	ident = detect_invisible();
 	break;
 
-      case ST_SPEED:
+      case SV_STAFF_SPEED:
 	if (p_ptr->flags.fast == 0) ident = TRUE;
 	if (p_ptr->flags.fast <= 0)
 	    p_ptr->flags.fast += randint(30) + 15;
@@ -1984,31 +1994,28 @@ void use(void)
 	    p_ptr->flags.fast += randint(5);
 	break;
 
-      case ST_SLOW:
+      case SV_STAFF_SLOWNESS:
 	if (p_ptr->flags.slow == 0) ident = TRUE;
 	p_ptr->flags.slow += randint(30) + 15;
 	break;
 
-      case ST_REMOVE:
+      case SV_STAFF_REMOVE_CURSE:
 	if (remove_curse()) {
-	    if (p_ptr->flags.blind < 1)
+	    if (p_ptr->flags.blind < 1) {
 		msg_print("The staff glows blue for a moment..");
+	    }
 	    ident = TRUE;
 	}
 	break;
 
-      case ST_DET_EVI:
+      case SV_STAFF_DETECT_EVIL:
 	ident = detect_evil();
 	break;
 
-      case ST_CURING:
-	if ((cure_blindness())
-	|| (cure_poison())
-	|| (cure_confusion()) 
-	|| (p_ptr->flags.stun > 0)
-	|| (p_ptr->flags.cut > 0)) {
-	    ident = TRUE;
-	}
+      case SV_STAFF_CURING:
+	if (cure_blindness()) ident = TRUE;
+	if (cure_poison()) ident = TRUE;
+	if (cure_confusion()) ident = TRUE;
 	if (p_ptr->flags.stun > 0) {
 	    if (p_ptr->flags.stun > 50) {
 		p_ptr->misc.ptohit += 20;
@@ -2019,18 +2026,20 @@ void use(void)
 	    }
 	    p_ptr->flags.stun = 0;
 	    msg_print("Your head stops stinging.");
+	    ident = TRUE;
 	}
 	else if (p_ptr->flags.cut > 0) {
-	    p_ptr->flags.cut = 0;
 	    msg_print("You feel better.");
+	    p_ptr->flags.cut = 0;
+	    ident = TRUE;
 	}
 	break;
 
-      case ST_DSP_EVI:
+      case SV_STAFF_DISPEL_EVIL:
 	ident = dispel_creature(MF2_EVIL, 60);
 	break;
 
-      case ST_DARK:
+      case SV_STAFF_DARKNESS:
 	ident = unlite_area(char_row, char_col);
 	break;
 
@@ -2040,64 +2049,40 @@ void use(void)
     }
 
     /* An identification was made */
-	    if (ident) {
-		if (!known1_p(i_ptr)) {
-		/* round half-way case up */
-		    p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) /
-			p_ptr->misc.lev;
-		    prt_experience();
-
-		    identify(&item_val);
-		    i_ptr = &inventory[item_val];
-		}
-	    } else if (!known1_p(i_ptr))
-		sample(i_ptr);
-	    inven_item_charges(item_val);
-	} else {
-	    msg_print("The staff has no charges left.");
-	    if (!known2_p(i_ptr))
-		add_inscribe(i_ptr, ID_EMPTY);
+    if (ident) {
+	if (!known1_p(i_ptr)) {
+	/* round half-way case up */
+	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	prt_experience();
+	identify(&item_val);
+	i_ptr = &inventory[item_val];
 	}
-    }
+    } else if (!known1_p(i_ptr)) sample(i_ptr);
+
+
+    /* Use a single charge */
+    i_ptr->pval--;
+
+    /* Describe the remaining charges */
+    inven_item_charges(item_val);
 }
+
+
+
+
 
 /*
  * rods.c : rod code 
- *
  * Copyright (c) 1989 Andrew Astrand 1991 
- *
  * Do what you like with it 
- *
  * I will sucker! ~Ludwig 
- */
-
-
-static int direction(int *dir)
-{
-    if (get_dir(NULL, dir)) {
-	if (p_ptr->flags.confused > 0) {
-	    msg_print("You are confused.");
-	    do {
-		*dir = randint(9);
-	    } while (*dir == 5);
-	}
-	return 1;
-    }
-    return 0;
-}
-
-
-
-
-
-/*
+ *
  * Activate (zap) a Rod
  */
-void activate_rod(void)
+void do_cmd_zap_rod(void)
 {
-    u32b              i;
-    int                 ident, chance, dir, l;
-    int                 item_val, j, k;
+    int                 ident, chance, dir;
+    int                 item_val, i1, i2, x, y;
     inven_type		*i_ptr;
 
     /* Assume free turn */
@@ -2108,19 +2093,21 @@ void activate_rod(void)
 	return;
     }
 
-    if (!find_range(TV_ROD, TV_NEVER, &j, &k)) {
+    if (!find_range(TV_ROD, TV_NEVER, &i1, &i2)) {
 	msg_print("You are not carrying any rods.");
 	return;
     }
 
     /* Get a rod */
-    if (get_item(&item_val, "Activate which rod?", j, k, 0)) {
+    if (!get_item(&item_val, "Activate which rod? ", i1, i2, 0)) return;
 
     /* Get the item */
     i_ptr = &inventory[item_val];
 
-	free_turn_flag = FALSE;
-	ident = FALSE;
+    free_turn_flag = FALSE;
+
+    /* Not identified yet */
+    ident = FALSE;
 
     /* Calculate the chance */
     chance = (p_ptr->misc.save + (stat_adj(A_INT) * 2) - (int)((i_ptr->level > 70) ? 70 : i_ptr->level) +
@@ -2143,16 +2130,15 @@ void activate_rod(void)
     }
 
     if (i_ptr->timeout <= 0) {
-	    i = i_ptr->flags;
 
     /* Starting location */
-    k = char_row;
-    l = char_col;
+    y = char_row;
+    x = char_col;
 
     /* Activate it */
-    switch (i) {
+    switch (i_ptr->flags) {
 
-      case RD_LT:
+      case SV_ROD_LIGHT:
 	if (!direction(&dir)) goto no_charge;
 	msg_print("A line of blue shimmering light appears.");
 	lite_line(dir, char_row, char_col);
@@ -2160,8 +2146,8 @@ void activate_rod(void)
 	i_ptr->timeout = 9;
 	break;
 
-      case RD_ILLUME:
-	lite_area(k, l, damroll(2, 8), 2);
+      case SV_ROD_ILLUMINATION:
+	lite_area(y, x, damroll(2, 8), 2);
 	ident = TRUE;
 	i_ptr->timeout = 30;
 	break;
@@ -2169,19 +2155,19 @@ void activate_rod(void)
       case RD_AC_BLTS:	   /* Acid , New */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(10)==1)
-	    line_spell(GF_ACID,dir,k,l,damroll(6,8));
+	    line_spell(GF_ACID,dir,y,x,damroll(6,8));
 	else
-	    fire_bolt(GF_ACID,dir,k,l,damroll(6,8));
+	    fire_bolt(GF_ACID,dir,y,x,damroll(6,8));
 	ident = TRUE;
 	i_ptr->timeout = 12;
 	break;
 
-      case RD_LT_BLTS:	   /* Lightning */
+      case SV_ROD_LIGHT_BLTS:	   /* Lightning */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(12)==1)
-	    line_spell(GF_ELEC, dir, k, l, damroll(3, 8));
+	    line_spell(GF_ELEC, dir, y, x, damroll(3, 8));
 	else
-	    fire_bolt(GF_ELEC, dir, k, l, damroll(3, 8));
+	    fire_bolt(GF_ELEC, dir, y, x, damroll(3, 8));
 	ident = TRUE;
 	i_ptr->timeout = 11;
 	break;
@@ -2189,9 +2175,9 @@ void activate_rod(void)
       case RD_FT_BLTS:	   /* Frost */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(10)==1)
-	    line_spell(GF_COLD, dir, k, l, damroll(5, 8));
+	    line_spell(GF_COLD, dir, y, x, damroll(5, 8));
 	else
-	    fire_bolt(GF_COLD, dir, k, l, damroll(5, 8));
+	    fire_bolt(GF_COLD, dir, y, x, damroll(5, 8));
 	ident = TRUE;
 	i_ptr->timeout = 13;
 	break;
@@ -2199,84 +2185,84 @@ void activate_rod(void)
       case RD_FR_BLTS:	   /* Fire */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(8)==1)
-	    line_spell(GF_FIRE, dir, k, l, damroll(8, 8));
+	    line_spell(GF_FIRE, dir, y, x, damroll(8, 8));
 	else
-	    fire_bolt(GF_FIRE, dir, k, l, damroll(8, 8));
+	    fire_bolt(GF_FIRE, dir, y, x, damroll(8, 8));
 	ident = TRUE;
 	i_ptr->timeout = 15;
 	break;
 
-      case RD_POLY:
+      case SV_ROD_POLYMORPH:
 	if (!direction(&dir)) goto no_charge;
-	ident = poly_monster(dir, k, l);
+	ident = poly_monster(dir, y, x);
 	i_ptr->timeout = 25;
 	break;
 
-      case RD_SLOW_MN:
+      case SV_ROD_SLOW_MONSTER:
 	if (!direction(&dir)) goto no_charge;
-	ident = speed_monster(dir, k, l, -1);
+	ident = speed_monster(dir, y, x, -1);
 	i_ptr->timeout = 20;
 	break;
 
-      case RD_SLEE_MN:
+      case SV_ROD_SLEEP_MONSTER:
 	if (!direction(&dir)) goto no_charge;
-	ident = sleep_monster(dir, k, l);
+	ident = sleep_monster(dir, y, x);
 	i_ptr->timeout = 18;
 	break;
 
-      case RD_DRAIN:
+      case SV_ROD_DRAIN_LIFE:
 	if (!direction(&dir)) goto no_charge;
-	ident = drain_life(dir, k, l, 75);
+	ident = drain_life(dir, y, x, 75);
 	i_ptr->timeout = 23;
 	break;
 
-      case RD_TELE:
+      case SV_ROD_TELEPORT_AWAY:
 	if (!direction(&dir)) goto no_charge;
-	ident = teleport_monster(dir, k, l);
+	ident = teleport_monster(dir, y, x);
 	i_ptr->timeout = 25;
 	break;
 
-      case RD_DISARM:
+      case SV_ROD_DISARMING:
 	if (!direction(&dir)) goto no_charge;
-	ident = disarm_all(dir, k, l);
+	ident = disarm_all(dir, y, x);
 	i_ptr->timeout = 30;
 	break;
 
-      case RD_LT_BALL:
+      case SV_ROD_ELEC_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_ELEC, dir, k, l, 32, 2);
+	fire_ball(GF_ELEC, dir, y, x, 32, 2);
 	ident = TRUE;
 	i_ptr->timeout = 23;
 	break;
 
-      case RD_CD_BALL:
+      case SV_ROD_COLD_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_COLD, dir, k, l, 48, 2);
+	fire_ball(GF_COLD, dir, y, x, 48, 2);
 	ident = TRUE;
 	i_ptr->timeout = 25;
 	break;
 
-      case RD_FR_BALL:
+      case SV_ROD_FIRE_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_FIRE, dir, k, l, 72, 2);
+	fire_ball(GF_FIRE, dir, y, x, 72, 2);
 	ident = TRUE;
 	i_ptr->timeout = 30;
 	break;
 
       case RD_AC_BALL:
 	if (!direction(&dir)) goto no_charge;
-	fire_ball(GF_ACID, dir, k, l, 60, 2);
+	fire_ball(GF_ACID, dir, y, x, 60, 2);
 	ident = TRUE;
 	i_ptr->timeout = 27;
 	break;
 
-      case RD_MAPPING:
+      case SV_ROD_MAPPING:
 	map_area();
 	ident = TRUE;
 	i_ptr->timeout = 99;
 	break;
 
-      case RD_IDENT:
+      case SV_ROD_IDENTIFY:
 	ident_spell();
 
 	/* We know what it is now */
@@ -2284,15 +2270,12 @@ void activate_rod(void)
 	i_ptr->timeout = 10;
 	break;
 
-      case RD_CURE:
-	if ((cure_blindness())
-	|| (cure_poison())
-	|| (cure_confusion())
-	|| (p_ptr->flags.stun > 0) ||
-	(p_ptr->flags.cut > 0)) {
-	    ident = TRUE;
-	}
+      case SV_ROD_CURING:
+	if (cure_blindness()) ident = TRUE;
+	if (cure_poison()) ident = TRUE;
+	if (cure_confusion()) ident = TRUE;
 	if (p_ptr->flags.stun > 0) {
+	    msg_print("Your head stops stinging.");
 	    if (p_ptr->flags.stun > 50) {
 		p_ptr->misc.ptohit += 20;
 		p_ptr->misc.ptodam += 20;
@@ -2302,7 +2285,6 @@ void activate_rod(void)
 	    }
 	    p_ptr->flags.stun = 0;
 	    ident = TRUE;
-	    msg_print("Your head stops stinging.");
 	}
 	else if (p_ptr->flags.cut > 0) {
 	    msg_print("You feel better.");
@@ -2312,7 +2294,7 @@ void activate_rod(void)
 	i_ptr->timeout = 888;
 	break;
 
-      case RD_HEAL:
+      case SV_ROD_HEALING:
 	ident = hp_player(500);
 	if (p_ptr->flags.stun > 0) {
 	    if (p_ptr->flags.stun > 50) {
@@ -2334,49 +2316,49 @@ void activate_rod(void)
 	i_ptr->timeout = 888;
 	break;
 
-      case RD_RECALL:
+      case SV_ROD_RECALL:
 	if (p_ptr->flags.word_recall == 0) {
 	    msg_print("The air about you becomes charged...");
 	    p_ptr->flags.word_recall = 15 + randint(20);
 	}
 	else {
-	    p_ptr->flags.word_recall = 0;
 	    msg_print("A tension leaves the air around you...");
+	    p_ptr->flags.word_recall = 0;
 	}
 	ident = TRUE;
 	i_ptr->timeout = 60;
 	break;
 
-      case RD_PROBE:
+      case SV_ROD_PROBING:
 	probing();
 	ident = TRUE;
 	i_ptr->timeout = 50;
 	break;
 
-      case RD_DETECT:
+      case SV_ROD_DETECTION:
 	detection();
 	ident = TRUE;
 	i_ptr->timeout = 99;
 	break;
 
-      case RD_RESTORE:
-	if (restore_level()
-	|| res_stat(A_STR)
-	|| res_stat(A_INT)
-	|| res_stat(A_WIS)
-	|| res_stat(A_DEX)
-	|| res_stat(A_CON)
-	|| res_stat(A_CHR)) ident = TRUE;
+      case SV_ROD_RESTORATION:
+	if (restore_level()) ident = TRUE;
+	if (res_stat(A_STR)) ident = TRUE;
+	if (res_stat(A_INT)) ident = TRUE;
+	if (res_stat(A_WIS)) ident = TRUE;
+	if (res_stat(A_DEX)) ident = TRUE;
+	if (res_stat(A_CON)) ident = TRUE;
+	if (res_stat(A_CHR)) ident = TRUE;
 	i_ptr->timeout = 999;
 	break;
 
-      case RD_SPEED:
+      case SV_ROD_SPEED:
 	if (p_ptr->flags.fast == 0) ident = TRUE;
 	p_ptr->flags.fast += randint(30) + 15;
 	i_ptr->timeout = 99;
 	break;
 
-      case RD_TRAP_LOC:
+      case SV_ROD_TRAP_LOC:
 	if (detect_trap()) ident = TRUE;
 	i_ptr->timeout = 99;	/* fairly long timeout because rod so low lv -CFT */
 	break;
@@ -2384,7 +2366,7 @@ void activate_rod(void)
 #if 0
       case RD_MK_WALL:	   /* JLS */
 	if (!direction(&dir)) goto no_charge;
-	ident = build_wall(dir, k, l);
+	ident = build_wall(dir, y, x);
 	/* don't want people to abuse this -JLS */
 	i_ptr->timeout = 999;
 	break;
@@ -2413,7 +2395,6 @@ void activate_rod(void)
 	} else {
 	    msg_print("The rod is currently exhausted.");
 	}
-    }
 }
 
 

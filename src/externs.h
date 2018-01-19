@@ -499,6 +499,8 @@ void rerate(void);
 
 /* effects.c */
 void eat(void);
+void do_cmd_aim_wand(void);
+void do_cmd_zap_rod(void);
 
 /* files.c */
 void init_files(void);
@@ -808,9 +810,6 @@ char *initstate(unsigned int, char *, int);
 char *setstate(char *);
 #endif
 
-/* rods.c */
-void activate_rod(void);
-
 /* save.c */
 int save_player(void);
 int _save_player(char *);
@@ -980,9 +979,6 @@ int my_topen(cptr, int, int);
 FILE *my_tfopen(cptr, cptr);
 
 /* variable.c */
-
-/* wands.c */
-void do_cmd_aim_wand(void);
 
 /* wizard.c */
 void change_character(void);
