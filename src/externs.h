@@ -485,7 +485,7 @@ void add_inscribe(inven_type *, int);
 void inscribe(inven_type *, cptr);
 void objdes(char *, struct inven_type *, int);
 void invcopy(inven_type *, int);
-void desc_charges(int);
+void inven_item_charges(int);
 void desc_remain(int);
 s16b object_offset(inven_type *);
 
@@ -982,7 +982,7 @@ FILE *my_tfopen(cptr, cptr);
 /* variable.c */
 
 /* wands.c */
-void aim(void);
+void do_cmd_aim_wand(void);
 
 /* wizard.c */
 void change_character(void);

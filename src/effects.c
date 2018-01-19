@@ -1475,11 +1475,11 @@ void read_scroll(void)
 /*
  * Aim a wand.
  */
-void aim(void)
+void do_cmd_aim_wand(void)
 {
     u32b                i;
-    int			ident, dir, l;
-    int			item_val, done_effect, j, k, chance;
+    int			ident, chance, dir, l;
+    int			item_val, done_effect, i1, k;
     inven_type		*i_ptr;
 
     free_turn_flag = TRUE;
@@ -1489,13 +1489,13 @@ void aim(void)
 	return;
     }
 
-    if (!find_range(TV_WAND, TV_NEVER, &j, &k)) {
+    if (!find_range(TV_WAND, TV_NEVER, &i1, &k)) {
 	msg_print("You are not carrying any wands.");
 	return;
     }
 
     /* Get a wand */
-    if (get_item(&item_val, "Aim which wand?", j, k, 0)) {
+    if (get_item(&item_val, "Aim which wand?", i1, k, 0)) {
 
     /* Get the item */
     i_ptr = &inventory[item_val];
@@ -1752,7 +1752,7 @@ void aim(void)
 		    sample(i_ptr);
 
     /* Describe the remaining charges */
-		desc_charges(item_val);
+		inven_item_charges(item_val);
 	    } else {
     /* The wand is already empty! */
 		msg_print("The wand has no charges left.");
@@ -2052,7 +2052,7 @@ void use(void)
 		}
 	    } else if (!known1_p(i_ptr))
 		sample(i_ptr);
-	    desc_charges(item_val);
+	    inven_item_charges(item_val);
 	} else {
 	    msg_print("The staff has no charges left.");
 	    if (!known2_p(i_ptr))

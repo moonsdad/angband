@@ -370,7 +370,7 @@
 #define BOUNDARY_WALL	15	/* Permanent */
 
 /* Column for stats    */
-#define STAT_COLUMN     0
+#define COL_STAT     0
 
 /* Class spell types */
 #define NONE            0
