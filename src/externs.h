@@ -144,7 +144,9 @@ extern int quick_messages;		/* Quick messages -CWS */
 extern int prompt_carry_flag;		/* Require "g" key to pick up */
 extern int carry_query_flag;		/* Prompt for pickup */
 
+extern int new_screen_layout;	/* Use the new screen layout */
 extern int equippy_chars;	/* do equipment characters -CWS */
+extern int depth_in_feet;	/* Display the depth in "feet" */
 extern int notice_seams;	/* Highlight mineral seams */
 
 extern int use_color;		/* Use color if possible */

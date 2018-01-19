@@ -336,8 +336,11 @@ void prt_depth()
     if (!dun_level) {
 	(void)strcpy(depths, "Town");
     }
-    else {
+    else if (depth_in_feet) {
 	(void)sprintf(depths, "%d ft", dun_level * 50);
+    }
+    else {
+	(void)sprintf(depths, "Lev %d", dun_level);
     }
 
     /* Right-Adjust the "depth", but clear old values */

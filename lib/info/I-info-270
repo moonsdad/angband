@@ -1,7 +1,12 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
 
+
 Rewrite of the "pathname constructor" code.
+Added floating point (yuck!) to "standard deviation" code.
 Added extra "options", for "color", "disturb", and others
+Implemented the "new_screen_layout" option (as an option).
+Added a "Show depth in feet (vs actual level)" option.
+Fixed more "gender" bugs in the monster recall code.
 Wrote a true "output buffer" for I/O, no longer depends on Curses
 Made it easy to add a "screen manager" for any "platform".
 Added "screen managers" for X11, Curses, and Macintosh
@@ -14,6 +19,8 @@ Renamed a LOT of variables/fields to more "consistent" forms.
 Fixed a few old bugs based in misplacement of certain flags.
 Reorganized the source to make the files more "self-contained".
 
+Threw out the "Bill Cosby" message.  "Cute" is not "good".
+Cleaned up the use of "hack_monptr" in a BIG way.
 Put "XXX" and "Hack" in the code to label areas of future work.
 
 

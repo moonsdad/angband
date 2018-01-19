@@ -190,6 +190,21 @@ static vtype        roffbuf;	   /* Line buffer. */
 static cptr roffp;	   /* Pointer into line buffer. */
 static int          roffpline;	   /* Place to print line now being loaded. */
 
+static cptr wd_They[4] = { "They", "He", "She", "It" };
+static cptr wd_they[4] = { "they", "he", "she", "it" };
+static cptr wd_poss[4] = { "their", "his", "her", "its" };
+static cptr wd_these[4] = { "these", "this", "this", "this" };
+static cptr wd_creat[4] = { "creatures", "creature", "creature", "creature" };
+static cptr wd_do[4] =   { "do", "does", "does", "does" };
+static cptr wd_are[4] =  { "are", "is", "is", "is" };
+static cptr wd_have[4] = { "have", "has", "has", "has" };
+static cptr wd_live[4] = { "live", "lives", "lives", "lives" };
+static cptr wd_move[4] = { "move", "moves", "moves", "moves" };
+static cptr wd_appear[4] = { "appear", "appears", "appears", "appears" };
+static cptr wd_resist[4] = { "resist", "resists", "resists", "resists" };
+
+
+
 /* Pluralizer: count, singular, plural) */
 #define plural(c, ss, sp)	((c) == 1 ? (ss) : (sp))
 
@@ -293,7 +308,7 @@ int roff_recall(int r_idx)
     u32b              rcflags1, rcflags2;
     u32b              rspells1, rspells2, rspells3;
     int                 breath = FALSE, magic = FALSE;
-    char			sex;
+    int			msex;
 
     monster_lore        save_mem;
 
@@ -303,7 +318,12 @@ int roff_recall(int r_idx)
     r_ptr = &r_list[r_idx];
     l_ptr = &l_list[r_idx];
 
-    sex = r_ptr->gender;
+    /* XXX Note that "it" and "they" are "reversed" */
+    if (r_ptr->gender == 'p' ) msex = 0;
+    if (r_ptr->gender == 'f' ) msex = 2;
+    if (r_ptr->gender == 'm' ) msex = 1;
+    else msex = 3;
+
 
     /* Hack -- Wizards know everything */
     if (wizard) {
@@ -350,7 +370,7 @@ int roff_recall(int r_idx)
     /* the MF1_WINNER property is always known, set it if a win monster */
     rcflags1 = l_ptr->r_cflags1 | (MF1_WINNER & r_ptr->cflags1);
     rcflags2 = l_ptr->r_cflags2 & r_ptr->cflags2;
-    if ((r_ptr->cflags2 & MF2_UNIQUE) || (sex == 'p'))
+    if ((r_ptr->cflags2 & MF2_UNIQUE) || (msex == 0))
 	(void)sprintf(temp, "%s:\n", r_ptr->name);
     else
 	(void)sprintf(temp, "The %s:\n", r_ptr->name);
@@ -365,9 +385,8 @@ int roff_recall(int r_idx)
 
 	/* We've been killed... */
 	if (l_ptr->r_deaths) {
-	    (void)sprintf(temp, "%s slain %d of your ancestors",
-			  (sex == 'm' ? "He has" : sex == 'f' ? "She has" :
-			   sex == 'p' ? "They have" : "It has"), l_ptr->r_deaths);
+	    (void)sprintf(temp, "%s %s slain %d of your ancestors",
+			  wd_They[msex], wd_have[msex], l_ptr->r_deaths);
 	    roff(temp);
 
 	    /* but we've also killed it */
@@ -393,16 +412,14 @@ int roff_recall(int r_idx)
     else if (l_ptr->r_deaths) {
 
 	(void)sprintf(temp,
-		      "%d of your ancestors %s",
-		      l_ptr->r_deaths, plural(l_ptr->r_deaths, "has", "have"));
+		      "%d of your ancestors %s been killed by %s %s, and ",
+		      l_ptr->r_deaths, plural(l_ptr->r_deaths, "has", "have"),
+		      wd_these[msex], wd_creat[msex]);
 	roff(temp);
-	roff((sex == 'p' ? " been killed by these creatures, and " :
-	      " been killed by this creature, and "));
 
 	if (l_ptr->r_kills == 0) {
-	    sprintf(temp, "%s not ever known to have been defeated.  ",
-		    (sex == 'm' ? "he is" : sex == 'f' ? "she is"
-		     : sex == 'p' ? "they are" : "it is"));
+	    sprintf(temp, "%s %s not ever known to have been defeated.  ",
+		     wd_they[msex], wd_are[msex]);
 	    roff(temp);
 	}
 	else {
@@ -444,18 +461,18 @@ int roff_recall(int r_idx)
 
     k = FALSE;
     if (r_ptr->level == 0) {
-	sprintf(temp, "%s in the town",
-		(sex == 'm' ? "He lives" : sex == 'f' ? "She lives" :
-		 sex == 'p' ? "They live" : "It lives"));
-	roff(temp);
+	roff(format("%s %s in the town", wd_They[msex], wd_live[msex]));
 	k = TRUE;
     }
     else if (l_ptr->r_kills) {
-	(void)sprintf(temp, "%s normally found at depths of %d feet",
-		      (sex == 'm' ? "He is" : sex == 'f' ? "She is" :
-		       sex == 'p' ? "They are" : "It is"),
-		      r_ptr->level * 50);
-	roff(temp);
+	if (depth_in_feet) {
+	    roff(format("%s %s normally found at depths of %d feet",
+			wd_They[msex], wd_are[msex], r_ptr->level * 50));
+	}
+	else {
+	    roff(format("%s %s normally found on dungeon level %d",
+			wd_They[msex], wd_are[msex], r_ptr->level));
+	}
 	k = TRUE;
     }
 
@@ -470,11 +487,11 @@ int roff_recall(int r_idx)
 	    roff(", and ");
 	}
 	else {
-	    roff((sex == 'm' ? "He" : sex == 'f' ? "She" :
-		  sex == 'p' ? "They" : "It"));
+	    roff(wd_They[msex]);
+	    roff(" ");
 	    k = TRUE;
 	}
-	roff((sex == 'p' ? " move" : " moves"));
+	roff(wd_move[msex]);
 	if (rcflags1 & CM1_RANDOM_MOVE) {
 	    roff(desc_howmuch[(rcflags1 & CM1_RANDOM_MOVE) >> 3]);
 	    roff(" erratically");
@@ -505,11 +522,12 @@ int roff_recall(int r_idx)
 	    roff(", but ");
 	}
 	else {
-	    roff((sex == 'm' ? "He" : sex == 'f' ? "She" :
-		  sex == 'p' ? "They" : "It"));
+	    roff(wd_They[msex]);
+	    roff(" ");
 	    k = TRUE;
 	}
-	roff(" does not deign to chase intruders");
+	roff(wd_do[msex]);
+	roff(" not deign to chase intruders");
     }
 
     /* End this sentence */
@@ -526,7 +544,8 @@ int roff_recall(int r_idx)
 	    roff("Killing this");
 	}
 	else {
-	    roff((sex == 'p' ? "A kill of these" : "A kill of this"));
+	    roff("A kill of ");
+	    roff(wd_these[msex]);
 	}
 
 	/* Describe the "quality" */
@@ -542,7 +561,7 @@ int roff_recall(int r_idx)
 	else if (r_ptr->cflags2 & MF2_DRAGON) roff("dragon");
 	else if (r_ptr->cflags2 & MF2_DEMON) roff("demon");
 	else if (r_ptr->cflags2 & MF2_TROLL) roff("troll");
-	else roff((sex == 'p' ? "creatures" : "creature"));
+	else roff(wd_creat[msex]);
 
 	/* calculate the integer exp part */
 	i = (long)r_ptr->mexp * r_ptr->level / p_ptr->misc.lev;
@@ -580,8 +599,8 @@ int roff_recall(int r_idx)
 
     /* Note that "group" flag should be obvious */
     if (r_ptr->cflags2 & MF2_GROUP) {
-	sprintf(temp, "%s usually appears in groups.  ",
-		(sex == 'm' ? "He" : sex == 'f' ? "She" : sex == 'p' ? "They" : "It"));
+	sprintf(temp, "%s usually %s in groups.  ",
+		wd_They[msex], wd_appear[msex]);
 	roff(temp);
     }
 
@@ -606,10 +625,8 @@ int roff_recall(int r_idx)
 	rspells1 &= ~CS1_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
-		sprintf(temp, "%s can breathe ",
-			(sex == 'm' ? "He" : sex == 'f' ? "She" :
-			 sex == 'p' ? "They" : "It"));
-		roff(temp);
+		roff(wd_They[msex]);
+		roff(" can breathe ");
 		k = FALSE;
 	    }
 	    else if (j || (rspells2 & CS2_BREATHE) || (rspells3 & CS3_BREATHE)) {
@@ -618,9 +635,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" and ");
 	    }
-	    sprintf(temp, desc_spell[i],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i], wd_poss[msex]);
 	    roff(temp);
 	}
 
@@ -629,10 +644,8 @@ int roff_recall(int r_idx)
 	rspells2 &= ~CS2_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
-		sprintf(temp, "%s can breathe ",
-			(sex == 'm' ? "He" : sex == 'f' ? "She" :
-			 sex == 'p' ? "They" : "It"));
-		roff(temp);
+		roff(wd_They[msex]);
+		roff(" can breathe ");
 		k = FALSE;
 	    }
 	    else if (j || (rspells3 & CS3_BREATHE)) {
@@ -641,9 +654,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" and ");
 	    }
-	    sprintf(temp, desc_spell[i + 32],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i + 32], wd_poss[msex]);
 	    roff(temp);
 	}
 
@@ -652,10 +663,8 @@ int roff_recall(int r_idx)
 	rspells1 &= ~CS3_BREATHE;
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
-		sprintf(temp, "%s can breathe ",
-			(sex == 'm' ? "He" : sex == 'f' ? "She" :
-			 sex == 'p' ? "They" : "It"));
-		roff(temp);
+		roff(wd_They[msex]);
+		roff(" can breathe ");
 		k = FALSE;
 	    }
 	    else if (j) {
@@ -664,9 +673,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" and ");
 	    }
-	    sprintf(temp, desc_spell[i + 64],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i + 64], wd_poss[msex]);
 	    roff(temp);
 	}
     }
@@ -685,11 +692,12 @@ int roff_recall(int r_idx)
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		if (breath) {
-		    roff((sex == 'p' ? ", and are also" : ", and is also"));
+		    sprintf(temp, ", and %s also", wd_are[msex]);
+		    roff(temp);
 		}
 		else {
-		    roff((sex == 'm' ? "He is" : sex == 'f' ? "She is" :
-			  sex == 'p' ? "They are" : "It is"));
+		    sprintf(temp, "%s %s", wd_They[msex], wd_are[msex]);
+		    roff(temp);
 		}
 		if (l_ptr->r_cflags2 & MF2_INTELLIGENT) {
 		    roff(" magical, casting spells intelligently which ");
@@ -705,9 +713,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" or ");
 	    }
-	    sprintf(temp, desc_spell[i],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i], wd_poss[msex]);
 	    roff(temp);
 	}
 
@@ -715,11 +721,12 @@ int roff_recall(int r_idx)
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		if (breath) {
-		    roff((sex == 'p' ? ", and are also" : ", and is also"));
+		    sprintf(temp, ", and %s also", wd_are[msex]);
+		    roff(temp);
 		}
 		else {
-		    roff((sex == 'm' ? "He is" : sex == 'f' ? "She is" :
-			  sex == 'p' ? "They are" : "It is"));
+		    sprintf(temp, "%s %s", wd_They[msex], wd_are[msex]);
+		    roff(temp);
 		}
 		roff(" magical, casting spells which ");
 		k = FALSE;
@@ -730,9 +737,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" or ");
 	    }
-	    sprintf(temp, desc_spell[i + 32],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i + 32], wd_poss[msex]);
 	    roff(temp);
 	}
 
@@ -740,11 +745,12 @@ int roff_recall(int r_idx)
 	while ((i = bit_pos(&j)) != -1) {
 	    if (k) {
 		if (breath) {
-		    roff((sex == 'p' ? ", and are also" : ", and is also"));
+		    sprintf(temp, ", and %s also", wd_are[msex]);
+		    roff(temp);
 		}
 		else {
-		    roff((sex == 'm' ? "He is" : sex == 'f' ? "She is" :
-			  sex == 'p' ? "They are" : "It is"));
+		    sprintf(temp, "%s %s", wd_They[msex], wd_are[msex]);
+		    roff(temp);
 		}
 		roff(" magical, casting spells which ");
 		k = FALSE;
@@ -755,9 +761,7 @@ int roff_recall(int r_idx)
 	    else {
 		roff(" or ");
 	    }
-	    sprintf(temp, desc_spell[i + 64],
-		    (sex == 'm' ? "his" : sex == 'f' ? "her" :
-		     sex == 'p' ? "their" : "its"));
+	    sprintf(temp, desc_spell[i + 64], wd_poss[msex]);
 	    roff(temp);
 	}
     }
@@ -785,10 +789,8 @@ int roff_recall(int r_idx)
 	((r_ptr->cflags2 & MF2_UNIQUE) &&
 	 knowuniqarmor(r_ptr->level, l_ptr->r_kills))) {
 
-	(void)sprintf(temp, "%s an armor rating of %d",
-		      (sex == 'm' ? "He has" : sex == 'f' ? "She has" :
-		       sex == 'p' ? "They have" : "It has"),
-		      r_ptr->ac);
+	(void)sprintf(temp, "%s %s an armor rating of %d",
+			wd_They[msex], wd_have[msex], r_ptr->ac);
 	roff(temp);
 	(void)sprintf(temp, " and a%s life rating of %dd%d.  ",
 		      ((r_ptr->cflags2 & MF2_MAX_HP) ? " maximized" : ""),
@@ -797,11 +799,9 @@ int roff_recall(int r_idx)
     }
 
     /* I wonder why this wasn't here before? -CFT */
-    if (rcflags2 & MF2_BREAK_WALL) {  /* I wonder why this wasn't here before? -CFT */
-	roff((sex == 'm' ? "He can bore through rock" :
-	      sex == 'f' ? "She can bore through rock" :
-	      sex == 'p' ? "They can bore through rock" :
-	      "It can bore through rock"));
+    if (rcflags2 & MF2_BREAK_WALL) {
+	roff(wd_They[msex]);
+	roff(" can bore through rock.  ");
 	k = FALSE;
     }
 
@@ -813,8 +813,8 @@ int roff_recall(int r_idx)
 	if (j & (MF1_MV_INVIS << i)) {
 	    j &= ~(MF1_MV_INVIS << i);
 	    if (k) {
-		roff((sex == 'm' ? "He can " : sex == 'f' ? "She can " :
-		      sex == 'p' ? "They can " : "It can "));
+		roff(wd_They[msex]);
+		roff(" can ");
 		k = FALSE;
 	    }
 	    else if (j & CM1_SPECIAL) {
@@ -836,10 +836,10 @@ int roff_recall(int r_idx)
 
     if (j & MF2_HURT_LITE) {
 	if (k) {
-	    roff((sex == 'm' ? "He is susceptible to " :
-		  sex == 'f' ? "She is susceptible to " :
-		  sex == 'p' ? "They are susceptible to " :
-		  "It is susceptible to "));
+	    roff(wd_They[msex]);
+	    roff(" ");
+	    roff(wd_are[msex]);
+	    roff(" susceptible to ");
 	    roff(desc_weakness[0]);
 	    k = FALSE;
 	}
@@ -847,10 +847,10 @@ int roff_recall(int r_idx)
 
     if (j & MF2_HURT_ROCK) {
 	if (k) {
-	    roff((sex == 'm' ? "He is susceptible to " :
-		  sex == 'f' ? "She is susceptible to " :
-		  sex == 'p' ? "They are susceptible to " :
-		  "It is susceptible to "));
+	    roff(wd_They[msex]);
+	    roff(" ");
+	    roff(wd_are[msex]);
+	    roff(" susceptible to ");
 	    roff(desc_weakness[1]);
 	    k = FALSE;
 	}
@@ -871,10 +871,10 @@ int roff_recall(int r_idx)
 	if (j & (MF2_IM_COLD << i)) {
 	    j &= ~(MF2_IM_COLD << i);
 	    if (k) {
-		roff((sex == 'm' ? "He resists " :
-		      sex == 'f' ? "She resists " :
-		      sex == 'p' ? "They resist " :
-		      "It resists "));
+		roff(wd_They[msex]);
+		roff(" ");
+		roff(wd_resist[msex]);
+		roff(" ");
 		k = FALSE;
 	    }
 	    else if (j & (MF2_IM_COLD | MF2_IM_FIRE | MF2_IM_ACID | MF2_IM_POIS | MF2_IM_ELEC)) {
@@ -891,18 +891,17 @@ int roff_recall(int r_idx)
     }
 
     if (rcflags2 & MF2_NO_INFRA) {
-	roff((sex == 'm' ? "He is cold blooded" :
-	      sex == 'f' ? "She is cold blooded" :
-	      sex == 'p' ? "They are cold blooded" :
-	      "It is cold blooded"));
+	roff(wd_They[msex]);
+	roff(" ");
+	roff(wd_are[msex]);
+	roff(" cold blooded");
     }
     if (rcflags2 & MF2_CHARM_SLEEP) {
 	if (rcflags2 & MF2_NO_INFRA) {
 	    roff(", and");
 	}
 	else {
-	    roff((sex == 'm' ? "He" : sex == 'f' ? "She" :
-		  sex == 'p' ? "They" : "It"));
+	    roff(wd_They[msex]);
 	}
 	roff(" cannot be charmed or slept");
     }
@@ -911,12 +910,12 @@ int roff_recall(int r_idx)
     }
 
     /* Do we know how aware it is? */
-    if (((l_ptr->r_wake * l_ptr->r_wake) > r_ptr->sleep) ||
+    if ((((int)l_ptr->r_wake * (int)l_ptr->r_wake) > r_ptr->sleep) ||
 	(l_ptr->r_ignore == MAX_UCHAR) ||
 	(r_ptr->sleep == 0 && l_ptr->r_kills >= 10)) {
 
 	/* XXX Plural verbs */
-	roff((sex == 'm' ? "He" : sex == 'f' ? "She" : sex == 'p' ? "They" : "It"));
+	roff(wd_They[msex]);
 	roff(" ");
 	if (r_ptr->sleep > 200) {
 	    roff("prefers to ignore");
@@ -937,24 +936,27 @@ int roff_recall(int r_idx)
 	    roff("takes a while to see");
 	}
 	else if (r_ptr->sleep > 5) {
-	    roff((sex == 'p' ? "are fairly observant of" : "is fairly observant of"));
+	    roff(wd_are[msex]);
+	    roff(" fairly observant of");
 	}
 	else if (r_ptr->sleep > 3) {
-	    roff((sex == 'p' ? "are observant of" : "is observant of"));
+	    roff(wd_are[msex]);
+	    roff(" observant of");
 	}
 	else if (r_ptr->sleep > 1) {
-	    roff((sex == 'p' ? "are very observant of" : "is very observant of"));
+	    roff(wd_are[msex]);
+	    roff(" very observant of");
 	}
 	else if (r_ptr->sleep != 0) {
-	    roff((sex == 'p' ? "are vigilant for" : "is vigilant for"));
+	    roff(wd_are[msex]);
+	    roff(" vigilant for");
 	}
 	else {
-	    roff((sex == 'p' ? "are ever vigilant for" : "is ever vigilant for"));
+	    roff(wd_are[msex]);
+	    roff(" ever vigilant for");
 	}
 	(void)sprintf(temp, " intruders, which %s may notice from %d feet.  ",
-		      (sex == 'm' ? "he" : sex == 'f' ? "she" :
-		       sex == 'p' ? "they" : "it"),
-		      10 * r_ptr->aaf);
+		      wd_they[msex], 10 * r_ptr->aaf);
 	roff(temp);
     }
 
@@ -964,8 +966,8 @@ int roff_recall(int r_idx)
 
 	j = (rcflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
 
-	roff((sex == 'm' ? "He may" : sex == 'f' ? "She may" :
-	      sex == 'p' ? "They may" : "It may"));
+	roff(wd_They[msex]);
+	roff(" may");
 
 
 	/* Only one treasure observed */
@@ -1054,8 +1056,8 @@ int roff_recall(int r_idx)
 
 	/* Introduce the attack description */
 	if (j == 1) {
-	    roff((sex == 'm' ? "He can " : sex == 'f' ? "She can " :
-		  sex == 'p' ? "They can " : "It can "));
+	    roff(wd_They[msex]);
+	    roff(" can ");
 	}
 	else if (j == k) {
 	    roff(", and ");
@@ -1109,17 +1111,15 @@ int roff_recall(int r_idx)
 
     /* Hack -- Or describe the lack of attacks */
     else if (k > 0 && l_ptr->r_attacks[0] >= 10) {
-	sprintf(temp, " %s no physical attacks.",
-		(sex == 'm' ? "He has" : sex == 'f' ? "She has" :
-		 sex == 'p' ? "They have" : "It has"));
+	sprintf(temp, " %s %s no physical attacks.",
+		wd_They[msex], wd_have[msex]);
 	roff(temp);
     }
 
     /* Or describe the lack of knowledge */
     else {
 	sprintf(temp, "Nothing is known about %s attack.",
-		(sex == 'm' ? "his" : sex == 'f' ? "her" :
-		 sex == 'p' ? "their" : "its"));
+		wd_poss[msex]);
 	roff(temp);
     }
 

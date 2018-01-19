@@ -139,7 +139,14 @@
 
 /* Treasure constants                                           */
 #define MAX_OBJ_LEVEL   255     /* Maximum level of magic in dungeon      */
-#define GREAT_OBJ        11     /* 1/n Chance of item being a Great Item  */
+
+/*
+ * Hack -- this is the chance (1/GREAT_OBJ) that when an item is
+ * created by "get_obj_num()", that the "level" will be "enhanced"
+ * by quite a large amount.  This will allow, for example, a ring
+ * of speed to be found at 50 feet.
+ */
+#define GREAT_OBJ        11     /* 1/Chance of item being a Great Item  */
 
 /* Number of dungeon objects */
 #define MAX_DUNGEON_OBJ  423

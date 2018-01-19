@@ -261,10 +261,16 @@ static opt_desc options[] = {
     { "Disable haggling in stores",		&no_haggle_flag},
     { "Plain object descriptions",		&plain_descriptions},
     { "Quick messages",		                &quick_messages},
-    { "Equippy chars",		                &equippy_chars},
+
+    { "Use new screen layout",                  &new_screen_layout },
+    { "Display Equippy chars",		        &equippy_chars },
+    { "Show dungeon level in feet",		&depth_in_feet },
+
+    { "Use color",				&use_color },
     { "Low hitpoint warning",			&hitpoint_warn},
     { "Delay speed", 				&delay_spd},
-    { (char *)0, 				(int *)0}
+
+    { NULL,					NULL }
 };
 
 
