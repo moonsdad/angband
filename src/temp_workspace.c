@@ -601,7 +601,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
 	missile_ctr = -MAX_SHORT - 1;
     else
 	missile_ctr++;
-    t_ptr->p1 = missile_ctr;
+    t_ptr->pval = missile_ctr;
 
     /* always show tohit/todam values if identified */
     t_ptr->ident |= ID_SHOW_HITDAM;
@@ -723,7 +723,7 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 {
     register int i, amount;
 
-    amount = t_ptr->p1 * factor;
+    amount = t_ptr->pval * factor;
     if (t_ptr->flags & TR_STATS) {
 	for (i = 0; i < 6; i++)
 	    if ((1 << i) & t_ptr->flags)
@@ -738,16 +738,16 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
     if (TR1_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
-		     objeci_list[t_ptr->index].name) &&
-	    (t_ptr->p1 > 0))
+		     k_list[t_ptr->index].name) &&
+	    (t_ptr->pval > 0))
 	    if ((inventory[INVEN_RIGHT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 objeci_list[inventory[INVEN_RIGHT].index].name) &&
-		(inventory[INVEN_RIGHT].p1 > 0) &&
+			 k_list[inventory[INVEN_RIGHT].index].name) &&
+		(inventory[INVEN_RIGHT].pval > 0) &&
 		(inventory[INVEN_LEFT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 objeci_list[inventory[INVEN_LEFT].index].name) &&
-		(inventory[INVEN_RIGHT].p1 > 0))
+			 k_list[inventory[INVEN_LEFT].index].name) &&
+		(inventory[INVEN_RIGHT].pval > 0))
 		return;
 	change_speed(-amount);
     }
@@ -1022,8 +1022,8 @@ void change_trap(register int y, register int x)
     } else if (t_ptr->tval == TV_SECRET_DOOR) {
     /* change secret door to closed door */
 	t_ptr->index = OBJ_CLOSED_DOOR;
-	t_ptr->tval = objeci_list[OBJ_CLOSED_DOOR].tval;
-	t_ptr->tchar = objeci_list[OBJ_CLOSED_DOOR].tchar;
+	t_ptr->tval = k_list[OBJ_CLOSED_DOOR].tval;
+	t_ptr->tchar = k_list[OBJ_CLOSED_DOOR].tchar;
 	lite_spot(y, x);
     }
 }
@@ -1658,7 +1658,7 @@ static void do_command(char com_val)
 		    inven_type          inv;
 
 		    for (temp = 0; temp < MAX_DUNGEON_OBJ; temp++) {
-			if (objeci_list[temp].level <= i) {
+			if (k_list[temp].level <= i) {
 			    invcopy(&inv, temp);
 			    known1(&inv);
 			}

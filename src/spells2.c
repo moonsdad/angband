@@ -764,7 +764,7 @@ void create_food(void)
     p_ptr->flags.food = PLAYER_FOOD_MAX;
 #else
      /* add to food timer rather than create mush - cba */
-     add_food(objeci_list[OBJ_MUSH].p1);
+     add_food(k_list[OBJ_MUSH].pval);
 #endif
 
     /* Hack -- update the display */
@@ -1352,7 +1352,7 @@ int remove_curse()
 	    (i_ptr->name2 != EGO_MORGUL) &&
 	    (i_ptr->name2 != ART_CALRIS) &&
 	    (i_ptr->name2 != ART_MORMEGIL)) {
-	    if (!(!stricmp(objeci_list[i_ptr->index].name, "Power") &&
+	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
 		i_ptr->flags &= ~TR_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */
@@ -1374,7 +1374,7 @@ int remove_all_curse()
     for (i = INVEN_WIELD; i <= INVEN_OUTER; i++) {
 	i_ptr = &inventory[i];
 	if (TR_CURSED & i_ptr->flags) {
-	    if (!(!stricmp(objeci_list[i_ptr->index].name, "Power") &&
+	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
 		i_ptr->flags &= ~TR_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */
@@ -1428,7 +1428,7 @@ void self_knowledge()
 
     for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {	/* get flags from items */
 	if (inventory[i].tval != TV_NOTHING) {
-	    if (inventory[i].p1 < 0) /* don't adjust TR_STATS if p1 is negative -CWS */
+	    if (inventory[i].pval < 0) /* don't adjust TR_STATS if pval is negative -CWS */
 		f |= (inventory[i].flags & ~(TR_STATS | TR1_SEARCH | TR1_STEALTH) );
 	    else
 		f |= inventory[i].flags;
@@ -2382,12 +2382,12 @@ int recharge(int num)
 	/* recharge II = recharge(60) = 1/10 failure for empty 10th level wand */
 	/* make it harder to recharge high level, and highly charged wands     */
 
-	    if (randint((num + 100 - (int)i_ptr->level - (10 * i_ptr->p1)) / 15) == 1) {
+	    if (randint((num + 100 - (int)i_ptr->level - (10 * i_ptr->pval)) / 15) == 1) {
 		msg_print("There is a bright flash of light.");
 		inven_destroy(item_val);
 	    } else {
 		num = (num / (i_ptr->level + 2)) + 1;
-		i_ptr->p1 += 2 + randint(num);
+		i_ptr->pval += 2 + randint(num);
 		if (known2_p(i_ptr))
 		    clear_known2(i_ptr);
 		clear_empty(i_ptr);
@@ -3038,7 +3038,7 @@ int disarm_all(int dir, int y, int x)
 		if (delete_object(y, x))
 		    disarm = TRUE;
 	    } else if (t_ptr->tval == TV_CLOSED_DOOR)
-		t_ptr->p1 = 0;	   /* Locked or jammed doors become merely closed. */
+		t_ptr->pval = 0;	   /* Locked or jammed doors become merely closed. */
 	    else if (t_ptr->tval == TV_SECRET_DOOR) {
 		c_ptr->fm = TRUE;
 		change_trap(y, x);
@@ -3151,7 +3151,7 @@ int trap_creation()
 			(void)delete_object(i, j);
 		    place_trap(i, j, randint(MAX_TRAP) - 1);
 		/* don't let player gain exp from the newly created traps */
-		    i_list[c_ptr->tptr].p1 = 0;
+		    i_list[c_ptr->tptr].pval = 0;
 		/* open pits are immediately visible, so call lite_spot */
 		    lite_spot(i, j);
 		} else

@@ -211,17 +211,17 @@ static void do_cmd_refill_lamp()
 	free_turn_flag = FALSE;
 	i_ptr = &inventory[INVEN_LITE];
 
-	i_ptr->p1 += inventory[i].p1;
+	i_ptr->pval += inventory[i].pval;
 
-	if (i_ptr->p1 > FUEL_LAMP) {
-	    i_ptr->p1 = FUEL_LAMP;
+	if (i_ptr->pval > FUEL_LAMP) {
+	    i_ptr->pval = FUEL_LAMP;
 	    msg_print("Your lamp overflows, spilling oil on the ground.");
 	    msg_print("Your lamp is full.");
 	}
-	else if (i_ptr->p1 > FUEL_LAMP / 2) {
+	else if (i_ptr->pval > FUEL_LAMP / 2) {
 	    msg_print("Your lamp is more than half full.");
 	}
-	else if (i_ptr->p1 == FUEL_LAMP / 2) {
+	else if (i_ptr->pval == FUEL_LAMP / 2) {
 	    msg_print("Your lamp is half full.");
 	}
 	else {

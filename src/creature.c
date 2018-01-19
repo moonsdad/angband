@@ -1467,9 +1467,9 @@ static void make_attack(int m_idx)
 	      /* Eat light */
 	      case 23:
 		i_ptr = &inventory[INVEN_LITE];
-		if ((i_ptr->p1 > 0) && ((i_ptr->flags2 & TR_ARTIFACT) == 0)) {
-		    i_ptr->p1 -= (250 + randint(250));
-		    if (i_ptr->p1 < 1) i_ptr->p1 = 1;
+		if ((i_ptr->pval > 0) && ((i_ptr->flags2 & TR_ARTIFACT) == 0)) {
+		    i_ptr->pval -= (250 + randint(250));
+		    if (i_ptr->pval < 1) i_ptr->pval = 1;
 		    if (p_ptr->flags.blind < 1) {
 			msg_print("Your light dims.");
 		    }
@@ -1488,9 +1488,9 @@ static void make_attack(int m_idx)
 		j = r_ptr->level;
 		i_ptr = &inventory[i];
 		if (((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) &&
-		    (i_ptr->p1 > 0)) {
-		    m_ptr->hp += j * i_ptr->p1;
-		    i_ptr->p1 = 0;
+		    (i_ptr->pval > 0)) {
+		    m_ptr->hp += j * i_ptr->pval;
+		    i_ptr->pval = 0;
 		    if (!known2_p(i_ptr)) {
 			add_inscribe(i_ptr, ID_EMPTY);
 		    }
@@ -1744,7 +1744,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		/* Hack -- break the door */
 		invcopy(i_ptr, OBJ_OPEN_DOOR);
-		i_ptr->p1 = (-1);          /* make it broken, not just open */
+		i_ptr->pval = (-1);          /* make it broken, not just open */
 		c_ptr->fval = CORR_FLOOR;	        /* change floor setting */
 
 		/* Redraw door */
@@ -1776,26 +1776,26 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		    /* XXX Hack -- scared monsters can open locked/stuck doors */
 		    if ((m_ptr->monfear) && rand_int(2)) {
-			i_ptr->p1 = 0;
+			i_ptr->pval = 0;
 		    }
 
 		    /* Closed door */
-		    if (i_ptr->p1 == 0) {
+		    if (i_ptr->pval == 0) {
 			do_move = TRUE;
 		    }
 
 		    /* Locked doors */
-		    else if (i_ptr->p1 > 0) {
-			if (randint((m_ptr->hp + 1) * (50 + i_ptr->p1)) <
-			    40 * (m_ptr->hp - 10 - i_ptr->p1)) {
-			    i_ptr->p1 = 0;
+		    else if (i_ptr->pval > 0) {
+			if (randint((m_ptr->hp + 1) * (50 + i_ptr->pval)) <
+			    40 * (m_ptr->hp - 10 - i_ptr->pval)) {
+			    i_ptr->pval = 0;
 			}
 		    }
 
 		    /* Stuck doors */
-		    else if (i_ptr->p1 < 0) {
-			if (randint((m_ptr->hp + 1) * (50 - i_ptr->p1)) <
-			    40 * (m_ptr->hp - 10 + i_ptr->p1)) {
+		    else if (i_ptr->pval < 0) {
+			if (randint((m_ptr->hp + 1) * (50 - i_ptr->pval)) <
+			    40 * (m_ptr->hp - 10 + i_ptr->pval)) {
 			    msg_print("You hear a door burst open!");
 			    disturb(1, 0);
 			    stuck_door = TRUE;
@@ -1818,7 +1818,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		    invcopy(i_ptr, OBJ_OPEN_DOOR);
 
 		    /* 50% chance of breaking door */
-		    if (stuck_door) i_ptr->p1 = 1 - randint(2);
+		    if (stuck_door) i_ptr->pval = 1 - randint(2);
 
 			c_ptr->fval = CORR_FLOOR;
 
@@ -1837,14 +1837,14 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		if (i_ptr->tval == TV_CLOSED_DOOR) {
 		    do_turn = TRUE;
-		    if (randint((m_ptr->hp + 1) * (80 + MY_ABS(i_ptr->p1))) <
-			40 * (m_ptr->hp - 20 - MY_ABS(i_ptr->p1))) {
+		    if (randint((m_ptr->hp + 1) * (80 + MY_ABS(i_ptr->pval))) <
+			40 * (m_ptr->hp - 20 - MY_ABS(i_ptr->pval))) {
 
 			/* XXX Should create a new object XXX */
 			invcopy(i_ptr, OBJ_OPEN_DOOR);
 
 			/* 50% chance of breaking door */
-			i_ptr->p1 = 0 - rand_int(2);
+			i_ptr->pval = 0 - rand_int(2);
 
 			c_ptr->fval = CORR_FLOOR;
 

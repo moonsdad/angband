@@ -413,7 +413,7 @@ static void place_broken_door(int y, int x)
 
     /* Hack -- nuke any walls */
     c_ptr->fval = CORR_FLOOR;
-    i_list[cur_pos].p1 = 1;
+    i_list[cur_pos].pval = 1;
 }
 
 
@@ -454,7 +454,7 @@ static void place_locked_door(int y, int x)
     c_ptr->fval = BLOCKED_FLOOR;
 
     /* Lock the door */
-    i_ptr->p1 = randint(10) + 10;
+    i_ptr->pval = randint(10) + 10;
 }
 
 
@@ -476,7 +476,7 @@ static void place_stuck_door(int y, int x)
     c_ptr->fval = BLOCKED_FLOOR;
 
     /* Stick the door */
-    i_ptr->p1 = (-randint(10) - 10);
+    i_ptr->pval = (-randint(10) - 10);
 }
 
 

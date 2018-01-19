@@ -631,25 +631,25 @@ void do_cmd_open()
 	/* Closed door		 */
 	    if (i_list[c_ptr->tptr].tval == TV_CLOSED_DOOR) {
 		t_ptr = &i_list[c_ptr->tptr];
-		if (t_ptr->p1 > 0) {
+		if (t_ptr->pval > 0) {
 		    i = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
 			+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM]
 			   * p_ptr->misc.lev / 3);
 	/* give a 1/50 chance of opening anything, anyway -CWS */
-		    if ((i - t_ptr->p1) < 2)
-			i = t_ptr->p1 + 2;
+		    if ((i - t_ptr->pval) < 2)
+			i = t_ptr->pval + 2;
 		    if (p_ptr->flags.confused > 0)
 			msg_print("You are too confused to pick the lock.");
-		    else if ((i - t_ptr->p1) > randint(100)) {
+		    else if ((i - t_ptr->pval) > randint(100)) {
 			msg_print("You have picked the lock.");
 			p_ptr->misc.exp++;
 			prt_experience();
-			t_ptr->p1 = 0;
+			t_ptr->pval = 0;
 		    } else
 			count_msg_print("You failed to pick the lock.");
-		} else if (t_ptr->p1 < 0)	/* It's stuck	  */
+		} else if (t_ptr->pval < 0)	/* It's stuck	  */
 		    msg_print("It appears to be stuck.");
-		if (t_ptr->p1 == 0) {
+		if (t_ptr->pval == 0) {
 		    invcopy(&i_list[c_ptr->tptr], OBJ_OPEN_DOOR);
 		    c_ptr->fval = CORR_FLOOR;
 		    lite_spot(y, x);
@@ -698,7 +698,7 @@ void do_cmd_open()
 		    t_ptr->flags &= ~TR_CURSED;
 
 		/* generate based on level chest was found on - dbd */
-		    object_level = t_ptr->p1;
+		    object_level = t_ptr->pval;
 
 	        /* but let's not get too crazy with storebought chests -CWS */
 		    if (t_ptr->ident & ID_STOREBOUGHT) {
@@ -760,7 +760,7 @@ void do_cmd_close()
 	if (c_ptr->tptr != 0)
 	    if (i_list[c_ptr->tptr].tval == TV_OPEN_DOOR)
 		if (c_ptr->cptr == 0)
-		    if (i_list[c_ptr->tptr].p1 == 0) {
+		    if (i_list[c_ptr->tptr].pval == 0) {
 			invcopy(&i_list[c_ptr->tptr], OBJ_CLOSED_DOOR);
 			c_ptr->fval = BLOCKED_FLOOR;
 			lite_spot(y, x);
@@ -930,7 +930,7 @@ void tunnel(int dir)
 	    msg_print("You are too afraid!");
     } else if (i_ptr->tval != TV_NOTHING) {
 	if (TR1_TUNNEL & i_ptr->flags)
-	    tabil += 25 + i_ptr->p1 * 50;
+	    tabil += 25 + i_ptr->pval * 50;
 	else {
 	    tabil += (i_ptr->dd * i_ptr->ds) + i_ptr->tohit
 		+ i_ptr->todam;
@@ -1069,7 +1069,7 @@ void do_cmd_disarm()
 	    if (i == TV_VIS_TRAP) {/* Floor trap    */
 		if ((tot + 100 - level) > randint(100)) {
 		    msg_print("You have disarmed the trap.");
-		    p_ptr->misc.exp += i_ptr->p1;
+		    p_ptr->misc.exp += i_ptr->pval;
 		    (void)delete_object(y, x);
 		/* make sure we move onto the trap even if confused */
 		    tmp = p_ptr->flags.confused;
@@ -1136,10 +1136,10 @@ void do_cmd_disarm()
  *
  * Note: Affected by strength and weight of character 
  *
- * For a closed door, p1 is positive if locked; negative if stuck. A disarm
+ * For a closed door, pval is positive if locked; negative if stuck. A disarm
  * spell unlocks and unjams doors! 
  *
- * For an open door, p1 is positive for a broken door. 
+ * For an open door, pval is positive for a broken door. 
  *
  * A closed door can be opened - harder if locked. Any door might be 
  * bashed open (and thereby broken). Bashing a door is (potentially)
@@ -1206,8 +1206,8 @@ void bash()
 		tmp = p_ptr->stats.use_stat[A_STR] + p_ptr->misc.wt / 2;
 
 		/* Use (roughly) similar method as for monsters. */
-		if (randint(tmp * (20 + MY_ABS(i_ptr->p1))) <
-			10 * (tmp - MY_ABS(i_ptr->p1))) {
+		if (randint(tmp * (20 + MY_ABS(i_ptr->pval))) <
+			10 * (tmp - MY_ABS(i_ptr->pval))) {
 
 		    msg_print("The door crashes open!");
 
@@ -1215,7 +1215,7 @@ void bash()
 		    invcopy(&i_list[c_ptr->tptr], OBJ_OPEN_DOOR);
 
 		    /* 50% chance of breaking door */
-		    i_ptr->p1 = 1 - randint(2);
+		    i_ptr->pval = 1 - randint(2);
 		    c_ptr->fval = CORR_FLOOR;
 
 		    /* If not confused, fall through the door */
@@ -1295,12 +1295,12 @@ static void do_cmd_spike()
 		    if (find_range(TV_SPIKE, TV_NEVER, &i, &j)) {
 			free_turn_flag = FALSE;
 			count_msg_print("You jam the door with a spike.");
-			if (t_ptr->p1 > 0)
-			    t_ptr->p1 = (-t_ptr->p1);	/* Make locked to stuck. */
+			if (t_ptr->pval > 0)
+			    t_ptr->pval = (-t_ptr->pval);	/* Make locked to stuck. */
 		    /* Successive spikes have a progressively smaller effect.
 		     * Series is: 0 20 30 37 43 48 52 56 60 64 67 70 ... 
 		     */
-			t_ptr->p1 -= 1 + 190 / (10 - t_ptr->p1);
+			t_ptr->pval -= 1 + 190 / (10 - t_ptr->pval);
 			i_ptr = &inventory[i];
 			if (i_ptr->number > 1) {
 			    i_ptr->number--;
@@ -1329,7 +1329,7 @@ static void do_cmd_spike()
 
 
 /*
- * Throw an object across the dungeon.		-RAK-
+ * Throw an object across the dungeon. -RAK-
  * Note: Flasks of oil do "fire damage" (is this still true?)
  * Note: Extra damage and chance of hitting when missiles are used
  * with correct weapon.  I.E.  wield bow and throw arrow.
@@ -1377,7 +1377,7 @@ void do_cmd_fire()
 	else if ((t->tval >= TV_MIN_WEAR) && (t->tval <= TV_MAX_WEAR) &&
 		 (t->flags & TR_CURSED) && known2_p(t))
 	    ok_throw = TRUE; /* if user wants to throw cursed, let him */
-	else if ((objeci_list[t->index].cost <= 0) && known1_p(t) &&
+	else if ((k_list[t->index].cost <= 0) && known1_p(t) &&
 		 !(known2_p(t) && (t->cost > 0)))
 	    ok_throw = TRUE;
 	else if ((t->cost <= 0) && known2_p(t))
@@ -1560,12 +1560,12 @@ void rest(void)
 {
     int   rest_num;
     vtype rest_str;
+    char ch;
 
     if (command_count > 0) {
 	rest_num = command_count;
 	command_count = 0;
     } else {
-	char                ch;
 
 	/* Ask the question (perhaps a "prompt" routine would be good) */
 	prt("Rest for how long? ('*' for HP/mana; '&' as needed) : ", 0, 0);
@@ -1585,10 +1585,11 @@ void rest(void)
 	    }
 	}
     }
+
+    /* Induce Rest */
     if (rest_num != 0) {
 
-	if (p_ptr->flags.status & PY_SEARCH)
-	    search_off();
+	if (p_ptr->flags.status & PY_SEARCH)  search_off();
 
 	p_ptr->flags.rest = rest_num;
 	p_ptr->flags.status |= PY_REST;
@@ -1606,7 +1607,7 @@ void rest(void)
 }
 
 
-static void do_cmd_feeling()
+void do_cmd_feeling()
 {
     /* No useful feeling in town */
     if (!dun_level) {
@@ -1678,7 +1679,7 @@ void add_inscribe(inven_type *i_ptr, int type)
 
 
 /*
- * Add a comment to an object description.		-CJS-
+ * Add a comment to an object description.		-CJS- 
  */
 void scribe_object(void)
 {
@@ -1957,10 +1958,26 @@ void artifact_check(void)
 }
 
 
+/*
+ * print out the status of uniques - cba 
+ *
+ * XXX This routine may induce a blank final screen.
+ */
 void do_cmd_check_uniques()
 {
     int      i, j, k;
     bigvtype msg;
+
+	
+    free_turn_flag = TRUE;
+
+#ifndef ALLOW_CHECK_UNIQUES
+    if (!wizard) {
+	msg_print("That command was not compiled.");
+	return;
+    }
+#endif
+
 
     save_screen();
 
@@ -1971,21 +1988,34 @@ void do_cmd_check_uniques()
     i = 1;
     prt("Uniques:", i++, j + 5);
 
-    for (k = 0; k < (MAX_R_IDX - 1); k++) {
-	if ((strlen(r_list[k].name) > 0) && (r_list[k].cflags2 & MF2_UNIQUE)) {
+    /* Note -- skip the ghost */
+    for (k = 0; k < MAX_R_IDX-1; k++) {
+
+	/* Only print Uniques */
+	if (r_list[k].cflags2 & MF2_UNIQUE) {
+
+	if ((strlen(r_list[k].name) > 0) ) {
 	    if (wizard) {
+
+		/* Print a message */            
 		sprintf(msg, "%s is %s.", r_list[k].name,
 			(u_list[k].dead) ? "dead" : "alive");            
 		prt(msg, i++, j);
+
 		unique_screen_full(&i, j);
-	    } else if (u_list[k].dead) {
-		sprintf(msg, "%s is dead.", r_list[k].name);
-		prt(msg, i++, j);
-		unique_screen_full(&i, j);
+		} else if (u_list[k].dead) {
+		    sprintf(msg, "%s is dead.", r_list[k].name);
+		    prt(msg, i++, j);
+		    unique_screen_full(&i, j);
+		}
 	    }
 	}
     }
+
+    /* Pause */
     pause_line(i);
+
+    /* Restore the screen */
     restore_screen();
 }
 

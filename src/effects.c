@@ -351,7 +351,7 @@ void eat(void)
 	    sample(i_ptr);
 
     /* Consume the food */
-    add_food(i_ptr->p1);
+    add_food(i_ptr->pval);
 
     /* Hack -- note loss of hunger */
     p_ptr->flags.status &= ~(PY_WEAK | PY_HUNGRY);
@@ -900,7 +900,7 @@ void quaff(void)
 	    sample(i_ptr);
 
     /* Potions can feed the player */
-    add_food(i_ptr->p1);
+    add_food(i_ptr->pval);
 
     /* Destroy the potion */
     desc_remain(item_val);
@@ -1528,10 +1528,10 @@ void aim(void)
 	return;
     }
 
-    if (i_ptr->p1 > 0) {
+    if (i_ptr->pval > 0) {
 	i = i_ptr->flags;
 	done_effect = 0;
-	(i_ptr->p1)--;
+	(i_ptr->pval)--;
 	while (!done_effect) {
 
     /* Start at the player */
@@ -1814,11 +1814,11 @@ void use(void)
 	return;
     }
 
-    if (i_ptr->p1 > 0) {
+    if (i_ptr->pval > 0) {
     i = i_ptr->flags;
 
     ident = FALSE;
-    (i_ptr->p1)--;
+    (i_ptr->pval)--;
 
     switch (i) {
 
@@ -2522,7 +2522,7 @@ static void activate(void)
 		break;
 	    }
 	    if (p_ptr->stats.use_stat[A_INT] < randint(18) &&
-	     randint(objeci_list[inventory[i].index].level) > p_ptr->misc.lev) {
+	     randint(k_list[inventory[i].index].level) > p_ptr->misc.lev) {
 		msg_print("You fail to activate it properly.");
 		break;
 	    }

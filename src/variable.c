@@ -170,6 +170,12 @@ u16b target_mon;
 #endif
 
 
+
+
+/* Current player's user id */
+int player_uid = 0;
+
+
 /* What killed the player */
 vtype died_from;
 

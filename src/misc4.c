@@ -1402,6 +1402,41 @@ void change_name()
 
 
 /*
+ * Describe number of remaining charges.		-RAK-	
+ */
+void desc_charges(int item_val)
+{
+    register int rem_num;
+    vtype        out_val;
+
+    if (known2_p(&inventory[item_val])) {
+	rem_num = inventory[item_val].pval;
+	(void)sprintf(out_val, "You have %d charges remaining.", rem_num);
+	msg_print(out_val);
+    }
+}
+
+
+/*
+ * Describe amount of item remaining.			-RAK-	
+ */
+void desc_remain(int item_val)
+{
+    bigvtype             out_val, tmp_str;
+    register inven_type *i_ptr;
+
+    i_ptr = &inventory[item_val];
+    i_ptr->number--;
+    objdes(tmp_str, i_ptr, TRUE);
+    i_ptr->number++;
+    (void)sprintf(out_val, "You have %s.", tmp_str);
+    msg_print(out_val);
+}
+
+
+
+
+/*
  * Computes current weight limit.			-RAK-
  */
 int weight_limit(void)
@@ -1442,8 +1477,8 @@ int inven_check_num(inven_type *t_ptr)
 		inventory[i].sval == t_ptr->subval &&
 	/* make sure the number field doesn't overflow */
 		((int)inventory[i].number + (int)t_ptr->number < 256) &&
-	/* they always stack (sval < 192), or else they have same p1 */
-		((t_ptr->sval < ITEM_GROUP_MIN) || (inventory[i].p1 == t_ptr->p1))
+	/* they always stack (sval < 192), or else they have same pval */
+		((t_ptr->sval < ITEM_GROUP_MIN) || (inventory[i].pval == t_ptr->pval))
 	/* only stack if both or neither are identified */
 		&& (known1_p(&inventory[i]) == known1_p(t_ptr)))
 		return TRUE;
@@ -1496,8 +1531,8 @@ int inven_carry(inven_type *i_ptr)
 		t_ptr->sval == subt &&
 	/* make sure the number field doesn't overflow */
 		((int)t_ptr->number + (int)i_ptr->number < 256) &&
-	/* they always stack (sval < 192), or else they have same p1 */
-		((subt < ITEM_GROUP_MIN) || (t_ptr->p1 == i_ptr->p1))
+	/* they always stack (sval < 192), or else they have same pval */
+		((subt < ITEM_GROUP_MIN) || (t_ptr->pval == i_ptr->pval))
 	/* only stack if both or neither are identified */
 		&& (known1_p(&inventory[slot]) == known1p)) {
 		stacked = TRUE;	   /* note that we did process the item -CFT */
@@ -2054,7 +2089,7 @@ int attack_blows(int weight, int *wtohit)
 	s = 0;				/* do Weapons of Speed */
 	for (d = INVEN_WIELD; d < INVEN_AUX; d++)
 	    if (inventory[d].flags2 & TR1_ATTACK_SPD)
-		s += inventory[d].p1;
+		s += inventory[d].pval;
 
 	d = (int)blows_table[str_index][dex_index];
 

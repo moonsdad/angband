@@ -16,6 +16,31 @@
 
 
 /*
+ * Pushs a record back onto free space list -RAK-
+ *
+ * Delete_object() should always be called instead, unless the object in
+ * question is not in the dungeon, e.g. in store1.c and files.c 
+ */
+void pusht(int my_x)
+{
+    s16b        x = (s16b) my_x;
+    register int i, j;
+
+    if (x != i_max - 1) {
+	i_list[x] = t_list[i_max - 1];
+
+    /* must change the tptr in the cave of the object just moved */
+	for (i = 0; i < cur_height; i++)
+	    for (j = 0; j < cur_width; j++)
+		if (cave[i][j].tptr == i_max - 1)
+		    cave[i][j].tptr = x;
+    }
+    i_max--;
+    invcopy(&i_list[i_max], OBJ_NOTHING);
+}
+
+
+/*
  * Deletes object from given location			-RAK-	
  */
 int delete_object(int y, int x)
@@ -75,8 +100,8 @@ static void compact_objects()
 		    && (distance(i, j, char_row, char_col) > cur_dis)) {
 
 		/* Every object gets a "saving throw" */
-		    switch (i_list[c_ptr->tptr].tval) {
-		      case TV_VIS_TRAP:
+		switch (i_list[c_ptr->tptr].tval) {
+		    case TV_VIS_TRAP:
 			chance = 15;
 			break;
 		    case TV_RUBBLE:
@@ -128,29 +153,6 @@ int i_pop(void)
     return (i_max++);
 }
 
-/*
- * Pushs a record back onto free space list		-RAK-	 
- *
- * Delete_object() should always be called instead, unless the object in
- * question is not in the dungeon, e.g. in store1.c and files.c 
- */
-void pusht(int my_x)
-{
-    s16b        x = (s16b) my_x;
-    register int i, j;
-
-    if (x != i_max - 1) {
-	i_list[x] = t_list[i_max - 1];
-
-    /* must change the tptr in the cave of the object just moved */
-	for (i = 0; i < cur_height; i++)
-	    for (j = 0; j < cur_width; j++)
-		if (cave[i][j].tptr == i_max - 1)
-		    cave[i][j].tptr = x;
-    }
-    i_max--;
-    invcopy(&i_list[i_max], OBJ_NOTHING);
-}
 
 
 /*
@@ -231,11 +233,11 @@ static void give_1_hi_resist(inven_type *i_ptr)
 	case 3: i_ptr->flags2 |= TR2_RES_LITE; break;
 	case 4: i_ptr->flags2 |= TR2_RES_DARK; break;
 	case 5: i_ptr->flags2 |= TR2_RES_CHAOS; break;
-	case 6: i_ptr->flags2 |= TR2_RES_DISEN; break;
+	case 6: i_ptr->flags2 |= TR2_RES_NETHER; break;
 	case 7: i_ptr->flags2 |= TR2_RES_SHARDS; break;
 	case 8: i_ptr->flags2 |= TR2_RES_NEXUS; break;
 	case 9: i_ptr->flags2 |= TR2_RES_BLIND; break;
-	case 10: i_ptr->flags2 |= TR2_RES_NETHER; break;
+	case 10: i_ptr->flags2 |= TR2_RES_DISEN; break;
     }
 }
 
@@ -243,7 +245,7 @@ static void give_1_hi_resist(inven_type *i_ptr)
  * Chance of treasure having magic abilities		-RAK-
  * Chance increases with each dungeon level			 
  *
- * some objects appear multiple times in the objeci_list with different
+ * some objects appear multiple times in the k_list with different
  * levels, this is to make the object occur more often, however, for
  * consistency, must set the level of these duplicates to be the same as the
  * object with the lowest level 
@@ -298,10 +300,10 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	else if (magik(chance) || good) {
 
 	    i_ptr->toac += randint(3) + m_bonus(0, 5, level);
-	    if (!stricmp(objeci_list[i_ptr->index].name, "& Robe") &&
+	    if (!stricmp(k_list[i_ptr->index].name, "& Robe") &&
 		((magik(special) && randint(30) == 1)
 		 || (good == 666 && magik(special)))) {
-		i_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD | TR2_RES_ACID |
+		i_ptr->flags |= (TR2_RES_ELEC | TR_RES_COLD | TR2_RES_ACID |
 				 TR2_RES_FIRE | TR_SUST_STAT);
 		if (wizard || peek)
 		    msg_print("Robe of the Magi");
@@ -309,7 +311,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		i_ptr->flags2 |= TR_HOLD_LIFE;
 		i_ptr->ident |= ID_NOSHOW_P1;
 		give_1_hi_resist(i_ptr);	/* JLS */
-		i_ptr->p1 = 10;
+		i_ptr->pval = 10;
 		i_ptr->toac += 10 + randint(5);
 		i_ptr->name2 = EGO_MAGI;
 		i_ptr->cost = 10000L + (i_ptr->toac * 100);
@@ -321,14 +323,14 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if ((randint(3) == 1 || good == 666) && !not_unique &&
 			unique_armour(i_ptr))
 			break;
-		    i_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD | TR2_RES_ACID |
+		    i_ptr->flags |= (TR2_RES_ELEC | TR_RES_COLD | TR2_RES_ACID |
 				     TR2_RES_FIRE);
 		    if (randint(3) == 1) {
 			if (peek) msg_print("Elvenkind");
 			rating += 25;
 			give_1_hi_resist(i_ptr);	/* JLS */
 			i_ptr->flags |= TR1_STEALTH;
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			i_ptr->name2 = EGO_ELVENKIND;
 			i_ptr->toac += 15;
 			i_ptr->cost += 15000L;
@@ -346,9 +348,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if ((randint(3) == 1 || good == 666) && !not_unique &&
 			unique_armour(i_ptr))
 			break;
-		    if (!strncmp(objeci_list[i_ptr->index].name,
+		    if (!strncmp(k_list[i_ptr->index].name,
 				 "Mithril", 7) ||
-			!strncmp(objeci_list[i_ptr->index].name,
+			!strncmp(k_list[i_ptr->index].name,
 				 "Adamantite", 10))
 			break;
 		    if (peek) msg_print("Resist Acid");
@@ -386,7 +388,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    if (peek) msg_print("Resist Lightning");
 		    rating += 15;
-		    i_ptr->flags |= TR2_RES_LIGHT;
+		    i_ptr->flags |= TR2_RES_ELEC;
 		    i_ptr->name2 = SN_RESIST_E;
 		    i_ptr->cost += 500L;
 		    break;
@@ -417,7 +419,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	 * number of ego weapons same as before, see also missiles 
 	 */
 	    if (magik(3*special/2)||good==666) { /* was 2 */
-		if (!stricmp("& Whip", objeci_list[i_ptr->index].name)
+		if (!stricmp("& Whip", k_list[i_ptr->index].name)
 		    && randint(2)==1) {
 		    if (peek) msg_print("Whip of Fire");
 		    rating += 20;
@@ -447,11 +449,11 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->tohit += 5;
 			i_ptr->todam += 5;
 			i_ptr->toac += randint(4);
-		    /* the value in p1 is used for strength increase */
-		    /* p1 is also used for sustain stat */
-			i_ptr->p1 = randint(4);
+		    /* the value in pval is used for strength increase */
+		    /* pval is also used for sustain stat */
+			i_ptr->pval = randint(4);
 			i_ptr->name2 = EGO_HA;
-			i_ptr->cost += i_ptr->p1 * 500;
+			i_ptr->cost += i_ptr->pval * 500;
 			i_ptr->cost += 10000L;
 			i_ptr->cost *= 2;
 			break;
@@ -462,16 +464,16 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Defender");
 			rating += 23;
-			i_ptr->flags |= (TR_FFALL | TR2_RES_LIGHT | TR3_SEE_INVIS
+			i_ptr->flags |= (TR3_FEATHER | TR2_RES_ELEC | TR3_SEE_INVIS
 				   | TR2_FREE_ACT | TR2_RES_COLD | TR2_RES_ACID
 				     | TR2_RES_FIRE | TR3_REGEN | TR1_STEALTH);
 			i_ptr->tohit += 3;
 			i_ptr->todam += 3;
 			i_ptr->toac += 5 + randint(5);
 			i_ptr->name2 = EGO_DF;
-		    /* the value in p1 is used for stealth */
-			i_ptr->p1 = randint(3);
-			i_ptr->cost += i_ptr->p1 * 500;
+		    /* the value in pval is used for stealth */
+			i_ptr->pval = randint(3);
+			i_ptr->cost += i_ptr->pval * 500;
 			i_ptr->cost += 7500L;
 			i_ptr->cost *= 2;
 			break;
@@ -531,8 +533,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (randint(3) == 1) {
 			    i_ptr->flags |= (TR1_WIS);
 			    i_ptr->flags2 |= (TR_BLESS_BLADE);
-			    i_ptr->p1 = m_bonus(0, 3, level);
-			    i_ptr->cost += (200 * i_ptr->p1);
+			    i_ptr->pval = m_bonus(0, 3, level);
+			    i_ptr->cost += (200 * i_ptr->pval);
 			}
 			if (peek)
 			    msg_print("Slay Evil");
@@ -617,7 +619,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags2 |= TR1_SLAY_ORC;
 			i_ptr->tohit += randint(5) + 3;
 			i_ptr->todam += randint(5) + 3;
-			i_ptr->p1 = 1;
+			i_ptr->pval = 1;
 			i_ptr->cost += 10000L;
 			i_ptr->cost *= 2;
 			i_ptr->name2 = EGO_WEST;
@@ -634,9 +636,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags2 = TR_BLESS_BLADE;
 			i_ptr->tohit += 3;
 			i_ptr->todam += 3;
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			i_ptr->name2 = EGO_BLESS_BLADE;
-			i_ptr->cost += i_ptr->p1 * 1000;
+			i_ptr->cost += i_ptr->pval * 1000;
 			i_ptr->cost += 3000L;
 			break;
 		      case 30:	   /* of Speed -DGK */
@@ -650,13 +652,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->todam += randint(3);
 			i_ptr->flags2 = TR1_ATTACK_SPD;
 			if (i_ptr->weight <= 80)
-			    i_ptr->p1 = randint(3);
+			    i_ptr->pval = randint(3);
 			else if (i_ptr->weight <= 130)
-			    i_ptr->p1 = randint(2);
+			    i_ptr->pval = randint(2);
 			else
-			    i_ptr->p1 = 1;
+			    i_ptr->pval = 1;
 			i_ptr->name2 = EGO_ATTACKS;
-			i_ptr->cost += (i_ptr->p1 * 2000);
+			i_ptr->cost += (i_ptr->pval * 2000);
 			i_ptr->cost *= 2;
 			break;
 		    }
@@ -686,7 +688,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    switch (randint(15)) {
 	      case 1: case 2: case 3:
 		if (((randint(3)==1)||(good==666)) && !not_unique &&
-		    !stricmp(objeci_list[i_ptr->index].name, "& Long Bow") &&
+		    !stricmp(k_list[i_ptr->index].name, "& Long Bow") &&
 		    (((i=randint(2))==1 && !BELEG) || (i==2 && !BARD))) {
 		    switch (i) {
 		    case 1:
@@ -701,7 +703,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->sval = 4; /* make do x5 damage!! -CFT */
 			i_ptr->tohit = 20;
 			i_ptr->todam = 22;
-			i_ptr->p1 = 3;
+			i_ptr->pval = 3;
 			i_ptr->flags |= (TR1_STEALTH | TR1_DEX);
 			i_ptr->flags2 |= (TR_ARTIFACT | TR2_RES_DISEN);
 			i_ptr->cost = 35000L;
@@ -718,7 +720,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->sval = 3; /* make do x4 damage!! -CFT */
 			i_ptr->tohit = 17;
 			i_ptr->todam = 19;
-			i_ptr->p1 = 3;
+			i_ptr->pval = 3;
 			i_ptr->flags |= (TR2_FREE_ACT | TR1_DEX);
 			i_ptr->flags2 |= (TR_ARTIFACT);
 			i_ptr->cost = 20000L;
@@ -728,7 +730,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    break;
 		}
 		if (((randint(5) == 1) || (good == 666)) && !not_unique &&
-		    !stricmp(objeci_list[i_ptr->index].name, "& Light Crossbow")
+		    !stricmp(k_list[i_ptr->index].name, "& Light Crossbow")
 		    && !CUBRAGOL) {
 		    if (CUBRAGOL)
 			break;
@@ -738,7 +740,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->sval = 11;
 		    i_ptr->tohit = 10;
 		    i_ptr->todam = 14;
-		    i_ptr->p1 = 1;
+		    i_ptr->pval = 1;
 		    i_ptr->flags |= (TR1_SPEED | TR2_RES_FIRE);
 		    i_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 		    i_ptr->cost = 38000L;
@@ -785,13 +787,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	if (magik(chance) || (good == 666)) {
 	    tmp = randint(3);
 	    if (tmp == 1) {
-		i_ptr->p1 += m_bonus(0, 5, level);
+		i_ptr->pval += m_bonus(0, 5, level);
 	    }
 	    if (tmp == 2)	/* do not give additional plusses -CWS */
 		;
 	    else {
 	    /* a cursed digging tool */
-		i_ptr->p1 = (-m_bonus(1, 15, level));
+		i_ptr->pval = (-m_bonus(1, 15, level));
 		i_ptr->cost = 0L;
 		i_ptr->flags |= TR_CURSED;
 	    }
@@ -802,15 +804,15 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	if (magik(chance) || good) {
 	    i_ptr->toac = randint(3) + m_bonus(0, 10, level);
 	    if ((((randint(2) == 1) && magik(5 * special / 2)) || (good == 666)) &&
-		!stricmp(objeci_list[i_ptr->index].name,
+		!stricmp(k_list[i_ptr->index].name,
 			 "& Set of Leather Gloves") &&
 		!not_unique && unique_armour(i_ptr));
 	    else if ((((randint(4) == 1) && magik(special)) || (good == 666))
-		     && !stricmp(objeci_list[i_ptr->index].name,
+		     && !stricmp(k_list[i_ptr->index].name,
 				 "& Set of Gauntlets") &&
 		     !not_unique && unique_armour(i_ptr));
 	    else if ((((randint(5) == 1) && magik(special)) || (good == 666))
-		     && !stricmp(objeci_list[i_ptr->index].name,
+		     && !stricmp(k_list[i_ptr->index].name,
 				 "& Set of Cesti") &&
 		     !not_unique && unique_armour(i_ptr));
 
@@ -842,9 +844,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    if (peek)
 			msg_print("Agility");
 		    rating += 14;
-		    i_ptr->p1 = 2 + randint(2);
+		    i_ptr->pval = 2 + randint(2);
 		    i_ptr->flags |= TR1_DEX;
-		    i_ptr->cost += (i_ptr->p1) * 400;
+		    i_ptr->cost += (i_ptr->pval) * 400;
 		    break;
 
 		  case 10:
@@ -855,13 +857,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			msg_print("Power");
 		    rating += 22;
 		    i_ptr->name2 = ART_POWER;
-		    i_ptr->p1 = 1 + randint(4);
+		    i_ptr->pval = 1 + randint(4);
 		    i_ptr->tohit += 1 + randint(4);
 		    i_ptr->todam += 1 + randint(4);
 		    i_ptr->flags |= TR1_STR;
 		    i_ptr->ident |= ID_SHOW_HITDAM;
 		    i_ptr->ident |= ID_NOSHOW_TYPE;
-		    i_ptr->cost += (i_ptr->tohit + i_ptr->todam + i_ptr->p1) * 300;
+		    i_ptr->cost += (i_ptr->tohit + i_ptr->todam + i_ptr->pval) * 300;
 		    break;
 		}
 	    }
@@ -877,7 +879,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->flags |= TR1_STR;
 		    i_ptr->name2 = EGO_WEAKNESS;
 		}
-		i_ptr->p1 = (randint(3) - m_bonus(0, 10, level));
+		i_ptr->pval = (randint(3) - m_bonus(0, 10, level));
 	    }
 	    i_ptr->toac = (-m_bonus(1, 20, level));
 	    i_ptr->flags |= TR_CURSED;
@@ -902,20 +904,20 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    msg_print("Boots of Speed");
 			i_ptr->name2 = EGO_SPEED;
 			rating += 30;
-			i_ptr->p1 = 1;
+			i_ptr->pval = 1;
 			i_ptr->cost += 300000L;
 		    }
 		} else if (stricmp("& Pair of Metal Shod Boots",
-				   objeci_list[i_ptr->index].name))	/* not metal */
+				   k_list[i_ptr->index].name))	/* not metal */
 		    if (tmp > 6) {
-			i_ptr->flags |= TR_FFALL;
+			i_ptr->flags |= TR3_FEATHER;
 			rating += 7;
 			i_ptr->name2 = EGO_SLOW_DESCENT;
 			i_ptr->cost += 250;
 		    } else if (tmp < 5) {
 			i_ptr->flags |= TR1_STEALTH;
 			rating += 16;
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			i_ptr->name2 = EGO_STEALTH;
 			i_ptr->cost += 500;
 		    } else {	   /* 5,6 */
@@ -934,7 +936,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->cost += 500;
 			i_ptr->cost *= 2;
 		    } else {	   /* tmp > 4 */
-			i_ptr->flags |= TR_FFALL;
+			i_ptr->flags |= TR3_FEATHER;
 			rating += 7;
 			i_ptr->name2 = EGO_SLOW_DESCENT;
 			i_ptr->cost += 250;
@@ -945,7 +947,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    if (tmp == 1) {
 		i_ptr->flags |= TR1_SPEED;
 		i_ptr->name2 = EGO_SLOWNESS;
-		i_ptr->p1 = -1;
+		i_ptr->pval = -1;
 	    } else if (tmp == 2) {
 		i_ptr->flags |= TR3_AGGRAVATE;
 		i_ptr->name2 = EGO_NOISE;
@@ -976,11 +978,11 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			      unique_armour(i_ptr))) {
 			    if (peek)
 				msg_print("Intelligence");
-			    i_ptr->p1 = randint(2);
+			    i_ptr->pval = randint(2);
 			    rating += 13;
 			    i_ptr->flags |= TR1_INT;
 			    i_ptr->name2 = EGO_INTELLIGENCE;
-			    i_ptr->cost += i_ptr->p1 * 500;
+			    i_ptr->cost += i_ptr->pval * 500;
 			}
 		    } else if (tmp < 6) {
 			if (!((randint(2) == 1) && !not_unique &&
@@ -988,26 +990,26 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    if (peek)
 				msg_print("Wisdom");
 			    rating += 13;
-			    i_ptr->p1 = randint(2);
+			    i_ptr->pval = randint(2);
 			    i_ptr->flags |= TR1_WIS;
 			    i_ptr->name2 = EGO_WISDOM;
-			    i_ptr->cost += i_ptr->p1 * 500;
+			    i_ptr->cost += i_ptr->pval * 500;
 			}
 		    } else if (tmp < 10) {
 			if (!((randint(2) == 1) && !not_unique &&
 			      unique_armour(i_ptr))) {
-			    i_ptr->p1 = 1 + randint(4);
+			    i_ptr->pval = 1 + randint(4);
 			    rating += 11;
 			    i_ptr->flags |= TR1_INFRA;
 			    i_ptr->name2 = EGO_INFRAVISION;
-			    i_ptr->cost += i_ptr->p1 * 250;
+			    i_ptr->cost += i_ptr->pval * 250;
 			}
 		    } else if (tmp < 12) {
 			if (!((randint(2) == 1) && !not_unique &&
 			      unique_armour(i_ptr))) {
 			    if (peek)
 				msg_print("Light");
-			    i_ptr->flags2 |= (TR2_RES_LITE | TR_LIGHT);
+			    i_ptr->flags2 |= (TR2_RES_LITE | TR3_LITE);
 			    rating += 6;
 			    i_ptr->name2 = EGO_LITE;
 			    i_ptr->cost += 500;
@@ -1042,37 +1044,37 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    if (peek)
 				msg_print("Crown of Might");
 			    rating += 19;
-			    i_ptr->p1 = randint(3);
+			    i_ptr->pval = randint(3);
 			    i_ptr->flags |= (TR2_FREE_ACT | TR1_CON |
 					     TR1_DEX | TR1_STR);
 			    i_ptr->name2 = EGO_MIGHT;
-			    i_ptr->cost += 1000 + i_ptr->p1 * 500;
+			    i_ptr->cost += 1000 + i_ptr->pval * 500;
 			}
 			break;
 		      case 2:
 			if (peek)
 			    msg_print("Lordliness");
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			rating += 17;
 			i_ptr->flags |= (TR1_CHR | TR1_WIS);
 			i_ptr->name2 = EGO_LORDLINESS;
-			i_ptr->cost += 1000 + i_ptr->p1 * 500;
+			i_ptr->cost += 1000 + i_ptr->pval * 500;
 			break;
 		      case 3:
 			if (peek)
 			    msg_print("Crown of the Magi");
 			rating += 15;
-			i_ptr->p1 = randint(3);
-			i_ptr->flags |= (TR2_RES_LIGHT | TR_RES_COLD
+			i_ptr->pval = randint(3);
+			i_ptr->flags |= (TR2_RES_ELEC | TR_RES_COLD
 				      | TR2_RES_ACID | TR2_RES_FIRE | TR1_INT);
 			i_ptr->name2 = EGO_MAGI;
-			i_ptr->cost += 3000 + i_ptr->p1 * 500;
+			i_ptr->cost += 3000 + i_ptr->pval * 500;
 			break;
 		      case 4:
 			rating += 8;
 			if (peek)
 			    msg_print("Beauty");
-			i_ptr->p1 = randint(4);
+			i_ptr->pval = randint(4);
 			i_ptr->flags |= TR1_CHR;
 			i_ptr->name2 = EGO_BEAUTY;
 			i_ptr->cost += 750;
@@ -1081,10 +1083,10 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (peek)
 			    msg_print("Seeing");
 			rating += 8;
-			i_ptr->p1 = 5 * (1 + randint(4));
+			i_ptr->pval = 5 * (1 + randint(4));
 			i_ptr->flags |= (TR3_SEE_INVIS | TR1_SEARCH);
 			i_ptr->name2 = EGO_SEEING;
-			i_ptr->cost += 1000 + i_ptr->p1 * 100;
+			i_ptr->cost += 1000 + i_ptr->pval * 100;
 			break;
 		      case 6:
 			i_ptr->flags |= TR3_REGEN;
@@ -1108,19 +1110,19 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    if (magik(special))
 		switch (randint(7)) {
 		  case 1:
-		    i_ptr->p1 = -randint(5);
+		    i_ptr->pval = -randint(5);
 		    i_ptr->flags |= TR1_INT;
 		    i_ptr->name2 = EGO_STUPIDITY;
 		    break;
 		  case 2:
 		  case 3:
-		    i_ptr->p1 = -randint(5);
+		    i_ptr->pval = -randint(5);
 		    i_ptr->flags |= TR1_WIS;
 		    i_ptr->name2 = EGO_DULLNESS;
 		    break;
 		  case 4:
 		  case 5:
-		    i_ptr->p1 = -randint(5);
+		    i_ptr->pval = -randint(5);
 		    i_ptr->flags |= TR1_STR;
 		    i_ptr->name2 = EGO_WEAKNESS;
 		    break;
@@ -1129,7 +1131,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->name2 = EGO_TELEPORTATION;
 		    break;
 		  case 7:
-		    i_ptr->p1 = -randint(5);
+		    i_ptr->pval = -randint(5);
 		    i_ptr->flags |= TR1_CHR;
 		    i_ptr->name2 = EGO_UGLINESS;
 		    break;
@@ -1145,17 +1147,17 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	      case 2:
 	      case 3:		   /* 132-135 */
 		if (magik(cursed)) {
-		    i_ptr->p1 = -m_bonus(1, 10, level);
+		    i_ptr->pval = -m_bonus(1, 10, level);
 		    i_ptr->flags |= TR_CURSED;
 		    i_ptr->cost = -i_ptr->cost;
 		} else {
-		    i_ptr->p1 = m_bonus(1, 6, level);
-		    i_ptr->cost += i_ptr->p1 * 100;
+		    i_ptr->pval = m_bonus(1, 6, level);
+		    i_ptr->cost += i_ptr->pval * 100;
 		}
 		break;
 	      case 4:		   /* 136 */
 		if (magik(cursed)) {
-		    i_ptr->p1 = -randint(3);
+		    i_ptr->pval = -randint(3);
 		    i_ptr->flags |= TR_CURSED;
 		    i_ptr->cost = -i_ptr->cost;
 		} else {
@@ -1163,16 +1165,16 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			msg_print("Ring of Speed");
 		    rating += 35;
 		    if (randint(888) == 1)
-			i_ptr->p1 = 2;
+			i_ptr->pval = 2;
 		    else
-			i_ptr->p1 = 1;
+			i_ptr->pval = 1;
 		}
 		break;
 	      case 5:
-		i_ptr->p1 = 5 * m_bonus(1, 10, level);
-		i_ptr->cost += i_ptr->p1 * 30;
+		i_ptr->pval = 5 * m_bonus(1, 10, level);
+		i_ptr->cost += i_ptr->pval * 30;
 		if (magik(cursed)) {
-		    i_ptr->p1 = -i_ptr->p1;
+		    i_ptr->pval = -i_ptr->pval;
 		    i_ptr->flags |= TR_CURSED;
 		    i_ptr->cost = -i_ptr->cost;
 		}
@@ -1187,7 +1189,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
               case 17:
               case 18:		   /* WOE, Stupidity */
 		i_ptr->toac = (-5) - m_bonus(1,10,level);
-		i_ptr->p1 = (-randint(4));
+		i_ptr->pval = (-randint(4));
 		break;
 	      case 19:		   /* Increase damage	      */
 		i_ptr->todam = m_bonus(1, 10, level);
@@ -1250,31 +1252,31 @@ void magic_treasure(int x, int level, int good, int not_unique)
       case TV_AMULET:		   /* Amulets	      */
 	if (i_ptr->sval < 2) {
 	    if (magik(cursed)) {
-		i_ptr->p1 = -m_bonus(1, 5, level);
+		i_ptr->pval = -m_bonus(1, 5, level);
 		i_ptr->flags |= TR_CURSED;
 		i_ptr->cost = -i_ptr->cost;
 	    } else {
-		i_ptr->p1 = m_bonus(1, 5, level);
-		i_ptr->cost += i_ptr->p1 * 100;
+		i_ptr->pval = m_bonus(1, 5, level);
+		i_ptr->cost += i_ptr->pval * 100;
 	    }
 	} else if (i_ptr->sval == 2) { /* searching */
-	    i_ptr->p1 = 5 * (randint(3) + m_bonus(0, 8, level));
+	    i_ptr->pval = 5 * (randint(3) + m_bonus(0, 8, level));
 	    if (magik(cursed)) {
-		i_ptr->p1 = -i_ptr->p1;
+		i_ptr->pval = -i_ptr->pval;
 		i_ptr->cost = -i_ptr->cost;
 		i_ptr->flags |= TR_CURSED;
 	    } else
-		i_ptr->cost += 20 * i_ptr->p1;
+		i_ptr->cost += 20 * i_ptr->pval;
 	} else if (i_ptr->sval == 8) {
 	    rating += 25;
-	    i_ptr->p1 = 5 * (randint(2) + m_bonus(0, 10, level));
+	    i_ptr->pval = 5 * (randint(2) + m_bonus(0, 10, level));
 	    i_ptr->toac = randint(4) + m_bonus(0, 8, level) - 2;
-	    i_ptr->cost += 20 * i_ptr->p1 + 50 * i_ptr->toac;
+	    i_ptr->cost += 20 * i_ptr->pval + 50 * i_ptr->toac;
 	    if (i_ptr->toac < 0) /* sort-of cursed...just to be annoying -CWS */
 		i_ptr->flags |= TR_CURSED;
 	} else if (i_ptr->sval == 9) {
 	/* amulet of DOOM */
-	    i_ptr->p1 = (-randint(5) - m_bonus(2, 10, level));
+	    i_ptr->pval = (-randint(5) - m_bonus(2, 10, level));
 	    i_ptr->toac = (-randint(3) - m_bonus(0, 6, level));
 	    i_ptr->flags |= TR_CURSED;
 	}
@@ -1284,7 +1286,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
     /* Dungeon found ones will be partially charged	 */
       case TV_LITE:
 	if ((i_ptr->sval % 2) == 1) {
-	    i_ptr->p1 = randint(i_ptr->p1);
+	    i_ptr->pval = randint(i_ptr->pval);
 	    i_ptr->sval -= 1;
 	}
 	break;
@@ -1292,91 +1294,91 @@ void magic_treasure(int x, int level, int good, int not_unique)
       case TV_WAND:
 	switch (i_ptr->sval) {
 	  case 0:
-	    i_ptr->p1 = randint(10) + 6;
+	    i_ptr->pval = randint(10) + 6;
 	    break;
 	  case 1:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 2:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 3:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 4:
-	    i_ptr->p1 = randint(4) + 3;
+	    i_ptr->pval = randint(4) + 3;
 	    break;
 	  case 5:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 6:
-	    i_ptr->p1 = randint(20) + 12;
+	    i_ptr->pval = randint(20) + 12;
 	    break;
 	  case 7:
-	    i_ptr->p1 = randint(20) + 12;
+	    i_ptr->pval = randint(20) + 12;
 	    break;
 	  case 8:
-	    i_ptr->p1 = randint(10) + 6;
+	    i_ptr->pval = randint(10) + 6;
 	    break;
 	  case 9:
-	    i_ptr->p1 = randint(12) + 6;
+	    i_ptr->pval = randint(12) + 6;
 	    break;
 	  case 10:
-	    i_ptr->p1 = randint(10) + 12;
+	    i_ptr->pval = randint(10) + 12;
 	    break;
 	  case 11:
-	    i_ptr->p1 = randint(3) + 3;
+	    i_ptr->pval = randint(3) + 3;
 	    break;
 	  case 12:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 13:
-	    i_ptr->p1 = randint(10) + 6;
+	    i_ptr->pval = randint(10) + 6;
 	    break;
 	  case 14:
-	    i_ptr->p1 = randint(5) + 3;
+	    i_ptr->pval = randint(5) + 3;
 	    break;
 	  case 15:
-	    i_ptr->p1 = randint(5) + 3;
+	    i_ptr->pval = randint(5) + 3;
 	    break;
 	  case 16:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 17:
-	    i_ptr->p1 = randint(5) + 4;
+	    i_ptr->pval = randint(5) + 4;
 	    break;
 	  case 18:
-	    i_ptr->p1 = randint(8) + 4;
+	    i_ptr->pval = randint(8) + 4;
 	    break;
 	  case 19:
-	    i_ptr->p1 = randint(6) + 2;
+	    i_ptr->pval = randint(6) + 2;
 	    break;
 	  case 20:
-	    i_ptr->p1 = randint(4) + 2;
+	    i_ptr->pval = randint(4) + 2;
 	    break;
 	  case 21:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 22:
-	    i_ptr->p1 = randint(5) + 2;
+	    i_ptr->pval = randint(5) + 2;
 	    break;
 	  case 23:
-	    i_ptr->p1 = randint(12) + 12;
+	    i_ptr->pval = randint(12) + 12;
 	    break;
 	  case 24:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    break;
 	  case 25:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    break;
 	  case 26:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    break;
 	  case 27:
-	    i_ptr->p1 = randint(2) + 1;
+	    i_ptr->pval = randint(2) + 1;
 	    break;
 	  case 28:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  default:
 	    break;
@@ -1386,99 +1388,99 @@ void magic_treasure(int x, int level, int good, int not_unique)
       case TV_STAFF:
 	switch (i_ptr->sval) {
 	  case 0:
-	    i_ptr->p1 = randint(20) + 12;
+	    i_ptr->pval = randint(20) + 12;
 	    break;
 	  case 1:
-	    i_ptr->p1 = randint(8) + 6;
+	    i_ptr->pval = randint(8) + 6;
 	    break;
 	  case 2:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 3:
-	    i_ptr->p1 = randint(20) + 12;
+	    i_ptr->pval = randint(20) + 12;
 	    break;
 	  case 4:
-	    i_ptr->p1 = randint(15) + 6;
+	    i_ptr->pval = randint(15) + 6;
 	    break;
 	  case 5:
-	    i_ptr->p1 = randint(4) + 5;
+	    i_ptr->pval = randint(4) + 5;
 	    break;
 	  case 6:
-	    i_ptr->p1 = randint(5) + 3;
+	    i_ptr->pval = randint(5) + 3;
 	    break;
 	  case 7:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    i_ptr->level = 10;
 	    break;
 	  case 8:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    break;
 	  case 9:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 10:
-	    i_ptr->p1 = randint(10) + 12;
+	    i_ptr->pval = randint(10) + 12;
 	    break;
 	  case 11:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 12:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 13:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 14:
-	    i_ptr->p1 = randint(10) + 12;
+	    i_ptr->pval = randint(10) + 12;
 	    break;
 	  case 15:
-	    i_ptr->p1 = randint(3) + 4;
+	    i_ptr->pval = randint(3) + 4;
 	    break;
 	  case 16:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 17:
-	    i_ptr->p1 = randint(5) + 6;
+	    i_ptr->pval = randint(5) + 6;
 	    break;
 	  case 18:
-	    i_ptr->p1 = randint(3) + 4;
+	    i_ptr->pval = randint(3) + 4;
 	    break;
 	  case 19:
-	    i_ptr->p1 = randint(10) + 12;
+	    i_ptr->pval = randint(10) + 12;
 	    break;
 	  case 20:
-	    i_ptr->p1 = randint(3) + 4;
+	    i_ptr->pval = randint(3) + 4;
 	    break;
 	  case 21:
-	    i_ptr->p1 = randint(3) + 4;
+	    i_ptr->pval = randint(3) + 4;
 	    break;
 	  case 22:
-	    i_ptr->p1 = randint(10) + 6;
+	    i_ptr->pval = randint(10) + 6;
 	    i_ptr->level = 5;
 	    break;
 	  case 23:
-	    i_ptr->p1 = randint(2) + 1;
+	    i_ptr->pval = randint(2) + 1;
 	    break;
 	  case 24:
-	    i_ptr->p1 = randint(3) + 1;
+	    i_ptr->pval = randint(3) + 1;
 	    break;
 	  case 25:
-	    i_ptr->p1 = randint(2) + 2;
+	    i_ptr->pval = randint(2) + 2;
 	    break;
 	  case 26:
-	    i_ptr->p1 = randint(15) + 5;
+	    i_ptr->pval = randint(15) + 5;
 	    break;
 	  case 27:
-	    i_ptr->p1 = randint(2) + 2;
+	    i_ptr->pval = randint(2) + 2;
 	    break;
 	  case 28:
-	    i_ptr->p1 = randint(5) + 5;
+	    i_ptr->pval = randint(5) + 5;
 	    break;
 	  case 29:
-	    i_ptr->p1 = randint(2) + 1;
+	    i_ptr->pval = randint(2) + 1;
 	    break;
 	  case 30:
-	    i_ptr->p1 = randint(6) + 2;
+	    i_ptr->pval = randint(6) + 2;
 	    break;
 	  default:
 	    break;
@@ -1493,7 +1495,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    i_ptr->toac += 1 + m_bonus(0, 20, level);
 	    if (magik(special) || (good == 666)) {
 		if (!not_unique &&
-		    !stricmp(objeci_list[i_ptr->index].name, "& Cloak")
+		    !stricmp(k_list[i_ptr->index].name, "& Cloak")
 		    && randint(10) == 1) {
 		    switch (randint(9)) {
 		      case 1:
@@ -1506,8 +1508,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			i_ptr->name2 = ART_COLLUIN;
 			i_ptr->toac = 15;
-			i_ptr->flags |= (TR2_RES_FIRE | TR_RES_COLD | TR_POISON |
-					 TR2_RES_LIGHT | TR2_RES_ACID);
+			i_ptr->flags |= (TR2_RES_FIRE | TR_RES_COLD | TR2_RES_POIS |
+					 TR2_RES_ELEC | TR2_RES_ACID);
 			i_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
 			i_ptr->cost = 10000L;
 			made_art_cloak = 1;
@@ -1523,7 +1525,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    good_item_flag = TRUE;
 			i_ptr->name2 = ART_HOLCOLLETH;
 			i_ptr->toac = 4;
-			i_ptr->p1 = 2;
+			i_ptr->pval = 2;
 			i_ptr->flags |= (TR1_INT | TR1_WIS | TR1_STEALTH |
 					 TR2_RES_ACID);
 			i_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
@@ -1544,7 +1546,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags = (TR1_DEX | TR1_CHR | TR2_RES_FIRE |
 				   TR2_RES_ACID | TR2_RES_COLD | TR2_FREE_ACT);
 			i_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
-			i_ptr->p1 = 3;
+			i_ptr->pval = 3;
 			i_ptr->cost = 35000L;
 			made_art_cloak = 1;
 			THINGOL = 1;
@@ -1578,7 +1580,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->toac = 15;
 			i_ptr->flags |= (TR1_STEALTH | TR2_RES_ACID);
 			i_ptr->flags2 |= (TR_ACTIVATE | TR_ARTIFACT);
-			i_ptr->p1 = 3;
+			i_ptr->pval = 3;
 			i_ptr->cost = 11000L;
 			made_art_cloak = 1;
 			COLANNON = 1;
@@ -1586,7 +1588,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    }
 
 		} else if (!not_unique &&
-			   !stricmp(objeci_list[i_ptr->index].name,
+			   !stricmp(k_list[i_ptr->index].name,
 				    "& Shadow Cloak")
 			   && randint(20) == 1) {
 		    switch (randint(2)) {
@@ -1602,7 +1604,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags = (TR2_RES_FIRE | TR_RES_COLD |
 				    TR1_INT | TR1_WIS | TR1_CHR | TR2_RES_ACID);
 			i_ptr->flags2 = (TR_ACTIVATE | TR_ARTIFACT);
-			i_ptr->p1 = 2;
+			i_ptr->pval = 2;
 			i_ptr->cost = 45000L;
 			made_art_cloak = 1;
 			LUTHIEN = 1;
@@ -1619,7 +1621,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags = (TR1_STEALTH |
 				  TR2_FREE_ACT | TR3_SEE_INVIS | TR2_RES_ACID);
 			i_ptr->flags2 |= (TR2_IM_ACID | TR_ARTIFACT);
-			i_ptr->p1 = 4;
+			i_ptr->pval = 4;
 			i_ptr->cost = 35000L;
 			made_art_cloak = 1;
 			TUOR = 1;
@@ -1634,14 +1636,14 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			rating += 8;
 		    } else if (randint(10) < 10) {
 			i_ptr->toac += m_bonus(3, 10, level);
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			i_ptr->flags |= TR1_STEALTH;
 			i_ptr->name2 = EGO_STEALTH;
-			i_ptr->cost += 500 + (50 * i_ptr->p1);
+			i_ptr->cost += 500 + (50 * i_ptr->pval);
 			rating += 9;
 		    } else {
 			i_ptr->toac += 10 + randint(10);
-			i_ptr->p1 = randint(3);
+			i_ptr->pval = randint(3);
 			i_ptr->flags |= (TR1_STEALTH | TR2_RES_ACID);
 			i_ptr->name2 = EGO_AMAN;
 			i_ptr->cost += 4000 + (100 * i_ptr->toac);
@@ -1725,9 +1727,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    break;
 	}
 	if (not_unique)		/* if bought from store - dbd */
-	    i_ptr->p1 = randint(i_ptr->level);
+	    i_ptr->pval = randint(i_ptr->level);
 	else			/* store the level chest's found on - dbd */
-	    i_ptr->p1 = dun_level;
+	    i_ptr->pval = dun_level;
 	break;
 
       case TV_SPIKE:
@@ -1738,7 +1740,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    missile_ctr = -MAX_SHORT - 1;
 	else
 	    missile_ctr++;
-	i_ptr->p1 = missile_ctr;
+	i_ptr->pval = missile_ctr;
 	break;
 
     case TV_BOLT: case TV_ARROW: case TV_SHOT:
@@ -1816,9 +1818,9 @@ again:
 	    goto again;
 	if (NARYA)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Narya");
@@ -1832,9 +1834,9 @@ again:
 	    goto again;
 	if (NENYA)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Nenya");
@@ -1848,9 +1850,9 @@ again:
 	    goto again;
 	if (VILYA)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(70) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(70) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Vilya");
@@ -1864,9 +1866,9 @@ again:
 	    goto again;
 	if (POWER)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(100) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(100) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Power (The One Ring)");
@@ -1878,9 +1880,9 @@ again:
 	done++;
 	if (PHIAL)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(30) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(30) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Phial of Galadriel");
@@ -1894,9 +1896,9 @@ again:
 	    goto again;
 	if (INGWE)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Amulet of Ingwe");
@@ -1910,9 +1912,9 @@ again:
 	    goto again;
 	if (CARLAMMAS)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(35) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(35) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Amulet of Carlammas");
@@ -1926,9 +1928,9 @@ again:
 	    goto again;
 	if (ELENDIL)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(30) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(30) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Star of Elendil");
@@ -1942,9 +1944,9 @@ again:
 	    goto again;
 	if (THRAIN)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Arkenstone of Thrain");
@@ -1958,9 +1960,9 @@ again:
 	    goto again;
 	if (TULKAS)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(65) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(65) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Ring of Tulkas");
@@ -1974,9 +1976,9 @@ again:
 	    goto again;
 	if (NECKLACE)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(60) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(60) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Necklace of the Dwarves");
@@ -1990,9 +1992,9 @@ again:
 	    goto again;
 	if (BARAHIR)
 	    goto again;
-	if ((objeci_list[tmp].level - 40) > object_level)
+	if ((k_list[tmp].level - 40) > object_level)
 	    goto again;
-	if ((objeci_list[tmp].level > object_level) && (randint(50) > 1))
+	if ((k_list[tmp].level > object_level) && (randint(50) > 1))
 	    goto again;
 	if ((wizard || peek))
 	    sprintf(str, "Ring of Barahir");
@@ -2008,8 +2010,8 @@ again:
     invcopy(&i_list[cur_pos], tmp);
     i_list[cur_pos].timeout = 0;
     i_list[cur_pos].ident |= ID_NOSHOW_TYPE; /* don't show (+x of yyy) for these */
-    if (objeci_list[tmp].level > object_level) {
-	rating += 2 * (objeci_list[sorted_objects[tmp]].level - object_level);
+    if (k_list[tmp].level > object_level) {
+	rating += 2 * (k_list[sorted_objects[tmp]].level - object_level);
     }
     if (cave[y][x].cptr == 1)
 	msg_print("You feel something roll beneath your feet.");
@@ -2044,14 +2046,14 @@ void place_object(int y, int x)
 
     do {	   /* don't generate another chest if opening_chest is true -CWS */
 	tmp = get_obj_num(dun_level, FALSE);
-    } while (opening_chest && (objeci_list[sorted_objects[tmp]].tval == TV_CHEST));
+    } while (opening_chest && (k_list[sorted_objects[tmp]].tval == TV_CHEST));
 	
     invcopy(&i_list[cur_pos], sorted_objects[tmp]);
     magic_treasure(cur_pos, dun_level, FALSE, 0);
-    if (objeci_list[sorted_objects[tmp]].level > dun_level)
-	rating += objeci_list[sorted_objects[tmp]].level - dun_level;
+    if (k_list[sorted_objects[tmp]].level > dun_level)
+	rating += k_list[sorted_objects[tmp]].level - dun_level;
     if (peek) {
-	if (objeci_list[sorted_objects[tmp]].level > dun_level) {
+	if (k_list[sorted_objects[tmp]].level > dun_level) {
 	    char buf[200];
 	    byte temp;
 	    
@@ -2095,7 +2097,7 @@ void place_good(int y, int x, u32b good)
     cave[y][x].tptr = cur_pos;
     do {
 	tmp = get_obj_num((object_level + 10), TRUE);
-	tv = objeci_list[sorted_objects[tmp]].tval;
+	tv = k_list[sorted_objects[tmp]].tval;
 
 	if ((tv == TV_HELM) || (tv == TV_SHIELD) || (tv == TV_CLOAK) ||
 	    (tv == TV_HAFTED) || (tv == TV_POLEARM) ||
@@ -2104,23 +2106,23 @@ void place_good(int y, int x, u32b good)
 	    is_good = TRUE;
 
 	if ((tv == TV_SWORD) &&
-	    strncmp("& Broken", objeci_list[sorted_objects[tmp]].name, 8))
+	    strncmp("& Broken", k_list[sorted_objects[tmp]].name, 8))
 	    is_good = TRUE;	   /* broken swords/daggers are NOT good!
 				    * -CFT */
 	if ((tv == TV_HARD_ARMOR) &&
-	    strncmp("Rusty", objeci_list[sorted_objects[tmp]].name, 5))
+	    strncmp("Rusty", k_list[sorted_objects[tmp]].name, 5))
 	    is_good = TRUE;	   /* rusty chainmail is NOT good! -CFT */
 	if ((tv == TV_SOFT_ARMOR) &&
-	 stricmp("some filthy rags", objeci_list[sorted_objects[tmp]].name))
+	 stricmp("some filthy rags", k_list[sorted_objects[tmp]].name))
 	    is_good = TRUE;	   /* nor are rags! -CFT */
 	if ((tv == TV_MAGIC_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Raal's */
-	    (objeci_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
+	    (k_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
 	if ((tv == TV_PRAYER_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Wrath of
 					 * God */
-	    (objeci_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
+	    (k_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
     } while (!is_good);
 
@@ -2130,7 +2132,7 @@ void place_good(int y, int x, u32b good)
 	/* Hack -- look at it */
 	if (peek) {
 	    char buf[200];
-	    if (objeci_list[sorted_objects[tmp]].level > object_level) {
+	    if (k_list[sorted_objects[tmp]].level > object_level) {
 	    byte               t;
 
 	    t = i_list[cur_pos].ident;
@@ -2309,7 +2311,8 @@ void get_coin_type(monster_race *r_ptr)
 }
 
 /*
- * Places a treasure (Gold or Gems) at given row, column -RAK-	 */
+ * Places a treasure (Gold or Gems) at given row, column -RAK-	
+ */
 void place_gold(int y, int x)
 {
     register int        i, cur_pos;
@@ -2353,7 +2356,7 @@ void place_gold(int y, int x)
 
     /* Hack -- average the values to make sure "creeping coins" are not too valuable */
     if (coin_type) {
-	i_ptr->cost = ((8L * (long)randint((int)objeci_list[OBJ_GOLD_LIST + i].cost))
+	i_ptr->cost = ((8L * (long)randint((int)k_list[OBJ_GOLD_LIST + i].cost))
 		       + (i_ptr->cost)) >> 1;
     }
 
@@ -2365,7 +2368,7 @@ void place_gold(int y, int x)
 
 
 /*
- * Returns the array number of a random object		-RAK-
+ * Returns the array number of a random object -RAK-
  */
 int get_obj_num(int level, int good)
 {
@@ -2397,14 +2400,14 @@ int get_obj_num(int level, int good)
 		if (i < j) i = j;
 		j = rand_int(t_level[level]);
 		if (i < j) i = j;
-		j = objeci_list[sorted_objects[i]].level;
+		j = k_list[sorted_objects[i]].level;
 		if (j == 0) i = rand_int(t_level[0]);
 		else i = randint(t_level[j] - t_level[j - 1]) - 1 + t_level[j - 1];
 	    }
 	}
-    } while (((objeci_list[sorted_objects[i]].rare ?
-	       (randint(objeci_list[sorted_objects[i]].rare) - 1) : 0) && !good)
-	     || (objeci_list[sorted_objects[i]].rare == 255));
+    } while (((k_list[sorted_objects[i]].rare ?
+	       (randint(k_list[sorted_objects[i]].rare) - 1) : 0) && !good)
+	     || (k_list[sorted_objects[i]].rare == 255));
 
     /* Accept that object */
     return (i);

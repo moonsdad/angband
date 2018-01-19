@@ -496,7 +496,7 @@ void calc_mana(int stat)
 	if ((inventory[INVEN_HANDS].tval != TV_NOTHING) &&
 	    !((inventory[INVEN_HANDS].flags & TR2_FREE_ACT) ||
 	      ((inventory[INVEN_HANDS].flags & TR1_DEX) &&
-	       (inventory[INVEN_HANDS].p1 > 0)))) {
+	       (inventory[INVEN_HANDS].pval > 0)))) {
 
 	    /* Only mages are affected */
 	    if (p_ptr->misc.pclass == 1 ||

@@ -328,7 +328,7 @@ s32b item_value(inven_type *i_ptr)
     else if (((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) ||
 	     ((i_ptr->tval >= TV_BOOTS) && (i_ptr->tval <= TV_SOFT_ARMOR))) {
 
-	if (!known2_p(i_ptr)) value = objeci_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = k_list[i_ptr->index].cost;
 
 	else if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -345,7 +345,7 @@ s32b item_value(inven_type *i_ptr)
 
 	else if (((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
 	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
-	if (!known2_p(i_ptr)) value = objeci_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = k_list[i_ptr->index].cost;
 
 	else {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -377,7 +377,7 @@ s32b item_value(inven_type *i_ptr)
 	/* player knows what type of ring, but does not know whether it is
 	 * cursed or not, if refuse to buy cursed objects here, then player
 	 * can use this to 'identify' cursed objects  */
-	    value = objeci_list[i_ptr->index].cost;
+	    value = k_list[i_ptr->index].cost;
 
 				/* Wands and staffs */
     } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
@@ -386,23 +386,23 @@ s32b item_value(inven_type *i_ptr)
 	    if (i_ptr->tval == TV_WAND) value = 50;
 	    else value = 70;
 	} else if (known2_p(i_ptr))
-	    value = i_ptr->cost + (i_ptr->cost / 20) * i_ptr->p1;
+	    value = i_ptr->cost + (i_ptr->cost / 20) * i_ptr->pval;
     }
 
 				/* picks and shovels */
     else if (i_ptr->tval == TV_DIGGING) {
 	if (!known2_p(i_ptr))
-	    value = objeci_list[i_ptr->index].cost;
+	    value = k_list[i_ptr->index].cost;
 
 	else {
-	    if (i_ptr->p1 < 0) value = 0;
+	    if (i_ptr->pval < 0) value = 0;
 	    else {
 
-	    /* some digging tools start with non-zero p1 values, so only
+	    /* some digging tools start with non-zero pval values, so only
 	     * multiply the plusses by 100, make sure result is positive 
 	     * no longer; have adjusted costs in treasure.c -CWS
 	     */
-		value = i_ptr->cost + i_ptr->p1;
+		value = i_ptr->cost + i_ptr->pval;
 		if (value < 0)
 		    value = 0;
 	    }
@@ -484,7 +484,7 @@ int store_check_num(inven_type *t_ptr, int store_num)
 	    if (i_ptr->tval == t_ptr->tval && i_ptr->sval == t_ptr->subval
 		&& ((int)i_ptr->number + (int)t_ptr->number < 256)
 		&& (t_ptr->sval < ITEM_GROUP_MIN
-		    || (i_ptr->p1 == t_ptr->p1)))
+		    || (i_ptr->pval == t_ptr->pval)))
 		store_check = TRUE;
 	}
 
@@ -497,7 +497,7 @@ int store_check_num(inven_type *t_ptr, int store_num)
 	    if (i_ptr->tval == t_ptr->tval && i_ptr->sval == t_ptr->subval
 		&& ((int)i_ptr->number + (int)t_ptr->number > 24)
 		&& (t_ptr->sval < ITEM_GROUP_MIN
-		    || (i_ptr->p1 == t_ptr->p1)))
+		    || (i_ptr->pval == t_ptr->pval)))
 		store_check = FALSE;
 	}
     return (store_check);
@@ -533,7 +533,7 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 		{
 		    if (subt == i_ptr->sval && /* Adds to other item        */
 			subt >= ITEM_SINGLE_STACK_MIN
-			&& (subt < ITEM_GROUP_MIN || i_ptr->p1 == t_ptr->p1))
+			&& (subt < ITEM_GROUP_MIN || i_ptr->pval == t_ptr->pval))
 		    {
 			stacked = TRUE; /* remember that we did stack it... -CFT */
 			*ipos = item_val;

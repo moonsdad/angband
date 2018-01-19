@@ -93,12 +93,12 @@ struct _monster_race {
 
   u16b damage[4];		/* Type attack and damage	*/
 
-  u32b cflags1;		/* Bit field		*/
-  u32b cflags2;		/* Bit field		*/
+  u32b cflags1;		/* Flags 1 (movement)		*/
+  u32b cflags2;		/* Flags 2 (defense)		*/
 
-  u32b spells1;		/* Creature spells		*/
-  u32b spells2;		/* More creature spells		*/
-  u32b spells3;		/* Yes! even More creature spells		*/
+  u32b spells1;		/* Spell flags 1 Creature spells		*/
+  u32b spells2;		/* Spell flags 2 More creature spells		*/
+  u32b spells3;		/* Spell flags 3 Yes! even More creature spells */
 };
 
 
@@ -116,6 +116,7 @@ typedef struct _monster_lore monster_lore;
 struct _monster_lore {
 
     u32b r_cflags1;
+    u32b r_cflags2;
     u32b r_spells1;
     u32b r_spells2;
     u32b r_spells3;
@@ -123,7 +124,6 @@ struct _monster_lore {
     u16b r_kills;		/* Count player killing monster */
     u16b r_deaths;		/* Count monster killing player */
 
-    u32b r_cflags2;
     byte r_attacks[MAX_MON_NATTACK];
 
     byte r_wake;		/* Number of times woken up (?) */
@@ -188,7 +188,7 @@ struct _inven_kind {
 
   byte tval;			/* Object type Category number			*/
   byte sval;			/* Object Sub-type Category number		*/
-  s16b p1;			/* Object extra info		*/
+  s16b pval;			/* Object extra info		*/
 
   byte level;			/* Object level			*/
   byte number;			/* Number of items: Always "one", for now	*/
@@ -229,13 +229,13 @@ typedef struct _inven_type inven_type;
 
 struct _inven_type {
 
-  u16b index;			/* Index to objeci_list	*/
+  u16b index;			/* Index to k_list	*/
 
   byte level;			/* Level item first found	*/
 
   byte tval;			/* Category number		*/
   byte sval;			/* Sub-category number		*/
-  s16b p1;			/* Misc. use variable		*/
+  s16b pval;			/* Misc. use variable		*/
 
 
   u16b timeout;		/* Timeout counter: wait before reactivating an Artifact		*/

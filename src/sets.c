@@ -201,8 +201,8 @@ inven_type *e;
     switch (element) {
       case TV_RING:
 	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
-	    ||(e->flags & TR2_RES_LIGHT)	/* can't check outside, because flags */
-	    ||(e->flags2 & TR2_IM_LIGHT))	/* used differently in potions/etc */
+	    ||(e->flags & TR2_RES_ELEC)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ELEC))	/* used differently in potions/etc */
 	    return (FALSE);
 	return (TRUE);
       case TV_WAND:

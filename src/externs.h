@@ -147,7 +147,10 @@ extern int carry_query_flag;		/* Prompt for pickup */
 extern int equippy_chars;	/* do equipment characters -CWS */
 extern int notice_seams;	/* Highlight mineral seams */
 
-/* Option Set 2  */
+extern int use_color;		/* Use color if possible */
+
+
+/* Option Set 2 -- Disturbance */
 
 extern int find_cut;		/* Cut corners */
 extern int find_examine;	/* Examine corners */
@@ -304,10 +307,6 @@ extern u16b player_hp[MAX_PLAYER_LEVEL];
 extern s16b char_row;
 extern s16b char_col;
 
-#if 0 /* not used? */
-extern char *dsp_race[MAX_RACES]; /* Short strings for races. -CJS- */
-#endif
-
 extern byte rgold_adj[MAX_RACES][MAX_RACES];
 
 extern s16b class_level_adj[MAX_CLASS][MAX_LEV_ADJ];
@@ -354,7 +353,7 @@ extern s16b inven_weight;		/* Total carried weight */
 extern s16b inven_ctr;			/* Number of obj's in inven */
 extern s16b equip_ctr;			/* Number of obj's in equip */
 
-/* Player inventory */
+/* Player inventory (inven+equip) */
 extern inven_type inventory[INVEN_TOTAL];
 
 
@@ -365,7 +364,7 @@ extern s16b i_max;
 
 extern inven_type i_list[MAX_I_IDX];
 
-extern inven_kind objeci_list[MAX_OBJECTS];
+extern inven_kind k_list[MAX_OBJECTS];
 
 extern byte object_ident[OBJECT_IDENT_SIZE];
 

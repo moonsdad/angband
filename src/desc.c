@@ -337,6 +337,9 @@ void flavor_init(void)
 	if (string[8] == ' ') {
 	    string[8] = '\0';
 	}
+	else if (string[7] == ' ') {
+	    string[7] = '\0';
+	}
 	else {
 	    string[9] = '\0';
 	}
@@ -537,13 +540,21 @@ void unmagic_name(inven_type *i_ptr)
 }
 
 
-/* defines for p1_use, determine how the p1 field is printed */
+
+
+
+
+
+
+/*
+ * defines for pval_use, determine how the pval field is printed 
+ */
 #define IGNORED  0		/* never show (+x) */
-#define CHARGES  1		/* show p1 as charges */
-#define PLUSSES  2		/* show p1 as (+x) only */
-#define LIGHT    3		/* show p1 as turns of light */
-#define FLAGS    4		/* show p1 as (+x of yyy) */
-#define Z_PLUSSES 5             /* always show p1 as (+x), even if x==0 -CWS */
+#define CHARGES  1		/* show pval as charges */
+#define PLUSSES  2		/* show pval as (+x) only */
+#define LIGHT    3		/* show pval as turns of light */
+#define FLAGS    4		/* show pval as (+x of yyy) */
+#define Z_PLUSSES 5             /* always show pval as (+x), even if x==0 -CWS */
 
 
 /*
@@ -556,27 +567,36 @@ void unmagic_name(inven_type *i_ptr)
  * Note that objdes now never returns a description ending with punctuation
  * (ie, "."'s) -CWS 
  */
-void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
+void objdes(char *out_val, inven_type *i_ptr, int pref)
 {
     /* base name, modifier string */
     register cptr basenm, modstr;
     int modify, append_name;
-    int indexx, p1_use;
+    int indexx, pval_use;
     vtype                tmp_str, damstr;
     bigvtype             tmp_val;
 
+    /* Hack -- Extract the sub-type "indexx" */
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    basenm = objeci_list[i_ptr->index].name;
+
+    /* Extract the (default) "base name" */
+    basenm = k_list[i_ptr->index].name;
+
+    /* Assume no modifier string */
     modstr = NULL;
 
     /* Start with no damage string */
     damstr[0] = '\0';
-    p1_use = IGNORED;
+
+    /* Assume no display of "pval" */
+    pval_use = IGNORED;
+
     modify = (known1_p(i_ptr) ? FALSE : TRUE);
     append_name = FALSE;
 
     /* Analyze the object */
     switch (i_ptr->tval) {
+
       case TV_MISC:
       case TV_CHEST:
 	break;
@@ -586,7 +606,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
       case TV_LITE:
-	p1_use = LIGHT;
+	pval_use = LIGHT;
 	if (!stricmp("The Phial of Galadriel", basenm) && !known2_p(i_ptr))
 	    basenm = "a Shining Phial";
 	if (!stricmp("The Star of Elendil", basenm) && !known2_p(i_ptr))
@@ -613,8 +633,8 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	  default:        /* just in case... */
 	    strcpy(damstr, " (unknown mult.)");
 	}
-	if (i_ptr->flags2 & TR_ARTIFACT)	/* only show p1 for artifacts... */
-	    p1_use = FLAGS;
+	if (i_ptr->flags2 & TR_ARTIFACT)	/* only show pval for artifacts... */
+	    pval_use = FLAGS;
 	break;
 
       /* Weapons have a damage string, and flags */
@@ -622,12 +642,13 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_POLEARM:
       case TV_SWORD:
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
-	p1_use = FLAGS;
+	pval_use = FLAGS;
 	break;
       case TV_DIGGING:
-	p1_use = Z_PLUSSES;
+	pval_use = Z_PLUSSES;
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
+
 
       /* Armour uses flags */
       case TV_BOOTS:
@@ -635,15 +656,15 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_CLOAK:
       case TV_HELM:
       case TV_SHIELD:
-      case TV_HARD_ARMOR:
       case TV_SOFT_ARMOR:
-	p1_use = FLAGS;
+      case TV_HARD_ARMOR:
+	pval_use = FLAGS;
 	break;
 
       /* Amulets (including a few "Specials") */
       case TV_AMULET:
 
-	p1_use = FLAGS;
+	pval_use = FLAGS;
 
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Amulet";
@@ -660,6 +681,9 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 
       /* Rings (including a few "Specials") */
       case TV_RING:
+
+	pval_use = PLUSSES;
+
 	if (!stricmp("Power", basenm)) { /* name this "the One Ring" -CWS */
 	    append_name = FALSE;
 	    if (!known2_p(i_ptr)) basenm = "a plain gold Ring";
@@ -674,10 +698,10 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	    basenm = "& Ring";
 	    append_name = TRUE;
 	}
-	p1_use = PLUSSES;
 	break;
 
       case TV_STAFF:
+	pval_use = CHARGES;
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Staff";
 	    modstr = staff_adj[indexx];
@@ -688,10 +712,10 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	    basenm = "& Staff";
 	    append_name = TRUE;
 	}
-	p1_use = CHARGES;
 	break;
 
       case TV_WAND:
+	pval_use = CHARGES;
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Wand";
 	    modstr = wand_adj[indexx];
@@ -702,7 +726,6 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 	    basenm = "& Wand";
 	    append_name = TRUE;
 	}
-	p1_use = CHARGES;
 	break;
 
       case TV_ROD:
@@ -803,12 +826,12 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
       case TV_VIS_TRAP:
       case TV_UP_STAIR:
       case TV_DOWN_STAIR:
-	(void)strcpy(out_val, objeci_list[i_ptr->index].name);
+	(void)strcpy(out_val, k_list[i_ptr->index].name);
     /* (void) strcat(out_val, "."); avoid ".." bug -CWS */
 	return;
 
       case TV_STORE_DOOR:
-	sprintf(out_val, "the entrance to the %s", objeci_list[i_ptr->index].name);
+	sprintf(out_val, "the entrance to the %s", k_list[i_ptr->index].name);
 	return;
 
       /* Used in the "inventory" routine */
@@ -830,7 +853,7 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
     /* Append the "kind name" to the "base name" */
     if (append_name) {
 	(void)strcat(tmp_val, " of ");
-	(void)strcat(tmp_val, objeci_list[i_ptr->index].name);
+	(void)strcat(tmp_val, k_list[i_ptr->index].name);
     }
 
 
@@ -899,67 +922,67 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
 
 	tmp_str[0] = '\0';
 
-    /* override defaults, check for p1 flags in the ident field */
-	if (p1_use != IGNORED) {
-	    if (p1_use == LIGHT);
+    /* override defaults, check for pval flags in the ident field */
+	if (pval_use != IGNORED) {
+	    if (pval_use == LIGHT);
 	    else if (i_ptr->ident & ID_NOSHOW_P1)
-		p1_use = IGNORED;
+		pval_use = IGNORED;
 	    else if (i_ptr->ident & ID_NOSHOW_TYPE)
-		p1_use = PLUSSES;
+		pval_use = PLUSSES;
 	}
 
-	if (p1_use == IGNORED);
-	else if ((p1_use == LIGHT) && !(i_ptr->flags2 & TR_ARTIFACT))
-	    (void)sprintf(tmp_str, " with %d turns of light", i_ptr->p1);
+	if (pval_use == IGNORED);
+	else if ((pval_use == LIGHT) && !(i_ptr->flags2 & TR_ARTIFACT))
+	    (void)sprintf(tmp_str, " with %d turns of light", i_ptr->pval);
 
 	else if (known2_p(i_ptr)) {
 
-	    if (p1_use == CHARGES)
-		(void)sprintf(tmp_str, " (%d charge%s", i_ptr->p1,
-			      (i_ptr->p1 == 1 ? ")" : "s)"));
+	    if (pval_use == CHARGES)
+		(void)sprintf(tmp_str, " (%d charge%s", i_ptr->pval,
+			      (i_ptr->pval == 1 ? ")" : "s)"));
 
-	    else if (p1_use == Z_PLUSSES) /* (+0) digging implements -CWS */
+	    else if (pval_use == Z_PLUSSES) /* (+0) digging implements -CWS */
 		    (void)sprintf(tmp_str, " (%c%d)",
-				  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 
-	    else if (i_ptr->p1 != 0) {
-		if (p1_use == PLUSSES)
+	    else if (i_ptr->pval != 0) {
+		if (pval_use == PLUSSES)
 		    (void)sprintf(tmp_str, " (%c%d)",
-				  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		else if (i_ptr->ident & ID_NOSHOW_TYPE)
 		    (void)sprintf(tmp_str, " (%c%d)",
-				  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 
-		else if (p1_use == FLAGS) {
+		else if (pval_use == FLAGS) {
 		    if ((i_ptr->flags & TR1_SPEED) &&
 			     (i_ptr->name2 != EGO_SPEED))
 			(void)sprintf(tmp_str, " (%c%d to speed)",
-				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		    else if (i_ptr->flags & TR1_SEARCH)
 			/*			&& (i_ptr->name2 != EGO_SLAY_EARCH)) */
 			(void)sprintf(tmp_str, " (%c%d to searching)",
-				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		    else if ((i_ptr->flags & TR1_STEALTH) &&
 			     (i_ptr->name2 != EGO_STEALTH))
 			(void)sprintf(tmp_str, " (%c%d to stealth)",
-				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		    else if ((i_ptr->flags & TR1_INFRA) &&
 			     (i_ptr->name2 != EGO_INFRAVISION))
 			(void)sprintf(tmp_str, " (%c%d to infravision)",
-				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		    else if (i_ptr->flags2 & TR1_ATTACK_SPD) {
-			if (MY_ABS(i_ptr->p1) == 1)
+			if (MY_ABS(i_ptr->pval) == 1)
 			    (void)sprintf(tmp_str, " (%c%d attack)",
-					  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+					  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 			else
 			    (void)sprintf(tmp_str, " (%c%d attacks)",
-					  (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
+					  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 		    } /* attack speed */
 		    else
 			(void)sprintf(tmp_str, " (%c%d)",
-				      (i_ptr->p1 < 0) ? '-' : '+', MY_ABS(i_ptr->p1));
-		}     /* p1_use == FLAGS */
-	    }         /* p1 != 0 */
+				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
+		}     /* pval_use == FLAGS */
+	    }         /* pval != 0 */
 	}             /* if known2_p (fully identified) */
 
 	(void)strcat(tmp_val, tmp_str);
@@ -1027,65 +1050,58 @@ void objdes(char *out_val, rgister inven_type *i_ptr, int pref)
     }
 }
 
-/* Describe number of remaining charges.		-RAK-	 */
-void desc_charges(int item_val)
-{
-    register int rem_num;
-    vtype        out_val;
-
-    if (known2_p(&inventory[item_val])) {
-	rem_num = inventory[item_val].p1;
-	(void)sprintf(out_val, "You have %d charges remaining.", rem_num);
-	msg_print(out_val);
-    }
-}
-
-
-/* Describe amount of item remaining.			-RAK-	 */
-void desc_remain(int item_val)
-{
-    bigvtype             out_val, tmp_str;
-    register inven_type *i_ptr;
-
-    i_ptr = &inventory[item_val];
-    i_ptr->number--;
-    objdes(tmp_str, i_ptr, TRUE);
-    i_ptr->number++;
-    (void)sprintf(out_val, "You have %s.", tmp_str);
-    msg_print(out_val);
-}
-
 
 
 
 /*
  * Make "i_ptr" a "clean" copy of the given "kind" of object
  */
-void invcopy(register inven_type *to, int from_index)
+void invcopy(inven_type *i_ptr, int k_idx)
 {
-    register inven_kind *from;
+    register inven_kind *k_ptr;
 
-    from = &objeci_list[from_index];
-    to->index = from_index;
-    to->name2 = SN_NULL;
-    to->inscrip[0] = '\0';
-    to->flags = from->flags;
-    to->flags2 = from->flags2;
-    to->tval = from->tval;
-    to->tchar = from->tchar;
-    to->p1 = from->p1;
-    to->cost = from->cost;
-    to->sval = from->subval;
-    to->number = from->number;
-    to->weight = from->weight;
-    to->tohit = from->tohit;
-    to->todam = from->todam;
-    to->ac = from->ac;
-    to->toac = from->toac;
-    to->dd = from->damage[0];
-    to->ds = from->damage[1];
-    to->level = from->level;
-    to->ident = 0;
+    /* Get the object template */
+    k_ptr = &k_list[k_idx];
+
+    /* Save the kind index */
+    i_ptr->index = k_idx;
+
+    /* Quick access to tval/sval */
+    i_ptr->tval = k_ptr->tval;
+    i_ptr->sval = k_ptr->subval;
+
+    i_ptr->tchar = k_ptr->tchar;
+
+    /* Save the default "pval" */
+    i_ptr->pval = k_ptr->pval;
+
+    /* Default number and weight */
+    i_ptr->number = k_ptr->number;
+    i_ptr->weight = k_ptr->weight;
+
+    /* Default magic */
+    i_ptr->tohit = k_ptr->tohit;
+    i_ptr->todam = k_ptr->todam;
+    i_ptr->toac = k_ptr->toac;
+    i_ptr->ac = k_ptr->ac;
+    i_ptr->dd = k_ptr->damage[0];
+    i_ptr->ds = k_ptr->damage[1];
+
+    /* Default cost and flags */
+    i_ptr->cost = k_ptr->cost;
+    i_ptr->flags = k_ptr->flags;
+    i_ptr->flags2 = k_ptr->flags2;
+
+    /* Wipe the inscription */
+    i_ptr->inscrip[0] = '\0';
+
+    /* No artifact name */
+
+    /* No special name */
+    i_ptr->name2 = SN_NULL;
+
+    i_ptr->level = k_ptr->level;
+    i_ptr->ident = 0;
 }
 
 

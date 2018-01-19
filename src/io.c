@@ -34,7 +34,7 @@ void bell()
 
 
 /*
- * Move the cursor to a given y, x position
+ * Move the cursor
  */
 void move_cursor(int row, int col)
 {
@@ -270,10 +270,6 @@ void ascii_to_text(char *buf, cptr str)
 /*
  * Help get a keypress.
  *
- * Returns a single character input from the terminal.	This silently -CJS-
- * consumes ^R to redraw the screen and reset the terminal, so that this
- * operation can always be performed at any input prompt.  inkey() never
- * returns ^R.	 
  */
 static char inkey_aux(void)
 {
@@ -331,27 +327,26 @@ char inkey(void)
  */
 void msg_more(int x)
 {
-    char   in_char;
-
     /* ensure that the complete -more- message is visible. */
     if (x > 73) x = 73;
 
     /* Print a message */
-    put_str(" -more-", MSG_LINE, x);
+    Term_putstr(x, MSG_LINE, -1, TERM_L_BLUE, " -more-");
 
-	/* let sigint handler know that we are waiting for a space */
-	    wait_for_more = 1;
+    /* let sigint handler know that we are waiting for a space */
+    wait_for_more = 1;
 
     /* Get an acceptable keypress */
-    do {
-		in_char = inkey();
-	} while ((in_char != ' ') && (in_char != ESCAPE)
-	&& (in_char != '\n') &&(in_char != '\r') && (!quick_messages));
-	    wait_for_more = 0;
+    while (1) {
+	int cmd = inkey();
+	if ((quick_messages) || (cmd == ESCAPE)) break;
+	if ((cmd == ' ') || (cmd == '\n') || (cmd == '\r')) break;
+	bell();
+    }
+    wait_for_more = 0;
 
     /* Note -- Do *NOT* call erase_line() */
-    (void)move(MSG_LINE, 0);
-    clrtoeol();
+    Term_erase(0, MSG_LINE, 80-1, MSG_LINE);
 }
 
 
@@ -360,6 +355,14 @@ void msg_more(int x)
  * Output a message to top line of screen.
  *
  * These messages are kept for later reference.	
+ *
+ * Allow multiple short messages to "share" the top line.
+ *
+ * We intentionally erase and flush the line to provide "flicker".
+ *
+ * When "msg_flag" is set, it means "verify old messages"
+ * Note: msg_flag must be explicitly "unset" if desired
+ * Note that "msg_flag" affects other routines.  Icky.
  */
 void msg_print(cptr msg)
 {
@@ -387,36 +390,38 @@ void msg_print(cptr msg)
 	    msg_more(len);
 
 	    /* Display the new message */
-	    put_str(msg, MSG_LINE, 0);
-
-		command_count = 0;
-		last_msg++;
-		if (last_msg >= MAX_SAVE_MSG)
-		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
-		old_msg[last_msg][VTYPESIZ - 1] = '\0';
+	    Term_putstr(0, MSG_LINE, -1, TERM_WHITE, msg);
 
 	    /* Let other messages share the line */
 	    len = strlen(msg) + 1;
 	    msg_flag = TRUE;
+	    command_count = 0;
 
+	    /* Memorize the message */
+	    last_msg++;
+	    if (last_msg >= MAX_SAVE_MSG)
+	    last_msg = 0;
+	    (void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
+	    old_msg[last_msg][VTYPESIZ - 1] = '\0';
 	}
 
 	/* The message fits */
 	else {
 
 	    /* Display the new message */
-	    put_str(msg, MSG_LINE, len);
+	    Term_putstr(len, MSG_LINE, -1, TERM_WHITE, msg);
 
 	    /* Let other messages share the line */
 	    len += strlen(msg) + 1;
-		command_count = 0;
-		last_msg++;
-		if (last_msg >= MAX_SAVE_MSG)
-		    last_msg = 0;
-		(void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
-		old_msg[last_msg][VTYPESIZ - 1] = '\0';
 	    msg_flag = TRUE;
+	    command_count = 0;
+
+	    /* Memorize the message */
+	    last_msg++;
+	    if (last_msg >= MAX_SAVE_MSG)
+	        last_msg = 0;
+	    (void)strncpy(old_msg[last_msg], msg, VTYPESIZ);
+	    old_msg[last_msg][VTYPESIZ - 1] = '\0';
 	    
 	}
     }
@@ -425,8 +430,12 @@ void msg_print(cptr msg)
     /* Ignore old messages */
     else {
 
-	/* Make the null string a special case.  -CJS- */
+	/* Make the null string a special case -- flush.  -CJS- */
 	if (!msg) {
+
+	    /* Clear the line */
+	    Term_erase(0, MSG_LINE, 80-1, MSG_LINE);
+
 	    /* Forget the message */
 	    len = 0;
 	    msg_flag = FALSE;
@@ -436,15 +445,16 @@ void msg_print(cptr msg)
 	else {
 
 	    /* Clear the line */
-	    (void)move(MSG_LINE, 0);
-	    clrtoeol();
+	    Term_erase(0, MSG_LINE, 80-1, MSG_LINE);
 
 	    /* Display it */
-	    put_str(msg, MSG_LINE, 0);
+	    Term_putstr(0, MSG_LINE, -1, TERM_WHITE, msg);
 
 	    /* Let other messages share the line */
 	    command_count = 0;
 	    len = strlen(msg) + 1;
+
+	    /* Memorize it */
 	    last_msg++;
 	    if (last_msg >= MAX_SAVE_MSG)
 		last_msg = 0;
@@ -457,8 +467,8 @@ void msg_print(cptr msg)
 
 
 
-/* Outputs a char to a given interpolated y, x position	-RAK-	 */
-/* sign bit of a character used to indicate standout mode. -CJS */
+/* Outputs a char to a given interpolated y, x position	-RAK-	 *
+ * sign bit of a character used to indicate standout mode. -CJS  */
 void print(int ch, int row, int col)
 {
     row -= panel_row_prt;	   /* Real co-ords convert to screen positions */
@@ -647,10 +657,7 @@ int get_string(char *buf, int row, int col, int len)
     register int i, k, x1, x2;
     int done;
 
-
-    (void)move(row, col);
-    for (i = len; i > 0; i--)
-	(void)addch(' ');
+    if (msg_flag && (row <= MSG_LINE)) msg_print(NULL);
     (void)move(row, col);
 
     /* Find the box bounds */

@@ -443,7 +443,7 @@
 #define ITEM_SINGLE_STACK_MAX   192     /* see NOTE below */
 
 
-/* these items stack with others only if have same sval and same p1,
+/* these items stack with others only if have same sval and same pval,
  * they are treated as a group for wielding, etc.
  */
 
@@ -451,7 +451,7 @@
 #define ITEM_GROUP_MAX          255
 
 /* NOTE: items with sval 192 are treated as single objects, but only stack
- * with others of same sval if have the same p1 value, only used for
+ * with others of same sval if have the same pval value, only used for
  * torches
  */
 
@@ -468,7 +468,7 @@
 #define ID_KNOWN2       0x8	/* Item is fully "known" */
 #define ID_STOREBOUGHT  0x10
 #define ID_SHOW_HITDAM  0x20
-#define ID_NOSHOW_P1    0x40    /* don't show (+x) even if p1 != 0 -CWS   */
+#define ID_NOSHOW_P1    0x40    /* don't show (+x) even if pval != 0 -CWS   */
 #define ID_NOSHOW_TYPE  0x80    /* don't show (+x of yyy), just (+x) -CWS */
 
 /*
@@ -823,14 +823,14 @@
 #define TR2_IM_FIRE		0x00000040L
 #define TR2_IM_COLD		0x00000080L
 #define TR2_IM_POIS		0x00004000L
-#define TR2_IM_LIGHT     0x00000200L
+#define TR2_IM_ELEC     0x00000200L
 #define TR2_FREE_ACT		0x00800000L	/* Free Action */
 
 #define TR2_RES_ACID		0x00100000L
 #define TR2_RES_FIRE		0x00080000L
 #define TR2_RES_COLD		0x00200000L
-#define TR_POISON		0x10000000L
-#define TR2_RES_LIGHT		0x02000000L
+#define TR2_RES_POIS		0x10000000L
+#define TR2_RES_ELEC		0x02000000L
 #define TR2_RES_DARK		0x00040000L
 
 #define TR2_RES_BLIND		0x00800000L
@@ -847,7 +847,7 @@
 #define TR_HOLD_LIFE    0x00000008L
 #define TR_EGO_WEAPON   0x0007E000L
 #define TR_ARTIFACT		0x02000000L	/* means "is an artifact" -CFT */
-#define TR_FFALL        0x04000000L
+#define TR3_FEATHER        0x04000000L
 #define TR2_RES_LITE       0x00020000L
 #define TR_LIGHTNING    0x00001000L
 #define TR3_SEE_INVIS		0x01000000L
@@ -857,7 +857,7 @@
 #define TR_ACTIVATE		0x00000800L
 #define TR1_IMPACT       0x00002000L
 #define TR2_RES_FEAR     0x10000000L
-#define TR_LIGHT        0x00000400L
+#define TR3_LITE        0x00000400L
 #define TR3_TELEPORT		0x00000400L
 #define TR3_AGGRAVATE		0x00000200L
 #define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/

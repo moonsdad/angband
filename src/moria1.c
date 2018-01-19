@@ -82,11 +82,11 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
     bigvtype     tmp_val;
     vtype        out_val[23];
 
+    /* Default "max-length" */
     len = 79 - col;
-    if (weight)
-	lim = 68;
-    else
-	lim = 76;
+
+    /* Maximum space allowed for descriptions */
+    lim = weight ? 68 : 76;
 
     for (i = 0; i < 23; i++)
 	out_val[i][0] = '\0';
@@ -94,42 +94,47 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
     k = 0;
     for (i = r1; i <= r2; i++) {
 	if (test) {
-	    if ((*test) (objeci_list[inventory[i].index].tval)) {
+	    if ((*test) (k_list[inventory[i].index].tval)) {
 		objdes(tmp_val, &inventory[i], TRUE);
 		tmp_val[lim] = 0;  /* Truncate if too long. */
 		(void)sprintf(out_val[i], "  %c) %s", 'a' + i, tmp_val);
 		l = strlen(out_val[i]);
-		if (weight)
-		    l += 9;
-		if (l > len)
-		    len = l;
+		if (weight) l += 9;
+		if (l > len) len = l;
 		k++;
 	    }
 	} else {
-	    objdes(tmp_val, &inventory[i], TRUE);
-	    tmp_val[lim] = 0;	   /* Truncate if too long. */
-	    (void)sprintf(out_val[i], "  %c) %s", 'a' + i, tmp_val);
-	    l = strlen(out_val[i]);
-	    if (weight)
-		l += 9;
-	    if (l > len)
-		len = l;
-	    k++;
+
+	/* Describe the object, enforce max length */
+	objdes(tmp_val, &inventory[i], TRUE);
+	tmp_val[lim] = 0;	   /* Truncate if too long. */
+
+	(void)sprintf(out_val[i], "  %c) %s", 'a' + i, tmp_val);
+
+	/* Find the predicted "line length" */
+	l = strlen(out_val[i]);
+
+	/* Be sure to account for the weight */
+	if (weight) l += 9;
+
+	/* Maintain the maximum length */
+	if (l > len) len = l;
+
+	/* Advance to next "line" */
+	k++;
 	}
     }
 
-    col = 79 - len;
-    if (col < 0) col = 0;
+    /* Find the column to start in */
+    col = (len > 76) ? 0 : (79 - len);
 
     j = 0;
     for (i = r1; (i <= r2) && k; i++) {
 	if (out_val[i][0]) {
 	    k--;
 	/* don't need first two spaces if in first column */
-	    if (col == 0)
-		prt(&out_val[i][2], 1 + j, col);
-	    else
-		prt(out_val[i], 1 + j, col);
+	    if (col == 0) prt(&out_val[i][2], 1 + j, col);
+	    else prt(out_val[i], 1 + j, col);
 	    if (weight) {
 		total_weight = inventory[i].weight * inventory[i].number;
 		(void)sprintf(tmp_val, "%3d.%d lb",
@@ -139,11 +144,10 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
 	    j++;
 	}
     }
+
     erase_line(1+j,col);
     return col;
 }
-
-
 
 
 
@@ -215,19 +219,22 @@ int show_equip(int weight, int col)
 	    }
 	    objdes(prt2, &inventory[i], TRUE);
 	    prt2[lim] = 0;	   /* Truncate if necessary */
-	    (void)sprintf(out_val[line], "  %c) %-14s: %s", line + 'a',
-			  prt1, prt2);
+	    (void)sprintf(out_val[line], "  %c) %-14s: %s", line + 'a', prt1, prt2);
+
+	/* Extract the maximal length (see below) */
 	    l = strlen(out_val[line]);
-	    if (weight)
-		l += 9;
-	    if (l > len)
-		len = l;
-	    line++;
+	    if (weight) l += 9;
+
+	/* Maintain the max-length */
+	    if (l > len) len = l;
+
+	/* Advance the entry */
+	line++;
 	}
     }
-    col = 79 - len;
-    if (col < 0)
-	col = 0;
+
+    /* Find a column to start in */
+    col = (len > 76) ? 0 : (79 - len);
 
     line = 0;
     for (i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
@@ -560,17 +567,17 @@ void calc_bonuses()
 	m_ptr->ptodam -= 5;
 	m_ptr->dis_td -= 5;
     }
-/* Add in temporary spell increases	 */
-/*
- * these changed from pac to ptoac, since mana now affected by high pac (to
- * sim. encumberence), and these really should be magical bonuses -CFT 
- */
+
+    /* Add in temporary spell increases */
+    /* these changed from pac to ptoac, since mana now affected by */
+    /* high pac (to simulate encumberence), and these really should */
+    /* be magical bonuses anyway -CFT */
+
     if (p_ptr->flags.status & PY_INVULN) {
 	m_ptr->ptoac += 100;
 	m_ptr->dis_tac += 100;
     }
-    if (p_ptr->flags.status & PY_BLESSED) {	/* changed to agree w/ code in
-					 * dungeon()... -CFT */
+    if (p_ptr->flags.status & PY_BLESSED) {	/* changed to agree w/ code in dungeon()... -CFT */
 	m_ptr->ptoac += 5;
 	m_ptr->dis_tac += 5;
 	m_ptr->ptohit += 10;
@@ -619,9 +626,9 @@ void calc_bonuses()
     if (TR3_TELEPORT & item_flags) p_ptr->flags.teleport = TRUE;
     if (TR3_REGEN & item_flags) p_ptr->flags.regenerate = TRUE;
     if (TR3_TELEPATHY & item_flags2) p_ptr->flags.telepathy = TRUE;
-    if (TR_LIGHT & item_flags2) _ptr->light = TRUE;
+    if (TR3_LITE & item_flags2) _ptr->light = TRUE;
     if (TR3_SEE_INVIS & item_flags) p_ptr->flags.see_inv = TRUE;
-    if (TR_FFALL & item_flags) p_ptr->flags.ffall = TRUE;
+    if (TR3_FEATHER & item_flags) p_ptr->flags.ffall = TRUE;
     if (TR2_FREE_ACT & item_flags) p_ptr->flags.free_act = TRUE;
     if (TR_HOLD_LIFE & item_flags2) ptr->hold_life = TRUE;
     
@@ -629,13 +636,13 @@ void calc_bonuses()
     if (TR2_IM_FIRE & item_flags2) p_ptr->flags.immune_fire = TRUE;
     if (TR2_IM_ACID & item_flags2) p_ptr->flags.immune_acid = TRUE;
     if (TR2_IM_COLD & item_flags2) p_ptr->flags.immune_cold = TRUE;
-    if (TR2_IM_LIGHT & item_flags2) p_ptr->flags.immune_elec = TRUE;
+    if (TR2_IM_ELEC & item_flags2) p_ptr->flags.immune_elec = TRUE;
     if (TR2_IM_POIS & item_flags2) p_ptr->flags.immune_pois = TRUE;
     if (TR2_RES_ACID & item_flags) p_ptr->flags.resist_acid = TRUE;
-    if (TR2_RES_LIGHT & item_flags) p_ptr->flags.resist_elec = TRUE;
+    if (TR2_RES_ELEC & item_flags) p_ptr->flags.resist_elec = TRUE;
     if (TR2_RES_FIRE & item_flags) p_ptr->flags.resist_fire = TRUE;
     if (TR2_RES_COLD & item_flags) p_ptr->flags.resist_cold = TRUE;
-    if (TR_POISON & item_flags) p_ptr->flags.resist_pois = TRUE;
+    if (TR2_RES_POIS & item_flags) p_ptr->flags.resist_pois = TRUE;
     if (TR2_RES_CONF & item_flags2) p_ptr->flags.resist_conf = TRUE;
     if (TR2_RES_SOUND & item_flags2) p_ptr->flags.resist_sound = TRUE;
     if (TR2_RES_LITE & item_flags2) p_ptr->flags.resist_lite = TRUE;
@@ -651,7 +658,7 @@ void calc_bonuses()
     i_ptr = &inventory[INVEN_WIELD];
     for (i = INVEN_WIELD; i < INVEN_LITE; i++) {
 	if (TR_SUST_STAT & i_ptr->flags)
-	    switch (i_ptr->p1) {
+	    switch (i_ptr->pval) {
 	      case 1: p_ptr->flags.sustain_str = TRUE; break;
 	      case 2: p_ptr->flags.sustain_int = TRUE; break;
 	      case 3: p_ptr->flags.sustain_wis = TRUE; break;
@@ -791,7 +798,7 @@ int verify(cptr prompt, int item)
 
 
 /*
- * Drops an item from inventory to given location	-RAK-
+ * Drops an item from inventory to given location -RAK-
  */
 void inven_drop(int item_val, int drop_all)
 {

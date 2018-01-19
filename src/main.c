@@ -23,9 +23,7 @@ static int force_keys_to = FALSE;
 
 int unfelt    = TRUE;
 int be_nasty  = FALSE;
-int player_uid;
 int quests[QUEST_MAX];
-monster_race ghost;
 
 #if (COST_ADJ != 100)
 static void price_adjust();
@@ -85,6 +83,10 @@ static bool is_wizard(int uid)
     return (allow);
 }
 
+
+/*
+ * Verify the name
+ */
 static int d_check(char *a)
 {
     while (*a)
@@ -116,8 +118,10 @@ static void quit_hook(cptr s)
  */
 int main(int argc, char *argv[])
 {
-    int generate, i;
-    int result = FALSE;
+    bool done = FALSE;
+
+    /* Dump score list (num lines)? */
+    int show_score = 0;
 
 #ifndef __MINT__
 #ifdef CHECK_LOAD
@@ -128,7 +132,6 @@ int main(int argc, char *argv[])
 #endif
 #endif
     char string[80];
-    struct rlimit rlp;
 
     /* Save the "program name" */
     argv0 = argv[0];
@@ -157,18 +160,8 @@ int main(int argc, char *argv[])
      * and prepare things to relinquish setuid privileges */
     init_scorefile();
 
-    /* Call this routine to grab a file pointer to the log files and
-     * start the backup process before relinquishing setuid privileges */
-    init_files();
-
-#ifndef MSDOS
     /* Get the user id (?) */
     player_uid = getuid();
-    if (player_uid < 0) {
-	perror("Can't set permissions correctly!  Getuid call failed.\n");
-	exit(0);
-    }
-#endif
 
 #if defined(SET_UID) && !defined(SECURE)
     /* Set the user id or quit */
@@ -212,11 +205,7 @@ int main(int argc, char *argv[])
 #endif
 
     /* Acquire the "user name" as a default player name */
-#ifndef MSDOS
     user_name(p_ptr->misc.name, player_uid);
-#else
-    user_name(p_ptr->misc.name);
-#endif
 
     /* check for user interface option */
     for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv) {
@@ -244,9 +233,10 @@ int main(int argc, char *argv[])
 	    break;
 	  case 'S':
 	  case 's':
+	    show_score = atoi(&argv[0][2]);
+	    if (show_score <= 0) show_score = 10;
 	    init_cur();
-	    if (isdigit((int)argv[0][2])) display_scores(0, atoi(&argv[0][2]));
-	    else display_scores(0, 10);
+	    display_scores(0, show_score);
 	    exit_game();
 	  case 'D':
 	  case 'd':
@@ -256,23 +246,18 @@ int main(int argc, char *argv[])
 	    exit_game();
 	  case 'F':
 	  case 'f':
-	    if (can_be_wizzard || to_be_wizard) fiddle = TRUE;
-	    else goto usage;
+	    if (!can_be_wizard) goto usage;
+	    fiddle = to_be_wizard = TRUE;
 	    break;
 	  case 'W':
 	  case 'w':
 	    if (!can_be_wizard) goto usage;
 	    to_be_wizard = TRUE;
-#ifndef MSDOS
-	    if (isdigit((int)argv[0][2])) player_uid = atoi(&argv[0][2]);
-#endif
 	    break;
 	  case 'u':
 	  case 'U':
 	    if (!argv[0][2]) goto usage;
 	    strcpy(p_ptr->misc.name, &argv[0][2]);
-		d_check(p_ptr->misc.name);
-		NO_SAVE=TRUE;
 	    break;
 
 	  default:
@@ -280,11 +265,7 @@ int main(int argc, char *argv[])
 
 	    /* Note -- the Term is NOT initialized */
 	    if (can_be_wizzard) {
-#ifdef MSDOS
-		puts("Usage: angband [-afnorw] [-s<num>] [-d<num>] <file>");
-#else
 		puts("Usage: angband [-afnor] [-s<num>] [-u<name>] [-w<uid>] [-d<num>]");
-#endif
 		puts("  a       Activate \"peek\" mode");
 		puts("  d<num>  Delete high score number <num>");
 		puts("  f       Enter \"fiddle\" mode");
@@ -292,30 +273,17 @@ int main(int argc, char *argv[])
 		puts("  o       Use original command set");
 		puts("  r       Use the \"rogue-like\" command set");
 		puts("  s<num>  Show high scores.  Show <num> scores, or first 10");
-#ifdef MSDOS
-		puts("  w       Start in wizard mode");
-		puts(" <file>   Play with savefile named <file>");
-#else
 		puts("  w<num>  Start in wizard mode, as uid number <num>");
 		puts("  u<name> Play with character named <name>");
-#endif
 		puts("Each option must be listed separately (ie '-r -n', not '-rn')");
 	    }
 	    else {
-#ifdef MSDOS
-		puts("Usage: angband [-nor] [-s<num>] <file>");
-#else
 		puts("Usage: angband [-nor] [-s<num>] [-u<name>]");
-#endif
 		puts("  n       Start a new character");
 		puts("  o       Use original command set");
 		puts("  r       Use the \"rogue-like\" command set");
 		puts("  s<num>  Show high scores.  Show <num> scores, or first 10");
-#ifdef MSDOS
-		puts(" <file>   Play with savefile named <file>");
-#else
 		puts("  u<name> Play with character named <name>");
-#endif
 		puts("Each option must be listed separately (ie '-r -n', not '-rn')");
 	    }
 	    /* Actually abort the process */
@@ -323,6 +291,9 @@ int main(int argc, char *argv[])
 	}
     }
 
+    /* Verify the "player name" */
+    d_check(p_ptr->misc.name);
+    NO_SAVE=TRUE;
 
 #ifdef USE_IBM
     /* Attempt to use the "main-ibm.c" support */
@@ -399,11 +370,6 @@ int main(int argc, char *argv[])
     /* XXX XXX Verify the "player name" */
     if (streq(player_name, "")) strcpy(player_name, "PLAYER");
 
-#ifndef MACINTOSH
-    /* On Mac, if -n is passed, no savefile is used */
-    /* If -n is not passed, the calling routine will know savefile name,
-       hence, this code is not necessary */
-#endif
 #ifdef SAVEFILE_USE_UID
     /* Load the savefile name */
     (void)sprintf(savefile, "%s%s%d%s",
@@ -446,12 +412,13 @@ int main(int argc, char *argv[])
 
 
 /*
- * Init players with some belongings			-RAK-
+ * Init players with some belongings -RAK-
  */
-static void char_inven_init()
+static void player_outfit()
 {
     register int i, j;
     inven_type inven_init;
+    inven_type *i_ptr = &inven_init;
     
     /* this is needed for bash to work right, it can't hurt anyway */
     for (i = 0; i < INVEN_TOTAL; i++)
@@ -460,12 +427,12 @@ static void char_inven_init()
     /* Give the player useful objects */
     for (i = 0; i < 5; i++) {
 	j = player_init[p_ptr->misc.pclass][i];
-	invcopy(&inven_init, j);
-	store_bought(&inven_init);
+	invcopy(i_ptr, j);
+	store_bought(i_ptr);
 	if (inven_init.tval == TV_SWORD || inven_init.tval == TV_HAFTED
 	    || inven_init.tval == TV_BOW)
 	    inven_init.ident |= ID_SHOW_HITDAM;
-	(void) inven_carry(&inven_init);
+	(void)inven_carry(i_ptr);
     }
 
     /* weird place for it, but why not? */
@@ -485,13 +452,16 @@ void play_game()
     int result = FALSE;
 
 
+    /* Hack -- turn off the cursor */
+    Term_hide_cursor();
+
     /* Grab a random seed from the clock          */
     init_seeds();
 
     /* Load and re-save a player's character (only Unix) */
     if (fiddle) {
 	if (load_player(&generate)) save_player();
-	exit_game();
+	quit(NULL);
     }
 
     /*
@@ -510,12 +480,13 @@ void play_game()
 
 
     /* See above */
-    if ((new_game == FALSE) && result) {
+    if (!new_game && result) {
 
 	/* Display character, allow name change */
 	change_name();
 
 	/* could be restoring a dead character after a signal or HANGUP */
+	/* Hack -- delayed death induced by certain signals */
 	if (p_ptr->misc.chp < 0) death = TRUE;
     }
 
@@ -650,7 +621,7 @@ void play_game()
 	generate = TRUE;
 
 	/* Give him some stuff */
-	char_inven_init();
+	player_outfit();
 	p_ptr->flags.food = 7500;
 	p_ptr->flags.food_digested = 2;
         if (class[p_ptr->misc.pclass].spell == MAGE)
@@ -690,6 +661,12 @@ void play_game()
     /* Begin the game */
     clear_screen();
     prt_stat_block();
+
+    /* Hack -- Flash a message */
+    if (generate) prt("Generating a new level...", 10, 20);
+
+    /* Flush it */
+    Term_fresh();
 
     /* Make a level */
     if (generate) generate_cave();
@@ -751,7 +728,7 @@ static void init_t_level()
     for (i = 0; i <= MAX_OBJ_LEVEL; i++)
 	t_level[i] = 0;
     for (i = 0; i < MAX_DUNGEON_OBJ; i++)
-	t_level[objeci_list[i].level]++;
+	t_level[k_list[i].level]++;
     for (i = 1; i <= MAX_OBJ_LEVEL; i++)
 	t_level[i] += t_level[i-1];
 
@@ -762,7 +739,7 @@ static void init_t_level()
 	tmp[i] = 1;
     for (i = 0; i < MAX_DUNGEON_OBJ; i++)
     {
-	l = objeci_list[i].level;
+	l = k_list[i].level;
 	sorted_objects[t_level[l] - tmp[l]] = i;
 	tmp[l]++;
     }
@@ -801,6 +778,6 @@ static void price_adjust()
 
     /* round half-way cases up */
     for (i = 0; i < MAX_OBJECTS; i++)
-	objeci_list[i].cost = ((object_list[i].cost * COST_ADJ) + 50) / 100;
+	k_list[i].cost = ((object_list[i].cost * COST_ADJ) + 50) / 100;
 }
 #endif

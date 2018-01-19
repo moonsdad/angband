@@ -462,24 +462,24 @@ again:
     for (; i < MAX_DUNGEON_OBJ; i++) {
 	switch (i_ptr->tval) {
 	  case TV_POTION1:
-	    if ((objeci_list[i].tval == TV_POTION1) ||
-		(objeci_list[i].tval == TV_POTION2)) {
-		sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+	    if ((k_list[i].tval == TV_POTION1) ||
+		(k_list[i].tval == TV_POTION2)) {
+		sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		prt(tmp_str, 1 + j, 0);
 		j++;
 	    }
 	    break;
 	  case TV_SCROLL1:
-	    if ((objeci_list[i].tval == TV_SCROLL1) ||
-		(objeci_list[i].tval == TV_SCROLL2)) {
-		sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+	    if ((k_list[i].tval == TV_SCROLL1) ||
+		(k_list[i].tval == TV_SCROLL2)) {
+		sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		prt(tmp_str, 1 + j, 0);
 		j++;
 	    }
 	    break;
 	  default:
-	    if (objeci_list[i].tval == i_ptr->tval) {
-		sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+	    if (k_list[i].tval == i_ptr->tval) {
+		sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		prt(tmp_str, 1 + j, 0);
 		j++;
 	    }
@@ -494,24 +494,24 @@ again:
 	for (i = (i - (MAX_DUNGEON_OBJ - 1)) + (SPECIAL_OBJ - 1); i < MAX_OBJECTS; i++) {
 	    switch (i_ptr->tval) {
 	      case TV_POTION1:
-		if ((objeci_list[i].tval == TV_POTION1) ||
-		    (objeci_list[i].tval == TV_POTION2)) {
-		    sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+		if ((k_list[i].tval == TV_POTION1) ||
+		    (k_list[i].tval == TV_POTION2)) {
+		    sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		    prt(tmp_str, 1 + j, 0);
 		    j++;
 		}
 		break;
 	      case TV_SCROLL1:
-		if ((objeci_list[i].tval == TV_SCROLL1) ||
-		    (objeci_list[i].tval == TV_SCROLL2)) {
-		    sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+		if ((k_list[i].tval == TV_SCROLL1) ||
+		    (k_list[i].tval == TV_SCROLL2)) {
+		    sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		    prt(tmp_str, 1 + j, 0);
 		    j++;
 		}
 		break;
 	      default:
-		if (objeci_list[i].tval == i_ptr->tval) {
-		    sprintf(tmp_str, "%c) %s", 'a' + j, objeci_list[i].name);
+		if (k_list[i].tval == i_ptr->tval) {
+		    sprintf(tmp_str, "%c) %s", 'a' + j, k_list[i].name);
 		    prt(tmp_str, 1 + j, 0);
 		    j++;
 		}
@@ -545,19 +545,19 @@ again:
     for (i = 0; i < MAX_DUNGEON_OBJ; i++) {
 	switch (i_ptr->tval) {
 	  case TV_POTION1:
-	    if ((objeci_list[i].tval == TV_POTION1) ||
-		(objeci_list[i].tval == TV_POTION2)) {
+	    if ((k_list[i].tval == TV_POTION1) ||
+		(k_list[i].tval == TV_POTION2)) {
 		j++;
 	    }
 	    break;
 	  case TV_SCROLL1:
-	    if ((objeci_list[i].tval == TV_SCROLL1) ||
-		(objeci_list[i].tval == TV_SCROLL2)) {
+	    if ((k_list[i].tval == TV_SCROLL1) ||
+		(k_list[i].tval == TV_SCROLL2)) {
 		j++;
 	    }
 	    break;
 	  default:
-	    if (objeci_list[i].tval == i_ptr->tval) {
+	    if (k_list[i].tval == i_ptr->tval) {
 		j++;
 	    }
 	    break;
@@ -569,19 +569,19 @@ again:
 	for (i = (SPECIAL_OBJ - 1); i < MAX_OBJECTS; i++) {
 	    switch (i_ptr->tval) {
 	      case TV_POTION1:
-		if ((objeci_list[i].tval == TV_POTION1) ||
-		    (objeci_list[i].tval == TV_POTION2)) {
+		if ((k_list[i].tval == TV_POTION1) ||
+		    (k_list[i].tval == TV_POTION2)) {
 		    j++;
 		}
 		break;
 	      case TV_SCROLL1:
-		if ((objeci_list[i].tval == TV_SCROLL1) ||
-		    (objeci_list[i].tval == TV_SCROLL2)) {
+		if ((k_list[i].tval == TV_SCROLL1) ||
+		    (k_list[i].tval == TV_SCROLL2)) {
 		    j++;
 		}
 		break;
 	      default:
-		if (objeci_list[i].tval == i_ptr->tval) {
+		if (k_list[i].tval == i_ptr->tval) {
 		    j++;
 		}
 		break;
@@ -662,7 +662,7 @@ again:
     prt("Magic Plus Flag  : ", 0, 0);
     if (!get_string(tmp_str, 0, 20, 5)) goto end;
     tmp_val = atoi(tmp_str);
-    if (tmp_val != 0) i_ptr->p1 = tmp_val;
+    if (tmp_val != 0) i_ptr->pval = tmp_val;
 
     save_screen();
 
@@ -792,11 +792,11 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Lightning? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR2_RES_LIGHT;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR2_RES_ELEC;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Poison? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_POISON;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR2_RES_POIS;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Resist Confusion? [yn]: ", &ch)) {
@@ -852,7 +852,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Feather Falling? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR_FFALL;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags |= TR3_FEATHER;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Tunneling? [yn]: ", &ch)) {
@@ -884,7 +884,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Immune to Lightning? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_IM_LIGHT;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_IM_ELEC;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Immune to Poison? [yn]: ", &ch)) {
@@ -892,7 +892,7 @@ again:
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Give off Light? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_LIGHT;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR3_LITE;
 	} else if (ch == '\033') goto end;
 
 	if (get_com("Activatable Item? [yn]: ", &ch)) {

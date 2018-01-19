@@ -34,7 +34,7 @@ char days[7][29] = {
 
 #define MDO MAX_DUNGEON_OBJ
 
-/* objeci_list[] index of objects that may appear in the store */
+/* k_list[] index of objects that may appear in the store */
 u16b store_choice[MAX_STORES][STORE_CHOICES] = {
 	/* General Store */
 {MDO,MDO,MDO,MDO,MDO,MDO,MDO,MDO,MDO+21,MDO+21,MDO+21,MDO+21,MDO+22,MDO+22,
@@ -75,7 +75,7 @@ int (*store_buy[MAX_STORES])() = {
 
 /*
  * Each type of character starts out with a few provisions.
- * Note that the entries refer to elements of the objeci_list[] array
+ * Note that the entries refer to elements of the k_list[] array
  * 356 = Food Ration, 365 = Wooden Torch, 123 = Cloak, 30 = Stiletto,
    103 = Soft Leather Armor, 318 = Beginners-Magic, 322 = Beginners Handbook
  */
@@ -508,21 +508,6 @@ player_race race[MAX_RACES] = {
     }
  };
 
-/* 5 char race for printing scores. */
-#if 0 /* not used */
-cptr dsp_race[MAX_RACES] = {
-  "Human",
-  "H-Elf",
-  "Elf  ",
-  "Hobbt",
-  "Gnome",
-  "Dwarf",
-  "H-Orc",
-  "H-Tro",
-  "Duned",
-  "HiElf"
-};
-#endif
 
 /*
  * Background information				

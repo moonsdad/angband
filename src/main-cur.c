@@ -230,7 +230,7 @@ static void unix_suspend_curses(int go)
 
 
 /*
- * Set up the terminal into a suitable state for moria.	 -CJS-
+ * Set up the terminal into a suitable state for a standard "moria" type game.	 -CJS-
  */
 static void moriaterm()
 {

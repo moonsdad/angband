@@ -46,7 +46,7 @@ static cptr value_check(inven_type *i_ptr)
     if (i_ptr->flags & TR_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
     if ((i_ptr->tval == TV_DIGGING) &&  /* also, good digging tools -CFT */
 	(i_ptr->flags & TR1_TUNNEL) &&
-	(i_ptr->p1 > objeci_list[i_ptr->index].p1)) /* better than normal for this
+	(i_ptr->pval > k_list[i_ptr->index].pval)) /* better than normal for this
 						       type of shovel/pick? -CFT */
 	return "good";
     if ((i_ptr->tohit<=0 && i_ptr->todam<=0 && i_ptr->toac<=0) &&
@@ -157,7 +157,6 @@ static void regen_monsters(void)
 {
     register int i;
     monster_type *m_ptr;
-    int          frac;
 
     /* Regenerate everyone */
     for (i = 0; i < MAX_M_IDX; i++) {
@@ -173,8 +172,11 @@ static void regen_monsters(void)
 		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
 	    }
 	/* Allow regeneration */
-	    if (m_ptr->hp < m_ptr->maxhp)
-		m_ptr->hp += ((frac = 2 * m_ptr->maxhp / 100) > 0) ? frac : 1;
+	if (m_ptr->hp < m_ptr->maxhp) {
+	    int frac = 2 * m_ptr->maxhp / 100L;
+	    if (!frac) frac = 1;
+	    m_ptr->hp += frac;
+	    }
 	    if (m_ptr->hp > m_ptr->maxhp) m_ptr->hp = m_ptr->maxhp;
 	} /* if hp >= 0 */
     } /* for loop */
@@ -206,7 +208,7 @@ void dungeon(void)
     i_ptr = &inventory[INVEN_LITE];
 
     /* Check light status for setup	   */
-    if (i_ptr->p1 > 0 || p_ptr->flags.light)
+    if (i_ptr->pval > 0 || p_ptr->flags.light)
 	player_light = TRUE;
     else
 	player_light = FALSE;
@@ -298,7 +300,8 @@ void dungeon(void)
     }
     old_turn = turn;
 
-/* Loop until dead,  or new level		 */
+    /* Loop until the character, level, or game, dies */
+
     do {
 
 	/* Advance the turn counter */
@@ -325,7 +328,7 @@ void dungeon(void)
 		msg_print("Please finish up or save your game.");
 	    }
 	}
-#endif				   /* CHECK_HOURS */
+#endif /* CHECK_HOURS */
 
 	/*** Update the Stores ***/
 	
@@ -359,13 +362,13 @@ void dungeon(void)
 	i_ptr = &inventory[INVEN_LITE];
 
 	if (player_light)
-	    if (i_ptr->p1 > 0) {
-		if (!(i_ptr->flags2 & TR_LIGHT))   /* don't dec if perm light -CFT */
+	    if (i_ptr->pval > 0) {
+		if (!(i_ptr->flags2 & TR3_LITE))   /* don't dec if perm light -CFT */
 		/* Decrease life-span */
-		    i_ptr->p1--;
+		    i_ptr->pval--;
 
 		/* The light is now out */
-		if (i_ptr->p1 == 0) {
+		if (i_ptr->pval == 0) {
 		    player_light = FALSE;
 		    disturb(0, 1);
 		/* unlight creatures */
@@ -374,9 +377,9 @@ void dungeon(void)
 		}
 
 		/* The light is getting dim */
-		else if ((i_ptr->p1 < 40) && (randint(5) == 1) &&
+		else if ((i_ptr->pval < 40) && (randint(5) == 1) &&
 			   (p_ptr->flags.blind < 1) &&
-			   !(i_ptr->flags2 & TR_LIGHT)) { /* perm light doesn't dim -CFT */
+			   !(i_ptr->flags2 & TR3_LITE)) { /* perm light doesn't dim -CFT */
 		    disturb(0, 0);
 		    msg_print("Your light is growing faint.");
 		}
@@ -388,9 +391,9 @@ void dungeon(void)
 		    process_monsters(FALSE);
 		}
 	    }
-	else if (i_ptr->p1 > 0 || p_ptr->flags.light) {
-	    if (!(i_ptr->flags2 & TR_LIGHT))
-		i_ptr->p1--;	   /* don't dec if perm light -CFT */
+	else if (i_ptr->pval > 0 || p_ptr->flags.light) {
+	    if (!(i_ptr->flags2 & TR3_LITE))
+		i_ptr->pval--;	   /* don't dec if perm light -CFT */
 	    player_light = TRUE;
 	    disturb(0, 1);
 	/* light creatures */
@@ -439,7 +442,7 @@ void dungeon(void)
 	/* Food consumption */
 	/* Note: Speeded up characters really burn up the food!  */
 	/* now summation, not square, since spd less powerful -CFT */
-       if (p_ptr->flags.speed < 0)
+	if (p_ptr->flags.speed < 0)
 	   p_ptr->flags.food -=  (p_ptr->flags.speed*p_ptr->flags.speed - p_ptr->flags.speed) / 2;
 
 	/* Digest some food */
@@ -949,7 +952,7 @@ void dungeon(void)
 		if (i_ptr->timeout > 0)
 		    i_ptr->timeout--;
 		if ((i_ptr->tval == TV_RING) &&
-		    (!stricmp(objeci_list[i_ptr->index].name, "Power")) &&
+		    (!stricmp(k_list[i_ptr->index].name, "Power")) &&
 		    (randint(20) == 1) && (p_ptr->misc.exp > 0))
 		    p_ptr->misc.exp--, p_ptr->misc.max_exp--, prt_experience();
 	    }
@@ -1130,7 +1133,7 @@ void dungeon(void)
 		    char                out_val[100], tmp[100], *ptr;
 		    int                 sp;
 
-		    (void)strcpy(tmp, objeci_list[i_ptr->index].name);
+		    (void)strcpy(tmp, k_list[i_ptr->index].name);
 
 		    ptr = tmp;
 		    sp = 0;
