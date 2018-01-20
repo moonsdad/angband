@@ -17,6 +17,7 @@ Cleaned up the header files (a lot).
 Separated out some generic "non-angband" files (like random.c).
 Renamed a LOT of variables/fields to more "consistent" forms.
 Fixed a few old bugs based in misplacement of certain flags.
+Rewrote the "monster recall" code some more, genericized it some.
 Reorganized the source to make the files more "self-contained".
 
 Threw out the "Bill Cosby" message.  "Cute" is not "good".

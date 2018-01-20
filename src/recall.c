@@ -186,9 +186,6 @@ static const char  *desc_immune[] = {
     "acid"
 };
 
-static vtype        roffbuf;	   /* Line buffer. */
-static cptr roffp;	   /* Pointer into line buffer. */
-static int          roffpline;	   /* Place to print line now being loaded. */
 
 static cptr wd_They[4] = { "They", "He", "She", "It" };
 static cptr wd_they[4] = { "they", "he", "she", "it" };
@@ -225,42 +222,197 @@ static cptr wd_resist[4] = { "resist", "resists", "resists", "resists" };
 
 
 
+
+
+
+
+
+
+
 /*
- * Print out strings, filling up lines as we go. 
+ * Keep track of which lines have been cleared
  */
-static void roff(register cptr p)
+static int max_clear = 0;
+
+
+/*
+ * A simple "recall fresh" function
+ */
+static void recall_fresh(void)
 {
-    register char *q, *r;
-    register int   linesize;
+    /* Hack -- use a special window */
+    if (use_recall_win && term_recall) {
 
-    linesize = sizeof(roffbuf);
-    if (linesize > 80)
-	linesize = 80;
+	Term_activate(term_recall);
+	Term_fresh();
+	Term_activate(term_screen);
+    }
 
-    while (*p) {
-	*roffp = *p;
-	if (*p == '\n' || roffp >= roffbuf + linesize) {
-	    q = roffp;
-	    if (*p != '\n') {
-		if (*q == ' ')
-		    q--;
-		if (*q == ' ')
-		    q--;
-		while (*q != ' ')
-		    q--;
-	    }
-	    *q = 0;
-	    prt(roffbuf, roffpline, 0);
-	    roffpline++;
-	    r = roffbuf;
-	    while (q < roffp)
-		*r++ = *++q;
-	    roffp = r;
-	} else
-	    roffp++;
-	p++;
+    /* On top of the normal window */
+    else {
+
+	Term_fresh();
     }
 }
+
+
+/*
+ * A simple "recall clear" function
+ */
+static void recall_clear(void)
+{
+    /* Hack -- use a special window */
+    if (use_recall_win && term_recall) {
+
+	Term_activate(term_recall);
+	Term_clear();
+	Term_activate(term_screen);
+    }
+
+    /* On top of the normal window */
+    else {
+        
+	msg_print(NULL);
+	max_clear = 0;
+    }
+}
+
+
+/*
+ * A simple "recall print" function, with color.
+ */
+static void recall_putstr(int x, int y, int n, byte a, cptr s)
+{
+    /* Hack -- use a special window */
+    if (use_recall_win && term_recall) {
+
+	Term_activate(term_recall);
+	Term_putstr(x, y, n, a, s);
+	Term_activate(term_screen);
+    }
+
+    /* On top of the normal window */
+    else {
+        
+	/* Be sure we have cleared up to the line below us */
+	while (max_clear < y+2) {
+	    Term_erase(0, max_clear, 80-1, max_clear);
+	    max_clear++;
+	}
+
+	/* Send it to the Term */
+	Term_putstr(x, y, n, a, s);
+    }
+}
+
+
+
+/*
+ * Buffer text, dumping full lines via "recall_print()".
+ * Very similar to the "message()" function in many ways.
+ * Automatically wraps to the next line when necessary.
+ * Also wraps to the next line on any "newline" in "str".
+ * If "str" is NULL, call "recall_clear()" and restart.
+ * There are never more chars buffered than can be printed.
+ */
+static void c_roff(byte a, cptr str)
+{
+    register cptr p, r;
+
+    /* Line buffer */
+    static char roff_buf[256];
+
+    /* Current Pointer into roff_buf */
+    static char *roff_p = roff_buf;
+
+    /* Last space saved into roff_buf */
+    static char *roff_s = NULL;
+
+    /* Place to print current line */
+    static int roff_row = 0;
+
+#ifdef USE_COLOR
+    if (!use_color) a = TERM_WHITE;
+#else
+    a = TERM_WHITE;
+#endif
+
+    /* Special handling for "new sequence" */
+    if (!str) {
+
+	/* Reset the row */
+	roff_row = 1;
+
+	/* Reset the pointer */
+	roff_p = roff_buf;
+
+	/* No spaces yet */
+	roff_s = NULL;
+
+	/* Simple string (could just return) */
+	str = "";
+    }
+
+    /* Scan the given string, character at a time */
+    for (p = str; *p; p++) {
+
+	int wrap = (*p == '\n');
+	char ch = *p;
+
+	/* Clean up the char */
+	if (!isprint(ch)) ch = ' ';
+
+	/* We may be "forced" to wrap */
+	if (roff_p >= roff_buf + 80) wrap = 1;
+
+	/* Try to avoid "hanging" single letter words */
+	if ((ch == ' ') && (roff_p + 2 >= roff_buf + 80)) wrap = 1;
+
+	/* Handle line-wrap */
+	if (wrap) {
+
+	    /* We must not dump past here */
+	    *roff_p = '\0';
+
+	    /* Assume nothing will be left over */
+	    r = roff_p;
+
+	    /* If we are in the middle of a word, try breaking on a space */
+	    if (roff_s && (ch != ' ')) {
+
+		/* Nuke the space */
+		*roff_s = '\0';
+
+		/* Remember the char after the space */
+		r = roff_s + 1;
+	    }
+
+	    /* Dump the line, advance the row */	    
+	    recall_putstr(0, roff_row++, -1, TERM_WHITE, roff_buf);
+
+	    /* No spaces yet */
+	    roff_s = NULL;
+
+	    /* Restart the buffer scanner */
+	    roff_p = roff_buf;
+
+	    /* Restore any "wrapped" chars */
+	    while (*r) *roff_p++ = *r++;
+	}
+
+	/* Save the char.  Hack -- skip leading spaces (and newlines) */
+	if ((roff_p > roff_buf) || (ch != ' ')) {
+	    if (ch == ' ') roff_s = roff_p;
+	    *roff_p++ = ch;
+	}
+    }
+}
+
+static void roff(cptr str)
+{
+    c_roff(TERM_WHITE, str);
+}
+
 
 
 /*
@@ -304,7 +456,9 @@ int roff_recall(int r_idx)
     const char             *p, *q;
     u16b                  *pu;
 
+    int			n_len; /* XXX Somehow got in here earier -RMHV */
     int                 mspeed;
+    u32b		flags;
     u32b              rcflags1, rcflags2;
     u32b              rspells1, rspells2, rspells3;
     int                 breath = FALSE, magic = FALSE;
@@ -358,9 +512,6 @@ int roff_recall(int r_idx)
 	}
     }
 
-
-    roffpline = 0;
-    roffp = roffbuf;
 
     /* Load the various flags */
     rspells1 = l_ptr->r_spells1 & r_ptr->spells1 & ~CS1_FREQ;
@@ -865,9 +1016,11 @@ int roff_recall(int r_idx)
 
     /* Do we know its special weaknesses? Most cflags2 flags. */
     k = TRUE;
+    flags = MF2_IM_COLD | MF2_IM_FIRE | MF2_IM_ACID;
+    flags |= MF2_IM_POIS | MF2_IM_ELEC;
 
     /* Mega-Hack */
-    for (i = 0; j & (MF2_IM_COLD | MF2_IM_FIRE | MF2_IM_ACID | MF2_IM_POIS | MF2_IM_ELEC); i++) {
+    for (i = 0; j & flags; i++) {
 	if (j & (MF2_IM_COLD << i)) {
 	    j &= ~(MF2_IM_COLD << i);
 	    if (k) {
@@ -877,7 +1030,7 @@ int roff_recall(int r_idx)
 		roff(" ");
 		k = FALSE;
 	    }
-	    else if (j & (MF2_IM_COLD | MF2_IM_FIRE | MF2_IM_ACID | MF2_IM_POIS | MF2_IM_ELEC)) {
+	    else if (j & flags) {
 		roff(", ");
 	    }
 	    else {
@@ -964,14 +1117,14 @@ int roff_recall(int r_idx)
     /* Do we know what it might carry? */
     if (rcflags1 & (MF1_CARRY_OBJ | MF1_CARRY_GOLD)) {
 
-	j = (rcflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
+	int num = (rcflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
 
 	roff(wd_They[msex]);
 	roff(" may");
 
 
 	/* Only one treasure observed */
-	if (j == 1) {
+	if (num == 1) {
 	    if ((r_ptr->cflags1 & CM1_TREASURE) == MF1_HAS_60) {
 		roff(" sometimes");
 	    }
@@ -981,7 +1134,7 @@ int roff_recall(int r_idx)
 	}
 
 	/* Only two treasures observed */
-	else if ((j == 2) &&
+	else if ((num == 2) &&
 		 ((r_ptr->cflags1 & CM1_TREASURE) ==
 		  (MF1_HAS_60 | MF1_HAS_90))) {
 	    roff(" often");
@@ -992,17 +1145,17 @@ int roff_recall(int r_idx)
 
 
 	if (r_ptr->cflags2 & MF2_SPECIAL) /* it'll tell you who has better treasure -CFT */
-	    p = (j==1?"n exceptional object":" exceptional objects");
+	    p = (num==1?"n exceptional object":" exceptional objects");
 	else if (r_ptr->cflags2 & MF2_GOOD)
-	    p = (j==1?" good object":" good objects");
+	    p = (num==1?" good object":" good objects");
 	else
-	    p = (j==1?"n object":" objects");
+	    p = (num==1?"n object":" objects");
 
 	/* One or more drops */
-	if (j == 1) {
+	if (num == 1) {
 	    p = " an object";
 	}
-	else if (j == 2) {
+	else if (num == 2) {
 	    roff(" one or two");
 	}
 	else {
@@ -1014,13 +1167,13 @@ int roff_recall(int r_idx)
 	    roff(p);
 	    if (rcflags1 & MF1_CARRY_GOLD) {
 		roff(" or treasure");
-		if (j > 1) roff("s");
+		if (num > 1) roff("s");
 	    }
 
 	/* End this sentence */
 	    roff(".  ");
 	}
-	else if (j != 1) roff(" treasures.  ");
+	else if (num != 1) roff(" treasures.  ");
 	else roff(" treasure.  ");
     }
 
@@ -1028,13 +1181,13 @@ int roff_recall(int r_idx)
     /* We know about attacks it has used on us, and maybe the damage they do. */
 
     /* Count the number of "known" attacks, used for punctuation */
-    for (K = j = 0; j < 4; j++) {
+    for (k = j = 0; j < 4; j++) {
 	if (l_ptr->r_attacks[j]) k++;
     }
 
     pu = r_ptr->damage;
 
-    /* Count the number of attacks s printed so far, used for punctuation */
+    /* Count the number of attacks printed so far, used for punctuation */
     j = 0;
 
     /* Examine the actual attacks */    
@@ -1071,7 +1224,7 @@ int roff_recall(int r_idx)
 	roff(desc_amethod[att_how]);
 
 	/* Non-standard attacks, or attacks doing damage */
-	if (att_type != 1 || (d1 > 0 && d2 > 0)) {
+	if (att_type != 1 || (d1 && d2)) {
 	    roff(" to ");
 
 	    /* Hack -- only describe certain attacks */
@@ -1133,14 +1286,25 @@ int roff_recall(int r_idx)
     /* Finish the roff-ing */
     roff("\n");
 
+    /* Refresh the roff-ing */
+    recall_fresh();
+    
+
     /* Hack -- Undo the "wizard memory" */
     if (wizard) *l_ptr = save_mem;
 
-    /* Prompt for pause */
-    prt("   --pause--", roffpline, 0);
 
-    /* Get a keypress */    /* Return it */
-    return inkey();
+    /* Not needed for graphic recall */
+    if (use_recall_win && term_recall) return (ESCAPE);
+
+    /* Prompt for pause */
+    prt("--pause--", 0, n_len + 3);
+
+    /* Get a keypress */
+    k = inkey();
+
+    /* Return it */
+    return (k);
 }
 
 
