@@ -253,7 +253,6 @@
 
 #define MAX_SIGHT          20   /* Maximum dis a creature can be seen       */
 #define MAX_SPELL_DIS      18   /* Maximum dis creat. spell can be cast     */
-#define MAX_MON_MULT       75   /* Maximum reproductions on a level         */
 #define MON_MULT_ADJ        8   /* High value slows multiplication          */
 #define MON_NASTY          50   /* 1/chance of high level creat             */
 #define MAX_M_ALLOC_CHANCE 160  /* 1/chance of new monster each round       */

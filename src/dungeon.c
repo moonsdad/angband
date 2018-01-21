@@ -233,9 +233,8 @@ void dungeon(void)
     /* Reset the "command" vars (again, mostly overkill) */
     command_count  = 0;
     find_count     = 0;
-    mon_tot_mult   = 0;
     coin_type      = 0;
-    old_lite        = (-1);
+    old_lite       = -1;
 
 #ifdef TARGET
     /* target code taken from Morgul -CFT */

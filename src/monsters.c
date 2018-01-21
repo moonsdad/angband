@@ -3059,4 +3059,3 @@ s16b m_level[MAX_R_LEV+1];
 
 /* Blank monster values	*/
 monster_type blank_monster = {0,0,0,0,0,0,0,FALSE,0,FALSE};
-s16b mon_tot_mult;		/* # of repro's of creature	*/

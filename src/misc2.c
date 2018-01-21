@@ -37,22 +37,31 @@ static int test_place(int y, int x)
 
 
 /*
- * Deletes a monster entry from the level		-RAK-
+ * Deletes a monster entry from the level. -RAK-
  */
 void delete_monster(int j)
 {
     register cave_type *c_ptr;
     register monster_type *m_ptr;
+    register int fx, fy;
 
-    /* trouble? abort! -CFT */
+    /* Paranoia trouble? abort! -CFT */
     if (j < 2) return;
 
     /* Get the monster */
     m_ptr = &m_list[j];
 
+    /* Get the monster location */
+    fx = m_ptr->fx;
+    fy = m_ptr->fy;
+
     if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE) check_unique(m_ptr);
 
-    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
+    /* One less of this monster on this level */
+    l_list[m_ptr->r_idx].cur_num--;
+
+    /* Forget that the monster is here */
+    cave[fy][fx].cptr = 0;
 
     if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
 
@@ -83,8 +92,6 @@ void delete_monster(int j)
 
     /* Wipe the monster record */
     m_list[m_max] = blank_monster;
-
-    if (mon_tot_mult > 0) mon_tot_mult--;
 }
 
 
@@ -106,7 +113,7 @@ void fix1_delete_monster(int j)
 {
     register monster_type *m_ptr;
 
-    /* trouble? abort! -CFT */
+    /* Paranoia trouble? abort! -CFT */
     if (j < 2) return;
 
 #ifdef TARGET
@@ -129,7 +136,6 @@ void fix1_delete_monster(int j)
 
     cave[m_ptr->fy][m_ptr->fx].cptr = 0;
     if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
-    if (mon_tot_mult > 0) mon_tot_mult--;
 }
 
 
@@ -257,13 +263,17 @@ int place_monster(int y, int x, int r_idx, int slp)
     /* Verify location YA paranoia check -CFT */
     if (!test_place(y, x)) return FALSE;
 
-    if (r_list[r_idx].cflags2 & MF2_UNIQUE) {
-	if (u_list[r_idx].exist) {
+    /* Get the race */
+    r_ptr = &r_list[r_idx];
+
+    /* See if we can make any more of them */
+    if (l_list[r_idx].cur_num >= l_list[r_idx].max_num) {
 
 	/* Note for wizard */
 	if (wizard) {
-	    (void)sprintf(buf, "Tried to create %s but exists.",
-			  r_list[r_idx].name);
+	    (void)sprintf(buf, "Ignoring %s monster (%s).",
+			  (l_list[r_idx].max_num ? "excessive" : "dead"),
+			  r_ptr->name);
 	    msg_print(buf);
 	}
 
@@ -271,11 +281,12 @@ int place_monster(int y, int x, int r_idx, int slp)
 	return FALSE;
     }
 
-    if (u_list[r_idx].dead) {
+    if (r_list[r_idx].cflags2 & MF2_UNIQUE) {
+	if (u_list[r_idx].exist) {
 
 	/* Note for wizard */
 	if (wizard) {
-	    (void)sprintf(buf, "Tried to create %s but dead.",
+	    (void)sprintf(buf, "Tried to create %s but exists.",
 	    		  r_list[r_idx].name);
 	    msg_print(buf);
 	}
@@ -284,8 +295,8 @@ int place_monster(int y, int x, int r_idx, int slp)
 	return FALSE;
     }
 
-	u_list[r_idx].exist = 1;
-    }
+    /* Count the monsters on the level */
+    l_list[r_idx].cur_num++;
 
     /* from um55, paranoia error check... Get the next monster record */
     cur_pos = m_pop();
@@ -343,6 +354,7 @@ int place_monster(int y, int x, int r_idx, int slp)
     /* Default to invisible */
     m_ptr->ml = FALSE;
 
+    /* Update the monster. */
     cave[y][x].cptr = cur_pos;
 
     /* Update the monster sleep info */
@@ -354,14 +366,14 @@ int place_monster(int y, int x, int r_idx, int slp)
 	    m_ptr->csleep = ((int)r_list[r_idx].sleep * 2) +
 			     randint((int)r_list[r_idx].sleep * 10);
 	}
-    } else
+    }
 
     /* to give the player a sporting chance, any monster that appears in */
     /* line-of-sight and can cast spells or breathe, should be asleep.   */
     /* This is an extension of Um55's sleeping dragon code...            */
 
     /* if asleep only to prevent summon-breathe-breathe-breathe-die, then don't sleep long -CFT */
-    if (((r_list[r_idx].spells1 & (MS1_CAUSE_1|MS1_CAUSE_2|MS1_HOLD|
+    else if (((r_list[r_idx].spells1 & (MS1_CAUSE_1|MS1_CAUSE_2|MS1_HOLD|
                                   MS1_BLIND|MS1_CONF|MS1_FEAR|MS1_SLOW|MS1_BR_ELEC|
                                   MS1_BR_POIS|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|
                                   MS1_BO_FIRE|MS1_BO_COLD|MS1_BO_ACID|MS1_ARROW_1|

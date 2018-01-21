@@ -401,7 +401,6 @@ extern struct unique_mon u_list[MAX_R_IDX];
 extern int quests[MAX_QUESTS];
 
 extern monster_type blank_monster; /* Blank monster values	*/
-extern s16b mon_tot_mult;		   /* # of repro's of creature	*/
 
 /* dungeon.c */
 extern char last_command;		/* Memory of previous command. */

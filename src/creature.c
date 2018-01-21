@@ -3143,12 +3143,10 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 int multiply_monster(int y, int x, int cr_index, int m_idx)
 {
     register int        i, j, k;
-    register cave_type *c_ptr;
-    int                 result;
 
-#ifdef ATARIST_MWC
-    u32b              holder;
-#endif
+    cave_type *c_ptr;
+
+    int result;
 
 
     /* Try up to 18 times */
@@ -3189,7 +3187,7 @@ int multiply_monster(int y, int x, int cr_index, int m_idx)
 			hack_m_idx = (-1);
 			if (!result)
 			    return FALSE;
-			mon_tot_mult++;
+
 			return check_mon_lite(j, k);
 		    }
 		} else
@@ -3199,9 +3197,9 @@ int multiply_monster(int y, int x, int cr_index, int m_idx)
 		    hack_m_idx = m_idx;
 		    result = place_monster(j, k, cr_index, FALSE);
 		    hack_m_idx = (-1);
-		    if (!result)
-			return FALSE;
-		    mon_tot_mult++;
+	/* Failed to create! */
+	if (!result) return FALSE;
+
 		    return check_mon_lite(j, k);
 		}
 	    }
@@ -3215,19 +3213,32 @@ int multiply_monster(int y, int x, int cr_index, int m_idx)
 
 
 /*
- * Move the critters about the dungeon			-RAK-	
+ * Move the critters about the dungeon			-RAK-
+ *
+ * Note that update_mon() has been called, so "m_ptr->ml" is correct.
+ * Thus, we will just directly modify the monster lore when appropriate.
+ * Note that make_move() will call update_mon() if necessary.
+ *
+ * Note that monsters are only allowed to reproduce "MAX_MON_MULT"
+ * times per level.  The "mon_tot_mult" variable starts at zero and
+ * increased once per "multiply_monster()".  It is also decreased once
+ * per deleted monster, in misc.c, by delete_monster().  So monsters
+ * can multiply up to 75 entities, but then they will stop until the
+ * player kills some of them off.  This is a silly algorithm.
  */
 static void mon_move(int m_idx, u32b *rcflags1)
 {
-    register int           i, j;
-    int                    k, move_test, dir;
-    register monster_race *r_ptr;
-    register monster_type  *m_ptr;
-    int                    mm[9];
+    int			i, j, k, move_test, dir;
+    monster_type	*m_ptr;
+    monster_race	*r_ptr;
+    int			mm[9];
     bigvtype               out_val, m_name;
 
+
+    /* Get the monster and its race info */
     m_ptr = &m_list[m_idx];
     r_ptr = &r_list[m_ptr->mptr];
+
 
 /* reduce fear, tough monsters can unfear faster -CFT, hacked by DGK */
     if (m_ptr->monfear) {
@@ -3243,74 +3254,103 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	}
 	m_ptr->monfear = (byte) t;
     }
-/* Does the critter multiply?				   */
-    if ((r_ptr->cflags1 & MF1_MULTIPLY) && (MAX_MON_MULT >= mon_tot_mult) &&
-	(((p_ptr->flags.rest != -1) && ((p_ptr->flags.rest % MON_MULT_ADJ) == 0)) ||
-	 ((p_ptr->flags.rest == -1) && (randint(MON_MULT_ADJ) == 1)))) {
-	k = 0;
-	for (i = (int)m_ptr->fy - 1; i <= (int)m_ptr->fy + 1; i++)
-	    for (j = (int)m_ptr->fx - 1; j <= (int)m_ptr->fx + 1; j++)
-		if (in_bounds(i, j) && (cave[i][j].cptr > 1))
-		    k++;
-    /* can't call randint with a value of zero, increment counter to allow
-     * creature multiplication 
-     */
-	if (k == 0)
-	    k++;
-	if ((k < 4) && (randint(k * MON_MULT_ADJ) == 1))
-	    if (multiply_monster((int)m_ptr->fy, (int)m_ptr->fx,
-				 (int)m_ptr->mptr, m_idx))
-		*rcflags1 |= MF1_MULTIPLY;
-    }
-    move_test = FALSE;
 
-/* if in wall, must immediately escape to a clear area */
+
+/* Hack -- if in wall, must immediately escape to a clear area */
     if (!(r_ptr->cflags1 & MF1_THRO_WALL) &&
 	(cave[m_ptr->fy][m_ptr->fx].fval >= MIN_CAVE_WALL)) {
 
     /* If the monster is already dead, don't kill it again! This can happen
      * for monsters moving faster than the player.  They will get multiple
      * moves, but should not if they die on the first move.  This is only a
-     * problem for monsters stuck in rock.  
-     */
-	if (m_ptr->hp < 0)
-	    return;
-	k = 0;
-	dir = 1;
+     * problem for monsters stuck in rock.  */
+	if (m_ptr->hp < 0) return;
+
     /* note direction of for loops matches direction of keypad from 1 to 9 */
     /* do not allow attack against the player */
-	for (i = m_ptr->fy + 1; i >= (int)(m_ptr->fy - 1); i--)
+	for (k = 0, dir = 1,i = m_ptr->fy + 1; i >= (int)(m_ptr->fy - 1); i--)
 	    for (j = m_ptr->fx - 1; j <= (int)(m_ptr->fx + 1); j++) {
 		if ((dir != 5) && (cave[i][j].fval <= MAX_OPEN_SPACE)
 		    && (cave[i][j].cptr != 1))
 		    mm[k++] = dir;
 		dir++;
 	    }
-	if (k != 0) {
-	/* put a random direction first */
+	}
+
+
+	/* Attempt to "escape" */
+	if (k) {
+
+	    /* Pick a random direction to prefer */
 	    dir = randint(k) - 1;
+
+	    /* Prefer that direction */
 	    i = mm[0];
 	    mm[0] = mm[dir];
 	    mm[dir] = i;
+
+	    /* Move the monster */
 	    make_move(m_idx, mm, rcflags1);
 	/* this can only fail if mm[0] has a rune of protection */
 	}
 
-/* if still in a wall, let it dig itself out, but also apply some more damage */
+
+	/* Hack -- if still in a wall, apply more damage, and dig out */
 	if (cave[m_ptr->fy][m_ptr->fx].fval >= MIN_CAVE_WALL) {
+
 /* in case the monster dies, may need to call fix1_delete_monster()
  * instead of delete_monsters() 
  */
+	    /* XXX XXX XXX XXX The player may not have caused the rocks */
+
+	    /* Apply damage, check for death */
 	    hack_m_idx = m_idx;
 	    i = mon_take_hit(m_idx, damroll(8, 8), FALSE);
 	    hack_m_idx = (-1);
-	    if (i >= 0)
+	    if (i >= 0) {
 		msg_print("You hear a scream muffled by rock!");
-	    else
+	    }
+	    else {
 		(void)twall((int)m_ptr->fy, (int)m_ptr->fx, 1, 0);
+	    }
 	}
-	return;			   /* monster movement finished */
+
+
+	/* monster movement finished */
+	return;
     }
+
+
+    /* Does the critter multiply?  Are creatures allowed to multiply? */
+    /* Hack -- If the player is resting, only multiply occasionally */
+    if ((r_ptr->cflags1 & MF1_MULTIPLY) &&
+	(l_ptr->cur_num < l_ptr->max_num) &&
+	(((p_ptr->flags.rest != -1) && ((p_ptr->flags.rest % MON_MULT_ADJ) == 0)) ||
+	 ((p_ptr->flags.rest == -1) && (randint(MON_MULT_ADJ) == 1)))) {
+
+	/* Count the adjacent monsters */
+	for (k = 0, i = (int)m_ptr->fy - 1; i <= (int)m_ptr->fy + 1; i++) {
+	    for (j = (int)m_ptr->fx - 1; j <= (int)m_ptr->fx + 1; j++) {
+		if (in_bounds(i, j) && (cave[i][j].cptr > 1))  k++;
+	    }
+	}
+
+    /* can't call randint with a value of zero, increment counter to allow
+     * creature multiplication  */
+	if (k == 0) k++;
+
+	/* Hack -- multiply slower in crowded rooms */
+	if ((k < 4) && (randint(k * MON_MULT_ADJ) == 1)) {
+
+	    /* Try to multiply */
+	    if (multiply_monster((int)m_ptr->fy, (int)m_ptr->fx,
+				 (int)m_ptr->mptr, m_idx))
+		*rcflags1 |= MF1_MULTIPLY;
+	}
+    }
+    move_test = FALSE;
+
+
 /* Creature is confused?  Chance it becomes un-confused  */
     else if (m_ptr->confused) {
 	mm[0] = randint(9);
@@ -3340,9 +3380,27 @@ static void mon_move(int m_idx, u32b *rcflags1)
     else if (r_ptr->spells1 != 0) {
 	mon_cast_spell(m_idx, &move_test);
     }
+
     if (!move_test) {
-    /* 75% random movement */
-	if ((r_ptr->cflags1 & MF1_MV_75) && (randint(100) < 75)) {
+
+	/* Attack, but don't move */
+	if ((r_ptr->cflags1 & MF1_MV_ONLY_ATT) && (m_ptr->cdis < 2)) {
+	    *rcflags1 |= MF1_MV_ONLY_ATT;
+	    get_moves(m_idx, mm);
+	    make_move(m_idx, mm, rcflags1);
+	}
+
+	    else if ((r_ptr->cflags1 & CM1_ALL_MV_FLAGS) == 0 &&
+		   (m_ptr->cdis < 2)) {
+
+	    /* little hack for Quylthulgs, so that will eventually notice
+	     * that they have no physical attacks */
+	    if (l_list[m_ptr->mptr].r_attacks[0] < MAX_UCHAR)
+		l_list[m_ptr->mptr].r_attacks[0]++;
+	}
+
+	/* 75% random movement */
+	else if ((r_ptr->cflags1 & MF1_MV_75) && (randint(100) < 75)) {
 	    mm[0] = randint(9);
 	    mm[1] = randint(9);
 	    mm[2] = randint(9);
@@ -3351,7 +3409,8 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	    *rcflags1 |= MF1_MV_75;
 	    make_move(m_idx, mm, rcflags1);
 	}
-    /* 40% random movement */
+
+	/* 40% random movement */
 	else if ((r_ptr->cflags1 & MF1_MV_40) && (randint(100) < 40)) {
 	    mm[0] = randint(9);
 	    mm[1] = randint(9);
@@ -3361,7 +3420,8 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	    *rcflags1 |= MF1_MV_40;
 	    make_move(m_idx, mm, rcflags1);
 	}
-    /* 20% random movement */
+
+	/* 20% random movement */
 	else if ((r_ptr->cflags1 & MF1_MV_20) && (randint(100) < 20)) {
 	    mm[0] = randint(9);
 	    mm[1] = randint(9);
@@ -3371,7 +3431,8 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	    *rcflags1 |= MF1_MV_20;
 	    make_move(m_idx, mm, rcflags1);
 	}
-    /* Normal movement */
+
+	/* Normal movement */
 	else if (r_ptr->cflags1 & MF1_MV_ATT_NORM) {
 	    if (randint(200) == 1) {
 		mm[0] = randint(9);
@@ -3384,19 +3445,6 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	    *rcflags1 |= MF1_MV_ATT_NORM;
 	    make_move(m_idx, mm, rcflags1);
 	}
-    /* Attack, but don't move */
-	else if ((r_ptr->cflags1 & MF1_MV_ONLY_ATT) && (m_ptr->cdis < 2)) {
-	    *rcflags1 |= MF1_MV_ONLY_ATT;
-	    get_moves(m_idx, mm);
-	    make_move(m_idx, mm, rcflags1);
-	} else if ((r_ptr->cflags1 & CM1_ALL_MV_FLAGS) == 0 &&
-		   (m_ptr->cdis < 2)) {
-
-	    /* little hack for Quylthulgs, so that will eventually notice
-	     * that they have no physical attacks */
-	    if (l_list[m_ptr->mptr].r_attacks[0] < MAX_UCHAR)
-		l_list[m_ptr->mptr].r_attacks[0]++;
-	}
     }
 }
 
@@ -3408,25 +3456,38 @@ static void mon_move(int m_idx, u32b *rcflags1)
  */
 void process_monsters(void)
 {
-    register int          i, k;
-    register monster_type *m_ptr;
-    monster_lore           *r_ptr;
+    int			i, k;
+
+    monster_type	*m_ptr;
+    monster_lore	*r_ptr;
+    
     u32b                notice, rcflags1;
     int                   wake, ignore;
     vtype                 cdesc;
 
-/* Process the monsters  */
+    /* Process the monsters (backwards) */
     for (i = m_max - 1; i >= MIN_M_IDX && !death; i--) {
+
+	/* Get the i'th monster */
 	m_ptr = &m_list[i];
-    /* Get rid of an eaten/breathed on monster.  Note: Be sure not to process
+
+
+	/* Hack -- Remove dead monsters.
+     * Get rid of an eaten/breathed on monster.  Note: Be sure not to process
      * this monster. This is necessary because we can't delete monsters while
-     * scanning the m_list here. 
-     */
+     * scanning the m_list here. */
 	if (m_ptr->hp < 0) {
+
 	    check_unique(m_ptr);
+
+	    /* Kill ourself */
 	    fix2_delete_monster(i);
+
+	    /* Continue */
 	    continue;
 	}
+
+
 	m_ptr->cdis = distance(char_row, char_col,
 			       (int)m_ptr->fy, (int)m_ptr->fx);
 
