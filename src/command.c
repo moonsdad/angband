@@ -312,7 +312,7 @@ void set_options()
 	switch (ch) {
 	  case ESCAPE:	  
 	    draw_cave();
-	    process_monsters(FALSE);	 /* draw monsters */
+	    update_monsters();	 /* draw monsters */
 	    prt_equippy_chars(); /* redraw equippy chars */
 	    return;
 	  case '-':

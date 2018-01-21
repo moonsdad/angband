@@ -459,7 +459,8 @@ void player_birth(void);
 void update_mon(int);
 int movement_rate(int);
 int multiply_monster(int, int, int, int);
-void process_monsters(int);
+void update_monsters(void);
+void process_monsters(void);
 
 /* death.c */
 void init_scorefile(void);

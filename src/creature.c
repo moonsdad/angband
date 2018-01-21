@@ -159,6 +159,22 @@ void update_mon(int m_idx)
 
 
 /*
+ * This function simply updates all the monsters (see above).
+ * Note that this may include a few "pending monster deaths",
+ * but that is a very minor inconvenience (and rare, too).
+ */
+void update_monsters(void)
+{
+    register int          i;
+
+    /* Process the monsters (backwards, for historical reasons) */
+    for (i = m_max - 1; i >= MIN_M_IDX; i--) update_mon(i);
+}
+
+
+
+
+/*
  * Given speed,  returns number of moves this turn.     -RAK-   
  * NOTE: Player must always move at least once per iteration,
  *       a slowed player is handled by moving monsters faster
@@ -581,7 +597,7 @@ static void shatter_quake(int mon_y, int mon_x)
 			char_col = x;
 			check_view();
 		    /* light creatures */
-			process_monsters(FALSE);
+			update_monsters();
 		    }
 		    take_hit(damage, "an Earthquake");
 		}
@@ -714,7 +730,7 @@ static void br_wall(int mon_y, int mon_x)
     check_view();
 
 	/* light creatures */
-    process_monsters(FALSE);
+    update_monsters();
     lite_spot(char_row, char_col);
 
     /* Take some damage */
@@ -3390,7 +3406,7 @@ static void mon_move(int m_idx, u32b *rcflags1)
 /*
  * Creatures movement and attacking are done from here	-RAK-
  */
-void process_monsters(int attack)
+void process_monsters(void)
 {
     register int          i, k;
     register monster_type *m_ptr;
@@ -3413,7 +3429,7 @@ void process_monsters(int attack)
 	}
 	m_ptr->cdis = distance(char_row, char_col,
 			       (int)m_ptr->fy, (int)m_ptr->fx);
-	if (attack) {		   /* Attack is argument passed to CREATURE */
+
 	    k = movement_rate(i);
 	    if (k <= 0)
 		update_mon(i);
@@ -3490,8 +3506,6 @@ void process_monsters(int attack)
 			r_ptr->r_cflags1 |= rcflags1;
 		    }
 		}
-	} else
-	    update_mon(i);
 
     /* Get rid of an eaten/breathed on monster.  This is necessary because we
      * can't delete monsters while scanning the m_list here.  This monster

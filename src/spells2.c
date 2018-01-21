@@ -258,12 +258,14 @@ void teleport_to(int ny, int nx)
     /* Move the player */
     move_rec(char_row, char_col, y, x);
 
-	darken_player(char_row, char_col);
+    /* Update the view/lite */
+    darken_player(char_row, char_col);
     char_row = y;
     char_col = x;
     check_view();
-/* light creatures */
-    process_monsters(FALSE);
+
+    /* light creatures */
+    update_monsters();
 }
 
 
@@ -512,8 +514,8 @@ int detect_evil(void)
 	msg_print("You sense the presence of evil!");
 	msg_print(NULL);
 
-	/* must unlight every monster just lighted */
-	process_monsters(FALSE);
+	/* Fix the monsters - must unlight every monster just lighted */
+	update_monsters();
     }
 
     return (flag);
@@ -1130,9 +1132,10 @@ void destroy_area(int y, int x)
     /* We need to redraw the screen. -DGK */
     if (p_ptr->flags.resist_blind || p_ptr->flags.resist_lite) {
 
+    update_monsters();
+
     /* Hack -- redraw the cave */
     draw_cave();
-	process_monsters(FALSE);	   /* draw monsters */
     }
 }
 
@@ -1970,7 +1973,7 @@ int detection(void)
 	msg_print(NULL);
 
 	/* must unlight every monster just lighted */
-	process_monsters(FALSE);
+	update_monsters();
     }
 
     /* XXX Only returns true if monsters were detected */
@@ -2150,7 +2153,7 @@ int detect_invisible()
 	msg_print(NULL);
 
 	/* must unlight every monster just lighted */
-	process_monsters(FALSE);
+	update_monsters();
     }
 
     return (flag);
@@ -2293,7 +2296,7 @@ int detect_monsters(void)
 	msg_print(NULL);
 
 	/* must unlight every monster just lighted */
-	process_monsters(FALSE);
+	update_monsters();
     }
 
     return (detect);

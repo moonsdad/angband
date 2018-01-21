@@ -1204,7 +1204,7 @@ static void do_command(char com_val)
 	    msg_print("You cannot be sure what is real and what is not!");
 	else {
 	    draw_cave();
-	    process_monsters(FALSE);	  /* draw monsters */
+	    update_monsters();	  /* draw monsters */
 	    prt_equippy_chars();  /* redraw equippy chars */
 	}
 	free_turn_flag = TRUE;
@@ -1644,7 +1644,7 @@ static void do_command(char com_val)
 		y = char_row;
 		x = char_col;
 		(void)summon_monster(&y, &x, TRUE);
-		process_monsters(FALSE);
+		update_monsters();
 		break;
 	      case '*':		/* '*' = identify all up to a level */
 		prt("Identify objects upto which level (0-200) ? ", 0, 0);

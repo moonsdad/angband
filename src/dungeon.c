@@ -275,20 +275,21 @@ void dungeon(void)
 	create_up_stair = FALSE;
     }
 
+
     /* Ensure we display the panel. Used to do this with a global var. -CJS- */
     panel_row = panel_col = (-1);
 
     /*  Check the view */
     check_view();
-
 /* must do this after panel_row/col set to -1, because search_off() will call
  * check_view(), and so the panel_* variables must be valid before
- * search_off() is called 
- */
-    if (p_ptr->flags.status & PY_SEARCH)
-	search_off();
+ * search_off() is called */
+    if (p_ptr->flags.status & PY_SEARCH) search_off();
+
 /* Light,  but do not move critters	    */
-    process_monsters(FALSE);
+
+    /* Update the monsters */
+    update_monsters();
 
     /* Print the depth */
     prt_depth();
@@ -372,7 +373,7 @@ void dungeon(void)
 		    player_light = FALSE;
 		    disturb(0, 1);
 		/* unlight creatures */
-		    process_monsters(FALSE);
+		    update_monsters();
 		    msg_print("Your light has gone out!");
 		}
 
@@ -388,7 +389,7 @@ void dungeon(void)
 		    player_light = FALSE;
 		    disturb(0, 1);
 		/* unlight creatures */
-		    process_monsters(FALSE);
+		    update_monsters();
 		}
 	    }
 	else if (i_ptr->pval > 0 || p_ptr->flags.light) {
@@ -397,7 +398,7 @@ void dungeon(void)
 	    player_light = TRUE;
 	    disturb(0, 1);
 	/* light creatures */
-	    process_monsters(FALSE);
+	    update_monsters();
 	}
 
 	/*** Check the Food, and Regenerate ***/
@@ -486,7 +487,7 @@ void dungeon(void)
 		prt_blind();
 		disturb(0, 1);
 	    /* unlight creatures */
-		process_monsters(FALSE);
+		update_monsters();
 	    }
 	    p_ptr->flags.blind--;
 	    if (p_ptr->flags.blind == 0) {
@@ -495,7 +496,7 @@ void dungeon(void)
 		prt_map();
 	    /* light creatures */
 		disturb(0, 1);
-		process_monsters(FALSE);
+		update_monsters();
 		msg_print("The veil of darkness lifts.");
 	    }
 	}
@@ -865,7 +866,7 @@ void dungeon(void)
 		p_ptr->flags.status |= PY_DET_INV;
 		p_ptr->flags.see_inv = TRUE;
 	    /* light but don't move creatures */
-		process_monsters(FALSE);
+		update_monsters();
 	    }
 	    p_ptr->flags.detect_inv--;
 	    if (p_ptr->flags.detect_inv == 0) {
@@ -880,7 +881,7 @@ void dungeon(void)
 			    p_ptr->flags.see_inv = TRUE;
 		}
 	    /* unlight but don't move creatures */
-		process_monsters(FALSE);
+		update_monsters();
 	    }
 	}
 
@@ -890,14 +891,14 @@ void dungeon(void)
 		p_ptr->flags.status |= PY_TIM_INFRA;
 		p_ptr->flags.see_infra++;
 	    /* light but don't move creatures */
-		process_monsters(FALSE);
+		update_monsters();
 	    }
 	    p_ptr->flags.tim_infra--;
 	    if (p_ptr->flags.tim_infra == 0) {
 		p_ptr->flags.status &= ~PY_TIM_INFRA;
 		p_ptr->flags.see_infra--;
 	    /* unlight but don't move creatures */
-		process_monsters(FALSE);
+		update_monsters();
 	    }
 	}
 
@@ -1333,7 +1334,7 @@ void dungeon(void)
 	    teleport(100);
     /* Move the creatures	       */
 	if (!new_level_flag)
-	    process_monsters(TRUE);
+	    process_monsters();
     /* Exit when new_level_flag is set   */
     }
     while (!new_level_flag && !eof_flag);

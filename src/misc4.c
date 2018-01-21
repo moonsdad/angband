@@ -2465,7 +2465,8 @@ void teleport(int dis)
     /* Check the view */
     check_view();
 
-    process_monsters(FALSE);
+    /* Update the monsters */
+    update_monsters();
 
     /* Hack -- The teleport is dealt with */
     teleport_flag = FALSE;
