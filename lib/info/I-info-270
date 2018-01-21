@@ -1,6 +1,7 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
 
 
+Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.
 Added floating point (yuck!) to "standard deviation" code.
 Added extra "options", for "color", "disturb", and others

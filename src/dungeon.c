@@ -285,7 +285,7 @@ void dungeon(void)
  * search_off() is called */
     if (p_ptr->flags.status & PY_SEARCH) search_off();
 
-/* Light,  but do not move critters	    */
+    /* Light,  but do not move critters	*/
 
     /* Update the monsters */
     update_monsters();
@@ -293,12 +293,9 @@ void dungeon(void)
     /* Print the depth */
     prt_depth();
 
-    /* FIXME: figure this out */
-    if (((turn - old_turn) > randint(50) + 50) && dun_level) {
-	unfelt = FALSE;
-	do_cmd_feeling();
-    }
-    old_turn = turn;
+    /* Announce (or repeat) the feeling, unless in town */
+    if (dun_level) do_cmd_feeling();
+
 
     /* Loop until the character, level, or game, dies */
 

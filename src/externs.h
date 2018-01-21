@@ -269,7 +269,7 @@ extern vtype old_msg[MAX_SAVE_MSG];	/* Last messages -CJS- */
 extern s16b last_msg;			/* Where in the array is the last */
 extern int death;			/* True if died	      */
 extern s32b turn;			/* Current game turn */
-extern s32b old_turn;			/* Last turn feeling was felt */
+extern s32b old_turn;			/* Last turn dungeon() started */
 extern int wizard;			/* Is the player currently a Wizard? */
 extern int to_be_wizard;		/* Does the player want to be a wizard? */
 extern s16b panic_save;		/* true if playing from a panic save */

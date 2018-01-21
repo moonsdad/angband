@@ -2993,7 +2993,9 @@ static void town_gen(void)
 	alloc_monster(MIN_M_ALLOC_TN, 3, TRUE);
     } else {			   /* Day */
 	for (i = 0; i < cur_height; i++) {
+
 	    c_ptr = &cave[i][0];
+
 	    for (j = 0; j < cur_width; j++) {
 		c_ptr->pl = TRUE;
 		c_ptr++;
@@ -3058,9 +3060,6 @@ void generate_cave()
 	cave_gen();
     }
 
-    unfelt = TRUE;
-    feeling = 0;
-
     /* Extract the feeling */
     if (rating > 100) feeling = 2;
     else if (rating > 80) feeling = 3;
@@ -3074,5 +3073,14 @@ void generate_cave()
 
     /* Have a special feeling, explicitly */
     if (good_item_flag) feeling = 1;
+
+    /* It takes 100 turns for "feelings" to recharge */
+    if ((turn - old_turn) < 100) feeling = 0;
+
+    /* Hack -- no feeling in the town */
+    if (!dun_level) feeling = 0;
+
+    /* Remember when this level was "created" */
+    old_turn = turn;
 }
 

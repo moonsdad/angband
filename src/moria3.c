@@ -1607,17 +1607,21 @@ void rest(void)
 }
 
 
+
+/*
+ * Note that "feeling" is set to zero unless some time has passed.
+ * Note that this is done when the level is GENERATED, not entered.
+ */
 void do_cmd_feeling()
 {
+    /* Free move */
+    free_turn_flag = TRUE; 
+
     /* No useful feeling in town */
     if (!dun_level) {
 	msg_print("You feel there is something special about the town level.");
 	return;
     }
-
-    if (unfelt)
-	msg_print("Looks like any other level.");
-    else
 
     /* Analyze the feeling */
     switch(feeling) {

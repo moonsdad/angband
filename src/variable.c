@@ -62,8 +62,8 @@ s16b cur_width;			/* Cur dungeon width */
 s16b dun_level = 0;		/* Cur dungeon level */
 int object_level = 0;		/* level for objects to be created -CWS  */
 
-s32b turn = (-1);			/* Cur turn of game    */
-s32b old_turn = (-1);		/* Last feeling message */
+s32b turn = 0;			/* Cur turn of game    */
+s32b old_turn = 0;		/* Last feeling message */
 
 int wizard = FALSE;		/* Is the player currently in Wizard mode? */
 int to_be_wizard = FALSE;	/* used during startup, when -w option used */
@@ -101,10 +101,13 @@ int quick_messages = FALSE;		/* Quick messages -CWS */
 int prompt_carry_flag = FALSE;		/* Require "g" key to pick up */
 int carry_query_flag = FALSE;		/* Prompt for pickup */
 
+int new_screen_layout = TRUE;	/* Use the new screen layout */
 int equippy_chars = TRUE;	/* do equipment characters -CWS */
+int depth_in_feet = TRUE;	/* Display the depth in "feet" */
 int notice_seams = TRUE;	/* Highlight mineral seams */
 
-/* Option Set 2  */
+
+/* Option Set 2 -- Disturbance */
 
 int find_cut = TRUE;		/* Cut corners */
 int find_examine = TRUE;	/* Examine corners */
@@ -126,6 +129,10 @@ int no_haggle_flag = FALSE;	/* Cancel haggling */
 int show_inven_weight = TRUE;	/* Show weights in inven */
 int show_equip_weight = TRUE;	/* Show weights in equip */
 int plain_descriptions = TRUE;	/* Plain descriptions */
+
+
+
+
 
 int hitpoint_warn = 1;		/* Hitpoint warning (0 to 9) */
 int delay_spd = 1;		/* Delay factor (0 to 9) */
