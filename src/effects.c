@@ -118,9 +118,9 @@ static void lose_chr()
  */
 void eat(void)
 {
-    u32b                 i;
-    int			   j, k, ident;
-    int                    item_val;
+    u32b                 flg;
+    int			   j, ident;
+    int                    item_val, i1, i2;
     register inven_type   *i_ptr;
 
     /* Assume the turn is free */
@@ -131,27 +131,27 @@ void eat(void)
 	return;
     }
 
-    if (!find_range(TV_FOOD, TV_NEVER, &j, &k)) {
+    if (!find_range(TV_FOOD, TV_NEVER, &i1, &i2)) {
 	msg_print("You are not carrying any food.");
 	return;
     }
 
     /* Get a food */
-    if (get_item(&item_val, "Eat what?", j, k, 0)) {
+    if (get_item(&item_val, "Eat what?", i1, i2, 0)) {
 
     /* Get the item */
     i_ptr = &inventory[item_val];
 
-	free_turn_flag = FALSE;
+    free_turn_flag = FALSE;
 
     /* Identity not known yet */
     ident = FALSE;
 
     /* Apply all of the food flags */
-    for (i = i_ptr->flags; i; ) {
+    for (flg = i_ptr->flags1; flg; ) {
 
 	/* Extract the next "effect" bit */
-	j = bit_pos(&i);
+	j = bit_pos(&flg);
 
 	/* Analyze the effect */
 	switch (j + 1) {
@@ -1025,17 +1025,17 @@ void read_scroll(void)
 		/* Pick a random item */
 		if (k > 0)
 		    l = tmp[randint(k) - 1];
-		if (TR_CURSED & inventory[INVEN_BODY].flags)
+		if (TR3_CURSED & inventory[INVEN_BODY].flags3)
 		    l = INVEN_BODY;
-		else if (TR_CURSED & inventory[INVEN_ARM].flags)
+		else if (TR3_CURSED & inventory[INVEN_ARM].flags3)
 		    l = INVEN_ARM;
-		else if (TR_CURSED & inventory[INVEN_OUTER].flags)
+		else if (TR3_CURSED & inventory[INVEN_OUTER].flags3)
 		    l = INVEN_OUTER;
-		else if (TR_CURSED & inventory[INVEN_HEAD].flags)
+		else if (TR3_CURSED & inventory[INVEN_HEAD].flags3)
 		    l = INVEN_HEAD;
-		else if (TR_CURSED & inventory[INVEN_HANDS].flags)
+		else if (TR3_CURSED & inventory[INVEN_HANDS].flags3)
 		    l = INVEN_HANDS;
-		else if (TR_CURSED & inventory[INVEN_FEET].flags)
+		else if (TR3_CURSED & inventory[INVEN_FEET].flags3)
 		    l = INVEN_FEET;
 		if (l > 0) {
 		    i_ptr = &inventory[l];
@@ -1257,7 +1257,7 @@ void read_scroll(void)
 		    i_ptr->name2 = EGO_SHATTERED;
 		    i_ptr->tohit = (-randint(5) - randint(5));
 		    i_ptr->todam = (-randint(5) - randint(5));
-		    i_ptr->flags = TR_CURSED;
+		    i_ptr->flags3 = TR3_CURSED;
 		    i_ptr->flags2 = 0;
 		    i_ptr->dd = i_ptr->ds = 1;
 		    i_ptr->toac = 0;	/* in case defender... */
@@ -1287,17 +1287,17 @@ void read_scroll(void)
 		/* Pick a random item */
 		if (k > 0)
 		    l = tmp[randint(k) - 1];
-		if (TR_CURSED & inventory[INVEN_BODY].flags)
+		if (TR3_CURSED & inventory[INVEN_BODY].flags3)
 		    l = INVEN_BODY;
-		else if (TR_CURSED & inventory[INVEN_ARM].flags)
+		else if (TR3_CURSED & inventory[INVEN_ARM].flags3)
 		    l = INVEN_ARM;
-		else if (TR_CURSED & inventory[INVEN_OUTER].flags)
+		else if (TR3_CURSED & inventory[INVEN_OUTER].flags3)
 		    l = INVEN_OUTER;
-		else if (TR_CURSED & inventory[INVEN_HEAD].flags)
+		else if (TR3_CURSED & inventory[INVEN_HEAD].flags3)
 		    l = INVEN_HEAD;
-		else if (TR_CURSED & inventory[INVEN_HANDS].flags)
+		else if (TR3_CURSED & inventory[INVEN_HANDS].flags3)
 		    l = INVEN_HANDS;
-		else if (TR_CURSED & inventory[INVEN_FEET].flags)
+		else if (TR3_CURSED & inventory[INVEN_FEET].flags3)
 		    l = INVEN_FEET;
 
 		if (l > 0) {
@@ -1369,7 +1369,7 @@ void read_scroll(void)
 		/* Blast the armor */
 		py_bonuses(i_ptr, -1);	/* take off current bonuses -CFT */
 		i_ptr->name2 = EGO_BLASTED;
-		i_ptr->flags = TR_CURSED;
+		i_ptr->flags3 = TR3_CURSED;
 		i_ptr->flags2 = 0;
 		i_ptr->toac = (-randint(5) - randint(5));
 		i_ptr->tohit = i_ptr->todam = 0; /* in case gaunlets of slaying... */
@@ -2409,7 +2409,7 @@ static void activate(void)
     num = 0;
     first = 0;
     for (i = 22; i < (INVEN_TOTAL - 1); i++) {
-	if ((inventory[i].flags2 & TR_ACTIVATE) && (known2_p(&(inventory[i])))) {
+	if ((inventory[i].flags3 & TR3_ACTIVATE) && (known2_p(&(inventory[i])))) {
 	    num++;
 	    if (!flag)
 		first = i;
@@ -2437,7 +2437,7 @@ static void activate(void)
 	    j=0;
 	    if (!redraw) {
 		for (i = first; i < (INVEN_TOTAL - 1); i++) {
-		    if ((inventory[i].flags2 & TR_ACTIVATE) &&
+		    if ((inventory[i].flags3 & TR3_ACTIVATE) &&
 			known2_p(&(inventory[i]))) {
 			objdes(tmp2, &inventory[i], TRUE);
 			sprintf(tmp, "%c) %-61s", 'a' + j, tmp2);
@@ -2483,7 +2483,7 @@ static void activate(void)
 	    flag = TRUE;
 	    j = 0;
 	    for (i = first; i < (INVEN_TOTAL - 1); i++) {
-		if ((inventory[i].flags2 & TR_ACTIVATE) && known2_p(&(inventory[i]))) {
+		if ((inventory[i].flags3 & TR3_ACTIVATE) && known2_p(&(inventory[i]))) {
 		    if (j == choice)
 			break;
 		    j++;
@@ -2722,14 +2722,15 @@ static void activate(void)
 		    for (a = 0; a < INVEN_WIELD; a++)
 /* search for bolts that are not cursed and are not already named -CWS */
 			if ((inventory[a].tval == TV_BOLT) &&
-			    !(inventory[a].flags & TR_CURSED) &&
+			    !(inventory[a].flags3 & TR3_CURSED) &&
 			    (inventory[a].name2 == SN_NULL))
 			    break;
 		    if (a < INVEN_WIELD) {
 			i_ptr = &inventory[a];
 			msg_print("Your bolts are covered in a fiery aura!");
 			i_ptr->name2 = EGO_FIRE;
-			i_ptr->flags |= (TR1_BRAND_FIRE|TR2_RES_FIRE);
+			i_ptr->flags1 |= (TR1_BRAND_FIRE)
+			|i_ptr->flags2 |= (TR2_RES_FIRE);
 			i_ptr->cost += 25;
 			enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);
 			calc_bonuses();

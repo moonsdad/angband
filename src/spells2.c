@@ -1174,10 +1174,10 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags & TR_CURSED) &&
+		if ((i_ptr->flags3 & TR3_CURSED) &&
 		    (i_ptr->tohit >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
-		    i_ptr->flags &= ~TR_CURSED;
+		    i_ptr->flags3 &= ~TR3_CURSED;
 		    i_ptr->ident &= ~ID_DAMD;
 		}
 	    }
@@ -1195,10 +1195,10 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags & TR_CURSED) &&
+		if ((i_ptr->flags3 & TR3_CURSED) &&
 		    (i_ptr->todam >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
-		    i_ptr->flags &= ~TR_CURSED;
+		    i_ptr->flags3 &= ~TR3_CURSED;
 		    i_ptr->ident &= ~ID_DAMD;
 		}
 	    }
@@ -1216,10 +1216,10 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags & TR_CURSED) &&
+		if ((i_ptr->flags3 & TR3_CURSED) &&
 		    (i_ptr->toac >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
-		    i_ptr->flags &= ~TR_CURSED;
+		    i_ptr->flags3 &= ~TR3_CURSED;
 		    i_ptr->ident &= ~ID_DAMD;
 		}
 	    }
@@ -1347,13 +1347,13 @@ int remove_curse()
     result = FALSE;
     for (i = INVEN_WIELD; i <= INVEN_OUTER; i++) {
 	i_ptr = &inventory[i];
-	if ((TR_CURSED & i_ptr->flags) &&
+	if ((TR3_CURSED & i_ptr->flags3) &&
 	    (i_ptr->name2 != EGO_MORGUL) &&
 	    (i_ptr->name2 != ART_CALRIS) &&
 	    (i_ptr->name2 != ART_MORMEGIL)) {
 	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
-		i_ptr->flags &= ~TR_CURSED;
+		i_ptr->flags3 &= ~TR3_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */
 		i_ptr->inscrip[0] = '\0';
 		calc_bonuses();
@@ -1372,10 +1372,10 @@ int remove_all_curse()
     result = FALSE;
     for (i = INVEN_WIELD; i <= INVEN_OUTER; i++) {
 	i_ptr = &inventory[i];
-	if (TR_CURSED & i_ptr->flags) {
+	if (TR3_CURSED & i_ptr->flags3) {
 	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
-		i_ptr->flags &= ~TR_CURSED;
+		i_ptr->flags3 &= ~TR3_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */
 		calc_bonuses();
 		i_ptr->inscrip[0] = '\0';
@@ -1422,16 +1422,28 @@ int restore_level()
  */
 void self_knowledge()
 {
-    int    i, j;
-    u32b f = 0L, f2 = 0L;
+    int    i = 0, j, k;
+    u32b f1 = 0L, f2 = 0L, f3 = 0L;
+    inven_type *i_ptr;
 
-    for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {	/* get flags from items */
-	if (inventory[i].tval != TV_NOTHING) {
-	    if (inventory[i].pval < 0) /* don't adjust TR_STATS if pval is negative -CWS */
-		f |= (inventory[i].flags & ~(TR_STATS | TR1_SEARCH | TR1_STEALTH) );
-	    else
-		f |= inventory[i].flags;
-	    f2 |= inventory[i].flags2;
+
+    /* Acquire item flags */
+    for (k = INVEN_WIELD; k <= INVEN_LITE; k++) {
+	i_ptr = &inventory[k];
+
+	/* Only examine real items */        
+	if (i_ptr->tval != TV_NOTHING) {
+
+	    /* don't adjust TR_STATS if pval is negative -CWS */
+	    if (i_ptr->pval > 0) {
+		f1 |= i_ptr->flags1;
+	    }
+	    else {
+		/* Mask out the "inactive" flags */
+		f1 |= (i_ptr->flags1 & ~(TR_STATS | TR1_SEARCH | TR1_STEALTH) );
+	    }
+	    f2 |= i_ptr->flags2;
+	    f3 |= i_ptr->flags3;
 	}
     }
 
@@ -1447,49 +1459,59 @@ void self_knowledge()
     i = 1;
     prt("Your Attributes:", i++, j + 5);
 
-    if (p_ptr->flags.blind > 0)
+    if (p_ptr->flags.blind > 0) {
 	prt("You cannot see.", i++, j);
-    if (p_ptr->flags.confused > 0)
+    }
+    if (p_ptr->flags.confused > 0) {
 	prt("You are confused.", i++, j);
-    if (p_ptr->flags.afraid > 0)
+    }
+    if (p_ptr->flags.afraid > 0) {
 	prt("You are terrified.", i++, j);
-    if (p_ptr->flags.cut > 0)
+    }
+    if (p_ptr->flags.cut > 0) {
 	prt("You are bleeding.", i++, j);
-    if (p_ptr->flags.stun > 0)
+    }
+    if (p_ptr->flags.stun > 0) {
 	prt("You are stunned and reeling.", i++, j);
-    if (p_ptr->flags.poisoned > 0)
+    }
+    if (p_ptr->flags.poisoned > 0) {
 	prt("You are poisoned.", i++, j);
-    if (p_ptr->flags.image > 0)
+    }
+    if (p_ptr->flags.image > 0) {
 	prt("You are hallucinating.", i++, j);
+    }
     if (p_ptr->flags.aggravate)
 	prt("You aggravate monsters.", i++, j);
-    if (p_ptr->flags.teleport)
+    }
+    if (p_ptr->flags.teleport) {
 	prt("Your position is very uncertain.", i++, j);
-
-    if (p_ptr->flags.blessed > 0)
+    }
+    if (p_ptr->flags.blessed > 0) {
 	prt("You feel rightous.", i++, j);
-    if (p_ptr->flags.hero > 0)
+    }
+    if (p_ptr->flags.hero > 0) {
 	prt("You feel heroic.", i++, j);
-    if (p_ptr->flags.shero > 0)
+    }
+    if (p_ptr->flags.shero > 0) {
 	prt("You are in a battle rage.", i++, j);
-    if (p_ptr->flags.protevil > 0)
+    }
+    if (p_ptr->flags.protevil > 0) {
 	prt("You are protected from evil.", i++, j);
-    if (p_ptr->flags.shield > 0)
+    }
+    if (p_ptr->flags.shield > 0) {
 	prt("You are protected by a mystic shield.", i++, j);
-    if (p_ptr->flags.invuln > 0)
+    }
+    if (p_ptr->flags.invuln > 0) {
 	prt("You are temporarily invulnerable.", i++, j);
-    if (p_ptr->flags.confusing)
+    }
+    if (p_ptr->flags.confusing) {
 	prt("Your hands are glowing dull red.", i++, j);
-    if (p_ptr->flags.new_spells > 0)
+    }
+    if (p_ptr->flags.new_spells > 0) {
 	prt("You can learn some more spells.", i++, j);
-    if (p_ptr->flags.word_recall > 0)
+    }
+    if (p_ptr->flags.word_recall > 0) {
 	prt("You will soon be recalled.", i++, j);
-
-    if (f & TR1_STEALTH)
-	prt("You are magically stealthy.", i++, j);
-    if (f & TR1_SEARCH) {
-	prt("You are magically perceptive.", i++, j);
-	pause_if_screen_full(&i, j);
     }
     if ((p_ptr->flags.see_infra) || (p_ptr->flags.tim_infra)) {
 	prt("Your eyes are sensitive to infrared light.", i++, j);
@@ -1527,64 +1549,72 @@ void self_knowledge()
 	prt("You are carrying a permanent light.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.resist_fear) {
-	prt("You are completely fearless.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (p_ptr->flags.resist_blind) {
-	prt("Your eyes are resistant to blindness.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (p_ptr->flags.immune_fire) {
-	prt("You are completely immune to fire.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_fire) && (p_ptr->flags.oppose_fire)) {
-	prt("You resist fire exceptionally well.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_fire) || (p_ptr->flags.oppose_fire)) {
-	prt("You are resistant to fire.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (p_ptr->flags.immune_cold) {
-	prt("You are completely immune to cold.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_cold) && (p_ptr->flags.oppose_cold)) {
-	prt("You resist cold exceptionally well.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_cold) || (p_ptr->flags.oppose_cold)) {
-	prt("You are resistant to cold.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
+
     if (p_ptr->flags.immune_acid) {
 	prt("You are completely immune to acid.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_acid) && (p_ptr->flags.oppose_acid)) {
+    }
+    else if ((p_ptr->flags.resist_acid) && (p_ptr->flags.oppose_acid)) {
 	prt("You resist acid exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_acid) || (p_ptr->flags.oppose_acid)) {
+    }
+     else if ((p_ptr->flags.resist_acid) || (p_ptr->flags.oppose_acid)) {
 	prt("You are resistant to acid.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (p_ptr->flags.immune_pois) {
-	prt("You are completely immune to poison.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_pois) && (p_ptr->flags.oppose_pois)) {
-	prt("You resist poison exceptionally well.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_pois) || (p_ptr->flags.oppose_pois)) {
-	prt("You are resistant to poison.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
+
     if (p_ptr->flags.immune_elec) {
 	prt("You are completely immune to lightning.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_elec) && (p_ptr->flags.oppose_elec)) {
+    }
+    else if ((p_ptr->flags.resist_elec) && (p_ptr->flags.oppose_elec)) {
 	prt("You resist lightning exceptionally well.", i++, j);
 	pause_if_screen_full(&i, j);
-    } else if ((p_ptr->flags.resist_elec) || (p_ptr->flags.oppose_elec)) {
+    }
+    else if ((p_ptr->flags.resist_elec) || (p_ptr->flags.oppose_elec)) {
 	prt("You are resistant to lightning.", i++, j);
 	pause_if_screen_full(&i, j);
     }
+
+    if (p_ptr->flags.immune_fire) {
+	prt("You are completely immune to fire.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_fire) && (p_ptr->flags.oppose_fire)) {
+	prt("You resist fire exceptionally well.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_fire) || (p_ptr->flags.oppose_fire)) {
+	prt("You are resistant to fire.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+
+    if (p_ptr->flags.immune_cold) {
+	prt("You are completely immune to cold.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_cold) && (p_ptr->flags.oppose_cold)) {
+	prt("You resist cold exceptionally well.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_cold) || (p_ptr->flags.oppose_cold)) {
+	prt("You are resistant to cold.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+
+    if (p_ptr->flags.immune_pois) {
+	prt("You are completely immune to poison.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_pois) && (p_ptr->flags.oppose_pois)) {
+	prt("You resist poison exceptionally well.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    else if ((p_ptr->flags.resist_pois) || (p_ptr->flags.oppose_pois)) {
+	prt("You are resistant to poison.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+
     if (p_ptr->flags.resist_lite) {
 	prt("You are resistant to bright light.", i++, j);
 	pause_if_screen_full(&i, j);
@@ -1621,37 +1651,14 @@ void self_knowledge()
 	prt("You are resistant to nether forces.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-
-#if 0
-/* Are these needed?  The player can see this...  For now, in here for
- * completeness... -CFT 
- */
-    if (f & TR1_STR) {
-	prt("You are magically strong.", i++, j);
+    if (p_ptr->flags.resist_fear) {
+	prt("You are completely fearless.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR1_INT) {
-	prt("You are magically intelligent.", i++, j);
+    if (p_ptr->flags.resist_blind) {
+	prt("Your eyes are resistant to blindness.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (f & TR1_WIS) {
-	prt("You are magically wise.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_DEX) {
-	prt("You are magically agile.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_CON) {
-	prt("You are magically tough.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_CHR) {
-	prt("You are magically popular.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-
-#endif
 
     if (p_ptr->flags.sustain_str) {
 	prt("You will not become weaker.", i++, j);
@@ -1677,23 +1684,69 @@ void self_knowledge()
 	prt("You will not become less popular.", i++, j);
 	pause_if_screen_full(&i, j);
     }
-    if (inventory[INVEN_LEFT].flags2 & TR1_ATTACK_SPD ||
-	inventory[INVEN_RIGHT].flags2 & TR1_ATTACK_SPD) {
+
+#if 0
+/* Are these needed?  The player can see this...  For now, in here for
+ * completeness... -CFT 
+ */
+    if (f1 & TR1_STR) {
+	prt("You are magically strong.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (f1 & TR1_INT) {
+	prt("You are magically intelligent.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (f1 & TR1_WIS) {
+	prt("You are magically wise.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (f1 & TR1_DEX) {
+	prt("You are magically agile.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (f1 & TR1_CON) {
+	prt("You are magically tough.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (f1 & TR1_CHR) {
+	prt("You are magically popular.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+
+#endif
+
+    if (f1 & TR1_STEALTH) {
+	prt("You are magically stealthy.", i++, j);
+    }
+    if (f1 & TR1_SEARCH) {
+	prt("You are magically perceptive.", i++, j);
+	pause_if_screen_full(&i, j);
+    }
+    if (inventory[INVEN_LEFT].flags1 & TR1_ATTACK_SPD ||
+	inventory[INVEN_RIGHT].flags1 & TR1_ATTACK_SPD) {
 	prt("You can strike at your foes with uncommon speed.", i++, j);
 	pause_if_screen_full(&i, j);
     }
 
+
+    /* Access the current weapon */
+    i_ptr = &inventory[INVEN_WIELD];
+
 /* this IS a bit redundant, but it prevents flags from other items from
- * affecting the weapon stats... -CFT
- */
+ * affecting the weapon stats... -CFT */
     if (inventory[INVEN_WIELD].tval != TV_NOTHING) {
-	f = inventory[INVEN_WIELD].flags;
-	f2 = inventory[INVEN_WIELD].flags2;
+	f1 = i_ptr->flags1;
+	f2 = i_ptr->flags2;
+	f3 = _ptr->flags3;
     } else {
-	f = 0L;
+	f1 = 0L;
 	f2 = 0L;
+	f3 = 0L;
     }
-    if (f & TR_CURSED) {
+
+	/* Indicate various curses */
+	if (f3 & TR3_CURSED) {
 	if (inventory[INVEN_WIELD].name2 == EGO_MORGUL)
 	    prt("Your weapon is truly foul.", i++, j);
 	else if (inventory[INVEN_WIELD].name2 == ART_CALRIS)
@@ -1703,68 +1756,74 @@ void self_knowledge()
 	else
 	    prt("Your weapon is accursed.", i++, j);
 	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_TUNNEL) {
-	prt("Your weapon is an effective digging tool.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR_BLESS_BLADE) {
-	prt("Your weapon has been blessed by the gods.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_ATTACK_SPD) {
-	prt("Your weapon strikes with uncommon speed.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_SLAY_ORC) {
-	prt("Your weapon is especially deadly against orcs.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_SLAY_TROLL) {
-	prt("Your weapon is especially deadly against trolls.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_SLAY_GIANT) {
-	prt("Your weapon is especially deadly against giants.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_SLAY_ANIMAL) {
-	prt("Your weapon is especially deadly against natural creatures.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_KILL_DRAGON) {
-	prt("Your weapon is a great bane of dragons.", i++, j);
-	pause_if_screen_full(&i, j);
-    } else if (f & TR1_SLAY_DRAGON) {
-	prt("Your weapon is especially deadly against dragons.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_SLAY_DEMON) {
-	prt("Your weapon strikes at demons with holy wrath.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_SLAY_UNDEAD) {
-	prt("Your weapon strikes at undead with holy wrath.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_SLAY_EVIL) {
-	prt("Your weapon fights against evil with holy fury.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_BRAND_COLD) {
-	prt("Your frigid weapon freezes your foes.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f & TR1_BRAND_FIRE) {
-	prt("Your flaming weapon burns your foes.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR_LIGHTNING) {
-	prt("Your weapon electrocutes your foes.", i++, j);
-	pause_if_screen_full(&i, j);
-    }
-    if (f2 & TR1_IMPACT)
-	prt("The unbelievable impact of your weapon can cause earthquakes.", i++, j);
+	}
+
+	/* Indicate Blessing */
+	if (f3 & TR3_BLESSED) {
+	    prt("Your weapon has been blessed by the gods.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+
+	/* Special "Attack Bonuses" */
+	if (f1 & TR1_TUNNEL) {
+	    prt("Your weapon is an effective digging tool.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_ATTACK_SPD) {
+	    prt("Your weapon strikes with uncommon speed.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_ORC) {
+	    prt("Your weapon is especially deadly against orcs.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_TROLL) {
+	    prt("Your weapon is especially deadly against trolls.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_GIANT) {
+	    prt("Your weapon is especially deadly against giants.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_ANIMAL) {
+	    prt("Your weapon is especially deadly against natural creatures.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_KILL_DRAGON) {
+	    prt("Your weapon is a great bane of dragons.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	else if (f1 & TR1_SLAY_DRAGON) {
+	    prt("Your weapon is especially deadly against dragons.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_DEMON) {
+	    prt("Your weapon strikes at demons with holy wrath.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_UNDEAD) {
+	    prt("Your weapon strikes at undead with holy wrath.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_SLAY_EVIL) {
+	    prt("Your weapon fights against evil with holy fury.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_BRAND_COLD) {
+	    prt("Your frigid weapon freezes your foes.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f1 & TR1_BRAND_FIRE) {
+	    prt("Your flaming weapon burns your foes.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f2 & TR_LIGHTNING) {
+	    prt("Your weapon electrocutes your foes.", i++, j);
+	    pause_if_screen_full(&i, j);
+	}
+	if (f2 & TR1_IMPACT) {
+	    prt("The unbelievable impact of your weapon can cause earthquakes.", i++, j);
+	}
 
     /* Pause */
     pause_line(i);
@@ -1843,11 +1902,21 @@ int sleep_monsters1(int y, int x)
 int lose_all_info(void)
 {
     int                 i;
+    inven_type          *i_ptr;
 
+    /* Forget info about objects */
     for (i = 0; i <= INVEN_AUX; i++) {
-	if (inventory[i].tval != TV_NOTHING)
-	    inventory[i].ident &= ~(ID_KNOWN2);
+
+	i_ptr = &inventory[i];
+
+	/* Skip non-items */
+	if (i_ptr->tval == TV_NOTHING) continue;
+
+	    /* Clear the "known" flag */
+	    i_ptr->ident &= ~ID_KNOWN2;
     }
+
+    /* Forget the map */
     wiz_lite(-1);
     return (0);
 }
@@ -1864,8 +1933,10 @@ int detect_treasure(void)
     for (i = panel_row_min; i <= panel_row_max; i++) {
 	for (j = panel_col_min; j <= panel_col_max; j++) {
 	    c_ptr = &cave[i][j];
-	    if ((c_ptr->tptr != 0) && (i_list[c_ptr->tptr].tval == TV_GOLD) &&
+	    if ((c_ptr->tptr != 0) &&
+		(i_list[c_ptr->tptr].tval == TV_GOLD) &&
 		!test_lite(i, j)) {
+
 		c_ptr->fm = TRUE;
 
 		/* Redraw */
@@ -1883,9 +1954,9 @@ int detect_treasure(void)
 /*
  * Detect magic items.
  *
- * This will light up all spaces with "magic" items, including potions,
- * scrolls, rods, wands, staves, amulets, rings, and "enchanted" items. This
- * excludes all foods and spell books. -- JND 
+ * This will light up all spaces with "magic" items, including potions, scrolls,
+ * rods, wands, staves, amulets, rings, and "enchanted" items.
+ * This excludes all foods and spell books. -- JND 
  *
  * It can probably be argued that this function is now too powerful.
  */
@@ -1893,7 +1964,7 @@ int detect_magic()
 {
     register int i, j, detect, tv;
     register cave_type *c_ptr;
-    register inven_type *t_ptr;
+    register inven_type *i_ptr;
 
     detect = FALSE;
     for (i = panel_row_min; i <= panel_row_max; i++) {
@@ -1908,18 +1979,18 @@ int detect_magic()
 	    if (test_lite(i, j)) continue;
 
 	    /* Get the item */
-		t_ptr = &i_list[c_ptr->tptr];
+	    i_ptr = &i_list[c_ptr->tptr];
 
 	    /* Examine the tval */            
-		tv = t_ptr->tval;
+	    tv = i_ptr->tval;
 
 	    /* Is it a weapon or armor or light? */
 	    /* If so, check for plusses on weapons and armor ... */
 	    /* ... and check whether it is an artifact! ;)  */
 	    /* Is it otherwise magical? */
 	    if (((tv > 9) && (tv < 39)) &&
-	    (((t_ptr->tohit > 0) || (t_ptr->todam) || (t_ptr->toac) || 
-	    (t_ptr->flags2 & TR_ARTIFACT)) || 
+	    (((i_ptr->tohit > 0) || (i_ptr->todam) || (i_ptr->toac) || 
+	    (i_ptr->flags2 & TR_ARTIFACT)) || 
 	    ((tv > 39) && (tv < 77)))) {
 
 		c_ptr->fm = TRUE;
@@ -2017,7 +2088,7 @@ int detect_trap(void)
     register int         i, j;
     int                  detect;
     register cave_type  *c_ptr;
-    register inven_type *t_ptr;
+    register inven_type *i_ptr;
 
     detect = FALSE;
     for (i = panel_row_min; i <= panel_row_max; i++) {
@@ -2026,16 +2097,16 @@ int detect_trap(void)
 	    if (c_ptr->tptr == 0) continue;
 
 	    /* Notice traps */
-		if (i_list[c_ptr->tptr].tval == TV_INVIS_TRAP) {
-		    c_ptr->fm = TRUE;
-		    change_trap(i, j);
-		    detect = TRUE;
+	    if (i_list[c_ptr->tptr].tval == TV_INVIS_TRAP) {
+		c_ptr->fm = TRUE;
+		change_trap(i, j);
+		detect = TRUE;
 	    }
 
 	    /* Identify chests */
 	    else if (i_list[c_ptr->tptr].tval == TV_CHEST) {
-		    t_ptr = &i_list[c_ptr->tptr];
-		    known2(t_ptr);
+		i_ptr = &i_list[c_ptr->tptr];
+		known2(i_ptr);
 	    }
 	}
     }
@@ -2065,7 +2136,8 @@ void stair_creation()
              !(i_list[c_ptr->tptr].flags2 & TR_ARTIFACT)))) {
 /* if no artifact here -CFT */
 	if (c_ptr->tptr != 0)
-	    delete_object(char_row, char_col);
+	delete_object(char_row, char_col);
+
 	cur_pos = i_pop();
 	c_ptr->tptr = cur_pos;
 	if ((randint(2) == 1 || is_quest(dun_level)) && (dun_level > 0)) {
@@ -2096,12 +2168,12 @@ int detect_sdoor()
 	    if (c_ptr->tptr == 0) continue;
 
 	    /* Secret doors  */
-		if (i_list[c_ptr->tptr].tval == TV_SECRET_DOOR) {
+	    if (i_list[c_ptr->tptr].tval == TV_SECRET_DOOR) {
 
-		    c_ptr->fm = TRUE;
-		    change_trap(i, j);
-		    detect = TRUE;
-		}
+		c_ptr->fm = TRUE;
+		change_trap(i, j);
+		detect = TRUE;
+	    }
 
 	    /* Staircases */
 	    else if (((i_list[c_ptr->tptr].tval == TV_UP_STAIR) ||
@@ -2128,19 +2200,20 @@ int detect_invisible()
 {
     register int           i, flag;
     register monster_type *m_ptr;
+    register monster_race *r_ptr;
 
     flag = FALSE;
     for (i = m_max - 1; i >= MIN_M_IDX; i--) {
 	m_ptr = &m_list[i];
-	if (panel_contains((int)m_ptr->fy, (int)m_ptr->fx) &&
-	    (MF1_MV_INVIS & r_list[m_ptr->mptr].cflags1)) {
+	r_ptr = &r_list[m_ptr->mptr]
+	if (panel_contains(m_ptr->fy, m_ptr->fx) &&
+	    (r_ptr->cflags1 & MF1_MV_INVIS)) {
 
 	    /* Draw the monster (even if invisible) */
 	    m_ptr->ml = TRUE;
 
-	/* works correctly even if hallucinating */
-	    print((char)r_list[m_ptr->mptr].cchar, (int)m_ptr->fy,
-		  (int)m_ptr->fx);
+	    /* works correctly even if hallucinating */
+	    print((char)r_list[m_ptr->mptr].cchar, (int)m_ptr->fy,(int)m_ptr->fx);
 
 	    /* Something was detected */
 	    flag = TRUE;
@@ -2201,7 +2274,7 @@ int ident_spell()
 	     * on floor can't stack
 	     */
 
-	    if ((i_ptr->flags & TR_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
+	    if ((i_ptr->flags3 & TR3_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
 		(i_ptr->tval != TV_PRAYER_BOOK))
 		add_inscribe(i_ptr, ID_DAMD);
 	    if (!known1_p(i_ptr))
@@ -2231,10 +2304,11 @@ void identify_pack()
 
     /* Simply identify and know every item */
     for (i = 0; i <= INVEN_AUX; i++) {
-	if (inventory[i].tval != TV_NOTHING)
-	    identify(&i);
 	i_ptr = &inventory[i];
-	known2(i_ptr);
+	if (i_ptr->tval != TV_NOTHING) {
+	    inven_aware(i_ptr);
+	    known2(i_ptr);
+	}
     }
 }
 
@@ -2283,8 +2357,8 @@ int detect_monsters(void)
 	    /* Draw the monster (unless invisible) */
 	    m_ptr->ml = TRUE;
 	/* works correctly even if hallucinating */
-	    print((char)r_list[m_ptr->mptr].cchar, (int)m_ptr->fy,
-		  (int)m_ptr->fx);
+	    print((char)r_list[m_ptr->mptr].cchar, (int)m_ptr->fy,(int)m_ptr->fx);
+
 	    detect = TRUE;
 	}
     }

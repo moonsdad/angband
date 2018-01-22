@@ -222,11 +222,11 @@ int show_equip(int weight, int col)
 	    (void)sprintf(out_val[line], "  %c) %-14s: %s", line + 'a', prt1, prt2);
 
 	/* Extract the maximal length (see below) */
-	    l = strlen(out_val[line]);
-	    if (weight) l += 9;
+	l = strlen(out_val[line]);
+	if (weight) l += 9;
 
 	/* Maintain the max-length */
-	    if (l > len) len = l;
+	if (l > len) len = l;
 
 	/* Advance the entry */
 	line++;
@@ -523,7 +523,7 @@ void calc_bonuses()
 	i_ptr = &inventory[i];
 
 	if (i_ptr->tval != TV_NOTHING) {
-	    if ((TR_CURSED & i_ptr->flags) == 0) {
+	    if ((TR3_CURSED & i_ptr->flags3) == 0) {
 		m_ptr->pac += i_ptr->ac;
 		m_ptr->dis_ac += i_ptr->ac;
 	    }
@@ -542,7 +542,7 @@ void calc_bonuses()
 
     if (p_ptr->misc.pclass == 2) {
 	i_ptr = &inventory[INVEN_WIELD];
-	if (!(i_ptr->flags2 & TR_BLESS_BLADE) && /* blessed blade == no penalty -CWS */
+	if (!(i_ptr->flags3 & TR3_BLESSED) && /* blessed blade == no penalty -CWS */
 	    (i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)) {
 	    m_ptr->ptohit -= 2;
 	    m_ptr->ptodam -= 2;
@@ -621,16 +621,16 @@ void calc_bonuses()
     }
 
     /* Process the item flags */
-    if (TR3_SLOW_DIGEST & item_flags) p_ptr->flags.slow_digest = TRUE;
-    if (TR3_AGGRAVATE & item_flags) p_ptr->flags.aggravate = TRUE;
-    if (TR3_TELEPORT & item_flags) p_ptr->flags.teleport = TRUE;
-    if (TR3_REGEN & item_flags) p_ptr->flags.regenerate = TRUE;
-    if (TR3_TELEPATHY & item_flags2) p_ptr->flags.telepathy = TRUE;
-    if (TR3_LITE & item_flags2) _ptr->light = TRUE;
-    if (TR3_SEE_INVIS & item_flags) p_ptr->flags.see_inv = TRUE;
-    if (TR3_FEATHER & item_flags) p_ptr->flags.ffall = TRUE;
-    if (TR2_FREE_ACT & item_flags) p_ptr->flags.free_act = TRUE;
-    if (TR_HOLD_LIFE & item_flags2) ptr->hold_life = TRUE;
+    if (TR3_SLOW_DIGEST & item_flags3) p_ptr->flags.slow_digest = TRUE;
+    if (TR3_AGGRAVATE & item_flags3) p_ptr->flags.aggravate = TRUE;
+    if (TR3_TELEPORT & item_flags3) p_ptr->flags.teleport = TRUE;
+    if (TR3_REGEN & item_flags3) p_ptr->flags.regenerate = TRUE;
+    if (TR3_TELEPATHY & item_flags3) p_ptr->flags.telepathy = TRUE;
+    if (TR3_LITE & item_flags3) _ptr->light = TRUE;
+    if (TR3_SEE_INVIS & item_flags3) p_ptr->flags.see_inv = TRUE;
+    if (TR3_FEATHER & item_flags3) p_ptr->flags.ffall = TRUE;
+    if (TR2_FREE_ACT & item_flags2) p_ptr->flags.free_act = TRUE;
+    if (TR2_HOLD_LIFE & item_flags2) ptr->hold_life = TRUE;
     
     /* Immunity and resistance */
     if (TR2_IM_FIRE & item_flags2) p_ptr->flags.immune_fire = TRUE;
@@ -638,11 +638,11 @@ void calc_bonuses()
     if (TR2_IM_COLD & item_flags2) p_ptr->flags.immune_cold = TRUE;
     if (TR2_IM_ELEC & item_flags2) p_ptr->flags.immune_elec = TRUE;
     if (TR2_IM_POIS & item_flags2) p_ptr->flags.immune_pois = TRUE;
-    if (TR2_RES_ACID & item_flags) p_ptr->flags.resist_acid = TRUE;
-    if (TR2_RES_ELEC & item_flags) p_ptr->flags.resist_elec = TRUE;
-    if (TR2_RES_FIRE & item_flags) p_ptr->flags.resist_fire = TRUE;
-    if (TR2_RES_COLD & item_flags) p_ptr->flags.resist_cold = TRUE;
-    if (TR2_RES_POIS & item_flags) p_ptr->flags.resist_pois = TRUE;
+    if (TR2_RES_ACID & item_flags2) p_ptr->flags.resist_acid = TRUE;
+    if (TR2_RES_ELEC & item_flags2) p_ptr->flags.resist_elec = TRUE;
+    if (TR2_RES_FIRE & item_flags2) p_ptr->flags.resist_fire = TRUE;
+    if (TR2_RES_COLD & item_flags2) p_ptr->flags.resist_cold = TRUE;
+    if (TR2_RES_POIS & item_flags2) p_ptr->flags.resist_pois = TRUE;
     if (TR2_RES_CONF & item_flags2) p_ptr->flags.resist_conf = TRUE;
     if (TR2_RES_SOUND & item_flags2) p_ptr->flags.resist_sound = TRUE;
     if (TR2_RES_LITE & item_flags2) p_ptr->flags.resist_lite = TRUE;
@@ -657,7 +657,7 @@ void calc_bonuses()
 
     i_ptr = &inventory[INVEN_WIELD];
     for (i = INVEN_WIELD; i < INVEN_LITE; i++) {
-	if (TR_SUST_STAT & i_ptr->flags)
+	if (TR_SUST_STAT & i_ptr->flags2)
 	    switch (i_ptr->pval) {
 	      case 1: p_ptr->flags.sustain_str = TRUE; break;
 	      case 2: p_ptr->flags.sustain_int = TRUE; break;
@@ -735,7 +735,7 @@ void check_strength()
 
     if (p_ptr->misc.pclass == 2 && !notlike) {
         if ((i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
-            && ((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
+            && ((i_ptr->flags3 & TR3_BLESSED) == 0)) {
             notlike = TRUE;
             msg_print("You do not feel comfortable with your weapon.");
         }
@@ -744,7 +744,7 @@ void check_strength()
             notlike = FALSE;
             msg_print("You feel comfortable again after removing that weapon.");
         } else if (!(i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
-		   || !((i_ptr->flags2 & TR_BLESS_BLADE) == 0)) {
+		   || !((i_ptr->flags3 & TR3_BLESSED) == 0)) {
             notlike = FALSE;
             msg_print("You feel comfortable with your weapon once more.");
         }
@@ -947,7 +947,7 @@ void inven_command(int command)
 	    if (inventory[INVEN_WIELD].tval == TV_NOTHING &&
 		inventory[INVEN_AUX].tval == TV_NOTHING)
 		msg_print("But you are wielding no weapons.");
-	    else if (TR_CURSED & inventory[INVEN_WIELD].flags) {
+	    else if (TR3_CURSED & inventory[INVEN_WIELD].flags3) {
 		objdes(prt1, &inventory[INVEN_WIELD], FALSE);
 		(void)sprintf(prt2,
 		     "The %s you are wielding appears to be cursed.", prt1);
@@ -1075,7 +1075,7 @@ void inven_command(int command)
 			while (tmp >= 0);
 			if (isupper((int)which) && !verify(prompt, item))
 			    item = (-1);
-			else if (TR_CURSED & inventory[item].flags) {
+			else if (TR3_CURSED & inventory[item].flags3) {
 			    msg_print("Hmmm, it seems to be cursed.");
 			    item = (-1);
 			} else if (command == 't' &&
@@ -1188,7 +1188,7 @@ void inven_command(int command)
 				break;
 			    }
 			if (item >= 0 && inventory[slot].tval != TV_NOTHING) {
-			    if (TR_CURSED & inventory[slot].flags) {
+			    if (TR3_CURSED & inventory[slot].flags3) {
 				objdes(prt1, &inventory[slot], FALSE);
 				(void)sprintf(prt2, "The %s you are ", prt1);
 				if (slot == INVEN_WIELD)	/* changed from
@@ -1260,7 +1260,7 @@ void inven_command(int command)
 			    msg_print(prt1);
 			/* check_str will clear the heavy flag if necessary */
 			    check_strength();
-			    if (i_ptr->flags & TR_CURSED) {
+			    if (i_ptr->flags3 & TR3_CURSED) {
 				msg_print("Oops! It feels deathly cold!");
 				add_inscribe(i_ptr, ID_DAMD);
 			    /* To force a cost of 0, even if unidentified. */

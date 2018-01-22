@@ -217,8 +217,10 @@ struct _inven_kind {
   s32b cost;			/* Object "base cost"		*/
 
   byte rare;		/* True if Rare		*/
-  u32b flags;		/* Special flags		*/
-  u32b flags2;		/* Yes! even more froggin' flags!		*/
+
+  u32b flags1;		/* Flags, set 1			*/
+  u32b flags2;		/* Flags, set 2			*/
+  u32b flags3;		/* Flags, set 3			*/
 };
 
 
@@ -266,8 +268,9 @@ struct _inven_type {
 
   s32b cost;			/* Cost of item			*/
 
-  u32b flags;		/* Special flags		*/
-  u32b flags2;		/* Yes! even more froggin' flags!		*/
+  u32b flags1;		/* Flags, set 1			*/
+  u32b flags2;		/* Flags, set 2			*/
+  u32b flags3;		/* Flags, set 3			*/
 
   char inscrip[INSCRIP_SIZE];	/* Object inscription		*/
 };

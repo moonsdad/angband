@@ -431,7 +431,7 @@ static void player_outfit()
 	store_bought(i_ptr);
 	if (inven_init.tval == TV_SWORD || inven_init.tval == TV_HAFTED
 	    || inven_init.tval == TV_BOW)
-	    inven_init.ident |= ID_SHOW_HITDAM;
+	    inven_init.ident |= TR3_SHOW_MODS;
 	(void)inven_carry(i_ptr);
     }
 

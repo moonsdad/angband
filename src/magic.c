@@ -1450,12 +1450,12 @@ void pray()
 
 		if (k > 0)
 		    l = tmp[randint(k) - 1];
-		if (TR_CURSED & inventory[INVEN_BODY].flags) l = INVEN_BODY;
-		else if (TR_CURSED & inventory[INVEN_ARM].flags) l = INVEN_ARM;
-		else if (TR_CURSED & inventory[INVEN_OUTER].flags l = INVEN_OUTER;
-		else if (TR_CURSED & inventory[INVEN_HEAD].flags) l = INVEN_HEAD;
-		else if (TR_CURSED & inventory[INVEN_HANDS].flags) l = INVEN_HANDS;
-		else if (TR_CURSED & inventory[INVEN_FEET].flags) l = INVEN_FEET;
+		if (TR3_CURSED & inventory[INVEN_BODY].flags3) l = INVEN_BODY;
+		else if (TR3_CURSED & inventory[INVEN_ARM].flags3) l = INVEN_ARM;
+		else if (TR3_CURSED & inventory[INVEN_OUTER].flags3) l = INVEN_OUTER;
+		else if (TR3_CURSED & inventory[INVEN_HEAD].flags3) l = INVEN_HEAD;
+		else if (TR3_CURSED & inventory[INVEN_HANDS].flags3) l = INVEN_HANDS;
+		else if (TR3_CURSED & inventory[INVEN_FEET].flags3) l = INVEN_FEET;
 
 		if (l > 0) {
 		    char                out_val[100], tmp_str[100];
@@ -1484,7 +1484,7 @@ void pray()
 	    /* object.  the curse would "taint" the magic -CFT */
 	    if ((i_ptr->tval != TV_NOTHING) &&
 		(i_ptr->name2 == SN_NULL) &&
-		(!(i_ptr->flags & TR_CURSED))) {
+		(!(i_ptr->flags3 & TR3_CURSED))) {
 
 		int hot = randint(2)-1;
 		char tmp_str[100], out_val[100];

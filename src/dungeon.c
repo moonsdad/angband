@@ -42,10 +42,10 @@ static cptr value_check(inven_type *i_ptr)
     if (i_ptr->ident & ID_MAGIK) return (NULL);
     if (i_ptr->ident & ID_DAMD) return (NULL);
     if (i_ptr->inscrip[0] != '\0') return (NULL);
-    if (i_ptr->flags & TR_CURSED && i_ptr->name2 == SN_NULL) return "worthless";
-    if (i_ptr->flags & TR_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
+    if (i_ptr->flags3 & TR3_CURSED && i_ptr->name2 == SN_NULL) return "worthless";
+    if (i_ptr->flags3 & TR3_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
     if ((i_ptr->tval == TV_DIGGING) &&  /* also, good digging tools -CFT */
-	(i_ptr->flags & TR1_TUNNEL) &&
+	(i_ptr->flags1 & TR1_TUNNEL) &&
 	(i_ptr->pval > k_list[i_ptr->index].pval)) /* better than normal for this
 						       type of shovel/pick? -CFT */
 	return "good";
@@ -71,7 +71,7 @@ static cptr value_check(inven_type *i_ptr)
 	(i_ptr->name2 == EGO_FIRE) || (i_ptr->name2 == EGO_SLAY_EVIL) ||
 	(i_ptr->name2 == EGO_DRAGON_SLAYING) || (i_ptr->name2 == EGO_SLAY_ANIMAL) ||
 	(i_ptr->name2 == EGO_ACCURACY) || (i_ptr->name2 == EGO_SLAY_O) ||
-	(i_ptr->name2 == ART_POWER) || (i_ptr->name2 == EGO_WEST) ||
+	(i_ptr->name2 == EGO_POWER) || (i_ptr->name2 == EGO_WEST) ||
 	(i_ptr->name2 == EGO_SLAY_DEMON) || (i_ptr->name2 == EGO_SLAY_T) ||
 	(i_ptr->name2 == EGO_LITE) || (i_ptr->name2 == EGO_AGILITY) ||
 	(i_ptr->name2 == EGO_SLAY_G) || (i_ptr->name2 == EGO_TELEPATHY) ||
@@ -360,7 +360,7 @@ void dungeon(void)
 
 	if (player_light)
 	    if (i_ptr->pval > 0) {
-		if (!(i_ptr->flags2 & TR3_LITE))   /* don't dec if perm light -CFT */
+		if (!(i_ptr->flags3 & TR3_LITE))   /* don't dec if perm light -CFT */
 		/* Decrease life-span */
 		    i_ptr->pval--;
 
@@ -376,7 +376,7 @@ void dungeon(void)
 		/* The light is getting dim */
 		else if ((i_ptr->pval < 40) && (randint(5) == 1) &&
 			   (p_ptr->flags.blind < 1) &&
-			   !(i_ptr->flags2 & TR3_LITE)) { /* perm light doesn't dim -CFT */
+			   !(i_ptr->flags3 & TR3_LITE)) { /* perm light doesn't dim -CFT */
 		    disturb(0, 0);
 		    msg_print("Your light is growing faint.");
 		}
@@ -389,7 +389,7 @@ void dungeon(void)
 		}
 	    }
 	else if (i_ptr->pval > 0 || p_ptr->flags.light) {
-	    if (!(i_ptr->flags2 & TR3_LITE))
+	    if (!(i_ptr->flags3 & TR3_LITE))
 		i_ptr->pval--;	   /* don't dec if perm light -CFT */
 	    player_light = TRUE;
 	    disturb(0, 1);
@@ -515,7 +515,7 @@ void dungeon(void)
 
 	/* Stun */
 	if (p_ptr->flags.stun > 0) {
-	    int                 oldstun = p_ptr->flags.stun;
+	    int oldstun = p_ptr->flags.stun;
 
 	    p_ptr->flags.stun -= (con_adj() <= 0 ? 1 : (con_adj() / 2 + 1));
 				/* fixes endless stun if bad con. -CFT */
@@ -945,7 +945,7 @@ void dungeon(void)
     /* Timeout Artifacts  */
 	for (i = 22; i < (INVEN_TOTAL - 1); i++) {
 	    i_ptr = &inventory[i];
-	    if (i_ptr->tval != TV_NOTHING && (i_ptr->flags2 & TR_ACTIVATE)) {
+	    if (i_ptr->tval != TV_NOTHING && (i_ptr->flags3 & TR3_ACTIVATE)) {
 		if (i_ptr->timeout > 0)
 		    i_ptr->timeout--;
 		if ((i_ptr->tval == TV_RING) &&
@@ -958,7 +958,7 @@ void dungeon(void)
     /* Timeout rods  */
 	for (i = 0; i < 22; i++) {
 	    i_ptr = &inventory[i];
-	    if (i_ptr->tval == TV_ROD && (i_ptr->flags2 & TR_ACTIVATE)) {
+	    if (i_ptr->tval == TV_ROD && (i_ptr->flags3 & TR3_ACTIVATE)) {
 		if (i_ptr->timeout > 0)
 		    i_ptr->timeout--;
 	    }

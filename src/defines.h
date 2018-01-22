@@ -473,9 +473,9 @@
 #define ID_EMPTY        0x4	/* Item is now "empty" */
 #define ID_KNOWN2       0x8	/* Item is fully "known" */
 #define ID_STOREBOUGHT  0x10
-#define ID_SHOW_HITDAM  0x20
+#define TR3_SHOW_MODS  0x20
 #define ID_NOSHOW_P1    0x40    /* don't show (+x) even if pval != 0 -CWS   */
-#define ID_NOSHOW_TYPE  0x80    /* don't show (+x of yyy), just (+x) -CWS */
+#define TR3_HIDE_TYPE  0x80    /* don't show (+x of yyy), just (+x) -CWS */
 
 /*
  * Ego-Item indexes
@@ -524,6 +524,7 @@
 #define EGO_ACCURACY		65
 
 #define EGO_SLAY_O		67
+#define EGO_POWER		68
 
 #define EGO_WEST		71
 #define EGO_BLESS_BLADE		72
@@ -577,7 +578,6 @@
 #define ART_NARYA                89
 #define ART_NENYA                88
 #define ART_VILYA                90
-#define ART_POWER                68
 
 	/* Dragon Scale */
 #define ART_RAZORBACK           175
@@ -905,67 +905,67 @@
 #define TR1_CON			0x00000010L	/* Uses "pval" */
 #define TR1_CHR			0x00000020L	/* Uses "pval" */
 #define TR1_STEALTH		0x00000100L	/* Uses "pval" */
-#define TR1_SEARCH		0x00000040L	/* Uses "pval" */
-#define TR1_INFRA		0x40000000L
-#define TR1_TUNNEL		0x20000000L
-#define TR1_SPEED		0x00001000L
-#define TR1_ATTACK_SPD		0x08000000L	/* extra attacks/round -DGK */
-#define TR1_SLAY_ANIMAL		0x00004000L
-#define TR1_SLAY_EVIL		0x00008000L
-#define TR1_SLAY_UNDEAD		0x00010000L
-#define TR1_SLAY_DEMON		0x00000001L
-#define TR1_SLAY_ORC		0x00000010L
-#define TR1_SLAY_TROLL		0x00000002L
-#define TR1_SLAY_GIANT		0x00000004L
-#define TR1_SLAY_DRAGON		0x00002000L
-#define TR1_KILL_DRAGON		0x08000000L
-#define TR1_BRAND_FIRE		0x00040000L
-#define TR1_BRAND_COLD		0x00020000L
+#define TR1_SEARCH		0x00000200L	/* Uses "pval" */
+#define TR1_INFRA		0x00000400L	/* Uses "pval" */
+#define TR1_TUNNEL		0x00000800L	/* Uses "pval" */
+#define TR1_SPEED		0x00001000L	/* Uses "pval" */
+#define TR1_ATTACK_SPD		0x00002000L	/* Uses "pval" extra attacks/round -DGK */
+#define TR1_SLAY_ANIMAL		0x00010000L
+#define TR1_SLAY_EVIL		0x00020000L
+#define TR1_SLAY_UNDEAD		0x00040000L
+#define TR1_SLAY_DEMON		0x00080000L
+#define TR1_SLAY_ORC		0x00100000L
+#define TR1_SLAY_TROLL		0x00200000L
+#define TR1_SLAY_GIANT		0x00400000L
+#define TR1_SLAY_DRAGON		0x00800000L
+#define TR1_KILL_DRAGON		0x01000000L	/* Execute Dragon */
+#define TR1_BRAND_FIRE		0x40000000L
+#define TR1_BRAND_COLD		0x80000000L
 
 #define TR_SUST_STAT    0x00400000L
 #define TR2_IM_ACID		0x00000100L
-#define TR2_IM_FIRE		0x00000040L
-#define TR2_IM_COLD		0x00000080L
-#define TR2_IM_POIS		0x00004000L
-#define TR2_IM_ELEC     0x00000200L
-#define TR2_FREE_ACT		0x00800000L	/* Free Action */
+#define TR2_IM_ELEC		0x00000200L
+#define TR2_IM_FIRE		0x00000400L
+#define TR2_IM_COLD		0x00000800L
+#define TR2_IM_POIS		0x00001000L
+#define TR2_FREE_ACT		0x00004000L	/* Free Action */
 
-#define TR2_RES_ACID		0x00100000L
-#define TR2_RES_FIRE		0x00080000L
-#define TR2_RES_COLD		0x00200000L
-#define TR2_RES_POIS		0x10000000L
-#define TR2_RES_ELEC		0x02000000L
-#define TR2_RES_DARK		0x00040000L
+#define TR2_RES_ACID		0x00010000L
+#define TR2_RES_ELEC		0x00020000L
+#define TR2_RES_FIRE		0x00040000L
+#define TR2_RES_COLD		0x00080000L
+#define TR2_RES_POIS		0x00100000L
+#define TR2_RES_LITE		0x00400000L	/* Oops */
+#define TR2_RES_DARK		0x00800000L	/* Oops */
 
-#define TR2_RES_BLIND		0x00800000L
-#define TR2_RES_CONF		0x00008000L
-#define TR2_RES_SOUND		0x00010000L
-#define TR2_RES_SHARDS		0x00200000L
+#define TR2_RES_BLIND		0x01000000L	/* Oops */
+#define TR2_RES_CONF		0x02000000L	/* Oops */
+#define TR2_RES_SOUND		0x04000000L	/* Oops */
+#define TR2_RES_SHARDS		0x08000000L	/* Oops */
 
-#define TR2_RES_NETHER		0x01000000L
-#define TR2_RES_NEXUS		0x00400000L
-#define TR2_RES_CHAOS		0x00080000L
-#define TR2_RES_DISEN		0x00100000L
+#define TR2_RES_NETHER		0x10000000L	/* Oops */
+#define TR2_RES_NEXUS		0x20000000L	/* Oops */
+#define TR2_RES_CHAOS		0x40000000L	/* Oops */
+#define TR2_RES_DISEN		0x80000000L	/* Oops */
 
-
-#define TR_HOLD_LIFE    0x00000008L
-#define TR_EGO_WEAPON   0x0007E000L
-#define TR_ARTIFACT		0x02000000L	/* means "is an artifact" -CFT */
-#define TR3_FEATHER        0x04000000L
-#define TR2_RES_LITE       0x00020000L
-#define TR_LIGHTNING    0x00001000L
-#define TR3_SEE_INVIS		0x01000000L
-#define TR3_TELEPATHY		0x00000020L
-#define TR3_SLOW_DIGEST		0x00000080L
-#define TR3_REGEN		0x00000800L
-#define TR_ACTIVATE		0x00000800L
 #define TR1_IMPACT       0x00002000L
 #define TR2_RES_FEAR     0x10000000L
-#define TR3_LITE        0x00000400L
-#define TR3_TELEPORT		0x00000400L
-#define TR3_AGGRAVATE		0x00000200L
-#define TR_BLESS_BLADE  0x04000000L /* priests use w/o penalty -DGK*/
-#define TR_CURSED		0x80000000L
+#define TR2_HOLD_LIFE    0x00000008L
+#define TR_EGO_WEAPON   0x0007E000L
+#define TR_LIGHTNING    0x00001000L
+#define TR_ARTIFACT		0x02000000L	/* means "is an artifact" -CFT */
+
+#define TR3_FEATHER	 	0x00001000L	/* Feather Falling */
+#define TR3_LITE		0x00002000L	/* Permanent Light */
+#define TR3_SEE_INVIS		0x00004000L	/* See Invisible */
+#define TR3_TELEPATHY		0x00008000L	/* Telepathy */
+#define TR3_SLOW_DIGEST		0x00010000L	/* Item slows down digestion */
+#define TR3_REGEN		0x00020000L	/* Item induces regeneration */
+#define TR3_ACTIVATE		0x01000000L	/* Item can be activated */
+#define TR3_TELEPORT		0x04000000L	/* Item teleports player */
+#define TR3_AGGRAVATE		0x08000000L	/* Item aggravates monsters */
+#define TR3_BLESSED		0x04000000L	/* priests use w/o penalty -DGK*/
+#define TR3_CURSED		0x20000000L	/* Item is Cursed */
 
 
 
@@ -1086,14 +1086,14 @@
 #define MF2_UNIQUE		0x80000000L /* unique monster */
 
 #define MS1_BLINK		0x00000010L
-#define TELE		0x000020L
+#define MS1_TELEPORT		0x00000020L
 #define MS1_TELE_TO	 	0x00000040L
 #define MS1_CAUSE_1		0x00000080L
 #define MS1_CAUSE_2		0x00000100L
 #define MS1_HOLD		0x00000200L
 #define MS1_BLIND		0x00000400L
 #define MS1_CONF		0x00000800L
-#define MS1_FEAR		0x001000L
+#define MS1_FEAR		0x00001000L
 #define MS1_S_MONSTER		0x00002000L
 #define MS1_S_UNDEAD		0x00004000L
 #define MS1_SLOW		0x00008000L
@@ -1114,7 +1114,7 @@
 #define MS1_BA_COLD    		0x40000000L
 #define MS1_BO_MANA     	0x80000000L
 
-/* spells 2 :-> */
+/* spells2 */
 #define MS2_BR_CHAO   		0x00000001L /* Chaos */
 #define MS2_BR_SHAR    		0x00000002L /* Shards */
 #define MS2_BR_SOUN    		0x00000004L /* Sound */
@@ -1148,7 +1148,7 @@
 #define MS2_S_HOUND      	0x40000000L
 #define MS2_BR_NETH    		0x80000000L /* Nexus */
 
-/* spells 3:-> */
+/* spells3 */
 #define MS3_BR_WALL   		0x00000001L /* Wall Building */
 #define MS3_BR_SLOW   	 	0x00000002L /* Slowness */
 #define MS3_BR_LITE    		0x00000004L /* Light */

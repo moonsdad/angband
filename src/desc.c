@@ -496,7 +496,7 @@ void identify(int *item)
 
     i_ptr = &inventory[*item];
 
-    if ((i_ptr->flags & TR_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
+    if ((i_ptr->flags & TR3_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
 	(i_ptr->tval != TV_PRAYER_BOOK))
 	add_inscribe(i_ptr, ID_DAMD);
 
@@ -888,7 +888,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	    (void)strcat(tmp_val, damstr);
 	if (known2_p(i_ptr)) {
 	/* originally used %+d, but several machines don't support it */
-	    if (i_ptr->ident & ID_SHOW_HITDAM)
+	    if (i_ptr->ident & TR3_SHOW_MODS)
 		(void)sprintf(tmp_str, " (%c%d,%c%d)",
 			  (i_ptr->tohit < 0) ? '-' : '+', MY_ABS( i_ptr->tohit),
 			 (i_ptr->todam < 0) ? '-' : '+', MY_ABS(i_ptr->todam));
@@ -927,7 +927,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	    if (pval_use == LIGHT);
 	    else if (i_ptr->ident & ID_NOSHOW_P1)
 		pval_use = IGNORED;
-	    else if (i_ptr->ident & ID_NOSHOW_TYPE)
+	    else if (i_ptr->ident & TR3_HIDE_TYPE)
 		pval_use = PLUSSES;
 	}
 
@@ -949,7 +949,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 		if (pval_use == PLUSSES)
 		    (void)sprintf(tmp_str, " (%c%d)",
 				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
-		else if (i_ptr->ident & ID_NOSHOW_TYPE)
+		else if (i_ptr->ident & TR3_HIDE_TYPE)
 		    (void)sprintf(tmp_str, " (%c%d)",
 				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 

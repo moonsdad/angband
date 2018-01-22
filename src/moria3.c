@@ -695,7 +695,7 @@ void do_cmd_open()
 		 * clear the cursed chest/monster win flag, so that people
 		 * can not win by opening a cursed chest 
 		 */
-		    t_ptr->flags &= ~TR_CURSED;
+		    t_ptr->flags3 &= ~TR3_CURSED;
 
 		/* generate based on level chest was found on - dbd */
 		    object_level = t_ptr->pval;
@@ -929,7 +929,7 @@ void tunnel(int dir)
 	else
 	    msg_print("You are too afraid!");
     } else if (i_ptr->tval != TV_NOTHING) {
-	if (TR1_TUNNEL & i_ptr->flags)
+	if (TR1_TUNNEL & i_ptr->flags1)
 	    tabil += 25 + i_ptr->pval * 50;
 	else {
 	    tabil += (i_ptr->dd * i_ptr->ds) + i_ptr->tohit
@@ -1375,7 +1375,7 @@ void do_cmd_fire()
 	else if (!known2_p(t) && (t->ident & ID_DAMD))
 	    ok_throw = TRUE;  /* Not IDed, but user knows it's cursed... */
 	else if ((t->tval >= TV_MIN_WEAR) && (t->tval <= TV_MAX_WEAR) &&
-		 (t->flags & TR_CURSED) && known2_p(t))
+		 (t->flags3 & TR3_CURSED) && known2_p(t))
 	    ok_throw = TRUE; /* if user wants to throw cursed, let him */
 	else if ((k_list[t->index].cost <= 0) && known1_p(t) &&
 		 !(known2_p(t) && (t->cost > 0)))

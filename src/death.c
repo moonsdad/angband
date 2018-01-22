@@ -260,7 +260,11 @@ void read_times(void)
     }
 #endif				   /* CHECK_HOURS */
 
-/* Attempt to open, and display, the intro "news" file		-RAK- */
+
+/*
+ * Attempt to open, and display, the intro "news" file		-RAK-
+ */
+    /* Try to open the News file */
     file1 = my_tfopen(ANGBAND_NEWS, "r");
 
     /* Error? */
@@ -484,7 +488,7 @@ void print_objects()
 			magic_treasure(j, level, 0, FALSE);
 			i_ptr = &i_list[j];
 			store_bought(i_ptr);
-			if (i_ptr->flags & TR_CURSED)
+			if (i_ptr->flags & TR3_CURSED)
 			    add_inscribe(i_ptr, ID_DAMD);
 			objdes(tmp_str, i_ptr, TRUE);
 		    }
@@ -868,6 +872,7 @@ static void print_tomb()
     put_str("________)/\\\\_)_/___(\\/___(//_\\)/_\\//__\\\\(/_|_)_______",
 	       19, 0);
 
+    /* Flush all input keys */
     flush();
 
     put_str("(ESC to abort, return to print on screen, or file name)", 23, 0);
@@ -875,9 +880,11 @@ static void print_tomb()
 
     if (get_string(str, 22, 18, 60)) {
 
-	for (i = 0; i < INVEN_TOTAL; i++) {
-    inven_type *i_ptr = &inventory[i];
-    if (i_ptr && i_ptr->tval != TV_NOTHING) {
+
+    /* Know everything the player is wearing/carrying */
+    for (i = 0; i < INVEN_TOTAL; i++) {
+	inven_type *i_ptr = &inventory[i];
+	if (i_ptr && i_ptr->tval != TV_NOTHING) {
 	    known1(i_ptr);
 	    known2(i_ptr);
 	}

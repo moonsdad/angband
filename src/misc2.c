@@ -63,8 +63,8 @@ void delete_monster(int j)
     /* Forget that the monster is here */
     cave[fy][fx].cptr = 0;
 
-    if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
-
+    /* Visual update */
+    if (m_ptr->ml) lite_spot(m_ptr->fy, m_ptr->fx);
 
 #ifdef TARGET
     /* This targetting code stolen from Morgul -CFT */
@@ -80,7 +80,7 @@ void delete_monster(int j)
 
 #ifdef TARGET
 	/* Targetted monster moved to replace dead or compacted monster CDW */
-	if (target_mon == m_max-1) target_mon = j;
+	if (target_mon == (int)(m_max-1)) target_mon = j;
 #endif
 
 	/* Slide the last monster into the dead monster's slot */
@@ -112,6 +112,7 @@ void delete_monster(int j)
 void fix1_delete_monster(int j)
 {
     register monster_type *m_ptr;
+    register int fx, fy;
 
     /* Paranoia trouble? abort! -CFT */
     if (j < 2) return;
@@ -127,15 +128,23 @@ void fix1_delete_monster(int j)
     /* Get the monster */
     m_ptr = &m_list[j];
 
+    /* Get the cave */
+    fy = m_ptr->fy;
+    fx = m_ptr->fx;
+
     if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE) check_unique(m_ptr);
 
-/* force the hp negative to ensure that the monster is dead, for example, if
+    /* Forget that the monster is here */
+    cave[fy][fx].cptr = 0;
+
+    /* Visual update */
+    if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
+
+    /* Mark the monster as "dead" (non-optimal method)
+ * force the hp negative to ensure that the monster is dead, for example, if
  * the monster was just eaten by another, it will still have positive hit
  * points  */
     m_ptr->hp = (-1);
-
-    cave[m_ptr->fy][m_ptr->fx].cptr = 0;
-    if (m_ptr->ml) lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
 }
 
 
@@ -147,7 +156,7 @@ void fix2_delete_monster(int j)
 {
     register monster_type *m_ptr;
 
-	/* trouble? abort! -CFT */
+    /*Paranoia  trouble? abort! -CFT */
     if (j < 2) return;
     
 #ifdef TARGET
@@ -173,7 +182,7 @@ void fix2_delete_monster(int j)
 
 
 /*
- * Compact monsters	-RAK-
+ *  Attempt to Compact some monsters (safely)	-RAK-
  *
  * Return TRUE if any monsters were deleted, FALSE if could not delete any
  * monsters. 
@@ -673,9 +682,11 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	g->ac = 15 + randint(15);
 	if (gc == 0 || gc >= 3) g->ac += randint(60);
 
+	/* Default speed */
+	g->speed = 11;
+
 	/* High level mages and rogues are fast... */
 	if ((gc == 1 || gc == 3) && lev > 25) g->speed = 12;
-	else g->speed = 11;
 
 	/* Use the letter 'p' */
 	g->cchar = 'p';
@@ -707,6 +718,12 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 
 	return;
     }
+
+
+    /* Initialize some more of the flags */    
+    g->cflags2 |= (MF2_UNDEAD | MF2_NO_INFRA | MF2_IM_POIS);
+
+
     /* Make a ghost with power based on the ghost level */
     switch ((int) (g->level / 4) + randint(3)) {
 
@@ -716,7 +733,7 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *)g->name, "%s, the Skeleton %s", name, ghost_race);
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_90 | MF2_GOOD);
 	g->spells1 |= (NONE8);
-	g->cflags2 |= (MF2_IM_POIS | MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_COLD | MF2_NO_INFRA);
+	g->cflags2 |= (MF2_CHARM_SLEEP  | MF2_EVIL | MF2_IM_COLD);
 	if (gr == 6) g->cflags2 |= MF2_ORC;
 	if (gr == 7) g->cflags2 |= MF2_TROLL;
 	g->ac = 26;
@@ -734,7 +751,7 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *)g->name, "%s, the %s zombie", name, cap(ghost_race));
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_60 | HAS_90 | MF2_GOOD);
 	g->spells1 |= (NONE8);
-	g->cflags2 |= (MF2_IM_POIS | MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_NO_INFRA);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL);
 	if (gr == 6) g->cflags2 |= MF2_ORC;
 	if (gr == 7) g->cflags2 |= MF2_TROLL;
 	g->ac = 30;
@@ -751,7 +768,7 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *) g->name, "%s, the Poltergeist", name);
 	g->cflags1 |= (MF1_MV_INVIS | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF2_GOOD | MF1_HAS_1D2 | MF1_MV_75 | MF1_THRO_WALL);
 	g->spells1 |= (NONE8);
-	g->cflags2 |= (MF2_IM_POIS | MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_COLD | MF2_NO_INFRA);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD);
 	g->ac = 20;
 	g->speed = 13;
 	g->cchar = 'G';
@@ -767,7 +784,7 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *)g->name, "%s, the Mummified %s", name, cap(ghost_race));
 	g->cflags1 |= (MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_1D2 | MF2_GOOD);
 	g->spells1 |= (NONE8);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_NO_INFRA);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL);
 	if (gr == 6) g->cflags2 |= MF2_ORC;
 	if (gr == 7) g->cflags2 |= MF2_TROLL;
 	g->ac = 35;
@@ -787,7 +804,7 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 		(name[strlen(name) - 1] == 's') ? "'" : "'s");
 	g->cflags1 |= (MF1_MV_INVIS | MF1_THRO_WALL | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_1D2 | MF2_GOOD);
 	g->spells1 |= (NONE8);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_IM_COLD | MF2_NO_INFRA);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD);
 	g->ac = 20;
 	g->speed = 11;
 	g->cchar = 'G';
@@ -800,11 +817,11 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	break;
 
       case 11:
-	sprintf((char *)g->name, "%s%s ghost", name, (name[strlen(name) - 1] == 's') ?
-		"'" : "'s");
+	sprintf((char *)g->name, "%s%s ghost", name,
+		(name[strlen(name) - 1] == 's') ? "'" : "'s");
 	g->cflags1 |= (MF1_MV_INVIS | MF1_THRO_WALL | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_1D2 | MF2_GOOD);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD);
 	g->spells1 |= (0xFL | MS1_HOLD | MS1_MANA_DRAIN | MS1_BLIND);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_IM_COLD | MF2_NO_INFRA);
 	g->ac = 40;
 	g->speed = 12;
 	g->cchar = 'G';
@@ -819,8 +836,8 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
       case 12:
 	sprintf((char *) g->name, "%s, the Vampire", name);
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_2D2 | MF2_GOOD);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_HURT_LITE);
 	g->spells1 |= (0x8L | MS1_HOLD | MS1_FEAR | MS1_TELE_TO | MS1_CAUSE_2);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_NO_INFRA | MF2_HURT_LITE);
 	g->ac = 40;
 	g->speed = 11;
 	g->cchar = 'V';
@@ -836,10 +853,9 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *)g->name, "%s%s Wraith", name,
 		(name[strlen(name) - 1] == 's') ? "'" : "'s");
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_4D2 | HAS_2D2 | MF2_GOOD);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD | MF2_HURT_LITE);
 	g->spells1 |= (0x7L | MS1_HOLD | MS1_FEAR | MS1_BLIND | MS1_CAUSE_3);
 	g->spells2 |= (MS2_BO_NETH);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_IM_COLD | MF2_NO_INFRA |
-			MF2_HURT_LITE);
 	g->ac = 60;
 	g->speed = 12;
 	g->cchar = 'W';
@@ -854,9 +870,9 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
       case 14:
 	sprintf((char *) g->name, "%s, the Vampire Lord", name);
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_1D2 | MF2_SPECIAL);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_HURT_LITE);
 	g->spells1 |= (0x8L | MS1_HOLD | MS1_FEAR | MS1_TELE_TO | MS1_CAUSE_3);
 	g->spells2 |= (MS2_BO_NETH);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_NO_INFRA | MF2_HURT_LITE);
 	g->ac = 80;
 	g->speed = 11;
 	g->cchar = 'V';
@@ -873,8 +889,8 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
 	sprintf((char *)g->name, "%s%s ghost", name,
 		 (name[strlen(name) - 1] == 's') ? "'" : "'s");
 	g->cflags1 |= (MF1_MV_INVIS | MF1_THRO_WALL | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_2D2 | MF2_SPECIAL);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD);
 	g->spells1 |= (0x5L | MS1_HOLD | MS1_MANA_DRAIN | MS1_BLIND | MS1_CONF);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_COLD | MF2_IM_POIS | MF2_NO_INFRA);
 	g->ac = 90;
 	g->speed = 13;
 	g->cchar = 'G';
@@ -889,12 +905,11 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
       case 17:
 	sprintf((char *)g->name, "%s, the Lich", name);
 	g->cflags1 |= (MF1_THRO_DR | MF1_MV_ATT_NORM | MF1_CARRY_OBJ | MF1_HAS_2D2 | HAS_1D2 | MF2_SPECIAL);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL | MF2_IM_COLD | MF2_INTELLIGENT);
 	g->spells1 |= (0x3L | MS1_FEAR | MS1_CAUSE_3 | MS1_TELE_TO | MS1_BLINK |
 		       MS1_S_UNDEAD | MS1_BA_FIRE | MS1_BA_COLD | MS1_HOLD |
 		       MS1_MANA_DRAIN | MS1_BLIND | MS1_CONF | TELE);
 	g->spells2 |= (MS2_BRAIN_SMASH | MS2_RAZOR);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_COLD | MF2_NO_INFRA | MF2_IM_POIS
-			| MF2_INTELLIGENT);
 	g->ac = 120;
 	g->speed = 12;
 	g->cchar = 'L';
@@ -910,13 +925,14 @@ void set_ghost(monster_race *g, char *name, int gr, int gc, int lev)
       default:
 	sprintf((char *)g->name, "%s%s ghost", name,
 		(name[strlen(name) - 1] == 's') ? "'" : "'s");
-	g->cflags1 |= (MF1_MV_INVIS | MF1_THRO_WALL | MF1_MV_ATT_NORM | MF1_CARRY_OBJ |
-		     MF1_HAS_1D2 | HAS_2D2 | MF2_SPECIAL);
+	g->cflags1 |= (MF1_MV_INVIS | MF1_THRO_WALL |
+		       MF1_MV_ATT_NORM | MF1_CARRY_OBJ |
+		       MF1_HAS_1D2 | MF1_HAS_2D2);
+	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_EVIL| MF2_SPECIAL | MF2_IM_COLD | MF2_INTELLIGENT);
 	g->spells1 |= (0x2L | MS1_HOLD | MS1_MANA_DRAIN | 
 		       MS1_BLIND | MS1_CONF | MS1_TELE_TO);
-	g->spells2 |= (MS2_BO_NETH | MS2_BA_NETH | MS2_BRAIN_SMASH | MS2_TELE_LEVEL);
-	g->cflags2 |= (MF2_CHARM_SLEEP | MF2_UNDEAD | MF2_EVIL | MF2_IM_POIS | MF2_IM_COLD | MF2_NO_INFRA |
-			MF2_INTELLIGENT);
+	g->spells2 |= (MS2_BO_NETH | MS2_BA_NETH | MS2_BRAIN_SMASH |
+		       MS2_TELE_LEVEL);
 	g->ac = 130;
 	g->speed = 13;
 	g->cchar = 'G';
@@ -975,15 +991,7 @@ int place_ghost()
 
 	fclose(fp);
 
-    /* Break up the hitpoints */
-	    j = 1;
-	    if (i > 255) {	   /* avoid wrap-around of byte hitdice, by factoring */
-		j = i / 32;
-		i = 32;
-	    }
-	    r_ptr->hd[0] = i;	   /* set_ghost may adj for race/class/lv */
-	    r_ptr->hd[1] = j;
-	    level = p_ptr->misc.lev;
+	level = p_ptr->misc.lev;
     }
 
     /* In the dungeon, ghosts have the same level as the level */    
@@ -1007,6 +1015,9 @@ int place_ghost()
 	}
 	fclose(fp);
 
+	level = dun_level;
+    }
+
 
     /* Break up the hitpoints */
     j = 1;
@@ -1018,9 +1029,6 @@ int place_ghost()
     /* set_ghost may adj for race/class/lv */
     r_ptr->hd[0] = i;
     r_ptr->hd[1] = j;
-
-		level = dun_level;
-    }
 
     /* Set up the ghost */
     set_ghost(r_ptr, name, gr, gc, level);
@@ -1037,6 +1045,7 @@ int place_ghost()
 	/* Pick a location */
 	y = randint(cur_height - 2);
 	x = randint(cur_width - 2);
+
     } while ((cave[y][x].fval >= MIN_CLOSED_SPACE) || (cave[y][x].cptr != 0)
 	     || (cave[y][x].tptr != 0) ||
 	/* Accept far away grids */
@@ -1045,7 +1054,7 @@ int place_ghost()
     m_ptr->fy = y;
     m_ptr->fx = x;
 
-    m_ptr->mptr = (MAX_R_IDX - 1);
+    m_ptr->mptr = MAX_R_IDX-1;
 
     /* Assign hitpoints */
     m_ptr->hp = (s16b) r_ptr->hd[0] * (s16b) r_ptr->hd[1];
@@ -1054,13 +1063,15 @@ int place_ghost()
     m_ptr->mspeed = r_list[m_ptr->mptr].speed - 10;
 
     m_ptr->stunned = 0;
-
-    m_ptr->cdis = distance(char_row, char_col, y, x);
-    cave[y][x].cptr = cur_pos;
     m_ptr->csleep = 0;
 
-    return 1;
+    cave[y][x].cptr = cur_pos;
+
+    m_ptr->cdis = distance(char_row, char_col, y, x);
+
+    return TRUE;
 }
+
 
 
 
@@ -1076,7 +1087,8 @@ int get_mons_num(int level)
 
     int          old = level;
 
-again:
+
+    while (1) {
 
 	if (level == 0) {
 	    i = randint(m_level[0]) - 1;
@@ -1089,6 +1101,7 @@ again:
 	    /* Make a Nasty Monster */
 	    if (randint(MON_NASTY) == 1) {
 		/* be a little more civilized about monster depths for the first levels -CWS */
+		/* Make low level monsters more likely at low levels */
 		i = level / 4 + 1;
 		if (i > 4) i = 4;
 		level = level + MY_ABS(i) + 1;
@@ -1100,6 +1113,7 @@ again:
 	 * all monsters of level less than or equal to the dungeon level.
 	 * This distribution makes a level n monster occur approx 2/n% of the
 	 * time on level n, and 1/n*n% are 1st level. */
+		/* Make high level monsters more likely at high levels */
 		num = m_level[level] - m_level[0];
 		i = randint(num) - 1;
 		j = randint(num) - 1;
@@ -1116,14 +1130,19 @@ again:
 	/* Uniques never appear out of "modified" depth */
 	if ((r_list[i].level > old) &&
 	    (r_list[i].cflags2 & MF2_UNIQUE)) {
-	    goto again;
+	    continue;
 	}
 
 	/* Quest Monsters never appear out of depth */
-	if ((r_list[i].level > (unsigned) dun_level) &&
+	if ((r_list[i].level > dun_level) &&
 	    (r_list[i].cflags2 & MF2_QUESTOR)) {
-	    goto again;
+	    continue;
 	}
+
+	break;
+    }
+
+    /* Accept the monster */
     return i;
 }
 
@@ -1138,7 +1157,8 @@ int get_nmons_num(int level)
 
     old = level;
 
-again:
+
+    while (1) {
 
 	if (level == 0) {
 	    i = randint(m_level[0]) - 1;
@@ -1168,13 +1188,16 @@ again:
 	}
 
 	if ((r_list[i].level > old) && (r_list[i].cflags2 & MF2_UNIQUE)) {
-	    goto again;
+	    continue;
 	}
 
-	if (( r_list[i].level > (unsigned) dun_level) &&
+	/* Quest monsters never appear out of depth */
+	if ((r_list[i].level > dun_level) &&
 	    (r_list[i].cflags2 & MF2_QUESTOR)) {
-	    goto again;
+	    continue;
 	}
+	break;
+    }
 
     /* Accept the monster */
     return i;
@@ -1267,6 +1290,7 @@ void alloc_monster(int num, int dis, int slp)
     register int y, x, i;
     int          r_idx;
 
+    /* Place the monsters */
     for (i = 0; i < num; i++) {
 
 	/* Find a legal, distant, unoccupied, space */
@@ -1323,24 +1347,25 @@ void alloc_monster(int num, int dis, int slp)
 int summon_monster(int *yp, int *xp, int slp)
 {
     register int        i, y, x, r_idx;
-    int                 summon;
     register cave_type *cave_ptr;
 
-    i = 0;
-    summon = FALSE;
+    /* Pick a monster race */
     r_idx = get_mons_num(dun_level + MON_SUMMON_ADJ);
-    do {
+
+    /* Try nine locations */
+    for (i = 0; i < 9; i++) {
 
 	/* Pick a nearby location */
 	y = *yp - 2 + randint(3);
 	x = *xp - 2 + randint(3);
 
 	/* Require legal grid */
-	if (in_bounds(y, x)) {
-	    cave_ptr = &cave[y][x];
+	if (!in_bounds(y, x)) continue;
+
+	cave_ptr = &cave[y][x];
 	
 	/* Require "empty" floor grids */
-	if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) continue;
 	
 	/* Place the monster */
 	if (r_list[r_idx].cflags2 & MF2_GROUP) {
@@ -1350,20 +1375,16 @@ int summon_monster(int *yp, int *xp, int slp)
 	    place_monster(y, x, r_idx, slp);
 	}
 
-		summon = TRUE;
-		i = 9;
-
 	/* Save the location */
 	*yp = y;
 	*xp = x;
 		
-	}
-	}
-	i++;
+	/* Success */
+	return (TRUE);
     }
-    while (i <= 9);
 
-    return (summon);
+    /* Nothing summoned */
+    return (FALSE);
 }
 
 
@@ -1555,8 +1576,7 @@ int summon_wraith(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon reptiles */
+/* Summon reptiles */
 int summon_reptile(int *y, int *x)
 {
     register int        i, j, k;
@@ -1604,8 +1624,7 @@ int summon_reptile(int *y, int *x)
 }
 
 
-/*
- * As for summon dragon, but keys on character ~Decado */
+/* As for summon dragon, but keys on character ~Decado */
 int summon_spider(int *y, int *x)
 {
     register int        i, j, k;
@@ -1652,8 +1671,7 @@ int summon_spider(int *y, int *x)
     return (summon);
 }
 
-/*
- * As for summon dragon, but keys on character ~Decado */
+/* As for summon dragon, but keys on character ~Decado */
 int summon_angel(int *y, int *x)
 {
     register int        i, j, k;
@@ -1698,8 +1716,7 @@ int summon_angel(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon ants */
+/* Summon ants */
 int summon_ant(int *y, int *x)
 {
     register int        i, j, k;
@@ -1746,8 +1763,7 @@ int summon_ant(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon uniques */
+/* Summon uniques */
 int summon_unique(int *y, int *x)
 {
     register int        i, j, k;
@@ -1794,8 +1810,7 @@ int summon_unique(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon jabberwocks, for extra effect to the summon_unique spell */
+/* Summon jabberwocks, for extra effect to the summon_unique spell */
 int summon_jabberwock(int *y, int *x)
 {
     register int        i, j, k;
@@ -1842,8 +1857,7 @@ int summon_jabberwock(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon greater undead */
+/* Summon greater undead */
 int summon_gundead(int *y, int *x)
 {
     register int        i, j, k;
@@ -1891,8 +1905,7 @@ int summon_gundead(int *y, int *x)
     return (summon);
 }
 
-/*
- * Summon ancient dragons */
+/* Summon ancient dragons */
 int summon_ancientd(int *y, int *x)
 {
     register int        i, j, k;
@@ -1939,8 +1952,7 @@ int summon_ancientd(int *y, int *x)
     return (summon);
 }
 
-/*
- * As for summon hound, but keys on character ~Decado */
+/* As for summon hound, but keys on character ~Decado */
 int summon_hound(int *y, int *x)
 {
     register int        i, j, k;
@@ -1988,8 +2000,7 @@ int summon_hound(int *y, int *x)
     return (summon);
 }
 
-/*
- * Place a sleepy jelly at the required coordinates ~Ludwig */
+/* Place a sleepy jelly at the required coordinates ~Ludwig */
 int summon_jelly(int *y, int *x)
 {
     int l, m, summon;

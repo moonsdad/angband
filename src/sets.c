@@ -145,7 +145,7 @@ inven_type *e;
     int element = e->tval;
 
     if ((element >= TV_MIN_ENCHANT) && (element <= TV_MAX_WEAR) &&
-	(e->flags & TR_CURSED) && (!(e->flags2 & TR_ARTIFACT)))
+	(e->flags3 & TR3_CURSED) && (!(e->flags2 & TR_ARTIFACT)))
 	return (TRUE);
     return (FALSE);
 }

@@ -604,7 +604,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
     t_ptr->pval = missile_ctr;
 
     /* always show tohit/todam values if identified */
-    t_ptr->ident |= ID_SHOW_HITDAM;
+    t_ptr->ident |= TR3_SHOW_MODS;
     if (magik(chance)||good) {
 	t_ptr->tohit = randint(5) + m_bonus(1, 15, level);
 	t_ptr->todam = randint(5) + m_bonus(1, 15, level);
@@ -668,7 +668,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
     else if (magik(cursed)) {
 	t_ptr->tohit = (-randint(10)) - m_bonus(5, 25, level);
 	t_ptr->todam = (-randint(10)) - m_bonus(5, 25, level);
-	t_ptr->flags |= TR_CURSED;
+	t_ptr->flags |= TR3_CURSED;
 	t_ptr->cost = 0;
 	if (randint(5)==1) {
 	    t_ptr->name2 = EGO_BACKBITING;
@@ -1044,7 +1044,7 @@ int special_check(register inven_type *t_ptr)
 	return 0;
     if (t_ptr->ident & ID_DAMD)
 	return 0;
-    if (t_ptr->flags & TR_CURSED)
+    if (t_ptr->flags & TR3_CURSED)
 	return -1;
     if (t_ptr->tval != TV_HARD_ARMOR && t_ptr->tval != TV_SWORD &&
 	t_ptr->tval != TV_SOFT_ARMOR && t_ptr->tval != TV_SHIELD &&
