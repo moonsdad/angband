@@ -134,7 +134,7 @@ extern s16b log_index;		/* Index to log file. -CJS- */
 
 
 /*
- * These are options, set with via "set_options()" -CJS-
+ * These are options, set with via "do_cmd_options()" -CJS-
  */
 
 /* Option set 1 */
@@ -619,7 +619,6 @@ int summon_gundead(int *, int *);
 int summon_ancientd(int *, int *);
 int summon_hound(int *, int *);
 int summon_jelly(int *, int *);
-void set_options(void);
 int next_to_walls(int, int);
 int get_nmons_num(int);
 int distance(int, int, int, int);
