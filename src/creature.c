@@ -477,13 +477,13 @@ static void shatter_quake(int mon_y, int mon_x)
 		if ((i == mon_y) && (j == mon_x))
 		    continue;
 		c_ptr = &cave[i][j];
-		if (c_ptr->cptr > 1) {
-		    m_ptr = &m_list[c_ptr->cptr];
+		if (c_ptr->m_idx > 1) {
+		    m_ptr = &m_list[c_ptr->m_idx];
 		    r_ptr = &r_list[m_ptr->r_idx];
 
 		    if (!(r_ptr->cflags1 & MF1_THRO_WALL) &&
 			!(r_ptr->cflags2 & MF2_BREAK_WALL)) {
-			if ((movement_rate(c_ptr->cptr) == 0) ||
+			if ((movement_rate(c_ptr->m_idx) == 0) ||
 			    (r_ptr->cflags1 & MF1_MV_ONLY_ATT))
 			/* monster can not move to escape the wall */
 			    kill = TRUE;
@@ -537,13 +537,13 @@ static void shatter_quake(int mon_y, int mon_x)
 				l_list[m_ptr->r_idx].r_cflags1 = treas |
 				    (l_list[m_ptr->r_idx].r_cflags1 & ~CM1_TREASURE);
 			    }
-			    if (monptr < c_ptr->cptr)
-				delete_monster((int)c_ptr->cptr);
+			    if (monptr < c_ptr->m_idx)
+				delete_monster((int)c_ptr->m_idx);
 			    else
-				fix1_delete_monster((int)c_ptr->cptr);
+				fix1_delete_monster((int)c_ptr->m_idx);
 			} /* if monster's hp < 0 */
 		    }
-		} else if (c_ptr->cptr == 1) {	/* Kill the dumb player! */
+		} else if (c_ptr->m_idx == 1) {	/* Kill the dumb player! */
 		    kill = TRUE;
 		    for (y = i - 1; y <= i + 1; y++) {
 			for (x = j - 1; x <= j + 1; x++) {
@@ -620,7 +620,7 @@ static void shatter_quake(int mon_y, int mon_x)
 		    c_ptr->pl = FALSE;
 		    c_ptr->fm = FALSE;
 		} else if ((c_ptr->fval <= MAX_CAVE_FLOOR) && (c_ptr->i_idx == 0)
-			   && (c_ptr->cptr != 1)) {
+			   && (c_ptr->m_idx != 1)) {
 		    /* don't bury player, it made him unattackable -CFT */
 		    tmp = randint(10);
 		    if (tmp < 6)
@@ -1677,7 +1677,7 @@ static void make_attack(int m_idx)
 	}
 
 	/* Can we learn another attack */
-	if (attackn < MAX_MON_NATTACK - 1) {
+	if (attackn < 4 - 1) {
 	    attackn++;
 	}
 	else {
@@ -1729,7 +1729,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 	i_ptr = &i_list[c_ptr->i_idx];
 
 	if ((i == 4) && (m_ptr->monfear) &&  /* cornered (or things in the way!) -CWS */
-	    ((c_ptr->fval > MAX_OPEN_SPACE) || (c_ptr->cptr > 1))) {
+	    ((c_ptr->fval > MAX_OPEN_SPACE) || (c_ptr->m_idx > 1))) {
 
 	    vtype               m_name, out_val;
 	    
@@ -1910,7 +1910,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 	/* Creature has attempted to move on player?	   */
 	    if (do_move)
 
-		if (c_ptr->cptr == 1) {
+		if (c_ptr->m_idx == 1) {
 		/* if the monster is not lit, must call update_mon, it may be
 		 * faster than character, and hence could have just moved
 		 * next to character this same turn */
@@ -1922,27 +1922,27 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		}
 
 	    /* Creature is attempting to move on other creature?	   */
-		else if ((c_ptr->cptr > 1) &&
+		else if ((c_ptr->m_idx > 1) &&
 			 ((newy != m_ptr->fy) ||
 			  (newx != m_ptr->fx))) {
 
 		    /* Creature eats other creatures?	 */
 		    if ((r_ptr->cflags1 & MF1_THRO_CREAT) &&
 			(r_list[m_ptr->r_idx].mexp >
-			 r_list[m_list[c_ptr->cptr].r_idx].mexp)) {
+			 r_list[m_list[c_ptr->m_idx].r_idx].mexp)) {
 
-			if (m_list[c_ptr->cptr].ml)
+			if (m_list[c_ptr->m_idx].ml)
     			    *rcflags1 |= MF1_THRO_CREAT;
 			/* It ate an already processed monster. Handle normally. */
-			if (m_idx < c_ptr->cptr)
-			    delete_monster((int)c_ptr->cptr);
+			if (m_idx < c_ptr->m_idx)
+			    delete_monster((int)c_ptr->m_idx);
 		    /*
 		     * If it eats this monster, an already processed monster
 		     * will take its place, causing all kinds of havoc. 
 		     * Delay the kill a bit. 
 		     */
 			else
-			    fix1_delete_monster((int)c_ptr->cptr);
+			    fix1_delete_monster((int)c_ptr->m_idx);
 		    } else
 			do_move = FALSE;
 		    }
@@ -3170,24 +3170,24 @@ int multiply_monster(int y, int x, int cr_index, int m_idx)
 	    c_ptr = &cave[j][k];
 
 	    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (c_ptr->i_idx == 0) &&
-		(c_ptr->cptr != 1)) {
+		(c_ptr->m_idx != 1)) {
 
-		if (c_ptr->cptr > 1) {	/* Creature there already?	 */
+		if (c_ptr->m_idx > 1) {	/* Creature there already?	 */
 		/* Some critters are cannibalistic!	    */
 		    if ((r_list[cr_index].cflags1 & MF1_THRO_CREAT)
 		/* Check the experience level -CJS- */
 			&& r_list[cr_index].mexp >=
-			r_list[m_list[c_ptr->cptr].r_idx].mexp) {
+			r_list[m_list[c_ptr->m_idx].r_idx].mexp) {
 		    /* It ate an already processed monster.Handle normally. */
-			if (m_idx < c_ptr->cptr)
-			    delete_monster((int)c_ptr->cptr);
+			if (m_idx < c_ptr->m_idx)
+			    delete_monster((int)c_ptr->m_idx);
 		    /*
 		     * If it eats this monster, an already processed mosnter
 		     * will take its place, causing all kinds of havoc. Delay
 		     * the kill a bit. 
 		     */
 			else
-			    fix1_delete_monster((int)c_ptr->cptr);
+			    fix1_delete_monster((int)c_ptr->m_idx);
 
 		    /* in case compact_monster() is called,it needs m_idx */
 			hack_m_idx = m_idx;

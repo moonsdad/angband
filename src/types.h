@@ -133,7 +133,7 @@ struct _monster_lore {
     u16b r_kills;		/* Count player killing monster */
     u16b r_deaths;		/* Count monster killing player */
 
-    byte r_attacks[MAX_MON_NATTACK];
+    byte r_attacks[4];
 
     byte r_wake;		/* Number of times woken up (?) */
     byte r_ignore;		/* Number of times ignored (?) */
@@ -306,7 +306,7 @@ typedef struct _cave_type cave_type;
 
 struct _cave_type {
 
-  u16b cptr;
+  u16b m_idx;		/* Monster index (in m_list) */
   u16b i_idx;		/* Item index (in i_list) */
 
   byte fval;		/* Grid type (0-15) */

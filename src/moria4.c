@@ -755,7 +755,7 @@ static void area_affect(int dir, int y, int x)
 		/* Also Creatures		 */
 		/* the monster should be visible since update_mon() checks
 		 * for the special case of being in find mode  */
-		if (c_ptr->cptr > 1 && m_list[c_ptr->cptr].ml) {
+		if (c_ptr->m_idx > 1 && m_list[c_ptr->m_idx].ml) {
 			end_find();
 			return;
 		}
@@ -929,8 +929,8 @@ void move_player(int dir, int do_pickup)
      * attacking each wall in an attempt to locate the invisible creature,
      * instead force player to tunnel into walls which always takes a turn 
      */
-	if ((c_ptr->cptr < 2)
-	  || (!m_list[c_ptr->cptr].ml && c_ptr->fval >= MIN_CLOSED_SPACE)) {
+	if ((c_ptr->m_idx < 2)
+	  || (!m_list[c_ptr->m_idx].ml && c_ptr->fval >= MIN_CLOSED_SPACE)) {
 	    if (c_ptr->fval <= MAX_OPEN_SPACE) {	/* Open floor spot	 */
 	    /* Make final assignments of char co-ords */
 		old_row = char_row;
@@ -1024,7 +1024,7 @@ void move_player(int dir, int do_pickup)
 	    old_find_flag = find_flag;
 	    end_find();
 	/* if player can see monster, and was in find mode, then nothing */
-	    if (m_list[c_ptr->cptr].ml && old_find_flag) {
+	    if (m_list[c_ptr->m_idx].ml && old_find_flag) {
 	    /* did not do anything this turn */
 		free_turn_flag = TRUE;
 	    } else {

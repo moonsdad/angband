@@ -86,7 +86,7 @@ void delete_monster(int j)
 	/* Slide the last monster into the dead monster's slot */
 	m_ptr = &m_list[m_max];
 	c_ptr = &cave[m_ptr->fy][m_ptr->fx];
-	c_ptr->cptr = j;
+	c_ptr->m_idx = j;
 	m_list[j] = m_list[m_max];
     }
 
@@ -1366,7 +1366,7 @@ int summon_monster(int *yp, int *xp, int slp)
 	cave_ptr = &cave[y][x];
 	
 	/* Require "empty" floor grids */
-	if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) continue;
+	if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) continue;
 	
 	/* Place the monster */
 	if (r_list[r_idx].cflags2 & MF2_GROUP) {
@@ -1422,7 +1422,7 @@ int summon_undead(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1468,7 +1468,7 @@ int summon_demon(int lev, int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1515,7 +1515,7 @@ int summon_dragon(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1563,7 +1563,7 @@ int summon_wraith(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1610,7 +1610,7 @@ int summon_reptile(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1658,7 +1658,7 @@ int summon_spider(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1704,7 +1704,7 @@ int summon_angel(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1750,7 +1750,7 @@ int summon_ant(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1797,7 +1797,7 @@ int summon_unique(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1844,7 +1844,7 @@ int summon_jabberwock(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1892,7 +1892,7 @@ int summon_gundead(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1939,7 +1939,7 @@ int summon_ancientd(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;
@@ -1987,7 +1987,7 @@ int summon_hound(int *y, int *x)
 	k = *x - 2 + randint(3);
 	if (in_bounds(j, k)) {
 	    cave_ptr = &cave[j][k];
-	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->cptr == 0)) {
+	    if (cave_ptr->fval <= MAX_OPEN_SPACE && (cave_ptr->m_idx == 0)) {
 		place_monster(j, k, m, FALSE);
 		summon = TRUE;
 		i = 9;

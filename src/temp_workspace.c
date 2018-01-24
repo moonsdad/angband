@@ -488,15 +488,15 @@ void mon_elec_dam(int y, int x, int dam)
     int                     i;
 
     c_ptr = &cave[y][x];
-    if (c_ptr->cptr > 1) {
-	m_ptr = &m_list[c_ptr->cptr];
+    if (c_ptr->m_idx > 1) {
+	m_ptr = &m_list[c_ptr->m_idx];
 	r_ptr = &r_list[m_ptr->r_idx];
 	monster_name(m_name, m_ptr, r_ptr);
 	m_ptr->csleep = 0;
 	if (MF2_HURT_LITE & r_ptr->cflags2) {
 	    if (m_ptr->ml)
 		l_list[m_ptr->r_idx].r_cflags2 |= MF2_HURT_LITE;
-	    i = mon_take_hit((int)c_ptr->cptr, dam, FALSE);
+	    i = mon_take_hit((int)c_ptr->m_idx, dam, FALSE);
 	    if (i >= 0) {
 		(void)sprintf(out_val, "%s shrivels away in the light!", m_name);
 		msg_print(out_val);

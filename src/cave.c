@@ -397,7 +397,7 @@ void lite_room(int y1, int x1)
     c_ptr = &cave[y1][x1];
     if (!c_ptr->pl && c_ptr->lr) {
 	c_ptr->pl = TRUE;
-	m_ptr = &m_list[c_ptr->cptr];
+	m_ptr = &m_list[c_ptr->m_idx];
 
 /* Monsters that are intelligent wake up all the time; non-MINDLESS monsters wake
  * up 1/3 the time, and MINDLESS monsters wake up 1/10 the time -CWS

@@ -87,12 +87,12 @@ int poly_monster(int dir, int y, int x)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	else if (c_ptr->m_idx > 1) {
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    if ((r_ptr->level < randint((p_ptr->misc.lev-10)<1?1:(p_ptr->misc.lev-10))+10)
                 && !(r_ptr->cflags2 & MF2_UNIQUE)) {
-		poly(c_ptr->cptr);
+		poly(c_ptr->m_idx);
 		if (panel_contains(y, x) && (c_ptr->tl || c_ptr->pl))
 		    p = TRUE;
 	    } else {
@@ -132,9 +132,9 @@ int build_wall(int dir, int y, int x)
 	    flag = TRUE;
 	}
 	else {
-	    if (c_ptr->cptr > 1) {
+	    if (c_ptr->m_idx > 1) {
 
-		m_ptr = &m_list[c_ptr->cptr];
+		m_ptr = &m_list[c_ptr->m_idx];
 		r_ptr = &r_list[m_ptr->r_idx];
 
 		/* stop the wall building */
@@ -154,7 +154,7 @@ int build_wall(int dir, int y, int x)
 		    (void)sprintf(out_val, "%s wails out in pain!", m_name);
 		    msg_print(out_val);
 
-		    i = mon_take_hit((int)c_ptr->cptr, damage, TRUE);
+		    i = mon_take_hit((int)c_ptr->m_idx, damage, TRUE);
 		    if (i >= 0) {
 			(void)sprintf(out_val, "%s is embedded in the rock.",
 				      m_name);
@@ -689,16 +689,16 @@ void earthquake(void)
 		delete_object(i, j);
 
 		/* Hurt the monster, if any */
-		if (c_ptr->cptr > 1) {
+		if (c_ptr->m_idx > 1) {
 
-		    m_ptr = &m_list[c_ptr->cptr];
+		    m_ptr = &m_list[c_ptr->m_idx];
 		    r_ptr = &r_list[m_ptr->r_idx];
 
 		    if (!(r_ptr->cflags1 & MF1_THRO_WALL) &&
 			!(r_ptr->cflags2 & MF2_BREAK_WALL)) {
 
 			/* monster can not move to escape the wall */
-			if ((movement_rate(c_ptr->cptr) == 0) || (r_ptr->cflags1 & MF1_MV_ONLY_ATT)) {
+			if ((movement_rate(c_ptr->m_idx) == 0) || (r_ptr->cflags1 & MF1_MV_ONLY_ATT)) {
 			    kill = TRUE;
 			}
 
@@ -724,7 +724,7 @@ void earthquake(void)
 			(void)sprintf(out_val, "%s wails out in pain!", m_name);
 			msg_print(out_val);
 
-			i = mon_take_hit((int)c_ptr->cptr, damage, TRUE);
+			i = mon_take_hit((int)c_ptr->m_idx, damage, TRUE);
 			if (i >= 0) {
 			    sprintf(out_val, "%s is embedded in the rock.",
 				    m_name);
@@ -1119,8 +1119,8 @@ static void replace_spot(int y, int x, int typ)
     delete_object(y, x);
 
     /* Delete the monster (if any) */
-    if (c_ptr->cptr > 1)
-	delete_monster((int)c_ptr->cptr);
+    if (c_ptr->m_idx > 1)
+	delete_monster((int)c_ptr->m_idx);
 }
 
 
@@ -1898,9 +1898,9 @@ int sleep_monsters1(int y, int x)
     for (i = y - 1; i <= y + 1; i++)
 	for (j = x - 1; j <= x + 1; j++) {
 	    c_ptr = &cave[i][j];
-	    if (c_ptr->cptr > 1) {
+	    if (c_ptr->m_idx > 1) {
 
-		m_ptr = &m_list[c_ptr->cptr];
+		m_ptr = &m_list[c_ptr->m_idx];
 		r_ptr = &r_list[m_ptr->r_idx];
 		monster_name(m_name, m_ptr, r_ptr);
 
@@ -2604,7 +2604,7 @@ void fire_ball(int typ, int dir, int py, int px, int dam_hp, int max_dis)
 
 #ifndef TARGET
 	    if ((c_ptr->fval >= MIN_CLOSED_SPACE) ||
-		((c_ptr->cptr > 1))) {
+		((c_ptr->m_idx > 1))) {
 		flag = TRUE;	   /* THEN we decide to explode here. -CFT */
 		if (c_ptr->fval >= MIN_CLOSED_SPACE) {
 		    py = oldy;
@@ -2612,7 +2612,7 @@ void fire_ball(int typ, int dir, int py, int px, int dam_hp, int max_dis)
 		}
 #else
 	    if ((c_ptr->fval >= MIN_CLOSED_SPACE) ||
-		((c_ptr->cptr > 1) &&
+		((c_ptr->m_idx > 1) &&
 		 (!target_mode || target_at(py, px) ||
 		  !los(target_row, target_col, char_row, char_col) ||
 		  ((target_mon < MAX_M_IDX) && !m_list[target_mon].ml))) ||
@@ -2681,17 +2681,17 @@ void fire_ball(int typ, int dir, int py, int px, int dam_hp, int max_dis)
 			    && los(py, px, i, j)) {
 			    c_ptr = &cave[i][j];
 			    if (c_ptr->fval <= MAX_OPEN_SPACE) {
-				if (c_ptr->cptr > 1) {
+				if (c_ptr->m_idx > 1) {
 				    dam = dam_hp;
-				    m_ptr = &m_list[c_ptr->cptr];
+				    m_ptr = &m_list[c_ptr->m_idx];
 				    spell_hit_monster(m_ptr, typ, &dam,
 				      (distance(i, j, py, px) + 1), &ny, &nx, TRUE);
 				    c_ptr = &cave[ny][nx];
 			/* may be new location if teleported by gravity warp... */
-				    m_ptr = &m_list[c_ptr->cptr];
+				    m_ptr = &m_list[c_ptr->m_idx];
 			/* and even if not, may be new monster if chaos polymorphed */
 				    r_ptr = &r_list[m_ptr->r_idx];
-				    monptr = c_ptr->cptr;
+				    monptr = c_ptr->m_idx;
 
 				/*
 				 * lite up creature if visible, temp set pl
@@ -2699,12 +2699,12 @@ void fire_ball(int typ, int dir, int py, int px, int dam_hp, int max_dis)
 				 */
 				    tmp = c_ptr->pl;
 				    c_ptr->pl = TRUE;
-				    update_mon((int)c_ptr->cptr);
+				    update_mon((int)c_ptr->m_idx);
 
 				    thit++;
 				    if (dam < 1)
 					dam = 1;	/* protect vs neg damage -CFT */
-				    k = mon_take_hit((int)c_ptr->cptr, dam, TRUE);
+				    k = mon_take_hit((int)c_ptr->m_idx, dam, TRUE);
 				    if (k >= 0)
 					tkill++;
 				    c_ptr->pl = tmp;
@@ -2784,9 +2784,9 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
 	else {
-	    if (c_ptr->cptr > 1) {
+	    if (c_ptr->m_idx > 1) {
 		flag = TRUE;
-		m_ptr = &m_list[c_ptr->cptr];
+		m_ptr = &m_list[c_ptr->m_idx];
 		r_ptr = &r_list[m_ptr->r_idx];
 	    /*
 	     * light up monster and draw monster, temporarily set pl so that
@@ -2794,7 +2794,7 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 	     */
 		i = c_ptr->pl;
 		c_ptr->pl = TRUE;
-		update_mon((int)c_ptr->cptr);
+		update_mon((int)c_ptr->m_idx);
 		c_ptr->pl = i;
 	    /* draw monster and clear previous bolt */
 		Term_fresh();
@@ -2802,7 +2802,7 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 		spell_hit_monster(m_ptr, typ, &dam, 0, &ny, &nx, TRUE);
 		c_ptr = &cave[ny][nx];	/* may be new location if teleported
 					 * by gravity warp... */
-		m_ptr = &m_list[c_ptr->cptr];	/* and even if not, may be
+		m_ptr = &m_list[c_ptr->m_idx];	/* and even if not, may be
 						 * new monster if chaos
 						 * polymorphed */
 		r_ptr = &r_list[m_ptr->r_idx];
@@ -2810,11 +2810,11 @@ void fire_bolt(int typ, int dir, int y, int x, int dam_hp)
 
 		if ((dam > 0) && (m_ptr->hp >= dam)) {
 		    (void)sprintf(out_val,
-			       pain_message((int)c_ptr->cptr, dam), m_name);
+			       pain_message((int)c_ptr->m_idx, dam), m_name);
 		    msg_print(out_val);
 		}
 
-		i = mon_take_hit((int)c_ptr->cptr, dam, TRUE);
+		i = mon_take_hit((int)c_ptr->m_idx, dam, TRUE);
 
 		if (i >= 0)
 		    prt_experience();
@@ -2869,15 +2869,15 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 	if ((dis > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;	/* then stop */
 	else {
-	    if (c_ptr->cptr > 1) { /* hit a monster! */
+	    if (c_ptr->m_idx > 1) { /* hit a monster! */
 		tdam = dam;
-		m_ptr = &m_list[c_ptr->cptr];
+		m_ptr = &m_list[c_ptr->m_idx];
 
 		if (!(p_ptr->flags.status & PY_BLIND) && panel_contains(y,x)){
 		    /* temp light monster to show it... */
 		    t = c_ptr->pl;
 		    c_ptr->pl = TRUE;
-		    update_mon((int)c_ptr->cptr);
+		    update_mon((int)c_ptr->m_idx);
 		    c_ptr->pl = t;
 		    Term_fresh();	/* draw monster */
 		}
@@ -2886,7 +2886,7 @@ void line_spell(int typ, int dir, int y, int x, int dam)
 		spell_hit_monster(m_ptr, typ, &tdam, 1, &ny, &nx, TRUE);
 		c_ptr = &cave[ny][nx]; /* may be new loc if tele by grav warp */
 
-		(void) mon_take_hit((int)c_ptr->cptr, tdam, TRUE); /* hurt it */
+		(void) mon_take_hit((int)c_ptr->m_idx, tdam, TRUE); /* hurt it */
 	    }
 	    if (!(p_ptr->flags.status & PY_BLIND)) {
 		for(t=1;t<=dis;t++)
@@ -2978,23 +2978,23 @@ int drain_life(int dir, int y, int x, int dam)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
+	else if (c_ptr->m_idx > 1) {
 	    flag = TRUE;
-	    m_ptr = &m_list[c_ptr->cptr];
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    if (((r_ptr->cflags2 & MF2_UNDEAD) == 0) &&
 		((r_ptr->cflags2 & MF2_DEMON) == 0) &&
 		(r_ptr->r_char != 'E' && r_ptr->r_char != 'g' && r_ptr->r_char != 'v')) {
 		drain = TRUE;
 		monster_name(m_name, m_ptr, r_ptr);
-		i = mon_take_hit((int)c_ptr->cptr, dam, TRUE);
+		i = mon_take_hit((int)c_ptr->m_idx, dam, TRUE);
 		if (i >= 0) {
 		    (void)sprintf(out_val, "%s dies in a fit of agony.", m_name);
 		    msg_print(out_val);
 		    prt_experience();
 		} else {
 		    (void)sprintf(out_val,
-			       pain_message((int)c_ptr->cptr, dam), m_name);
+			       pain_message((int)c_ptr->m_idx, dam), m_name);
 		    msg_print(out_val);
 		}
 	    } else {
@@ -3063,13 +3063,13 @@ int wall_to_mud(int dir, int y, int x)
 	    }
 	}
 	
-	if (c_ptr->cptr > 1) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	if (c_ptr->m_idx > 1) {
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    if (MF2_HURT_ROCK & r_ptr->cflags2) {
 		monster_name(m_name, m_ptr, r_ptr);
 		flag = m_ptr->ml;
-		i = mon_take_hit((int)c_ptr->cptr, (20 + randint(30)), TRUE);
+		i = mon_take_hit((int)c_ptr->m_idx, (20 + randint(30)), TRUE);
 		if (flag) {
 		    if (i >= 0) {
 			l_list[i].r_cflags2 |= MF2_HURT_ROCK;
@@ -3288,20 +3288,20 @@ int hp_monster(int dir, int y, int x, int dam)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
+	else if (c_ptr->m_idx > 1) {
 	    flag = TRUE;
-	    m_ptr = &m_list[c_ptr->cptr];
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    monster_name(m_name, m_ptr, r_ptr);
 	    monster = TRUE;
-	    i = mon_take_hit((int)c_ptr->cptr, dam, TRUE);
+	    i = mon_take_hit((int)c_ptr->m_idx, dam, TRUE);
 	    if (i >= 0) {
 		(void)sprintf(out_val, "%s dies in a fit of agony.", m_name);
 		msg_print(out_val);
 		prt_experience();
 	    } else if (dam > 0) {
 		(void)sprintf(out_val,
-			      pain_message((int)c_ptr->cptr, dam), m_name);
+			      pain_message((int)c_ptr->m_idx, dam), m_name);
 		msg_print(out_val);
 	    }
 	}
@@ -3330,9 +3330,9 @@ int speed_monster(int dir, int y, int x, int spd)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
+	else if (c_ptr->m_idx > 1) {
 	    flag = TRUE;
-	    m_ptr = &m_list[c_ptr->cptr];
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    monster_name(m_name, m_ptr, r_ptr);
 	    if (spd > 0) {
@@ -3379,8 +3379,8 @@ int sleep_monster(int dir, int y, int x)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	else if (c_ptr->m_idx > 1) {
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 
 	    flag = TRUE;
@@ -3423,8 +3423,8 @@ int confuse_monster(int dir, int y, int x, int lvl)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	else if (c_ptr->m_idx > 1) {
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    monster_name(m_name, m_ptr, r_ptr);
 	    flag = TRUE;
@@ -3469,8 +3469,8 @@ int fear_monster(int dir, int y, int x, int lvl)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	else if (c_ptr->m_idx > 1) {
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    r_ptr = &r_list[m_ptr->r_idx];
 	    monster_name(m_name, m_ptr, r_ptr);
 	    flag = TRUE;
@@ -3510,10 +3510,10 @@ int clone_monster(int dir, int y, int x)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_list[c_ptr->cptr].csleep = 0;
+	else if (c_ptr->m_idx > 1) {
+	    m_list[c_ptr->m_idx].csleep = 0;
 	/* monptr of 0 is safe here, since can't reach here from creatures */
-	    return multiply_monster(y, x, (int)m_list[c_ptr->cptr].r_idx, 0);
+	    return multiply_monster(y, x, (int)m_list[c_ptr->m_idx].r_idx, 0);
 	}
     }
     while (!flag);
@@ -3535,9 +3535,9 @@ int teleport_monster(int dir, int y, int x)
 	c_ptr = &cave[y][x];
 	if ((dist > OBJ_BOLT_RANGE) || c_ptr->fval >= MIN_CLOSED_SPACE)
 	    flag = TRUE;
-	else if (c_ptr->cptr > 1) {
-	    m_list[c_ptr->cptr].csleep = 0;	/* wake it up */
-	    teleport_away((int)c_ptr->cptr, MAX_SIGHT * 5);
+	else if (c_ptr->m_idx > 1) {
+	    m_list[c_ptr->m_idx].csleep = 0;	/* wake it up */
+	    teleport_away((int)c_ptr->m_idx, MAX_SIGHT * 5);
 	    result = TRUE;
 	}
     }
@@ -3669,8 +3669,8 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		    delay(8 * delay_spd);	/* milliseconds */
 		    lite_spot(i, j);
 		}
-		if (c_ptr->cptr > 1 && c_ptr->cptr != monptr) {
-		    m_ptr = &m_list[c_ptr->cptr];
+		if (c_ptr->m_idx > 1 && c_ptr->m_idx != monptr) {
+		    m_ptr = &m_list[c_ptr->m_idx];
 		    dam = dam_hp;
 
 		    spell_hit_monster(m_ptr, typ, &dam, 0, &ny, &nx, FALSE);
@@ -3678,7 +3678,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 		    /* may be new location if teleported by gravity warp... */
 		    c_ptr = &cave[ny][nx];
 		    /* and even if not, may be new monster if chaos polymorphed */
-		    m_ptr = &m_list[c_ptr->cptr];
+		    m_ptr = &m_list[c_ptr->m_idx];
 		    r_ptr = &r_list[m_ptr->r_idx];
 		    monster_name(m_name, m_ptr, r_ptr);
 
@@ -3709,17 +3709,17 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			    l_list[m_ptr->r_idx].r_cflags1 = treas |
 				(l_list[m_ptr->r_idx].r_cflags1 & ~CM1_TREASURE);
 			}
-			if (monptr < c_ptr->cptr)
-			    delete_monster((int)c_ptr->cptr);
+			if (monptr < c_ptr->m_idx)
+			    delete_monster((int)c_ptr->m_idx);
 			else
-			    fix1_delete_monster((int)c_ptr->cptr);
+			    fix1_delete_monster((int)c_ptr->m_idx);
 		    } else {
-			(void)sprintf(out_val, pain_message((int)c_ptr->cptr, dam),
+			(void)sprintf(out_val, pain_message((int)c_ptr->m_idx, dam),
 				      m_name);
 			msg_print(out_val);
 		    }
 		    break;
-		} else if (c_ptr->cptr == 1) {
+		} else if (c_ptr->m_idx == 1) {
 		    if (dam_hp < 1)
 			dam_hp = 1;
 		    m_ptr = &m_list[monptr];
@@ -4165,14 +4165,14 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 		if ((c_ptr->i_idx != 0) && (*destroy) (&i_list[c_ptr->i_idx]))
 		    (void)delete_object(i, j);
 		if (c_ptr->fval <= MAX_OPEN_SPACE) {
-		    if ((c_ptr->cptr > 1) && (c_ptr->cptr != monptr)) {
+		    if ((c_ptr->m_idx > 1) && (c_ptr->m_idx != monptr)) {
 			dam = dam_hp;
-			m_ptr = &m_list[c_ptr->cptr];
+			m_ptr = &m_list[c_ptr->m_idx];
 			spell_hit_monster(m_ptr, typ, &dam, distance(i, j, y, x) + 1,
 					  &ny, &nx, FALSE);
 			c_ptr = &cave[ny][nx];	/* may be new location if teleported
                                                  * by gravity warp... */
-			m_ptr = &m_list[c_ptr->cptr];	/* and even if not, may be new
+			m_ptr = &m_list[c_ptr->m_idx];	/* and even if not, may be new
 							 * monster if chaos polymorphed */
 			r_ptr = &r_list[m_ptr->r_idx];
 
@@ -4210,16 +4210,16 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 				    (l_list[m_ptr->r_idx].r_cflags1 & ~CM1_TREASURE);
 			    }
 			/* It ate an already processed monster.  Handle normally. */
-			    if (monptr < c_ptr->cptr)
-				delete_monster((int)c_ptr->cptr);
+			    if (monptr < c_ptr->m_idx)
+				delete_monster((int)c_ptr->m_idx);
 
 /* If it eats this monster, an already processed monster will take its place,
  * causing all kinds of havoc. Delay the kill a bit.
  */
 			    else
-				fix1_delete_monster((int)c_ptr->cptr);
+				fix1_delete_monster((int)c_ptr->m_idx);
 			}
-		    } else if (c_ptr->cptr == 1) {
+		    } else if (c_ptr->m_idx == 1) {
 			dam = (dam_hp / (distance(i, j, y, x) + 1));
 			m_ptr = &m_list[monptr];
 		    /* let's do at least one point of damage */

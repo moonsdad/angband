@@ -2322,7 +2322,7 @@ void place_good(int y, int x, u32b good)
 	}
     }
 
-    if (c_ptr->cptr == 1) {
+    if (c_ptr->m_idx == 1) {
 	msg_print("You feel something roll beneath your feet.");
     }
 }

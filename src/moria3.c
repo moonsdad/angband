@@ -183,15 +183,15 @@ static int look_see(int x, int y, int *transparent)
     out_val[0] = 0;
 
     /* Examine visible monsters */
-    if (gl_rock == 0 && c_ptr->cptr > 1 && m_list[c_ptr->cptr].ml) {
+    if (gl_rock == 0 && c_ptr->m_idx > 1 && m_list[c_ptr->m_idx].ml) {
 
-	j = m_list[c_ptr->cptr].r_idx;
+	j = m_list[c_ptr->m_idx].r_idx;
 
 	if (r_list[j].cflags2 & MF2_UNIQUE) {
 
 	    /* Describe */
 	    (void)sprintf(out_val, "%s %s (%s).  [(r)ecall]",
-			  dstring, r_list[j].name, look_mon_desc((int)c_ptr->cptr));
+			  dstring, r_list[j].name, look_mon_desc((int)c_ptr->m_idx));
 	}
 
 	/* Use prompt */
@@ -200,7 +200,7 @@ static int look_see(int x, int y, int *transparent)
 			  dstring,
 			  (is_a_vowel(r_list[j].name[0]) ? "an" : "a"),
 			  r_list[j].name,
-			  look_mon_desc((int)c_ptr->cptr));
+			  look_mon_desc((int)c_ptr->m_idx));
 	}
 	dstring = "It is on";
 
@@ -616,10 +616,10 @@ void do_cmd_open()
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
 	no_object = FALSE;
-	if (c_ptr->cptr > 1 && c_ptr->i_idx != 0 &&
+	if (c_ptr->m_idx > 1 && c_ptr->i_idx != 0 &&
 	    (i_list[c_ptr->i_idx].tval == TV_CLOSED_DOOR
 	     || i_list[c_ptr->i_idx].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    if (m_ptr->ml) {
 		if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
 		    (void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
@@ -761,7 +761,7 @@ void do_cmd_close()
 	no_object = FALSE;
 	if (c_ptr->i_idx != 0)
 	    if (i_list[c_ptr->i_idx].tval == TV_OPEN_DOOR)
-		if (c_ptr->cptr == 0)
+		if (c_ptr->m_idx == 0)
 		    if (i_list[c_ptr->i_idx].pval == 0) {
 			invcopy(&i_list[c_ptr->i_idx], OBJ_CLOSED_DOOR);
 			c_ptr->fval = BLOCKED_FLOOR;
@@ -769,7 +769,7 @@ void do_cmd_close()
 		    } else
 			msg_print("The door appears to be broken.");
 		else {
-		    m_ptr = &m_list[c_ptr->cptr];
+		    m_ptr = &m_list[c_ptr->m_idx];
 		    if (m_ptr->ml) {
 			if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
 			    (void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
@@ -913,8 +913,8 @@ void tunnel(int dir)
 	}
 	return;
     }
-    if (c_ptr->cptr > 1) {
-	m_ptr = &m_list[c_ptr->cptr];
+    if (c_ptr->m_idx > 1) {
+	m_ptr = &m_list[c_ptr->m_idx];
 	if (m_ptr->ml) {
 	    if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
 		(void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
@@ -1040,10 +1040,10 @@ void do_cmd_disarm()
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
 	no_disarm = FALSE;
-	if (c_ptr->cptr > 1 && c_ptr->i_idx != 0 &&
+	if (c_ptr->m_idx > 1 && c_ptr->i_idx != 0 &&
 	    (i_list[c_ptr->i_idx].tval == TV_VIS_TRAP
 	     || i_list[c_ptr->i_idx].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->cptr];
+	    m_ptr = &m_list[c_ptr->m_idx];
 	    if (m_ptr->ml)
 		(void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
 	    else
@@ -1185,7 +1185,7 @@ void bash()
 	c_ptr = &cave[y][x];
 
 	/* Request to bash a monster */
-	if (c_ptr->cptr > 1) {
+	if (c_ptr->m_idx > 1) {
 	    if (p_ptr->flags.afraid > 0) {
 		msg_print("You are too afraid!");
 	    }
@@ -1296,7 +1296,7 @@ void do_cmd_spike()
 	i_ptr = &i_list[c_ptr->i_idx];
 
 	    if (i_ptr->tval == TV_CLOSED_DOOR)
-		if (c_ptr->cptr == 0) {
+		if (c_ptr->m_idx == 0) {
 		    if (find_range(TV_SPIKE, TV_NEVER, &i, &j)) {
 			free_turn_flag = FALSE;
 			count_msg_print("You jam the door with a spike.");
@@ -1316,7 +1316,7 @@ void do_cmd_spike()
 		} else {
 		    free_turn_flag = FALSE;
 		    (void)sprintf(tmp_str, "The %s is in your way!",
-				  r_list[m_list[c_ptr->cptr].r_idx].name);
+				  r_list[m_list[c_ptr->m_idx].r_idx].name);
 		    msg_print(tmp_str);
 		}
 	    else if (i_ptr->tval == TV_OPEN_DOOR)
@@ -1439,9 +1439,9 @@ void do_cmd_fire()
 			flag = TRUE;
 		    c_ptr = &cave[y][x];
 		    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (!flag)) {
-			if (c_ptr->cptr > 1) {
+			if (c_ptr->m_idx > 1) {
 			    flag = TRUE;
-			    m_ptr = &m_list[c_ptr->cptr];
+			    m_ptr = &m_list[c_ptr->m_idx];
 			    tbth = tbth - cur_dis;
 			/* if monster not lit, make it much more difficult to
 			 * hit, subtract off most bonuses, and reduce bthb
@@ -1480,7 +1480,7 @@ void do_cmd_fire()
 			     * always print fear msgs, so player can stop
 			     * shooting -CWS 
 			     */
-				i = mon_take_hit((int)c_ptr->cptr, tdam, TRUE);
+				i = mon_take_hit((int)c_ptr->m_idx, tdam, TRUE);
 				if (i < 0) {
 				    char                buf[100];
 				    char                cdesc[100];
@@ -1492,7 +1492,7 @@ void do_cmd_fire()
 				    } else
 					strcpy(cdesc, "It");
 				    (void)sprintf(buf,
-						  pain_message((int)c_ptr->cptr,
+						  pain_message((int)c_ptr->m_idx,
 							       (int)tdam), cdesc);
 				    msg_print(buf);
 				}

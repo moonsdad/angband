@@ -293,7 +293,7 @@ static int sv_write()
 	    wr_long(r_ptr->r_cflags2);
 	    wr_byte(r_ptr->r_wake);
 	    wr_byte(r_ptr->r_ignore);
-	    wr_bytes(r_ptr->r_attacks, MAX_MON_NATTACK);
+	    wr_bytes(r_ptr->r_attacks, 4);
 	}
     }
     wr_short((u16b) 0xFFFF);	   /* sentinel to indicate no more monster info */
@@ -500,10 +500,10 @@ static int sv_write()
     for (i = 0; i < MAX_HEIGHT; i++)
 	for (j = 0; j < MAX_WIDTH; j++) {
 	    c_ptr = &cave[i][j];
-	    if (c_ptr->cptr != 0) {
+	    if (c_ptr->m_idx != 0) {
 		wr_byte((byte) i);
 		wr_byte((byte) j);
-		wr_short((u16b) c_ptr->cptr); /* was wr_byte -CWS */
+		wr_short((u16b) c_ptr->m_idx); /* was wr_byte -CWS */
 	    }
 	}
     wr_byte((byte) 0xFF);	   /* marks end of cptr info */
@@ -1037,7 +1037,7 @@ int load_player(int *generate)
 	    rd_long(&r_ptr->r_cflags2);
 	    rd_byte(&r_ptr->r_wake);
 	    rd_byte(&r_ptr->r_ignore);
-	    rd_bytes(r_ptr->r_attacks, MAX_MON_NATTACK);
+	    rd_bytes(r_ptr->r_attacks, 4);
 	    rd_short(&int16u_tmp);
 	}
 	if (to_be_wizard)
