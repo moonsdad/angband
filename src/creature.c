@@ -24,15 +24,22 @@ void update_mon(int m_idx)
     register monster_type  *m_ptr;
     register monster_race  *r_ptr;
 
-#ifdef ATARIST_MWC
-    u32b                 holder;
-#endif
+    /* The current monster location */
+    int fy, fx;
 
     /* Can the monster be sensed in any way? */
     int flag = FALSE;
 
     /* Get the monster */
     m_ptr = &m_list[m_idx];
+
+    /* Get the monster race (to check flags) */
+    r_ptr = &r_list[m_ptr->r_idx];
+
+
+    /* Get the monster location */
+    fy = m_ptr->fy;
+    fx = m_ptr->fx;
 
     if ((m_ptr->cdis <= MAX_SIGHT) &&
 	(!(p_ptr->flags.status & PY_BLIND) || p_ptr->flags.telepathy) &&
@@ -43,8 +50,8 @@ void update_mon(int m_idx)
     /* if not mindless, telepathy sees -CWS */
 	if (p_ptr->flags.telepathy) {
 
-	    char c = r_list[m_ptr->mptr].cchar;
-	    cptr n = r_list[m_ptr->mptr].name;
+	    char c = r_ptr->r_char;
+	    cptr n = r_ptr->name;
 
 	    /* Never sense monsters with "bizarre minds" */
 	    /* (elementals & golems & vorticies & xorns) -CFT */
@@ -58,7 +65,13 @@ void update_mon(int m_idx)
 	    /* Once in a while, sense spiders  -CFT*/
 	    /* But always sense Driders and Uniques (Shelob and Ungol) */
 	    else if (c=='S' && strncmp(n, "Drider", 6) &&
-		     !(r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)) {
+		     !(r_ptr->cflags2 & MF2_UNIQUE)) {
+		if (randint(5)==1) flag = TRUE;
+	    }
+
+	    /* Once in a while, sense worms -CFT */
+	    /* But always sense Wereworms and Giant Purple Worms */
+	    else if (c=='w' && strncmp(n, "Were", 4) && strncmp(n, "Gian", 4)) {
 		if (randint(5)==1) flag = TRUE;
 	    }
 
@@ -71,32 +84,29 @@ void update_mon(int m_idx)
 	    /* Never sense icky things.  But always sense Blue icky things.. */
 	    else if (c=='i' && strncmp(n, "Blue", 4));
 
-	    /* occas. show worms, except Purple worms and Wereworms -CFT */
-	    else if (c=='w' && strncmp(n, "Were", 4) && strncmp(n, "Gian", 4)) {
-		if (randint(5)==1) flag = TRUE;
-	    }
-
 	    /* Never sense 'shrooms.  But always sense magic 'shrooms */
 	    else if (c==',' && strncmp(n, "Magic", 5));
 
 	    /* Never sense mindless monsters. */
-	    else if (!(r_list[m_ptr->mptr].cflags2 & MF2_MINDLESS)) flag = TRUE;
+	    else if (r_ptr->cflags2 & MF2_MINDLESS);
+
+	    /* Finally, sense anything not explicitly denied above. */
+	    else flag = TRUE;
 	}
 
 	/* Normal line of sight */
 	if (los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx)) {
 
 	    /* Get the cave grid (to check light) */
-	    c_ptr = &cave[m_ptr->fy][m_ptr->fx];
-	    r_ptr = &r_list[m_ptr->mptr];
+	    c_ptr = &cave[fy][fx];
 
 	    /* Infravision is able to see "nearby" monsters */
 	    if ((p_ptr->flags.see_infra > 0) &&
-		(m_ptr->cdis <= p_ptr->flags.see_infra)) {
+		(m_ptr->cdis <= (unsigned)(p_ptr->flags.see_infra))) {
 
 		/* Infravision only works on "warm" creatures */
 		/* changed to act sensibly -CFT */
-		if (MF2_NO_INFRA & r_ptr->cflags2)	l_list[m_ptr->mptr].r_cflags2 |= NO_INFRA;
+		if (r_ptr->cflags2 & MF2_NO_INFRA) l_list[m_ptr->r_idx].r_cflags2 |= NO_INFRA;
 		
 		/* Infravision works */
 		else flag = TRUE;   /* only can see if not MF2_NO_INFRA... */
@@ -106,20 +116,11 @@ void update_mon(int m_idx)
 	    if (c_ptr->pl || c_ptr->tl ||
 		(find_flag && m_ptr->cdis <= cur_lite && player_light)) {
 
-#ifdef ATARIST_MWC
-		holder = MF1_MV_INVIS;
-		if ((holder & r_ptr->cflags1) == 0)
-#else
-		if ((MF1_MV_INVIS & r_ptr->cflags1) == 0)
-#endif
-		    flag = TRUE;
+		/* Take note of invisibility */
+		if ((r_ptr->cflags1 & MF1_MV_INVIS) == 0) flag = TRUE;
 		else if (p_ptr->flags.see_inv) {
 		    flag = TRUE;
-#ifdef ATARIST_MWC
-		    l_list[m_ptr->mptr].r_cflags1 |= holder;
-#else
-		    l_list[m_ptr->mptr].r_cflags1 |= MF1_MV_INVIS;
-#endif
+		    l_list[m_ptr->r_idx].r_cflags1 |= MF1_MV_INVIS;
 		}
 	    }
 	}
@@ -145,13 +146,15 @@ void update_mon(int m_idx)
 	    screen_change = TRUE;  /* notify inven_command */
 	}
     }
-    /* Turn it off.	 */
+
+    /* Turn it off. */
     else if (m_ptr->ml) {
 
 	    /* Mark monster as hidden */
 	    m_ptr->ml = FALSE;
-	 	lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
-	 	screen_change = TRUE;	   /* notify inven_command */
+
+	    lite_spot((int)m_ptr->fy, (int)m_ptr->fx);
+	    screen_change = TRUE;	   /* notify inven_command */
     }
 }
 
@@ -270,7 +273,7 @@ static void get_moves(int m_idx, int *mm)
  */
 
     /* Apply fear if possible and necessary */
-    if (((s16b)(p_ptr->misc.lev - 34 - r_list[(m_list[m_idx]).mptr].level +
+    if (((s16b)(p_ptr->misc.lev - 34 - r_list[(m_list[m_idx]).r_idx].level +
 		 ((m_list[m_idx].maxhp) % 8)) > 0)
 	|| m_list[m_idx].monfear) { /* Run away!  Run away! -DGK */
     
@@ -476,7 +479,7 @@ static void shatter_quake(int mon_y, int mon_x)
 		c_ptr = &cave[i][j];
 		if (c_ptr->cptr > 1) {
 		    m_ptr = &m_list[c_ptr->cptr];
-		    r_ptr = &r_list[m_ptr->mptr];
+		    r_ptr = &r_list[m_ptr->r_idx];
 
 		    if (!(r_ptr->cflags1 & MF1_THRO_WALL) &&
 			!(r_ptr->cflags2 & MF2_BREAK_WALL)) {
@@ -527,12 +530,12 @@ static void shatter_quake(int mon_y, int mon_x)
 			    treas = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
 						  r_ptr->cflags1, 0, 0);
 			    if (m_ptr->ml) {
-				temp = (l_list[m_ptr->mptr].r_cflags1 & CM1_TREASURE)
+				temp = (l_list[m_ptr->r_idx].r_cflags1 & CM1_TREASURE)
 				    >> CM1_TR_SHIFT;
 				if (temp > ((treas & CM1_TREASURE) >> CM1_TR_SHIFT))
 				    treas = (treas & ~CM1_TREASURE) | (temp << CM1_TR_SHIFT);
-				l_list[m_ptr->mptr].r_cflags1 = treas |
-				    (l_list[m_ptr->mptr].r_cflags1 & ~CM1_TREASURE);
+				l_list[m_ptr->r_idx].r_cflags1 = treas |
+				    (l_list[m_ptr->r_idx].r_cflags1 & ~CM1_TREASURE);
 			    }
 			    if (monptr < c_ptr->cptr)
 				delete_monster((int)c_ptr->cptr);
@@ -601,13 +604,13 @@ static void shatter_quake(int mon_y, int mon_x)
 		    }
 		    take_hit(damage, "an Earthquake");
 		}
-		if (c_ptr->tptr != 0)
-		    if (((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			 (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			 (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT)) ||
-			(i_list[c_ptr->tptr].tval == TV_UP_STAIR) ||
-			(i_list[c_ptr->tptr].tval == TV_DOWN_STAIR) ||
-			(i_list[c_ptr->tptr].tval == TV_STORE_DOOR))
+		if (c_ptr->i_idx != 0)
+		    if (((i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
+			 (i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+			 (i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT)) ||
+			(i_list[c_ptr->i_idx].tval == TV_UP_STAIR) ||
+			(i_list[c_ptr->i_idx].tval == TV_DOWN_STAIR) ||
+			(i_list[c_ptr->i_idx].tval == TV_STORE_DOOR))
 			continue;  /* don't kill artifacts... */
 		    else
 			(void)delete_object(i, j);
@@ -616,7 +619,7 @@ static void shatter_quake(int mon_y, int mon_x)
 		    c_ptr->fval = CORR_FLOOR;
 		    c_ptr->pl = FALSE;
 		    c_ptr->fm = FALSE;
-		} else if ((c_ptr->fval <= MAX_CAVE_FLOOR) && (c_ptr->tptr == 0)
+		} else if ((c_ptr->fval <= MAX_CAVE_FLOOR) && (c_ptr->i_idx == 0)
 			   && (c_ptr->cptr != 1)) {
 		    /* don't bury player, it made him unattackable -CFT */
 		    tmp = randint(10);
@@ -642,14 +645,21 @@ static void shatter_quake(int mon_y, int mon_x)
 static void br_wall(int mon_y, int mon_x)
 {
     register int        k, l;
+    register int	cx, cy;
     register cave_type *c_ptr;
-    int                 kill, damage = 0, tmp, y, x = 0;
+    int                 tmp;
+    int			damage = 0;
+    int			y, x = 0, kill = TRUE;
 
-    kill = TRUE;
-    for (y = char_row - 1; y <= char_row + 1; y++) {
-	for (x = char_col - 1; x <= char_col + 1; x++) {
+
+    /* Get the player location */
+    cx = char_row;
+    cy = char_col;
+
+    for (y = cx - 1; y <= cx + 1; y++) {
+	for (x = cy - 1; x <= cy + 1; x++) {
 	    if ((cave[y][x].fval <= MAX_OPEN_SPACE) &&
-	      (cave[y][x].cptr == 0) && !(y == char_row && x == char_col)) {
+	      (cave[y][x].cptr == 0) && !(y == cx && x == cy)) {
 		kill = FALSE;
 		break;
 	    }
@@ -669,6 +679,9 @@ static void br_wall(int mon_y, int mon_x)
 	msg_print("You are pummeled with debris!");
 	break;
     }
+
+
+    /* Hurt the player a lot (is this "fair"?) */
     if (kill) {
 	msg_print("You are trapped, crushed and cannot move!");
 	damage = 250;
@@ -680,13 +693,13 @@ static void br_wall(int mon_y, int mon_x)
 	/* Calculate results */
 	switch (randint(3)) {
 	  case 1:
+	    msg_print("But you nimbly dodge the blast!");
+	    damage = 0;
+	    break;
+	  case 2:
 	    msg_print("The rubble bashes you!");
 	    damage = damroll(10, 4);
 	    stun_player(randint(50));
-	    break;
-	  case 2:
-	    msg_print("But you nimbly dodge the blast!");
-	    damage = 0;
 	    break;
 	  case 3:
 	    msg_print("The floor crushes you against the ceiling!");
@@ -695,19 +708,21 @@ static void br_wall(int mon_y, int mon_x)
 	    break;
 	}
 
-	c_ptr = &cave[char_row][char_col];
 
-	move_rec(char_row, char_col, y, x);
+	/* Destroy the player's old grid */
+	c_ptr = &cave[cx][char_col];
+
+	move_rec(cx, cy, y, x);
 
     /* don't destroy floor if stairs, shop, or artifact... */
 	if ((c_ptr->fval <= MAX_CAVE_FLOOR) &&
-	((c_ptr->tptr == 0) || ((i_list[c_ptr->tptr].tval != TV_UP_STAIR) &&
-			      (i_list[c_ptr->tptr].tval != TV_DOWN_STAIR) &&
-			      (i_list[c_ptr->tptr].tval != TV_STORE_DOOR) &&
-			      !((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-				(i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			    (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT))))) {
-	    if (c_ptr->tptr) delete_object(char_row, char_col);
+	((c_ptr->i_idx == 0) || ((i_list[c_ptr->i_idx].tval != TV_UP_STAIR) &&
+			      (i_list[c_ptr->i_idx].tval != TV_DOWN_STAIR) &&
+			      (i_list[c_ptr->i_idx].tval != TV_STORE_DOOR) &&
+			      !((i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
+				(i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+			    (i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT))))) {
+	    if (c_ptr->i_idx) delete_object(cx, cy);
 	    tmp = randint(10);
 	    if (tmp < 6) c_ptr->fval = QUARTZ_WALL;
 	    else if (tmp < 9) c_ptr->fval = MAGMA_WALL;
@@ -715,23 +730,23 @@ static void br_wall(int mon_y, int mon_x)
 
 	    c_ptr->fm = FALSE;
 	}
-	for (k = char_row - 1; k <= char_row + 1; k++)
-	    for (l = char_col - 1; l <= char_col + 1; l++) {
+	for (k = cx - 1; k <= cx + 1; k++)
+	    for (l = cy - 1; l <= cy + 1; l++) {
 		c_ptr = &cave[k][l];
 		c_ptr->tl = FALSE;
 		lite_spot(k, l);
 	    }
-	lite_spot(char_row, char_col);
-	char_row = y;
+	lite_spot(cx, cy);
+	cx = y;
 	char_col = x;
     } /* !kill */
 
 	/* Check the view */
-    check_view();
+	check_view();
 
 	/* light creatures */
-    update_monsters();
-    lite_spot(char_row, char_col);
+	update_monsters();
+	lite_spot(cx, cy);
 
     /* Take some damage */
     take_hit(damage, "an Earthquake");
@@ -745,12 +760,13 @@ static void br_wall(int mon_y, int mon_x)
 static void make_attack(int m_idx)
 {
     int                    attype, adesc, adice, asides;
-    int                    i, j, damage, flag, attackn, notice, visible;
+    int                    i, j, tmp, damage, flag, attackn, notice, visible;
     int                    shatter = FALSE;
     int                    do_cut, do_stun;
     s32b                  gold;
     u16b                  *ap, *ap_orig;
-    vtype                  cdesc, tmp_str, ddesc;
+    vtype                  ddesc;
+    vtype		   cdesc, tmp_str;
 
     register monster_race	*r_ptr;
     monster_type		*m_ptr;
@@ -765,27 +781,28 @@ static void make_attack(int m_idx)
     if (death) return;
 
     m_ptr = &m_list[m_idx];
-    r_ptr = &r_list[m_ptr->mptr];
+    r_ptr = &r_list[m_ptr->r_idx];
 
-    if (r_ptr->cflags2 & MF2_DESTRUCT) shatter = TRUE;
-
+    /* Get the monster name (or "it") */
     if (!m_ptr->ml)
 	(void)strcpy(cdesc, "It ");
     else {
-	if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
+	if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
 	    (void)sprintf(cdesc, "%s ", r_ptr->name);
 	else
 	    (void)sprintf(cdesc, "The %s ", r_ptr->name);
     }
 
-    /* For "DIED_FROM" string	   */
+    /* Get the "DIED_FROM" string */
     if (r_ptr->cflags2 & MF2_UNIQUE)
 	(void)sprintf(ddesc, "%s", r_ptr->name);
     else if (is_a_vowel(r_ptr->name[0]))
 	(void)sprintf(ddesc, "an %s", r_ptr->name);
     else
 	(void)sprintf(ddesc, "a %s", r_ptr->name);
-    /* End DIED_FROM		   */
+    /* End DIED_FROM */
+
+    if (r_ptr->cflags2 & MF2_DESTRUCT) shatter = TRUE;
 
     attackn = 0;
     ap = r_ptr->damage;
@@ -806,7 +823,7 @@ static void make_attack(int m_idx)
 	     ((p_ptr->misc.lev + 1) > r_ptr->level)) &&
 	    (randint(100) + (p_ptr->misc.lev) > 50)) {
 
-	    if (m_ptr->ml) l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
+	    if (m_ptr->ml) l_list[m_ptr->r_idx].r_cflags2 |= MF2_EVIL;
 	    attype = 99;
 	    adesc = 99;
 	}
@@ -868,13 +885,13 @@ static void make_attack(int m_idx)
 		flag = TRUE;
 	    break;
 	  case 12:		   /* Steal Money    */
-	    if ((test_hit(5, (int)r_ptr->level, 0, (int)p_ptr->misc.misc.lev,
+	    if ((test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.misc.lev,
 			  CLA_MISC_HIT))
 		&& (p_ptr->misc.misc.au > 0))
 		flag = TRUE;
 	    break;
 	  case 13:		   /* Steal Object   */
-	    if ((test_hit(2, (int)r_ptr->level, 0, (int)p_ptr->misc.misc.lev,
+	    if ((test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.misc.lev,
 			  CLA_MISC_HIT))
 		&& (inven_ctr > 0))
 		flag = TRUE;
@@ -1256,7 +1273,7 @@ static void make_attack(int m_idx)
 		    (randint(168) < p_ptr->stats.use_stat[A_DEX])) {
 		    msg_print("You quickly protect your money pouch!");
 		}
-		else {		   /* make this more sane.... -CWS */
+		else { /* make this more sane.... -CWS */
 		    vtype               t1;
 		    gold = (p_ptr->misc.au / 10) + randint(25);
 		    if (gold > 5000) gold = 2000 + randint(1000) + (p_ptr->misc.au / 20);
@@ -1277,7 +1294,7 @@ static void make_attack(int m_idx)
 
 	      /* Steal Object */
 	      case 13:
-		/* immune to steal at 18/150 change */
+		/* immune to steal at 18/150 dexterity */
 		if ((p_ptr->flags.paralysis < 1) &&
 		    (randint(168) < p_ptr->stats.use_stat[A_DEX])) {
 		    msg_print("You grab hold of your backpack!");
@@ -1288,23 +1305,26 @@ static void make_attack(int m_idx)
 		    /* Steal a single item from the pack */
 		    i = rand_int(inven_ctr);
 
-		    /* don't destroy artifacts -CFT */
+		    /* Get the item */
+		    i_ptr = &inventory[i];
+
+		    /* Don't steal artifacts  -CFT */
 		    if ((inventory[i].tval >= TV_MIN_WEAR) &&
 			(inventory[i].tval <= TV_MAX_WEAR) &&
 			(inventory[i].flags2 & TR_ARTIFACT)) break;
 
 		    /* Get a description */
-		    objdes(t1, &inventory[i], FALSE);
+		    objdes(t1, i_ptr, FALSE);
 
 		    /* Message */
 		    sprintf(t2, "%sour %s (%c) %s stolen!",
 		    /* stacked single items */
-			    ((inventory[i].sval <= ITEM_SINGLE_STACK_MAX) &&
-			     (inventory[i].number > 1))? "One of y" : "Y",
+			    ((i_ptr->sval <= ITEM_SINGLE_STACK_MAX) &&
+			     (i_ptr->number > 1))? "One of y" : "Y",
 			    t1, i + 'a',
 		    /* stacked group items */
-			    ((inventory[i].sval > ITEM_SINGLE_STACK_MAX) &&
-			     (inventory[i].number > 1))? "were" : "was");
+			    ((i_ptr->sval > ITEM_SINGLE_STACK_MAX) &&
+			     (i_ptr->number > 1))? "were" : "was");
 		    msg_print(t2);
 
 		    /* Steal the item */
@@ -1463,8 +1483,7 @@ static void make_attack(int m_idx)
 			    msg_print (t2);
 			    calc_bonuses ();
 			}
-			else
-			    notice = FALSE;
+			else notice = FALSE;
 		    }
 		}
 		break;
@@ -1573,46 +1592,41 @@ static void make_attack(int m_idx)
 		break;
 	    }
 
+	    /* The next few lines deal with "critical" cuts/stunning */
+	    /* Note that "tmp" is unused if (!do_tmp && !do_stun) */
+
 	    if (do_cut && do_stun) {
 		switch (randint(2)) {
-		  case 1:
-		    do_cut = FALSE;
-		    break;
-		  case 2:
-		    do_stun = FALSE;
-		    break;
+		  case 1: do_cut = FALSE; break;
+		  case 2: do_stun = FALSE; break;
 		}
 	    }
-	    switch (monster_critical(adice, asides, damage)) {
+
+	    /* Critical hit (zero if non-critical) */
+	    tmp = monster_critical(adice, asides, damage);
+
+	    /* Critical Cut (note check for "do_cut==0") */
+	    switch (do_cut * tmp) {
 	      case 0: break;
-	      case 1:
-		if (do_cut) cut_player(randint(5));
-		else if (do_stun)  stun_player(randint(5));
-		break;
-	      case 2:
-		if (do_cut) cut_player(randint(5) + 5);
-		else if (do_stun)  stun_player(randint(5) + 5);
-		break;
-	      case 3:
-		if (do_cut) cut_player(randint(30) + 20);
-		else if (do_stun) stun_player(randint(20) + 10);
-		break;
-	      case 4:
-		if (do_cut) cut_player(randint(70) + 30);
-		else if (do_stun) stun_player(randint(40) + 30);
-		break;
-	      case 5:
-		if (do_cut) cut_player(randint(250) + 50);
-		else if (do_stun) stun_player(randint(50) + 40);
-		break;
-	      case 6:
-		if (do_cut) cut_player(300);
-		else if (do_stun) stun_player(randint(60) + 57);
-		break;
-	      default:
-		if (do_cut) cut_player(5000);
-		else if (do_stun) stun_player(100 + randint(10));
-		break;
+	      case 1: cut_player(randint(5)); break;
+	      case 2: cut_player(randint(5) + 5); break;
+	      case 3: cut_player(randint(30) + 20); break;
+	      case 4: cut_player(randint(70) + 30); break;
+	      case 5: cut_player(randint(250) + 50); break;
+	      case 6: cut_player(300); break;
+	      default: cut_player(5000); break;
+	    }
+
+	    /* Critical Stun (note check for "do_stun==0") */
+	    switch (do_stun * tmp) {
+	      case 0: break;
+	      case 1: stun_player(randint(5)); break;
+	      case 2: stun_player(randint(5) + 5); break;
+	      case 3: stun_player(randint(20) + 10); break;
+	      case 4: stun_player(randint(40) + 30); break;
+	      case 5: stun_player(randint(50) + 40); break;
+	      case 6: stun_player(randint(60) + 57); break;
+	      default: stun_player(100 + randint(10)); break;
 	    }
 
 	    /* monster is only confused if it actually hits */
@@ -1623,16 +1637,17 @@ static void make_attack(int m_idx)
 		    p_ptr->flags.confusing = FALSE;
 		    if ((randint(MAX_R_LEV) < r_ptr->level) ||
 			(MF2_CHARM_SLEEP & r_ptr->cflags2)) {
-			(void)sprintf(tmp_str, "%sis unaffected.", cdesc);
+			sprintf(tmp_str, "%sis unaffected.", cdesc);
 		    }
 		    else {
-			(void)sprintf(tmp_str, "%sappears confused.", cdesc);
+			sprintf(tmp_str, "%sappears confused.", cdesc);
 			m_ptr->confused = TRUE;
 		    }
 		    msg_print(tmp_str);
 
 		    if (visible && !death && randint(4) == 1) {
-			l_list[m_ptr->mptr].r_cflags2 |= r_ptr->cflags2 & MF2_CHARM_SLEEP;
+			l_list[m_ptr->r_idx].r_cflags2 |=
+			    r_ptr->cflags2 & MF2_CHARM_SLEEP;
 		    }
 		}
 	    }
@@ -1644,13 +1659,13 @@ static void make_attack(int m_idx)
 	 * attacks if creature repelled (no damage done) 
 	 */
 	    if ((notice ||
-		 (l_list[m_ptr->mptr].r_attacks[attackn] != 0 &&
+		 (l_list[m_ptr->r_idx].r_attacks[attackn] != 0 &&
 		  attype != 99))
-		&& l_list[m_ptr->mptr].r_attacks[attackn] < MAX_UCHAR) {
-		l_list[m_ptr->mptr].r_attacks[attackn]++;
+		&& l_list[m_ptr->r_idx].r_attacks[attackn] < MAX_UCHAR) {
+		l_list[m_ptr->r_idx].r_attacks[attackn]++;
 	    }
-	    if (visible && death && l_list[m_ptr->mptr].r_deaths < MAX_SHORT) {
-		l_list[m_ptr->mptr].r_deaths++;
+	    if (visible && death && l_list[m_ptr->r_idx].r_deaths < MAX_SHORT) {
+		l_list[m_ptr->r_idx].r_deaths++;
 	    }
 	}
 	else {
@@ -1678,11 +1693,11 @@ static void make_attack(int m_idx)
  */
 static void make_move(int m_idx, int *mm, u32b *rcflags1)
 {
-    u32b                movebits;
     register cave_type    *c_ptr;
     register inven_type   *i_ptr;
     register monster_type *m_ptr;
     register monster_race *r_ptr;
+    register monster_lore *l_ptr;
 
     int                   i, newy, newx;
 
@@ -1693,17 +1708,12 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 
 
-
-#ifdef ATARIST_MWC
-    u32b              holder;
-#endif
-
     i = 0;
 
     /* Access the monster */
     m_ptr = &m_list[m_idx];
-    r_ptr = &r_list[m_ptr->mptr];
-    movebits = r_list[m_ptr->mptr].cflags1;
+    r_ptr = &r_list[m_ptr->r_idx];
+    l_ptr = &l_list[m_ptr->r_idx];
 
     do {
 
@@ -1714,6 +1724,9 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 	/* Access that cave grid */
 	c_ptr = &cave[newy][newx];
+
+	/* Access that cave grid's contents */
+	i_ptr = &i_list[c_ptr->i_idx];
 
 	if ((i == 4) && (m_ptr->monfear) &&  /* cornered (or things in the way!) -CWS */
 	    ((c_ptr->fval > MAX_OPEN_SPACE) || (c_ptr->cptr > 1))) {
@@ -1730,7 +1743,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 	}
 
 	/* XXX Ignore requests to move through boundary walls */
-	if (c_ptr->fval != BOUNDARY_WALL) {
+	if (c_ptr->fval == BOUNDARY_WALL) continue;
 
 	/* Floor is open? */
 	if (c_ptr->fval <= MAX_OPEN_SPACE) {
@@ -1739,20 +1752,21 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 	}
 
 	/* Creature moves through walls? */
-	else if (movebits & MF1_THRO_WALL) {
-	    do_move = TRUE;
+	else if (r_ptr->cflags1 & MF1_THRO_WALL) {
 
-		*rcflags1 |= MF1_THRO_WALL;
+	    do_move = TRUE;
+	    
+	    /* XXX XXX XXX Hack -- never notice moving *into* los() */
+	    *rcflags1 |= MF1_THRO_WALL;
 	}
 
 	/* Crunch up those Walls Morgoth and Umber Hulks!!!! */
-	else if (r_list[m_ptr->mptr].cflags2 & MF2_BREAK_WALL) {
+	else if (r_ptr->cflags2 & MF2_BREAK_WALL) {
 
-		i_ptr = &i_list[c_ptr->tptr];
 	    do_move = TRUE;
 
 	    /* XXX Hack -- assume the player can see it */
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_BREAK_WALL;
+	    l_ptr->r_cflags2 |= MF2_BREAK_WALL;
 
 	    /* Hack -- break open doors */
 	    if ((i_ptr->tval == TV_CLOSED_DOOR) ||
@@ -1760,8 +1774,8 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		/* Hack -- break the door */
 		invcopy(i_ptr, OBJ_OPEN_DOOR);
-		i_ptr->pval = (-1);          /* make it broken, not just open */
-		c_ptr->fval = CORR_FLOOR;	        /* change floor setting */
+		i_ptr->pval = (-1); /* make it broken, not just open */
+		c_ptr->fval = CORR_FLOOR; /* change floor setting */
 
 		/* Redraw door */
 		lite_spot(newy, newx);
@@ -1775,14 +1789,13 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 	    else {
 		(void)twall(newy, newx, 1, 0);
 	    }
-	    }
+	}
 
 	/* Creature can open doors? */
-	else if (c_ptr->tptr != 0) {
-		i_ptr = &i_list[c_ptr->tptr];
+	else if (c_ptr->i_idx) {
 
 	    /* Creature can open doors. */
-	    if (movebits & MF1_THRO_DR) {
+	    if (r_ptr->cflags1 & MF1_THRO_DR) {
 
 		stuck_door = FALSE;
 
@@ -1800,7 +1813,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 			do_move = TRUE;
 		    }
 
-		    /* Locked doors */
+		    /* Locked doors -- take a turn to unlock it */
 		    else if (i_ptr->pval > 0) {
 			if (randint((m_ptr->hp + 1) * (50 + i_ptr->pval)) <
 			    40 * (m_ptr->hp - 10 - i_ptr->pval)) {
@@ -1836,12 +1849,12 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		    /* 50% chance of breaking door */
 		    if (stuck_door) i_ptr->pval = 1 - randint(2);
 
-			c_ptr->fval = CORR_FLOOR;
+		    c_ptr->fval = CORR_FLOOR;
 
 		    /* Redraw door */
 		    lite_spot(newy, newx);
 
-			*rcflags1 |= MF1_THRO_DR;
+		    *rcflags1 |= MF1_THRO_DR;
 
 		    /* Hack -- should move into open doorway */
 		    do_move = FALSE;
@@ -1875,11 +1888,11 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 
 	/* Hack -- check for Glyph of Warding */
-	if (do_move && (c_ptr->tptr != 0) &&
-	    (i_list[c_ptr->tptr].tval == TV_VIS_TRAP) && (t_list[c_ptr->tptr].sval == 99)) {
+	if (do_move && (c_ptr->i_idx != 0) &&
+	    (i_ptr->tval == TV_VIS_TRAP) && (i_ptr->sval == 99)) {
 
 	    /* Break the ward */
-	    if (randint(OBJ_BREAK_GLYPH) < r_list[m_ptr->mptr].level) {
+	    if (randint(OBJ_BREAK_GLYPH) < r_list[m_ptr->r_idx].level) {
 		if ((newy == char_row) && (newx == char_col))
 		    msg_print("The rune of protection is broken!");
 		    (void)delete_object(newy, newx);
@@ -1888,7 +1901,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		    do_move = FALSE;
 /* If the creature moves only to attack, don't let it move if the glyph
  * prevents it from attacking */
-		    if (movebits & MF1_MV_ONLY_ATT)
+		    if (r_ptr->cflags1 & MF1_MV_ONLY_ATT)
 			do_turn = TRUE;
 		}
 	}
@@ -1896,12 +1909,11 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 	/* Creature has attempted to move on player?	   */
 	    if (do_move)
+
 		if (c_ptr->cptr == 1) {
-		/*
-		 * if the monster is not lit, must call update_mon, it may be
+		/* if the monster is not lit, must call update_mon, it may be
 		 * faster than character, and hence could have just moved
-		 * next to character this same turn 
-		 */
+		 * next to character this same turn */
 		    if (!m_ptr->ml)
 			update_mon(m_idx);
 		    make_attack(m_idx);
@@ -1913,20 +1925,14 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		else if ((c_ptr->cptr > 1) &&
 			 ((newy != m_ptr->fy) ||
 			  (newx != m_ptr->fx))) {
+
 		    /* Creature eats other creatures?	 */
-#ifdef ATARIST_MWC
-		    if ((movebits & (holder = MF1_THRO_CREAT)) &&
-#else
-		    if ((movebits & MF1_THRO_CREAT) &&
-#endif
-			(r_list[m_ptr->mptr].mexp >
-			 r_list[m_list[c_ptr->cptr].mptr].mexp)) {
+		    if ((r_ptr->cflags1 & MF1_THRO_CREAT) &&
+			(r_list[m_ptr->r_idx].mexp >
+			 r_list[m_list[c_ptr->cptr].r_idx].mexp)) {
+
 			if (m_list[c_ptr->cptr].ml)
-#ifdef ATARIST_MWC
-			    *rcflags1 |= holder;
-#else
     			    *rcflags1 |= MF1_THRO_CREAT;
-#endif
 			/* It ate an already processed monster. Handle normally. */
 			if (m_idx < c_ptr->cptr)
 			    delete_monster((int)c_ptr->cptr);
@@ -1942,6 +1948,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		    }
 	/* Creature has been allowed move.	 */
 	    if (do_move) {
+
 	    /* Move creature record		       */
 		move_rec((int)m_ptr->fy, (int)m_ptr->fx, newy, newx);
 		if (m_ptr->ml) {
@@ -1954,43 +1961,40 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 		do_turn = TRUE;
 
 	    /* Pick up or eat an object	       */
-#ifdef ATARIST_MWC
-		if (movebits & (holder = MF1_PICK_UP))
-#else
-		if (movebits & MF1_PICK_UP)
-#endif
+		if (r_ptr->cflags1 & MF1_PICK_UP)
 		{
 /* used in code to prevent orcs from picking up Slay Orc weapons, etc -CFT */
 		    u32b t;
 
 		    c_ptr = &cave[newy][newx];
 
-		    if ((c_ptr->tptr != 0)
-			&& (i_list[c_ptr->tptr].tval <= TV_MAX_OBJECT)) {
+		    if ((c_ptr->i_idx != 0)
+			&& (i_list[c_ptr->i_idx].tval <= TV_MAX_OBJECT)) {
 #ifdef ATARIST_MWC
 			*rcflags1 |= holder;
 #else
 			*rcflags1 |= MF1_PICK_UP;
 #endif
 			t = 0L;
-			if ((i_list[c_ptr->tptr].flags & TR1_SLAY_DRAGON) ||
-			    (i_list[c_ptr->tptr].flags & TR1_KILL_DRAGON))
+			if ((i_list[c_ptr->i_idx].flags & TR1_SLAY_DRAGON) ||
+			    (i_list[c_ptr->i_idx].flags & TR1_KILL_DRAGON))
 			    t |= MF2_DRAGON;
-			if (i_list[c_ptr->tptr].flags & TR1_SLAY_UNDEAD)
+			if (i_list[c_ptr->i_idx].flags & TR1_SLAY_UNDEAD)
 			    t |= MF2_UNDEAD;
-			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_DEMON)
+			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_DEMON)
 			    t |= MF2_DEMON;
-			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_TROLL)
+			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_TROLL)
 			    t |= MF2_TROLL;
-			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_GIANT)
+			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_GIANT)
 			    t |= MF2_GIANT;
-			if (i_list[c_ptr->tptr].flags2 & TR1_SLAY_ORC)
+			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_ORC)
 			    t |= MF2_ORC;
+
 		    /* if artifact, or wearable & hurts this monster -CWS */
-			if ((i_list[c_ptr->tptr].flags2 & TR_ARTIFACT) ||
-			    ( (i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			      (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			      (r_list[m_ptr->mptr].cflags2 & t) )) {
+			if ((i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT) ||
+			    ( (i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
+			      (i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+			      (r_list[m_ptr->r_idx].cflags2 & t) )) {
 
 /* FIXME: should use new line-splitting code */
 
@@ -2001,8 +2005,8 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 			    if ((m_ptr->ml) && los(char_row, char_col, m_ptr->fy,
 						   m_ptr->fx)) {
 			    /* if we can see it, tell us what happened -CFT */
-				monster_name(m_name, m_ptr, &(r_list[m_ptr->mptr]));
-				objdes(i_name, &(i_list[c_ptr->tptr]), TRUE);
+				monster_name(m_name, m_ptr, &(r_list[m_ptr->r_idx]));
+				objdes(i_name, &(i_list[c_ptr->i_idx]), TRUE);
 				sprintf(out_val,
 					"%s tries to pick up %s, but stops suddenly!",
 					m_name, i_name);
@@ -2021,8 +2025,9 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 			    } /* if can see */
 			}
 			      /* if shouldn't pick up */ 
-			else
+			else {
 			    (void)delete_object(newy, newx);
+		        }
 		    }
 		}
 	    }
@@ -2050,13 +2055,15 @@ static void mon_cast_spell(int m_idx, int *took_turn)
     int			spell_choice[64];
     int		desperate = FALSE;
 
-    vtype                  cdesc, outval, ddesc;
+    vtype                  cdesc, outval;
 
-    struct flags  *f_ptr;
-    monster_type  *m_ptr;
-    monster_race *r_ptr;
+    monster_type	*m_ptr;
+    monster_race	*r_ptr;
+    struct flags	*f_ptr;
 
     char                   sex;
+
+    vtype		ddesc;
 
     /* alter msgs if player can't see -CFT */
     int blind = (p_ptr->flags.blind > 0);
@@ -2066,7 +2073,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 
     /* Access the monster */
     m_ptr = &m_list[m_idx];
-    r_ptr = &r_list[m_ptr->mptr];
+    r_ptr = &r_list[m_ptr->r_idx];
     sex = r_ptr->gender;
 
     /* Hack -- extract the "1 in x" chance of casting spell */
@@ -2083,10 +2090,10 @@ static void mon_cast_spell(int m_idx, int *took_turn)
     else if (randint(chance) != 1) *took_turn = FALSE;
 
     /* Must be within certain range */
-    else if (m_ptr->cdis > MAX_SPELL_DIS) *took_turn = FALSE;
+    else if (m_ptr->cdis > MAX_SPELL_DIS) *took_turn = (FALSE);
 
-    /* Must have unobstructed Line-Of-Sight	 (reversed direction -CWS)  */
-    else if (!los((int)m_ptr->fy, (int)m_ptr->fx, char_row, char_col)) *took_turn = FALSE;
+    /* Must have unobstructed Line-Of-Sight, from Monster to Player -CWS */
+    else if (!los((int)m_ptr->fy, (int)m_ptr->fx, char_row, char_col)) *took_turn = (FALSE);
 
 	/* Creature is going to cast a spell	 */
     else {
@@ -2113,8 +2120,8 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	 r_ptr->spells3 & CS3_INT) && randint(2) == 1) {
 
 	desperate = TRUE;
-	l_list[m_ptr->mptr].r_cflags2 |= MF2_INTELLIGENT;
-	}
+	l_list[m_ptr->r_idx].r_cflags2 |= MF2_INTELLIGENT;
+    }
 
     /* No spells yet */
     k = 0;
@@ -2321,7 +2328,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    x = char_col;
 	/* in case compact_monster() is called,it needs m_idx */
 	    hack_m_idx = m_idx;
-	    (void)summon_demon(r_list[m_ptr->mptr].level, &y, &x);
+	    (void)summon_demon(r_list[m_ptr->r_idx].level, &y, &x);
 	    hack_m_idx = (-1);
 	    update_mon((int)cave[y][x].cptr);
 	    break;
@@ -2388,7 +2395,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
 	    bolt(GF_FIRE, char_row, char_col,
-		 damroll(9, 8) + (r_list[m_ptr->mptr].level / 3)
+		 damroll(9, 8) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2397,7 +2404,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you feel a frigid blast .");
 	    msg_print(cdesc);
 	    bolt(GF_COLD, char_row, char_col,
-		 damroll(6, 8) + (r_list[m_ptr->mptr].level / 3)
+		 damroll(6, 8) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2406,7 +2413,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and your skin burns.");
 	    msg_print(cdesc);
 	    bolt(GF_ACID, char_row, char_col,
-		 damroll(7, 8) + (r_list[m_ptr->mptr].level / 3)
+		 damroll(7, 8) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2415,7 +2422,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you feel an arrow hit you.");
 	    msg_print(cdesc);
 	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
-		 damroll(2, 6) + (r_list[m_ptr->mptr].level / 3)
+		 damroll(2, 6) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2436,7 +2443,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you're on fire.");
 	    msg_print(cdesc);
 	    breath(GF_FIRE, char_row, char_col,
-		   randint((r_list[m_ptr->mptr].level * 7) / 2) + 10,
+		   randint((r_list[m_ptr->r_idx].level * 7) / 2) + 10,
 		   ddesc, m_idx);
 	    break;
 
@@ -2445,7 +2452,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you feel a frigid blast.");
 	    msg_print(cdesc);
 	    breath(GF_COLD, char_row, char_col,
-		   randint((r_list[m_ptr->mptr].level * 3) / 2) + 10,
+		   randint((r_list[m_ptr->r_idx].level * 3) / 2) + 10,
 		   ddesc, m_idx);
 	    break;
 
@@ -2454,7 +2461,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you feel a magical blast.");
 	    msg_print(cdesc);
 	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
-		 randint((r_list[m_ptr->mptr].level * 7) / 2) + 50, ddesc, m_ptr,
+		 randint((r_list[m_ptr->r_idx].level * 7) / 2) + 50, ddesc, m_ptr,
 		 m_idx);
 	    break;
 
@@ -2511,7 +2518,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
 	    bolt(GF_ELEC, char_row, char_col,
-		 damroll(4, 8) + (r_list[m_ptr->mptr].level / 3)
+		 damroll(4, 8) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2520,7 +2527,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you get zapped.");
 	    msg_print(cdesc);
 	    breath(GF_ELEC, char_row, char_col,
-		randint((r_list[m_ptr->mptr].level * 3) / 2) + 8, ddesc, m_idx);
+		randint((r_list[m_ptr->r_idx].level * 3) / 2) + 8, ddesc, m_idx);
 	    break;
 
 	  case 41:
@@ -2528,7 +2535,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and your skin is burning.");
 	    msg_print(cdesc);
 	    breath(GF_ACID, char_row, char_col,
-		   randint(r_list[m_ptr->mptr].level * 3) + 15, ddesc, m_idx);
+		   randint(r_list[m_ptr->r_idx].level * 3) + 15, ddesc, m_idx);
 	    break;
 
 	  case 42:
@@ -2599,10 +2606,10 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    msg_print(outval);
 	    monster_is_afraid = 0;
 	    if (m_ptr->maxhp == 0) {	/* then we're just going to fix it! -CFT */
-		if ((r_list[m_ptr->mptr].cflags2 & MF2_MAX_HP) || be_nasty)
-		    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
+		if ((r_list[m_ptr->r_idx].cflags2 & MF2_MAX_HP) || be_nasty)
+		    m_ptr->maxhp = max_hp(r_list[m_ptr->r_idx].hd);
 		else
-		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
+		    m_ptr->maxhp = pdamroll(r_list[m_ptr->r_idx].hd);
 	    }
 	    if (!blind) /* if we bother to say "mumbles" above, then shouldn't
                          * see it heal itself -CFT */
@@ -2624,7 +2631,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    }
 	    else {
 
-		m_ptr->hp += (r_list[m_ptr->mptr].level) * 6;
+		m_ptr->hp += (r_list[m_ptr->r_idx].level) * 6;
 		if (m_ptr->hp > m_ptr->maxhp) m_ptr->hp = m_ptr->maxhp;
 
 		if (m_ptr->hp == m_ptr->maxhp) {
@@ -2652,7 +2659,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 		if (monster_is_afraid == -1) {
 		    vtype               m_name, out_val;
 
-		    monster_name(m_name, m_ptr, &r_list[m_ptr->mptr]);
+		    monster_name(m_name, m_ptr, &r_list[m_ptr->r_idx]);
 		    sprintf(out_val, "%s recovers %s courage.", m_name,
 			    (sex == 'm' ? "his" : sex == 'f' ? "her" :
 			     sex == 'p' ? "their" : "its"));
@@ -2667,8 +2674,8 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 			      (sex == 'm' ? "him" : sex == 'f' ? "her" :
 			       sex == 'p' ? "them" : "it"));
 	    msg_print(outval);
-	    if ((m_ptr->mspeed) <= ((int)(r_list[m_ptr->mptr].speed) - 10)) {
-		if ((r_list[m_ptr->mptr].speed) <= 15) {
+	    if ((m_ptr->mspeed) <= ((int)(r_list[m_ptr->r_idx].speed) - 10)) {
+		if ((r_list[m_ptr->r_idx].speed) <= 15) {
 		    (void)strcat(cdesc, "starts moving faster.");
 		    msg_print(cdesc);
 		    m_ptr->mspeed += 1;
@@ -2691,7 +2698,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you are hit with a hellish blast.");
 	    msg_print(cdesc);
 	    bolt(GF_PLASMA, char_row, char_col,
-		 10 + damroll(8, 7) + (r_list[m_ptr->mptr].level),
+		 10 + damroll(8, 7) + (r_list[m_ptr->r_idx].level),
 		 ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2715,7 +2722,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
 	    bolt(GF_NETHER, char_row, char_col,
-		 30 + damroll(5, 5) + (r_list[m_ptr->mptr].level * 3) / 2,
+		 30 + damroll(5, 5) + (r_list[m_ptr->r_idx].level * 3) / 2,
 		 ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2724,7 +2731,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
 	    bolt(GF_COLD, char_row, char_col,
-		 damroll(6, 6) + (r_list[m_ptr->mptr].level)
+		 damroll(6, 6) + (r_list[m_ptr->r_idx].level)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2835,7 +2842,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles.");
 	    msg_print(cdesc);
 	    bolt(GF_WATER, char_row, char_col,
-		 damroll(10, 10) + (r_list[m_ptr->mptr].level)
+		 damroll(10, 10) + (r_list[m_ptr->r_idx].level)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
 
@@ -2845,7 +2852,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    msg_print(cdesc);
 	    msg_print("You are engulfed in a whirlpool.");
 	    breath(GF_WATER, char_row, char_col,
-		   randint((r_list[m_ptr->mptr].level * 5) / 2) + 50,
+		   randint((r_list[m_ptr->r_idx].level * 5) / 2) + 50,
 		   ddesc, m_idx);
 	    break;
 
@@ -2854,7 +2861,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you feel an unholy aura.");
 	    msg_print(cdesc);
 	    breath(GF_NETHER, char_row, char_col,
-		   (50 + damroll(10, 10) + (r_list[m_ptr->mptr].level)),
+		   (50 + damroll(10, 10) + (r_list[m_ptr->r_idx].level)),
 		   ddesc, m_idx);
 	    break;
 
@@ -3020,7 +3027,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you are hit by a storm of power.");
 	    msg_print(cdesc);
 	    breath(GF_MANA, char_row, char_col,
-		   (r_list[m_ptr->mptr].level * 5) + damroll(10, 10),
+		   (r_list[m_ptr->r_idx].level * 5) + damroll(10, 10),
 		   ddesc, m_idx);
 	    break;
 
@@ -3117,20 +3124,20 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	if ((m_ptr->ml)	|| (thrown_spell == 45) || (thrown_spell == 57)) {
 
 	    if (thrown_spell < 33) {
-		l_list[m_ptr->mptr].r_spells1 |= 1L << (thrown_spell - 1);
+		l_list[m_ptr->r_idx].r_spells1 |= 1L << (thrown_spell - 1);
 	    }
 	    else if (thrown_spell < 65) {
-		l_list[m_ptr->mptr].r_spells2 |= 1L << (thrown_spell - 33);
+		l_list[m_ptr->r_idx].r_spells2 |= 1L << (thrown_spell - 33);
 	    }
 	    else if (thrown_spell < 97) {
-		l_list[m_ptr->mptr].r_spells3 |= 1L << (thrown_spell - 65);
+		l_list[m_ptr->r_idx].r_spells3 |= 1L << (thrown_spell - 65);
 	    }
 
-	    if ((l_list[m_ptr->mptr].r_spells1 & CS1_FREQ) != CS_FREQ)
-		l_list[m_ptr->mptr].r_spells1++;
+	    if ((l_list[m_ptr->r_idx].r_spells1 & CS1_FREQ) != CS_FREQ)
+		l_list[m_ptr->r_idx].r_spells1++;
 
-		if (death && l_list[m_ptr->mptr].r_deaths < MAX_SHORT)
-		l_list[m_ptr->mptr].r_deaths++;
+		if (death && l_list[m_ptr->r_idx].r_deaths < MAX_SHORT)
+		l_list[m_ptr->r_idx].r_deaths++;
 	}
     }
 }
@@ -3156,20 +3163,21 @@ int multiply_monster(int y, int x, int cr_index, int m_idx)
 	j = y - 2 + randint(3);
 	k = x - 2 + randint(3);
 
-    /*
-     * don't create a new creature on top of the old one, that causes
-     * invincible/invisible creatures to appear 
-     */
+	/* don't create a new creature on top of the old one, that causes
+	 * invincible/invisible creatures to appear  */
 	if (in_bounds(j, k) && (j != y || k != x)) {
+
 	    c_ptr = &cave[j][k];
-	    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (c_ptr->tptr == 0) &&
+
+	    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (c_ptr->i_idx == 0) &&
 		(c_ptr->cptr != 1)) {
+
 		if (c_ptr->cptr > 1) {	/* Creature there already?	 */
 		/* Some critters are cannibalistic!	    */
 		    if ((r_list[cr_index].cflags1 & MF1_THRO_CREAT)
 		/* Check the experience level -CJS- */
 			&& r_list[cr_index].mexp >=
-			r_list[m_list[c_ptr->cptr].mptr].mexp) {
+			r_list[m_list[c_ptr->cptr].r_idx].mexp) {
 		    /* It ate an already processed monster.Handle normally. */
 			if (m_idx < c_ptr->cptr)
 			    delete_monster((int)c_ptr->cptr);
@@ -3237,13 +3245,13 @@ static void mon_move(int m_idx, u32b *rcflags1)
 
     /* Get the monster and its race info */
     m_ptr = &m_list[m_idx];
-    r_ptr = &r_list[m_ptr->mptr];
+    r_ptr = &r_list[m_ptr->r_idx];
 
 
 /* reduce fear, tough monsters can unfear faster -CFT, hacked by DGK */
     if (m_ptr->monfear) {
 	int t = (int)m_ptr->monfear;    /* use int so avoid unsigned wraparound -CFT */
-	t -= randint(r_list[m_ptr->mptr].level / 10);
+	t -= randint(r_list[m_ptr->r_idx].level / 10);
 	if (t <= 0) {
 	    t = 0;
 	    if (m_ptr->ml && los(char_row, char_col, m_ptr->fy, m_ptr->fx)) {
@@ -3344,31 +3352,31 @@ static void mon_move(int m_idx, u32b *rcflags1)
 
 	    /* Try to multiply */
 	    if (multiply_monster((int)m_ptr->fy, (int)m_ptr->fx,
-				 (int)m_ptr->mptr, m_idx))
+				 (int)m_ptr->r_idx, m_idx))
 		*rcflags1 |= MF1_MULTIPLY;
 	}
     }
     move_test = FALSE;
 
 
-/* Creature is confused?  Chance it becomes un-confused  */
+    /* Creature is confused?  Chance it becomes un-confused  */
     else if (m_ptr->confused) {
 	mm[0] = randint(9);
 	mm[1] = randint(9);
 	mm[2] = randint(9);
 	mm[3] = randint(9);
 	mm[4] = randint(9);
-/* don't move him if he is not supposed to move! */
+    /* don't move him if he is not supposed to move! */
 	if (!(r_ptr->cflags1 & MF1_MV_ONLY_ATT)) {
 	    *rcflags1 |= MF1_MV_ONLY_ATT;
 	    make_move(m_idx, mm, rcflags1);
 	}
 
-/* reduce conf, tough monsters can unconf faster -CFT */
+    /* reduce conf, tough monsters can unconf faster -CFT */
 	{			/* use int so avoid unsigned wraparound -CFT */
 	    int t = (int)m_ptr->confused;
 
-	    t -= randint(r_list[m_ptr->mptr].level / 10);
+	    t -= randint(r_list[m_ptr->r_idx].level / 10);
 	    if (t < 0)
 		t = 0;
 	    m_ptr->confused = (byte) t;
@@ -3376,7 +3384,7 @@ static void mon_move(int m_idx, u32b *rcflags1)
 	move_test = TRUE;
     }
 
-/* Creature may cast a spell */
+    /* Creature may cast a spell */
     else if (r_ptr->spells1 != 0) {
 	mon_cast_spell(m_idx, &move_test);
     }
@@ -3395,8 +3403,8 @@ static void mon_move(int m_idx, u32b *rcflags1)
 
 	    /* little hack for Quylthulgs, so that will eventually notice
 	     * that they have no physical attacks */
-	    if (l_list[m_ptr->mptr].r_attacks[0] < MAX_UCHAR)
-		l_list[m_ptr->mptr].r_attacks[0]++;
+	    if (l_list[m_ptr->r_idx].r_attacks[0] < MAX_UCHAR)
+		l_list[m_ptr->r_idx].r_attacks[0]++;
 	}
 
 	/* 75% random movement */
@@ -3502,14 +3510,14 @@ void process_monsters(void)
 		    rcflags1 = 0;
 		    if ((m_ptr->ml && /* check los so telepathy won't wake lice -CFT */
 			 los(char_row, char_col, (int)m_ptr->fy, (int)m_ptr->fx)) ||
-			(m_ptr->cdis <= r_list[m_ptr->mptr].aaf)
+			(m_ptr->cdis <= r_list[m_ptr->r_idx].aaf)
 
 			/* Monsters trapped in rock must be given a turn also,
 			 * so that they will die/dig out immediately.  */
 #ifdef ATARIST_MWC
-		    || ((!(r_list[m_ptr->mptr].cflags1 & (holder = MF1_THRO_WALL)))
+		    || ((!(r_list[m_ptr->r_idx].cflags1 & (holder = MF1_THRO_WALL)))
 #else
-			|| ((!(r_list[m_ptr->mptr].cflags1 & MF1_THRO_WALL))
+			|| ((!(r_list[m_ptr->r_idx].cflags1 & MF1_THRO_WALL))
 #endif
 		     && cave[m_ptr->fy][m_ptr->fx].fval >= MIN_CAVE_WALL)) {
 			if (m_ptr->csleep > 0)
@@ -3533,20 +3541,20 @@ void process_monsters(void)
 			    }
 			if (m_ptr->stunned != 0) {
 /* NOTE: Balrog = 100*100 = 10000, it always recovers instantly */
-			    if (randint(5000) < r_list[m_ptr->mptr].level
-				* r_list[m_ptr->mptr].level)
+			    if (randint(5000) < r_list[m_ptr->r_idx].level
+				* r_list[m_ptr->r_idx].level)
 				m_ptr->stunned = 0;
 			    else
 				m_ptr->stunned--;
 			    if (m_ptr->stunned == 0) {
 				if (!m_ptr->ml)
 				    (void)strcpy(cdesc, "It ");
-				else if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
+				else if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
 				    (void)sprintf(cdesc, "%s ",
-						  r_list[m_ptr->mptr].name);
+						  r_list[m_ptr->r_idx].name);
 				else
 				    (void)sprintf(cdesc, "The %s ",
-						  r_list[m_ptr->mptr].name);
+						  r_list[m_ptr->r_idx].name);
 				msg_print(strcat(cdesc,
 					    "recovers and glares at you."));
 			    }
@@ -3556,7 +3564,7 @@ void process_monsters(void)
 		    }
 		    update_mon(i);
 		    if (m_ptr->ml) {
-			r_ptr = &l_list[m_ptr->mptr];
+			r_ptr = &l_list[m_ptr->r_idx];
 			if (wake) {
 			    if (r_ptr->r_wake < MAX_UCHAR)
 				r_ptr->r_wake++;

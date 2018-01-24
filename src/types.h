@@ -80,7 +80,7 @@ struct _monster_race {
   u16b level;			/* Level of creature		*/
   byte rarity;			/* Rarity of creature		*/
   char gender;			/* one of 'm','f','n','p' to genderize monsters -CWS */
-  byte cchar;			/* Character rep.		*/
+  char r_char;			/* Racial "symbol"		*/
 
   byte hd[2];			/* Creatures hit die		*/
   u16b ac;			/* Armour Class			*/
@@ -164,7 +164,7 @@ typedef struct _monster_type monster_type;
 
 struct _monster_type {
 
-  u16b mptr;			/* Monster race index		*/
+  u16b r_idx;			/* Monster race index		*/
 
   byte fy;			/* Y location on map		*/
   byte fx;			/* X location on map		*/
@@ -307,7 +307,7 @@ typedef struct _cave_type cave_type;
 struct _cave_type {
 
   u16b cptr;
-  u16b tptr;
+  u16b i_idx;		/* Item index (in i_list) */
 
   byte fval;		/* Grid type (0-15) */
 

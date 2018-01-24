@@ -77,13 +77,13 @@ void target()
 		    (los(char_row,char_col,m_list[m_idx].fy,m_list[m_idx].fx))) {
 		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 		    (void) sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
-				   r_list[m_list[m_idx].mptr].name);
+				   r_list[m_list[m_idx].r_idx].name);
 		    prt(desc,0,0);
 		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 		    query = inkey();
 		    while ((query == 'r')||(query == 'R')) {
 			save_screen();
-			query = roff_recall(m_list[m_idx].mptr);
+			query = roff_recall(m_list[m_idx].r_idx);
 			restore_screen();
 			move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
 			query = inkey();
@@ -522,10 +522,10 @@ void search(int y, int x, int chance)
 	    if (randint(100) < chance) {
 
 		c_ptr = &cave[i][j];
-		i_ptr = &i_list[c_ptr->tptr];
+		i_ptr = &i_list[c_ptr->i_idx];
 
-	    /* Search for hidden objects */
-		if (c_ptr->tptr == 0) {
+		/* Search for hidden objects */
+		if (c_ptr->i_idx == 0) {
 		    /* Nothing */
 		}
 
@@ -597,8 +597,8 @@ void carry(int y, int x, int pickup)
     register inven_type *i_ptr;
 
     c_ptr = &cave[y][x];
-    i_ptr = &i_list[c_ptr->tptr];
-    i = i_list[c_ptr->tptr].tval;
+    i_ptr = &i_list[c_ptr->i_idx];
+    i = i_list[c_ptr->i_idx].tval;
 
     if (i <= TV_MAX_PICK_UP) {
 	end_find();
@@ -734,14 +734,14 @@ static void area_affect(int dir, int y, int x)
 	    if (mmove(newdir, &row, &col)) {
 
 	    /* Objects player can see (Including doors?) cause a stop. */
-		c_ptr = &cave[row][col];
+	    c_ptr = &cave[row][col];
 
 
-		if (player_light || c_ptr->tl || c_ptr->pl || c_ptr->fm) {
+	    if (player_light || c_ptr->tl || c_ptr->pl || c_ptr->fm) {
 
-		if (c_ptr->tptr != 0) {
+		if (c_ptr->i_idx != 0) {
 
-		    t = i_list[c_ptr->tptr].tval;
+		    t = i_list[c_ptr->i_idx].tval;
 
 		    if (t != TV_INVIS_TRAP && t != TV_SECRET_DOOR
 		    && (t != TV_OPEN_DOOR || !find_ignore_doors)) {
@@ -976,8 +976,8 @@ void move_player(int dir, int do_pickup)
 	    /* Move the light source		       */
 		move_light(old_row, old_col, char_row, char_col);
 	    /* An object is beneath him.	     */
-		if (c_ptr->tptr != 0) {
-		    i = i_list[c_ptr->tptr].tval;
+		if (c_ptr->i_idx != 0) {
+		    i = i_list[c_ptr->i_idx].tval;
 		    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
 			|| i == TV_STORE_DOOR || !prompt_carry_flag
 			|| i == TV_GOLD)
@@ -987,7 +987,7 @@ void move_player(int dir, int do_pickup)
 			inven_type         *i_ptr;
 			bigvtype            tmp_str, tmp2_str;
 
-			i_ptr = &i_list[cave[char_row][char_col].tptr];
+			i_ptr = &i_list[cave[char_row][char_col].i_idx];
 			objdes(tmp_str, i_ptr, TRUE);
 			sprintf(tmp2_str, "You see %s.", tmp_str);
 			msg_print(tmp2_str);
@@ -995,15 +995,15 @@ void move_player(int dir, int do_pickup)
 		/* if stepped on falling rock trap, and space contains
 		 * rubble, then step back into a clear area 
 		 */
-		    if (i_list[c_ptr->tptr].tval == TV_RUBBLE) {
+		    if (i_list[c_ptr->i_idx].tval == TV_RUBBLE) {
 			move_rec(char_row, char_col, old_row, old_col);
 			move_light(char_row, char_col, old_row, old_col);
 			char_row = old_row;
 			char_col = old_col;
 	/* check to see if we have stepped back onto another trap, if so, set it off */
 			c_ptr = &cave[char_row][char_col];
-			if (c_ptr->tptr != 0) {
-			    i = i_list[c_ptr->tptr].tval;
+			if (c_ptr->i_idx != 0) {
+			    i = i_list[c_ptr->i_idx].tval;
 			    if (i == TV_INVIS_TRAP || i == TV_VIS_TRAP
 				|| i == TV_STORE_DOOR)
 				hit_trap(char_row, char_col);
@@ -1011,10 +1011,10 @@ void move_player(int dir, int do_pickup)
 		    }
 		}
 	    } else {		   /* Can't move onto floor space */
-		if (!find_flag && (c_ptr->tptr != 0)) {
-		    if (i_list[c_ptr->tptr].tval == TV_RUBBLE)
+		if (!find_flag && (c_ptr->i_idx != 0)) {
+		    if (i_list[c_ptr->i_idx].tval == TV_RUBBLE)
 			msg_print("There is rubble blocking your way.");
-		    else if (i_list[c_ptr->tptr].tval == TV_CLOSED_DOOR)
+		    else if (i_list[c_ptr->i_idx].tval == TV_CLOSED_DOOR)
 			msg_print("There is a closed door blocking your way.");
 		} else
 		    end_find();

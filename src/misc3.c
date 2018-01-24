@@ -29,11 +29,11 @@ void pusht(int my_x)
     if (x != i_max - 1) {
 	i_list[x] = t_list[i_max - 1];
 
-    /* must change the tptr in the cave of the object just moved */
+    /* must change the i_idx in the cave of the object just moved */
 	for (i = 0; i < cur_height; i++)
 	    for (j = 0; j < cur_width; j++)
-		if (cave[i][j].tptr == i_max - 1)
-		    cave[i][j].tptr = x;
+		if (cave[i][j].i_idx == i_max - 1)
+		    cave[i][j].i_idx = x;
     }
     i_max--;
     invcopy(&i_list[i_max], OBJ_NOTHING);
@@ -54,10 +54,10 @@ int delete_object(int y, int x)
     if (c_ptr->fval == BLOCKED_FLOOR) c_ptr->fval = CORR_FLOOR;
 
     /* then eliminate it */
-    pusht(c_ptr->tptr);
+    pusht(c_ptr->i_idx);
 
     /* There is nothing here */
-    c_ptr->tptr = 0;
+    c_ptr->i_idx = 0;
 
     c_ptr->fm = FALSE;
 
@@ -96,11 +96,11 @@ static void compact_objects()
 		/* Get the location */
 		c_ptr = &cave[i][j];
 
-		if ((c_ptr->tptr != 0)
+		if ((c_ptr->i_idx != 0)
 		    && (distance(i, j, char_row, char_col) > cur_dis)) {
 
 		/* Every object gets a "saving throw" */
-		switch (i_list[c_ptr->tptr].tval) {
+		switch (i_list[c_ptr->i_idx].tval) {
 		    case TV_VIS_TRAP:
 			chance = 15;
 			break;
@@ -119,9 +119,9 @@ static void compact_objects()
 			chance = 3;
 			break;
 		    default:
-			if ((i_list[c_ptr->tptr].tval >= TV_MIN_WEAR) &&
-			    (i_list[c_ptr->tptr].tval <= TV_MAX_WEAR) &&
-			    (i_list[c_ptr->tptr].flags2 & TR_ARTIFACT))
+			if ((i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
+			    (i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+			    (i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT))
 			    chance = 0;	/* don't compact artifacts -CFT */
 			else
 			    chance = 10;
@@ -1950,13 +1950,13 @@ static int special_place_object(int y, int x)
     /* Is this cave grid sacred? */
     if (!in_bounds(y,x)) return (FALSE); /* abort! -CFT */
 
-    if (cave[y][x].tptr != 0)
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+    if (cave[y][x].i_idx != 0)
+	if ((i_list[cave[y][x].i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].i_idx].flags2 & TR_ARTIFACT)))
 	    return 0;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -2161,7 +2161,7 @@ again:
     if (strlen(str) > 0 && (wizard || peek))
 	msg_print(str);
     cur_pos = i_pop();
-    cave[y][x].tptr = cur_pos;
+    cave[y][x].i_idx = cur_pos;
     invcopy(&i_list[cur_pos], tmp);
     i_list[cur_pos].timeout = 0;
     i_list[cur_pos].flags3 |= TR3_HIDE_TYPE; /* don't show (+x of yyy) for these */
@@ -2187,13 +2187,13 @@ void place_object(int y, int x)
     register int cur_pos, tmp;
 
     if (!in_bounds(y,x)) return; /* abort! -CFT */
-    if (cave[y][x].tptr != 0)
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+    if (cave[y][x].i_idx != 0)
+	if ((i_list[cave[y][x].i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].i_idx].flags2 & TR_ARTIFACT)))
 	    return; /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y,x);
@@ -2204,7 +2204,7 @@ void place_object(int y, int x)
 
     /* Make it */
     cur_pos = i_pop();
-    cave[y][x].tptr = cur_pos;
+    cave[y][x].i_idx = cur_pos;
 
     do {	   /* don't generate another chest if opening_chest is true -CWS */
 	tmp = get_obj_num(dun_level, FALSE);
@@ -2240,18 +2240,22 @@ void place_object(int y, int x)
  */
 void place_good(int y, int x, u32b good)
 {
-    register int cur_pos, tmp;
+    register int cur_pos, k_idx;
     int          tv, is_good = FALSE;
+    cave_type *c_ptr;
 
-    if (!in_bounds(y, x))
-	return;			   /* abort! -CFT */
-    if (cave[y][x].tptr != 0)
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+    if (!in_bounds(y, x)) return; /* abort! -CFT */
+
+    /* Get the grid */
+    c_ptr = &cave[y][x];
+
+    if (c_ptr->i_idx != 0)
+	if ((i_list[c_ptr->i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[c_ptr->i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[c_ptr->i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT)))
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -2262,16 +2266,16 @@ void place_good(int y, int x, u32b good)
     }
 
     cur_pos = i_pop();
-    cave[y][x].tptr = cur_pos;
+    c_ptr->i_idx = cur_pos;
 
     /* Pick a good "base object" */
     do {
 
 	/* Pick a random object, based on "object_level" */
-	tmp = get_obj_num((object_level + 10), TRUE);
+	k_idx = get_obj_num((object_level + 10), TRUE);
 
 	/* Examine the object */
-	tv = k_list[sorted_objects[tmp]].tval;
+	tv = k_list[sorted_objects[k_idx]].tval;
 
 	/* Normal weapons/armour are okay (except "shots" or "shovels") */
 	if ((tv == TV_HELM) || (tv == TV_SHIELD) || (tv == TV_CLOAK) ||
@@ -2281,33 +2285,33 @@ void place_good(int y, int x, u32b good)
 	    is_good = TRUE;
 
 	if ((tv == TV_SWORD) &&
-	    strncmp("& Broken", k_list[sorted_objects[tmp]].name, 8))
+	    strncmp("& Broken", k_list[sorted_objects[k_idx]].name, 8))
 	    is_good = TRUE;	   /* broken swords/daggers are NOT good!
 				    * -CFT */
 	if ((tv == TV_HARD_ARMOR) &&
-	    strncmp("Rusty", k_list[sorted_objects[tmp]].name, 5))
+	    strncmp("Rusty", k_list[sorted_objects[k_idx]].name, 5))
 	    is_good = TRUE;	   /* rusty chainmail is NOT good! -CFT */
 	if ((tv == TV_SOFT_ARMOR) &&
-	 stricmp("some filthy rags", k_list[sorted_objects[tmp]].name))
+	 stricmp("some filthy rags", k_list[sorted_objects[k_idx]].name))
 	    is_good = TRUE;	   /* nor are rags! -CFT */
 	if ((tv == TV_MAGIC_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Raal's */
-	    (k_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
+	    (k_list[sorted_objects[k_idx]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
 	if ((tv == TV_PRAYER_BOOK) &&	/* if book, good must be one of the
 					 * deeper, special must be Wrath of
 					 * God */
-	    (k_list[sorted_objects[tmp]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
+	    (k_list[sorted_objects[k_idx]].sval > ((good & MF2_SPECIAL) ? 71 : 67)))
 	    is_good = TRUE;
     } while (!is_good);
 
-    invcopy(&i_list[cur_pos], sorted_objects[tmp]);
+    invcopy(&i_list[cur_pos], sorted_objects[k_idx]);
     magic_treasure(cur_pos, object_level, (good & MF2_SPECIAL) ? 666 : 1, 0);
 
 	/* Hack -- look at it */
 	if (peek) {
 	    char buf[200];
-	    if (k_list[sorted_objects[tmp]].level > object_level) {
+	    if (k_list[sorted_objects[k_idx]].level > object_level) {
 	    byte               t;
 
 	    t = i_list[cur_pos].ident;
@@ -2318,7 +2322,7 @@ void place_good(int y, int x, u32b good)
 	}
     }
 
-    if (cave[y][x].cptr == 1) {
+    if (c_ptr->cptr == 1) {
 	msg_print("You feel something roll beneath your feet.");
     }
 }
@@ -2347,7 +2351,7 @@ void random_object(int y, int x, int num)
 	    } while (!in_bounds(j, k));
 	    cave_ptr = &cave[j][k];
 
-	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
+	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->i_idx == 0)) {
 		object_level = dun_level;
 
 	    /* Place something */
@@ -2387,7 +2391,7 @@ void special_random_object(int y, int x, int num)
 	    k = x - 4 + randint(7);
 	    cave_ptr = &cave[j][k];
 
-	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->tptr == 0)) {
+	    if ((cave_ptr->fval <= MAX_CAVE_FLOOR) && (cave_ptr->i_idx == 0)) {
 
 	    /* Perhaps attempt to place a "Special Object" */
 	    if (randint(5) == 1) {
@@ -2419,21 +2423,21 @@ void place_trap(int y, int x, int sval)
     /* don't put rubble under monsters, it's annoying -CFT */
     if (cave[y][x].cptr >= MIN_M_IDX) return;
 
-    if (cave[y][x].tptr != 0)
+    if (cave[y][x].i_idx != 0)
     /* don't replace stairs, stores, artifacts */
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].i_idx].flags2 & TR_ARTIFACT)))
 	    return;
 	else
 	    delete_object(y, x);
 
     /* Make a new object */
     cur_pos = i_pop();
-    cave[y][x].tptr = cur_pos;
+    cave[y][x].i_idx = cur_pos;
     invcopy(&i_list[cur_pos], OBJ_TRAP_LIST + sval);
 }
 
@@ -2449,15 +2453,15 @@ void place_rubble(int y, int x)
 
     if (!in_bounds(y, x)) return;			   /* abort! -CFT */
 
-    if (cave[y][x].tptr != 0)
+    if (cave[y][x].i_idx != 0)
 
    /* don't replace stairs, stores, artifacts */
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+	if ((i_list[cave[y][x].i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].i_idx].flags2 & TR_ARTIFACT)))
 	    return;
 	else
     /* Delete whatever is there */
@@ -2469,7 +2473,7 @@ void place_rubble(int y, int x)
 
     /* Put the rubble in the cave */
     c_ptr = &cave[y][x];
-    c_ptr->tptr = cur_pos;
+    c_ptr->i_idx = cur_pos;
 
     /* Hack -- nuke any walls */
     c_ptr->fval = BLOCKED_FLOOR;
@@ -2501,13 +2505,13 @@ void place_gold(int y, int x)
 
     if (!in_bounds(y, x))
 	return;			   /* abort! -CFT */
-    if (cave[y][x].tptr != 0)
-	if ((i_list[cave[y][x].tptr].tval == TV_STORE_DOOR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_UP_STAIR) ||
-	    (i_list[cave[y][x].tptr].tval == TV_DOWN_STAIR) ||
-	    ((i_list[cave[y][x].tptr].tval >= TV_MIN_WEAR) &&
-	     (i_list[cave[y][x].tptr].tval <= TV_MAX_WEAR) &&
-	     (i_list[cave[y][x].tptr].flags2 & TR_ARTIFACT)))
+    if (cave[y][x].i_idx != 0)
+	if ((i_list[cave[y][x].i_idx].tval == TV_STORE_DOOR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_UP_STAIR) ||
+	    (i_list[cave[y][x].i_idx].tval == TV_DOWN_STAIR) ||
+	    ((i_list[cave[y][x].i_idx].tval >= TV_MIN_WEAR) &&
+	     (i_list[cave[y][x].i_idx].tval <= TV_MAX_WEAR) &&
+	     (i_list[cave[y][x].i_idx].flags2 & TR_ARTIFACT)))
 	    return;		   /* don't replace stairs, stores, artifacts */
 	else
 	    delete_object(y, x);
@@ -2528,7 +2532,7 @@ void place_gold(int y, int x)
     if (i >= MAX_GOLD) i = MAX_GOLD - 1;
 
     /* Make it */
-    cave[y][x].tptr = cur_pos;
+    cave[y][x].i_idx = cur_pos;
     i_ptr = &i_list[cur_pos];
     invcopy(i_ptr, OBJ_GOLD_LIST + i);
 
@@ -2556,12 +2560,26 @@ int get_obj_num(int level, int good)
     register int i, j;
 
     do {
-	if (level == 0) i = rand_int(t_level[0]);
+
+	/* Town level is easy */
+	if (level == 0) {
+
+	    /* Pick a level 0 entry */
+	    i = rand_int(t_level[0]);
+	}
+
+	/* Other levels sometimes have great stuff */
 	else {
-	    if (level >= MAX_OBJ_LEVEL) level = MAX_OBJ_LEVEL;
+
+	    /* Never exceed a given level */
+	    if (level >= MAX_K_LEV) level = MAX_K_LEV;
+
+	    /* Occasionally, get a "better" object */
 	    else if (randint(GREAT_OBJ) == 1) {
-		level = level * MAX_OBJ_LEVEL / randint(MAX_OBJ_LEVEL) + 1;
-		if (level > MAX_OBJ_LEVEL) level = MAX_OBJ_LEVEL;
+
+		/* What a bizarre calculation */
+		level = 1 + (level * MAX_K_LEV / randint(MAX_K_LEV));
+		if (level > MAX_K_LEV) level = MAX_K_LEV;
 	    }
 
 

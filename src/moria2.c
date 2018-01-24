@@ -20,12 +20,15 @@
  */
 void move_rec(int y1, int x1, int y2, int x2)
 {
-    int tmp;
-
     /* this always works correctly, even if y1==y2 and x1==x2 */
-    tmp = cave[y1][x1].cptr;
-    cave[y1][x1].cptr = 0;
-    cave[y2][x2].cptr = tmp;
+
+	int m_idx = cave[y1][x1].cptr;
+
+	/* No monster is at the old location */
+	cave[y1][x1].cptr = 0;
+
+	/* Copy the monster index */
+	cave[y2][x2].cptr = m_idx;
 }
 
 
@@ -35,7 +38,7 @@ void move_rec(int y1, int x1, int y2, int x2)
  */
 int is_quest(int level)
 {
-    if (level == Q_PLANE) return FALSE;
+    if (level == Q_PLANE) return (FALSE);
     if (quests[SAURON_QUEST] && (level == quests[SAURON_QUEST])) return TRUE;
     return FALSE;
 }
@@ -59,7 +62,7 @@ void hit_trap(int y, int x)
     c_ptr = &cave[y][x];
 
     /* Get the trap */
-    i_ptr = &i_list[c_ptr->tptr];
+    i_ptr = &i_list[c_ptr->i_idx];
 
     /* Roll for damage */
     dam = pdamroll(i_ptr->damage);
@@ -354,8 +357,8 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
 
 void check_unique(monster_type *m_ptr)
 {
-    if (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)
-	u_list[m_ptr->mptr].exist = 0;
+    if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
+	u_list[m_ptr->r_idx].exist = 0;
 }
 
 
@@ -388,7 +391,7 @@ static int summon_object(int y, int x, int num, int typ, s32b  ood)
 	    k = x - 3 + randint(5);
 	    if (in_bounds(j, k) && los(y, x, j, k)) {
 		c_ptr = &cave[j][k];
-		if (c_ptr->fval <= MAX_OPEN_SPACE && (c_ptr->tptr == 0)) {
+		if (c_ptr->fval <= MAX_OPEN_SPACE && (c_ptr->i_idx == 0)) {
 		    if (typ == 3) {/* typ == 3 -> 50% objects, 50% gold */
 			if (randint(100) < 50)
 			    real_typ = 1;
@@ -438,9 +441,6 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
     int			i, number;
     s32b       dump, res;
 
-#if defined(ATARIST_MWC)
-    s32b              holder;	   /* avoid a compiler bug */
-#endif
 
     if (win) {		   /* MORGOTH */
 	register int        j, k;
@@ -453,14 +453,14 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	    k = x - 3 + randint(5);
 	    if (in_bounds(j, k) && los(y, x, j, k)) {
 		c_ptr = &cave[j][k];
-		if (c_ptr->fval <= MAX_OPEN_SPACE && (c_ptr->tptr == 0)) {
+		if (c_ptr->fval <= MAX_OPEN_SPACE && (c_ptr->i_idx == 0)) {
 		    if (!crown) {
 			int                 cur_pos;
 			inven_type         *t_ptr;
 
 			crown = TRUE;
 			cur_pos = i_pop();
-			cave[j][k].tptr = cur_pos;
+			cave[j][k].i_idx = cur_pos;
 			invcopy(&i_list[cur_pos], 98);
 			t_ptr = &i_list[cur_pos];
 			t_ptr->flags1 |= (TR1_STR | TR1_DEX | TR1_CON | TR1_INT | TR1_WIS | TR1_CHR);
@@ -477,7 +477,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 
 			grond = TRUE;
 			cur_pos = i_pop();
-			cave[j][k].tptr = cur_pos;
+			cave[j][k].i_idx = cur_pos;
 			invcopy(&i_list[cur_pos], 56);
 			t_ptr = &i_list[cur_pos];
 			t_ptr->name2 = ART_GROND;
@@ -504,7 +504,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	}
 	while (!grond && i < 50);
     }
-#if !defined(ATARIST_MWC)
+
     if (flags & MF1_CARRY_OBJ)
 	i = 1;
     else
@@ -527,47 +527,9 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	dump = summon_object(y, x, number, i, good);
     else
 	dump = 0;
-#else
-    holder = MF1_CARRY_OBJ;
-    if (flags & holder)
-	i = 1;
-    else
-	i = 0;
-    holder = MF1_CARRY_GOLD;
-    if (flags & holder)
-	i += 2;
-
-    number = 0;
-    holder = MF1_HAS_60;
-    if ((flags & holder) && (randint(100) < 60))
-	number++;
-    holder = MF1_HAS_90;
-    if ((flags & holder) && (randint(100) < 90))
-	number++;
-    holder = MF1_HAS_1D2;
-    if (flags & holder)
-	number += randint(2);
-    holder = MF1_HAS_2D2;
-    if (flags & holder)
-	number += damroll(2, 2);
-    holder = MF1_HAS_4D2;
-    if (flags & holder)
-	number += damroll(4, 2);
-    if (number > 0)
-	dump = summon_object(y, x, number, i, good);
-    else
-	dump = 0;
 
 
-#endif
-
-#if defined(ATARIST_MWC)
-    holder = MF1_WINNER;
-    if (flags & holder)
-#else
-    if (flags & MF1_WINNER)
-#endif
-    {
+    if (flags & MF1_WINNER) {
 	total_winner = TRUE;
 	prt_winner();
 	msg_print("*** CONGRATULATIONS *** You have won the game.");
@@ -576,23 +538,9 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
     if (dump) {
 	res = 0;
 	if (dump & 255)
-#ifdef ATARIST_MWC
-	{
-	    holder = MF1_CARRY_OBJ;
-	    res |= holder;
-	}
-#else
 	    res |= MF1_CARRY_OBJ;
-#endif
 	if (dump >= 256)
-#ifdef ATARIST_MWC
-	{
-	    holder = MF1_CARRY_GOLD;
-	    res |= holder;
-	}
-#else
 	    res |= MF1_CARRY_GOLD;
-#endif
 	dump = (dump % 256) + (dump / 256);	/* number of items */
 	res |= dump << CM1_TR_SHIFT;
     } else
@@ -619,7 +567,7 @@ static int fearless(monster_race *r_ptr)
     }
 
     /* The 'E' and 'g' monsters have NoFear */
-    if (r_ptr->cchar == 'E' || r_ptr->cchar == 'g') {
+    if (r_ptr->r_char == 'E' || r_ptr->r_char == 'g') {
 	flag = TRUE;
     }
 
@@ -633,7 +581,7 @@ static int fearless(monster_race *r_ptr)
 	flag = FALSE;
     }
 
-    /* it can't run away */
+    /* XXX Hack -- No "Normal Move" --> it can't run away */
     if (!(r_ptr->cflags1 & MF1_MV_ATT_NORM)) {
 	flag = TRUE;
     }
@@ -664,22 +612,22 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
     /* Get the creature */
     m_ptr = &m_list[m_idx];
 
+    r_ptr = &r_list[m_ptr->r_idx];
+
     /* Hurt it, and wake it up */
     m_ptr->hp -= dam;
     m_ptr->csleep = 0;
-
-    r_ptr = &r_list[m_ptr->mptr];
 
     /* It is dead now */
     if (m_ptr->hp < 0) {
 
 	/* Delete ghost file */
-	if (m_ptr->mptr == (MAX_R_IDX-1)) {
+	if (m_ptr->r_idx == (MAX_R_IDX-1)) {
 
 	    char                tmp[100];
 
 	    if (!dun_level) {
-		sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, r_list[m_ptr->mptr].level);
+		sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, r_ptr->level);
 	    }
 	    else {
 		sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, dun_level);
@@ -688,16 +636,16 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	    unlink(tmp);
 	}
 
-	if (r_list[m_ptr->mptr].cflags2 & MF2_QUESTOR) {
+	if (r_ptr->cflags2 & MF2_QUESTOR) {
 	    for (i = 0; i < DEFINED_QUESTS; i++) {	/* search for monster's lv, not... */
-		if (quests[i] == r_list[m_ptr->mptr].level) {	/* ...cur lv. -CFT */
+		if (quests[i] == r_ptr->level) {	/* ...cur lv. -CFT */
 		    quests[i] = 0;
 		    found = TRUE;
 		    break;
 		}
 	    }
 	    if (found) {
-		if ((unsigned) dun_level != r_list[m_ptr->mptr].level) {
+		if ((unsigned) dun_level != r_ptr->level) {
 		    /* just mesg */
 		    msg_print("Well done!!  Now continue onward towards Morgoth.");
 		} else {	   /* stairs and mesg */
@@ -705,61 +653,67 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 		    int                 cur_pos;
 
 		    ca_ptr = &cave[m_ptr->fy][m_ptr->fx];
-		    if (ca_ptr->tptr != 0) {	/* don't overwrite artifact -CFT */
+		    if (ca_ptr->i_idx != 0) {	/* don't overwrite artifact -CFT */
 			int                 ty = m_ptr->fy, tx = m_ptr->fx, ny, nx;
 
-			while ((cave[ty][tx].tptr != 0) &&
-			  (i_list[cave[ty][tx].tptr].tval >= TV_MIN_WEAR) &&
-			  (i_list[cave[ty][tx].tptr].tval <= TV_MAX_WEAR) &&
-			 (i_list[cave[ty][tx].tptr].flags2 & TR_ARTIFACT)) {
+			while ((cave[ty][tx].i_idx != 0) &&
+			  (i_list[cave[ty][tx].i_idx].tval >= TV_MIN_WEAR) &&
+			  (i_list[cave[ty][tx].i_idx].tval <= TV_MAX_WEAR) &&
+			 (i_list[cave[ty][tx].i_idx].flags2 & TR_ARTIFACT)) {
 			    do { /* pick new possible spot */
 				ny = ty + (byte) randint(3) - 2;
 				nx = tx + (byte) randint(3) - 2;
 			    } while (!in_bounds(ny, nx) ||
 				     (cave[ny][nx].fval > MAX_OPEN_SPACE));
+
 			    ty = ny;	/* this is a new spot, not in a wall/door/etc */
 			    tx = nx;
-			} /* ok, to exit this, [ty][tx] must not be artifact
-			   * -CFT */
-			if (cave[ty][tx].tptr != 0)	/* so we can delete it -CFT */
+			} /* ok, to exit this, [ty][tx] must not be artifact -CFT */
+
+			if (cave[ty][tx].i_idx != 0)	/* so we can delete it -CFT */
 			    (void)delete_object(ty, tx);
 			ca_ptr = &cave[ty][tx];	/* put stairway here... */
 		    }
+
 		    cur_pos = i_pop();
-		    ca_ptr->tptr = cur_pos;
+		    ca_ptr->i_idx = cur_pos;
 		    invcopy(&i_list[cur_pos], OBJ_DOWN_STAIR);
 		    msg_print("Well done!! Go for it!");
 		    msg_print("A magical stairway appears...");
+
 		} /* if-else for stairway */
 	    } /* if found */
 	} /* if quest monster */
+
 	object_level = (dun_level + r_ptr->level) >> 1;
 	coin_type = 0;
 	get_coin_type(r_ptr);
 	i = monster_death((int)m_ptr->fy, (int)m_ptr->fx,
-			  r_list[m_ptr->mptr].cflags1,
-			  (r_list[m_ptr->mptr].cflags2 & (MF2_SPECIAL | MF2_GOOD)),
-			  (r_list[m_ptr->mptr].cflags1 & MF1_WINNER));
+			  r_list[m_ptr->r_idx].cflags1,
+			  (r_list[m_ptr->r_idx].cflags2 & (MF2_SPECIAL | MF2_GOOD)),
+			  (r_list[m_ptr->r_idx].cflags1 & MF1_WINNER));
 	coin_type = 0;
+
 	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
-	    (r_list[m_ptr->mptr].cflags1 & MF1_WINNER) ||
-	    (r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE)) {
+	    (r_list[m_ptr->r_idx].cflags1 & MF1_WINNER) ||
+	    (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)) {
 	    /* recall even invisible uniques */
 
-	    tmp = (l_list[m_ptr->mptr].r_cflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
+	    tmp = (l_list[m_ptr->r_idx].r_cflags1 & CM1_TREASURE) >> CM1_TR_SHIFT;
 	    if (tmp > ((i & CM1_TREASURE) >> CM1_TR_SHIFT))
 		i = (i & ~CM1_TREASURE) | (tmp << CM1_TR_SHIFT);
-	    l_list[m_ptr->mptr].r_cflags1 =
-		(l_list[m_ptr->mptr].r_cflags1 & ~CM1_TREASURE) | i;
-	    if (l_list[m_ptr->mptr].r_kills < MAX_SHORT)
-		l_list[m_ptr->mptr].r_kills++;
+	    l_list[m_ptr->r_idx].r_cflags1 =
+		(l_list[m_ptr->r_idx].r_cflags1 & ~CM1_TREASURE) | i;
+	    if (l_list[m_ptr->r_idx].r_kills < MAX_SHORT)
+		l_list[m_ptr->r_idx].r_kills++;
 	}
-	r_ptr = &r_list[m_ptr->mptr];
+	r_ptr = &r_list[m_ptr->r_idx];
 
 	if (r_ptr->cflags2 & MF2_UNIQUE) {
-	    u_list[m_ptr->mptr].exist = 0;
-	    u_list[m_ptr->mptr].dead = 1;
+	    u_list[m_ptr->r_idx].exist = 0;
+	    u_list[m_ptr->r_idx].dead = 1;
 	}
+
 	new_exp = ((long)r_ptr->mexp * r_ptr->level) / p_ptr->misc.lev;
 	new_exp_frac = ((((long)r_ptr->mexp * r_ptr->level) % p_ptr->misc.lev)
 			* 0x10000L / p_ptr->misc.lev) + p_ptr->misc.exp_frac;
@@ -780,20 +734,22 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	}
 
 	/* can't call prt_experience() here, as that would result in "new level"
-	 * message appearing before "monster dies" message 
-	 */
-	m_take_hit = m_ptr->mptr;
+	 * message appearing before "monster dies" message  */
+	m_take_hit = m_ptr->r_idx;
 	/* in case this is called from within process_monsters(), this is a horrible
-	 * hack, the m_list/process_monsters() code needs to be rewritten 
-	 */
+	 * hack, the m_list/process_monsters() code needs to be rewritten */
 	if (hack_m_idx < m_idx)
 	    delete_monster(m_idx);
 	else
 	    fix1_delete_monster(m_idx);
+
 	monster_is_afraid = 0;
-    } else {
+    }
+
+    else {
 	if (m_ptr->maxhp <= 0)	   /* Then fix it! -DGK */
 	    m_ptr->maxhp = 1;
+
 	percentage = (m_ptr->hp * 100L) / (m_ptr->maxhp);
 
 	if (fearless(r_ptr)) {
@@ -837,8 +793,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 		if (monster_is_afraid == 1) monster_is_afraid = (-1);
 		m_ptr->monfear = 0;
 		if (m_ptr->ml && print_fear) {
-		    char                sex = r_ptr->gender;
-
+		    char sex = r_ptr->gender;
 		    monster_name(m_name, m_ptr, r_ptr);
 		    sprintf(out_val, "%s recovers %s courage.", m_name,
 			    (sex == 'm' ? "his" : sex == 'f' ? "her" :
@@ -865,7 +820,7 @@ void py_attack(int y, int x)
     register struct misc   *p_ptr;
 
     cr_idx = cave[y][x].cptr;
-    r_idx = m_list[cr_idx].mptr;
+    r_idx = m_list[cr_idx].r_idx;
 
     m_list[cr_idx].csleep = 0;
     i_ptr = &inventory[INVEN_WIELD];
@@ -977,10 +932,10 @@ void py_attack(int y, int x)
 	    /* See if we done it in.  */
 	    if (mon_take_hit(cr_idx, k, FALSE) >= 0) {	/* never print msgs -CWS */
 
-		if ((r_list[r_idx].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
-		    (r_list[r_idx].cchar == 'E') ||
-		    (r_list[r_idx].cchar == 'v') ||
-		    (r_list[r_idx].cchar == 'g')) {
+		if ((r_list[r_idx].cflags2 & MF2_DEMON) ||
+		    (r_list[r_idx].cflags2 & MF2_UNDEAD) ||
+		    (r_list[r_idx].cflags2 & MF2_MINDLESS) ||
+		    (strchr("EvgX", r_list[r_idx].r_char))) {
 		    (void)sprintf(out_val, "You have destroyed %s.", m_name);
 		}
 		else {
@@ -992,6 +947,8 @@ void py_attack(int y, int x)
 		/* No more attacks */
 		blows = 0;
 	    }
+
+
 	    if ((i_ptr->tval >= TV_SHOT)
 		&& (i_ptr->tval <= TV_ARROW)) {	/* Use missiles up */
 		i_ptr->number--;
@@ -1204,7 +1161,7 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
 	do {
 	    if (in_bounds(i, j)) {
 		c_ptr = &cave[i][j];
-		if (c_ptr->fval <= MAX_OPEN_SPACE && c_ptr->tptr == 0)
+		if (c_ptr->fval <= MAX_OPEN_SPACE && c_ptr->i_idx == 0)
 		    flag = TRUE;
 	    }
 	    if (!flag) {
@@ -1225,7 +1182,7 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
 		j = x + randint(3) -2;
 	    } while (!in_bounds(i,j) || cave[i][j].fval > MAX_OPEN_SPACE);
 	    k++;
-	    if (!(cur_pos = cave[i][j].tptr) || (k>64))
+	    if (!(cur_pos = cave[i][j].i_idx) || (k>64))
 		flag = TRUE;
 	    if (flag && (((i_list[cur_pos].flags2 & TR_ARTIFACT) &&
 			  ((cur_pos = i_list[cur_pos].tval) >= TV_MIN_WEAR) &&
@@ -1244,10 +1201,10 @@ static void drop_throw(int y, int x, inven_type *t_ptr)
     } /* if not flag and is artifact */
     if (flag)
     {
-	if (cave[i][j].tptr)	/* we must have crushed something; waste it -CFT */
+	if (cave[i][j].i_idx)	/* we must have crushed something; waste it -CFT */
 	    delete_object(i,j);
 	cur_pos = i_pop();
-	cave[i][j].tptr = cur_pos;
+	cave[i][j].i_idx = cur_pos;
 	i_list[cur_pos] = *t_ptr;
 	lite_spot(i, j);
     }
@@ -1312,12 +1269,12 @@ void py_bash(int y, int x)
 {
     int                     monster, k, avg_max_hp, base_tohit, r_idx;
     register monster_type  *m_ptr;
-    register monster_race *r_ptr;
+    register monster_race  *r_ptr;
     vtype                   m_name, out_val;
 
     monster = cave[y][x].cptr;
     m_ptr = &m_list[monster];
-    r_idx = m_ptr->mptr;
+    r_idx = m_ptr->r_idx;
     m_ptr->csleep = 0;
 
     /* Get the creature pointer, used many times below */
@@ -1364,10 +1321,10 @@ void py_bash(int y, int x)
 	if (mon_take_hit(monster, k, TRUE) >= 0) {
 
 	    /* Appropriate message */
-	    if ((r_list[r_idx].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
-		(r_list[r_idx].cchar == 'E') ||
-		(r_list[r_idx].cchar == 'v') ||
-		(r_list[r_idx].cchar == 'g')) {
+	    if ((r_list[r_idx].cflags2 & MF2_DEMON) ||
+		(r_list[r_idx].cflags2 & MF2_UNDEAD) ||
+		(r_list[r_idx].cflags2 & MF2_MINDLESS) ||
+		(strchr("EvgX", r_list[r_idx].r_char))) {
 		(void)sprintf(out_val, "You have destroyed %s.", m_name);
 	    }
 	    else {
@@ -1381,20 +1338,20 @@ void py_bash(int y, int x)
 
 	    m_name[0] = toupper((int)m_name[0]);	/* Capitalize */
 
-	    /* Can not stun Balrog */
-	    avg_max_hp = (r_ptr->cflags2 & MF2_MAX_HP ?
-			  r_ptr->hd[0] * r_ptr->hd[1] :
-			  (r_ptr->hd[0] * (r_ptr->hd[1] + 1)) >> 1);
+	    /* Balrog cannot be stunned */
+	    avg_max_hp = ((r_ptr->cflags2 & MF2_MAX_HP) ?
+			   (r_ptr->hd[0] * r_ptr->hd[1]) :
+			   ((r_ptr->hd[0] * (r_ptr->hd[1] + 1)) >> 1));
 
 	    /* Apply saving throw */
 	    if ((100 + randint(400) + randint(400)) >
 		(m_ptr->hp + avg_max_hp)) {
 		m_ptr->stunned += randint(3) + 1;
 		if (m_ptr->stunned > 24) m_ptr->stunned = 24;
-		(void)sprintf(out_val, "%s appears stunned!", m_name);
+		sprintf(out_val, "%s appears stunned!", m_name);
 	    }
 	    else {
-		(void)sprintf(out_val, "%s ignores your bash!", m_name);
+		sprintf(out_val, "%s ignores your bash!", m_name);
 	    }
 	    msg_print(out_val);
 	}

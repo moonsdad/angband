@@ -125,11 +125,13 @@ static void do_cmd_browse(void)
 static void do_cmd_go_up()
 {
     cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = &cave[char_row][char_col];
+    i_ptr = &i_list[c_ptr->i_idx];
 
     /* Verify stairs */
-    if ((c_ptr->tptr == 0)||(i_list[c_ptr->tptr].tval != TV_UP_STAIR)) {
+    if ((c_ptr->i_idx == 0)||(i_ptr->tval != TV_UP_STAIR)) {
 	msg_print("I see no up staircase here.");
 	free_turn_flag = TRUE;
 	return;
@@ -160,10 +162,12 @@ static void do_cmd_go_up()
 static void do_cmd_go_down()
 {
     cave_type *c_ptr;
+    inven_type *i_ptr;
 
     c_ptr = &cave[char_row][char_col];
+    i_ptr = &i_list[c_ptr->i_idx];
 
-    if ((c_ptr->tptr == 0)||(i_list[c_ptr->tptr].tval != TV_DOWN_STAIR)) {
+    if ((c_ptr->i_idx == 0)||(i_ptr->tval != TV_DOWN_STAIR)) {
 	msg_print("I see no down staircase here.");
 	free_turn_flag = TRUE;
 	return;
@@ -184,7 +188,6 @@ static void do_cmd_go_down()
 
     /* Create a way back */
     create_up_stair = TRUE;
-
 }
 
 
@@ -231,6 +234,8 @@ static void do_cmd_refill_lamp()
 	inven_destroy(i);
     }
 }
+
+
 
 
 /*
@@ -520,7 +525,19 @@ void do_command(char com_val)
     } else
 	do_pickup = TRUE;
 
+    /* Parse the command */
     switch (com_val) {
+
+	/* (ESC) do nothing. */
+	case ESCAPE:
+	    free_turn_flag = TRUE; break;
+
+	/* (SPACE) do nothing */
+	case ' ':
+	    free_turn_flag = TRUE; break;
+
+
+	 
       case 'Q':			/* (Q)uit		(^K)ill */
 	flush();
 	if ((!total_winner) ? get_check("Do you really want to quit?")
@@ -531,6 +548,7 @@ void do_command(char com_val)
 	}
 	free_turn_flag = TRUE;
 	break;
+
       case CTRL('P'):		/* (^P)revious message. */
 	if (command_count > 0) {
 	    i = command_count;
@@ -563,10 +581,12 @@ void do_command(char com_val)
 	}
 	free_turn_flag = TRUE;
 	break;
+
       case CTRL('F'):		/* Repeat (^F)eeling */
 	free_turn_flag = TRUE;
 	do_cmd_feeling();
 	break;
+
       case CTRL('W'):		/* (^W)izard mode */
 	if (wizard) {
 	    wizard = FALSE;
@@ -576,6 +596,7 @@ void do_command(char com_val)
 	prt_winner();
 	free_turn_flag = TRUE;
 	break;
+
       case CTRL('X'):		/* e(^X)it and save */
 	if (total_winner) {
 	    msg_print("You are a Total Winner,  your character must be retired.");
@@ -593,6 +614,7 @@ void do_command(char com_val)
 	}
 	free_turn_flag = TRUE;
 	break;
+
       case CTRL('R'):
 	if (p_ptr->flags.image > 0)
 	    msg_print("You cannot be sure what is real and what is not!");
@@ -603,6 +625,7 @@ void do_command(char com_val)
 	}
 	free_turn_flag = TRUE;
 	break;
+
 #ifdef TARGET
 /* select a target (sorry, no intuitive letter keys were left: a/A for aim,
  * t/T for target, f/F for focus, s/S for select, c/C for choose and p/P for pick
@@ -613,16 +636,19 @@ void do_command(char com_val)
 	free_turn_flag = TRUE;
 	break;    			
 #endif
+
       case '=':			/* (=) set options */
 	save_screen();
 	do_cmd_options();
 	restore_screen();
 	free_turn_flag = TRUE;
 	break;
+
       case '{':			/* ({) inscribe an object    */
 	scribe_object();
 	free_turn_flag = TRUE;
 	break;
+
       case '!':			/* (!) escape to the shell */
 	if (!wizard)
 #ifdef MSDOS			/* Let's be a little more accurate... */
@@ -634,62 +660,77 @@ void do_command(char com_val)
 	    rerate();
 	free_turn_flag = TRUE;
 	break;
-      case ESCAPE:		/* (ESC)   do nothing. */
-      case ' ':			/* (space) do nothing. */
-	free_turn_flag = TRUE;
-	break;
+
+
+
       case 'b':			/* (b) down, left	(1) */
 	move_player(1, do_pickup);
 	break;
+
       case 'j':			/* (j) down		(2) */
 	move_player(2, do_pickup);
 	break;
+
       case 'n':			/* (n) down, right	(3) */
 	move_player(3, do_pickup);
 	break;
+
       case 'h':			/* (h) left		(4) */
 	move_player(4, do_pickup);
 	break;
+
       case 'l':			/* (l) right		(6) */
 	move_player(6, do_pickup);
 	break;
+
       case 'y':			/* (y) up, left		(7) */
 	move_player(7, do_pickup);
 	break;
+
       case 'k':			/* (k) up		(8) */
 	move_player(8, do_pickup);
 	break;
+
       case 'u':			/* (u) up, right	(9) */
 	move_player(9, do_pickup);
 	break;
+
       case 'B':			/* (B) run down, left	(. 1) */
 	find_init(1);
 	break;
+
       case 'J':			/* (J) run down		(. 2) */
 	find_init(2);
 	break;
+
       case 'N':			/* (N) run down, right	(. 3) */
 	find_init(3);
 	break;
+
       case 'H':			/* (H) run left		(. 4) */
 	find_init(4);
 	break;
+
       case 'L':			/* (L) run right	(. 6) */
 	find_init(6);
 	break;
+
       case 'Y':			/* (Y) run up, left	(. 7) */
 	find_init(7);
 	break;
       case 'K':			/* (K) run up		(. 8) */
 	find_init(8);
 	break;
+
       case 'U':			/* (U) run up, right	(. 9) */
 	find_init(9);
 	break;
+
       case '/':			/* (/) identify a symbol */
 	ident_char();
 	free_turn_flag = TRUE;
 	break;
+
       case '.':			/* (.) stay in one place (5) */
 	move_player(5, do_pickup);
 	if (command_count > 1) {
@@ -697,12 +738,15 @@ void do_command(char com_val)
 	    rest();
 	}
 	break;
+
       case '<':			/* (<) go down a staircase */
 	do_cmd_go_up();
 	break;
+
       case '>':			/* (>) go up a staircase */
 	do_cmd_go_down();
 	break;
+
       case '?':			/* (?) help with commands */
 	if (rogue_like_commands)
 	    helpfile(ANGBAND_R_HELP);
@@ -710,43 +754,53 @@ void do_command(char com_val)
 	    helpfile(ANGBAND_O_HELP);
 	free_turn_flag = TRUE;
 	break;
+
 #ifdef ALLOW_SCORE
       case 'v':   /* score patch originally by Mike Welsh mikewe@acacia.cs.pdx.edu */
 	sprintf(prt1,"Your current score is: %ld", total_points());
 	msg_print(prt1);
 	break;
 #endif
+
       case 'f':			/* (f)orce		(B)ash */
 	bash();
 	break;
+
       case 'A':			/* (A)ctivate		(A)ctivate */
 	activate();
 	break;
+
       case 'C':			/* (C)haracter description */
 	save_screen();
 	change_name();
 	restore_screen();
 	free_turn_flag = TRUE;
 	break;
+
       case 'D':			/* (D)isarm trap */
 	do_cmd_disarm();
 	break;
+
       case 'E':			/* (E)at food */
 	eat();
 	break;
+
       case 'F':			/* (F)ill lamp */
 	do_cmd_refill_lamp();
 	break;
+
       case 'G':			/* (G)ain magic spells */
 	gain_spells();
 	break;
+
       case 'g':			/* (g)et an object... */
 	if (prompt_carry_flag) {
-	    if (cave[char_row][char_col].tptr != 0)	/* minor change -CFT */
+	    if (cave[char_row][char_col].i_idx != 0)	/* minor change -CFT */
 		carry(char_row, char_col, TRUE);
 	} else
 	    free_turn_flag = TRUE;
 	break;
+
       case 'W':			/* (W)here are we on the map	(L)ocate on map */
 	if ((p_ptr->flags.blind > 0) || no_lite())
 	    msg_print("You can't see your map.");
@@ -809,9 +863,11 @@ void do_command(char com_val)
 	}
 	free_turn_flag = TRUE;
 	break;
+
       case 'R':			/* (R)est a while */
 	rest();
 	break;
+
       case '#':			/* (#) search toggle	(S)earch toggle */
 	if (p_ptr->flags.status & PY_SEARCH)
 	    search_off();
@@ -819,101 +875,132 @@ void do_command(char com_val)
 	    search_on();
 	free_turn_flag = TRUE;
 	break;
+
       case CTRL('B'):		/* (^B) tunnel down left	(T 1) */
 	tunnel(1);
 	break;
+
       case CTRL('M'):		/* cr must be treated same as lf. */
       case CTRL('J'):		/* (^J) tunnel down		(T 2) */
 	tunnel(2);
 	break;
+
       case CTRL('N'):		/* (^N) tunnel down right	(T 3) */
 	tunnel(3);
 	break;
+
       case CTRL('H'):		/* (^H) tunnel left		(T 4) */
 	tunnel(4);
 	break;
+
       case CTRL('L'):		/* (^L) tunnel right		(T 6) */
 	tunnel(6);
 	break;
+
       case CTRL('Y'):		/* (^Y) tunnel up left		(T 7) */
 	tunnel(7);
 	break;
+
       case CTRL('K'):		/* (^K) tunnel up		(T 8) */
 	tunnel(8);
 	break;
+
       case CTRL('U'):		/* (^U) tunnel up right		(T 9) */
 	tunnel(9);
 	break;
+
       case 'z':			/* (z)ap a wand		(a)im a wand */
 	do_cmd_aim_wand();
 	break;
+
       case 'a':			/* (a)ctivate a rod	(z)ap a rod */
 	do_cmd_zap_rod();
 	break;
+
       case 'M':
 	screen_map();
 	free_turn_flag = TRUE;
 	break;
+
       case 'P':			/* (P)eruse a book	(B)rowse in a book */
 	do_cmd_browse();
 	free_turn_flag = TRUE;
 	break;
+
       case 'c':			/* (c)lose an object */
 	do_cmd_close();
 	break;
+
       case 'd':			/* (d)rop something */
 	inven_command('d');
 	break;
+
       case 'e':			/* (e)quipment list */
 	inven_command('e');
 	break;
+
       case 't':			/* (t)hrow something	(f)ire something */
 	do_cmd_fire();
 	break;
+
       case 'i':			/* (i)nventory list */
 	inven_command('i');
 	break;
+
       case 'S':			/* (S)pike a door	(j)am a door */
 	do_cmd_spike();
 	break;
+
       case 'x':			/* e(x)amine surrounds	(l)ook about */
 	look();
 	free_turn_flag = TRUE;
 	break;
+
       case 'm':			/* (m)agic spells */
 	cast();
 	break;
+
       case 'o':			/* (o)pen something */
 	do_cmd_open();
 	break;
+
       case 'p':			/* (p)ray */
 	pray();
 	break;
+
       case 'q':			/* (q)uaff */
 	quaff();
 	break;
+
       case 'r':			/* (r)ead */
 	read_scroll();
 	break;
+
       case 's':			/* (s)earch for a turn */
 	search(char_row, char_col, p_ptr->misc.srh);
 	break;
+
       case 'T':			/* (T)ake off something	(t)ake off */
 	inven_command('t');
 	break;
+
       case 'Z':			/* (Z)ap a staff	(u)se a staff */
 	use();
 	break;
+
       case 'V':			/* (V)ersion of game */
 	helpfile(ANGBAND_VERSION);
 	free_turn_flag = TRUE;
 	break;
+
       case 'w':			/* (w)ear or wield */
 	inven_command('w');
 	break;
+
       case 'X':			/* e(X)change weapons	e(x)change */
 	inven_command('x');
 	break;
+
 #ifdef ALLOW_CHECK_ARTIFACTS /* -CWS */
       case '~':
 	if ((!wizard) && (dun_level != 0)) {
@@ -922,12 +1009,14 @@ void do_command(char com_val)
 	} else
 	    artifact_check_no_file();
 	break;
+
 #endif
 #ifdef ALLOW_CHECK_UNIQUES /* -CWS */
       case '|':
 	do_cmd_check_uniques();
 	break;
 #endif
+
       default:
 	if (wizard) {
 	    free_turn_flag = TRUE; /* Wizard commands are free moves */
@@ -959,6 +1048,7 @@ void do_command(char com_val)
 		if (f_ptr->stun > 1)
 		    f_ptr->stun = 1;
 		break;
+
 	      case CTRL('D'):	/* ^D = up/down */
 		if (command_count > 0) {
 		    if (command_count > 99)
@@ -982,10 +1072,12 @@ void do_command(char com_val)
 		} else
 		    erase_line(MSG_LINE, 0);
 		break;
+
 	      case CTRL('E'):	/* ^E = wizchar */
 		change_character();
 		erase_line(MSG_LINE, 0); /* from um55 -CFT */
 		break;
+
 	      case CTRL('G'):	/* ^G = treasure */
 		if (command_count > 0) {
 		    i = command_count;
@@ -995,15 +1087,19 @@ void do_command(char com_val)
 		random_object(char_row, char_col, i);
 		prt_map();
 		break;
+
 	      case CTRL('I'):	/* ^I = identify */
 		(void)ident_spell();
 		break;
+
 	      case CTRL('O'):	/* ^O = objects */
 		print_objects();
 		break;
+
 	      case CTRL('T'):	/* ^T = teleport */
 		teleport(100);
 		break;
+
 	      case CTRL('V'):	/* ^V special treasure */
 		if (command_count > 0) {
 		    i = command_count;
@@ -1013,33 +1109,42 @@ void do_command(char com_val)
 		special_random_object(char_row, char_col, i);
 		prt_map();
 		break;
+
 	      case CTRL('Z'):	/* ^Z = genocide */
 		(void)mass_genocide(FALSE);
 		break;
+
 	      case ':':
 		map_area();
 		break;
+
 	      case '~':
 		artifact_check_no_file();
 		break;
+
 	      case '|':
 		do_cmd_check_uniques();
 		break;
+
 	      case '@':
 		wizard_create();
 		break;
+
 	      case '$':	   /* $ = wiz light */
 		wiz_lite(TRUE);
 		break;
+
 	      case '%':	   /* self-knowledge */
 		self_knowledge();
 		break;
+
 	      case '&':	   /* & = summon  */
 		y = char_row;
 		x = char_col;
 		(void)summon_monster(&y, &x, TRUE);
 		update_monsters();
 		break;
+
 	      case '*':		/* '*' = identify all up to a level */
 		prt("Identify objects upto which level (0-200) ? ", 0, 0);
 		i = (-1);
@@ -1060,6 +1165,7 @@ void do_command(char com_val)
 		}
 		erase_line(MSG_LINE, 0);
 		break;
+
 	      case '+':
 		if (command_count > 0) {
 		    p_ptr->misc.exp = command_count;
@@ -1070,6 +1176,7 @@ void do_command(char com_val)
 		    p_ptr->misc.exp = p_ptr->misc.exp * 2;
 		prt_experience();
 		break;
+
 	      default:
 		prt("Type '?' or '\\' for help.", 0, 0);
 	    }

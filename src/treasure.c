@@ -1210,6 +1210,6 @@ s16b sorted_objects[MAX_DUNGEON_OBJ];
 
 /* Identified objects flags					*/
 byte object_ident[OBJECT_IDENT_SIZE];
-s16b t_level[MAX_OBJ_LEVEL+1];
+s16b t_level[MAX_K_LEV+1];
 inven_type i_list[MAX_I_IDX];
 

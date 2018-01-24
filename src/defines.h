@@ -138,7 +138,7 @@
 #define COST_ADJ         100    /* Adjust prices for buying and selling  */
 
 /* Treasure constants                                           */
-#define MAX_OBJ_LEVEL   255     /* Maximum level of magic in dungeon      */
+#define MAX_K_LEV   255     /* Maximum level of magic in dungeon      */
 
 /*
  * Hack -- this is the chance (1/GREAT_OBJ) that when an item is

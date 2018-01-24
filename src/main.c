@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
 #endif
 
     /* Init monster and treasure levels for allocate */
-    init_m_level();
+    init_r_level();
     init_t_level();
 
     /* Call the main function */
@@ -701,19 +701,19 @@ void play_game()
 /*
  * Initializes M_LEVEL array for use with PLACE_MONSTER	-RAK-	
  */
-static void init_m_level()
+static void init_r_level()
 {
     register int i, k;
 
     for (i = 0; i <= MAX_R_LEV; i++)
-	m_level[i] = 0;
+	r_level[i] = 0;
 
     k = MAX_R_IDX - WIN_MON_TOT;
     for (i = 0; i < k; i++)
-	m_level[r_list[i].level]++;
+	r_level[r_list[i].level]++;
 
     for (i = 1; i <= MAX_R_LEV; i++)
-	m_level[i] += m_level[i-1];
+	r_level[i] += r_level[i-1];
 }
 
 
@@ -723,19 +723,19 @@ static void init_m_level()
 static void init_t_level()
 {
     register int i, l;
-    int tmp[MAX_OBJ_LEVEL+1];
+    int tmp[MAX_K_LEV+1];
 
-    for (i = 0; i <= MAX_OBJ_LEVEL; i++)
+    for (i = 0; i <= MAX_K_LEV; i++)
 	t_level[i] = 0;
     for (i = 0; i < MAX_DUNGEON_OBJ; i++)
 	t_level[k_list[i].level]++;
-    for (i = 1; i <= MAX_OBJ_LEVEL; i++)
+    for (i = 1; i <= MAX_K_LEV; i++)
 	t_level[i] += t_level[i-1];
 
     /* now produce an array with object indexes sorted by level, by using
        the info in t_level, this is an O(n) sort! */
     /* this is not a stable sort, but that does not matter */
-    for (i = 0; i <= MAX_OBJ_LEVEL; i++)
+    for (i = 0; i <= MAX_K_LEV; i++)
 	tmp[i] = 1;
     for (i = 0; i < MAX_DUNGEON_OBJ; i++)
     {

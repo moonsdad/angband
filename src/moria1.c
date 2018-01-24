@@ -271,29 +271,35 @@ int show_equip(int weight, int col)
  */
 int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 {
-    vtype        out_val;
-    char         which;
-    register int test_flag, item;
-    int          full, i_scr, redraw;
-
+    char        which;
+    int		test_flag, item;
+    int		full, i_scr, redraw;
+    vtype       out_val;
     int on_floor, ih;
     cave_type *c_ptr;
- 
+
     /* check we're a) identifying and b) on the floor is an object
-     * and c) it is a object wich could be picked up
-     */
+     * and c) it is a object wich could be picked up */
 
     c_ptr = &cave[char_row][char_col];
-    ih = i_list[c_ptr->tptr].tval;
+
+    ih = i_list[c_ptr->i_idx].tval;
+
     on_floor = ( (strcmp("Item you wish identified?",pmt) == 0) &&
-		 !( (c_ptr->tptr == 0) || ih == TV_NOTHING
+		 !( (c_ptr->i_idx == 0) || ih == TV_NOTHING
 		    || ih > TV_MAX_PICK_UP) );
+
+    redraw = FALSE;
 
     /* No item selected */
     item = FALSE;
 
-    redraw = FALSE;
+    /* Default to "no item" */
     *com_val = 0;
+
+
+
+
     i_scr = 1;
     if (j > INVEN_WIELD) {
 	full = TRUE;
@@ -306,6 +312,7 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 	full = FALSE;
 
     if (inven_ctr > 0 || (full && equip_ctr > 0)) {
+
 	do {
 	    if (redraw) {
 		if (i_scr > 0)
@@ -326,14 +333,22 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 			      (redraw ? "" : " * for inventory list,"), pmt);
 	    test_flag = FALSE;
 	    prt(out_val, 0, 0);
+
 	    do {
+
+	/* Get a key */
 		which = inkey();
+
+	/* Parse it */
 		switch (which) {
+
+	  /* Cancel */
 		  case ESCAPE:
 		    test_flag = TRUE;
 		    free_turn_flag = TRUE;
 		    i_scr = (-1);
 		    break;
+
 		  case '/':
 		    if (full) {
 			if (i_scr > 0) {
@@ -373,6 +388,7 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 
 		    }
 		    break;
+
 		  case '*':
 		    if (!redraw) {
 			test_flag = TRUE;
@@ -380,6 +396,7 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
 			redraw = TRUE;
 		    }
 		    break;
+
 		case '-':
 		/* not identified from INVEN or EQU but not aborted */
 		    if (on_floor) {
@@ -447,7 +464,7 @@ int get_item(int *com_val, cptr pmt, int i, int j, int       (*test) ())
  */
 void calc_bonuses()
 {
-    s32b		item_flags, item_flags2;
+    s32b		item_flags1, item_flags2, item_flags3;
 
     int			i, old_dis_ac;
 
@@ -522,21 +539,22 @@ void calc_bonuses()
 
 	i_ptr = &inventory[i];
 
-	if (i_ptr->tval != TV_NOTHING) {
-	    if ((TR3_CURSED & i_ptr->flags3) == 0) {
-		m_ptr->pac += i_ptr->ac;
-		m_ptr->dis_ac += i_ptr->ac;
-	    }
-	    m_ptr->ptohit += i_ptr->tohit;
-	    if (i_ptr->tval != TV_BOW)            	/* Bows can't damage. -CJS- */
-		m_ptr->ptodam += i_ptr->todam;
-	    m_ptr->ptoac += i_ptr->toac;
-	    if (known2_p(i_ptr)) {
-		m_ptr->dis_th += i_ptr->tohit;
-		if (i_ptr->tval != TV_BOW)
-		    m_ptr->dis_td += i_ptr->todam;	/* Bows can't damage. -CJS- */
-		m_ptr->dis_tac += i_ptr->toac;
-	    }
+	/* Skip missing items */
+	if (i_ptr->tval == TV_NOTHING) continue;
+
+	if ((TR3_CURSED & i_ptr->flags3) == 0) {
+	    m_ptr->pac += i_ptr->ac;
+	    m_ptr->dis_ac += i_ptr->ac;
+	}
+	m_ptr->ptohit += i_ptr->tohit;
+	if (i_ptr->tval != TV_BOW)            	/* Bows can't damage. -CJS- */
+	    m_ptr->ptodam += i_ptr->todam;
+	m_ptr->ptoac += i_ptr->toac;
+	if (known2_p(i_ptr)) {
+	    m_ptr->dis_th += i_ptr->tohit;
+	    if (i_ptr->tval != TV_BOW)
+	        m_ptr->dis_td += i_ptr->todam;	/* Bows can't damage. -CJS- */
+	    m_ptr->dis_tac += i_ptr->toac;
 	}
     }
 
@@ -554,7 +572,7 @@ void calc_bonuses()
 	m_ptr->dis_th += (p_ptr->stats.use_stat[A_STR] * 15 -
 			  inventory[INVEN_WIELD].weight);
 
-/* don't forget stun adj, or we'll get incorrect values... -CFT */
+    /* don't forget stun adj, or we'll get incorrect values... -CFT */
     if (p_ptr->flags.stun > 50) {
 	m_ptr->ptohit -= 20;
 	m_ptr->dis_th -= 20;
@@ -577,43 +595,50 @@ void calc_bonuses()
 	m_ptr->ptoac += 100;
 	m_ptr->dis_tac += 100;
     }
+
     if (p_ptr->flags.status & PY_BLESSED) {	/* changed to agree w/ code in dungeon()... -CFT */
 	m_ptr->ptoac += 5;
 	m_ptr->dis_tac += 5;
 	m_ptr->ptohit += 10;
 	m_ptr->dis_th += 10;
     }
+
     if (p_ptr->flags.shield > 0) {
 	m_ptr->ptoac += 50;
 	m_ptr->dis_tac += 50;
     }
+
     if (p_ptr->flags.detect_inv > 0)
 	p_ptr->flags.see_inv = TRUE;
     if (p_ptr->status & PY_HERO) { /* now agrees w/ code in dungeon() -CFT */
 	m_ptr->ptohit += 12;
 	m_ptr->dis_th += 12;
     }
+
     if (p_ptr->status & PY_SHERO) {/* now agrees w/ code in dungeon() -CFT */
 	m_ptr->ptohit += 24;
 	m_ptr->dis_th += 24;
 	m_ptr->ptoac -= 10;	   /* berserk, so not being careful... -CFT */
 	m_ptr->dis_tac -= 10;
     }
+
     m_ptr->dis_ac += m_ptr->dis_tac;	/* this moved from above, so it will
 					 * show ac adjustments from spells...
 					 * -CFT */
 
-/* can't print AC here because might be in a store */
+    /* can't print AC here because might be in a store */
     p_ptr->status |= PY_ARMOR;	   /* This was in an if, but I want to be
 				    * sure ac is shown properly... -CFT */
 
-    item_flags = 0L;
+    item_flags1 = item_flags2 = item_flags3 = 0L;
+
     i_ptr = &inventory[INVEN_WIELD];
+
     for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {
-	item_flags |= i_ptr->flags;
+	item_flags1 |= i_ptr->flags1;
 	i_ptr++;
     }
-    item_flags2 = 0L;
+
     i_ptr = &inventory[INVEN_WIELD];
     for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {
 	item_flags2 |= i_ptr->flags2;
@@ -626,11 +651,11 @@ void calc_bonuses()
     if (TR3_TELEPORT & item_flags3) p_ptr->flags.teleport = TRUE;
     if (TR3_REGEN & item_flags3) p_ptr->flags.regenerate = TRUE;
     if (TR3_TELEPATHY & item_flags3) p_ptr->flags.telepathy = TRUE;
-    if (TR3_LITE & item_flags3) _ptr->light = TRUE;
+    if (TR3_LITE & item_flags3) p_ptr->light = TRUE;
     if (TR3_SEE_INVIS & item_flags3) p_ptr->flags.see_inv = TRUE;
     if (TR3_FEATHER & item_flags3) p_ptr->flags.ffall = TRUE;
     if (TR2_FREE_ACT & item_flags2) p_ptr->flags.free_act = TRUE;
-    if (TR2_HOLD_LIFE & item_flags2) ptr->hold_life = TRUE;
+    if (TR2_HOLD_LIFE & item_flags2) p_ptr->hold_life = TRUE;
     
     /* Immunity and resistance */
     if (TR2_IM_FIRE & item_flags2) p_ptr->flags.immune_fire = TRUE;
@@ -810,11 +835,11 @@ void inven_drop(int item_val, int drop_all)
     /* Access the slot to be dropped */
     i_ptr = &inventory[item_val];
 
-    if (cave[char_row][char_col].tptr != 0)
+    if (cave[char_row][char_col].i_idx != 0)
 	(void)delete_object(char_row, char_col);
     i = i_pop();
     i_list[i] = *i_ptr;
-    cave[char_row][char_col].tptr = i;
+    cave[char_row][char_col].i_idx = i;
 
     if (item_val >= INVEN_WIELD)
 	takeoff(item_val, -1);
@@ -915,7 +940,7 @@ void inven_command(int command)
 	  case 'd':		   /* Drop */
 	    if (inven_ctr == 0 && equip_ctr == 0)
 		msg_print("But you're not carrying anything.");
-	    else if (cave[char_row][char_col].tptr != 0)
+	    else if (cave[char_row][char_col].i_idx != 0)
 		msg_print("There's no room to drop anything here.");
 	    else {
 		selecting = TRUE;
@@ -1080,7 +1105,7 @@ void inven_command(int command)
 			    item = (-1);
 			} else if (command == 't' &&
 				   !inven_check_num(&inventory[item])) {
-			    if (cave[char_row][char_col].tptr != 0) {
+			    if (cave[char_row][char_col].i_idx != 0) {
 				msg_print("You can't carry it.");
 				item = (-1);
 			    } else if (get_check("You can't carry it.  Drop it?"))

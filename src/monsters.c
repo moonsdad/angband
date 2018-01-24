@@ -3055,7 +3055,7 @@ creature_type r_list[MAX_R_IDX] = {
 		            ,'@',{5,5},{0,0,0,0},32000,255,'n'}
 };
 
-s16b m_level[MAX_R_LEV+1];
+s16b r_level[MAX_R_LEV+1];
 
 /* Blank monster values	*/
 monster_type blank_monster = {0,0,0,0,0,0,0,FALSE,0,FALSE};

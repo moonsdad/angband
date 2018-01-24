@@ -402,8 +402,8 @@ void lite_room(int y1, int x1)
 /* Monsters that are intelligent wake up all the time; non-MINDLESS monsters wake
  * up 1/3 the time, and MINDLESS monsters wake up 1/10 the time -CWS
  */
-	if ((r_list[m_ptr->mptr].cflags2 & MF2_INTELLIGENT) ||
-	    (!(r_list[m_ptr->mptr].cflags2 & MF2_MINDLESS) && (randint(3) == 1)) ||
+	if ((r_list[m_ptr->r_idx].cflags2 & MF2_INTELLIGENT) ||
+	    (!(r_list[m_ptr->r_idx].cflags2 & MF2_MINDLESS) && (randint(3) == 1)) ||
 	    (randint(10) == 1))
 	    m_ptr->csleep = 0;
 
@@ -498,12 +498,12 @@ void unlite_room(int y, int x)
 
 
 /*
- * Map the current area plus some			-RAK-	
+ * Map the current panel (plus some) -RAK-
  */
 void map_area(void)
 {
     register cave_type *c_ptr;
-    register int        i7, i8, x, y;
+    register int        dx, dy, x, y;
     int                 y1, y2, x1, x2;
 
     /* Pick an area to map */
@@ -516,19 +516,30 @@ void map_area(void)
     for (y = y1; y <= y2; y++) {
 	for (x = x1; x <= x2; x++) {
 
-	    if (in_bounds(y, x) && (cave[y][x].fval <= MAX_CAVE_FLOOR))
-		for (i7 = y - 1; i7 <= y + 1; i7++)
-		    for (i8 = x - 1; i8 <= x + 1; i8++) {
-			c_ptr = &cave[i7][i8];
-			if (c_ptr->fval >= MIN_CAVE_WALL)
+	    if (in_bounds(y, x) && (cave[y][x].fval <= MAX_CAVE_FLOOR)) {
+
+		for (dx = y - 1; dx <= y + 1; dx++) {
+
+		    for (dy = x - 1; dy <= x + 1; dy++) {
+
+			c_ptr = &cave[dx][dy];
+
+			if (c_ptr->fval >= MIN_CAVE_WALL) {
 			    c_ptr->pl = TRUE;
-			else if ((c_ptr->tptr != 0) &&
-			     (i_list[c_ptr->tptr].tval >= TV_MIN_VISIBLE) &&
-			       (i_list[c_ptr->tptr].tval <= TV_MAX_VISIBLE))
+			}
+
+			else if ((c_ptr->i_idx != 0) &&
+			(i_list[c_ptr->i_idx].tval >= TV_MIN_VISIBLE) &&
+			(i_list[c_ptr->i_idx].tval <= TV_MAX_VISIBLE)) {
+
 			    c_ptr->fm = TRUE;
+			}
 		    }
+		}
+	    }
 	}
     }
+
     /* Redraw the map */
     prt_map();
 }
@@ -586,16 +597,7 @@ void wiz_lite(int light)
 
 
 
-
-/* definitions used by screen_map() */
-
-/* index into border character array */
-#define TL 0			   /* top left */
-#define TR 1
-#define BL 2
-#define BR 3
-#define HE 4			   /* horizontal edge */
-#define VE 5
+/* "symbol" definitions used by screen_map() */
 
 /* character set to use */
 #ifdef MSDOS
@@ -607,6 +609,14 @@ void wiz_lite(int light)
 #else
 #   define CH(x)	(screen_border[0][x])
 #endif
+
+/* index into border character array */
+#define TL 0			   /* top left */
+#define TR 1
+#define BL 2
+#define BR 3
+#define HE 4			   /* horizontal edge */
+#define VE 5
 
 /* Display highest priority object in the RATIO by RATIO area */
 #define	RATIO 3
@@ -624,49 +634,38 @@ void screen_map(void)
     {'+', '+', '+', '+', '-', '|'},	/* normal chars */
     {201, 187, 200, 188, 205, 186}	/* graphics chars */
     };
+
     byte map[MAX_WIDTH / RATIO + 1];
     byte tmp;
 
-    int   row, orow, col, myrow = 0, mycol = 0;
+    int   row, orow, col;
 
-    int   priority[256];
+    int  myrow = 0, mycol = 0;
 
-#ifndef MACINTOSH
-    char  prntscrnbuf[80];
-#endif
+    int priority[256];
 
-    for (i = 0; i < 256; i++)
-	priority[i] = 0;
-    priority['<'] = 5;
-    priority['>'] = 5;
+
+
+    /* Default priority used for objects and such */
+    for (i = 0; i < 256; i++) priority[i] = 0;
+
+    /* A few things are special */    
     priority['@'] = 10;
-#ifdef MSDOS
-    priority[wallsym] = (-5);
-    priority[floorsym] = (-10);
-    priority['±'] = (-1);
-#else
+    priority['>'] = 5;
+    priority['<'] = 5;
+    priority['x'] = (-1);
+    priority['\''] = (-3);
     priority['#'] = (-5);
     priority['.'] = (-10);
-    priority['x'] = (-1);
-#endif
-    priority['\''] = (-3);
     priority[' '] = (-15);
 
     save_screen();
     clear_screen();
 
-#ifdef MACINTOSH
-    DSetScreenCursor(0, 0);
-    DWriteScreenCharAttr(CH(TL), ATTR_NORMAL);
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	DWriteScreenCharAttr(CH(HE), ATTR_NORMAL);
-    DWriteScreenCharAttr(CH(TR), ATTR_NORMAL);
-#else
     use_value2          mvaddch(0, 0, CH(TL));
     for (i = 0; i < MAX_WIDTH / RATIO; i++)
 	(void)addch(CH(HE));
     (void)addch(CH(TR));
-#endif
 
     orow = (-1);
     map[MAX_WIDTH / RATIO] = '\0';
@@ -675,19 +674,12 @@ void screen_map(void)
 	if (row != orow) {
 	    if (orow >= 0) {
 
-#ifdef MACINTOSH
-		DSetScreenCursor(0, orow + 1);
-		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-		DWriteScreenString(map);
-		DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-#else
 	    /* can not use mvprintw() on ibmpc, because PC-Curses is horribly
 	     * written, and mvprintw() causes the fp emulation library to be
 	     * linked with PC-Moria, makes the program 10K bigger 
 	     */
 		(void)sprintf(prntscrnbuf, "%c%s%c", CH(VE), map, CH(VE));
 		use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
-#endif
 	    }
 	    for (j = 0; j < MAX_WIDTH / RATIO; j++)
 		map[j] = ' ';
@@ -705,30 +697,15 @@ void screen_map(void)
 	}
     }
     if (orow >= 0) {
-#ifdef MACINTOSH
-	DSetScreenCursor(0, orow + 1);
-	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-	DWriteScreenString(map);
-	DWriteScreenCharAttr(CH(VE), ATTR_NORMAL);
-#else
 	(void)sprintf(prntscrnbuf, "%c%s%c", CH(VE), map, CH(VE));
 	use_value2          mvaddstr(orow + 1, 0, prntscrnbuf);
-
-#endif
     }
-#ifdef MACINTOSH
-    DSetScreenCursor(0, orow + 2);
-    DWriteScreenCharAttr(CH(BL), ATTR_NORMAL);
-    for (i = 0; i < MAX_WIDTH / RATIO; i++)
-	DWriteScreenCharAttr(CH(HE), ATTR_NORMAL);
-    DWriteScreenCharAttr(CH(BR), ATTR_NORMAL);
-#else
+
     use_value2          mvaddch(orow + 2, 0, CH(BL));
 
     for (i = 0; i < MAX_WIDTH / RATIO; i++)
 	(void)addch(CH(HE));
     (void)addch(CH(BR));
-#endif
 
     /* Wait for it */
     put_str("Hit any key to continue", 23, 23);

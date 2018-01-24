@@ -166,10 +166,10 @@ static void regen_monsters(void)
 
 	if (m_ptr->hp >= 0) {
 	    if (m_ptr->maxhp == 0) {	/* then we're just going to fix it!  -CFT */
-		if ((r_list[m_ptr->mptr].cflags2 & MF2_MAX_HP) || be_nasty)
-		    m_ptr->maxhp = max_hp(r_list[m_ptr->mptr].hd);
+		if ((r_list[m_ptr->r_idx].cflags2 & MF2_MAX_HP) || be_nasty)
+		    m_ptr->maxhp = max_hp(r_list[m_ptr->r_idx].hd);
 		else
-		    m_ptr->maxhp = pdamroll(r_list[m_ptr->mptr].hd);
+		    m_ptr->maxhp = pdamroll(r_list[m_ptr->r_idx].hd);
 	    }
 	/* Allow regeneration */
 	if (m_ptr->hp < m_ptr->maxhp) {
@@ -253,15 +253,15 @@ void dungeon(void)
 
 	c_ptr = &cave[char_row][char_col];
 
-	if ((c_ptr->tptr == 0) ||
-	    ((i_list[c_ptr->tptr].tval != TV_STORE_DOOR) && /* if not store */
-	     ((i_list[c_ptr->tptr].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
-	      (i_list[c_ptr->tptr].tval > TV_MIN_WEAR) ||
-	      !(i_list[c_ptr->tptr].flags2 & TR_ARTIFACT)))) {
-	    if (c_ptr->tptr != 0)
+	if ((c_ptr->i_idx == 0) ||
+	    ((i_list[c_ptr->i_idx].tval != TV_STORE_DOOR) && /* if not store */
+	     ((i_list[c_ptr->i_idx].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
+	      (i_list[c_ptr->i_idx].tval > TV_MIN_WEAR) ||
+	      !(i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT)))) {
+	    if (c_ptr->i_idx != 0)
 	    delete_object(char_row, char_col);
 	    cur_pos = i_pop();
-	    c_ptr->tptr = cur_pos;
+	    c_ptr->i_idx = cur_pos;
 	    if (create_up_stair) {
 		invcopy(&i_list[cur_pos], OBJ_UP_STAIR);
 	    }

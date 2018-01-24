@@ -370,7 +370,7 @@ extern inven_kind k_list[MAX_OBJECTS];
 
 extern byte object_ident[OBJECT_IDENT_SIZE];
 
-extern s16b t_level[MAX_OBJ_LEVEL+1];
+extern s16b t_level[MAX_K_LEV+1];
 
 extern cptr special_names[SN_ARRAY_SIZE];
 
@@ -393,7 +393,7 @@ extern monster_lore l_list[MAX_R_IDX];
 
 extern describe_mon_type desc_list[MAX_R_IDX];
 
-extern s16b m_level[MAX_R_LEV+1];
+extern s16b r_level[MAX_R_LEV+1];
 
 /* Brand new extra effecient and kind way to add unique monsters... HOORAY!! */
 extern struct unique_mon u_list[MAX_R_IDX];

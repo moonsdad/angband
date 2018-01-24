@@ -510,13 +510,13 @@ static int sv_write()
     for (i = 0; i < MAX_HEIGHT; i++)
 	for (j = 0; j < MAX_WIDTH; j++) {
 	    c_ptr = &cave[i][j];
-	    if (c_ptr->tptr != 0) {
+	    if (c_ptr->i_idx != 0) {
 		wr_byte((byte) i);
 		wr_byte((byte) j);
-		wr_short((u16b) c_ptr->tptr);
+		wr_short((u16b) c_ptr->i_idx);
 	    }
 	}
-    wr_byte(0xFF);		   /* marks end of tptr info */
+    wr_byte(0xFF);		   /* marks end of i_idx info */
 
 /* must set counter to zero, note that code may write out two bytes
  * unnecessarily 
@@ -590,7 +590,7 @@ static int sv_write()
     wr_byte((byte) r_list[MAX_R_IDX - 1].aaf);
     wr_short((byte) r_list[MAX_R_IDX - 1].ac);
     wr_byte((byte) r_list[MAX_R_IDX - 1].speed);
-    wr_byte((byte) r_list[MAX_R_IDX - 1].cchar);
+    wr_byte((byte) r_list[MAX_R_IDX - 1].r_char);
     wr_bytes(r_list[MAX_R_IDX - 1].hd, 2);
     wr_bytes(r_list[MAX_R_IDX - 1].damage, sizeof(u16b ) * 4);
     wr_short((u16b) r_list[MAX_R_IDX - 1].level);
@@ -1448,7 +1448,7 @@ int load_player(int *generate)
 		prt("Error in treasure pointer info", 12, 0);
 		goto error;
 	    }
-	    cave[ychar][xchar].tptr = int16u_tmp;
+	    cave[ychar][xchar].i_idx = int16u_tmp;
 	    rd_byte(&char_tmp);
 	}
     /* read in the rest of the cave info */
@@ -1537,7 +1537,7 @@ int load_player(int *generate)
 	    rd_byte((byte *) & (r_list[MAX_R_IDX - 1].ac));
 
 	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].speed));
-	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].cchar));
+	rd_byte((byte *) & (r_list[MAX_R_IDX - 1].r_char));
 
 	rd_bytes((byte *) (r_list[MAX_R_IDX - 1].hd), 2);
 
@@ -1777,7 +1777,7 @@ static void wr_monster(register monster_type *mon)
     wr_short((u16b) mon->maxhp); /* added -CWS */
     wr_short((u16b) mon->csleep);
     wr_short((u16b) mon->mspeed);
-    wr_short(mon->mptr);
+    wr_short(mon->r_idx);
     wr_byte(mon->fy);
     wr_byte(mon->fx);
     wr_byte(mon->cdis);
@@ -1903,7 +1903,7 @@ static void rd_monster(register monster_type *mon)
 
     rd_short((u16b *) & mon->csleep);
     rd_short((u16b *) & mon->mspeed);
-    rd_short(&mon->mptr);
+    rd_short(&mon->r_idx);
     rd_byte(&mon->fy);
     rd_byte(&mon->fx);
     rd_byte(&mon->cdis);

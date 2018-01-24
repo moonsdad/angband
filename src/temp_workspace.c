@@ -32,7 +32,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 
     *y = m_ptr->fy;		/* these only change if mon gets teleported */
     *x = m_ptr->fx; 
-    r_ptr = &r_list[m_ptr->mptr];
+    r_ptr = &r_list[m_ptr->r_idx];
     if (m_ptr->ml){
 	if (r_ptr->cflags2 & MF2_UNIQUE)
 	    sprintf(cdesc, "%s ", r_ptr->name);
@@ -51,7 +51,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_ELEC;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_ELEC;
         }
 	break;
       case GF_POIS:
@@ -59,7 +59,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_POIS;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_POIS;
         }
 	break;
       case GF_ACID:
@@ -67,7 +67,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_ACID;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_ACID;
         }
 	break;
       case GF_COLD:
@@ -75,7 +75,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_COLD;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_COLD;
         }
 	break;
       case GF_FIRE:
@@ -83,7 +83,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_FIRE;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_FIRE;
         }
 	break;
       case GF_HOLY_ORB:
@@ -91,7 +91,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam *= 2;
 	    res = SUSCEPT;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_EVIL;
         }
 	break;
       case GF_ARROW:		/* for now, no defense... maybe it should have a
@@ -117,7 +117,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = IMMUNE;
 	    *dam = 0;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_UNDEAD;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_UNDEAD;
         }
 	else if (r_ptr->spells2 & MS2_BR_LIFE) { /* if can breath nether, should get
 						  good resist to damage -CFT */
@@ -129,11 +129,11 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam /= 2;	/* evil takes *2 for holy, so /2 for this... -CFT */
 	    res = SOME_RES;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_EVIL;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_EVIL;
         }
 	break;
       case GF_WATER:	/* water elementals should resist.  anyone else? -CFT */
-	if ((r_ptr->cchar == 'E') && (r_ptr->name[0] == 'W')){
+	if ((r_ptr->r_char == 'E') && (r_ptr->name[0] == 'W')){
 	    res = IMMUNE;
 	    *dam = 0; /* water spirit, water ele, and Waldern -CFT */
         }
@@ -334,7 +334,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    res = RESIST;
 	    *dam /= 9;
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_IM_COLD;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_IM_COLD;
         }
 	if ((*dam <= m_ptr->hp) &&
 	    !(r_ptr->spells2 & MS2_BR_SOUN) &&
@@ -359,13 +359,13 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
     if (res == CHANGED)
 	sprintf(outval, "%schanges!",cdesc);
     else if ((*dam > m_ptr->hp) &&
-	     (by_player || !(r_list[m_ptr->mptr].cflags2 & MF2_UNIQUE))) {
+	     (by_player || !(r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE))) {
 	res = DEAD;
-	if ((r_list[m_ptr->mptr].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
-	    (r_list[m_ptr->mptr].cchar == 'E') ||
-	    (r_list[m_ptr->mptr].cchar == 'v') ||
-	    (r_list[m_ptr->mptr].cchar == 'g') ||
-	    (r_list[m_ptr->mptr].cchar == 'X'))
+	if ((r_list[m_ptr->r_idx].cflags2 & (MF2_DEMON|MF2_UNDEAD|MF2_MINDLESS)) ||
+	    (r_list[m_ptr->r_idx].r_char == 'E') ||
+	    (r_list[m_ptr->r_idx].r_char == 'v') ||
+	    (r_list[m_ptr->r_idx].r_char == 'g') ||
+	    (r_list[m_ptr->r_idx].r_char == 'X'))
 	    sprintf(outval, "%sis destroyed.", cdesc);
 	else
 	    sprintf(outval, "%sdies.", cdesc);
@@ -490,12 +490,12 @@ void mon_elec_dam(int y, int x, int dam)
     c_ptr = &cave[y][x];
     if (c_ptr->cptr > 1) {
 	m_ptr = &m_list[c_ptr->cptr];
-	r_ptr = &r_list[m_ptr->mptr];
+	r_ptr = &r_list[m_ptr->r_idx];
 	monster_name(m_name, m_ptr, r_ptr);
 	m_ptr->csleep = 0;
 	if (MF2_HURT_LITE & r_ptr->cflags2) {
 	    if (m_ptr->ml)
-		l_list[m_ptr->mptr].r_cflags2 |= MF2_HURT_LITE;
+		l_list[m_ptr->r_idx].r_cflags2 |= MF2_HURT_LITE;
 	    i = mon_take_hit((int)c_ptr->cptr, dam, FALSE);
 	    if (i >= 0) {
 		(void)sprintf(out_val, "%s shrivels away in the light!", m_name);
@@ -539,15 +539,15 @@ int detect_enchantment()
     for (i = panel_row_min; i <= panel_row_max; i++)
 	for (j = panel_col_min; j <= panel_col_max; j++) {
 	    c_ptr = &cave[i][j];
-	    tv = i_list[c_ptr->tptr].tval;
-	    if ((c_ptr->tptr != 0) && !test_lite(i, j) &&
+	    tv = i_list[c_ptr->i_idx].tval;
+	    if ((c_ptr->i_idx != 0) && !test_lite(i, j) &&
 		( ((tv > TV_MAX_ENCHANT) && (tv < TV_FLASK)) || /* misc items */
 		 (tv == TV_MAGIC_BOOK) || (tv == TV_PRAYER_BOOK) || /* books */
 		 ((tv >= TV_MIN_WEAR) && (tv <= TV_MAX_ENCHANT) && /* armor/weap */
-		  ((i_list[c_ptr->tptr].flags2 & TR_ARTIFACT) || /* if Art., or */
-		   (i_list[c_ptr->tptr].tohit>0) || /* has pluses, then show */
-		   (i_list[c_ptr->tptr].todam>0) ||
-		   (i_list[c_ptr->tptr].toac>0))) )){
+		  ((i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT) || /* if Art., or */
+		   (i_list[c_ptr->i_idx].tohit>0) || /* has pluses, then show */
+		   (i_list[c_ptr->i_idx].todam>0) ||
+		   (i_list[c_ptr->i_idx].toac>0))) )){
 		c_ptr->fm = TRUE;
 		lite_spot(i, j);
 		detect = TRUE;
@@ -925,8 +925,8 @@ static void sub1_move_light(int y1, register int x1, int y2, register int x2)
 		    c_ptr->tl = TRUE;
 		if (c_ptr->fval >= MIN_CAVE_WALL)
 		    c_ptr->pl = TRUE;
-		else if (!c_ptr->fm && c_ptr->tptr != 0) {
-		    tval = i_list[c_ptr->tptr].tval;
+		else if (!c_ptr->fm && c_ptr->i_idx != 0) {
+		    tval = i_list[c_ptr->i_idx].tval;
 		    if ((tval >= TV_MIN_VISIBLE) && (tval <= TV_MAX_VISIBLE))
 			c_ptr->fm = TRUE;
 		}
@@ -1015,7 +1015,7 @@ void change_trap(register int y, register int x)
     register inven_type *t_ptr;
 
     c_ptr = &cave[y][x];
-    t_ptr = &i_list[c_ptr->tptr];
+    t_ptr = &i_list[c_ptr->i_idx];
     if (t_ptr->tval == TV_INVIS_TRAP) {
 	t_ptr->tval = TV_VIS_TRAP;
 	lite_spot(y, x);
