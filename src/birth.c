@@ -48,7 +48,7 @@ static void save_prev_data()
 
     /* Save the stats */
     for (i = 0; i < 6; i++) {
-	prev.stat[i] = (u16b) p_ptr->stats.max_stat[i];
+	prev.stat[i] = p_ptr->max_stat[i];
     }
 
     return;
@@ -64,14 +64,14 @@ static int load_prev_data()
 
     if (!prev.stat[0]) return 0;
     for (i = 0; i < 6; i++) {
-	p_ptr->stats.cur_stat[i] = prev.stat[i];
-	p_ptr->stats.max_stat[i] = prev.stat[i];
-	p_ptr->stats.use_stat[i] = prev.stat[i];
+	p_ptr->cur_stat[i] = prev.stat[i];
+	p_ptr->max_stat[i] = prev.stat[i];
+	p_ptr->use_stat[i] = prev.stat[i];
     }
 
-    p_ptr->misc.ptodam = todam_adj();
-    p_ptr->misc.ptohit = tohit_adj();
-    p_ptr->misc.pac = toac_adj();
+    p_ptr->ptodam = todam_adj();
+    p_ptr->ptohit = tohit_adj();
+    p_ptr->pac = toac_adj();
     prev.stat[0] = 0;
     return 1;
 }
@@ -98,12 +98,12 @@ static void choose_sex(void)
 	move_cursor(20, 29);
 	c = inkey();
 	if (c == 'm' || c == 'M') {
-	    p_ptr->misc.male = TRUE;
+	    p_ptr->male = TRUE;
 	    c_put_str(TERM_L_BLUE, "Male", 4, 15);
 	    break;
 	}
 	else if (c == 'f' || c == 'F') {
-	    p_ptr->misc.male = FALSE;
+	    p_ptr->male = FALSE;
 	    c_put_str(TERM_L_BLUE, "Female", 4, 15);
 	    break;
 	}
@@ -147,7 +147,7 @@ static void choose_race(void)
 	s = inkey();
 	j = s - 'a';
 	if ((j < MAX_RACES) && (j >= 0)) {
-	    p_ptr->misc.prace = j;
+	    p_ptr->prace = j;
 	    c_put_str(TERM_L_BLUE, race[j].trace, 3, 15);
 	    break;
 	}
@@ -167,21 +167,17 @@ static void choose_race(void)
  */
 static void choose_class()
 {
-    int         i, j, k, l, m;
+    int          j, k, l, m;
     int          cl[MAX_CLASS];
-    player_class   *c_ptr;
     char         tmp_str[80], s;
-    u32b       mask;
 
     /* Clear the display */
     clear_from(20);
 
     /* Prepare to list */
-    i = p_ptr->misc.prace;
     k = 0;
     l = 2;
     m = 21;
-    mask = 0x1;
 
     /* No legal choices yet */
     for (j = 0; j < MAX_CLASS; j++) cl[j] = 0;
@@ -189,7 +185,7 @@ static void choose_class()
     put_str("Choose a class (? for Help):", 20, 2);
     /* Display the legal choices */
     for (j = 0; j < MAX_CLASS; j++) {
-	if (race[i].rtclass & mask) {
+	if (race[p_ptr->prace].rtclass & (1L << j)) {
 	    sprintf(tmp_str, "%c) %s", k + 'a', class[j].title);
 	    put_str(tmp_str, m, l);
 	    cl[k++] = j;
@@ -199,20 +195,18 @@ static void choose_class()
 		m++;
 	    }
 	}
-	mask <<= 1;
     }
 
     /* Get a class */
-    p_ptr->misc.pclass = 0;
+    p_ptr->pclass = 0;
     while (1) {
 	move_cursor(20, 31);
 	s = inkey();
 	j = s - 'a';
 	if ((j < k) && (j >= 0)) {
-	    p_ptr->misc.pclass = cl[j];
-	    c_ptr = &class[p_ptr->misc.pclass];
+	    p_ptr->pclass = cl[j];
 	    clear_from(20);
-	    c_put_str(TERM_L_BLUE, c_ptr->title, 5, 15);
+	    c_put_str(TERM_L_BLUE, class[p_ptr->pclass].title, 5, 15);
 	    break;
 	}
 	else if (s == '?') {
@@ -231,10 +225,9 @@ static void get_class()
     int                 min_value, max_value;
     int                 percent;
     char                buf[50];
-    register struct misc *m_ptr;
     player_class         *c_ptr;
 
-    c_ptr = &class[p_ptr->misc.pclass];
+    c_ptr = &class[p_ptr->pclass];
     change_stat(A_STR, c_ptr->madj_str);
     change_stat(A_INT, c_ptr->madj_int);
     change_stat(A_WIS, c_ptr->madj_wis);
@@ -243,41 +236,41 @@ static void get_class()
     change_stat(A_CHR, c_ptr->madj_chr);
 
     for (i = 0; i < 6; i++) {
-	p_ptr->stats.cur_stat[i] = p_ptr->stats.max_stat[i];
-	p_ptr->stats.use_stat[i] = p_ptr->stats.max_stat[i];
+	p_ptr->cur_stat[i] = p_ptr->max_stat[i];
+	p_ptr->use_stat[i] = p_ptr->max_stat[i];
     }
-    p_ptr->misc.ptodam = todam_adj();           /* Real values		 */
-    p_ptr->misc.ptohit = tohit_adj();
-    p_ptr->misc.ptoac = toac_adj();
-    p_ptr->misc.pac = 0;
-    p_ptr->misc.dis_td = p_ptr->misc.ptodam;	/* Displayed values	 */
-    p_ptr->misc.dis_th = p_ptr->misc.ptohit;
-    p_ptr->misc.dis_tac = p_ptr->misc.ptoac;
-    p_ptr->misc.dis_ac = p_ptr->misc.pac + p_ptr->misc.dis_tac;
+    p_ptr->ptodam = todam_adj();           /* Real values		 */
+    p_ptr->ptohit = tohit_adj();
+    p_ptr->ptoac = toac_adj();
+    p_ptr->pac = 0;
+    p_ptr->dis_td = p_ptr->ptodam;	/* Displayed values	 */
+    p_ptr->dis_th = p_ptr->ptohit;
+    p_ptr->dis_tac = p_ptr->ptoac;
+    p_ptr->dis_ac = p_ptr->pac + p_ptr->dis_tac;
 
 /*
  * now set misc stats, do this after setting stats because of con_adj() for
  * hitpoints 
  */
-    m_ptr = &p_ptr->misc;
-    m_ptr->hitdie += c_ptr->adj_hd;
-    m_ptr->mhp = con_adj() + m_ptr->hitdie;
-    m_ptr->chp = m_ptr->mhp;
-    m_ptr->chp_frac = 0;
+
+    p_ptr->hitdie += c_ptr->adj_hd;
+    p_ptr->mhp = con_adj() + p_ptr->hitdie;
+    p_ptr->chp = p_ptr->mhp;
+    p_ptr->chp_frac = 0;
 
 /*
  * initialize hit_points array: put bounds on total possible hp,
  * only succeed if it is within 1/8 of average value
  */
-    min_value = (MAX_PLAYER_LEVEL * 3 * (m_ptr->hitdie - 1)) / 8 +
+    min_value = (MAX_PLAYER_LEVEL * 3 * (p_ptr->hitdie - 1)) / 8 +
 	MAX_PLAYER_LEVEL;
-    max_value = (MAX_PLAYER_LEVEL * 5 * (m_ptr->hitdie - 1)) / 8 +
+    max_value = (MAX_PLAYER_LEVEL * 5 * (p_ptr->hitdie - 1)) / 8 +
 	MAX_PLAYER_LEVEL;
 
     player_hp[0] = m_ptr->hitdie;
     do {
 	for (i = 1; i < MAX_PLAYER_LEVEL; i++) {
-	    player_hp[i] = randint((int)m_ptr->hitdie);
+	    player_hp[i] = randint((int)p_ptr->hitdie);
 	    player_hp[i] += player_hp[i - 1];
 	}
     }
@@ -286,18 +279,18 @@ static void get_class()
 
     if (peek) {
 	percent = (int)(((long)player_hp[MAX_PLAYER_LEVEL - 1] * 200L) /
-		(m_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * m_ptr->hitdie)));
+		(p_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * p_ptr->hitdie)));
 	sprintf(buf, "%d%% Life Rating", percent);
 	msg_print(buf);
     }
-    m_ptr->bth += c_ptr->mbth;
-    m_ptr->bthb += c_ptr->mbthb;   /* RAK */
-    m_ptr->srh += c_ptr->msrh;
-    m_ptr->disarm = c_ptr->mdis + todis_adj();
-    m_ptr->fos += c_ptr->mfos;
-    m_ptr->stl += c_ptr->mstl;
-    m_ptr->save += c_ptr->msav;
-    m_ptr->expfact += c_ptr->m_exp;
+    p_ptr->bth += c_ptr->mbth;
+    p_ptr->bthb += c_ptr->mbthb;   /* RAK */
+    p_ptr->srh += c_ptr->msrh;
+    p_ptr->disarm = c_ptr->mdis + todis_adj();
+    p_ptr->fos += c_ptr->mfos;
+    p_ptr->stl += c_ptr->mstl;
+    p_ptr->save += c_ptr->msav;
+    p_ptr->expfact += c_ptr->m_exp;
 }
 
 
@@ -322,8 +315,7 @@ static int adjust_stat(int stat_value, s16b amount, int auto_roll)
 	for (i = 0; i > amount; i--) {
 
 /* OK so auto_roll conditions not needed for negative amounts since stat_value
- * is always 15 at least currently!  -JK
- */
+ * is always 15 at least currently!  -JK */
 	    if (stat_value > 108) {
 		stat_value--;
 	    }
@@ -368,9 +360,9 @@ static int adjust_stat(int stat_value, s16b amount, int auto_roll)
  */
 static void change_stat(int stat, int amount)
 {
-    int max = p_ptr->stats.max_stat[stat];
-    int tmp = adjust_stat(max, (s16b)amount, FALSE);
-    p_ptr->stats.max_stat[stat] = tmp;
+    int max = p_ptr->max_stat[stat];
+    int tmp = adjust_stat(max, amount, FALSE);
+    p_ptr->max_stat[stat] = tmp;
 }
 
 
@@ -382,6 +374,8 @@ static void get_stats(void)
 {
     register int        i, j;
     int dice[18];
+
+
 
     /* Roll and verify some stats */
     while (TRUE) {
@@ -399,7 +393,7 @@ static void get_stats(void)
     /* Each stat is 5 + 1d3 + 1d4 + 1d5 */
     for (i = 0; i < 6; i++) {
 	j = 5 + dice[3*i] + dice[3*i+1] + dice[3*i+2];
-	p_ptr->stats.max_stat[i] = j;
+	p_ptr->max_stat[i] = j;
     }
 }
 
@@ -412,11 +406,11 @@ static void get_all_stats(void)
 {
     register int        j;
 
-    player_race *rp_ptr = &race[p_ptr->misc.prace];
+    player_race *rp_ptr = &race[p_ptr->prace];
 
     get_stats();
-
-    /* Modify the stats for "class" */
+    
+    /* Modify the stats for "race" */
     change_stat(A_STR, rp_ptr->str_adj);
     change_stat(A_INT, rp_ptr->int_adj);
     change_stat(A_WIS, rp_ptr->wis_adj);
@@ -426,24 +420,24 @@ static void get_all_stats(void)
 
     /* Analyze the stats */
     for (j = 0; j < 6; j++) {
-	p_ptr->stats.cur_stat[j] = p_ptr->stats.max_stat[j];
-	p_ptr->stats.use_stat[j] = modify_stat(j, p_ptr->stats.mod_stat[j]);
+	p_ptr->cur_stat[j] = p_ptr->max_stat[j];
+	p_ptr->use_stat[j] = modify_stat(j, p_ptr->mod_stat[j]);
     }
 
-    p_ptr->misc.srh = rp_ptr->srh;
-    p_ptr->misc.bth = rp_ptr->bth;
-    p_ptr->misc.bthb = rp_ptr->bthb;
-    p_ptr->misc.fos = rp_ptr->fos;
-    p_ptr->misc.stl = rp_ptr->stl;
-    p_ptr->misc.save = rp_ptr->bsav;
-    p_ptr->misc.hitdie = rp_ptr->bhitdie;
-    p_ptr->misc.lev = 1;
-    p_ptr->misc.ptodam = todam_adj();
-    p_ptr->misc.ptohit = tohit_adj();
-    p_ptr->misc.ptoac = 0;
-    p_ptr->misc.pac = toac_adj();
-    p_ptr->misc.expfact = rp_ptr->b_exp;
-    p_ptr->flags.see_infra = rp_ptr->infra;
+    p_ptr->srh = rp_ptr->srh;
+    p_ptr->bth = rp_ptr->bth;
+    p_ptr->bthb = rp_ptr->bthb;
+    p_ptr->fos = rp_ptr->fos;
+    p_ptr->stl = rp_ptr->stl;
+    p_ptr->save = rp_ptr->bsav;
+    p_ptr->hitdie = rp_ptr->bhitdie;
+    p_ptr->lev = 1;
+    p_ptr->ptodam = todam_adj();
+    p_ptr->ptohit = tohit_adj();
+    p_ptr->ptoac = 0;
+    p_ptr->pac = toac_adj();
+    p_ptr->expfact = rp_ptr->b_exp;
+    p_ptr->see_infra = rp_ptr->infra;
 }
 
 
@@ -459,11 +453,11 @@ static void put_auto_stats()
 
     /* Put the stats */
     for (i = 0; i < 6; i++) {
-	cnv_stat(p_ptr->stats.use_stat[i], buf);
+	cnv_stat(p_ptr->use_stat[i], buf);
 	put_str(stat_names[i], 2 + i, 61);
 	put_str(buf, 2 + i, 66);
-	if (p_ptr->stats.max_stat[i] > p_ptr->stats.cur_stat[i]) {
-	    cnv_stat(p_ptr->stats.max_stat[i], buf);
+	if (p_ptr->max_stat[i] > p_ptr->cur_stat[i]) {
+	    cnv_stat(p_ptr->max_stat[i], buf);
 	    put_str(buf, 2 + i, 73);
 	}
     }
@@ -483,7 +477,7 @@ static void put_history()
     
     put_str("Character Background", 15, 27);
     for (i = 0; i < 4; i++) {
-	put_str(p_ptr->misc.history[i], i + 16, 10);
+	put_str(p_ptr->history[i], i + 16, 10);
     }
 }
 
@@ -504,18 +498,18 @@ static void get_history(void)
 
     /* Get a block of history text */
     /* Special race */
-    if (p_ptr->misc.prace == 8) {
+    if (p_ptr->prace == 8) {
 	hist_idx = 1;
     }
 
     /* Special race */
-    else if (p_ptr->misc.prace > 8) {
+    else if (p_ptr->prace > 8) {
 	hist_idx = 2 * 3 + 1;
     }
 
     /* Normal races */
     else {
-	hist_idx = p_ptr->misc.prace * 3 + 1;
+	hist_idx = p_ptr->prace * 3 + 1;
     }
 
     history_block[0] = '\0';
@@ -543,7 +537,7 @@ static void get_history(void)
 
     /* clear the previous history strings */
     for (hist_idx = 0; hist_idx < 4; hist_idx++) {
-	p_ptr->misc.history[hist_idx][0] = '\0';
+	p_ptr->history[hist_idx][0] = '\0';
     }
 
     /* Process block of history text for pretty output	 */
@@ -566,9 +560,9 @@ static void get_history(void)
 	    flag = TRUE;
 	}
 
-	(void)strncpy(p_ptr->misc.history[line_ctr],
+	(void)strncpy(p_ptr->history[line_ctr],
 		&history_block[start_pos], cur_len);
-	p_ptr->misc.history[line_ctr][cur_len] = '\0';
+	p_ptr->history[line_ctr][cur_len] = '\0';
 	line_ctr++;
 	start_pos = new_start;
     }
@@ -578,7 +572,7 @@ static void get_history(void)
     else if (social_class < 1) social_class = 1;
 
     /* Save the social class */
-    p_ptr->misc.sc = social_class;
+    p_ptr->sc = social_class;
 }
 
 
@@ -591,10 +585,10 @@ static void get_prev_history()
     background->chart = prev.bg.chart;
     background->next = prev.bg.next;
     background->bonus = prev.bg.bonus;
-    p_ptr->misc.sc = prev.sc;
+    p_ptr->sc = prev.sc;
 
     for (i = 0; i < 4; i++)
-	strncpy(p_ptr->misc.history[i], prev.history[i], 60);
+	strncpy(p_ptr->history[i], prev.history[i], 60);
 }
 
 static void set_prev_history()
@@ -604,12 +598,12 @@ static void set_prev_history()
     prev.bg.chart = background->chart;
     prev.bg.next = background->next;
     prev.bg.bonus = background->bonus;
-    prev.sc = p_ptr->misc.sc;
+    prev.sc = p_ptr->sc;
 
-    (void)strncpy(prev.history[0], p_ptr->misc.history[0], 60);
-    (void)strncpy(prev.history[1], p_ptr->misc.history[1], 60);
-    (void)strncpy(prev.history[2], p_ptr->misc.history[2], 60);
-    (void)strncpy(prev.history[3], p_ptr->misc.history[3], 60);
+    (void)strncpy(prev.history[0], p_ptr->history[0], 60);
+    (void)strncpy(prev.history[1], p_ptr->history[1], 60);
+    (void)strncpy(prev.history[2], p_ptr->history[2], 60);
+    (void)strncpy(prev.history[3], p_ptr->history[3], 60);
 
     return;
 }
@@ -622,32 +616,32 @@ static void get_ahw(void)
 {
     register int        i;
 
-    i = p_ptr->misc.prace;
+    i = p_ptr->prace;
     
     /* Calculate the starting age */
-    p_ptr->misc.age = race[i].b_age + randint((int)race[i].m_age);
+    p_ptr->age = race[i].b_age + randint((int)race[i].m_age);
 
     /* Calculate the height/weight for males */
-    if (p_ptr->misc.male) {
-	p_ptr->misc.ht = randnor((int)race[i].m_b_ht, (int)race[i].m_m_ht);
-	p_ptr->misc.wt = randnor((int)race[i].m_b_wt, (int)race[i].m_m_wt);
+    if (p_ptr->male) {
+	p_ptr->ht = randnor((int)race[i].m_b_ht, (int)race[i].m_m_ht);
+	p_ptr->wt = randnor((int)race[i].m_b_wt, (int)race[i].m_m_wt);
     }
 
     /* Calculate the height/weight for females */
     else {
-	p_ptr->misc.ht = randnor((int)race[i].f_b_ht, (int)race[i].f_m_ht);
-	p_ptr->misc.wt = randnor((int)race[i].f_b_wt, (int)race[i].f_m_wt);
+	p_ptr->ht = randnor((int)race[i].f_b_ht, (int)race[i].f_m_ht);
+	p_ptr->wt = randnor((int)race[i].f_b_wt, (int)race[i].f_m_wt);
     }
-    p_ptr->misc.disarm += race[i].b_dis;
+    p_ptr->disarm += race[i].b_dis;
 }
 
 
 static void set_prev_ahw()
 {
-    prev.age = p_ptr->misc.age;
-    prev.wt = p_ptr->misc.wt;
-    prev.ht = p_ptr->misc.ht;
-    prev.disarm = p_ptr->misc.disarm;
+    prev.age = p_ptr->age;
+    prev.wt = p_ptr->wt;
+    prev.ht = p_ptr->ht;
+    prev.disarm = p_ptr->disarm;
 
     return;
 }
@@ -655,10 +649,10 @@ static void set_prev_ahw()
 
 static void get_prev_ahw()
 {
-    p_ptr->misc.age = prev.age;
-    p_ptr->misc.wt = prev.wt;
-    p_ptr->misc.ht = prev.ht;
-    p_ptr->misc.disarm = prev.disarm;
+    p_ptr->age = prev.age;
+    p_ptr->wt = prev.wt;
+    p_ptr->ht = prev.ht;
+    p_ptr->disarm = prev.disarm;
     prev.age = prev.wt = prev.ht = prev.disarm = 0;
 }
 
@@ -680,14 +674,14 @@ static void get_money(void)
     register int        gold;
 
     /* Social Class adj */
-    gold = p_ptr->misc.sc * 6 + randint(25) + 325;
+    gold = p_ptr->sc * 6 + randint(25) + 325;
 
     /* Stat adj */
-    gold -= monval(p_ptr->stats.max_stat[A_STR]);
-    gold -= monval(p_ptr->stats.max_stat[A_INT]);
-    gold -= monval(p_ptr->stats.max_stat[A_WIS]);
-    gold -= monval(p_ptr->stats.max_stat[A_CON]);
-    gold -= monval(p_ptr->stats.max_stat[A_DEX]);
+    gold -= monval(p_ptr->max_stat[A_STR]);
+    gold -= monval(p_ptr->max_stat[A_INT]);
+    gold -= monval(p_ptr->max_stat[A_WIS]);
+    gold -= monval(p_ptr->max_stat[A_CON]);
+    gold -= monval(p_ptr->max_stat[A_DEX]);
 
     /* Charisma adj */
     gold += monval(a_ptr[A_CHR]);
@@ -697,10 +691,10 @@ static void get_money(void)
 
     /* She charmed the banker into it! -CJS- */
     /* She slept with the banker.. :) -GDH-  */
-    if (!p_ptr->misc.male) gold += 50;
+    if (!p_ptr->male) gold += 50;
 
     /* Save the gold */
-    p_ptr->misc.au = gold;
+    p_ptr->au = gold;
 }
 
 
@@ -709,16 +703,15 @@ void rerate()
 {
     int         min_value, max_value, i, percent;
     char        buf[50];
-    struct misc *m_ptr = &p_ptr->misc;
 
-    min_value = (MAX_PLAYER_LEVEL * 3 * (m_ptr->hitdie - 1)) / 8 +
+    min_value = (MAX_PLAYER_LEVEL * 3 * (p_ptr->hitdie - 1)) / 8 +
 	MAX_PLAYER_LEVEL;
-    max_value = (MAX_PLAYER_LEVEL * 5 * (m_ptr->hitdie - 1)) / 8 +
+    max_value = (MAX_PLAYER_LEVEL * 5 * (p_ptr->hitdie - 1)) / 8 +
 	MAX_PLAYER_LEVEL;
-    player_hp[0] = m_ptr->hitdie;
+    player_hp[0] = p_ptr->hitdie;
     do {
 	for (i = 1; i < MAX_PLAYER_LEVEL; i++) {
-	    player_hp[i] = randint((int)m_ptr->hitdie);
+	    player_hp[i] = randint((int)p_ptr->hitdie);
 	    player_hp[i] += player_hp[i - 1];
 	}
     }
@@ -726,7 +719,7 @@ void rerate()
 	   (player_hp[MAX_PLAYER_LEVEL - 1] > max_value));
 
     percent = (int)(((long)player_hp[MAX_PLAYER_LEVEL - 1] * 200L) /
-		(m_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * m_ptr->hitdie)));
+		(p_ptr->hitdie + ((MAX_PLAYER_LEVEL - 1) * p_ptr->hitdie)));
 
     sprintf(buf, "%d%% Life Rating", percent);
     calc_hitpoints();
@@ -780,8 +773,8 @@ void player_birth()
     choose_class();
 
     /* Access the race/class */
-    cp_ptr = &class[p_ptr->misc.pclass];
-    rp_ptr = &race[p_ptr->misc.prace];
+    cp_ptr = &class[p_ptr->pclass];
+    rp_ptr = &race[p_ptr->prace];
 
 
 #ifdef AUTOROLLER
@@ -917,12 +910,12 @@ void player_birth()
 	} while ((autoroll) &&
 
 	    /* Break if "happy" */
-		 ((stat[A_STR] > p_ptr->stats.cur_stat[A_STR]) ||
-		  (stat[A_INT] > p_ptr->stats.cur_stat[A_INT]) ||
-		  (stat[A_WIS] > p_ptr->stats.cur_stat[A_WIS]) ||
-		  (stat[A_DEX] > p_ptr->stats.cur_stat[A_DEX]) ||
-		  (stat[A_CON] > p_ptr->stats.cur_stat[A_CON]) ||
-		  (stat[A_CHR] > p_ptr->stats.cur_stat[A_CHR]))
+		 ((stat[A_STR] > p_ptr->cur_stat[A_STR]) ||
+		  (stat[A_INT] > p_ptr->cur_stat[A_INT]) ||
+		  (stat[A_WIS] > p_ptr->cur_stat[A_WIS]) ||
+		  (stat[A_DEX] > p_ptr->cur_stat[A_DEX]) ||
+		  (stat[A_CON] > p_ptr->cur_stat[A_CON]) ||
+		  (stat[A_CHR] > p_ptr->cur_stat[A_CHR]))
 
 #if (defined (unix) || defined(ATARI_ST)) /* CFT's if/elif/else    */
 		 && (!check_input(1)));	  /* unix needs flush here */
@@ -1008,20 +1001,12 @@ void pause_exit(int prt_line, int delay)
     dummy = inkey();
     if (dummy == 'Q') {
 	erase_line(prt_line, 0);
-#ifndef MSDOS			   /* PCs are slow enough as is  -dgk */
-	if (delay > 0)
-	    (void)sleep((unsigned)delay);
-#else
     /* prevent message about delay unused */
 	dummy = delay;
-#endif
-#ifdef MACINTOSH
-	enablefilemenu(FALSE);
+
 	exit_game();
-	enablefilemenu(TRUE);
-#else
-	exit_game();
-#endif
     }
     erase_line(prt_line, 0);
 }
+
+

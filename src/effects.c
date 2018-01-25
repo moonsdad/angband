@@ -27,7 +27,7 @@
  */
 static void lose_str()
 {
-    if (!p_ptr->flags.sustain_str) {
+    if (!p_ptr->sustain_str) {
 	(void)dec_stat(A_STR);
 	msg_print("You feel very weak.");
     }
@@ -42,7 +42,7 @@ static void lose_str()
  */
 static void lose_int()
 {
-    if (!p_ptr->flags.sustain_int) {
+    if (!p_ptr->sustain_int) {
 	(void)dec_stat(A_INT);
 	msg_print("You become very dizzy.");
     }
@@ -57,7 +57,7 @@ static void lose_int()
  */
 static void lose_wis()
 {
-    if (!p_ptr->flags.sustain_wis) {
+    if (!p_ptr->sustain_wis) {
 	(void)dec_stat(A_WIS);
 	msg_print("You feel very naive.");
     }
@@ -72,7 +72,7 @@ static void lose_wis()
  */
 static void lose_dex()
 {
-    if (!p_ptr->flags.sustain_dex) {
+    if (!p_ptr->sustain_dex) {
 	(void)dec_stat(A_DEX);
 	msg_print("You feel very sore.");
     }
@@ -87,7 +87,7 @@ static void lose_dex()
  */
 static void lose_con()
 {
-    if (!p_ptr->flags.sustain_con) {
+    if (!p_ptr->sustain_con) {
 	(void)dec_stat(A_CON);
 	msg_print("You feel very sick.");
     }
@@ -102,7 +102,7 @@ static void lose_con()
  */
 static void lose_chr()
 {
-    if (!p_ptr->flags.sustain_chr) {
+    if (!p_ptr->sustain_chr) {
 	(void)dec_stat(A_CHR);
 	msg_print("Your skin starts to itch.");
     }
@@ -137,7 +137,7 @@ void eat(void)
     }
 
     /* Get a food */
-    if (get_item(&item_val, "Eat what?", i1, i2, 0)) {
+    if (!get_item(&item_val, "Eat what?", i1, i2, 0)) return;
 
     /* Get the item */
     i_ptr = &inventory[item_val];
@@ -157,15 +157,15 @@ void eat(void)
 	switch (j + 1) {
 
 	  case 1:
-	    if (!p_ptr->flags.resist_pois) {
-		p_ptr->flags.poisoned += randint(10) + i_ptr->level;
+	    if (!p_ptr->resist_pois) {
+		p_ptr->poisoned += randint(10) + i_ptr->level;
 	    }
 		ident = TRUE;
 	    break;
 
 	  case 2:
-	    if (!p_ptr->flags.resist_blind) {
-		p_ptr->flags.blind += randint(250) + 10 * i_ptr->level + 100;
+	    if (!p_ptr->resist_blind) {
+		p_ptr->blind += randint(250) + 10 * i_ptr->level + 100;
 		draw_cave();
 		msg_print("A veil of darkness surrounds you.");
 		ident = TRUE;
@@ -173,23 +173,23 @@ void eat(void)
 	    break;
 
 	  case 3:
-	    if (!p_ptr->flags.resist_fear) {
-		p_ptr->flags.afraid += randint(10) + i_ptr->level;
+	    if (!p_ptr->resist_fear) {
+		p_ptr->afraid += randint(10) + i_ptr->level;
 		msg_print("You feel terrified!");
 		ident = TRUE;
 	    }
 	    break;
 
 	  case 4:
-	    if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
-		p_ptr->flags.confused += randint(10) + i_ptr->level;
+	    if ((!p_ptr->resist_conf) && (!p_ptr->resist_chaos)) {
+		p_ptr->confused += randint(10) + i_ptr->level;
 		msg_print("You feel drugged.");
 	    }
 		ident = TRUE;
 	    break;
 
 	  case 5:
-	    p_ptr->flags.image += randint(200) + 25 * i_ptr->level + 200;
+	    p_ptr->image += randint(200) + 25 * i_ptr->level + 200;
 	    msg_print("You feel drugged.");
 	    ident = TRUE;
 	    break;
@@ -203,8 +203,8 @@ void eat(void)
 	    break;
 
 	  case 8:
-	    if (p_ptr->flags.afraid > 1) {
-		p_ptr->flags.afraid = 1;
+	    if (p_ptr->afraid > 1) {
+		p_ptr->afraid = 1;
 		ident = TRUE;
 	    }
 	    break;
@@ -341,7 +341,7 @@ void eat(void)
 
 	    /* The player is now aware of the object */
 	    /* round half-way case up */
-		p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+		p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 		prt_experience();
 
 		identify(&item_val);
@@ -354,12 +354,12 @@ void eat(void)
     add_food(i_ptr->pval);
 
     /* Hack -- note loss of hunger */
-    p_ptr->flags.status &= ~(PY_WEAK | PY_HUNGRY);
+    p_ptr->status &= ~(PY_WEAK | PY_HUNGRY);
     prt_hunger();
 
 	desc_remain(item_val);
 	inven_destroy(item_val);
-    }
+
 }
 
 
@@ -371,9 +371,9 @@ void eat(void)
  */
 void quaff(void)
 {
-    u32b i, l;
-    int    j, k, item_val;
-    int    ident;
+    u32b flg, l;
+    int    j, ident;
+    int    item_val, i1, i2;
     register inven_type   *i_ptr;
 
     /* Assume the turn will be free */
@@ -384,13 +384,13 @@ void quaff(void)
 	return;
     }
 
-    if (!find_range(TV_POTION1, TV_POTION2, &j, &k)) {
+    if (!find_range(TV_POTION1, TV_POTION2, &i1, &i2)) {
 	msg_print("You are not carrying any potions.");
 	return;
     }
 
     /* Get a potion */
-    if (get_item(&item_val, "Quaff which potion?", j, k, 0)) {
+    if (get_item(&item_val, "Quaff which potion? ", i1, i2, 0)) {
 
     /* Get the item */
     i_ptr = &inventory[item_val];
@@ -401,16 +401,16 @@ void quaff(void)
     ident = FALSE;
 
     /* Note potions with no effects */
-    if (i_ptr->flags == 0) {
+    if ((i_ptr->flags1 == 0) && (i_ptr->flags2 == 0)) {
 	msg_print("You feel less thirsty.");
 	ident = TRUE;
     }
 
     /* Analyze the first set of effects */    
-    for (i = i_ptr->flags1; i; ) {
+    for (flg = i_ptr->flags1; flg; ) {
 
 	/* Extract the next effect bit */
-	j = bit_pos(&i);
+	j = bit_pos(&flg);
 	if (i_ptr->tval == TV_POTION2)
 	    j += 32;
 
@@ -495,63 +495,63 @@ void quaff(void)
 
 	  case 13:
 	    if (hp_player(damroll(2, 7))) ident = TRUE;
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut -= 10;
-		if (p_ptr->flags.cut < 0) p_ptr->flags.cut = 0;
-		ident = TRUE;
+	    if (p_ptr->cut > 0) {
 		msg_print("Your wounds heal.");
+		p_ptr->cut -= 10;
+		if (p_ptr->cut < 0) p_ptr->cut = 0;
+		ident = TRUE;
 	    }
 	    break;
 
 	  case 14:
 	    if (hp_player(damroll(4, 7))) ident = TRUE;
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = (p_ptr->flags.cut / 2) - 50;
-		if (p_ptr->flags.cut < 0) p_ptr->flags.cut = 0;
-		ident = TRUE;
+	    if (p_ptr->cut > 0) {
 		msg_print("Your wounds heal.");
+		p_ptr->cut = (p_ptr->cut / 2) - 50;
+		if (p_ptr->cut < 0) p_ptr->cut = 0;
+		ident = TRUE;
 	    }
 	    break;
 
 	  case 15:
 	    if (hp_player(damroll(6, 7))) ident = TRUE;
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
-		ident = TRUE;
+	    if (p_ptr->cut > 0) {
 		msg_print("Your wounds heal.");
-	    }
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
-		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
-		}
-		p_ptr->flags.stun = 0;
+		p_ptr->cut = 0;
 		ident = TRUE;
+	    }
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
+		} else {
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
+		}
 		msg_print("Your head stops stinging.");
+		p_ptr->stun = 0;
+		ident = TRUE;
 	    }
 	    break;
 
 	  case 16:
 	    if (hp_player(400)) ident = TRUE;
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
 		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
 		}
-		p_ptr->flags.stun = 0;
-		ident = TRUE;
 		msg_print("Your head stops stinging.");
-		}
-		   if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+		p_ptr->stun = 0;
 		ident = TRUE;
+	    }
+	    if (p_ptr->cut > 0) {
 		msg_print("Your wounds heal.");
+		p_ptr->cut = 0;
+		ident = TRUE;
 	    }
 	    break;
 
@@ -563,10 +563,10 @@ void quaff(void)
 	    break;
 
 	  case 18:
-	    if (p_ptr->misc.exp < MAX_EXP) {
-		l = (p_ptr->misc.exp / 2) + 10;
+	    if (p_ptr->exp < MAX_EXP) {
+		l = (p_ptr->exp / 2) + 10;
 		if (l > 100000L) l = 100000L;
-		p_ptr->misc.exp += l;
+		p_ptr->exp += l;
 		msg_print("You feel more experienced.");
 		prt_experience();
 		ident = TRUE;
@@ -574,60 +574,60 @@ void quaff(void)
 	    break;
 
 	  case 19:
-	    if (!f_ptr->free_act) {
+	    if (!p_ptr->free_act) {
 		/* paralysis must be zero, we are drinking */
 		/* but what about multiple potion effects? */
 		msg_print("You fall asleep.");
-		p_ptr->flags.paralysis += randint(4) + 4;
+		p_ptr->paralysis += randint(4) + 4;
 		ident = TRUE;
 	    }
 	    break;
 
 	  case 20:
-	    if (!p_ptr->flags.resist_blind) {
-		if (p_ptr->flags.blind == 0) {
+	    if (!p_ptr->resist_blind) {
+		if (p_ptr->blind == 0) {
 		    msg_print("You are covered by a veil of darkness.");
 		    ident = TRUE;
 		}
-		f_ptr->flags.blind += randint(100) + 100;
+		p_ptr->blind += randint(100) + 100;
 	    }
 	    break;
 
 	  case 21:
-	    if (!p_ptr->flags.resist_conf) {
-		if (p_ptr->flags.confused == 0) {
+	    if (!p_ptr->resist_conf) {
+		if (p_ptr->confused == 0) {
 		    msg_print("Hey!  This is good stuff!  *Hick!*");
 		    ident = TRUE;
 		}
-		p_ptr->flags.confused += randint(20) + 12;
+		p_ptr->confused += randint(20) + 12;
 	    }
 	    break;
 
 	  case 22:
-	    if (!(p_ptr->flags.immune_pois ||
-		  p_ptr->flags.resist_pois ||
-		  p_ptr->flags.oppose_pois)) {
+	    if (!(p_ptr->immune_pois ||
+		  p_ptr->resist_pois ||
+		  p_ptr->oppose_pois)) {
 		msg_print("You feel very sick.");
-		p_ptr->flags.poisoned += randint(15) + 10;
+		p_ptr->poisoned += randint(15) + 10;
 	    }
 	    else {
 		msg_print("The poison has no effect.");
 	    }
-	    if (!p_ptr->flags.resist_pois)
+	    if (!p_ptr->resist_pois)
 	    ident = TRUE;
 	    break;
 
 	  case 23:
-	    if (p_ptr->flags.fast == 0) ident = TRUE;
-	    if (p_ptr->flags.fast <= 0) {
-		p_ptr->flags.fast += randint(25) + 15;
+	    if (p_ptr->fast == 0) ident = TRUE;
+	    if (p_ptr->fast <= 0) {
+		p_ptr->fast += randint(25) + 15;
 	    } else
-		p_ptr->flags.fast += randint(5);
+		p_ptr->fast += randint(5);
 	    break;
 
 	  case 24:
-	    if (p_ptr->flags.slow == 0) ident = TRUE;
-	    p_ptr->flags.slow += randint(25) + 15;
+	    if (p_ptr->slow == 0) ident = TRUE;
+	    p_ptr->slow += randint(25) + 15;
 	    break;
 
 	  case 26:
@@ -665,17 +665,17 @@ void quaff(void)
 
 	  case 34:
 	    ident = TRUE;
-	    if (!p_ptr->flags.hold_life && p_ptr->misc.exp > 0) {
+	    if (!p_ptr->hold_life && p_ptr->exp > 0) {
 		s32b               m, scale;
 
 		msg_print("You feel your memories fade.");
-		m = p_ptr->misc.exp / 5;
-		if (p_ptr->misc.exp > MAX_SHORT) {
-		    scale = MAX_LONG / p_ptr->misc.exp;
-		    m += (randint((int)scale) * p_ptr->misc.exp) / (scale * 5);
+		m = p_ptr->exp / 5;
+		if (p_ptr->exp > MAX_SHORT) {
+		    scale = MAX_LONG / p_ptr->exp;
+		    m += (randint((int)scale) * p_ptr->exp) / (scale * 5);
 		}
 		else {
-		    m += randint((int)p_ptr->misc.exp) / 5;
+		    m += randint((int)p_ptr->exp) / 5;
 		}
 		lose_exp(m);
 	    }
@@ -686,20 +686,20 @@ void quaff(void)
 
 	  case 35:
 	    ident = cure_poison();
-	    if (p_ptr->flags.food > 150) p_ptr->flags.food = 150;
-	    p_ptr->flags.paralysis = 4;
+	    if (p_ptr->food > 150) p_ptr->food = 150;
+	    p_ptr->paralysis = 4;
 	    msg_print("The potion makes you vomit! ");
 	    ident = TRUE;
 	    break;
 
 	  case 37:
-	    if (p_ptr->flags.hero == 0) ident = TRUE;
-	    p_ptr->flags.hero += randint(25) + 25;
+	    if (p_ptr->hero == 0) ident = TRUE;
+	    p_ptr->hero += randint(25) + 25;
 	    break;
 
 	  case 38:
-	    if (p_ptr->flags.shero == 0) ident = TRUE;
-	    p_ptr->flags.shero += randint(25) + 25;
+	    if (p_ptr->shero == 0) ident = TRUE;
+	    p_ptr->shero += randint(25) + 25;
 	    break;
 
 	  case 39:
@@ -711,17 +711,17 @@ void quaff(void)
 	    break;
 
 	  case 41:
-	    if (!p_ptr->flags.oppose_fire) ident = TRUE;
-	    p_ptr->flags.oppose_fire += randint(10) + 10;
+	    if (!p_ptr->oppose_fire) ident = TRUE;
+	    p_ptr->oppose_fire += randint(10) + 10;
 	    break;
 
 	  case 42:
-	    if (!p_ptr->flags.oppose_cold) ident = TRUE;
-	    p_ptr->flags.oppose_cold += randint(10) + 10;
+	    if (!p_ptr->oppose_cold) ident = TRUE;
+	    p_ptr->oppose_cold += randint(10) + 10;
 	    break;
 
 	  case 43:
-	    if (!p_ptr->flags.detect_inv) ident = TRUE;
+	    if (!p_ptr->detect_inv) ident = TRUE;
 	    detect_inv2(randint(12) + 12);
 	    break;
 
@@ -734,20 +734,20 @@ void quaff(void)
 	    break;
 
 	  case 46:
-	    if (p_ptr->misc.cmana < p_ptr->misc.mana) {
-		p_ptr->misc.cmana = p_ptr->misc.mana;
-		ident = TRUE;
+	    if (p_ptr->cmana < p_ptr->mana) {
+		p_ptr->cmana = p_ptr->mana;
 		msg_print("Your feel your head clear.");
 		prt_cmana();
+		ident = TRUE;
 	    }
 	    break;
 
 	  case 47:
-	    if (p_ptr->flags.tim_infra == 0) {
+	    if (p_ptr->tim_infra == 0) {
 		msg_print("Your eyes begin to tingle.");
 		ident = TRUE;
 	    }
-	    p_ptr->flags.tim_infra += 100 + randint(100);
+	    p_ptr->tim_infra += 100 + randint(100);
 	    break;
 
 	  case 48:
@@ -792,22 +792,22 @@ void quaff(void)
 	    cure_poison() |
 	    cure_blindness() |
 	    cure_confusion() |
-	    (p_ptr->flags.stun > 0) |
-		(p_ptr->flags.cut > 0) |
-	    (p_ptr->flags.image > 0) |
+	    (p_ptr->stun > 0) |
+	    (p_ptr->cut > 0) |
+	    (p_ptr->image > 0) |
 	    remove_fear()) {
 		ident = TRUE;
-		p_ptr->flags.cut = 0;
-		p_ptr->flags.image = 0;
-		if (p_ptr->flags.stun > 0) {
-		    if (p_ptr->flags.stun > 50) {
-			p_ptr->misc.ptohit += 20;
-			p_ptr->misc.ptodam += 20;
+		p_ptr->cut = 0;
+		p_ptr->image = 0;
+		if (p_ptr->stun > 0) {
+		    if (p_ptr->stun > 50) {
+			p_ptr->ptohit += 20;
+			p_ptr->ptodam += 20;
 		    } else {
-			p_ptr->misc.ptohit += 5;
-			p_ptr->misc.ptodam += 5;
+			p_ptr->ptohit += 5;
+			p_ptr->ptodam += 5;
 		    }
-		    p_ptr->flags.stun = 0;
+		    p_ptr->stun = 0;
 		}
 	    }
 	    break;
@@ -851,20 +851,20 @@ void quaff(void)
 
 	  case 56:
 	    if (hp_player(1200)) ident = TRUE;
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
 		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
 		}
-		p_ptr->flags.stun = 0;
+		p_ptr->stun = 0;
 		msg_print("Your head stops stinging.");
 		ident = TRUE;
 	    }
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 		ident = TRUE;
 	    }
@@ -890,9 +890,8 @@ void quaff(void)
     if (ident) {
 	if (!known1_p(i_ptr)) {
 	    /* round half-way case up */
-		p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+		p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 		prt_experience();
-
 		identify(&item_val);
 		i_ptr = &inventory[item_val];
 	    }
@@ -926,7 +925,7 @@ void read_scroll(void)
 
     free_turn_flag = TRUE;
 
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see to read the scroll.");
 	return;
     }
@@ -936,7 +935,7 @@ void read_scroll(void)
 	return;
     }
 
-    if (p_ptr->flags.confused > 0) {
+    if (p_ptr->confused > 0) {
 	msg_print("You are too confused to read a scroll.");
 	return;
     }
@@ -1110,9 +1109,9 @@ void read_scroll(void)
 	    break;
 
 	  case 11:
-	    if (p_ptr->flags.confusing == 0) {
+	    if (p_ptr->confusing == 0) {
 		msg_print("Your hands begin to glow.");
-		p_ptr->flags.confusing = TRUE;
+		p_ptr->confusing = TRUE;
 		ident = TRUE;
 	    }
 	    break;
@@ -1191,8 +1190,8 @@ void read_scroll(void)
 
 	  case 27:
 	    ident = unlite_area(char_row, char_col);
-	    if (!p_ptr->flags.resist_blind) {
-		p_ptr->flags.blind += 3 + randint(5);
+	    if (!p_ptr->resist_blind) {
+		p_ptr->blind += 3 + randint(5);
 	    }
 	    break;
 
@@ -1234,11 +1233,11 @@ void read_scroll(void)
 	  case 34:
 
 	    /* Pick a weapon */
-	    i_ptr = &inventory[INVEN_WIELD];
+	    j_ptr = &inventory[INVEN_WIELD];
 	    
-	    if (i_ptr->tval != TV_NOTHING) {
-		objdes(tmp_str, i_ptr, FALSE);
-		if ((i_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
+	    if (j_ptr->tval != TV_NOTHING) {
+		objdes(tmp_str, j_ptr, FALSE);
+		if ((j_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
 		    msg_print("A terrible black aura tries to surround your weapon,");
 		    sprintf(out_val, "but your %s resists the effects!", tmp_str);
 		    msg_print(out_val);
@@ -1253,16 +1252,16 @@ void read_scroll(void)
 			msg_print(out_val);
 
 		    /* Shatter the weapon */
-		    py_bonuses(i_ptr, -1);	/* take off current bonuses -CFT */
-		    i_ptr->name2 = EGO_SHATTERED;
-		    i_ptr->tohit = (-randint(5) - randint(5));
-		    i_ptr->todam = (-randint(5) - randint(5));
-		    i_ptr->flags3 = TR3_CURSED;
-		    i_ptr->flags2 = 0;
-		    i_ptr->dd = i_ptr->ds = 1;
-		    i_ptr->toac = 0;	/* in case defender... */
-		    i_ptr->cost = (-1);
-			py_bonuses(i_ptr, 1);	/* now apply new "bonuses"  -CFT */
+		    py_bonuses(j_ptr, -1);	/* take off current bonuses -CFT */
+		    j_ptr->name2 = EGO_SHATTERED;
+		    j_ptr->tohit = (-randint(5) - randint(5));
+		    j_ptr->todam = (-randint(5) - randint(5));
+		    j_ptr->flags3 = TR3_CURSED;
+		    j_ptr->flags2 = 0;
+		    j_ptr->dd = j_ptr->ds = 1;
+		    j_ptr->toac = 0;	/* in case defender... */
+		    j_ptr->cost = (-1);
+			py_bonuses(j_ptr, 1);	/* now apply new "bonuses"  -CFT */
 		    
 		    /* Recalculate bonuses */
 		    calc_bonuses();
@@ -1301,18 +1300,18 @@ void read_scroll(void)
 		    l = INVEN_FEET;
 
 		if (l > 0) {
-		    i_ptr = &inventory[l];
+		    j_ptr = &inventory[l];
 
 
 
 
 	    /* Message (and knowledge) */
-	    objdes(tmp_str, i_ptr, FALSE);
+	    objdes(tmp_str, j_ptr, FALSE);
 	    (void) sprintf(out_val,"Your %s glows brightly!", tmp_str);
 	    msg_print(out_val);
 
 	    /* Attempt to enchant */
-	    if (!enchant(i_ptr, randint(3)+1, ENCH_TOAC)) {
+	    if (!enchant(j_ptr, randint(3)+1, ENCH_TOAC)) {
 		msg_print("The enchantment fails.");
 	    }
 	    ident = TRUE;
@@ -1346,13 +1345,13 @@ void read_scroll(void)
 		if (k > 0) {
 
 		/* Pick a random item */
-	    i_ptr = &inventory[k];
+	    j_ptr = &inventory[k];
 
 	    /* Describe */
-	    objdes(tmp_str, i_ptr, FALSE);
+	    objdes(tmp_str, j_ptr, FALSE);
 
 	    /* Attempt a saving throw for artifacts */
-	    if ((i_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
+	    if ((j_ptr->flags2 & TR_ARTIFACT) && (randint(7) < 4)) {
 		msg_print("A terrible black aura tries to surround your");
 	    sprintf(out_val, "%s, but it resists the effects!", tmp_str);
 		msg_print(out_val);
@@ -1367,17 +1366,17 @@ void read_scroll(void)
 		msg_print(out_val);
 
 		/* Blast the armor */
-		py_bonuses(i_ptr, -1);	/* take off current bonuses -CFT */
-		i_ptr->name2 = EGO_BLASTED;
-		i_ptr->flags3 = TR3_CURSED;
-		i_ptr->flags2 = 0;
-		i_ptr->toac = (-randint(5) - randint(5));
-		i_ptr->tohit = i_ptr->todam = 0; /* in case gaunlets of slaying... */
-		i_ptr->ac = (i_ptr->ac > 9) ? 1 : 0;
-		i_ptr->cost = (-1);
+		py_bonuses(j_ptr, -1);	/* take off current bonuses -CFT */
+		j_ptr->name2 = EGO_BLASTED;
+		j_ptr->flags3 = TR3_CURSED;
+		j_ptr->flags2 = 0;
+		j_ptr->toac = (-randint(5) - randint(5));
+		j_ptr->tohit = j_ptr->todam = 0; /* in case gaunlets of slaying... */
+		j_ptr->ac = (j_ptr->ac > 9) ? 1 : 0;
+		j_ptr->cost = (-1);
 
 		/* Recalculate bonuses */
-		py_bonuses(i_ptr, 1);	/* now apply new "bonuses"  -CFT */
+		py_bonuses(j_ptr, 1);	/* now apply new "bonuses"  -CFT */
 		calc_bonuses();
 	    }
 
@@ -1411,12 +1410,12 @@ void read_scroll(void)
 	    break;
 
 	  case 41:
-	    if (p_ptr->flags.word_recall == 0) {
-		p_ptr->flags.word_recall = 15 + randint(20);
+	    if (p_ptr->word_recall == 0) {
+		p_ptr->word_recall = 15 + randint(20);
 		msg_print("The air about you becomes charged...");
 	    }
 	    else {
-		p_ptr->flags.word_recall = 0;
+		p_ptr->word_recall = 0;
 		msg_print("A tension leaves the air around you...");
 	    }
 	    ident = TRUE;
@@ -1450,7 +1449,7 @@ void read_scroll(void)
     if (ident) {
 	    if (!known1_p(i_ptr)) {
 	/* round half-way case up */
-	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 
 		identify(&item_val);
@@ -1503,7 +1502,7 @@ void do_cmd_aim_wand(void)
     free_turn_flag = FALSE;
 
     if (!get_dir(NULL, &dir)) return;
-    if (p_ptr->flags.confused > 0) {
+    if (p_ptr->confused > 0) {
 	msg_print("You are confused.");
 	do {
 	    dir = randint(9);
@@ -1512,10 +1511,10 @@ void do_cmd_aim_wand(void)
 
 
     /* Chance of success */
-    chance = (p_ptr->misc.save + stat_adj(A_INT) - (int)(i_ptr->level>42?42:i_ptr->level) +
-	      (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3));
+    chance = (p_ptr->save + stat_adj(A_INT) - (int)(i_ptr->level>42?42:i_ptr->level) +
+	      (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3));
 
-    if (p_ptr->flags.confused > 0) chance = chance / 2;
+    if (p_ptr->confused > 0) chance = chance / 2;
 
     /* Give everyone a slight chance */
     if ((chance < USE_DEVICE) && (randint(USE_DEVICE - chance + 1) == 1)) {
@@ -1755,7 +1754,7 @@ void do_cmd_aim_wand(void)
     if (ident) {
 	if (!known1_p(i_ptr)) {
 	/* round half-way case up */
-	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
@@ -1806,10 +1805,10 @@ void use(void)
     free_turn_flag = FALSE;
 
     /* Chance of success */
-    chance = p_ptr->misc.save + stat_adj(A_INT) - (int)(i_ptr->level > 50 ? 50 : i_ptr->level) +
-	      (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3);
+    chance = p_ptr->save + stat_adj(A_INT) - (int)(i_ptr->level > 50 ? 50 : i_ptr->level) +
+	      (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3);
 
-    if (p_ptr->flags.confused > 0) chance = chance / 2;
+    if (p_ptr->confused > 0) chance = chance / 2;
 
     if ((chance < USE_DEVICE) && (randint(USE_DEVICE - chance + 1) == 1)) {
 	chance = USE_DEVICE;   /* Give everyone a slight chance */
@@ -1834,20 +1833,20 @@ void use(void)
 
       case SV_STAFF_HEALING:
 	ident = hp_player(300);
-	if (p_ptr->flags.stun > 0) {
-		    if (p_ptr->flags.stun > 50) {
-			p_ptr->misc.ptohit += 20;
-			p_ptr->misc.ptodam += 20;
+	if (p_ptr->stun > 0) {
+		    if (p_ptr->stun > 50) {
+			p_ptr->ptohit += 20;
+			p_ptr->ptodam += 20;
 		    } else {
-			p_ptr->misc.ptohit += 5;
-			p_ptr->misc.ptodam += 5;
+			p_ptr->ptohit += 5;
+			p_ptr->ptodam += 5;
 		    }
-		    p_ptr->flags.stun = 0;
+		    p_ptr->stun = 0;
 			ident = TRUE;
 		    msg_print("Your head stops stinging.");
 		}
-		if (p_ptr->flags.cut > 0) {
-		    p_ptr->flags.cut = 0;
+		if (p_ptr->cut > 0) {
+		    p_ptr->cut = 0;
 		    ident = TRUE;
 		    msg_print("You feel better.");
 		}
@@ -1875,20 +1874,20 @@ void use(void)
 	cure_poison();
 	remove_fear();
 	hp_player(50);
-	if (p_ptr->flags.stun > 0) {
-	    if (p_ptr->flags.stun > 50) {
-		p_ptr->misc.ptohit += 20;
-		p_ptr->misc.ptodam += 20;
+	if (p_ptr->stun > 0) {
+	    if (p_ptr->stun > 50) {
+		p_ptr->ptohit += 20;
+		p_ptr->ptodam += 20;
 	    } else {
-		p_ptr->misc.ptohit += 5;
-		p_ptr->misc.ptodam += 5;
+		p_ptr->ptohit += 5;
+		p_ptr->ptodam += 5;
 	    }
-	    p_ptr->flags.stun = 0;
+	    p_ptr->stun = 0;
 	    ident = TRUE;
 	    msg_print("Your head stops stinging.");
 	}
-	if (p_ptr->flags.cut > 0) {
-	    p_ptr->flags.cut = 0;
+	if (p_ptr->cut > 0) {
+	    p_ptr->cut = 0;
 	    ident = TRUE;
 	    msg_print("You feel better.");
 	}
@@ -1900,8 +1899,8 @@ void use(void)
 	    msg_print("You have a warm feeling.");
 	    ident = TRUE;
 	}
-	if (p_ptr->misc.cmana < p_ptr->misc.mana) {
-	    p_ptr->misc.cmana = p_ptr->misc.mana;
+	if (p_ptr->cmana < p_ptr->mana) {
+	    p_ptr->cmana = p_ptr->mana;
 	    ident = TRUE;
 	    msg_print("Your feel your head clear.");
 	    prt_cmana();
@@ -1987,21 +1986,21 @@ void use(void)
 	break;
 
       case SV_STAFF_SPEED:
-	if (p_ptr->flags.fast == 0) ident = TRUE;
-	if (p_ptr->flags.fast <= 0)
-	    p_ptr->flags.fast += randint(30) + 15;
+	if (p_ptr->fast == 0) ident = TRUE;
+	if (p_ptr->fast <= 0)
+	    p_ptr->fast += randint(30) + 15;
 	else
-	    p_ptr->flags.fast += randint(5);
+	    p_ptr->fast += randint(5);
 	break;
 
       case SV_STAFF_SLOWNESS:
-	if (p_ptr->flags.slow == 0) ident = TRUE;
-	p_ptr->flags.slow += randint(30) + 15;
+	if (p_ptr->slow == 0) ident = TRUE;
+	p_ptr->slow += randint(30) + 15;
 	break;
 
       case SV_STAFF_REMOVE_CURSE:
 	if (remove_curse()) {
-	    if (p_ptr->flags.blind < 1) {
+	    if (p_ptr->blind < 1) {
 		msg_print("The staff glows blue for a moment..");
 	    }
 	    ident = TRUE;
@@ -2016,21 +2015,21 @@ void use(void)
 	if (cure_blindness()) ident = TRUE;
 	if (cure_poison()) ident = TRUE;
 	if (cure_confusion()) ident = TRUE;
-	if (p_ptr->flags.stun > 0) {
-	    if (p_ptr->flags.stun > 50) {
-		p_ptr->misc.ptohit += 20;
-		p_ptr->misc.ptodam += 20;
+	if (p_ptr->stun > 0) {
+	    if (p_ptr->stun > 50) {
+		p_ptr->ptohit += 20;
+		p_ptr->ptodam += 20;
 	    } else {
-		p_ptr->misc.ptohit += 5;
-		p_ptr->misc.ptodam += 5;
+		p_ptr->ptohit += 5;
+		p_ptr->ptodam += 5;
 	    }
-	    p_ptr->flags.stun = 0;
+	    p_ptr->stun = 0;
 	    msg_print("Your head stops stinging.");
 	    ident = TRUE;
 	}
-	else if (p_ptr->flags.cut > 0) {
+	else if (p_ptr->cut > 0) {
 	    msg_print("You feel better.");
-	    p_ptr->flags.cut = 0;
+	    p_ptr->cut = 0;
 	    ident = TRUE;
 	}
 	break;
@@ -2052,7 +2051,7 @@ void use(void)
     if (ident) {
 	if (!known1_p(i_ptr)) {
 	/* round half-way case up */
-	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
@@ -2110,10 +2109,10 @@ void do_cmd_zap_rod(void)
     ident = FALSE;
 
     /* Calculate the chance */
-    chance = (p_ptr->misc.save + (stat_adj(A_INT) * 2) - (int)((i_ptr->level > 70) ? 70 : i_ptr->level) +
-	      (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3));
+    chance = (p_ptr->save + (stat_adj(A_INT) * 2) - (int)((i_ptr->level > 70) ? 70 : i_ptr->level) +
+	      (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3));
 
-    if (p_ptr->flags.confused > 0) chance = chance / 2;
+    if (p_ptr->confused > 0) chance = chance / 2;
 
     /* Give everyone a slight chance */
     if ((chance < USE_DEVICE) && (randint(USE_DEVICE - chance + 1) == 1)) {
@@ -2274,21 +2273,21 @@ void do_cmd_zap_rod(void)
 	if (cure_blindness()) ident = TRUE;
 	if (cure_poison()) ident = TRUE;
 	if (cure_confusion()) ident = TRUE;
-	if (p_ptr->flags.stun > 0) {
+	if (p_ptr->stun > 0) {
 	    msg_print("Your head stops stinging.");
-	    if (p_ptr->flags.stun > 50) {
-		p_ptr->misc.ptohit += 20;
-		p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 50) {
+		p_ptr->ptohit += 20;
+		p_ptr->ptodam += 20;
 	    } else {
-		p_ptr->misc.ptohit += 5;
-		p_ptr->misc.ptodam += 5;
+		p_ptr->ptohit += 5;
+		p_ptr->ptodam += 5;
 	    }
-	    p_ptr->flags.stun = 0;
+	    p_ptr->stun = 0;
 	    ident = TRUE;
 	}
-	else if (p_ptr->flags.cut > 0) {
+	else if (p_ptr->cut > 0) {
 	    msg_print("You feel better.");
-	    p_ptr->flags.cut = 0;
+	    p_ptr->cut = 0;
 	    ident = TRUE;
 	}
 	i_ptr->timeout = 888;
@@ -2296,34 +2295,34 @@ void do_cmd_zap_rod(void)
 
       case SV_ROD_HEALING:
 	ident = hp_player(500);
-	if (p_ptr->flags.stun > 0) {
-	    if (p_ptr->flags.stun > 50) {
-		p_ptr->misc.ptohit += 20;
-		p_ptr->misc.ptodam += 20;
+	if (p_ptr->stun > 0) {
+	    if (p_ptr->stun > 50) {
+		p_ptr->ptohit += 20;
+		p_ptr->ptodam += 20;
 	    } else {
-		p_ptr->misc.ptohit += 5;
-		p_ptr->misc.ptodam += 5;
+		p_ptr->ptohit += 5;
+		p_ptr->ptodam += 5;
 	    }
-	    p_ptr->flags.stun = 0;
+	    p_ptr->stun = 0;
 	    ident = TRUE;
 	    msg_print("Your head stops stinging.");
 	}
-	if (p_ptr->flags.cut > 0) {
+	if (p_ptr->cut > 0) {
 	    msg_print("You feel better.");
-	    p_ptr->flags.cut = 0;
+	    p_ptr->cut = 0;
 	    ident = TRUE;
 	}
 	i_ptr->timeout = 888;
 	break;
 
       case SV_ROD_RECALL:
-	if (p_ptr->flags.word_recall == 0) {
+	if (p_ptr->word_recall == 0) {
 	    msg_print("The air about you becomes charged...");
-	    p_ptr->flags.word_recall = 15 + randint(20);
+	    p_ptr->word_recall = 15 + randint(20);
 	}
 	else {
 	    msg_print("A tension leaves the air around you...");
-	    p_ptr->flags.word_recall = 0;
+	    p_ptr->word_recall = 0;
 	}
 	ident = TRUE;
 	i_ptr->timeout = 60;
@@ -2353,8 +2352,8 @@ void do_cmd_zap_rod(void)
 	break;
 
       case SV_ROD_SPEED:
-	if (p_ptr->flags.fast == 0) ident = TRUE;
-	p_ptr->flags.fast += randint(30) + 15;
+	if (p_ptr->fast == 0) ident = TRUE;
+	p_ptr->fast += randint(30) + 15;
 	i_ptr->timeout = 99;
 	break;
 
@@ -2381,7 +2380,7 @@ void do_cmd_zap_rod(void)
     if (ident) {
 	if (!known1_p(i_ptr)) {
 	/* round half-way case up */
-	p_ptr->misc.exp += (i_ptr->level + (p_ptr->misc.lev >> 1)) / p_ptr->misc.lev;
+	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 
 	identify(&item_val);
@@ -2502,8 +2501,8 @@ static void activate(void)
 		msg_print("It whines, glows and fades...");
 		break;
 	    }
-	    if (p_ptr->stats.use_stat[A_INT] < randint(18) &&
-	     randint(k_list[inventory[i].index].level) > p_ptr->misc.lev) {
+	    if (p_ptr->use_stat[A_INT] < randint(18) &&
+	     randint(k_list[inventory[i].index].level) > p_ptr->lev) {
 		msg_print("You fail to activate it properly.");
 		break;
 	    }
@@ -2516,7 +2515,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_NARTHANC) {
 		    msg_print("Your dagger is covered in fire...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2528,7 +2527,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_NIMTHANC) {
 		    msg_print("Your dagger is covered in frost...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2540,7 +2539,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_DETHANC) {
 		    msg_print("Your dagger is covered in sparks...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2552,7 +2551,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_RILIA) {
 		    msg_print("Your dagger throbs deep green...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2564,7 +2563,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_BELANGIL) {
 		    msg_print("Your dagger is covered in frost...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2588,7 +2587,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_RINGIL) {
 		    msg_print("Your sword glows an intense blue...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2600,7 +2599,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_ANDURIL) {
 		    msg_print("Your sword glows an intense red...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2615,7 +2614,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_FIRESTAR) {
 		    msg_print("Your morningstar rages in fire...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2628,7 +2627,7 @@ static void activate(void)
 		break;
 	      case (92):
 		if (inventory[i].name2 == ART_FEANOR) {
-		    p_ptr->flags.fast += randint(25) + 15;
+		    p_ptr->fast += randint(25) + 15;
 		    inventory[i].timeout = 200;
 		}
 		break;
@@ -2636,7 +2635,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_THEODEN) {
 		    msg_print("The blade of your axe glows black...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2651,7 +2650,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_TURMIL) {
 		    msg_print("The head of your hammer glows white...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2671,11 +2670,11 @@ static void activate(void)
 		break;
 	      case (71):
 		if (inventory[i].name2 == ART_AVAVIR) {
-		    if (p_ptr->flags.word_recall == 0) {
-			p_ptr->flags.word_recall = 15 + randint(20);
+		    if (p_ptr->word_recall == 0) {
+			p_ptr->word_recall = 15 + randint(20);
 			msg_print("The air about you becomes charged...");
 		    } else {
-			p_ptr->flags.word_recall = 0;
+			p_ptr->word_recall = 0;
 			msg_print("A tension leaves the air around you...");
 		    }
 		    inventory[i].timeout = 200;
@@ -2683,8 +2682,8 @@ static void activate(void)
 		break;
 	      case (53):
 		if (inventory[i].name2 == ART_TARATOL) {
-		    if (p_ptr->flags.fast == 0)
-			p_ptr->flags.fast += randint(30) + 15;
+		    if (p_ptr->fast == 0)
+			p_ptr->fast += randint(30) + 15;
 		    inventory[i].timeout = 166;
 		}
 		break;
@@ -2708,10 +2707,10 @@ static void activate(void)
 		if (inventory[i].name2 == ART_LOTHARANG) {
 		    msg_print("Your battle axe radiates deep purple...");
 		    hp_player(damroll(4, 7));
-		    if (p_ptr->flags.cut > 0) {
-			p_ptr->flags.cut = (p_ptr->flags.cut / 2) - 50;
-			if (p_ptr->flags.cut < 0)
-			    p_ptr->flags.cut = 0;
+		    if (p_ptr->cut > 0) {
+			p_ptr->cut = (p_ptr->cut / 2) - 50;
+			if (p_ptr->cut < 0)
+			    p_ptr->cut = 0;
 			msg_print("You wounds heal.");
 		    }
 		    inventory[i].timeout = 2 + randint(2);
@@ -2745,7 +2744,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_ARUNRUTH) {
 		    msg_print("Your sword glows a pale blue...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2760,7 +2759,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_AEGLOS) {
 		    msg_print("Your spear glows a bright white...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2772,7 +2771,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_OROME) {
 		    msg_print("Your spear pulsates...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2813,7 +2812,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_ULMO) {
 		    msg_print("Your trident glows deep red...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2829,11 +2828,11 @@ static void activate(void)
 		if (inventory[i].name2 == ART_COLLUIN) {
 		    msg_print("Your cloak glows many colours...");
 		    msg_print("You feel you can resist anything.");
-		    p_ptr->flags.oppose_fire += randint(20) + 20;
-		    p_ptr->flags.oppose_cold += randint(20) + 20;
-		    p_ptr->flags.oppose_elec += randint(20) + 20;
-		    p_ptr->flags.oppose_pois += randint(20) + 20;
-		    p_ptr->flags.oppose_acid += randint(20) + 20;
+		    p_ptr->oppose_fire += randint(20) + 20;
+		    p_ptr->oppose_cold += randint(20) + 20;
+		    p_ptr->oppose_elec += randint(20) + 20;
+		    p_ptr->oppose_pois += randint(20) + 20;
+		    p_ptr->oppose_acid += randint(20) + 20;
 		    inventory[i].timeout = 111;
 		} else if (inventory[i].name2 == ART_HOLCOLLETH) {
 		    msg_print("You momentarily disappear...");
@@ -2852,7 +2851,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_TOTILA) {
 		    msg_print("Your flail glows in scintillating colours...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2867,7 +2866,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_CAMMITHRIM) {
 		    msg_print("Your gloves glow extremely brightly...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2883,7 +2882,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_PAURHACH) {
 		    msg_print("Your gauntlets are covered in fire...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2898,7 +2897,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_PAURNIMMEN) {
 		    msg_print("Your gauntlets are covered in frost...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2910,7 +2909,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_PAURAEGEN) {
 		    msg_print("Your gauntlets are covered in sparks...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2922,7 +2921,7 @@ static void activate(void)
 		} else if (inventory[i].name2 == ART_PAURNEN) {
 		    msg_print("Your gauntlets look very acidic...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2937,7 +2936,7 @@ static void activate(void)
 		if (inventory[i].name2 == ART_FINGOLFIN) {
 		    msg_print("Magical spikes appear on your cesti...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -2965,7 +2964,7 @@ static void activate(void)
 	      case (SPECIAL_OBJ - 1):	/* Narya */
 		msg_print("The ring glows deep red...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -2978,7 +2977,7 @@ static void activate(void)
 	      case (SPECIAL_OBJ): /* Nenya */
 		msg_print("The ring glows bright white...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -2991,7 +2990,7 @@ static void activate(void)
 	      case (SPECIAL_OBJ + 1):	/* Vilya */
 		msg_print("The ring glows deep blue...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3003,18 +3002,18 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 2):	/* Power */
 		msg_print("The ring glows intensely black...");
-		switch (randint(17) + (8 - p_ptr->misc.lev / 10)) {
+		switch (randint(17) + (8 - p_ptr->lev / 10)) {
 		  case 5:
 		    dispel_creature(0xFFFFFFFL, 1000);
 		    break;
 		  case 6:
 		  case 7:
 		    msg_print("You are surrounded by a malignant aura");
-		    p_ptr->misc.lev--;
-		    p_ptr->misc.exp = player_exp[p_ptr->misc.lev - 2] * p_ptr->misc.expfact / 100 +
-			randint((player_exp[p_ptr->misc.lev - 1] * p_ptr->misc.expfact / 100) -
-		       (player_exp[p_ptr->misc.lev - 2] * p_ptr->misc.expfact / 100));
-		    p_ptr->misc.max_exp = p_ptr->misc.exp;
+		    p_ptr->lev--;
+		    p_ptr->exp = player_exp[p_ptr->lev - 2] * p_ptr->expfact / 100 +
+			randint((player_exp[p_ptr->lev - 1] * p_ptr->expfact / 100) -
+		       (player_exp[p_ptr->lev - 2] * p_ptr->expfact / 100));
+		    p_ptr->max_exp = p_ptr->exp;
 		    prt_experience();
 		    ruin_stat(A_STR);
 		    ruin_stat(A_INT);
@@ -3023,22 +3022,22 @@ static void activate(void)
 		    ruin_stat(A_CON);
 		    ruin_stat(A_CHR);
 		    calc_hitpoints();
-		    if (class[p_ptr->misc.pclass].spell == MAGE) {
+		    if (class[p_ptr->pclass].spell == MAGE) {
 			calc_spells(A_INT);
 			calc_mana(A_INT);
-		    } else if (class[p_ptr->misc.pclass].spell == PRIEST) {
+		    } else if (class[p_ptr->pclass].spell == PRIEST) {
 			calc_spells(A_WIS);
 			calc_mana(A_WIS);
 		    }
 		    prt_level();
 		    prt_title();
-		    take_hit((p_ptr->misc.chp > 2) ? p_ptr->misc.chp / 2 : 0, "malignant aura");
+		    take_hit((p_ptr->chp > 2) ? p_ptr->chp / 2 : 0, "malignant aura");
 		    break;
 		  case 8:
 		  case 9:
 		  case 10:
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -3049,7 +3048,7 @@ static void activate(void)
 		    break;
 		  default:
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -3063,7 +3062,7 @@ static void activate(void)
 	      case (389):	   /* Blue */
 		msg_print("You breathe lightning...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3076,7 +3075,7 @@ static void activate(void)
 	      case (390):	   /* White */
 		msg_print("You breathe frost...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3089,7 +3088,7 @@ static void activate(void)
 	      case (391):	   /* Black */
 		msg_print("You breathe acid...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3102,7 +3101,7 @@ static void activate(void)
 	      case (392):	   /* Gas */
 		msg_print("You breathe poison gas...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3115,7 +3114,7 @@ static void activate(void)
 	      case (393):	   /* Fire */
 		msg_print("You breathe fire...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3132,7 +3131,7 @@ static void activate(void)
 		    inventory[i].timeout = 1000;
 		} else {
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -3157,7 +3156,7 @@ static void activate(void)
 	      case (408):	   /* Bronze */
 		msg_print("You breathe confusion...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3170,7 +3169,7 @@ static void activate(void)
 	      case (409):	   /* Gold */
 		msg_print("You breathe sound...");
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3182,7 +3181,7 @@ static void activate(void)
 		break;
 	      case (415):	   /* Chaos */
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3199,7 +3198,7 @@ static void activate(void)
 		break;
 	      case (416):	   /* Law */
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3216,7 +3215,7 @@ static void activate(void)
 		break;
 	      case (417):	   /* Balance */
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3237,7 +3236,7 @@ static void activate(void)
 		break;
 	      case (418):	   /* Shining */
 		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->flags.confused > 0) {
+		    if (p_ptr->confused > 0) {
 			msg_print("You are confused.");
 			do {
 			    dir = randint(9);
@@ -3256,18 +3255,18 @@ static void activate(void)
 		if (inventory[i].name2 == ART_BLADETURNER) {
 		    msg_print("Your armour glows many colours...");
 		    msg_print("You enter a berserk rage...");
-		    p_ptr->flags.hero += randint(50) + 50;
-		    p_ptr->flags.shero += randint(50) + 50;
+		    p_ptr->hero += randint(50) + 50;
+		    p_ptr->shero += randint(50) + 50;
 		    bless(randint(50) + 50);
-		    p_ptr->flags.oppose_fire += randint(50) + 50;
-		    p_ptr->flags.oppose_cold += randint(50) + 50;
-		    p_ptr->flags.oppose_elec += randint(50) + 50;
-		    p_ptr->flags.oppose_acid += randint(50) + 50;
+		    p_ptr->oppose_fire += randint(50) + 50;
+		    p_ptr->oppose_cold += randint(50) + 50;
+		    p_ptr->oppose_elec += randint(50) + 50;
+		    p_ptr->oppose_acid += randint(50) + 50;
 		    inventory[i].timeout = 400;
 		} else {
 		    msg_print("You breathe the elements...");
 		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->flags.confused > 0) {
+			if (p_ptr->confused > 0) {
 			    msg_print("You are confused.");
 			    do {
 				dir = randint(9);
@@ -3285,7 +3284,7 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 4):
 		msg_print("An aura of good floods the area...");
-		dispel_creature(MF2_EVIL, (int)(5 * p_ptr->misc.lev));
+		dispel_creature(MF2_EVIL, (int)(5 * p_ptr->lev));
 		inventory[i].timeout = 444 + randint(222);
 		break;
 	      case (SPECIAL_OBJ + 5):
@@ -3309,7 +3308,7 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ + 8):
 		msg_print("The ring glows brightly...");
-		p_ptr->flags.fast += randint(100) + 50;
+		p_ptr->fast += randint(100) + 50;
 		inventory[i].timeout = 200;
 		break;
 	      default:

@@ -418,12 +418,12 @@ void look()
     int                 dir, dummy;
 
     /* Blind */
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see a damn thing!");
     }
 
     /* Hallucinating */
-    else if (p_ptr->flags.image > 0) {
+    else if (p_ptr->image > 0) {
 	msg_print("You can't believe what you are seeing! It's like a dream!");
     }
 
@@ -540,7 +540,7 @@ static void chest_trap(int y, int x)
 
     if (i_ptr->flags2 & CH2_LOSE_STR) {
 	msg_print("A small needle has pricked you!");
-	if (!p_ptr->flags.sustain_str) {
+	if (!p_ptr->sustain_str) {
 	    (void)dec_stat(A_STR);
 	    take_hit(damroll(1, 4), "a poison needle");
 	    msg_print("You feel weakened!");
@@ -553,21 +553,21 @@ static void chest_trap(int y, int x)
     if (i_ptr->flags2 & CH2_POISON) {
 	msg_print("A small needle has pricked you!");
 	take_hit(damroll(1, 6), "a poison needle");
-	if (!(p_ptr->flags.resist_pois ||
-	      p_ptr->flags.oppose_pois ||
-	      p_ptr->flags.immune_pois)) {
-	    p_ptr->flags.poisoned += 10 + randint(20);
+	if (!(p_ptr->resist_pois ||
+	      p_ptr->oppose_pois ||
+	      p_ptr->immune_pois)) {
+	    p_ptr->poisoned += 10 + randint(20);
 	}
     }
 
     if (i_ptr->flags2 & CH2_PARALYSED) {
 	msg_print("A puff of yellow gas surrounds you!");
-	if (p_ptr->flags.free_act) {
+	if (p_ptr->free_act) {
 	    msg_print("You are unaffected.");
 	}
 	else {
 	    msg_print("You choke and pass out.");
-	    p_ptr->flags.paralysis = 10 + randint(20);
+	    p_ptr->paralysis = 10 + randint(20);
 	}
     }
 
@@ -599,7 +599,7 @@ void do_cmd_open()
     int				flag, no_object;
     register cave_type		*c_ptr;
     register inven_type		*t_ptr;
-    register struct misc	*p_ptr;
+
     register monster_type	*m_ptr;
     vtype			m_name, out_val;
 #ifdef TARGET
@@ -634,17 +634,17 @@ void do_cmd_open()
 	    if (i_list[c_ptr->i_idx].tval == TV_CLOSED_DOOR) {
 		t_ptr = &i_list[c_ptr->i_idx];
 		if (t_ptr->pval > 0) {
-		    i = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-			+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM]
-			   * p_ptr->misc.lev / 3);
+		    i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
+			+ (class_level_adj[p_ptr->pclass][CLA_DISARM]
+			   * p_ptr->lev / 3);
 	/* give a 1/50 chance of opening anything, anyway -CWS */
 		    if ((i - t_ptr->pval) < 2)
 			i = t_ptr->pval + 2;
-		    if (p_ptr->flags.confused > 0)
+		    if (p_ptr->confused > 0)
 			msg_print("You are too confused to pick the lock.");
 		    else if ((i - t_ptr->pval) > randint(100)) {
 			msg_print("You have picked the lock.");
-			p_ptr->misc.exp++;
+			p_ptr->exp++;
 			prt_experience();
 			t_ptr->pval = 0;
 		    } else
@@ -661,31 +661,31 @@ void do_cmd_open()
 	    }
     /* Open a closed chest.		     */
 	    else if (i_list[c_ptr->i_idx].tval == TV_CHEST) {
-		i = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-		    + (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
+		i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
+		    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
 		t_ptr = &i_list[c_ptr->i_idx];
 		flag = FALSE;
-		if (CH2_LOCKED & t_ptr->flags)
-		    if (p_ptr->flags.confused > 0)
+		if (CH2_LOCKED & t_ptr->flags2)
+		    if (p_ptr->confused > 0)
 			msg_print("You are too confused to pick the lock.");
 		    else if ((i - (int)t_ptr->level) > randint(100)) {
 			msg_print("You have picked the lock.");
 			flag = TRUE;
-			p_ptr->misc.exp += t_ptr->level;
+			p_ptr->exp += t_ptr->level;
 			prt_experience();
 		    } else
 			count_msg_print("You failed to pick the lock.");
 		else
 		    flag = TRUE;
 		if (flag) {
-		    t_ptr->flags &= ~CH2_LOCKED;
+		    t_ptr->flags2 &= ~CH2_LOCKED;
 		    t_ptr->name2 = SN_EMPTY;
 		    known2(t_ptr);
 		    t_ptr->cost = 0;
 		}
 		flag = FALSE;
 	    /* Was chest still trapped?	 (Snicker)   */
-		if ((CH2_LOCKED & t_ptr->flags) == 0) {
+		if ((CH2_LOCKED & t_ptr->flags2) == 0) {
 		    chest_trap(y, x);
 		    if (c_ptr->i_idx != 0)
 			flag = TRUE;
@@ -882,7 +882,7 @@ void tunnel(int dir)
     monster_type       *m_ptr;
     vtype               out_val, m_name;
 
-    if ((p_ptr->flags.confused > 0) && /* Confused?	     */
+    if ((p_ptr->confused > 0) && /* Confused?	     */
 	(randint(4) > 1))	   /* 75% random movement   */
 	dir = randint(9);
     y = char_row;
@@ -892,7 +892,7 @@ void tunnel(int dir)
     c_ptr = &cave[y][x];
 /* Compute the digging ability of player; based on	   */
 /* strength, and type of tool used			   */
-    tabil = p_ptr->stats.use_stat[A_STR];
+    tabil = p_ptr->use_stat[A_STR];
     i_ptr = &inventory[INVEN_WIELD];
 
 /* Don't let the player tunnel somewhere illegal, this is necessary to
@@ -926,7 +926,7 @@ void tunnel(int dir)
 	msg_print(out_val);
 
     /* let the player attack the creature */
-	if (p_ptr->flags.afraid < 1)
+	if (p_ptr->afraid < 1)
 	    py_attack(y, x);
 	else
 	    msg_print("You are too afraid!");
@@ -941,7 +941,7 @@ void tunnel(int dir)
 	}
 
 	if (weapon_heavy) {
-	    tabil += (p_ptr->stats.use_stat[A_STR] * 15) - i_ptr->weight;
+	    tabil += (p_ptr->use_stat[A_STR] * 15) - i_ptr->weight;
 	    if (tabil < 0)
 		tabil = 0;
 	}
@@ -996,7 +996,7 @@ void tunnel(int dir)
 	    /* Secret doors. */
 		else if (i_list[c_ptr->i_idx].tval == TV_SECRET_DOOR) {
 		    count_msg_print("You tunnel into the granite wall.");
-		    search(char_row, char_col, p_ptr->misc.srh);
+		    search(char_row, char_col, p_ptr->srh);
 		}
 		else {
 		    msg_print("You can't tunnel through that.");
@@ -1052,16 +1052,16 @@ void do_cmd_disarm()
 	    msg_print(out_val);
 	} else if (c_ptr->i_idx != 0) {
 
-	    tot = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-		+ (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
+	    tot = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
+		+ (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
 
-	    if ((p_ptr->flags.blind > 0) || (no_lite())) {
+	    if ((p_ptr->blind > 0) || (no_lite())) {
 		tot = tot / 10;
 	    }
-	    if (p_ptr->flags.confused > 0) {
+	    if (p_ptr->confused > 0) {
 		tot = tot / 10;
 	    }
-	    if (p_ptr->flags.image > 0) {
+	    if (p_ptr->image > 0) {
 		tot = tot / 10;
 	    }
 
@@ -1071,13 +1071,13 @@ void do_cmd_disarm()
 	    if (i == TV_VIS_TRAP) {/* Floor trap    */
 		if ((tot + 100 - level) > randint(100)) {
 		    msg_print("You have disarmed the trap.");
-		    p_ptr->misc.exp += i_ptr->pval;
+		    p_ptr->exp += i_ptr->pval;
 		    (void)delete_object(y, x);
 		/* make sure we move onto the trap even if confused */
-		    tmp = p_ptr->flags.confused;
-		    p_ptr->flags.confused = 0;
+		    tmp = p_ptr->confused;
+		    p_ptr->confused = 0;
 		    move_player(dir, FALSE);
-		    p_ptr->flags.confused = tmp;
+		    p_ptr->confused = tmp;
 		    prt_experience();
 		}
 	    /* avoid randint(0) call */
@@ -1086,25 +1086,25 @@ void do_cmd_disarm()
 		else {
 		    msg_print("You set the trap off!");
 		/* make sure we move onto the trap even if confused */
-		    tmp = p_ptr->flags.confused;
-		    p_ptr->flags.confused = 0;
+		    tmp = p_ptr->confused;
+		    p_ptr->confused = 0;
 		    move_player(dir, FALSE);
-		    p_ptr->flags.confused += tmp;
+		    p_ptr->confused += tmp;
 		}
 	    } else if (i == TV_CHEST) {
 		if (!known2_p(i_ptr)) {
 		    msg_print("I don't see a trap.");
 		    free_turn_flag = TRUE;
-		} else if (CH2_TRAP_MASK & i_ptr->flags) {
+		} else if (CH2_TRAP_MASK & i_ptr->flags2) {
 		    if ((tot - level) > randint(100)) {
-			i_ptr->flags &= ~CH2_TRAP_MASK;
-			if (CH2_LOCKED & i_ptr->flags)
+			i_ptr->flags2 &= ~CH2_TRAP_MASK;
+			if (CH2_LOCKED & i_ptr->flags2)
 			    i_ptr->name2 = SN_LOCKED;
 			else
 			    i_ptr->name2 = SN_DISARMED;
 			msg_print("You have disarmed the chest.");
 			known2(i_ptr);
-			p_ptr->misc.exp += level;
+			p_ptr->exp += level;
 			prt_experience();
 		    } else if ((tot > 5) && (randint(tot) > 5))
 			count_msg_print("You failed to disarm the chest.");
@@ -1174,7 +1174,7 @@ void bash()
 #endif
 
     if (get_dir(NULL, &dir)) {
-	if (p_ptr->flags.confused > 0) {
+	if (p_ptr->confused > 0) {
 	    msg_print("You are confused.");
 	    do {
 		dir = randint(9);
@@ -1186,7 +1186,7 @@ void bash()
 
 	/* Request to bash a monster */
 	if (c_ptr->m_idx > 1) {
-	    if (p_ptr->flags.afraid > 0) {
+	    if (p_ptr->afraid > 0) {
 		msg_print("You are too afraid!");
 	    }
 	    else {
@@ -1205,7 +1205,7 @@ void bash()
 
 		count_msg_print("You smash into the door!");
 
-		tmp = p_ptr->stats.use_stat[A_STR] + p_ptr->misc.wt / 2;
+		tmp = p_ptr->use_stat[A_STR] + p_ptr->wt / 2;
 
 		/* Use (roughly) similar method as for monsters. */
 		if (randint(tmp * (20 + MY_ABS(i_ptr->pval))) <
@@ -1221,7 +1221,7 @@ void bash()
 		    c_ptr->fval = CORR_FLOOR;
 
 		    /* If not confused, fall through the door */
-		    if (p_ptr->flags.confused == 0) {
+		    if (p_ptr->confused == 0) {
 			move_player(dir, FALSE);
 		    }
 		    else
@@ -1230,9 +1230,9 @@ void bash()
 		    /* Check the view */
 		    check_view();
 		}
-		else if (randint(150) > p_ptr->stats.use_stat[A_DEX]) {
+		else if (randint(150) > p_ptr->use_stat[A_DEX]) {
 		    msg_print("You are off-balance.");
-		    p_ptr->flags.paralysis = 1 + randint(2);
+		    p_ptr->paralysis = 1 + randint(2);
 		}
 		else if (command_count == 0)
 		    msg_print("The door holds firm.");
@@ -1240,11 +1240,11 @@ void bash()
 		if (randint(10) == 1) {
 		    msg_print("You have destroyed the chest and its contents!");
 		    i_ptr->index = OBJ_RUINED_CHEST;
-		    i_ptr->flags = 0;
+		    i_ptr->flags2 = 0;
 		}
-		else if ((CH2_LOCKED & i_ptr->flags) && (randint(10) == 1)) {
+		else if ((i_ptr->flags2 & CH2_LOCKED) && (randint(10) == 1)) {
 		    msg_print("The lock breaks open!");
-		    i_ptr->flags &= ~CH2_LOCKED;
+		    i_ptr->flags2 &= ~CH2_LOCKED;
 		}
 		else
 		    count_msg_print("The chest holds firm.");
@@ -1408,7 +1408,7 @@ void do_cmd_fire()
 	if (get_dir(NULL, &dir)) {
 
 	    desc_remain(item_val);
-	    if (p_ptr->flags.confused > 0) {
+	    if (p_ptr->confused > 0) {
 		msg_print("You are confused.");
 		do {
 		    dir = randint(9);
@@ -1449,10 +1449,10 @@ void do_cmd_fire()
 			 */
 			    if (!m_ptr->ml)
 				tbth = (tbth / (cur_dis + 2))
-				    - (p_ptr->misc.lev *
-				       class_level_adj[p_ptr->misc.pclass][CLA_BTHB] / 2)
+				    - (p_ptr->lev *
+				       class_level_adj[p_ptr->pclass][CLA_BTHB] / 2)
 				    - (tpth * (BTH_PLUS_ADJ - 1));
-			    if (test_hit(tbth, (int)p_ptr->misc.lev, tpth,
+			    if (test_hit(tbth, (int)p_ptr->lev, tpth,
 				   (int)r_list[m_ptr->r_idx].ac, CLA_BTHB)) {
 				i = m_ptr->r_idx;
 				objdes(tmp_str, &throw_obj, FALSE);
@@ -1519,7 +1519,7 @@ void do_cmd_fire()
 			}
 			else
 			{   /* do not test c_ptr->fm here */
-			    if (panel_contains(y, x) && (p_ptr->flags.blind < 1)
+			    if (panel_contains(y, x) && (p_ptr->blind < 1)
 				&& (c_ptr->tl || c_ptr->pl)) {
 				print(tchar, y, x);
 				Term_fresh();	/* show object moving */
@@ -1599,12 +1599,12 @@ void rest(void)
     /* Induce Rest */
     if (rest_num != 0) {
 
-	if (p_ptr->flags.status & PY_SEARCH)  search_off();
+	if (p_ptr->status & PY_SEARCH)  search_off();
 
-	p_ptr->flags.rest = rest_num;
-	p_ptr->flags.status |= PY_REST;
+	p_ptr->rest = rest_num;
+	p_ptr->status |= PY_REST;
 	prt_state();
-	p_ptr->flags.food_digested--;
+	p_ptr->food_digested--;
 	prt("Press any key to stop resting...", 0, 0);
 	Term_fresh();
     }

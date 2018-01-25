@@ -124,15 +124,15 @@ void acid_dam(int dam, cptr kb_str)
 {
     register int flag;
 
-    if (p_ptr->flags.resist_acid > 0) dam = dam / 3;
-    if (p_ptr->flags.oppose_acid > 0) dam = dam / 3;
-    if (p_ptr->flags.immune_acid) dam = 1;
+    if (p_ptr->resist_acid > 0) dam = dam / 3;
+    if (p_ptr->oppose_acid > 0) dam = dam / 3;
+    if (p_ptr->immune_acid) dam = 1;
 
     flag = 0;
 
-    if (!p_ptr->flags.oppose_acid)
+    if (!p_ptr->oppose_acid)
 	if (minus_ac((s32b) TR2_RES_ACID)) flag = 1;
-    if (p_ptr->flags.resist_acid) flag += 2;
+    if (p_ptr->resist_acid) flag += 2;
     inven_damage(set_acid_affect, 3);
 }
 
@@ -142,9 +142,9 @@ void acid_dam(int dam, cptr kb_str)
  */
 void elec_dam(int dam, cptr kb_str)
 {
-    if (p_ptr->flags.oppose_elec) dam = dam / 3;
-    if (p_ptr->flags.resist_elec) dam = dam / 3;
-    if (p_ptr->flags.immune_elec) dam = 1;
+    if (p_ptr->oppose_elec) dam = dam / 3;
+    if (p_ptr->resist_elec) dam = dam / 3;
+    if (p_ptr->immune_elec) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_lightning_destroy, 3);
 }
@@ -157,9 +157,9 @@ void elec_dam(int dam, cptr kb_str)
  */
 void fire_dam(int dam, cptr kb_str)
 {
-    if (p_ptr->flags.resist_fire) dam = dam / 3;
-    if (p_ptr->flags.oppose_fire > 0) dam = dam / 3;
-    if (p_ptr->flags.immune_fire) dam = 1;
+    if (p_ptr->resist_fire) dam = dam / 3;
+    if (p_ptr->oppose_fire > 0) dam = dam / 3;
+    if (p_ptr->immune_fire) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_flammable, 3);
 }
@@ -170,9 +170,9 @@ void fire_dam(int dam, cptr kb_str)
  */
 void cold_dam(int dam, cptr kb_str)
 {
-    if (p_ptr->flags.resist_cold) dam = dam / 3;
-    if (p_ptr->flags.oppose_cold > 0) dam = dam / 3;
-    if (p_ptr->flags.immune_cold) dam = 1;
+    if (p_ptr->resist_cold) dam = dam / 3;
+    if (p_ptr->oppose_cold > 0) dam = dam / 3;
+    if (p_ptr->immune_cold) dam = 1;
     take_hit(dam, kb_str);
     inven_damage(set_frost_destroy, 5);
 }
@@ -184,12 +184,12 @@ void cold_dam(int dam, cptr kb_str)
  */
 void poison_gas(int dam, cptr kb_str)
 {
-    if (p_ptr->flags.oppose_pois > 0) dam = 2 * dam / 3;
-    if (p_ptr->flags.resist_pois) dam = (dam * 3) / 5;
-    if (p_ptr->flags.immune_pois) dam = 1;
+    if (p_ptr->oppose_pois > 0) dam = 2 * dam / 3;
+    if (p_ptr->resist_pois) dam = (dam * 3) / 5;
+    if (p_ptr->immune_pois) dam = 1;
     take_hit(dam, kb_str);
-    if (!(p_ptr->flags.resist_pois || p_ptr->flags.oppose_pois
-	  || p_ptr->flags.immune_pois)) p_ptr->flags.poisoned += 12 + randint(dam);
+    if (!(p_ptr->resist_pois || p_ptr->oppose_pois
+	  || p_ptr->immune_pois)) p_ptr->poisoned += 12 + randint(dam);
 }
 
 
@@ -198,7 +198,7 @@ void poison_gas(int dam, cptr kb_str)
  */
 void corrode_gas(cptr kb_str)
 {
-    if (!p_ptr->flags.immune_acid)
+    if (!p_ptr->immune_acid)
 	if (!minus_ac((s32b) TR2_RES_ACID))
 	    take_hit(randint(8), kb_str);
     inven_damage(set_corrodes, 5);

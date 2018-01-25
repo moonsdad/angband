@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
     /* default command set defined in config.h file */
     rogue_like_commands = ROGUE_LIKE;
     
-    strcpy(p_ptr->misc.name, "\0");
+    strcpy(p_ptr->name, "\0");
     
 
 
@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
 #endif
 
     /* Acquire the "user name" as a default player name */
-    user_name(p_ptr->misc.name, player_uid);
+    user_name(p_ptr->name, player_uid);
 
     /* check for user interface option */
     for (--argc, ++argv; argc > 0 && argv[0][0] == '-'; --argc, ++argv) {
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 	  case 'u':
 	  case 'U':
 	    if (!argv[0][2]) goto usage;
-	    strcpy(p_ptr->misc.name, &argv[0][2]);
+	    strcpy(p_ptr->name, &argv[0][2]);
 	    break;
 
 	  default:
@@ -292,7 +292,7 @@ int main(int argc, char *argv[])
     }
 
     /* Verify the "player name" */
-    d_check(p_ptr->misc.name);
+    d_check(p_ptr->name);
     NO_SAVE=TRUE;
 
 #ifdef USE_IBM
@@ -426,7 +426,7 @@ static void player_outfit()
 
     /* Give the player useful objects */
     for (i = 0; i < 5; i++) {
-	j = player_init[p_ptr->misc.pclass][i];
+	j = player_init[p_ptr->pclass][i];
 	invcopy(i_ptr, j);
 	store_bought(i_ptr);
 	if (inven_init.tval == TV_SWORD || inven_init.tval == TV_HAFTED
@@ -487,7 +487,7 @@ void play_game()
 
 	/* could be restoring a dead character after a signal or HANGUP */
 	/* Hack -- delayed death induced by certain signals */
-	if (p_ptr->misc.chp < 0) death = TRUE;
+	if (p_ptr->chp < 0) death = TRUE;
     }
 
     /* Create character */
@@ -622,15 +622,15 @@ void play_game()
 
 	/* Give him some stuff */
 	player_outfit();
-	p_ptr->flags.food = 7500;
-	p_ptr->flags.food_digested = 2;
-        if (class[p_ptr->misc.pclass].spell == MAGE)
+	p_ptr->food = 7500;
+	p_ptr->food_digested = 2;
+        if (class[p_ptr->pclass].spell == MAGE)
 	{			/* Magic realm   */
 	    clear_screen();	/* makes spell list easier to read */
 	    calc_spells(A_INT);
 	    calc_mana(A_INT);
 	}
-	else if (class[p_ptr->misc.pclass].spell == PRIEST)
+	else if (class[p_ptr->pclass].spell == PRIEST)
 	{			/* Clerical realm*/
 	    calc_spells(A_WIS);
 	    clear_screen();	/* force out the 'learn prayer' message */

@@ -496,7 +496,7 @@ void identify(int *item)
 
     i_ptr = &inventory[*item];
 
-    if ((i_ptr->flags & TR3_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
+    if ((i_ptr->flags3 & TR3_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
 	(i_ptr->tval != TV_PRAYER_BOOK))
 	add_inscribe(i_ptr, ID_DAMD);
 
@@ -954,19 +954,19 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 				  (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
 
 		else if (pval_use == FLAGS) {
-		    if ((i_ptr->flags & TR1_SPEED) &&
+		    if ((i_ptr->flags1 & TR1_SPEED) &&
 			     (i_ptr->name2 != EGO_SPEED))
 			(void)sprintf(tmp_str, " (%c%d to speed)",
 				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
-		    else if (i_ptr->flags & TR1_SEARCH)
+		    else if (i_ptr->flags1 & TR1_SEARCH)
 			/*			&& (i_ptr->name2 != EGO_SLAY_EARCH)) */
 			(void)sprintf(tmp_str, " (%c%d to searching)",
 				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
-		    else if ((i_ptr->flags & TR1_STEALTH) &&
+		    else if ((i_ptr->flags1 & TR1_STEALTH) &&
 			     (i_ptr->name2 != EGO_STEALTH))
 			(void)sprintf(tmp_str, " (%c%d to stealth)",
 				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
-		    else if ((i_ptr->flags & TR1_INFRA) &&
+		    else if ((i_ptr->flags1 & TR1_INFRA) &&
 			     (i_ptr->name2 != EGO_INFRAVISION))
 			(void)sprintf(tmp_str, " (%c%d to infravision)",
 				      (i_ptr->pval < 0) ? '-' : '+', MY_ABS(i_ptr->pval));
@@ -1089,8 +1089,9 @@ void invcopy(inven_type *i_ptr, int k_idx)
 
     /* Default cost and flags */
     i_ptr->cost = k_ptr->cost;
-    i_ptr->flags = k_ptr->flags;
+    i_ptr->flags1 = k_ptr->flags1;
     i_ptr->flags2 = k_ptr->flags2;
+    i_ptr->flags3 = k_ptr->flags3;
 
     /* Wipe the inscription */
     i_ptr->inscrip[0] = '\0';

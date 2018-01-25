@@ -96,7 +96,7 @@ void prt_stat(int stat)
     char tmp[32];
 
 	put_str(stat_names[stat], ROW_STAT + stat, COL_STAT);
-	cnv_stat(p_ptr->stats.use_stat[stat], tmp);
+	cnv_stat(p_ptr->use_stat[stat], tmp);
 	c_put_str(TERM_L_GREEN, tmp, ROW_STAT + stat, COL_STAT + 6);
 }
 
@@ -110,7 +110,7 @@ int stat_adj(int stat)
 {
     register int value;
 
-    value = p_ptr->stats.use_stat[stat];
+    value = p_ptr->use_stat[stat];
     if (value > 228) return (20);
     if (value > 218) return (18);
     if (value > 198) return (16);
@@ -141,7 +141,7 @@ int chr_adj()
 {
     register int charisma;
 
-    charisma = p_ptr->stats.use_stat[A_CHR];
+    charisma = p_ptr->use_stat[A_CHR];
 
     if (charisma > 217) return (80);
     if (charisma > 187) return (86);
@@ -198,7 +198,7 @@ int con_adj()
 {
     register int con;
 
-    con = p_ptr->stats.use_stat[A_CON];
+    con = p_ptr->use_stat[A_CON];
 
     if (con < 7) return (con - 7);
     if (con < 17) return (0);
@@ -226,13 +226,13 @@ cptr title_string()
 {
     cptr p;
 
-    if (p_ptr->misc.lev < 1) {
+    if (p_ptr->lev < 1) {
 	p = "Babe in arms";
     }
-    else if (p_ptr->misc.lev <= MAX_PLAYER_LEVEL) {
-	p = player_title[p_ptr->misc.pclass][p_ptr->misc.lev - 1];
+    else if (p_ptr->lev <= MAX_PLAYER_LEVEL) {
+	p = player_title[p_ptr->pclass][p_ptr->lev - 1];
     }
-    else if (p_ptr->misc.male) {
+    else if (p_ptr->male) {
 	p = "**KING**";
     }
     else {
@@ -271,7 +271,7 @@ void prt_cmana()
     char tmp[32];
     byte color;
 
-    sprintf(tmp, "%6d", p_ptr->misc.cmana);
+    sprintf(tmp, "%6d", p_ptr->cmana);
 	color = TERM_L_GREEN;
 
     c_put_str(color, tmp, ROW_MANA, COL_STAT + 6);
@@ -284,7 +284,7 @@ void prt_cmana()
 void prt_mhp()
 {
     char tmp[32];
-    sprintf(tmp, "%6d", p_ptr->misc.mhp);
+    sprintf(tmp, "%6d", p_ptr->mhp);
     c_put_str(TERM_L_GREEN, tmp, ROW_MAXHP, COL_STAT + 6);
 }
 
@@ -296,7 +296,7 @@ void prt_chp()
 {
     char tmp[32];
     byte color;
-    sprintf(tmp, "%6d", p_ptr->misc.chp);
+    sprintf(tmp, "%6d", p_ptr->chp);
 	color = TERM_L_GREEN;
 
     c_put_str(color, tmp, ROW_CURHP, COL_STAT + 6);
@@ -309,7 +309,7 @@ void prt_chp()
 void prt_pac()
 {
     char tmp[32];
-    sprintf(tmp, "%6d", p_ptr->misc.dis_ac);
+    sprintf(tmp, "%6d", p_ptr->dis_ac);
     c_put_str(TERM_L_GREEN, tmp, ROW_AC, COL_STAT + 6);
 }
 
@@ -321,7 +321,7 @@ void prt_gold()
 {
     char tmp[32];
 
-    sprintf(tmp, "%9ld", (long)p_ptr->misc.au);
+    sprintf(tmp, "%9ld", (long)p_ptr->au);
     c_put_str(TERM_L_GREEN, tmp, ROW_GOLD, COL_STAT + 3);
 }
 
@@ -353,10 +353,10 @@ void prt_depth()
  */
 void prt_hunger()
 {
-    if (PY_WEAK & p_ptr->flags.status) {
+    if (PY_WEAK & p_ptr->status) {
 	c_put_str(TERM_ORANGE, "Weak  ", 23, 0);
     }
-    else if (PY_HUNGRY & p_ptr->flags.status) {
+    else if (PY_HUNGRY & p_ptr->status) {
 	c_put_str(TERM_YELLOW, "Hungry", 23, 0);
     }
     else {
@@ -370,7 +370,7 @@ void prt_hunger()
  */
 void prt_blind(void)
 {
-    if (PY_BLIND & p_ptr->flags.status) {
+    if (PY_BLIND & p_ptr->status) {
 	put_str("Blind", 23, 7);
     }
     else {
@@ -384,7 +384,7 @@ void prt_blind(void)
  */
 void prt_confused(void)
 {
-    if (PY_CONFUSED & p_ptr->flags.status) {
+    if (PY_CONFUSED & p_ptr->status) {
 	c_put_str(TERM_ORANGE, "Confused", 23, 13);
     }
     else {
@@ -398,7 +398,7 @@ void prt_confused(void)
  */
 void prt_afraid()
 {
-    if (PY_FEAR & p_ptr->flags.status) {
+    if (PY_FEAR & p_ptr->status) {
 	c_put_str(TERM_ORANGE, "Afraid", 23, 22);
     }
     else {
@@ -412,7 +412,7 @@ void prt_afraid()
  */
 void prt_poisoned(void)
 {
-    if (PY_POISONED & p_ptr->flags.status) {
+    if (PY_POISONED & p_ptr->status) {
 	c_put_str(TERM_L_GREEN, "Poisoned", 23, 29);
     }
     else {
@@ -434,23 +434,23 @@ void prt_state(void)
     char text[16] = "          ";
 
     /* Turn off the flag */
-    p_ptr->flags.status &= ~PY_REPEAT;
+    p_ptr->status &= ~PY_REPEAT;
 
     /* Most important info is paralyzation */
-    if (p_ptr->flags.paralysis > 1) {
+    if (p_ptr->paralysis > 1) {
 	attr = TERM_RED;
 	strcpy(text, "Paralyzed!");
     }
 
     /* Then comes resting */
-    else if (PY_REST & p_ptr->flags.status) {
-	if (p_ptr->flags.rest > 0) {
-	    (void)sprintf(text, "Rest %-5d", p_ptr->flags.rest);
+    else if (PY_REST & p_ptr->status) {
+	if (p_ptr->rest > 0) {
+	    (void)sprintf(text, "Rest %-5d", p_ptr->rest);
 	}
-	else if (p_ptr->flags.rest == -1) {
+	else if (p_ptr->rest == -1) {
 	    (void)sprintf(text, "Rest *****");
 	}
-	else if (p_ptr->flags.rest == -2) {
+	else if (p_ptr->rest == -2) {
 	    (void)sprintf(text, "Rest &&&&&");
 	}
     }
@@ -459,16 +459,16 @@ void prt_state(void)
     else if (command_count > 0) {
 
 	/* Hack -- we need to redraw this */
-	p_ptr->flags.status |= PY_REPEAT;
+	p_ptr->status |= PY_REPEAT;
 
 	/* Hack -- ignore searching info */
-	/* if (PY_SEARCH & p_ptr->flags.status) ... */
+	/* if (PY_SEARCH & p_ptr->status) ... */
 
 
 	    (void)sprintf(text, "Repeat %3d", command_count); /* "repeat 999" is 10 characters */
     }
 
-    else if (PY_SEARCH & p_ptr->flags.status) {
+    else if (PY_SEARCH & p_ptr->status) {
 	strcpy(text, "Searching ");
     }
 
@@ -482,9 +482,9 @@ void prt_state(void)
  */
 void prt_speed()
 {
-    int i = p_ptr->flags.speed;
+    int i = p_ptr->speed;
 
-    if (PY_SEARCH & p_ptr->flags.status) i--;	/* Search mode. */
+    if (PY_SEARCH & p_ptr->status) i--;	/* Search mode. */
 
 
     if (i > 2)
@@ -510,8 +510,8 @@ void prt_speed()
 
 void prt_study()
 {
-    p_ptr->flags.status &= ~PY_STUDY;
-    if (p_ptr->flags.new_spells != 0) {
+    p_ptr->status &= ~PY_STUDY;
+    if (p_ptr->new_spells != 0) {
 	put_str("Study", 23, 64);
     }
     else {
@@ -522,7 +522,7 @@ void prt_study()
 
 void prt_cut()
 {
-    int c = p_ptr->flags.cut;
+    int c = p_ptr->cut;
 
     if (c > 900)
 	c_put_str(TERM_L_RED,"Mortal wound", ROW_CUT, 0);
@@ -546,9 +546,9 @@ void prt_cut()
 
 void prt_stun(void)
 {
-    int s = p_ptr->flags.stun;
+    int s = p_ptr->stun;
 
-    if (!p_ptr->flags.resist_sound) {
+    if (!p_ptr->resist_sound) {
 	if (s > 100) {
 	    c_put_str(TERM_RED, "Knocked out ", ROW_STUN, 0);
 	}
@@ -623,52 +623,52 @@ void prt_equippy_chars(void)
  */
 void prt_stat_block()
 {
-    register struct misc *m_ptr = &p_ptr->misc;
+
     register int          i;
 
-    prt_field(race[p_ptr->misc.prace].trace, ROW_RACE, COL_STAT);
-    prt_field(class[p_ptr->misc.pclass].title, ROW_CLASS, COL_STAT);
+    prt_field(race[p_ptr->prace].trace, ROW_RACE, COL_STAT);
+    prt_field(class[p_ptr->pclass].title, ROW_CLASS, COL_STAT);
 
     prt_field(title_string(), ROW_TITLE, COL_STAT);
 
     for (i = 0; i < 6; i++) prt_stat(i);
 
-    prt_num("LEV", (int)m_ptr->lev, ROW_LEVEL, COL_STAT);
+    prt_num("LEV", (int)p_ptr->lev, ROW_LEVEL, COL_STAT);
 
-    prt_lnum("EXP", m_ptr->exp, ROW_EXP, COL_STAT);
+    prt_lnum("EXP", p_ptr->exp, ROW_EXP, COL_STAT);
 
-    prt_num("MNA", m_ptr->cmana, ROW_MANA, COL_STAT);
+    prt_num("MNA", p_ptr->cmana, ROW_MANA, COL_STAT);
 
-    prt_num("MHP", m_ptr->mhp, ROW_MAXHP, COL_STAT);
+    prt_num("MHP", p_ptr->mhp, ROW_MAXHP, COL_STAT);
 
-    prt_num("CHP", m_ptr->chp, ROW_CURHP, COL_STAT);
+    prt_num("CHP", p_ptr->chp, ROW_CURHP, COL_STAT);
 
     prt_chp(); /* this will overwrite hp, in color, if needed. -CFT */
 
-    prt_num("AC ", m_ptr->dis_ac, ROW_AC, COL_STAT);
+    prt_num("AC ", p_ptr->dis_ac, ROW_AC, COL_STAT);
 
-    prt_lnum("AU ", m_ptr->au, ROW_GOLD, COL_STAT);
+    prt_lnum("AU ", p_ptr->au, ROW_GOLD, COL_STAT);
 
     prt_winner();
     prt_cut();
     prt_stun();
     prt_study();
 
-    if ((PY_HUNGRY | PY_WEAK) & p_ptr->flags.status)
+    if ((PY_HUNGRY | PY_WEAK) & p_ptr->status)
 	prt_hunger();
-    if (PY_BLIND & p_ptr->flags.status)
+    if (PY_BLIND & p_ptr->status)
 	prt_blind();
-    if (PY_CONFUSED & p_ptr->flags.status)
+    if (PY_CONFUSED & p_ptr->status)
 	prt_confused();
-    if (PY_FEAR & p_ptr->flags.status)
+    if (PY_FEAR & p_ptr->status)
 	prt_afraid();
-    if (PY_POISONED & p_ptr->flags.status)
+    if (PY_POISONED & p_ptr->status)
 	prt_poisoned();
-    if ((PY_SEARCH | PY_REST) & p_ptr->flags.status)
+    if ((PY_SEARCH | PY_REST) & p_ptr->status)
 	prt_state();
 
     /* if speed non zero, print it, modify speed if Searching */
-    if (p_ptr->flags.speed - ((PY_SEARCH & status) >> 8) != 0)
+    if (p_ptr->speed - ((PY_SEARCH & status) >> 8) != 0)
 	prt_speed();
 
 	prt_equippy_chars();
@@ -695,8 +695,8 @@ void draw_cave(void)
  */
 void cut_player(int c)
 {
-    c += p_ptr->flags.cut;
-    p_ptr->flags.cut = c;
+    c += p_ptr->cut;
+    p_ptr->cut = c;
 
     if (c > 5000) {
 	msg_print("You have been given a mortal wound.");
@@ -729,47 +729,47 @@ void stun_player(int s)
 {
     int t;
 
-    if (p_ptr->flags.resist_sound) return;
+    if (p_ptr->resist_sound) return;
 
-	t = p_ptr->flags.stun;
-	p_ptr->flags.stun += s;
-	s = p_ptr->flags.stun;
+	t = p_ptr->stun;
+	p_ptr->stun += s;
+	s = p_ptr->stun;
 
     if (s > 100) {
 	msg_print("You have been knocked out.");
 	    if (t == 0) {
-		p_ptr->misc.ptohit -= 20;
-		p_ptr->misc.ptodam -= 20;
-		p_ptr->misc.dis_th -= 20;
-		p_ptr->misc.dis_td -= 20;
+		p_ptr->ptohit -= 20;
+		p_ptr->ptodam -= 20;
+		p_ptr->dis_th -= 20;
+		p_ptr->dis_td -= 20;
 	    } else if (t <= 50) {
-		p_ptr->misc.ptohit -= 15;
-		p_ptr->misc.ptodam -= 15;
-		p_ptr->misc.dis_th -= 15;
-		p_ptr->misc.dis_td -= 15;
+		p_ptr->ptohit -= 15;
+		p_ptr->ptodam -= 15;
+		p_ptr->dis_th -= 15;
+		p_ptr->dis_td -= 15;
 	    }
     }
     else if (s > 50) {
 	msg_print("You've been heavily stunned.");
 	    if (t == 0) {
-		p_ptr->misc.ptohit -= 20;
-		p_ptr->misc.ptodam -= 20;
-		p_ptr->misc.dis_th -=20;
-		p_ptr->misc.dis_td -=20;
+		p_ptr->ptohit -= 20;
+		p_ptr->ptodam -= 20;
+		p_ptr->dis_th -=20;
+		p_ptr->dis_td -=20;
 	    } else if (t <= 50) {
-		p_ptr->misc.ptohit -= 15;
-		p_ptr->misc.ptodam -= 15;
-		p_ptr->misc.dis_th -= 15;
-		p_ptr->misc.dis_td -= 15;
+		p_ptr->ptohit -= 15;
+		p_ptr->ptodam -= 15;
+		p_ptr->dis_th -= 15;
+		p_ptr->dis_td -= 15;
 	    }
     }
     else if (s > 0) {
 	msg_print("You've been stunned.");
 	    if (t == 0) {
-		p_ptr->misc.ptohit -= 5;
-		p_ptr->misc.ptodam -= 5;
-		p_ptr->misc.dis_th -= 5;
-		p_ptr->misc.dis_td -= 5;
+		p_ptr->ptohit -= 5;
+		p_ptr->ptodam -= 5;
+		p_ptr->dis_th -= 5;
+		p_ptr->dis_td -= 5;
 	    }
 	}
 }
@@ -783,7 +783,7 @@ u16b modify_stat(int stat, int amount)
     register int    loop, i;
     register u16b tmp_stat;
 
-    tmp_stat = p_ptr->stats.cur_stat[stat];
+    tmp_stat = p_ptr->cur_stat[stat];
 
     loop = ABS(amount);
 
@@ -811,11 +811,11 @@ u16b modify_stat(int stat, int amount)
 void set_use_stat(int stat)
 {
     /* Calculate the "total" stat value */
-    p_ptr->stats.use_stat[stat] = modify_stat(stat, p_ptr->stats.mod_stat[stat]);
+    p_ptr->use_stat[stat] = modify_stat(stat, p_ptr->mod_stat[stat]);
 
     /* Calculate various effects */
     if (stat == A_STR) {
-	p_ptr->flags.status |= PY_STR_WGT;
+	p_ptr->status |= PY_STR_WGT;
 	calc_bonuses();
     }
     else if (stat == A_DEX) {
@@ -824,11 +824,11 @@ void set_use_stat(int stat)
     else if (stat == A_CON) {
 	calc_hitpoints();
     }
-    else if (stat == A_INT && class[p_ptr->misc.pclass].spell == MAGE) {
+    else if (stat == A_INT && class[p_ptr->pclass].spell == MAGE) {
 	calc_spells(A_INT);
 	calc_mana(A_INT);
     }
-    else if (stat == A_WIS && class[p_ptr->misc.pclass].spell == PRIEST) {
+    else if (stat == A_WIS && class[p_ptr->pclass].spell == PRIEST) {
 	calc_spells(A_WIS);
 	calc_mana(A_WIS);
     }
@@ -846,7 +846,7 @@ int inc_stat(int stat)
     res_stat(stat);
 
     /* Then augment the current/max stat */
-    tmp_stat = p_ptr->stats.cur_stat[stat];
+    tmp_stat = p_ptr->cur_stat[stat];
 
     /* Cannot go above 18/100 */
     if (tmp_stat < 118) {
@@ -864,9 +864,9 @@ int inc_stat(int stat)
 	    tmp_stat++;
 	}
 
-	p_ptr->stats.cur_stat[stat] = tmp_stat;
-	if (tmp_stat > p_ptr->stats.max_stat[stat]) {
-	    p_ptr->stats.max_stat[stat] = tmp_stat;
+	p_ptr->cur_stat[stat] = tmp_stat;
+	if (tmp_stat > p_ptr->max_stat[stat]) {
+	    p_ptr->max_stat[stat] = tmp_stat;
 	}
 	set_use_stat(stat);
 	prt_stat(stat);
@@ -885,7 +885,7 @@ int dec_stat(int stat)
 {
     int tmp_stat, loss;
 
-    tmp_stat = p_ptr->stats.cur_stat[stat];
+    tmp_stat = p_ptr->cur_stat[stat];
     if (tmp_stat > 3) {
 	if (tmp_stat < 19)
 	    tmp_stat--;
@@ -897,7 +897,7 @@ int dec_stat(int stat)
 	} else
 	    tmp_stat--;
 
-	p_ptr->stats.cur_stat[stat] = tmp_stat;
+	p_ptr->cur_stat[stat] = tmp_stat;
 	set_use_stat(stat);
 	prt_stat(stat);
 	return TRUE;
@@ -908,7 +908,7 @@ int ruin_stat(register int stat)
 {
     register int tmp_stat;
 
-    tmp_stat = p_ptr->stats.cur_stat[stat];
+    tmp_stat = p_ptr->cur_stat[stat];
     if (tmp_stat > 3) {
 	if (tmp_stat > 6) {
 	    if (tmp_stat < 19) {
@@ -921,8 +921,8 @@ int ruin_stat(register int stat)
 	} else
 	    tmp_stat--;
 
-	p_ptr->stats.cur_stat[stat] = tmp_stat;
-	p_ptr->stats.max_stat[stat] = tmp_stat;
+	p_ptr->cur_stat[stat] = tmp_stat;
+	p_ptr->max_stat[stat] = tmp_stat;
 	set_use_stat(stat);
 	prt_stat(stat);
 	return TRUE;
@@ -937,8 +937,8 @@ int ruin_stat(register int stat)
 int res_stat(int stat)
 {
     /* Restore */
-    if (p_ptr->stats.cur_stat[stat] != p_ptr->stats.max_stat[stat]) {
-	p_ptr->stats.cur_stat[stat] = p_ptr->stats.max_stat[stat];
+    if (p_ptr->cur_stat[stat] != p_ptr->max_stat[stat]) {
+	p_ptr->cur_stat[stat] = p_ptr->max_stat[stat];
 	set_use_stat(stat);
 	prt_stat(stat);
 	return TRUE;
@@ -956,7 +956,7 @@ int tohit_adj()
 {
     register int total, stat;
 
-    stat = p_ptr->stats.use_stat[A_DEX];
+    stat = p_ptr->use_stat[A_DEX];
     if      (stat <   4)  total = -3;
     else if (stat <   6)  total = -2;
     else if (stat <   8)  total = -1;
@@ -977,7 +977,7 @@ int tohit_adj()
     else if (stat < 218)  total = 14;
     else if (stat < 228)  total = 15;
     else total = 17;
-    stat = p_ptr->stats.use_stat[A_STR];
+    stat = p_ptr->use_stat[A_STR];
     if      (stat <   4)  total -= 3;
     else if (stat <   5)  total -= 2;
     else if (stat <   7)  total -= 1;
@@ -1008,7 +1008,7 @@ int toac_adj(void)
 {
     register int stat;
 
-    stat = p_ptr->stats.use_stat[A_DEX];
+    stat = p_ptr->use_stat[A_DEX];
     if      (stat <   4)  return(-4);
     else if (stat ==  4)  return(-3);
     else if (stat ==  5)  return(-2);
@@ -1040,7 +1040,7 @@ int todis_adj(void)
 {
     register int stat;
 
-    stat = p_ptr->stats.use_stat[A_DEX];
+    stat = p_ptr->use_stat[A_DEX];
     if      (stat <=  3)  return(-8);
     else if (stat ==  4)  return(-6);
     else if (stat ==  5)  return(-4);
@@ -1064,7 +1064,7 @@ int todam_adj(void)
 {
     register int stat;
 
-    stat = p_ptr->stats.use_stat[A_STR];
+    stat = p_ptr->use_stat[A_STR];
     if      (stat <   4)  return(-2);
     else if (stat <   5)  return(-1);
     else if (stat <  16)  return( 0);
@@ -1138,7 +1138,7 @@ static void prt_int(int num, int row, int col)
  */
 void put_character()
 {
-    register struct misc *m_ptr = &p_ptr->misc;
+
 
     clear_screen();
 
@@ -1148,10 +1148,10 @@ void put_character()
     put_str("Class       :", 5, 1);
 
     if (character_generated) {
-    c_put_str(TERM_L_BLUE, m_ptr->name, 2, 15);
-    c_put_str(TERM_L_BLUE, (m_ptr->male ? "Male" : "Female"), 4, 15);
-    c_put_str(TERM_L_BLUE, race[m_ptr->prace].trace, 3, 15);
-    c_put_str(TERM_L_BLUE, class[m_ptr->pclass].title, 5, 15);
+    c_put_str(TERM_L_BLUE, p_ptr->name, 2, 15);
+    c_put_str(TERM_L_BLUE, (p_ptr->male ? "Male" : "Female"), 4, 15);
+    c_put_str(TERM_L_BLUE, race[p_ptr->prace].trace, 3, 15);
+    c_put_str(TERM_L_BLUE, class[p_ptr->pclass].title, 5, 15);
     }
 }
 
@@ -1162,30 +1162,30 @@ void put_character()
  */
 void put_stats()
 {
-    struct misc *m_ptr = &p_ptr->misc;
+
     int          i, temp;
     vtype        buf;
 
     /* Display the stats */
     for (i = 0; i < 6; i++) {
 
-	cnv_stat(p_ptr->stats.use_stat[i], buf);
+	cnv_stat(p_ptr->use_stat[i], buf);
 	put_str(stat_names[i], 2 + i, 61);
 	put_str(buf, 2 + i, 66);
-	if (p_ptr->stats.max_stat[i] > p_ptr->stats.cur_stat[i]) {
+	if (p_ptr->max_stat[i] > p_ptr->cur_stat[i]) {
 	    /* this looks silly, but it happens because modify_stat() only
 	     * looks at cur_stat -CFT */
-	    temp = p_ptr->stats.cur_stat[i];
-	    p_ptr->stats.cur_stat[i] = p_ptr->stats.max_stat[i];
-	    cnv_stat (modify_stat(i,p_ptr->stats.mod_stat[i]), buf);
-	    p_ptr->stats.cur_stat[i] = temp; /* DON'T MS2_FORGET! -CFT */
+	    temp = p_ptr->cur_stat[i];
+	    p_ptr->cur_stat[i] = p_ptr->max_stat[i];
+	    cnv_stat (modify_stat(i,p_ptr->mod_stat[i]), buf);
+	    p_ptr->cur_stat[i] = temp; /* DON'T MS2_FORGET! -CFT */
 	    put_str(buf, 2 + i, 73);
 	}
     }
-    prt_num("+ To Hit    ", m_ptr->dis_th, 9, 1);
-    prt_num("+ To Damage ", m_ptr->dis_td, 10, 1);
-    prt_num("+ To AC     ", m_ptr->dis_tac, 11, 1);
-    prt_num("  Total AC  ", m_ptr->dis_ac, 12, 1);
+    prt_num("+ To Hit    ", p_ptr->dis_th, 9, 1);
+    prt_num("+ To Damage ", p_ptr->dis_td, 10, 1);
+    prt_num("+ To AC     ", p_ptr->dis_tac, 11, 1);
+    prt_num("  Total AC  ", p_ptr->dis_ac, 12, 1);
 }
 
 
@@ -1251,11 +1251,11 @@ cptr likert(int x, int y)
  */
 void put_misc1()
 {
-    register struct misc *m_ptr = &p_ptr->misc;
-    prt_num("Age          ", (int)m_ptr->age, 2, 32);
-    prt_num("Height       ", (int)m_ptr->ht, 3, 32);
-    prt_num("Weight       ", (int)m_ptr->wt, 4, 32);
-    prt_num("Social Class ", (int)m_ptr->sc, 5, 32);
+
+    prt_num("Age          ", (int)p_ptr->age, 2, 32);
+    prt_num("Height       ", (int)p_ptr->ht, 3, 32);
+    prt_num("Weight       ", (int)p_ptr->wt, 4, 32);
+    prt_num("Social Class ", (int)p_ptr->sc, 5, 32);
 }
 
 
@@ -1267,26 +1267,26 @@ void put_misc1()
  */
 void put_misc2()
 {
-    register struct misc *m_ptr = &p_ptr->misc;
 
-    prt_num("Level      ", (int)m_ptr->lev, 9, 28);
-    prt_lnum("Experience ", m_ptr->exp, 10, 28);
-    prt_lnum("Max Exp    ", m_ptr->max_exp, 11, 28);
-    if (m_ptr->lev >= MAX_PLAYER_LEVEL) {
+
+    prt_num("Level      ", (int)p_ptr->lev, 9, 28);
+    prt_lnum("Experience ", p_ptr->exp, 10, 28);
+    prt_lnum("Max Exp    ", p_ptr->max_exp, 11, 28);
+    if (p_ptr->lev >= MAX_PLAYER_LEVEL) {
 	char                buf[40];
 
 	sprintf(buf, "%s%9s", "Exp to Adv.", "****");
 	put_str(buf, 12, 28);
     }
     else {
-	prt_lnum("Exp to Adv.", (s32b) (player_exp[m_ptr->lev - 1] * m_ptr->expfact / 100),
+	prt_lnum("Exp to Adv.", (s32b) (player_exp[p_ptr->lev - 1] * p_ptr->expfact / 100),
 	    12, 28);
     }
-    prt_lnum("Gold       ", m_ptr->au, 13, 28);
-    prt_num("Max Hit Points ", m_ptr->mhp, 9, 52);
-    prt_num("Cur Hit Points ", m_ptr->chp, 10, 52);
-    prt_num("Max Mana       ", m_ptr->mana, 11, 52);
-    prt_num("Cur Mana       ", m_ptr->cmana, 12, 52);
+    prt_lnum("Gold       ", p_ptr->au, 13, 28);
+    prt_num("Max Hit Points ", p_ptr->mhp, 9, 52);
+    prt_num("Cur Hit Points ", p_ptr->chp, 10, 52);
+    prt_num("Max Mana       ", p_ptr->mana, 11, 52);
+    prt_num("Cur Mana       ", p_ptr->cmana, 12, 52);
 }
 
 
@@ -1303,26 +1303,26 @@ void put_misc3()
     cptr		desc;
 
     /* XXX XXX XXX Skill with current weapon */
-    xbth = p_ptr->misc.bth + p_ptr->misc.ptohit * BTH_PLUS_ADJ +
-	(class_level_adj[p_ptr->misc.pclass][CLA_BTH] * p_ptr->misc.lev);
-    xbthb = p_ptr->misc.bthb + p_ptr->misc.ptohit * BTH_PLUS_ADJ +
-	   (class_level_adj[p_ptr->misc.pclass][CLA_BTHB] * p_ptr->misc.lev);
+    xbth = p_ptr->bth + p_ptr->ptohit * BTH_PLUS_ADJ +
+	(class_level_adj[p_ptr->pclass][CLA_BTH] * p_ptr->lev);
+    xbthb = p_ptr->bthb + p_ptr->ptohit * BTH_PLUS_ADJ +
+	   (class_level_adj[p_ptr->pclass][CLA_BTHB] * p_ptr->lev);
 
     /* this results in a range from 0 to 29 */
     xfos = 40 - p_ptr->fos;
     if (xfos < 0) xfos = 0;
-    xsrh = p_ptr->misc.srh;
+    xsrh = p_ptr->srh;
     /* this results in a range from 0 to 9 */
-    xstl = p_ptr->misc.stl + 1;
-    xdis = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT) +
-	   (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
-    xsave = p_ptr->misc.save + stat_adj(A_WIS) +
-	    (class_level_adj[p_ptr->misc.pclass][CLA_SAVE] * p_ptr->misc.lev / 3);
-    xdev = p_ptr->misc.save + stat_adj(A_INT) +
-	   (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3);
+    xstl = p_ptr->stl + 1;
+    xdis = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT) +
+	   (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
+    xsave = p_ptr->save + stat_adj(A_WIS) +
+	    (class_level_adj[p_ptr->pclass][CLA_SAVE] * p_ptr->lev / 3);
+    xdev = p_ptr->save + stat_adj(A_INT) +
+	   (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3);
 
     /* Infravision string */
-    (void)sprintf(xinfra, "%d feet", p_ptr->flags.see_infra * 10);
+    (void)sprintf(xinfra, "%d feet", p_ptr->see_infra * 10);
 
     /* Clear it */
     clear_from(14);
@@ -1388,7 +1388,7 @@ void get_name()
 {
     char tmp[100];
 
-    strcpy(tmp, p_ptr->misc.name);
+    strcpy(tmp, p_ptr->name);
 
     /* Prompt and ask */
     prt("Enter your player's name  [press <RETURN> when finished]", 21, 2);
@@ -1399,10 +1399,10 @@ void get_name()
  * Force player to give a name, would be nice to get name from chooser (STR
  * -16096), but that name might be too long 
  */
-    while (!get_string(p_ptr->misc.name, 2, 15, 15) || p_ptr->misc.name[0] == 0);
+    while (!get_string(p_ptr->name, 2, 15, 15) || p_ptr->name[0] == 0);
 #else
-    if (!get_string(p_ptr->misc.name, 2, 15, 15) || p_ptr->misc.name[0] == 0) {
-	strcpy(p_ptr->misc.name, tmp);
+    if (!get_string(p_ptr->name, 2, 15, 15) || p_ptr->name[0] == 0) {
+	strcpy(p_ptr->name, tmp);
 	put_str(tmp, 2, 15);
     }
 #endif
@@ -1515,10 +1515,10 @@ int weight_limit(void)
     register s32b weight_cap;
 
     /* Factor in strength */
-    weight_cap = (long)p_ptr->stats.use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP;
+    weight_cap = (long)p_ptr->use_stat[A_STR] * (long)PLAYER_WEIGHT_CAP;
 
     /* Hack -- large players can carry more */
-    weight_cap += (long)p_ptr->misc.wt;
+    weight_cap += (long)p_ptr->wt;
 
     /* Nobody can carry more than 300 pounds */
     if (weight_cap > 3000L) weight_cap = 3000L;
@@ -1636,14 +1636,14 @@ int inven_carry(inven_type *i_ptr)
 	/* For items which are always known1p, i.e. never have a 'color',
 	 * insert them into the inventory in sorted order.  
 	 */
-	    if ((typ == TV_PRAYER_BOOK) && (class[p_ptr->misc.pclass].spell == MAGE))
+	    if ((typ == TV_PRAYER_BOOK) && (class[p_ptr->pclass].spell == MAGE))
 		typ = TV_MAGIC_BOOK - 1;
 	/* sort is in descending, so this will be immediately after magic books.
 	 * It helps that there is no tval that uses this. -CFT
 	 */
 	    tval_tmp = j_ptr->tval;
 	    if ((tval_tmp == TV_PRAYER_BOOK) &&
-		(class[p_ptr->misc.pclass].spell == MAGE))
+		(class[p_ptr->pclass].spell == MAGE))
 		tval_tmp = TV_MAGIC_BOOK - 1;
 	/* sort is in descending, so this will be immediately after magic books.
 	 * It helps that there is no tval that uses this. -CFT
@@ -1673,7 +1673,7 @@ int inven_carry(inven_type *i_ptr)
     inven_weight += i_ptr->number * i_ptr->weight;
 
     /* Remember to re-calculate bonuses */
-    p_ptr->flags.status |= PY_STR_WGT;
+    p_ptr->status |= PY_STR_WGT;
 
     /* Say where it went */
     return slot;
@@ -1690,12 +1690,12 @@ int spell_chance(int spell)
     register int         stat;
     int                  minfail;
 
-    s_ptr = &magic_spell[p_ptr->misc.pclass - 1][spell];
-    chance = s_ptr->sfail - 3 * (p_ptr->misc.lev - s_ptr->slevel);
-    stat = (class[p_ptr->misc.pclass].spell == MAGE) ? A_INT : A_WIS;
+    s_ptr = &magic_spell[p_ptr->pclass - 1][spell];
+    chance = s_ptr->sfail - 3 * (p_ptr->lev - s_ptr->slevel);
+    stat = (class[p_ptr->pclass].spell == MAGE) ? A_INT : A_WIS;
     chance -= 3 * (stat_adj(stat) - 1);
-    if (s_ptr->smana > p_ptr->misc.cmana) {
-	chance += 5 * (s_ptr->smana - p_ptr->misc.cmana);
+    if (s_ptr->smana > p_ptr->cmana) {
+	chance += 5 * (s_ptr->smana - p_ptr->cmana);
     }
     
     switch (stat_adj(stat)) {
@@ -1746,13 +1746,13 @@ int spell_chance(int spell)
     }
 
      /* only mages/priests can get best chances... */
-    if ((minfail < 5) && (p_ptr->misc.pclass != 1) && (p_ptr->misc.pclass != 2)) {
+    if ((minfail < 5) && (p_ptr->pclass != 1) && (p_ptr->pclass != 2)) {
 	minfail = 5;
     }
 
     /* Big prayer penalty for edged weapons  -DGK */
     /* XXX So, like, switch weapons and then pray? */
-    if (p_ptr->misc.pclass == 2) {
+    if (p_ptr->pclass == 2) {
 	register inven_type *i_ptr;
 	i_ptr = &inventory[INVEN_WIELD];
 	if ((i_ptr->tval == TV_SWORD) || (i_ptr->tval == TV_POLEARM)) {
@@ -1790,7 +1790,7 @@ void print_spells(int *spell, int num, int comment, int nonconsec)
 
     col = (comment ? 22 : 31);
 
-    offset = (class[p_ptr->misc.pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
+    offset = (class[p_ptr->pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
     erase_line(1, col);
     put_str("Name", 1, col + 5);
     put_str("Lv Mana Fail", 1, col + 35);
@@ -1800,7 +1800,7 @@ void print_spells(int *spell, int num, int comment, int nonconsec)
 
     for (i = 0; i < num; i++) {
 	j = spell[i];
-	s_ptr = &magic_spell[p_ptr->misc.pclass - 1][j];
+	s_ptr = &magic_spell[p_ptr->pclass - 1][j];
 	if (comment == FALSE) {
 	    p = "";
 	}
@@ -1859,7 +1859,7 @@ int get_spell(int *spell, int num, int *sn, int *sc, cptr prompt, int first_spel
 	   spell[0] + 'a' - first_spell, spell[num - 1] + 'a' - first_spell,
 		  prompt);
     redraw = FALSE;
-    offset = (class[p_ptr->misc.pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
+    offset = (class[p_ptr->pclass].spell == MAGE ? SPELL_OFFSET : PRAYER_OFFSET);
 
     /* Get a spell from the user */
     while (!flag && get_com(out_str, &choice)) {
@@ -1876,7 +1876,7 @@ int get_spell(int *spell, int num, int *sn, int *sc, cptr prompt, int first_spel
 		*sn = (-2);
 	    }
 	    else {
-		s_ptr = &magic_spell[p_ptr->misc.pclass - 1][*sn];
+		s_ptr = &magic_spell[p_ptr->pclass - 1][*sn];
 		(void)sprintf(tmp_str, "Cast %s (%d mana, %d%% fail)?",
 			      spell_names[*sn + offset], s_ptr->smana,
 			      spell_chance(*sn));
@@ -1922,7 +1922,7 @@ int get_spell(int *spell, int num, int *sn, int *sc, cptr prompt, int first_spel
 
 	if (*sn == -2) {
 	    sprintf(tmp_str, "You don't know that %s.",
-		(class[p_ptr->misc.pclass].spell == MAGE) ? "spell" : "prayer");
+		(class[p_ptr->pclass].spell == MAGE) ? "spell" : "prayer");
 	    msg_print(tmp_str);
 	}
     }
@@ -1945,18 +1945,18 @@ static void gain_level(void)
 {
     vtype               out_val;
 
-    p_ptr->misc.lev++;
-    (void)sprintf(out_val, "Welcome to level %d.", (int)p_ptr->misc.lev);
+    p_ptr->lev++;
+    (void)sprintf(out_val, "Welcome to level %d.", (int)p_ptr->lev);
     msg_print(out_val);
     calc_hitpoints();
     prt_level();
     prt_title();
 
-    if (class[p_ptr->misc.pclass].spell == MAGE) {
+    if (class[p_ptr->pclass].spell == MAGE) {
 	calc_spells(A_INT);
 	calc_mana(A_INT);
     }
-    else if (class[p_ptr->misc.spell == PRIEST) {
+    else if (class[p_ptr->spell == PRIEST) {
 	calc_spells(A_WIS);
 	calc_mana(A_WIS);
     }
@@ -1970,31 +1970,31 @@ void prt_experience()
 {
     char out_val[100];
 
-    if (p_ptr->misc.exp > MAX_EXP) p_ptr->misc.exp = MAX_EXP;
+    if (p_ptr->exp > MAX_EXP) p_ptr->exp = MAX_EXP;
 
-    if (p_ptr->misc.lev < MAX_PLAYER_LEVEL) {
+    if (p_ptr->lev < MAX_PLAYER_LEVEL) {
 
-	while ((player_exp[p_ptr->misc.lev-1] * p_ptr->misc.expfact / 100)
-	       <= p_ptr->misc.exp && (p_ptr->misc.lev < MAX_PLAYER_LEVEL)) {
+	while ((player_exp[p_ptr->lev-1] * p_ptr->expfact / 100)
+	       <= p_ptr->exp && (p_ptr->lev < MAX_PLAYER_LEVEL)) {
 
 	    gain_level();
 
 	    /* Level was actually gained, not restored */
-	    if (p_ptr->misc.exp > p_ptr->misc.max_exp) {
+	    if (p_ptr->exp > p_ptr->max_exp) {
 
 		/* level was actually gained, not restored:
 		 * This "300" is arbitrary, but it makes human ages work okay,
 		 * and I chose the other racial age adjustments based on this as well -CFT
 		 */
-		p_ptr->misc.age += randint((u16b)class[p_ptr->misc.pclass].age_adj *
-				       (u16b)race[p_ptr->misc.prace].m_age)/300;
+		p_ptr->age += randint((u16b)class[p_ptr->pclass].age_adj *
+				       (u16b)race[p_ptr->prace].m_age)/300;
 	    }
 	}
     }
 
-    if (p_ptr->misc.exp > p_ptr->misc.max_exp) p_ptr->misc.max_exp = p_ptr->misc.exp;
+    if (p_ptr->exp > p_ptr->max_exp) p_ptr->max_exp = p_ptr->exp;
 
-    (void) sprintf(out_val, "%8ld", (long)p_ptr->misc.exp);
+    (void) sprintf(out_val, "%8ld", (long)p_ptr->exp);
     put_str(out_val, 13, COL_STAT+4);
 }
 
@@ -2009,33 +2009,33 @@ void calc_hitpoints()
     register s32b        value;
 
     /* Calculate hitpoints */
-    hitpoints = player_hp[p_ptr->misc.lev - 1] + (con_adj() * p_ptr->misc.lev);
+    hitpoints = player_hp[p_ptr->lev - 1] + (con_adj() * p_ptr->lev);
 
     /* Hack -- minimum hitpoints: always give at least one point per level + 1 */
-    if (hitpoints < (p_ptr->misc.lev + 1)) {
-	hitpoints = p_ptr->misc.lev + 1;
+    if (hitpoints < (p_ptr->lev + 1)) {
+	hitpoints = p_ptr->lev + 1;
     }
 
     /* Factor in the hero / superhero values */
-    if (p_ptr->flags.status & PY_HERO) hitpoints += 10;
-    if (p_ptr->flags.status & PY_SHERO) hitpoints += 30;
+    if (p_ptr->status & PY_HERO) hitpoints += 10;
+    if (p_ptr->status & PY_SHERO) hitpoints += 30;
 
     /* mhp can equal zero while character is being created */
-    if (p_ptr->misc.mhp && (hitpoints != p_ptr->misc.mhp)) {
+    if (p_ptr->mhp && (hitpoints != p_ptr->mhp)) {
 
         /* change current hit points proportionately to change of mhp */
         /* divide first to avoid overflow, little loss of accuracy */
-	value = (((long)p_ptr->misc.chp << 16) + p_ptr->misc.chp_frac) / p_ptr->misc.mhp;
+	value = (((long)p_ptr->chp << 16) + p_ptr->chp_frac) / p_ptr->mhp;
 	value = value * hitpoints;
-	p_ptr->misc.chp = value >> 16;
-	p_ptr->misc.chp_frac = value & 0xFFFF;
+	p_ptr->chp = value >> 16;
+	p_ptr->chp_frac = value & 0xFFFF;
 
 	/* Save the new max-hitpoints */
-	p_ptr->misc.mhp = hitpoints;
+	p_ptr->mhp = hitpoints;
 
 	/* can't print hit points here, may be in store or inventory mode */
 	/* Remember to redisplay the hitpoints */
-	p_ptr->flags.status |= PY_HP;
+	p_ptr->status |= PY_HP;
     }
 }
 
@@ -2114,8 +2114,8 @@ int attack_blows(int weight, int *wtohit)
     int b = 0;
     
     /* Start with the strength/dexterity */
-    int s = p_ptr->stats.use_stat[A_STR];
-    int d = p_ptr->stats.use_stat[A_DEX];
+    int s = p_ptr->use_stat[A_STR];
+    int d = p_ptr->use_stat[A_DEX];
 
     if (s * 15 < weight) {
 
@@ -2139,7 +2139,7 @@ int attack_blows(int weight, int *wtohit)
 	else dex_index = 11;
 
 	/* new class-based weight penalties -CWS */
-	switch (p_ptr->misc.pclass) {
+	switch (p_ptr->pclass) {
 	  case 0:				/* Warriors */
 	    adj_weight = ((s * 10) / ((weight < 30) ? 30 : weight));
 	    break;
@@ -2182,12 +2182,12 @@ int attack_blows(int weight, int *wtohit)
 	b = (int)blows_table[str_index][dex_index];
 
 	/* Non-warrior attack penalty */
-	if (p_ptr->misc.pclass != 0) {
+	if (p_ptr->pclass != 0) {
 	    if (b > 5) b = 5;
 	}
 	
 	/* Mage attack penalty */
-	if (p_ptr->misc.pclass == 1) {
+	if (p_ptr->pclass == 1) {
 	    if (b > 4) b = 4;
 	}
 
@@ -2227,7 +2227,7 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 	}
 
 	/* Execute Dragon */
-	else if ((i_ptr->flags & TR1_KILL_DRAGON) &&
+	else if ((i_ptr->flags1 & TR1_KILL_DRAGON) &&
 	    (m_ptr->cflags2 & MF2_DRAGON)) {
 
 	    tdam *= 5;
@@ -2235,7 +2235,7 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 	}
 
 	/* Slay Dragon  */
-	else if ((i_ptr->flags & TR1_SLAY_DRAGON) &&
+	else if ((i_ptr->flags1 & TR1_SLAY_DRAGON) &&
 	    (m_ptr->cflags2 & MF2_DRAGON)) {
 
 	    tdam *= 3;
@@ -2243,7 +2243,7 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 	}
 
 	/* Slay Undead */
-	else if ((i_ptr->flags & TR1_SLAY_UNDEAD) &&
+	else if ((i_ptr->flags1 & TR1_SLAY_UNDEAD) &&
 	    (m_ptr->cflags2 & MF2_UNDEAD)) {
 
 	    tdam *= 3;
@@ -2284,18 +2284,18 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 
 	/* Frost */
 	else if ((!(m_ptr->cflags2 & MF2_IM_COLD))
-		 && (i_ptr->flags & TR1_BRAND_COLD)) {
+		 && (i_ptr->flags1 & TR1_BRAND_COLD)) {
 	    tdam *= 3;
 	}
 
 	/* Fire	 */
 	else if ((!(m_ptr->cflags2 & MF2_IM_FIRE))
-		 && (i_ptr->flags & TR1_BRAND_FIRE)) {
+		 && (i_ptr->flags1 & TR1_BRAND_FIRE)) {
 	    tdam *= 3;
 	}
 
 	/* Slay Evil */
-	else if ((i_ptr->flags & TR1_SLAY_EVIL) &&
+	else if ((i_ptr->flags1 & TR1_SLAY_EVIL) &&
 	    (m_ptr->cflags2 & MF2_EVIL)) {
 
 	    tdam *= 2;
@@ -2303,7 +2303,7 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 	}
 
 	/* Slay Animal */
-	else if ((i_ptr->flags & TR1_SLAY_ANIMAL) &&
+	else if ((i_ptr->flags1 & TR1_SLAY_ANIMAL) &&
 	    (m_ptr->cflags2 & MF2_ANIMAL)) {
 
 	    tdam *= 2;
@@ -2311,13 +2311,13 @@ int tot_dam(inven_type *i_ptr, int tdam, int r_idx)
 	}
 
 	/* let's do the resistances */
-	if (((m_ptr->cflags2 & MF2_IM_COLD)) && (i_ptr->flags & TR1_BRAND_COLD)) {
+	if (((m_ptr->cflags2 & MF2_IM_COLD)) && (i_ptr->flags1 & TR1_BRAND_COLD)) {
 	    r_ptr->r_cflags2 |= MF2_IM_COLD;
 	    tdam = (tdam * 3) / 4;
 	    reduced = TRUE;
 	}
 
-	if (((m_ptr->cflags2 & MF2_IM_FIRE)) && (i_ptr->flags & TR1_BRAND_FIRE)) {
+	if (((m_ptr->cflags2 & MF2_IM_FIRE)) && (i_ptr->flags1 & TR1_BRAND_FIRE)) {
 	    r_ptr->r_cflags2 |= MF2_IM_FIRE;
 	    if (!reduced) {
 		tdam = (tdam * 3) / 4;
@@ -2355,8 +2355,8 @@ int critical_blow(int weight, int plus, int dam, int attack_type)
 /* Weight of weapon, plusses to hit, and character level all */
 /* contribute to the chance of a critical	             */
     if (randint(5000) <= (int)(weight + 5 * plus
-			     + (class_level_adj[p_ptr->misc.pclass][attack_type]
-				* p_ptr->misc.lev))) {
+			     + (class_level_adj[p_ptr->pclass][attack_type]
+				* p_ptr->lev))) {
 	weight += randint(650);
 	if (weight < 400) {
 	    critical = 2 * dam + 5;
@@ -2384,9 +2384,9 @@ int critical_blow(int weight, int plus, int dam, int attack_type)
 int player_saves(void)
 {
     /* MPW C couldn't handle the expression, so split it into two parts */
-    s16b t1 = class_level_adj[p_ptr->misc.pclass][CLA_SAVE];
-    s16b t2 = p_ptr->misc.save + stat_adj(A_WIS);
-    s16b t3 = t2 + (t1 * p_ptr->misc.lev / 3);
+    s16b t1 = class_level_adj[p_ptr->pclass][CLA_SAVE];
+    s16b t2 = p_ptr->save + stat_adj(A_WIS);
+    s16b t3 = t2 + (t1 * p_ptr->lev / 3);
     return (randint(100) <= t3);
 }
 

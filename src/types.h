@@ -462,18 +462,24 @@ typedef struct _player_type player_type;
 
 struct _player_type {
 
-struct misc {
   char name[27];		    /* Character name	*/
 
   byte prace;			/* # of race	*/
   byte pclass;			/* # of class	*/
   byte male;			/* Sex of character */
+  byte new_spells;		/* Number of spells can learn. */
   byte hitdie;			/* Char hit die	*/
   byte expfact;			/* Experience factor	*/
 
   u16b age;			/* Characters age	*/
   u16b ht;			/* Height		*/
   u16b wt;			/* Weight		*/
+
+/* Stats now kept in arrays, for more efficient access. -CJS- */
+  u16b use_stat[6];		/* Current "resulting" stat values */
+  u16b max_stat[6];		/* Current "maximal" stat values */
+  byte cur_stat[6];		/* Current "natural" stat values */
+  s16b mod_stat[6];		/* Current "stat modifiers" (may be +/-) */
 
   s32b au;			/* Gold		*/
 
@@ -514,18 +520,7 @@ struct misc {
   s16b dis_tac;		/* Display +ToTAC	*/
 
   char history[4][60];	    /* History record		*/
-} misc;
 
-/* Stats now kept in arrays, for more efficient access. -CJS- */
-struct stats {
-  u16b max_stat[6];	    /* What is restored		    */
-  byte cur_stat[6];	    /* What is natural		    */
-  s16b mod_stat[6];	    /* What is modified, may be +/- */
-  u16b use_stat[6];	    /* What is used		    */
-} stats;
-
-struct flags {
-  byte new_spells;		    /* Number of spells can learn. */
 
   u32b status;		/* Status of player	   */
 
@@ -607,7 +602,6 @@ struct flags {
   byte telepathy;		/* Has telepathy	*/
   byte slow_digest;		/* Lower food needs	*/
   byte confusing;		/* Glowing hands.	*/
-} flags;
 };
 
 

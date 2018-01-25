@@ -39,7 +39,7 @@ static void do_cmd_browse(void)
 	return;
     }
 
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see to read your spell book!");
 	return;
     }
@@ -49,7 +49,7 @@ static void do_cmd_browse(void)
 	return;
     }
 
-    if (p_ptr->flags.confused > 0) {
+    if (p_ptr->confused > 0) {
 	msg_print("You are too confused.");
 	return;
     }
@@ -63,10 +63,10 @@ static void do_cmd_browse(void)
     i_ptr = &inventory[item_val];
 
     /* Check the language */
-    if (class[p_ptr->misc.pclass].spell == MAGE) {
+    if (class[p_ptr->pclass].spell == MAGE) {
 	if (i_ptr->tval == TV_MAGIC_BOOK) flag = TRUE;
     }
-    else if (class[p_ptr->misc.pclass].spell == PRIEST) {
+    else if (class[p_ptr->pclass].spell == PRIEST) {
 	if (i_ptr->tval == TV_PRAYER_BOOK) flag = TRUE;
     }
 
@@ -85,7 +85,7 @@ static void do_cmd_browse(void)
 
     while (j1) {
 	k = bit_pos(&j1);
-	s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k];
+	s_ptr = &magic_spell[p_ptr->pclass - 1][k];
 	if (s_ptr->slevel < 99) {
 	    spell_index[i] = k;
 	    i++;
@@ -102,7 +102,7 @@ static void do_cmd_browse(void)
 
     while (j2) {
 	k = bit_pos(&j2);
-	s_ptr = &magic_spell[p_ptr->misc.pclass - 1][k + 32];
+	s_ptr = &magic_spell[p_ptr->pclass - 1][k + 32];
 	if (s_ptr->slevel < 99) {
 	    spell_index[i] = (k + 32);
 	    i++;
@@ -455,6 +455,7 @@ static void do_cmd_options()
 }
 
 
+
 /*
  */
 /*
@@ -470,7 +471,6 @@ void do_command(char com_val)
     int                    dir_val, do_pickup;
     int                    y, x, i, j = 0;
     vtype                  out_val, tmp_str;
-    register struct flags *f_ptr;
     char                   prt1[80];
 
 /* hack for move without pickup.  Map '-' to a movement command. */
@@ -616,7 +616,7 @@ void do_command(char com_val)
 	break;
 
       case CTRL('R'):
-	if (p_ptr->flags.image > 0)
+	if (p_ptr->image > 0)
 	    msg_print("You cannot be sure what is real and what is not!");
 	else {
 	    draw_cave();
@@ -802,7 +802,7 @@ void do_command(char com_val)
 	break;
 
       case 'W':			/* (W)here are we on the map	(L)ocate on map */
-	if ((p_ptr->flags.blind > 0) || no_lite())
+	if ((p_ptr->blind > 0) || no_lite())
 	    msg_print("You can't see your map.");
 	else {
 	    int                 cy, cx, p_y, p_x;
@@ -869,7 +869,7 @@ void do_command(char com_val)
 	break;
 
       case '#':			/* (#) search toggle	(S)earch toggle */
-	if (p_ptr->flags.status & PY_SEARCH)
+	if (p_ptr->status & PY_SEARCH)
 	    search_off();
 	else
 	    search_on();
@@ -977,7 +977,7 @@ void do_command(char com_val)
 	break;
 
       case 's':			/* (s)earch for a turn */
-	search(char_row, char_col, p_ptr->misc.srh);
+	search(char_row, char_col, p_ptr->srh);
 	break;
 
       case 'T':			/* (T)ake off something	(t)ake off */
@@ -1037,16 +1037,16 @@ void do_command(char com_val)
 		(void)res_stat(A_CHR);
 		(void)restore_level();
 		(void)hp_player(2000);
-		p_ptr->flags.food = PLAYER_FOOD_MAX;
-		f_ptr = &p_ptr->flags;
-		if (f_ptr->slow > 1)
-		    f_ptr->slow = 1;
-		if (f_ptr->image > 1)
-		    f_ptr->image = 1;
-		if (f_ptr->cut > 1)
-		    f_ptr->cut = 1;
-		if (f_ptr->stun > 1)
-		    f_ptr->stun = 1;
+		p_ptr->food = PLAYER_FOOD_MAX;
+
+		if (p_ptr->slow > 1)
+		    p_ptr->slow = 1;
+		if (p_ptr->image > 1)
+		    p_ptr->image = 1;
+		if (p_ptr->cut > 1)
+		    p_ptr->cut = 1;
+		if (p_ptr->stun > 1)
+		    p_ptr->stun = 1;
 		break;
 
 	      case CTRL('D'):	/* ^D = up/down */
@@ -1168,12 +1168,12 @@ void do_command(char com_val)
 
 	      case '+':
 		if (command_count > 0) {
-		    p_ptr->misc.exp = command_count;
+		    p_ptr->exp = command_count;
 		    command_count = 0;
-		} else if (p_ptr->misc.exp == 0)
-		    p_ptr->misc.exp = 1;
+		} else if (p_ptr->exp == 0)
+		    p_ptr->exp = 1;
 		else
-		    p_ptr->misc.exp = p_ptr->misc.exp * 2;
+		    p_ptr->exp = p_ptr->exp * 2;
 		prt_experience();
 		break;
 

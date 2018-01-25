@@ -23,7 +23,7 @@
 static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, int *y, int *x, byte by_player)
 {
     register monster_race *r_ptr;
-    int blind = (p_ptr->flags.status & PY_BLIND) ? 1 : 0;
+    int blind = (p_ptr->status & PY_BLIND) ? 1 : 0;
     int res;			/* controls messages, using above #defines -CFT */
     vtype cdesc, outval;
 
@@ -685,11 +685,11 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
  */
 void bst_stat(int stat, int amount)
 {
-    p_ptr->stats.mod_stat[stat] += amount;
+    p_ptr->mod_stat[stat] += amount;
 
     set_use_stat(stat);
 /* can not call prt_stat() here, may be in store, may be in inven_command */
-    p_ptr->flags.status |= (PY_STR << stat);
+    p_ptr->status |= (PY_STR << stat);
 }
 
 
@@ -706,8 +706,8 @@ void bst_stat(int stat, int amount)
  */
 void change_speed(register int num)
 {
-    p_ptr->flags.speed += num;
-    p_ptr->flags.status |= PY_SPEED;
+    p_ptr->speed += num;
+    p_ptr->status |= PY_SPEED;
 }
 
 
@@ -730,11 +730,11 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 		bst_stat(i, amount);
     }
     if (TR1_SEARCH & t_ptr->flags) {
-	p_ptr->misc.srh += amount;
-	p_ptr->misc.fos -= amount;
+	p_ptr->srh += amount;
+	p_ptr->fos -= amount;
     }
     if (TR1_STEALTH & t_ptr->flags)
-	p_ptr->misc.stl += amount;
+	p_ptr->stl += amount;
     if (TR1_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
@@ -752,7 +752,7 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
 	change_speed(-amount);
     }
     if (TR1_INFRA & t_ptr->flags)
-	p_ptr->flags.see_infra += amount;
+	p_ptr->see_infra += amount;
 }
 
 
@@ -999,7 +999,7 @@ void darken_player(int y1, int x1)
 /* Four cases : Normal, Finding, Blind, and Nolight	 -RAK-	 */
 void move_light(int y1, int x1, int y2, int x2)
 {
-    if (p_ptr->flags.blind > 0 || !player_light)
+    if (p_ptr->blind > 0 || !player_light)
 	sub3_move_light(y1, x1, y2, x2);
     else
 	sub1_move_light(y1, x1, y2, x2);

@@ -96,13 +96,10 @@ static int sv_write()
     register monster_lore *r_ptr;
     struct stats         *s_ptr;
 
-#ifdef MSDOS
-    inven_type           *t_ptr;
 
-#endif
-    register struct flags *f_ptr;
+
     store_type  *st_ptr;
-    struct misc *m_ptr;
+
 
 /* clear the death flag when creating a HANGUP save file, so that player can
  * see tombstone when restart 
@@ -304,54 +301,53 @@ static int sv_write()
     wr_long(l);
     wr_long(l);
 
-    m_ptr = &p_ptr->misc;
-    wr_string(m_ptr->name);
-    wr_byte(m_ptr->male);
-    wr_long((u32b) m_ptr->au);
-    wr_long((u32b) m_ptr->max_exp);
-    wr_long((u32b) m_ptr->exp);
-    wr_short(m_ptr->exp_frac);
-    wr_short(m_ptr->age);
-    wr_short(m_ptr->ht);
-    wr_short(m_ptr->wt);
-    wr_short(m_ptr->lev);
-    wr_short(m_ptr->max_dlv);
-    wr_short((u16b) m_ptr->srh);
-    wr_short((u16b) m_ptr->fos);
-    wr_short((u16b) m_ptr->bth);
-    wr_short((u16b) m_ptr->bthb);
-    wr_short((u16b) m_ptr->mana);
-    wr_short((u16b) m_ptr->mhp);
-    wr_short((u16b) m_ptr->ptohit);
-    wr_short((u16b) m_ptr->ptodam);
-    wr_short((u16b) m_ptr->pac);
-    wr_short((u16b) m_ptr->ptoac);
-    wr_short((u16b) m_ptr->dis_th);
-    wr_short((u16b) m_ptr->dis_td);
-    wr_short((u16b) m_ptr->dis_ac);
-    wr_short((u16b) m_ptr->dis_tac);
-    wr_short((u16b) m_ptr->disarm);
-    wr_short((u16b) m_ptr->save);
-    wr_short((u16b) m_ptr->sc);
-    wr_short((u16b) m_ptr->stl);
-    wr_byte(m_ptr->pclass);
-    wr_byte(m_ptr->prace);
-    wr_byte(m_ptr->hitdie);
-    wr_byte(m_ptr->expfact);
-    wr_short((u16b) m_ptr->cmana);
-    wr_short(m_ptr->cmana_frac);
-    wr_short((u16b) m_ptr->chp);
-    wr_short(m_ptr->chp_frac);
-    for (i = 0; i < 4; i++)
-	wr_string(m_ptr->history[i]);
 
-    s_ptr = &p_ptr->stats;
+    wr_string(p_ptr->name);
+    wr_byte(p_ptr->male);
+    wr_long((u32b) p_ptr->au);
+    wr_long((u32b) p_ptr->max_exp);
+    wr_long((u32b) p_ptr->exp);
+    wr_short(p_ptr->exp_frac);
+    wr_short(p_ptr->age);
+    wr_short(p_ptr->ht);
+    wr_short(p_ptr->wt);
+    wr_short(p_ptr->lev);
+    wr_short(p_ptr->max_dlv);
+    wr_short((u16b) p_ptr->srh);
+    wr_short((u16b) p_ptr->fos);
+    wr_short((u16b) p_ptr->bth);
+    wr_short((u16b) p_ptr->bthb);
+    wr_short((u16b) p_ptr->mana);
+    wr_short((u16b) p_ptr->mhp);
+    wr_short((u16b) p_ptr->ptohit);
+    wr_short((u16b) p_ptr->ptodam);
+    wr_short((u16b) p_ptr->pac);
+    wr_short((u16b) p_ptr->ptoac);
+    wr_short((u16b) p_ptr->dis_th);
+    wr_short((u16b) p_ptr->dis_td);
+    wr_short((u16b) p_ptr->dis_ac);
+    wr_short((u16b) p_ptr->dis_tac);
+    wr_short((u16b) p_ptr->disarm);
+    wr_short((u16b) p_ptr->save);
+    wr_short((u16b) p_ptr->sc);
+    wr_short((u16b) p_ptr->stl);
+    wr_byte(p_ptr->pclass);
+    wr_byte(p_ptr->prace);
+    wr_byte(p_ptr->hitdie);
+    wr_byte(p_ptr->expfact);
+    wr_short((u16b) p_ptr->cmana);
+    wr_short(p_ptr->cmana_frac);
+    wr_short((u16b) p_ptr->chp);
+    wr_short(p_ptr->chp_frac);
+    for (i = 0; i < 4; i++)
+	wr_string(p_ptr->history[i]);
+
+    s_ptr = &p_ptr->
     wr_shorts(s_ptr->max_stat, 6);
     wr_bytes(s_ptr->cur_stat, 6);               /* Was wr_shorts -TL */
     wr_shorts((u16b *) s_ptr->mod_stat, 6);
     wr_shorts(s_ptr->use_stat, 6);
 
-    f_ptr = &p_ptr->flags;
     wr_long(f_ptr->status);
     wr_short((u16b) f_ptr->rest);
     wr_short((u16b) f_ptr->blind);
@@ -781,9 +777,8 @@ int load_player(int *generate)
     u16b                 int16u_tmp;
     register cave_type    *c_ptr;
     register monster_lore  *r_ptr;
-    struct misc           *m_ptr;
+
     struct stats          *s_ptr;
-    register struct flags *f_ptr;
     store_type            *st_ptr;
     byte char_tmp, ychar, xchar, count;
 
@@ -1138,48 +1133,47 @@ int load_player(int *generate)
 	    && get_check("Resurrect a dead character?"))
 	    l &= ~0x80000000L;
 	if ((l & 0x80000000L) == 0) {
-	    m_ptr = &p_ptr->misc;
-	    rd_string(m_ptr->name);
-	    rd_byte(&m_ptr->male);
-	    rd_long((u32b *) & m_ptr->au);
-	    rd_long((u32b *) & m_ptr->max_exp);
-	    rd_long((u32b *) & m_ptr->exp);
-	    rd_short(&m_ptr->exp_frac);
-	    rd_short(&m_ptr->age);
-	    rd_short(&m_ptr->ht);
-	    rd_short(&m_ptr->wt);
-	    rd_short(&m_ptr->lev);
-	    rd_short(&m_ptr->max_dlv);
-	    rd_short((u16b *) & m_ptr->srh);
-	    rd_short((u16b *) & m_ptr->fos);
-	    rd_short((u16b *) & m_ptr->bth);
-	    rd_short((u16b *) & m_ptr->bthb);
-	    rd_short((u16b *) & m_ptr->mana);
-	    rd_short((u16b *) & m_ptr->mhp);
-	    rd_short((u16b *) & m_ptr->ptohit);
-	    rd_short((u16b *) & m_ptr->ptodam);
-	    rd_short((u16b *) & m_ptr->pac);
-	    rd_short((u16b *) & m_ptr->ptoac);
-	    rd_short((u16b *) & m_ptr->dis_th);
-	    rd_short((u16b *) & m_ptr->dis_td);
-	    rd_short((u16b *) & m_ptr->dis_ac);
-	    rd_short((u16b *) & m_ptr->dis_tac);
-	    rd_short((u16b *) & m_ptr->disarm);
-	    rd_short((u16b *) & m_ptr->save);
-	    rd_short((u16b *) & m_ptr->sc);
-	    rd_short((u16b *) & m_ptr->stl);
-	    rd_byte(&m_ptr->pclass);
-	    rd_byte(&m_ptr->prace);
-	    rd_byte(&m_ptr->hitdie);
-	    rd_byte(&m_ptr->expfact);
-	    rd_short((u16b *) & m_ptr->cmana);
-	    rd_short(&m_ptr->cmana_frac);
-	    rd_short((u16b *) & m_ptr->chp);
-	    rd_short(&m_ptr->chp_frac);
+	    rd_string(p_ptr->name);
+	    rd_byte(&p_ptr->male);
+	    rd_long((u32b *) & p_ptr->au);
+	    rd_long((u32b *) & p_ptr->max_exp);
+	    rd_long((u32b *) & p_ptr->exp);
+	    rd_short(&p_ptr->exp_frac);
+	    rd_short(&p_ptr->age);
+	    rd_short(&p_ptr->ht);
+	    rd_short(&p_ptr->wt);
+	    rd_short(&p_ptr->lev);
+	    rd_short(&p_ptr->max_dlv);
+	    rd_short((u16b *) & p_ptr->srh);
+	    rd_short((u16b *) & p_ptr->fos);
+	    rd_short((u16b *) & p_ptr->bth);
+	    rd_short((u16b *) & p_ptr->bthb);
+	    rd_short((u16b *) & p_ptr->mana);
+	    rd_short((u16b *) & p_ptr->mhp);
+	    rd_short((u16b *) & p_ptr->ptohit);
+	    rd_short((u16b *) & p_ptr->ptodam);
+	    rd_short((u16b *) & p_ptr->pac);
+	    rd_short((u16b *) & p_ptr->ptoac);
+	    rd_short((u16b *) & p_ptr->dis_th);
+	    rd_short((u16b *) & p_ptr->dis_td);
+	    rd_short((u16b *) & p_ptr->dis_ac);
+	    rd_short((u16b *) & p_ptr->dis_tac);
+	    rd_short((u16b *) & p_ptr->disarm);
+	    rd_short((u16b *) & p_ptr->save);
+	    rd_short((u16b *) & p_ptr->sc);
+	    rd_short((u16b *) & p_ptr->stl);
+	    rd_byte(&p_ptr->pclass);
+	    rd_byte(&p_ptr->prace);
+	    rd_byte(&p_ptr->hitdie);
+	    rd_byte(&p_ptr->expfact);
+	    rd_short((u16b *) & p_ptr->cmana);
+	    rd_short(&p_ptr->cmana_frac);
+	    rd_short((u16b *) & p_ptr->chp);
+	    rd_short(&p_ptr->chp_frac);
 	    for (i = 0; i < 4; i++)
-		rd_string(m_ptr->history[i]);
+		rd_string(p_ptr->history[i]);
 
-	    s_ptr = &p_ptr->stats;
+	    s_ptr = &p_ptr->
 	    rd_shorts(s_ptr->max_stat, 6);
 	    if (version_maj <= 2 && version_min <=5 && patch_level <= 6)
 		rd_shorts(s_ptr->cur_stat, 6);
@@ -1188,7 +1182,6 @@ int load_player(int *generate)
 	    rd_shorts((u16b *) s_ptr->mod_stat, 6);
 	    rd_shorts(s_ptr->use_stat, 6);
 
-	    f_ptr = &p_ptr->flags;
 	    rd_long(&f_ptr->status);
 	    rd_short((u16b *) & f_ptr->rest);
 	    rd_short((u16b *) & f_ptr->blind);
@@ -1339,31 +1332,31 @@ int load_player(int *generate)
 		    goto error;
 		}
 		prt("Attempting a resurrection!", 0, 0);
-		if (p_ptr->misc.chp < 0) {
-		    p_ptr->misc.chp = 0;
-		    p_ptr->misc.chp_frac = 0;
+		if (p_ptr->chp < 0) {
+		    p_ptr->chp = 0;
+		    p_ptr->chp_frac = 0;
 		}
 	    /* don't let him starve to death immediately */
-		if (p_ptr->flags.food < 5000)
-		    p_ptr->flags.food = 5000;
+		if (p_ptr->food < 5000)
+		    p_ptr->food = 5000;
 		cure_poison();
 		cure_blindness();
 		cure_confusion();
 		remove_fear();
 
-		if (p_ptr->flags.image > 0) p_ptr->flags.image = 0;
-		if (p_ptr->flags.cut > 0) p_ptr->flags.cut = 0;
-		if (p_ptr->flags.stun > 0) {
-		    if (p_ptr->flags.stun > 50) {
-			p_ptr->misc.ptohit += 20;
-			p_ptr->misc.ptodam += 20;
+		if (p_ptr->image > 0) p_ptr->image = 0;
+		if (p_ptr->cut > 0) p_ptr->cut = 0;
+		if (p_ptr->stun > 0) {
+		    if (p_ptr->stun > 50) {
+			p_ptr->ptohit += 20;
+			p_ptr->ptodam += 20;
 		    } else {
-			p_ptr->misc.ptohit += 5;
-			p_ptr->misc.ptodam += 5;
+			p_ptr->ptohit += 5;
+			p_ptr->ptodam += 5;
 		    }
-		    p_ptr->flags.stun = 0;
+		    p_ptr->stun = 0;
 		}
-		if (p_ptr->flags.word_recall > 0) p_ptr->flags.word_recall = 0;
+		if (p_ptr->word_recall > 0) p_ptr->word_recall = 0;
 
 		/* Resurrect on the town level. */
 		dun_level = 0;
@@ -1586,7 +1579,7 @@ error:
 	else {
 
 	    /* don't overwrite the "killed by" string if character is dead */
-	    if (p_ptr->misc.chp >= 0) {
+	    if (p_ptr->chp >= 0) {
 		(void)strcpy(died_from, "(alive and well)");
 	    }
 

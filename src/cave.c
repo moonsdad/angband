@@ -372,11 +372,11 @@ void check_view(void)
 
     /* A room of light should be lit.	 */
     if (c_ptr->fval == LIGHT_FLOOR) {
-		if ((p_ptr->flags.blind < 1) && !c_ptr->pl) lite_room(char_row, char_col);
+		if ((p_ptr->blind < 1) && !c_ptr->pl) lite_room(char_row, char_col);
     }
 
     /* In doorway of light-room?		   */
-    else if (c_ptr->lr && (p_ptr->flags.blind < 1)) {
+    else if (c_ptr->lr && (p_ptr->blind < 1)) {
 	for (i = (char_row - 1); i <= (char_row + 1); i++)
 	    for (j = (char_col - 1); j <= (char_col + 1); j++) {
 		d_ptr = &cave[i][j];
@@ -452,7 +452,7 @@ void lite_room(int y1, int x1)
 	    if ((!c_ptr->pl) && (c_ptr->lr))
 		lite_room(y1 + 1, x1 - 1);
 	}
-    }     
+    }
 }
 
 /*
@@ -640,7 +640,7 @@ void screen_map(void)
 
     int   row, orow, col;
 
-    int  myrow = 0, mycol = 0;
+    int myrow = 0, mycol = 0;
 
     int priority[256];
 

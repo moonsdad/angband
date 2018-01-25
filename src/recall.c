@@ -715,12 +715,12 @@ int roff_recall(int r_idx)
 	else roff(wd_creat[msex]);
 
 	/* calculate the integer exp part */
-	i = (long)r_ptr->mexp * r_ptr->level / p_ptr->misc.lev;
+	i = (long)r_ptr->mexp * r_ptr->level / p_ptr->lev;
 
 	/* calculate the fractional exp part scaled by 100, */
 	/* must use long arithmetic to avoid overflow  */
-	j = (((long)r_ptr->mexp * r_ptr->level % p_ptr->misc.lev) * (long)1000 /
-	     p_ptr->misc.lev + 5) / 10;
+	j = (((long)r_ptr->mexp * r_ptr->level % p_ptr->lev) * (long)1000 /
+	     p_ptr->lev + 5) / 10;
 
 	/* Mention the experience */
 	(void)sprintf(temp, " is worth %lu.%02lu point%s",
@@ -730,15 +730,15 @@ int roff_recall(int r_idx)
 
 	/* Take account of annoying English */
 	p = "th";
-	i = p_ptr->misc.lev % 10;
-	if ((p_ptr->misc.lev / 10) == 1);
+	i = p_ptr->lev % 10;
+	if ((p_ptr->lev / 10) == 1);
 	else if (i == 1) p = "st";
 	else if (i == 2) p = "nd";
 	else if (i == 3) p = "rd";
 
 	/* Take account of "leading vowels" in numbers */
 	q = "";
-	i = p_ptr->misc.lev;
+	i = p_ptr->lev;
 	if ((i == 8) || (i == 11) || (i == 18)) q = "n";
 
 	/* Mention the dependance on the player's level */

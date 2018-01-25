@@ -364,10 +364,8 @@ int max_hp(byte *array)
 unsigned char loc_symbol(int y, int x)
 {
     register cave_type    *cave_ptr;
-    register struct flags *f_ptr;
 
     cave_ptr = &cave[y][x];
-    f_ptr = &p_ptr->flags;
 
     if ((cave_ptr->m_idx == 1) && (!find_flag || find_prself))
 	return '@';
@@ -409,12 +407,12 @@ void add_food(int num)
 {
     register int           extra, penalty;
 
-    if (p_ptr->flags.food < 0) p_ptr->flags.food = 0;
-    p_ptr->flags.food += num;
+    if (p_ptr->food < 0) p_ptr->food = 0;
+    p_ptr->food += num;
     /* overflow check */
-    if (num > 0 && p_ptr->flags.food <= 0) p_ptr->flags.food = 32000;
+    if (num > 0 && p_ptr->food <= 0) p_ptr->food = 32000;
 
-    if (p_ptr->flags.food > PLAYER_FOOD_MAX) {
+    if (p_ptr->food > PLAYER_FOOD_MAX) {
 
 	msg_print("You are bloated from overeating. ");
 
@@ -426,9 +424,9 @@ void add_food(int num)
 	if (extra > num) extra = num;
 	penalty = extra / 50;
 
-	p_ptr->flags.slow += penalty;
-	if (extra == num) p_ptr->flags.food = p_ptr->flags.food - num + penalty;
-	else p_ptr->flags.food = PLAYER_FOOD_MAX + penalty;
+	p_ptr->slow += penalty;
+	if (extra == num) p_ptr->food = p_ptr->food - num + penalty;
+	else p_ptr->food = PLAYER_FOOD_MAX + penalty;
     }
 
     else if (p_ptr->food > PLAYER_FOOD_FULL) {

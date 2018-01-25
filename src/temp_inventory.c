@@ -106,7 +106,7 @@ void inven_destroy(int item_val)
 	invcopy(&inventory[inven_ctr - 1], OBJ_NOTHING);
 	inven_ctr--;
     }
-    p_ptr->flags.status |= PY_STR_WGT;
+    p_ptr->status |= PY_STR_WGT;
 }
 
 

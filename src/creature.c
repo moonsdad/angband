@@ -42,13 +42,13 @@ void update_mon(int m_idx)
     fx = m_ptr->fx;
 
     if ((m_ptr->cdis <= MAX_SIGHT) &&
-	(!(p_ptr->flags.status & PY_BLIND) || p_ptr->flags.telepathy) &&
+	(!(p_ptr->status & PY_BLIND) || p_ptr->telepathy) &&
 	(panel_contains((int)m_ptr->fy, (int)m_ptr->fx))) {
     /* Wizard sight.	     */
 	if (wizard) flag = TRUE;
 
     /* if not mindless, telepathy sees -CWS */
-	if (p_ptr->flags.telepathy) {
+	if (p_ptr->telepathy) {
 
 	    char c = r_ptr->r_char;
 	    cptr n = r_ptr->name;
@@ -101,8 +101,8 @@ void update_mon(int m_idx)
 	    c_ptr = &cave[fy][fx];
 
 	    /* Infravision is able to see "nearby" monsters */
-	    if ((p_ptr->flags.see_infra > 0) &&
-		(m_ptr->cdis <= (unsigned)(p_ptr->flags.see_infra))) {
+	    if ((p_ptr->see_infra > 0) &&
+		(m_ptr->cdis <= (unsigned)(p_ptr->see_infra))) {
 
 		/* Infravision only works on "warm" creatures */
 		/* changed to act sensibly -CFT */
@@ -118,7 +118,7 @@ void update_mon(int m_idx)
 
 		/* Take note of invisibility */
 		if ((r_ptr->cflags1 & MF1_MV_INVIS) == 0) flag = TRUE;
-		else if (p_ptr->flags.see_inv) {
+		else if (p_ptr->see_inv) {
 		    flag = TRUE;
 		    l_list[m_ptr->r_idx].r_cflags1 |= MF1_MV_INVIS;
 		}
@@ -190,7 +190,7 @@ int movement_rate(int monnum)
 {
   register int ps, ms, tm, i;
 
-  ps = 1 - p_ptr->flags.speed;	/* this makes normal = 1, fast = 2,
+  ps = 1 - p_ptr->speed;	/* this makes normal = 1, fast = 2,
                                  * v.fast = 3, slow = 0, v.slow = -1 -CFT */
   ms = m_list[monnum].mspeed;
   
@@ -273,7 +273,7 @@ static void get_moves(int m_idx, int *mm)
  */
 
     /* Apply fear if possible and necessary */
-    if (((s16b)(p_ptr->misc.lev - 34 - r_list[(m_list[m_idx]).r_idx].level +
+    if (((s16b)(p_ptr->lev - 34 - r_list[(m_list[m_idx]).r_idx].level +
 		 ((m_list[m_idx].maxhp) % 8)) > 0)
 	|| m_list[m_idx].monfear) { /* Run away!  Run away! -DGK */
     
@@ -770,7 +770,6 @@ static void make_attack(int m_idx)
 
     register monster_race	*r_ptr;
     monster_type		*m_ptr;
-    register struct flags  *f_ptr = &p_ptr->flags;
     register inven_type		*i_ptr;
 
     /* flag to see if blinked away (after steal) -CFT */
@@ -819,9 +818,9 @@ static void make_attack(int m_idx)
 	flag = FALSE;
 
 	/* Random (100) + level > 50 chance for stop any attack added */
-	if (((p_ptr->flags.protevil > 0) && (r_ptr->cflags2 & MF2_EVIL) &&
-	     ((p_ptr->misc.lev + 1) > r_ptr->level)) &&
-	    (randint(100) + (p_ptr->misc.lev) > 50)) {
+	if (((p_ptr->protevil > 0) && (r_ptr->cflags2 & MF2_EVIL) &&
+	     ((p_ptr->lev + 1) > r_ptr->level)) &&
+	    (randint(100) + (p_ptr->lev) > 50)) {
 
 	    if (m_ptr->ml) l_list[m_ptr->r_idx].r_cflags2 |= MF2_EVIL;
 	    attype = 99;
@@ -830,99 +829,99 @@ static void make_attack(int m_idx)
 
 	switch (attype) {
 	  case 1:		   /* Normal attack  */
-	    if (test_hit(60, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(60, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 2:		   /* Lose Strength */
-	    if (test_hit(-3, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(-3, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 3:		   /* Confusion attack */
-	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 4:		   /* Fear attack    */
-	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 5:		   /* Fire attack    */
-	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 6:		   /* Acid attack    */
-	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 7:		   /* Cold attack    */
-	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 8:		   /* Lightning attack */
-	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(10, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 9:		   /* Corrosion attack */
-	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 10:		   /* Blindness attack */
-	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 11:		   /* Paralysis attack */
-	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 12:		   /* Steal Money    */
-	    if ((test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.misc.lev,
+	    if ((test_hit(5, (int)r_ptr->level, 0, p_ptr->lev,
 			  CLA_MISC_HIT))
-		&& (p_ptr->misc.misc.au > 0))
+		&& (p_ptr->au > 0))
 		flag = TRUE;
 	    break;
 	  case 13:		   /* Steal Object   */
-	    if ((test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.misc.lev,
+	    if ((test_hit(2, (int)r_ptr->level, 0, p_ptr->lev,
 			  CLA_MISC_HIT))
 		&& (inven_ctr > 0))
 		flag = TRUE;
 	    break;
 	  case 14:		   /* Poison	       */
-	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 15:		   /* Lose dexterity */
-	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 16:		   /* Lose constitution */
-	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(0, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 17:		   /* Lose intelligence */
-	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 18:		   /* Lose wisdom */
-	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(2, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 19:		   /* Lose experience */
-	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
@@ -930,28 +929,28 @@ static void make_attack(int m_idx)
 	    flag = TRUE;
 	    break;
 	  case 21:		   /* Disenchant	  */
-	    if (test_hit(20, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(20, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 22:		   /* Eat food	  */
-	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 23:		   /* Eat light	  */
-	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if (test_hit(5, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			 CLA_MISC_HIT))
 		flag = TRUE;
 	    break;
 	  case 24:		   /* Eat charges	  */
-	    if ((test_hit(15, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if ((test_hit(15, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			  CLA_MISC_HIT)))
 		/* check to make sure an object (XXX drainable?) exists */
 		if (inven_ctr > 0) flag = TRUE;
 	    break;
 	  case 25:		   /* Drain all stats   */
-	    if ((test_hit(2, (int)r_ptr->level, 0, p_ptr->misc.pac + p_ptr->misc.ptoac,
+	    if ((test_hit(2, (int)r_ptr->level, 0, p_ptr->pac + p_ptr->ptoac,
 			  CLA_MISC_HIT)))
 		flag = TRUE;
 	    break;
@@ -1138,8 +1137,8 @@ static void make_attack(int m_idx)
 	      /* Normal attack	 */
 	      case 1:
 		/* round half-way case down */
-		damage -= ((((((p_ptr->misc.pac + p_ptr->misc.ptoac) > 150) ? 150 :
-		     (p_ptr->misc.pac + p_ptr->misc.ptoac)) * 3) / 4) * damage) / 200;
+		damage -= ((((((p_ptr->pac + p_ptr->ptoac) > 150) ? 150 :
+		     (p_ptr->pac + p_ptr->ptoac)) * 3) / 4) * damage) / 200;
 		take_hit(damage, ddesc);
 		if ((damage > 23) && shatter) {
 		    /* Earthquake centered at the monster */
@@ -1150,7 +1149,7 @@ static void make_attack(int m_idx)
 	      /* Lose Strength */
 	      case 2:
 		take_hit(damage, ddesc);
-		if (p_ptr->flags.sustain_str) {
+		if (p_ptr->sustain_str) {
 		    msg_print("You feel weaker for a moment, but it passes.");
 		}
 		else if (rand_int(2)) {
@@ -1165,16 +1164,16 @@ static void make_attack(int m_idx)
 	      /* Confusion attack */
 	      case 3:
 		take_hit(damage, ddesc);
-		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
+		if ((!p_ptr->resist_conf) && (!p_ptr->resist_chaos)) {
 		    if (randint(2) == 1) {
-			if (f_ptr->confused < 1) {
+			if (p_ptr->confused < 1) {
 			    msg_print("You feel confused.");
-			    f_ptr->confused += randint((int)r_ptr->level);
+			    p_ptr->confused += randint((int)r_ptr->level);
 			}
 			else {
 			    notice = FALSE;
 			}
-			f_ptr->confused += 3;
+			p_ptr->confused += 3;
 		    }
 		    else {
 			notice = FALSE;
@@ -1186,16 +1185,16 @@ static void make_attack(int m_idx)
 	      case 4:
 		take_hit(damage, ddesc);
 		if (player_saves() ||
-		    (p_ptr->misc.pclass == 1 && randint(3) == 1) ||
-		    p_ptr->flags.resist_fear) {
+		    (p_ptr->pclass == 1 && randint(3) == 1) ||
+		    p_ptr->resist_fear) {
 		    msg_print("You stand your ground!");
 		}
-		else if (f_ptr->afraid < 1) {
+		else if (p_ptr->afraid < 1) {
 		    msg_print("You are suddenly afraid!");
-		    f_ptr->afraid += 3 + randint((int)r_ptr->level);
+		    p_ptr->afraid += 3 + randint((int)r_ptr->level);
 		}
 		else {
-		    f_ptr->afraid += 3;
+		    p_ptr->afraid += 3;
 		    notice = FALSE;
 		}
 		break;
@@ -1234,13 +1233,13 @@ static void make_attack(int m_idx)
 	      /* Blindness attack */
 	      case 10:
 		take_hit(damage, ddesc);
-		if (!p_ptr->flags.resist_blind) {
-		    if (f_ptr->blind < 1) {
-			f_ptr->blind += 10 + randint((int)r_ptr->level);
+		if (!p_ptr->resist_blind) {
+		    if (p_ptr->blind < 1) {
+			p_ptr->blind += 10 + randint((int)r_ptr->level);
 			msg_print("Your eyes begin to sting.");
 		    }
 		    else {
-			f_ptr->blind += 5;
+			p_ptr->blind += 5;
 			notice = FALSE;
 		    }
 		}
@@ -1252,12 +1251,12 @@ static void make_attack(int m_idx)
 		if (player_saves()) {
 		    msg_print("You resist the effects!");
 		}
-		else if (f_ptr->paralysis < 1) {
-		    if (f_ptr->free_act) {
+		else if (p_ptr->paralysis < 1) {
+		    if (p_ptr->free_act) {
 			msg_print("You are unaffected.");
 		    }
 		    else {
-			f_ptr->paralysis = randint((int)r_ptr->level) + 3;
+			p_ptr->paralysis = randint((int)r_ptr->level) + 3;
 			msg_print("You are paralysed.");
 		    }
 		}
@@ -1269,16 +1268,17 @@ static void make_attack(int m_idx)
 	      /* Steal Money */
 	      case 12:
 		/* immune to steal at 18/150 */
-		if ((p_ptr->flags.paralysis < 1) &&
-		    (randint(168) < p_ptr->stats.use_stat[A_DEX])) {
+		if ((p_ptr->paralysis < 1) &&
+		    (randint(168) < p_ptr->use_stat[A_DEX])) {
 		    msg_print("You quickly protect your money pouch!");
 		}
 		else { /* make this more sane.... -CWS */
 		    vtype               t1;
-		    gold = (p_ptr->misc.au / 10) + randint(25);
-		    if (gold > 5000) gold = 2000 + randint(1000) + (p_ptr->misc.au / 20);
-		    if (gold > p_ptr->misc.au) gold = p_ptr->misc.au;
-		    p_ptr->misc.au -= gold;
+		    gold = (p_ptr->au / 10) + randint(25);
+		    if (gold < 2) gold = 2;
+		    if (gold > 5000) gold = 2000 + randint(1000) + (p_ptr->au / 20);
+		    if (gold > p_ptr->au) gold = p_ptr->au;
+		    p_ptr->au -= gold;
 		    msg_print("Your purse feels lighter.");
 			sprintf(t1, "%ld coin%s stolen!", (long)gold,
 			(gold > 1L) ? "s were" : " was");
@@ -1295,8 +1295,8 @@ static void make_attack(int m_idx)
 	      /* Steal Object */
 	      case 13:
 		/* immune to steal at 18/150 dexterity */
-		if ((p_ptr->flags.paralysis < 1) &&
-		    (randint(168) < p_ptr->stats.use_stat[A_DEX])) {
+		if ((p_ptr->paralysis < 1) &&
+		    (randint(168) < p_ptr->use_stat[A_DEX])) {
 		    msg_print("You grab hold of your backpack!");
 		}
 		else {
@@ -1343,11 +1343,11 @@ static void make_attack(int m_idx)
 	      /* Poison	 */
 	      case 14:
 		take_hit(damage, ddesc);
-		if (!(f_ptr->immune_pois ||
-		    f_ptr->resist_pois ||
-		    f_ptr->oppose_pois)) {
+		if (!p_ptr->immune_pois &&
+		    !p_ptr->resist_pois &&
+		    !p_ptr->oppose_pois) {
 		    msg_print("You feel very sick.");
-		    f_ptr->poisoned += randint((int)r_ptr->level) + 5;
+		    p_ptr->poisoned += randint((int)r_ptr->level) + 5;
 		}
 		else {
 		    msg_print("The poison has no effect.");
@@ -1357,7 +1357,7 @@ static void make_attack(int m_idx)
 	      /* Lose dexterity */
 	      case 15:
 		take_hit(damage, ddesc);
-		if (f_ptr->sustain_dex) {
+		if (p_ptr->sustain_dex) {
 		    msg_print("You feel clumsy for a moment, but it passes.");
 		}
 		else {
@@ -1369,7 +1369,7 @@ static void make_attack(int m_idx)
 	      /* Lose constitution */
 	      case 16:
 		take_hit(damage, ddesc);
-		if (f_ptr->sustain_con) {
+		if (p_ptr->sustain_con) {
 		    msg_print("Your body resists the effects of the disease.");
 		}
 		else {
@@ -1382,7 +1382,7 @@ static void make_attack(int m_idx)
 	      case 17:
 		take_hit(damage, ddesc);
 		msg_print("You have trouble thinking clearly.");
-		if (f_ptr->sustain_int) {
+		if (p_ptr->sustain_int) {
 		    msg_print("But your mind quickly clears.");
 		}
 		else {
@@ -1393,7 +1393,7 @@ static void make_attack(int m_idx)
 	      /* Lose wisdom */
 	      case 18:
 		take_hit(damage, ddesc);
-		if (f_ptr->sustain_wis) {
+		if (p_ptr->sustain_wis) {
 		    msg_print("Your wisdom is sustained.");
 		}
 		else {
@@ -1404,17 +1404,17 @@ static void make_attack(int m_idx)
 
 	      /* Lose experience  */
 	      case 19:
-		if (f_ptr->hold_life && rand_int(5)) {
+		if (p_ptr->hold_life && rand_int(5)) {
 		    msg_print("You keep hold of your life force!");
 		}
 		else {
-		    if (f_ptr->hold_life) {
+		    if (p_ptr->hold_life) {
 			msg_print("You feel your life slipping away!");
-			lose_exp(damage + (p_ptr->misc.exp/1000) * MON_DRAIN_LIFE);
+			lose_exp(damage + (p_ptr->exp/1000) * MON_DRAIN_LIFE);
 		    }
 		    else {
 			msg_print("You feel your life draining away!");
-			lose_exp(damage + (p_ptr->misc.exp/100) * MON_DRAIN_LIFE);
+			lose_exp(damage + (p_ptr->exp/100) * MON_DRAIN_LIFE);
 		    }
 		}
 		break;
@@ -1428,7 +1428,7 @@ static void make_attack(int m_idx)
 	      case 21:
 
 		/* Allow complete resist */
-		if (!p_ptr->flags.resist_disen) {
+		if (!p_ptr->resist_disen) {
 		    byte               chance = 0;
 
 		    /* Take some damage */
@@ -1505,7 +1505,7 @@ static void make_attack(int m_idx)
 		if ((i_ptr->pval > 0) && ((i_ptr->flags2 & TR_ARTIFACT) == 0)) {
 		    i_ptr->pval -= (250 + randint(250));
 		    if (i_ptr->pval < 1) i_ptr->pval = 1;
-		    if (p_ptr->flags.blind < 1) {
+		    if (p_ptr->blind < 1) {
 			msg_print("Your light dims.");
 		    }
 		    else {
@@ -1539,21 +1539,21 @@ static void make_attack(int m_idx)
 	      /* Drain all stats. Haha! SM */
 	      case 25:
 		take_hit(damage, ddesc);
-		if (p_ptr->flags.sustain_str) {
+		if (p_ptr->sustain_str) {
 		    msg_print("You feel weaker for a moment, but it passes.");
 		}
 		else {
 		    msg_print("You feel weaker.");
 		    (void)dec_stat(A_STR);
 		}
-		if (f_ptr->sustain_dex) {
+		if (p_ptr->sustain_dex) {
 		    msg_print("You feel clumsy for a moment, but it passes.");
 		}
 		else {
 		    msg_print("You feel more clumsy.");
 		    (void)dec_stat(A_DEX);
 		}
-		if (f_ptr->sustain_con) {
+		if (p_ptr->sustain_con) {
 		    msg_print("Your body resists the effects of the disease.");
 		}
 		else {
@@ -1561,20 +1561,20 @@ static void make_attack(int m_idx)
 		    (void)dec_stat(A_CON);
 		}
 		msg_print("You have trouble thinking clearly.");
-		if (f_ptr->sustain_int) {
+		if (p_ptr->sustain_int) {
 		    msg_print("But your mind quickly clears.");
 		}
 		else {
 		    (void)dec_stat(A_INT);
 		}
-		if (f_ptr->sustain_wis) {
+		if (p_ptr->sustain_wis) {
 		    msg_print("Your wisdom is sustained.");
 		}
 		else {
 		    msg_print("Your wisdom is drained.");
 		    (void)dec_stat(A_WIS);
 		}
-		if (f_ptr->sustain_chr) {
+		if (p_ptr->sustain_chr) {
 		    msg_print("You keep your good looks.");
 		}
 		else {
@@ -1632,9 +1632,9 @@ static void make_attack(int m_idx)
 	    /* monster is only confused if it actually hits */
 	    /* if no attacks, monster can't get confused -dbd */
 	    if (!attype) {
-		if (p_ptr->flags.confusing && p_ptr->flags.protevil <= 0) {
+		if (p_ptr->confusing && p_ptr->protevil <= 0) {
 		    msg_print("Your hands stop glowing.");
-		    p_ptr->flags.confusing = FALSE;
+		    p_ptr->confusing = FALSE;
 		    if ((randint(MAX_R_LEV) < r_ptr->level) ||
 			(MF2_CHARM_SLEEP & r_ptr->cflags2)) {
 			sprintf(tmp_str, "%sis unaffected.", cdesc);
@@ -1970,24 +1970,22 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		    if ((c_ptr->i_idx != 0)
 			&& (i_list[c_ptr->i_idx].tval <= TV_MAX_OBJECT)) {
-#ifdef ATARIST_MWC
-			*rcflags1 |= holder;
-#else
+
 			*rcflags1 |= MF1_PICK_UP;
-#endif
+
 			t = 0L;
-			if ((i_list[c_ptr->i_idx].flags & TR1_SLAY_DRAGON) ||
-			    (i_list[c_ptr->i_idx].flags & TR1_KILL_DRAGON))
+			if ((i_list[c_ptr->i_idx].flags1 & TR1_SLAY_DRAGON) ||
+			    (i_list[c_ptr->i_idx].flags1 & TR1_KILL_DRAGON))
 			    t |= MF2_DRAGON;
-			if (i_list[c_ptr->i_idx].flags & TR1_SLAY_UNDEAD)
+			if (i_list[c_ptr->i_idx].flags1 & TR1_SLAY_UNDEAD)
 			    t |= MF2_UNDEAD;
-			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_DEMON)
+			if (i_list[c_ptr->i_idx].flags1 & TR1_SLAY_DEMON)
 			    t |= MF2_DEMON;
-			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_TROLL)
+			if (i_list[c_ptr->i_idx].flags1 & TR1_SLAY_TROLL)
 			    t |= MF2_TROLL;
-			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_GIANT)
+			if (i_list[c_ptr->i_idx].flags1 & TR1_SLAY_GIANT)
 			    t |= MF2_GIANT;
-			if (i_list[c_ptr->i_idx].flags2 & TR1_SLAY_ORC)
+			if (i_list[c_ptr->i_idx].flags1 & TR1_SLAY_ORC)
 			    t |= MF2_ORC;
 
 		    /* if artifact, or wearable & hurts this monster -CWS */
@@ -2059,14 +2057,13 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 
     monster_type	*m_ptr;
     monster_race	*r_ptr;
-    struct flags	*f_ptr;
 
     char                   sex;
 
     vtype		ddesc;
 
     /* alter msgs if player can't see -CFT */
-    int blind = (p_ptr->flags.blind > 0);
+    int blind = (p_ptr->blind > 0);
 
     /* Already dead */
     if (death) return;
@@ -2191,18 +2188,18 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "gazes deep into your eyes!");
 	    else (void)strcat(cdesc, "mumbles, and you feel something holding you!");
 	    msg_print(cdesc);
-	    if (p_ptr->flags.free_act) {
+	    if (p_ptr->free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else if (player_saves()) {
 		if (!blind) msg_print("You stare back unafraid!");
 		else msg_print("You resist!");
 	    }
-	    else if (p_ptr->flags.paralysis > 0) {
-		p_ptr->flags.paralysis += 2;
+	    else if (p_ptr->paralysis > 0) {
+		p_ptr->paralysis += 2;
 	    }
 	    else {
-		p_ptr->flags.paralysis = randint(5) + 4;
+		p_ptr->paralysis = randint(5) + 4;
 	    }
 	    break;
 
@@ -2210,15 +2207,15 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a spell, burning your eyes!");
 	    else (void)strcat(cdesc, "mumbles, and your eyes burn even more.");
 	    msg_print(cdesc);
-	    if ((player_saves()) || (p_ptr->flags.resist_blind)) {
+	    if ((player_saves()) || (p_ptr->resist_blind)) {
 		if (!blind) msg_print("You blink and your vision clears.");
 		else msg_print("But the extra burning quickly fades away.");
 	    }
-	    else if (p_ptr->flags.blind > 0) {
-		p_ptr->flags.blind += 6;
+	    else if (p_ptr->blind > 0) {
+		p_ptr->blind += 6;
 	    }
 	    else {
-		p_ptr->flags.blind += 12 + randint(3);
+		p_ptr->blind += 12 + randint(3);
 	    }
 	    break;
 
@@ -2227,15 +2224,15 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles, and you hear puzzling noises.");
 	    msg_print(cdesc);
 	    if ((player_saves()) ||
-		(p_ptr->flags.resist_conf) ||
-		(p_ptr->flags.resist_chaos)) {
+		(p_ptr->resist_conf) ||
+		(p_ptr->resist_chaos)) {
 		msg_print("You disbelieve the feeble spell.");
 	    }
-	    else if (p_ptr->flags.confused > 0) {
-		p_ptr->flags.confused += 2;
+	    else if (p_ptr->confused > 0) {
+		p_ptr->confused += 2;
 	    }
 	    else {
-		p_ptr->flags.confused = randint(5) + 3;
+		p_ptr->confused = randint(5) + 3;
 	    }
 	    break;
 
@@ -2243,14 +2240,14 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a fearful illusion.");
 	    else (void)strcat(cdesc, "mumbles, and you hear scary noises.");
 	    msg_print(cdesc);
-	    if (player_saves() || p_ptr->flags.resist_fear) {
+	    if (player_saves() || p_ptr->resist_fear) {
 		msg_print("You refuse to be frightened.");
 	    }
-	    else if (p_ptr->flags.afraid > 0) {
-		p_ptr->flags.afraid += 2;
+	    else if (p_ptr->afraid > 0) {
+		p_ptr->afraid += 2;
 	    }
 	    else {
-		p_ptr->flags.afraid = randint(5) + 3;
+		p_ptr->afraid = randint(5) + 3;
 	    }
 	    break;
 
@@ -2283,22 +2280,22 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	  case 16:		   /* Slow Person	 */
 	    (void)strcat(cdesc, "drains power from your muscles!");
 	    msg_print(cdesc);
-	    if (p_ptr->flags.free_act) {
+	    if (p_ptr->free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else if (player_saves()) {
 		msg_print("Your body resists the spell.");
 	    }
-	    else if (p_ptr->flags.slow > 0) {
-		p_ptr->flags.slow += 2;
+	    else if (p_ptr->slow > 0) {
+		p_ptr->slow += 2;
 	    }
 	    else {
-		p_ptr->flags.slow = randint(5) + 3;
+		p_ptr->slow = randint(5) + 3;
 	    }
 	    break;
 
 	  case 17:		   /* Drain Mana	 */
-	    if (p_ptr->misc.cmana > 0) {
+	    if (p_ptr->cmana > 0) {
 		disturb(1, 0);
 		(void)sprintf(outval, "%sdraws psychic energy from you!", cdesc);
 		msg_print(outval);
@@ -2307,13 +2304,13 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 		    msg_print(outval);
 		}
 		r1 = (randint((int)r_ptr->level) >> 1) + 1;
-		if (r1 > p_ptr->misc.cmana) {
-		    r1 = p_ptr->misc.cmana;
-		    p_ptr->misc.cmana = 0;
-		    p_ptr->misc.cmana_frac = 0;
+		if (r1 > p_ptr->cmana) {
+		    r1 = p_ptr->cmana;
+		    p_ptr->cmana = 0;
+		    p_ptr->cmana_frac = 0;
 		}
 		else {
-		    p_ptr->misc.cmana -= r1;
+		    p_ptr->cmana -= r1;
 		}
 		prt_cmana();
 		m_ptr->hp += 6 * (r1);
@@ -2575,12 +2572,12 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    }
 	    else {
 		msg_print("Your mind is blasted by psionic energy.");
-		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
-		    if (p_ptr->flags.confused > 0) {
-			p_ptr->flags.confused += 2;
+		if ((!p_ptr->resist_conf) && (!p_ptr->resist_chaos)) {
+		    if (p_ptr->confused > 0) {
+			p_ptr->confused += 2;
 		    }
 		    else {
-			p_ptr->flags.confused = randint(5) + 3;
+			p_ptr->confused = randint(5) + 3;
 		    }
 		}
 		take_hit(damroll(8, 8), ddesc);
@@ -2772,34 +2769,34 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else {
 		msg_print("Your mind is blasted by psionic energy.");
 		take_hit(damroll(12, 15), ddesc);
-		if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
-		    if (p_ptr->flags.confused > 0) {
-			p_ptr->flags.confused += 2;
+		if ((!p_ptr->resist_conf) && (!p_ptr->resist_chaos)) {
+		    if (p_ptr->confused > 0) {
+			p_ptr->confused += 2;
 		    }
 		    else {
-			p_ptr->flags.confused = randint(5) + 3;
+			p_ptr->confused = randint(5) + 3;
 		    }
 		}
-		if (!p_ptr->flags.free_act) {
-		    if (p_ptr->flags.paralysis > 0) {
-			p_ptr->flags.paralysis += 2;
+		if (!p_ptr->free_act) {
+		    if (p_ptr->paralysis > 0) {
+			p_ptr->paralysis += 2;
 		    }
 		    else {
-			p_ptr->flags.paralysis = randint(5) + 4;
+			p_ptr->paralysis = randint(5) + 4;
 		    }
-		    if (p_ptr->flags.slow > 0) {
-			p_ptr->flags.slow += 2;
+		    if (p_ptr->slow > 0) {
+			p_ptr->slow += 2;
 		    }
 		    else {
-			p_ptr->flags.slow = randint(5) + 3;
+			p_ptr->slow = randint(5) + 3;
 		    }
 		}
-		if (!p_ptr->flags.resist_blind) {
-		    if (p_ptr->flags.blind > 0) {
-			p_ptr->flags.blind += 6;
+		if (!p_ptr->resist_blind) {
+		    if (p_ptr->blind > 0) {
+			p_ptr->blind += 6;
 		    }
 		    else {
-			p_ptr->flags.blind += 12 + randint(3);
+			p_ptr->blind += 12 + randint(3);
 		    }
 		}
 	    }
@@ -2818,7 +2815,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    else (void)strcat(cdesc, "mumbles strangely.");
 	    msg_print(cdesc);
 	    if ((player_saves()) || (randint(3) != 1) ||
-		(p_ptr->flags.resist_nexus)) {
+		(p_ptr->resist_nexus)) {
 		msg_print("You keep your feet firmly on the ground.");
 	    }
 	    else {
@@ -3333,8 +3330,8 @@ static void mon_move(int m_idx, u32b *rcflags1)
     /* Hack -- If the player is resting, only multiply occasionally */
     if ((r_ptr->cflags1 & MF1_MULTIPLY) &&
 	(l_ptr->cur_num < l_ptr->max_num) &&
-	(((p_ptr->flags.rest != -1) && ((p_ptr->flags.rest % MON_MULT_ADJ) == 0)) ||
-	 ((p_ptr->flags.rest == -1) && (randint(MON_MULT_ADJ) == 1)))) {
+	(((p_ptr->rest != -1) && ((p_ptr->rest % MON_MULT_ADJ) == 0)) ||
+	 ((p_ptr->rest == -1) && (randint(MON_MULT_ADJ) == 1)))) {
 
 	/* Count the adjacent monsters */
 	for (k = 0, i = (int)m_ptr->fy - 1; i <= (int)m_ptr->fy + 1; i++) {
@@ -3521,14 +3518,14 @@ void process_monsters(void)
 #endif
 		     && cave[m_ptr->fy][m_ptr->fx].fval >= MIN_CAVE_WALL)) {
 			if (m_ptr->csleep > 0)
-			    if (p_ptr->flags.aggravate)
+			    if (p_ptr->aggravate)
 				m_ptr->csleep = 0;
-			    else if ((p_ptr->flags.rest == 0 &&
-				      p_ptr->flags.paralysis < 1)
+			    else if ((p_ptr->rest == 0 &&
+				      p_ptr->paralysis < 1)
 				     || (randint(50) == 1)) {
 				notice = randint(1024);
 				if ((notice * notice * notice) <=
-				    (1L << (29 - p_ptr->misc.stl))) {
+				    (1L << (29 - p_ptr->stl))) {
 				    m_ptr->csleep -= (100 / m_ptr->cdis);
 				    if (m_ptr->csleep > 0)
 					ignore = TRUE;

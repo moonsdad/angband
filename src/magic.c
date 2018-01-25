@@ -28,7 +28,7 @@ void calc_spells(int stat)
     cptr	    p;
     register spell_type  *s_ptr;
 
-    s_ptr = &magic_spell[p_ptr->misc.pclass - 1][0];
+    s_ptr = &magic_spell[p_ptr->pclass - 1][0];
 
     if (stat == A_INT) {
 	p = "spell";
@@ -43,7 +43,7 @@ void calc_spells(int stat)
     for (i = 31, mask = 0x80000000L; mask; mask >>= 1, i--) {
 
 	if (mask & spell_learned) {
-	    if (s_ptr[i].slevel > p_ptr->misc.lev) {
+	    if (s_ptr[i].slevel > p_ptr->lev) {
 		spell_learned &= ~mask;
 		spell_forgotten |= mask;
 		(void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
@@ -53,7 +53,7 @@ void calc_spells(int stat)
 	}
 
 	if (mask & spell_learned2) {
-	    if (s_ptr[i + 32].slevel > p_ptr->misc.lev) {
+	    if (s_ptr[i + 32].slevel > p_ptr->lev) {
 		spell_learned2 &= ~mask;
 		spell_forgotten2 |= mask;
 		(void)sprintf(tmp_str, "You have forgotten the %s of %s.", p,
@@ -65,7 +65,7 @@ void calc_spells(int stat)
 
 
     /* Determine the number of spells allowed */
-    levels = p_ptr->misc.lev - class[p_ptr->misc.pclass].first_spell_lev + 1;
+    levels = p_ptr->lev - class[p_ptr->pclass].first_spell_lev + 1;
     switch (stat_adj(stat)) {
       case 0:
 	num_allowed = 0;
@@ -118,7 +118,7 @@ void calc_spells(int stat)
 	    if (j < 32) {	   /* use spell_learned, spell_forgotten... -CFT */
 		mask = 1L << j;	   /* bit in spell fields */
 		if (mask & spell_forgotten) {
-		    if (s_ptr[j].slevel <= p_ptr->misc.lev) {
+		    if (s_ptr[j].slevel <= p_ptr->lev) {
 			spell_forgotten &= ~mask;
 			spell_learned |= mask;
 			new_spells--;
@@ -137,7 +137,7 @@ void calc_spells(int stat)
 	    else {		   /* j > 31, use spell_learned2,  spell_forgotten2... -CFT */
 		mask = 1L << (j - 32);	/* bit in spell fields */
 		if (mask & spell_forgotten2) {
-		    if (s_ptr[j].slevel <= p_ptr->misc.lev) {
+		    if (s_ptr[j].slevel <= p_ptr->lev) {
 			spell_forgotten2 &= ~mask;
 			spell_learned2 |= mask;
 			new_spells--;
@@ -159,22 +159,22 @@ void calc_spells(int stat)
 	/* must check all spells here, in gain_spell() we actually check if
 	 * the books are present  */
 	/* only bother with spells learnable by class -CFT */
-	spell_flag = spellmasks[p_ptr->misc.pclass][0] & ~spell_learned;
+	spell_flag = spellmasks[p_ptr->pclass][0] & ~spell_learned;
 	i = 0;
 	for (j = 0; spell_flag; j++) {
 	    mask = 1L << j;
 	    if (spell_flag & mask) {
 		spell_flag &= ~mask;
-		if (s_ptr[j].slevel <= p_ptr->misc.lev) i++;
+		if (s_ptr[j].slevel <= p_ptr->lev) i++;
 	    }
 	}
 
 	/* only bother with spells learnable by class -CFT */
-	spell_flag = spellmasks[p_ptr->misc.pclass][1] & ~spell_learned2;
+	spell_flag = spellmasks[p_ptr->pclass][1] & ~spell_learned2;
 	for (j = 0, mask = 0x1; spell_flag; mask <<= 1, j++) {
 	    if (spell_flag & mask) {
 		spell_flag &= ~mask;
-		if (s_ptr[j + 32].slevel <= p_ptr->misc.lev) i++;
+		if (s_ptr[j + 32].slevel <= p_ptr->lev) i++;
 	    }
 	}
 
@@ -232,13 +232,13 @@ void calc_spells(int stat)
 
 
     /* Take note when "study" changes */
-    if (new_spells != p_ptr->flags.new_spells) {
-	if (new_spells > 0 && p_ptr->flags.new_spells == 0) {
+    if (new_spells != p_ptr->new_spells) {
+	if (new_spells > 0 && p_ptr->new_spells == 0) {
 	    (void)sprintf(tmp_str, "You can learn some new %ss now.", p);
 	    msg_print(tmp_str);
 	}
-	p_ptr->flags.new_spells = new_spells;
-	p_ptr->flags.status |= PY_STUDY;
+	p_ptr->new_spells = new_spells;
+	p_ptr->status |= PY_STUDY;
     }
 }
 
@@ -256,12 +256,12 @@ void gain_spells(void)
     vtype               tmp_str;
     register spell_type *s_ptr;
 
-    if (!p_ptr->misc.pclass) {
+    if (!p_ptr->pclass) {
 	msg_print("A warrior learn magic???  HA!");
 	return;
     }
 
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see to read your spell book!");
 	return;
     }
@@ -271,19 +271,19 @@ void gain_spells(void)
 	return;
     }
 
-    if (p_ptr->flags.confused > 0) {
+    if (p_ptr->confused > 0) {
 	msg_print("You are too confused.");
 	return;
     }
 
 
-    new_spells = p_ptr->flags.new_spells;
+    new_spells = p_ptr->new_spells;
     diff_spells = 0;
-    s_ptr = &magic_spell[p_ptr->misc.pclass - 1][0];
+    s_ptr = &magic_spell[p_ptr->pclass - 1][0];
 
 
     /* Mage vs Priest */
-    if (class[p_ptr->misc.pclass].spell == MAGE) {
+    if (class[p_ptr->pclass].spell == MAGE) {
 	stat = A_INT;
 	offset = SPELL_OFFSET;
     }
@@ -312,7 +312,7 @@ void gain_spells(void)
 	for (i = 0; i < inven_ctr; i++) {
 	    if (((stat == A_INT) && (inventory[i].tval == TV_MAGIC_BOOK)) ||
 		((stat == A_WIS) && (inventory[i].tval == TV_PRAYER_BOOK))) {
-		spell_flag |= inventory[i].flags;
+		spell_flag |= inventory[i].flags1;
 		spell_flag2 |= inventory[i].flags2;
 	    }
 	}
@@ -324,16 +324,29 @@ void gain_spells(void)
 
     i = 0;
 
-    for (j = 0, mask = 0x1; (spell_flag | spell_flag2); mask <<= 1, j++) {
+    /* Check the low level spells first */ 
+    for (j = 0; spell_flag; j++) {
+
+	/* Get the mode */
+	mask = 1L << j;
+
 	if (spell_flag & mask) {
 	    spell_flag &= ~mask;
-	    if (s_ptr[j].slevel <= p_ptr->misc.lev) {
+	    if (s_ptr[j].slevel <= p_ptr->lev) {
 		spells[i++] = j;
 	    }
 	}
+    }
+
+    /* And THEN check the high level spells */
+    for (j = 0; spell_flag2; j++) {
+
+	/* Get the mode */
+	mask = 1L << j;
+
 	if (spell_flag2 & mask) {
 	    spell_flag2 &= ~mask;
-	    if (s_ptr[j + 32].slevel <= p_ptr->misc.lev) {
+	    if (s_ptr[j + 32].slevel <= p_ptr->lev) {
 		spells[i++] = j + 32;
 	    }
 	}
@@ -411,15 +424,15 @@ void gain_spells(void)
 	}
     }
 
-    p_ptr->flags.new_spells = new_spells + diff_spells;
+    p_ptr->new_spells = new_spells + diff_spells;
 
     /* Player has gained some spells */
-    if (p_ptr->flags.new_spells == 0) {
-	p_ptr->flags.status |= PY_STUDY;
+    if (p_ptr->new_spells == 0) {
+	p_ptr->status |= PY_STUDY;
     }
 
     /* set the mana for first level characters when they learn first spell */
-    if (p_ptr->misc.mana == 0) calc_mana(stat);
+    if (p_ptr->mana == 0) calc_mana(stat);
 }
 
 
@@ -437,7 +450,7 @@ void calc_mana(int stat)
 
 
     if (spell_learned != 0 || spell_learned2 != 0) {
-	levels = p_ptr->misc.lev - class[p_ptr->misc.pclass].first_spell_lev + 1;
+	levels = p_ptr->lev - class[p_ptr->pclass].first_spell_lev + 1;
 	switch (stat_adj(stat)) {
 	  case 0:
 	    new_mana = 0;
@@ -493,15 +506,20 @@ void calc_mana(int stat)
 
 	/* gauntlets of dex (or free action - DGK) can hardly interfere w/ spellcasting!
 	 * But cursed ones can! -CFT */
-	if ((inventory[INVEN_HANDS].tval != TV_NOTHING) &&
-	    !((inventory[INVEN_HANDS].flags & TR2_FREE_ACT) ||
-	      ((inventory[INVEN_HANDS].flags & TR1_DEX) &&
-	       (inventory[INVEN_HANDS].pval > 0)))) {
+
+	/* Get the gloves */
+	i_ptr = &inventory[INVEN_HANDS];
+
+	/* good gauntlets of dexterity or free action do not hurt spells */
+	if ((i_ptr->tval != TV_NOTHING) &&
+	    !((i_ptr->flags2 & TR2_FREE_ACT) ||
+	      ((i_ptr->flags1 & TR1_DEX) &&
+	       (i_ptr->pval > 0)))) {
 
 	    /* Only mages are affected */
-	    if (p_ptr->misc.pclass == 1 ||
-		p_ptr->misc.pclass == 3 ||
-		p_ptr->misc.pclass == 4) {
+	    if (p_ptr->pclass == 1 ||
+		p_ptr->pclass == 3 ||
+		p_ptr->pclass == 4) {
 
 		new_mana = (3 * new_mana) / 4;
 	    }
@@ -523,7 +541,7 @@ void calc_mana(int stat)
 	}
 
 	/* Determine the weight allowance */
-	switch (p_ptr->misc.pclass) {
+	switch (p_ptr->pclass) {
 	  case 1:
 	    maxwgt = 300;
 	    break;
@@ -558,41 +576,41 @@ void calc_mana(int stat)
 
 	/* No mana left */
 	if (new_mana < 1) {
-	    p_ptr->misc.cmana = p_ptr->misc.cmana_frac = p_ptr->misc.mana = 0;
-	    p_ptr->flags.status |= PY_MANA;
+	    p_ptr->cmana = p_ptr->cmana_frac = p_ptr->mana = 0;
+	    p_ptr->status |= PY_MANA;
 	    return;
 	}
 
 	/* mana can be zero when creating character */
-	if (p_ptr->misc.mana != new_mana) {
+	if (p_ptr->mana != new_mana) {
 
-	    if (p_ptr->misc.mana != 0) {
+	    if (p_ptr->mana != 0) {
 	    /*
 	     * change current mana proportionately to change of max mana,
 	     * divide first to avoid overflow, little loss of accuracy 
 	     */
-		value = ((((long)p_ptr->misc.cmana << 16) + p_ptr->misc.cmana_frac) /
-			 p_ptr->misc.mana * new_mana);
-		p_ptr->misc.cmana = value >> 16;
-		p_ptr->misc.cmana_frac = value & 0xFFFF;
+		value = ((((long)p_ptr->cmana << 16) + p_ptr->cmana_frac) /
+			 p_ptr->mana * new_mana);
+		p_ptr->cmana = value >> 16;
+		p_ptr->cmana_frac = value & 0xFFFF;
 	    }
 	    else {
-		p_ptr->misc.cmana = new_mana;
-		p_ptr->misc.cmana_frac = 0;
+		p_ptr->cmana = new_mana;
+		p_ptr->cmana_frac = 0;
 	    }
 
-	    p_ptr->misc.mana = new_mana;
+	    p_ptr->mana = new_mana;
 
 	    /* can't print mana here, may be in store or inventory mode */
-	    p_ptr->flags.status |= PY_MANA;
+	    p_ptr->status |= PY_MANA;
 	}
     }
 
-    else if (p_ptr->misc.mana != 0) {
-	p_ptr->misc.mana = 0;
-	p_ptr->misc.cmana = 0;
+    else if (p_ptr->mana != 0) {
+	p_ptr->mana = 0;
+	p_ptr->cmana = 0;
 	/* can't print mana here, may be in store or inventory mode */
-	p_ptr->flags.status |= PY_MANA;
+	p_ptr->status |= PY_MANA;
     }
 }
 
@@ -606,16 +624,16 @@ void cast()
 {
     int                    i, j, item_val, dir;
     int                    choice, chance, result;
-    register spell_type   *m_ptr;
+    register spell_type   *s_ptr;
 
     free_turn_flag = TRUE;
 
-    if (class[p_ptr->misc.pclass].spell != MAGE) {
+    if (class[p_ptr->pclass].spell != MAGE) {
 	msg_print("You can't cast spells!");
 	return;
     }
 
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see to read your spell book!");
 	return;
     }
@@ -624,8 +642,8 @@ void cast()
 	msg_print("You have no light to read by.");
 	return;
     }
-
-    if (p_ptr->flags.confused > 0) {
+    
+    if (p_ptr->confused > 0) {
 	msg_print("You are too confused.");
 	return;
     }
@@ -648,11 +666,11 @@ void cast()
     }
 
 
-    if (p_ptr->flags.stun > 50) chance += 25;
-    else if (p_ptr->flags.stun > 0) chance += 15;
+    if (p_ptr->stun > 50) chance += 25;
+    else if (p_ptr->stun > 0) chance += 15;
 
 	if (result > 0) {
-	    m_ptr = &magic_spell[p_ptr->misc.pclass - 1][choice];
+	    s_ptr = &magic_spell[p_ptr->pclass - 1][choice];
 	    free_turn_flag = FALSE;
 
     /* Failed spell */
@@ -664,8 +682,8 @@ void cast()
     else {
 
 	/* does missile spell do line? -CFT */
-	chance = p_ptr->misc.lev + stat_adj(A_INT) /
-		  (p_ptr->misc.pclass == 1 ? 2 : (p_ptr->misc.pclass == 4 ? 4 : 5));
+	chance = p_ptr->lev + stat_adj(A_INT) /
+		  (p_ptr->pclass == 1 ? 2 : (p_ptr->pclass == 4 ? 4 : 5));
 
 	/* Spells.  */
 	switch (choice + 1) {
@@ -674,10 +692,10 @@ void cast()
 	    if (get_dir(NULL, &dir))
 			if (randint(100) < (chance-10))
 			    line_spell(GF_MISSILE, dir, char_row, char_col,
-				       damroll(3 + ((p_ptr->misc.lev - 1) / 5), 4) );
+				       damroll(3 + ((p_ptr->lev - 1) / 5), 4) );
 			else
 			    fire_bolt(GF_MISSILE, dir, char_row, char_col,
-				      damroll(3 + ((p_ptr->misc.lev - 1) / 5), 4));
+				      damroll(3 + ((p_ptr->lev - 1) / 5), 4));
 	    break;
 
 	  case 2:
@@ -690,7 +708,7 @@ void cast()
 
 	  case 4:
 	    (void)lite_area(char_row, char_col,
-			    damroll(2, (p_ptr->misc.lev / 2)), (p_ptr->misc.lev / 10) + 1);
+			    damroll(2, (p_ptr->lev / 2)), (p_ptr->lev / 10) + 1);
 	    break;
 
 	  case 5:	   /* treasure detection */
@@ -699,9 +717,9 @@ void cast()
 
 	  case 6:
 	    (void)hp_player(damroll(4, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut -= 15;
-		if (p_ptr->flags.cut < 0) p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut -= 15;
+		if (p_ptr->cut < 0) p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
@@ -718,22 +736,22 @@ void cast()
 	  case 9:
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_POIS, dir, char_row, char_col,
-		      10 + (p_ptr->misc.lev / 2), 2);
+		      10 + (p_ptr->lev / 2), 2);
 	    break;
 
 	  case 10:
 	    if (!get_dir(NULL, &dir)) return;
-	    (void)confuse_monster(dir, char_row, char_col, p_ptr->misc.lev);
+	    (void)confuse_monster(dir, char_row, char_col, p_ptr->lev);
 	    break;
 
 	  case 11:
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < (chance-10))
 		    line_spell(GF_ELEC, dir, char_row, char_col,
-			       damroll(3+((p_ptr->misc.lev-5)/4),8));
+			       damroll(3+((p_ptr->lev-5)/4),8));
 		else
 		    fire_bolt(GF_ELEC, dir, char_row, char_col,
-			      damroll(3+((p_ptr->misc.lev-5)/4),8));
+			      damroll(3+((p_ptr->lev-5)/4),8));
 	    break;
 	    
 	  case 12:
@@ -750,7 +768,7 @@ void cast()
 	    break;
 
 	  case 15:
-	    teleport((int)(p_ptr->misc.lev * 5));
+	    teleport((int)(p_ptr->lev * 5));
 	    break;
 
 	  case 16:
@@ -763,10 +781,10 @@ void cast()
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < (chance-10))
 		    line_spell(GF_COLD, dir, char_row, char_col,
-			 damroll(5+((p_ptr->misc.lev-5)/4),8));
+			 damroll(5+((p_ptr->lev-5)/4),8));
 		else
 		    fire_bolt(GF_COLD, dir, char_row, char_col,
-			 damroll(5+((p_ptr->misc.lev-5)/4),8));
+			 damroll(5+((p_ptr->lev-5)/4),8));
 	    break;
 
 	  case 18:
@@ -803,10 +821,10 @@ void cast()
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < chance)
 		    line_spell(GF_FIRE, dir, char_row, char_col,
-			       damroll(8+((p_ptr->misc.lev-5)/4),8));
+			       damroll(8+((p_ptr->lev-5)/4),8));
 		else
 		    fire_bolt(GF_FIRE, dir, char_row, char_col,
-			      damroll(8+((p_ptr->misc.lev-5)/4),8));
+			      damroll(8+((p_ptr->lev-5)/4),8));
 	    break;
 	    
 	  case 26:
@@ -817,7 +835,7 @@ void cast()
 	  case 27:
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_COLD, dir, char_row, char_col,
-		      30 + (p_ptr->misc.lev), 2);
+		      30 + (p_ptr->lev), 2);
 	    break;
 
 	  case 28:
@@ -830,18 +848,18 @@ void cast()
 	    break;
 
 	  case 30:
-	    if (p_ptr->flags.fast <= 0) {
-		p_ptr->flags.fast += randint(20) + p_ptr->misc.lev;
+	    if (p_ptr->fast <= 0) {
+		p_ptr->fast += randint(20) + p_ptr->lev;
 	    }
 	    else {
-		p_ptr->flags.fast += randint(5);
+		p_ptr->fast += randint(5);
 	    }
 	    break;
 
 	  case 31:
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_FIRE, dir, char_row, char_col,
-		      55 + (p_ptr->misc.lev), 2);
+		      55 + (p_ptr->lev), 2);
 	    break;
 
 	  case 32:
@@ -869,12 +887,12 @@ void cast()
 	    break;
 
 	  case 38:	   /* Word of Recall */
-	    if (p_ptr->flags.word_recall == 0) {
-		p_ptr->flags.word_recall = 15 + randint(20);
+	    if (p_ptr->word_recall == 0) {
+		p_ptr->word_recall = 15 + randint(20);
 		msg_print("The air about you becomes charged...");
 	    }
 	    else {
-		p_ptr->flags.word_recall = 0;
+		p_ptr->word_recall = 0;
 		msg_print("A tension leaves the air around you...");
 	    }
 	    break;
@@ -883,34 +901,34 @@ void cast()
 	    if (!get_dir(NULL, &dir)) return;
 		if (randint(100) < (chance-5))
 		    line_spell(GF_ACID, dir, char_row, char_col,
-			       damroll(6+((p_ptr->misc.lev-5)/4), 8));
+			       damroll(6+((p_ptr->lev-5)/4), 8));
 		else
 		    fire_bolt(GF_ACID, dir, char_row, char_col,
-			      damroll(6+((p_ptr->misc.lev-5)/4), 8));
+			      damroll(6+((p_ptr->lev-5)/4), 8));
 	    break;
 
 	  case 40:	   /* Cloud kill */
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_POIS, dir, char_row, char_col,
-		      20 + (p_ptr->misc.lev / 2), 3);
+		      20 + (p_ptr->lev / 2), 3);
 	    break;
 
 	  case 41:	   /* Acid Ball */
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_ACID, dir, char_row, char_col,
-		      40 + (p_ptr->misc.lev), 2);
+		      40 + (p_ptr->lev), 2);
 	    break;
 
 	  case 42:	   /* Ice Storm */
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_COLD, dir, char_row, char_col,
-		      70 + (p_ptr->misc.lev), 3);
+		      70 + (p_ptr->lev), 3);
 	    break;
 
 	  case 43:	   /* Meteor Swarm */
 	    if (!get_dir(NULL, &dir)) return;
 	    fire_ball(GF_METEOR, dir, char_row, char_col,
-		      65 + (p_ptr->misc.lev), 3);
+		      65 + (p_ptr->lev), 3);
 	    break;
 
 	  case 44:	   /* Hellfire */
@@ -939,35 +957,35 @@ void cast()
 	    break;
 
 	  case 50:
-	    p_ptr->flags.oppose_fire += randint(20) + 20;
+	    p_ptr->oppose_fire += randint(20) + 20;
 	    break;
 
 	  case 51:
-	    p_ptr->flags.oppose_cold += randint(20) + 20;
+	    p_ptr->oppose_cold += randint(20) + 20;
 	    break;
 	    
 	  case 52:
-	    p_ptr->flags.oppose_acid += randint(20) + 20;
+	    p_ptr->oppose_acid += randint(20) + 20;
 	    break;
 	    
 	  case 53:
-	    p_ptr->flags.oppose_pois += randint(20) + 20;
+	    p_ptr->oppose_pois += randint(20) + 20;
 	    break;
 	    
 	  case 54:
-	    p_ptr->flags.oppose_fire += randint(20) + 20;
-	    p_ptr->flags.oppose_cold += randint(20) + 20;
-	    p_ptr->flags.oppose_elec += randint(20) + 20;
-	    p_ptr->flags.oppose_pois += randint(20) + 20;
-	    p_ptr->flags.oppose_acid += randint(20) + 20;
+	    p_ptr->oppose_fire += randint(20) + 20;
+	    p_ptr->oppose_cold += randint(20) + 20;
+	    p_ptr->oppose_elec += randint(20) + 20;
+	    p_ptr->oppose_pois += randint(20) + 20;
+	    p_ptr->oppose_acid += randint(20) + 20;
 	    break;
 	    
 	  case 55:
-	    p_ptr->flags.hero += randint(25) + 25;
+	    p_ptr->hero += randint(25) + 25;
 	    break;
 	    
 	  case 56:
-	    p_ptr->flags.shield += randint(20) + 30;
+	    p_ptr->shield += randint(20) + 30;
 	    calc_bonuses();
 	    prt_pac();
 	    calc_mana(A_INT);
@@ -975,20 +993,20 @@ void cast()
 	    break;
 	    
 	  case 57:
-	    p_ptr->flags.shero += randint(25) + 25;
+	    p_ptr->shero += randint(25) + 25;
 	    break;
 	    
 	  case 58:
-	    if (p_ptr->flags.fast <= 0) {
-		p_ptr->flags.fast += randint(30) + 30 + p_ptr->misc.lev;
+	    if (p_ptr->fast <= 0) {
+		p_ptr->fast += randint(30) + 30 + p_ptr->lev;
 	    }
 	    else {
-		p_ptr->flags.fast += randint(5);
+		p_ptr->fast += randint(5);
 	    }
 	    break;
 
 	  case 59:
-	    p_ptr->flags.invuln += randint(8) + 8;
+	    p_ptr->invuln += randint(8) + 8;
 	    break;
 
 	  default:
@@ -1002,14 +1020,14 @@ void cast()
 	if (choice < 32) {
 	    if ((spell_worked & (1L << choice)) == 0) {
 		spell_worked |= (1L << choice);
-		p_ptr->misc.exp += m_ptr->sexp << 2;
+		p_ptr->exp += s_ptr->sexp << 2;
 		prt_experience();
 	    }
 	}
 	else {
 	    if ((spell_worked2 & (1L << (choice - 32))) == 0) {
 		 spell_worked2 |= (1L << (choice - 32));
-		p_ptr->misc.exp += m_ptr->sexp << 2;
+		p_ptr->exp += s_ptr->sexp << 2;
 		prt_experience();
 	    }
 	}
@@ -1019,18 +1037,18 @@ void cast()
     if (!free_turn_flag) {
 
     /* Use some mana */
-    if (m_ptr->smana > p_ptr->misc.cmana) {
+    if (s_ptr->smana > p_ptr->cmana) {
 	msg_print("You faint from the effort!");
-	p_ptr->flags.paralysis = randint((int)(5 * (m_ptr->smana - p_ptr->misc.cmana)));
-	p_ptr->misc.cmana = 0;
-	p_ptr->misc.cmana_frac = 0;
+	p_ptr->paralysis = randint((int)(5 * (s_ptr->smana - p_ptr->cmana)));
+	p_ptr->cmana = 0;
+	p_ptr->cmana_frac = 0;
 	if (randint(3) == 1) {
 	    msg_print("You have damaged your health!");
 	    (void)dec_stat(A_CON);
 	}
     }
     else {
-	p_ptr->misc.cmana -= m_ptr->smana;
+	p_ptr->cmana -= s_ptr->smana;
     }
 
     /* Display current mana */
@@ -1055,12 +1073,12 @@ void pray()
 
     free_turn_flag = TRUE;
 
-    if (class[p_ptr->misc.pclass].spell != PRIEST) {
+    if (class[p_ptr->pclass].spell != PRIEST) {
 	msg_print("Pray hard enough and your prayers may be answered.");
 	return;
     }
 
-    if (p_ptr->flags.blind > 0) {
+    if (p_ptr->blind > 0) {
 	msg_print("You can't see to read your prayer!");
 	return;
     }
@@ -1070,7 +1088,7 @@ void pray()
 	return;
     }
 
-    if (p_ptr->flags.confused > 0) {
+    if (p_ptr->confused > 0) {
 	msg_print("You are too confused.");
 	return;
     }
@@ -1101,11 +1119,11 @@ void pray()
 
 	else if (result > 0) {
 
-    s_ptr = &magic_spell[p_ptr->misc.pclass - 1][choice];
+    s_ptr = &magic_spell[p_ptr->pclass - 1][choice];
     free_turn_flag = FALSE;
 
-    if (p_ptr->flags.stun > 50) chance += 25;
-    else if (p_ptr->flags.stun > 0) chance += 15;
+    if (p_ptr->stun > 50) chance += 25;
+    else if (p_ptr->stun > 0) chance += 15;
 
     /* Check for failure */	    
     if (randint(100) <= chance)	{
@@ -1124,9 +1142,9 @@ void pray()
 
 	  case 2:
 	    (void)hp_player(damroll(3, 3));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut -= 10;
-		if (p_ptr->flags.cut < 0) p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut -= 10;
+		if (p_ptr->cut < 0) p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
@@ -1141,7 +1159,7 @@ void pray()
 	    
 	  case 5:
 	    (void)lite_area(char_row, char_col,
-		            damroll(2, (p_ptr->misc.lev / 2)), (p_ptr->misc.lev / 10) + 1);
+		            damroll(2, (p_ptr->lev / 2)), (p_ptr->lev / 10) + 1);
 	    break;
 /* FIXME: hammer? */
     
@@ -1159,19 +1177,18 @@ void pray()
 	    
 	  case 9:
 	    if (get_dir(NULL, &dir))
-	    (void)fear_monster(dir, char_row, char_col, p_ptr->misc.lev);
+	    (void)fear_monster(dir, char_row, char_col, p_ptr->lev);
 	    break;
 	    
 	  case 10:
-	    teleport((int)(p_ptr->misc.lev * 3));
+	    teleport((int)(p_ptr->lev * 3));
 	    break;
 	    
 	  case 11:
 	    (void)hp_player(damroll(4, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = (p_ptr->flags.cut / 2) - 20;
-		if (p_ptr->flags.cut < 0)
-		    p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = (p_ptr->cut / 2) - 20;
+		if (p_ptr->cut < 0) p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
@@ -1193,8 +1210,8 @@ void pray()
 	    break;
 	    
 	  case 16:
-	    p_ptr->flags.oppose_fire += randint(10) + 10;
-	    p_ptr->flags.oppose_cold += randint(10) + 10;
+	    p_ptr->oppose_fire += randint(10) + 10;
+	    p_ptr->oppose_cold += randint(10) + 10;
 	    break;
 	    
 	  case 17:
@@ -1205,15 +1222,15 @@ void pray()
 	    if (!get_dir(NULL, &dir)) return;
 	    /* Radius increases with level */
 	    fire_ball(GF_HOLY_ORB, dir, char_row, char_col,
-		      (int)(damroll(3,6) + p_ptr->misc.lev +
-			    (p_ptr->misc.pclass == 2 ? 2 : 1) * stat_adj(A_WIS)),
-		      (p_ptr->misc.lev<30 ? 2 : 3));
+		      (int)(damroll(3,6) + p_ptr->lev +
+			    (p_ptr->pclass == 2 ? 2 : 1) * stat_adj(A_WIS)),
+		      (p_ptr->lev<30 ? 2 : 3));
 	    break;
 
 	  case 19:
 	    (void)hp_player(damroll(8, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
@@ -1236,8 +1253,8 @@ void pray()
 	    
 	  case 24:
 	    (void)hp_player(damroll(16, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
@@ -1251,30 +1268,30 @@ void pray()
 	    break;
 	    
 	  case 27:
-	    (void)dispel_creature(MF2_UNDEAD, (int)(3 * p_ptr->misc.lev));
+	    (void)dispel_creature(MF2_UNDEAD, (int)(3 * p_ptr->lev));
 	    break;
 	    
 	  case 28:
 	    (void)hp_player(200);
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
 		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
 		}
-		p_ptr->flags.stun = 0;
+		p_ptr->stun = 0;
 		msg_print("Your head stops stinging.");
 	    }
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("You feel better.");
 	    }
 	    break;
 	    
 	  case 29:
-	    (void)dispel_creature(MF2_EVIL, (int)(3 * p_ptr->misc.lev));
+	    (void)dispel_creature(MF2_EVIL, (int)(3 * p_ptr->lev));
 	    break;
 	    
 	  case 30:
@@ -1282,23 +1299,23 @@ void pray()
 	    break;
 	    
 	  case 31:
-	    (void)dispel_creature(MF2_EVIL, (int)(4 * p_ptr->misc.lev));
+	    (void)dispel_creature(MF2_EVIL, (int)(4 * p_ptr->lev));
 	    (void)remove_fear();
 	    (void)cure_poison();
 	    (void)hp_player(1000);
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
 		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
 		}
-		p_ptr->flags.stun = 0;
+		p_ptr->stun = 0;
 		msg_print("Your head stops stinging.");
 	    }
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("You feel better.");
 	    }
 	    break;
@@ -1325,35 +1342,35 @@ void pray()
 	    
 	  case 37:
 	    (void)hp_player(damroll(8, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
 	    
 	  case 38:
 	    (void)hp_player(damroll(16, 4));
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("Your wounds heal.");
 	    }
 	    break;
 	    
 	  case 39:
 	    (void)hp_player(2000);
-	    if (p_ptr->flags.stun > 0) {
-		if (p_ptr->flags.stun > 50) {
-		    p_ptr->misc.ptohit += 20;
-		    p_ptr->misc.ptodam += 20;
+	    if (p_ptr->stun > 0) {
+		if (p_ptr->stun > 50) {
+		    p_ptr->ptohit += 20;
+		    p_ptr->ptodam += 20;
 		} else {
-		    p_ptr->misc.ptohit += 5;
-		    p_ptr->misc.ptodam += 5;
+		    p_ptr->ptohit += 5;
+		    p_ptr->ptodam += 5;
 		}
-		p_ptr->flags.stun = 0;
+		p_ptr->stun = 0;
 		msg_print("Your head stops stinging.");
 	    }
-	    if (p_ptr->flags.cut > 0) {
-		p_ptr->flags.cut = 0;
+	    if (p_ptr->cut > 0) {
+		p_ptr->cut = 0;
 		msg_print("You feel better.");
 	    }
 	    break;
@@ -1384,11 +1401,11 @@ void pray()
 	    break;
 	    
 	  case 42:	   /* dispel undead */
-	    (void)dispel_creature(MF2_UNDEAD, (int)(4 * p_ptr->misc.lev));
+	    (void)dispel_creature(MF2_UNDEAD, (int)(4 * p_ptr->lev));
 	    break;
 	    
 	  case 43:	   /* dispel evil */
-	    (void)dispel_creature(MF2_EVIL, (int)(4 * p_ptr->misc.lev));
+	    (void)dispel_creature(MF2_EVIL, (int)(4 * p_ptr->lev));
 	    break;
 	    
 	  case 44:	   /* banishment */
@@ -1494,14 +1511,16 @@ void pray()
 		    sprintf(out_val,
 			    "Your %s is covered in a fiery shield!",
 			    tmp_str);
-		    i_ptr->name2 |= EGO_FT;
-		    i_ptr->flags |= (TR1_BRAND_FIRE | TR2_RES_FIRE);
+		    i_ptr->name2 = EGO_FT;
+		    i_ptr->flags1 |= (TR1_BRAND_FIRE);
+		    i_ptr->flags2 |= (TR2_RES_FIRE);
 		}
 		else {
 		    sprintf(out_val, "Your %s glows deep, icy blue!",
 			    tmp_str);
-		    i_ptr->name2 |= EGO_FB;
-		    i_ptr->flags |= (TR1_BRAND_COLD | TR2_RES_COLD);
+		    i_ptr->name2 = EGO_FB;
+		    i_ptr->flags1 |= (TR1_BRAND_COLD);
+		    i_ptr->flags2 |= (TR2_RES_COLD);
 		}
 		msg_print(out_val);
 		enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);
@@ -1517,7 +1536,7 @@ void pray()
 	    break;
 
 	  case 54:	   /* teleport */
-	    teleport((int)(p_ptr->misc.lev * 8));
+	    teleport((int)(p_ptr->lev * 8));
 	    break;
 
 	  case 55:	   /* teleport away */
@@ -1530,12 +1549,12 @@ void pray()
 	    break;
 	    
 	  case 57:	   /* word of recall */
-	    if (p_ptr->flags.word_recall == 0) {
-		p_ptr->flags.word_recall = 15 + randint(20);
+	    if (p_ptr->word_recall == 0) {
+		p_ptr->word_recall = 15 + randint(20);
 		msg_print("The air about you becomes charged...");
 	    }
 	    else {
-		p_ptr->flags.word_recall = 0;
+		p_ptr->word_recall = 0;
 		msg_print("A tension leaves the air around you...");
 	    }
 	    break;
@@ -1549,40 +1568,43 @@ void pray()
 	}
 
 	/* End of prayers.				 */
-		if (!free_turn_flag) {
-		    if (choice < 32) {
-			if ((spell_worked & (1L << choice)) == 0) {
-			    p_ptr->misc.exp += s_ptr->sexp << 2;
-			    spell_worked |= (1L << choice);
-			    prt_experience();
-			}
-		    } else {
-			if ((spell_worked2 & (1L << (choice - 32))) == 0) {
-			    p_ptr->misc.exp += s_ptr->sexp << 2;
-			    spell_worked2 |= (1L << (choice - 32));
-			    prt_experience();
+	if (!free_turn_flag) {
+	if (choice < 32) {
+	    if ((spell_worked & (1L << choice)) == 0) {
+		spell_worked |= (1L << choice);
+		p_ptr->exp += s_ptr->sexp << 2;
+		prt_experience();
+	    }
+	}
+	else {
+	    if ((spell_worked2 & (1L << (choice - 32))) == 0) {
+		 spell_worked2 |= (1L << (choice - 32));
+		 p_ptr->exp += s_ptr->sexp << 2;
+		 prt_experience();
 			}
 		    }
 		}
 	    }
-	    if (!free_turn_flag) {
-		if (s_ptr->smana > m_ptr->cmana) {
-		    msg_print("You faint from fatigue!");
-		    p_ptr->flags.paralysis =
-			randint((int)(5 * (s_ptr->smana - p_ptr->misc.cmana)));
-		    p_ptr->misc.cmana = 0;
-		    p_ptr->misc.cmana_frac = 0;
-		    if (randint(3) == 1) {
-			msg_print("You have damaged your health!");
-			(void)dec_stat(A_CON);
-		    }
-		}
-	    else {
-		    p_ptr->misc.cmana -= s_ptr->smana;
-    	}
+
+    if (!free_turn_flag) {
+
+    /* Reduce mana */
+    if (s_ptr->smana > p_ptr->cmana) {
+	msg_print("You faint from fatigue!");
+	p_ptr->paralysis = randint((int)(5 * (s_ptr->smana - p_ptr->cmana)));
+	p_ptr->cmana = 0;
+	p_ptr->cmana_frac = 0;
+	if (randint(3) == 1) {
+	    msg_print("You have damaged your health!");
+	    (void)dec_stat(A_CON);
+	}
+    }
+    else {
+	p_ptr->cmana -= s_ptr->smana;
+    }
     
-	    /* Display current mana */
-		prt_cmana();
+    /* Display current mana */
+    prt_cmana();
 	    }
 	}
     }

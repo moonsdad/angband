@@ -72,7 +72,7 @@ void hit_trap(int y, int x)
 
       case 1:			   /* Open pit */
 	msg_print("You fell into a pit!");
-	if (p_ptr->flags.ffall) {
+	if (p_ptr->ffall) {
 	    msg_print("You gently float down.");
 	}
 	else {
@@ -82,7 +82,7 @@ void hit_trap(int y, int x)
 	break;
 
       case 2:			   /* Arrow trap */
-	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("An arrow hits you.");
@@ -96,7 +96,7 @@ void hit_trap(int y, int x)
 
 	msg_print("You fell into a covered pit.");
 
-	if (p_ptr->flags.ffall) {
+	if (p_ptr->ffall) {
 	    msg_print("You gently float down.");
 	}
 
@@ -112,7 +112,7 @@ void hit_trap(int y, int x)
 	msg_print("You fell through a trap door!");
 	new_level_flag = TRUE;
 	dun_level++;
-	if (p_ptr->flags.ffall) {
+	if (p_ptr->ffall) {
 	    msg_print("You gently float down.");
 	}
 	else {
@@ -125,14 +125,14 @@ void hit_trap(int y, int x)
 	 /* end normal */ 
 	else {			   /* it's a quest level, can't let them fall through */
 	    msg_print("You fall into a spiked pit!");
-	    if (p_ptr->flags.ffall)
+	    if (p_ptr->ffall)
 		msg_print("You gently float down.");
 	    else {
 		dam = (dam * 3) / 2;	/* do a little extra damage for spikes */
 		if (randint(3) == 1) {
 		    msg_print("The spikes are poisoned!");
-		    if (!(p_ptr->flags.immune_pois || p_ptr->flags.resist_pois ||
-			  p_ptr->flags.oppose_pois))
+		    if (!(p_ptr->immune_pois || p_ptr->resist_pois ||
+			  p_ptr->oppose_pois))
 			dam *= 2;  /* more damage from poison!  :-)  -CFT */
 		    else
 			msg_print("You are unaffected by the poison.");
@@ -142,14 +142,14 @@ void hit_trap(int y, int x)
 	break;
 
       case 5:			   /* Sleep gas */
-	if (p_ptr->flags.paralysis == 0) {
+	if (p_ptr->paralysis == 0) {
 	    msg_print("A strange white mist surrounds you!");
-	    if (p_ptr->flags.free_act) {
+	    if (p_ptr->free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else {
 		msg_print("You fall asleep.");
-		p_ptr->flags.paralysis += randint(10) + 4;
+		p_ptr->paralysis += randint(10) + 4;
 	    }
 	}
 	break;
@@ -161,8 +161,8 @@ void hit_trap(int y, int x)
 	break;
 
       case 7:			   /* STR Dart */
-	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
-	    if (!p_ptr->flags.sustain_str) {
+	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
+	    if (!p_ptr->sustain_str) {
 		(void)dec_stat(A_STR);
 		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
@@ -218,34 +218,34 @@ void hit_trap(int y, int x)
 
       case 14:			   /* Poison gas */
 	msg_print("A pungent green gas surrounds you!");
-	if (!(p_ptr->flags.immune_pois || p_ptr->flags.resist_pois || p_ptr->flags.oppose_pois))
+	if (!(p_ptr->immune_pois || p_ptr->resist_pois || p_ptr->oppose_pois))
 	poison_gas(dam, "a poison gas trap");
 	break;
 
       case 15:			   /* Blind Gas */
 	msg_print("A black gas surrounds you!");
-	if (!p_ptr->flags.resist_blind) {
-	    p_ptr->flags.blind += randint(50) + 50;
+	if (!p_ptr->resist_blind) {
+	    p_ptr->blind += randint(50) + 50;
 	}
 	break;
 
       case 16:			   /* Confuse Gas */
 	msg_print("A gas of scintillating colors surrounds you!");
-	if ((!p_ptr->flags.resist_conf) && (!p_ptr->flags.resist_chaos)) {
-	    p_ptr->flags.confused += randint(15) + 15;
+	if ((!p_ptr->resist_conf) && (!p_ptr->resist_chaos)) {
+	    p_ptr->confused += randint(15) + 15;
 	}
 	break;
 
       case 17:			   /* Slow Dart */
-	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 	    objdes(tmp, i_ptr, TRUE);
 	    take_hit(dam, tmp);
 	    msg_print("A small dart hits you!");
-	    if (p_ptr->flags.free_act) {
+	    if (p_ptr->free_act) {
 		msg_print("You are unaffected.");
 	    }
 	    else {
-		p_ptr->flags.slow += randint(20) + 10;
+		p_ptr->slow += randint(20) + 10;
 	    }
 	}
 	else {
@@ -254,10 +254,10 @@ void hit_trap(int y, int x)
 	break;
 
       case 18:			   /* CON Dart */
-	if (test_hit(125, 0, 0, p_ptr->misc->pac + p_ptr->misc->ptoac, CLA_MISC_HIT)) {
+	if (test_hit(125, 0, 0, p_ptr->pac + p_ptr->ptoac, CLA_MISC_HIT)) {
 		objdes(tmp, i_ptr, TRUE);
 		take_hit(dam, tmp);
-	    if (!p_ptr->flags.sustain_con) {
+	    if (!p_ptr->sustain_con) {
 		(void)dec_stat(A_CON);
 		msg_print("A small dart saps your health!");
 	    }
@@ -309,42 +309,42 @@ int cast_spell(cptr prompt, int item_val, int *sn, int *sc)
     register spell_type *s_ptr;
 
     /* if a warrior, abort as if by ESC -CFT */
-    if (!p_ptr->misc.pclass) return 0;
+    if (!p_ptr->pclass) return 0;
 
     /* Assume nothing to read */
     result = (-1);
 
     i = 0;
 
-    j1 = inventory[item_val].flags;
+    j1 = inventory[item_val].flags1;
     j2 = inventory[item_val].flags2;
 
     first_spell = bit_pos(&j1);
     /* set j1 again, since bit_pos modified it */
-    j1 = inventory[item_val].flags & spell_learned;
-    s_ptr = magic_spell[p_ptr->misc.pclass - 1];
+    j1 = inventory[item_val].flags1 & spell_learned;
+    s_ptr = magic_spell[p_ptr->pclass - 1];
 
     while (j1) {
 	k = bit_pos(&j1);
-	if (s_ptr[k].slevel <= p_ptr->misc.lev) {
+	if (s_ptr[k].slevel <= p_ptr->lev) {
 	    spell[i] = k;
 	    i++;
 	}
     }
-    if (!(inventory[item_val].flags & spell_learned))
+    if (!(inventory[item_val].flags1 & spell_learned))
 	first_spell = bit_pos(&j2) + 32;
     j2 = inventory[item_val].flags2 & spell_learned2;
     while (j2) {
 	k = bit_pos(&j2);
-	if (s_ptr[k + 32].slevel <= p_ptr->misc.lev) {
+	if (s_ptr[k + 32].slevel <= p_ptr->lev) {
 	    spell[i] = k + 32;
 	    i++;
 	}
     }
     if (i > 0) {
 	result = get_spell(spell, i, sn, sc, prompt, first_spell);
-	if (result && magic_spell[p_ptr->misc.pclass - 1][*sn].smana > p_ptr->misc.cmana) {
-	    if (class[p_ptr->misc.pclass].spell == MAGE)
+	if (result && magic_spell[p_ptr->pclass - 1][*sn].smana > p_ptr->cmana) {
+	    if (class[p_ptr->pclass].spell == MAGE)
 		result = get_check("You summon your limited strength to cast this one! Confirm?");
 	    else
 		result = get_check("The gods may think you presumptuous for this! Confirm?");
@@ -505,23 +505,23 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	while (!grond && i < 50);
     }
 
-    if (flags & MF1_CARRY_OBJ)
+    if (flags1 & MF1_CARRY_OBJ)
 	i = 1;
     else
 	i = 0;
-    if (flags & MF1_CARRY_GOLD)
+    if (flags1 & MF1_CARRY_GOLD)
 	i += 2;
 
     number = 0;
-    if ((flags & MF1_HAS_60) && (randint(100) < 60))
+    if ((flags1 & MF1_HAS_60) && (randint(100) < 60))
 	number++;
-    if ((flags & MF1_HAS_90) && (randint(100) < 90))
+    if ((flags1 & MF1_HAS_90) && (randint(100) < 90))
 	number++;
-    if (flags & MF1_HAS_1D2)
+    if (flags1 & MF1_HAS_1D2)
 	number += randint(2);
-    if (flags & MF1_HAS_2D2)
+    if (flags1 & MF1_HAS_2D2)
 	number += damroll(2, 2);
-    if (flags & MF1_HAS_4D2)
+    if (flags1 & MF1_HAS_4D2)
 	number += damroll(4, 2);
     if (number > 0)
 	dump = summon_object(y, x, number, i, good);
@@ -529,7 +529,7 @@ s32b monster_death(int y, int x, register s32b flags, s32b good, s32b win)
 	dump = 0;
 
 
-    if (flags & MF1_WINNER) {
+    if (flags1 & MF1_WINNER) {
 	total_winner = TRUE;
 	prt_winner();
 	msg_print("*** CONGRATULATIONS *** You have won the game.");
@@ -694,7 +694,7 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 			  (r_list[m_ptr->r_idx].cflags1 & MF1_WINNER));
 	coin_type = 0;
 
-	if ((p_ptr->flags.blind < 1 && m_ptr->ml) ||
+	if ((p_ptr->blind < 1 && m_ptr->ml) ||
 	    (r_list[m_ptr->r_idx].cflags1 & MF1_WINNER) ||
 	    (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)) {
 	    /* recall even invisible uniques */
@@ -714,23 +714,23 @@ int mon_take_hit(int m_idx, int dam, int print_fear)
 	    u_list[m_ptr->r_idx].dead = 1;
 	}
 
-	new_exp = ((long)r_ptr->mexp * r_ptr->level) / p_ptr->misc.lev;
-	new_exp_frac = ((((long)r_ptr->mexp * r_ptr->level) % p_ptr->misc.lev)
-			* 0x10000L / p_ptr->misc.lev) + p_ptr->misc.exp_frac;
+	new_exp = ((long)r_ptr->mexp * r_ptr->level) / p_ptr->lev;
+	new_exp_frac = ((((long)r_ptr->mexp * r_ptr->level) % p_ptr->lev)
+			* 0x10000L / p_ptr->lev) + p_ptr->exp_frac;
 
 	if (new_exp_frac >= 0x10000L) {
 	    new_exp++;
-	    p_ptr->misc.exp_frac = new_exp_frac - 0x10000L;
+	    p_ptr->exp_frac = new_exp_frac - 0x10000L;
 	}
 	else {
-	    p_ptr->misc.exp_frac = new_exp_frac;
+	    p_ptr->exp_frac = new_exp_frac;
 	}
 
-	p_ptr->misc.exp += new_exp;
+	p_ptr->exp += new_exp;
 
 	/* When drained, the player advances at 10% the normal rate */
-	if (p_ptr->misc.exp < p_ptr->misc.max_exp) {
-	    p_ptr->misc.max_exp += new_exp/10;
+	if (p_ptr->exp < p_ptr->max_exp) {
+	    p_ptr->max_exp += new_exp/10;
 	}
 
 	/* can't call prt_experience() here, as that would result in "new level"
@@ -817,7 +817,7 @@ void py_attack(int y, int x)
     int                 cr_idx, r_idx, tot_tohit, base_tohit;
     vtype               m_name, out_val;
     register inven_type    *i_ptr;
-    register struct misc   *p_ptr;
+
 
     cr_idx = cave[y][x].cptr;
     r_idx = m_list[cr_idx].r_idx;
@@ -854,15 +854,15 @@ void py_attack(int y, int x)
     if ((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
     /* Fix for arrows */
 	blows = 1;
-    tot_tohit += p_ptr->misc.ptohit;
+    tot_tohit += p_ptr->ptohit;
 
     /* If creature is lit, use base rates, else, make it harder to hit */
     if (m_list[cr_idx].ml) {
-	base_tohit = p_ptr->misc.bth;
+	base_tohit = p_ptr->bth;
     }
     else {
-	base_tohit = (p_ptr->misc.bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1)) -
-	             (p_ptr->misc.lev * class_level_adj[p_ptr->misc.pclass][CLA_BTH] / 2);
+	base_tohit = (p_ptr->bth / 2) - (tot_tohit * (BTH_PLUS_ADJ - 1)) -
+	             (p_ptr->lev * class_level_adj[p_ptr->pclass][CLA_BTH] / 2);
     }
 
     /* Assume no fear messages need to be redone */
@@ -872,7 +872,7 @@ void py_attack(int y, int x)
     do {
 
 	/* We hit it! */
-	if (test_hit(base_tohit, (int)p_ptr->misc.lev, tot_tohit,
+	if (test_hit(base_tohit, (int)p_ptr->lev, tot_tohit,
 		     (int)r_list[r_idx].ac, CLA_BTH)) {
 
 	    if (!wizard) {
@@ -893,21 +893,21 @@ void py_attack(int y, int x)
 	    }
 
 	    /* Apply the player damage bonuses */
-	    k += p_ptr->misc.ptodam;
+	    k += p_ptr->ptodam;
 
 	    if (wizard) {
 		(void)sprintf(out_val,
 			      "You hit %s with %d hp, doing %d+%d damage.",
-			      m_name, m_list[cr_idx].hp, (k - p_ptr->misc.ptodam),
-			      p_ptr->misc.ptodam);
+			      m_name, m_list[cr_idx].hp, (k - p_ptr->ptodam),
+			      p_ptr->ptodam);
 		msg_print(out_val);
 	    }
 
 	    if (k < 0) k = 0;
 
 	    /* Confusion attack */
-	    if (p_ptr->flags.confusing) {
-		p_ptr->flags.confusing = FALSE;
+	    if (p_ptr->confusing) {
+		p_ptr->confusing = FALSE;
 		msg_print("Your hands stop glowing.");
 		if ((r_list[r_idx].cflags2 & MF2_CHARM_SLEEP) ||
 		    (randint(MAX_R_LEV) < r_list[r_idx].level)) {
@@ -953,7 +953,7 @@ void py_attack(int y, int x)
 		&& (i_ptr->tval <= TV_ARROW)) {	/* Use missiles up */
 		i_ptr->number--;
 		inven_weight -= i_ptr->weight;
-		p_ptr->flags.status |= PY_STR_WGT;
+		p_ptr->status |= PY_STR_WGT;
 		if (i_ptr->number == 0) {
 		    equip_ctr--;
 		    py_bonuses(i_ptr, -1);
@@ -1008,7 +1008,7 @@ static void inven_throw(int item_val, inven_type *t_ptr)
 	t_ptr->number = 1;
 	i_ptr->number--;
 	inven_weight -= i_ptr->weight;
-	p_ptr->flags.status |= PY_STR_WGT;
+	p_ptr->status |= PY_STR_WGT;
     } else
 	inven_destroy(item_val);
 }
@@ -1028,15 +1028,15 @@ static void facts(inven_type *i_ptr, \
 
     /* Throwing objects			 */
     *tdam = pdamroll(i_ptr->damage) + i_ptr->todam;
-    *tbth = p_ptr->misc.bthb * 75 / 100;
-    *tpth = p_ptr->misc.ptohit + i_ptr->tohit;
+    *tbth = p_ptr->bthb * 75 / 100;
+    *tpth = p_ptr->ptohit + i_ptr->tohit;
 
     /* Add this back later if the correct throwing device. -CJS- */
     if (inventory[INVEN_WIELD].tval != TV_NOTHING)
 	*tpth -= inventory[INVEN_WIELD].tohit;
 
     /* Distance based on strength */
-    *tdis = (((p_ptr->stats.use_stat[A_STR] + 20) * 10) / tmp_weight);
+    *tdis = (((p_ptr->use_stat[A_STR] + 20) * 10) / tmp_weight);
 
     /* Max distance of 10, no matter how strong */
     if (*tdis > 10) *tdis = 10;
@@ -1056,7 +1056,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Sling and ammo */
 	  case 20:
 	    if (i_ptr->tval != TV_SHOT) break;
-		*tbth = p_ptr->misc.bthb;
+		*tbth = p_ptr->bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 2;
@@ -1066,7 +1066,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Sling of Might and ammo */
 	  case 21:
 	    if (i_ptr->tval != TV_SHOT) break;
-		*tbth = p_ptr->misc.bthb;
+		*tbth = p_ptr->bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 3;
@@ -1076,7 +1076,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Short Bow and Arrow	 */
 	  case 1:
 	    if (i_ptr->tval != TV_ARROW) break;
-		*tbth = p_ptr->misc.bthb;
+		*tbth = p_ptr->bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 2;
@@ -1086,7 +1086,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Long Bow and Arrow	 */
 	  case 2:
 	    if (i_ptr->tval != TV_ARROW) break;
-		*tbth = p_ptr->misc.bthb;
+		*tbth = p_ptr->bthb;
 		*tpth += 2 * inventory[INVEN_WIELD].tohit;
 		*tdam += inventory[INVEN_WIELD].todam;
 		*tdam = *tdam * 3;
@@ -1096,7 +1096,7 @@ static void facts(inven_type *i_ptr, \
       /* C Bow, BARD, L bow of M and Arrow*/
 	  case 3:
 	    if (i_ptr->tval != TV_ARROW) break;
-	    *tbth = p_ptr->misc.bthb;
+	    *tbth = p_ptr->bthb;
 	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
 	    *tdam += inventory[INVEN_WIELD].todam;
 	    *tdam = *tdam * 4;
@@ -1106,7 +1106,7 @@ static void facts(inven_type *i_ptr, \
 	  /* C Bow of M, BELEG and Arrow*/
 	  case 4:
 	    if (i_ptr->tval != TV_ARROW) break;
-	    *tbth = p_ptr->misc.bthb;
+	    *tbth = p_ptr->bthb;
 	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
 	    *tdam += inventory[INVEN_WIELD].todam;
 	    *tdam = *tdam * 5;
@@ -1116,7 +1116,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Light Crossbow and Bolt */
 	  case 10:
 	    if (i_ptr->tval != TV_BOLT) break;
-	    *tbth = p_ptr->misc.bthb;
+	    *tbth = p_ptr->bthb;
 	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
 	    *tdam += inventory[INVEN_WIELD].todam;
 	    *tdam = *tdam * 3;
@@ -1126,7 +1126,7 @@ static void facts(inven_type *i_ptr, \
 	  /* Heavy Crossbow and Bolt */
 	  case 11:
 	    if (i_ptr->tval != TV_BOLT) break;
-	    *tbth = p_ptr->misc.bthb;
+	    *tbth = p_ptr->bthb;
 	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
 	    *tdam += inventory[INVEN_WIELD].todam;
 	    *tdam = *tdam * 4;
@@ -1136,7 +1136,7 @@ static void facts(inven_type *i_ptr, \
 	  /* H xbow of M and Bolt*/
 	  case 12:
 	    if (i_ptr->tval != TV_BOLT) break;
-	    *tbth = p_ptr->misc.bthb;
+	    *tbth = p_ptr->bthb;
 	    *tpth += 2 * inventory[INVEN_WIELD].tohit;
 	    *tdam += inventory[INVEN_WIELD].todam;
 	    *tdam = *tdam * 5;
@@ -1292,27 +1292,27 @@ void py_bash(int y, int x)
     }
 
     /* Attempt to bash */
-    base_tohit = (p_ptr->stats.use_stat[A_STR] +
+    base_tohit = (p_ptr->use_stat[A_STR] +
 		  inventory[INVEN_ARM].weight / 2 +
-		  p_ptr->misc.wt / 10);
+		  p_ptr->wt / 10);
 
     /* Harder to bash invisible monsters */
     if (!m_ptr->ml) {
 	base_tohit = (base_tohit / 2) - 
-	     (p_ptr->stats.use_stat[A_DEX] * (BTH_PLUS_ADJ - 1)) -
-	     (p_ptr->misc.lev * class_level_adj[p_ptr->misc.pclass][CLA_BTH] / 2);
+	     (p_ptr->use_stat[A_DEX] * (BTH_PLUS_ADJ - 1)) -
+	     (p_ptr->lev * class_level_adj[p_ptr->pclass][CLA_BTH] / 2);
     }
 
     /* Hack -- test for contact */
-    if (test_hit(base_tohit, (int)p_ptr->misc.lev,
-		 (int)p_ptr->stats.use_stat[A_DEX], (int)r_ptr->ac, CLA_BTH)) {
+    if (test_hit(base_tohit, (int)p_ptr->lev,
+		 (int)p_ptr->use_stat[A_DEX], (int)r_ptr->ac, CLA_BTH)) {
 
 	(void)sprintf(out_val, "You hit %s.", m_name);
 	msg_print(out_val);
 	k = pdamroll(inventory[INVEN_ARM].damage);
 	k = critical_blow((int)(inventory[INVEN_ARM].weight / 4 +
-				p_ptr->stats.use_stat[A_STR]), 0, k, CLA_BTH);
-	k += p_ptr->misc.wt / 60 + 3;
+				p_ptr->use_stat[A_STR]), 0, k, CLA_BTH);
+	k += p_ptr->wt / 60 + 3;
 
 	/* No negative damage */
 	if (k < 0) k = 0;
@@ -1362,9 +1362,9 @@ void py_bash(int y, int x)
     }
 
     /* Stumble */
-    if (randint(150) > p_ptr->stats.use_stat[A_DEX]) {
+    if (randint(150) > p_ptr->use_stat[A_DEX]) {
 	msg_print("You are off balance.");
-	p_ptr->flags.paralysis = (1 + randint(2));
+	p_ptr->paralysis = (1 + randint(2));
     }
 }
 
@@ -1390,7 +1390,7 @@ int test_hit(int bth, int level, int pth, int ac, int attack_type)
 
     /* Calculate the "attack quality" */    
     i = (bth + pth * BTH_PLUS_ADJ +
-	 (level * class_level_adj[p_ptr->misc.pclass][attack_type]));
+	 (level * class_level_adj[p_ptr->pclass][attack_type]));
 
     /* Apply the "pth" against the "ac" */
     if ((i > 0) && (randint(i) > ((3 * ac) / 4))) {
@@ -1408,19 +1408,19 @@ int test_hit(int bth, int level, int pth, int ac, int attack_type)
 void take_hit(int damage, cptr hit_from)
 {
     /* Hack -- Apply "invulnerability" */
-    if (p_ptr->flags.invuln > 0 && damage < 9000) {
+    if (p_ptr->invuln > 0 && damage < 9000) {
 	return;
     }
 
     /* Hurt the player */
-    p_ptr->misc.chp -= damage;
+    p_ptr->chp -= damage;
 
     /* Dead player */
-    if (p_ptr->misc.chp < 0) {
+    if (p_ptr->chp < 0) {
 
 	/* Hack -- allow wizard to abort death */
 	if ((wizard) && !(get_check("Die?"))) {
-	    p_ptr->misc.chp = p_ptr->misc.mhp;
+	    p_ptr->chp = p_ptr->mhp;
 	    prt_chp();
 	    msg_print("OK, so you don't die.");
 	    return;
@@ -1440,7 +1440,7 @@ void take_hit(int damage, cptr hit_from)
     prt_chp();
 
     /* Hack -- hitpoint warning */    
-    if (p_ptr->misc.chp <= p_ptr->misc.mhp * hitpoint_warn / 10) {
+    if (p_ptr->chp <= p_ptr->mhp * hitpoint_warn / 10) {
 	msg_print("*** LOW HITPOINT WARNING! ***");
 	msg_print(NULL);	/* make sure they see it -CWS */
     }

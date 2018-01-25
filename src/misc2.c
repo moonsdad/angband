@@ -289,6 +289,8 @@ static int has_breath(int z)
 
 /*
  * Places a monster at given location
+ *
+ * Refuses to place out-of-depth Quest Monsters.
  */
 int place_monster(int y, int x, int r_idx, int slp)
 {
@@ -355,6 +357,7 @@ int place_monster(int y, int x, int r_idx, int slp)
 
 	rating += ((c = r_ptr->level - dun_level) > 30) ? 15 : c / 2;
 	if (r_ptr->cflags2 & MF2_UNIQUE) {
+	
 	/* Normal monsters are worth "half" as much */
 	    rating += (r_ptr->level - dun_level) / 2;
 	}
@@ -989,10 +992,10 @@ int place_ghost()
     if (!dun_level) {
 
 	/* You have to be level 5, and even then its only 10% */
-	if (p_ptr->misc.lev < 5 || randint(10) > 1) return 0;
+	if (p_ptr->lev < 5 || randint(10) > 1) return 0;
 
 	/* Look for a proper bones file */
-	sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, p_ptr->misc.lev);
+	sprintf(tmp, "%s%s%d", ANGBAND_DIR_BONES, PATH_SEP, p_ptr->lev);
 	fp = my_tfopen(tmp, "r");
 	if (!fp) return (0);
 
@@ -1005,7 +1008,7 @@ int place_ghost()
 
 	fclose(fp);
 
-	level = p_ptr->misc.lev;
+	level = p_ptr->lev;
     }
 
     /* In the dungeon, ghosts have the same level as the level */    

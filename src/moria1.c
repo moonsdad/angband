@@ -175,7 +175,7 @@ int show_equip(int weight, int col)
 	if (i_ptr->tval != TV_NOTHING) {
 	    switch (i) {
 	      case INVEN_WIELD:
-		if (p_ptr->stats.use_stat[A_STR] * 15 < i_ptr->weight)
+		if (p_ptr->use_stat[A_STR] * 15 < i_ptr->weight)
 		    prt1 = "Just lifting";
 		else
 		    prt1 = "Wielding";
@@ -470,70 +470,70 @@ void calc_bonuses()
 
     inven_type		*i_ptr;
 
-    struct misc		*m_ptr = &p_ptr->misc;
 
 
-    if (p_ptr->flags.slow_digest) p_ptr->flags.food_digested++;
-    if (p_ptr->flags.regenerate) p_ptr->flags.food_digested -= 3;
 
-    if (p_ptr->misc.prace == 9) p_ptr->flags.see_inv = TRUE;
-    else p_ptr->flags.see_inv = FALSE;
-    p_ptr->flags.teleport = FALSE;
-    if (p_ptr->misc.prace == 4) p_ptr->flags.free_act = TRUE;
-    else p_ptr->flags.free_act = FALSE;
-    p_ptr->flags.slow_digest = FALSE;
-    p_ptr->flags.aggravate = FALSE;
-    p_ptr->flags.regenerate = FALSE;
-    if (p_ptr->misc.prace == 9) p_ptr->flags.ffall = TRUE;
+    if (p_ptr->slow_digest) p_ptr->food_digested++;
+    if (p_ptr->regenerate) p_ptr->food_digested -= 3;
+
+    if (p_ptr->prace == 9) p_ptr->see_inv = TRUE;
+    else p_ptr->see_inv = FALSE;
+    p_ptr->teleport = FALSE;
+    if (p_ptr->prace == 4) p_ptr->free_act = TRUE;
+    else p_ptr->free_act = FALSE;
+    p_ptr->slow_digest = FALSE;
+    p_ptr->aggravate = FALSE;
+    p_ptr->regenerate = FALSE;
+    if (p_ptr->prace == 9) p_ptr->ffall = TRUE;
     else ptr->ffall = FALSE;
-    p_ptr->flags.hold_life = FALSE;
-    p_ptr->flags.telepathy = FALSE;
-    p_ptr->flags.light = FALSE;
-    if (p_ptr->misc.prace == 7) p_ptr->flags.sustain_str = TRUE;
-    else p_ptr->flags.sustain_str = FALSE;
-    p_ptr->flags.sustain_int = FALSE;
-    p_ptr->flags.sustain_wis = FALSE;
-    if (p_ptr->misc.prace == 8) p_ptr->flags.sustain_con = TRUE;
+    p_ptr->hold_life = FALSE;
+    p_ptr->telepathy = FALSE;
+    p_ptr->light = FALSE;
+    if (p_ptr->prace == 7) p_ptr->sustain_str = TRUE;
+    else p_ptr->sustain_str = FALSE;
+    p_ptr->sustain_int = FALSE;
+    p_ptr->sustain_wis = FALSE;
+    if (p_ptr->prace == 8) p_ptr->sustain_con = TRUE;
     else tr->sustain_con = FALSE;
-    if (p_ptr->misc.prace == 3) p_ptr->flags.sustain_dex = TRUE;
-    else p_ptr->flags.sustain_dex = FALSE;
-    p_ptr->flags.sustain_chr = FALSE;
-    p_ptr->flags.resist_fire = FALSE;
-    p_ptr->flags.resist_acid = FALSE;
-    p_ptr->flags.resist_cold = FALSE;
-    p_ptr->flags.resist_elec = FALSE;
-    p_ptr->flags.resist_pois = FALSE;
-    p_ptr->flags.resist_conf = FALSE;
-    p_ptr->flags.resist_sound = FALSE;
-    if (p_ptr->misc.prace == 2) tr->resist_lite = TRUE;
-    else p_ptr->flags.resist_lite = FALSE;
-    if (p_ptr->misc.prace == 6) p_ptr->flags.resist_dark = TRUE;
-    else p_ptr->flags.resist_dark = FALSE;
-    p_ptr->flags.resist_chaos = FALSE;
-    p_ptr->flags.resist_disen = FALSE;
-    p_ptr->flags.resist_shards = FALSE;
-    p_ptr->flags.resist_nexus = FALSE;
-    if (p_ptr->misc.prace == 5) p_ptr->flags.resist_blind = TRUE;
-    else p_ptr->flags.resist_blind = FALSE;
-    p_ptr->flags.resist_nether = FALSE;
-    p_ptr->flags.resist_fear = FALSE;
-    p_ptr->flags.immune_fire = FALSE;
-    p_ptr->flags.immune_acid = FALSE;
-    p_ptr->flags.immune_pois = FALSE;
-    p_ptr->flags.immune_cold = FALSE;
-    p_ptr->flags.immune_elec = FALSE;
+    if (p_ptr->prace == 3) p_ptr->sustain_dex = TRUE;
+    else p_ptr->sustain_dex = FALSE;
+    p_ptr->sustain_chr = FALSE;
+    p_ptr->resist_fire = FALSE;
+    p_ptr->resist_acid = FALSE;
+    p_ptr->resist_cold = FALSE;
+    p_ptr->resist_elec = FALSE;
+    p_ptr->resist_pois = FALSE;
+    p_ptr->resist_conf = FALSE;
+    p_ptr->resist_sound = FALSE;
+    if (p_ptr->prace == 2) tr->resist_lite = TRUE;
+    else p_ptr->resist_lite = FALSE;
+    if (p_ptr->prace == 6) p_ptr->resist_dark = TRUE;
+    else p_ptr->resist_dark = FALSE;
+    p_ptr->resist_chaos = FALSE;
+    p_ptr->resist_disen = FALSE;
+    p_ptr->resist_shards = FALSE;
+    p_ptr->resist_nexus = FALSE;
+    if (p_ptr->prace == 5) p_ptr->resist_blind = TRUE;
+    else p_ptr->resist_blind = FALSE;
+    p_ptr->resist_nether = FALSE;
+    p_ptr->resist_fear = FALSE;
+    p_ptr->immune_fire = FALSE;
+    p_ptr->immune_acid = FALSE;
+    p_ptr->immune_pois = FALSE;
+    p_ptr->immune_cold = FALSE;
+    p_ptr->immune_elec = FALSE;
 
     /* Save the old armor class */
-    old_dis_ac = m_ptr->dis_ac;
+    old_dis_ac = p_ptr->dis_ac;
 
-    m_ptr->ptohit = tohit_adj();   /* Real To Hit   */
-    m_ptr->ptodam = todam_adj();   /* Real To Dam   */
-    m_ptr->ptoac = toac_adj();	   /* Real To AC    */
-    m_ptr->pac = 0;		   /* Real AC	     */
-    m_ptr->dis_th = m_ptr->ptohit; /* Display To Hit	    */
-    m_ptr->dis_td = m_ptr->ptodam; /* Display To Dam	    */
-    m_ptr->dis_ac = 0;		   /* Display AC		 */
-    m_ptr->dis_tac = m_ptr->ptoac; /* Display To AC	    */
+    p_ptr->ptohit = tohit_adj();   /* Real To Hit   */
+    p_ptr->ptodam = todam_adj();   /* Real To Dam   */
+    p_ptr->ptoac = toac_adj();	   /* Real To AC    */
+    p_ptr->pac = 0;		   /* Real AC	     */
+    p_ptr->dis_th = p_ptr->ptohit; /* Display To Hit	    */
+    p_ptr->dis_td = p_ptr->ptodam; /* Display To Dam	    */
+    p_ptr->dis_ac = 0;		   /* Display AC		 */
+    p_ptr->dis_tac = p_ptr->ptoac; /* Display To AC	    */
 
     for (i = INVEN_WIELD; i <= INVEN_LITE; i++) {
 
@@ -543,47 +543,47 @@ void calc_bonuses()
 	if (i_ptr->tval == TV_NOTHING) continue;
 
 	if ((TR3_CURSED & i_ptr->flags3) == 0) {
-	    m_ptr->pac += i_ptr->ac;
-	    m_ptr->dis_ac += i_ptr->ac;
+	    p_ptr->pac += i_ptr->ac;
+	    p_ptr->dis_ac += i_ptr->ac;
 	}
-	m_ptr->ptohit += i_ptr->tohit;
+	p_ptr->ptohit += i_ptr->tohit;
 	if (i_ptr->tval != TV_BOW)            	/* Bows can't damage. -CJS- */
-	    m_ptr->ptodam += i_ptr->todam;
-	m_ptr->ptoac += i_ptr->toac;
+	    p_ptr->ptodam += i_ptr->todam;
+	p_ptr->ptoac += i_ptr->toac;
 	if (known2_p(i_ptr)) {
-	    m_ptr->dis_th += i_ptr->tohit;
+	    p_ptr->dis_th += i_ptr->tohit;
 	    if (i_ptr->tval != TV_BOW)
-	        m_ptr->dis_td += i_ptr->todam;	/* Bows can't damage. -CJS- */
-	    m_ptr->dis_tac += i_ptr->toac;
+	        p_ptr->dis_td += i_ptr->todam;	/* Bows can't damage. -CJS- */
+	    p_ptr->dis_tac += i_ptr->toac;
 	}
     }
 
-    if (p_ptr->misc.pclass == 2) {
+    if (p_ptr->pclass == 2) {
 	i_ptr = &inventory[INVEN_WIELD];
 	if (!(i_ptr->flags3 & TR3_BLESSED) && /* blessed blade == no penalty -CWS */
 	    (i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)) {
-	    m_ptr->ptohit -= 2;
-	    m_ptr->ptodam -= 2;
-	    m_ptr->dis_th -= 2;
-	    m_ptr->dis_td -= 2;
+	    p_ptr->ptohit -= 2;
+	    p_ptr->ptodam -= 2;
+	    p_ptr->dis_th -= 2;
+	    p_ptr->dis_td -= 2;
 	}
     }
     if (weapon_heavy)
-	m_ptr->dis_th += (p_ptr->stats.use_stat[A_STR] * 15 -
+	p_ptr->dis_th += (p_ptr->use_stat[A_STR] * 15 -
 			  inventory[INVEN_WIELD].weight);
 
     /* don't forget stun adj, or we'll get incorrect values... -CFT */
-    if (p_ptr->flags.stun > 50) {
-	m_ptr->ptohit -= 20;
-	m_ptr->dis_th -= 20;
-	m_ptr->ptodam -= 20;
-	m_ptr->dis_td -= 20;
+    if (p_ptr->stun > 50) {
+	p_ptr->ptohit -= 20;
+	p_ptr->dis_th -= 20;
+	p_ptr->ptodam -= 20;
+	p_ptr->dis_td -= 20;
     }
-    else if (p_ptr->flags.stun > 0) {
-	m_ptr->ptohit -= 5;
-	m_ptr->dis_th -= 5;
-	m_ptr->ptodam -= 5;
-	m_ptr->dis_td -= 5;
+    else if (p_ptr->stun > 0) {
+	p_ptr->ptohit -= 5;
+	p_ptr->dis_th -= 5;
+	p_ptr->ptodam -= 5;
+	p_ptr->dis_td -= 5;
     }
 
     /* Add in temporary spell increases */
@@ -591,38 +591,38 @@ void calc_bonuses()
     /* high pac (to simulate encumberence), and these really should */
     /* be magical bonuses anyway -CFT */
 
-    if (p_ptr->flags.status & PY_INVULN) {
-	m_ptr->ptoac += 100;
-	m_ptr->dis_tac += 100;
+    if (p_ptr->status & PY_INVULN) {
+	p_ptr->ptoac += 100;
+	p_ptr->dis_tac += 100;
     }
 
-    if (p_ptr->flags.status & PY_BLESSED) {	/* changed to agree w/ code in dungeon()... -CFT */
-	m_ptr->ptoac += 5;
-	m_ptr->dis_tac += 5;
-	m_ptr->ptohit += 10;
-	m_ptr->dis_th += 10;
+    if (p_ptr->status & PY_BLESSED) {	/* changed to agree w/ code in dungeon()... -CFT */
+	p_ptr->ptoac += 5;
+	p_ptr->dis_tac += 5;
+	p_ptr->ptohit += 10;
+	p_ptr->dis_th += 10;
     }
 
-    if (p_ptr->flags.shield > 0) {
-	m_ptr->ptoac += 50;
-	m_ptr->dis_tac += 50;
+    if (p_ptr->shield > 0) {
+	p_ptr->ptoac += 50;
+	p_ptr->dis_tac += 50;
     }
 
-    if (p_ptr->flags.detect_inv > 0)
-	p_ptr->flags.see_inv = TRUE;
+    if (p_ptr->detect_inv > 0)
+	p_ptr->see_inv = TRUE;
     if (p_ptr->status & PY_HERO) { /* now agrees w/ code in dungeon() -CFT */
-	m_ptr->ptohit += 12;
-	m_ptr->dis_th += 12;
+	p_ptr->ptohit += 12;
+	p_ptr->dis_th += 12;
     }
 
     if (p_ptr->status & PY_SHERO) {/* now agrees w/ code in dungeon() -CFT */
-	m_ptr->ptohit += 24;
-	m_ptr->dis_th += 24;
-	m_ptr->ptoac -= 10;	   /* berserk, so not being careful... -CFT */
-	m_ptr->dis_tac -= 10;
+	p_ptr->ptohit += 24;
+	p_ptr->dis_th += 24;
+	p_ptr->ptoac -= 10;	   /* berserk, so not being careful... -CFT */
+	p_ptr->dis_tac -= 10;
     }
 
-    m_ptr->dis_ac += m_ptr->dis_tac;	/* this moved from above, so it will
+    p_ptr->dis_ac += p_ptr->dis_tac;	/* this moved from above, so it will
 					 * show ac adjustments from spells...
 					 * -CFT */
 
@@ -646,57 +646,57 @@ void calc_bonuses()
     }
 
     /* Process the item flags */
-    if (TR3_SLOW_DIGEST & item_flags3) p_ptr->flags.slow_digest = TRUE;
-    if (TR3_AGGRAVATE & item_flags3) p_ptr->flags.aggravate = TRUE;
-    if (TR3_TELEPORT & item_flags3) p_ptr->flags.teleport = TRUE;
-    if (TR3_REGEN & item_flags3) p_ptr->flags.regenerate = TRUE;
-    if (TR3_TELEPATHY & item_flags3) p_ptr->flags.telepathy = TRUE;
+    if (TR3_SLOW_DIGEST & item_flags3) p_ptr->slow_digest = TRUE;
+    if (TR3_AGGRAVATE & item_flags3) p_ptr->aggravate = TRUE;
+    if (TR3_TELEPORT & item_flags3) p_ptr->teleport = TRUE;
+    if (TR3_REGEN & item_flags3) p_ptr->regenerate = TRUE;
+    if (TR3_TELEPATHY & item_flags3) p_ptr->telepathy = TRUE;
     if (TR3_LITE & item_flags3) p_ptr->light = TRUE;
-    if (TR3_SEE_INVIS & item_flags3) p_ptr->flags.see_inv = TRUE;
-    if (TR3_FEATHER & item_flags3) p_ptr->flags.ffall = TRUE;
-    if (TR2_FREE_ACT & item_flags2) p_ptr->flags.free_act = TRUE;
+    if (TR3_SEE_INVIS & item_flags3) p_ptr->see_inv = TRUE;
+    if (TR3_FEATHER & item_flags3) p_ptr->ffall = TRUE;
+    if (TR2_FREE_ACT & item_flags2) p_ptr->free_act = TRUE;
     if (TR2_HOLD_LIFE & item_flags2) p_ptr->hold_life = TRUE;
     
     /* Immunity and resistance */
-    if (TR2_IM_FIRE & item_flags2) p_ptr->flags.immune_fire = TRUE;
-    if (TR2_IM_ACID & item_flags2) p_ptr->flags.immune_acid = TRUE;
-    if (TR2_IM_COLD & item_flags2) p_ptr->flags.immune_cold = TRUE;
-    if (TR2_IM_ELEC & item_flags2) p_ptr->flags.immune_elec = TRUE;
-    if (TR2_IM_POIS & item_flags2) p_ptr->flags.immune_pois = TRUE;
-    if (TR2_RES_ACID & item_flags2) p_ptr->flags.resist_acid = TRUE;
-    if (TR2_RES_ELEC & item_flags2) p_ptr->flags.resist_elec = TRUE;
-    if (TR2_RES_FIRE & item_flags2) p_ptr->flags.resist_fire = TRUE;
-    if (TR2_RES_COLD & item_flags2) p_ptr->flags.resist_cold = TRUE;
-    if (TR2_RES_POIS & item_flags2) p_ptr->flags.resist_pois = TRUE;
-    if (TR2_RES_CONF & item_flags2) p_ptr->flags.resist_conf = TRUE;
-    if (TR2_RES_SOUND & item_flags2) p_ptr->flags.resist_sound = TRUE;
-    if (TR2_RES_LITE & item_flags2) p_ptr->flags.resist_lite = TRUE;
-    if (TR2_RES_DARK & item_flags2) p_ptr->flags.resist_dark = TRUE;
-    if (TR2_RES_CHAOS & item_flags2) p_ptr->flags.resist_chaos = TRUE;
-    if (TR2_RES_DISEN & item_flags2) p_ptr->flags.resist_disen = TRUE;
-    if (TR2_RES_SHARDS & item_flags2) p_ptr->flags.resist_shards = TRUE;
-    if (TR2_RES_NEXUS & item_flags2) p_ptr->flags.resist_nexus = TRUE;
-    if (TR2_RES_BLIND & item_flags2) p_ptr->flags.resist_blind = TRUE;
-    if (TR2_RES_NETHER & item_flags2) p_ptr->flags.resist_nether = TRUE;
-    if (TR2_RES_FEAR & item_flags2) p_ptr->flags.resist_fear = TRUE;
+    if (TR2_IM_FIRE & item_flags2) p_ptr->immune_fire = TRUE;
+    if (TR2_IM_ACID & item_flags2) p_ptr->immune_acid = TRUE;
+    if (TR2_IM_COLD & item_flags2) p_ptr->immune_cold = TRUE;
+    if (TR2_IM_ELEC & item_flags2) p_ptr->immune_elec = TRUE;
+    if (TR2_IM_POIS & item_flags2) p_ptr->immune_pois = TRUE;
+    if (TR2_RES_ACID & item_flags2) p_ptr->resist_acid = TRUE;
+    if (TR2_RES_ELEC & item_flags2) p_ptr->resist_elec = TRUE;
+    if (TR2_RES_FIRE & item_flags2) p_ptr->resist_fire = TRUE;
+    if (TR2_RES_COLD & item_flags2) p_ptr->resist_cold = TRUE;
+    if (TR2_RES_POIS & item_flags2) p_ptr->resist_pois = TRUE;
+    if (TR2_RES_CONF & item_flags2) p_ptr->resist_conf = TRUE;
+    if (TR2_RES_SOUND & item_flags2) p_ptr->resist_sound = TRUE;
+    if (TR2_RES_LITE & item_flags2) p_ptr->resist_lite = TRUE;
+    if (TR2_RES_DARK & item_flags2) p_ptr->resist_dark = TRUE;
+    if (TR2_RES_CHAOS & item_flags2) p_ptr->resist_chaos = TRUE;
+    if (TR2_RES_DISEN & item_flags2) p_ptr->resist_disen = TRUE;
+    if (TR2_RES_SHARDS & item_flags2) p_ptr->resist_shards = TRUE;
+    if (TR2_RES_NEXUS & item_flags2) p_ptr->resist_nexus = TRUE;
+    if (TR2_RES_BLIND & item_flags2) p_ptr->resist_blind = TRUE;
+    if (TR2_RES_NETHER & item_flags2) p_ptr->resist_nether = TRUE;
+    if (TR2_RES_FEAR & item_flags2) p_ptr->resist_fear = TRUE;
 
     i_ptr = &inventory[INVEN_WIELD];
     for (i = INVEN_WIELD; i < INVEN_LITE; i++) {
 	if (TR_SUST_STAT & i_ptr->flags2)
 	    switch (i_ptr->pval) {
-	      case 1: p_ptr->flags.sustain_str = TRUE; break;
-	      case 2: p_ptr->flags.sustain_int = TRUE; break;
-	      case 3: p_ptr->flags.sustain_wis = TRUE; break;
-	      case 4: p_ptr->flags.sustain_con = TRUE; break;
-	      case 5: p_ptr->flags.sustain_dex = TRUE; break;
-	      case 6: p_ptr->flags.sustain_chr = TRUE; break;
+	      case 1: p_ptr->sustain_str = TRUE; break;
+	      case 2: p_ptr->sustain_int = TRUE; break;
+	      case 3: p_ptr->sustain_wis = TRUE; break;
+	      case 4: p_ptr->sustain_con = TRUE; break;
+	      case 5: p_ptr->sustain_dex = TRUE; break;
+	      case 6: p_ptr->sustain_chr = TRUE; break;
 	      case 10:		   /* :-) ~Ludwig the Hacker!!! */
-			p_ptr->flags.sustain_str = TRUE;
-			p_ptr->flags.sustain_int = TRUE;
-			p_ptr->flags.sustain_wis = TRUE;
-			p_ptr->flags.sustain_con = TRUE;
-			p_ptr->flags.sustain_dex = TRUE;
-			p_ptr->flags.sustain_chr = TRUE;
+			p_ptr->sustain_str = TRUE;
+			p_ptr->sustain_int = TRUE;
+			p_ptr->sustain_wis = TRUE;
+			p_ptr->sustain_con = TRUE;
+			p_ptr->sustain_dex = TRUE;
+			p_ptr->sustain_chr = TRUE;
 			break;
 	      default:
 		break;
@@ -706,15 +706,15 @@ void calc_bonuses()
 
 
     /* Regeneration takes more food */
-    if (p_ptr->flags.regenerate) p_ptr->flags.food_digested += 3;
+    if (p_ptr->regenerate) p_ptr->food_digested += 3;
 
     /* Slow digestion takes less food */
-    if (p_ptr->flags.slow_digest) p_ptr->flags.food_digested--;
+    if (p_ptr->slow_digest) p_ptr->food_digested--;
 
     /* Recalculate the mana */
-    if (class[p_ptr->misc.pclass].spell == MAGE) {
+    if (class[p_ptr->pclass].spell == MAGE) {
 	calc_mana(A_INT);
-    } else if (class[p_ptr->misc.pclass].spell == PRIEST) {
+    } else if (class[p_ptr->pclass].spell == PRIEST) {
 	calc_mana(A_WIS);
     }
 }
@@ -729,7 +729,7 @@ void check_strength()
 
     i_ptr = &inventory[INVEN_WIELD];
     if (i_ptr->tval != TV_NOTHING
-	&& (p_ptr->stats.use_stat[A_STR] * 15 < i_ptr->weight)) {
+	&& (p_ptr->use_stat[A_STR] * 15 < i_ptr->weight)) {
 	if (weapon_heavy == FALSE) {
 	    msg_print("You have trouble wielding such a heavy weapon.");
 	    weapon_heavy = TRUE;
@@ -756,15 +756,15 @@ void check_strength()
 	change_speed(i - pack_heavy);
 	pack_heavy = i;
     }
-    p_ptr->flags.status &= ~PY_STR_WGT;
+    p_ptr->status &= ~PY_STR_WGT;
 
-    if (p_ptr->misc.pclass == 2 && !notlike) {
+    if (p_ptr->pclass == 2 && !notlike) {
         if ((i_ptr->tval == TV_SWORD || i_ptr->tval == TV_POLEARM)
             && ((i_ptr->flags3 & TR3_BLESSED) == 0)) {
             notlike = TRUE;
             msg_print("You do not feel comfortable with your weapon.");
         }
-    } else if (p_ptr->misc.pclass == 2 && notlike) {
+    } else if (p_ptr->pclass == 2 && notlike) {
         if (i_ptr->tval == TV_NOTHING) {
             notlike = FALSE;
             msg_print("You feel comfortable again after removing that weapon.");
@@ -790,7 +790,7 @@ void takeoff(int item_val, int posn)
     equip_ctr--;
     t_ptr = &inventory[item_val];
     inven_weight -= t_ptr->weight * t_ptr->number;
-    p_ptr->flags.status |= PY_STR_WGT;
+    p_ptr->status |= PY_STR_WGT;
 
     if (item_val == INVEN_WIELD || item_val == INVEN_BOW) p = "Was wielding ";
     else if (item_val == INVEN_LITE) p = "Light source was ";
@@ -862,7 +862,7 @@ void inven_drop(int item_val, int drop_all)
 	(void)sprintf(prt2, "Dropped %s.", prt1);
 	msg_print(prt2);
     }
-    p_ptr->flags.status |= PY_STR_WGT;
+    p_ptr->status |= PY_STR_WGT;
 }
 
 
@@ -1402,7 +1402,7 @@ void inven_command(int command)
 	if (tmp2 < cur_lite)
 	    tmp2 = cur_lite;
 
-	if (!p_ptr->flags.blind) {
+	if (!p_ptr->blind) {
 	    min_i = MY_MAX(0, (char_row - cur_lite));
 	    max_i = MY_MIN(cur_height, (char_row + cur_lite));
 	    min_j = MY_MAX(0, (char_col - cur_lite));

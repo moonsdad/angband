@@ -488,7 +488,7 @@ void print_objects()
 			magic_treasure(j, level, 0, FALSE);
 			i_ptr = &i_list[j];
 			store_bought(i_ptr);
-			if (i_ptr->flags & TR3_CURSED)
+			if (i_ptr->flags3 & TR3_CURSED)
 			    add_inscribe(i_ptr, ID_DAMD);
 			objdes(tmp_str, i_ptr, TRUE);
 		    }
@@ -524,7 +524,6 @@ int file_character(cptr filename1)
     int			xstl, xdis, xsave, xdev;
     char                xinfra[32];
 
-    register struct misc *p_ptr;
 
     vtype			out_val, prt1;
     bigvtype			prt2;
@@ -568,75 +567,75 @@ int file_character(cptr filename1)
 	blank = " ";
 
 	(void)fprintf(file1, "%c\n\n", CTRL('L'));
-	(void)fprintf(file1, " Name%9s %-23s", colon, p_ptr->misc.name);
-	(void)fprintf(file1, "Age%11s %6d ", colon, (int)p_ptr->misc.age);
-	cnv_stat(p_ptr->stats.use_stat[A_STR], prt1);
+	(void)fprintf(file1, " Name%9s %-23s", colon, p_ptr->name);
+	(void)fprintf(file1, "Age%11s %6d ", colon, (int)p_ptr->age);
+	cnv_stat(p_ptr->use_stat[A_STR], prt1);
 	(void)fprintf(file1, "   STR : %s\n", prt1);
-	(void)fprintf(file1, " Race%9s %-23s", colon, race[p_ptr->misc.prace].trace);
-	(void)fprintf(file1, "Height%8s %6d ", colon, (int)p_ptr->misc.ht);
-	cnv_stat(p_ptr->stats.use_stat[A_INT], prt1);
+	(void)fprintf(file1, " Race%9s %-23s", colon, race[p_ptr->prace].trace);
+	(void)fprintf(file1, "Height%8s %6d ", colon, (int)p_ptr->ht);
+	cnv_stat(p_ptr->use_stat[A_INT], prt1);
 	(void)fprintf(file1, "   INT : %s\n", prt1);
 	(void)fprintf(file1, " Sex%10s %-23s", colon,
-		      (p_ptr->misc.male ? "Male" : "Female"));
-	(void)fprintf(file1, "Weight%8s %6d ", colon, (int)p_ptr->misc.wt);
-	cnv_stat(p_ptr->stats.use_stat[A_WIS], prt1);
+		      (p_ptr->male ? "Male" : "Female"));
+	(void)fprintf(file1, "Weight%8s %6d ", colon, (int)p_ptr->wt);
+	cnv_stat(p_ptr->use_stat[A_WIS], prt1);
 	(void)fprintf(file1, "   WIS : %s\n", prt1);
 	(void)fprintf(file1, " Class%8s %-23s", colon,
-		      class[p_ptr->misc.pclass].title);
-	(void)fprintf(file1, "Social Class : %6d ", p_ptr->misc.sc);
-	cnv_stat(p_ptr->stats.use_stat[A_DEX], prt1);
+		      class[p_ptr->pclass].title);
+	(void)fprintf(file1, "Social Class : %6d ", p_ptr->sc);
+	cnv_stat(p_ptr->use_stat[A_DEX], prt1);
 	(void)fprintf(file1, "   DEX : %s\n", prt1);
 	(void)fprintf(file1, " Title%8s %-23s", colon, title_string());
 	(void)fprintf(file1, "%22s", blank);
-	cnv_stat(p_ptr->stats.use_stat[A_CON], prt1);
+	cnv_stat(p_ptr->use_stat[A_CON], prt1);
 	(void)fprintf(file1, "   CON : %s\n", prt1);
 	(void)fprintf(file1, "%34s", blank);
 	(void)fprintf(file1, "%26s", blank);
-	cnv_stat(p_ptr->stats.use_stat[A_CHR], prt1);
+	cnv_stat(p_ptr->use_stat[A_CHR], prt1);
 	(void)fprintf(file1, "   CHR : %s\n\n", prt1);
 
-	(void)fprintf(file1, " + To Hit    : %6d", p_ptr->misc.dis_th);
-	(void)fprintf(file1, "%7sLevel      :%9d", blank, (int)p_ptr->misc.lev);
-	(void)fprintf(file1, "   Max Hit Points : %6d\n", p_ptr->misc.mhp);
-	(void)fprintf(file1, " + To Damage : %6d", p_ptr->misc.dis_td);
-	(void)fprintf(file1, "%7sExperience :%9ld", blank, (long)p_ptr->misc.exp);
-	(void)fprintf(file1, "   Cur Hit Points : %6d\n", p_ptr->misc.chp);
-	(void)fprintf(file1, " + To AC     : %6d", p_ptr->misc.dis_tac);
-	(void)fprintf(file1, "%7sMax Exp    :%9ld", blank, (long)p_ptr->misc.max_exp);
-	(void)fprintf(file1, "   Max Mana%8s %6d\n", colon, p_ptr->misc.mana);
-	(void)fprintf(file1, "   Total AC  : %6d", p_ptr->misc.dis_ac);
+	(void)fprintf(file1, " + To Hit    : %6d", p_ptr->dis_th);
+	(void)fprintf(file1, "%7sLevel      :%9d", blank, (int)p_ptr->lev);
+	(void)fprintf(file1, "   Max Hit Points : %6d\n", p_ptr->mhp);
+	(void)fprintf(file1, " + To Damage : %6d", p_ptr->dis_td);
+	(void)fprintf(file1, "%7sExperience :%9ld", blank, (long)p_ptr->exp);
+	(void)fprintf(file1, "   Cur Hit Points : %6d\n", p_ptr->chp);
+	(void)fprintf(file1, " + To AC     : %6d", p_ptr->dis_tac);
+	(void)fprintf(file1, "%7sMax Exp    :%9ld", blank, (long)p_ptr->max_exp);
+	(void)fprintf(file1, "   Max Mana%8s %6d\n", colon, p_ptr->mana);
+	(void)fprintf(file1, "   Total AC  : %6d", p_ptr->dis_ac);
 	
-	if (p_ptr->misc.lev >= MAX_PLAYER_LEVEL) {
+	if (p_ptr->lev >= MAX_PLAYER_LEVEL) {
 	    (void)fprintf(file1, "%7sExp to Adv.:%9s", blank, "****");
 	}
 	else {
 	    (void)fprintf(file1, "%7sExp to Adv.:%9ld", blank,
-			  (long) (player_exp[p_ptr->misc.lev - 1] *
-				   p_ptr->misc.expfact / 100));
+			  (long) (player_exp[p_ptr->lev - 1] *
+				   p_ptr->expfact / 100L));
 	}
 
-	(void)fprintf(file1, "   Cur Mana%8s %6d\n", colon, p_ptr->misc.cmana);
-	(void)fprintf(file1, "%28sGold%8s%9ld\n", blank, colon, (long)p_ptr->misc.au);
+	(void)fprintf(file1, "   Cur Mana%8s %6d\n", colon, p_ptr->cmana);
+	(void)fprintf(file1, "%28sGold%8s%9ld\n", blank, colon, (long)p_ptr->au);
 
-	xbth = p_ptr->misc.bth + p_ptr->misc.ptohit * BTH_PLUS_ADJ
-	    + (class_level_adj[p_ptr->misc.pclass][CLA_BTH] * p_ptr->misc.lev);
-	xbthb = p_ptr->misc.bthb + p_ptr->misc.ptohit * BTH_PLUS_ADJ
-	    + (class_level_adj[p_ptr->misc.pclass][CLA_BTHB] * p_ptr->misc.lev);
+	xbth = p_ptr->bth + p_ptr->ptohit * BTH_PLUS_ADJ
+	    + (class_level_adj[p_ptr->pclass][CLA_BTH] * p_ptr->lev);
+	xbthb = p_ptr->bthb + p_ptr->ptohit * BTH_PLUS_ADJ
+	    + (class_level_adj[p_ptr->pclass][CLA_BTHB] * p_ptr->lev);
     /* this results in a range from 0 to 29 */
-	xfos = 40 - p_ptr->misc.fos;
+	xfos = 40 - p_ptr->fos;
 	if (xfos < 0)
 	    xfos = 0;
-	xsrh = p_ptr->misc.srh;
+	xsrh = p_ptr->srh;
     /* this results in a range from 0 to 9 */
-	xstl = p_ptr->misc.stl + 1;
-	xdis = p_ptr->misc.disarm + 2 * todis_adj() + stat_adj(A_INT)
-	    + (class_level_adj[p_ptr->misc.pclass][CLA_DISARM] * p_ptr->misc.lev / 3);
-	xsave = p_ptr->misc.save + stat_adj(A_WIS)
-	    + (class_level_adj[p_ptr->misc.pclass][CLA_SAVE] * p_ptr->misc.lev / 3);
-	xdev = p_ptr->misc.save + stat_adj(A_INT)
-	    + (class_level_adj[p_ptr->misc.pclass][CLA_DEVICE] * p_ptr->misc.lev / 3);
+	xstl = p_ptr->stl + 1;
+	xdis = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
+	    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
+	xsave = p_ptr->save + stat_adj(A_WIS)
+	    + (class_level_adj[p_ptr->pclass][CLA_SAVE] * p_ptr->lev / 3);
+	xdev = p_ptr->save + stat_adj(A_INT)
+	    + (class_level_adj[p_ptr->pclass][CLA_DEVICE] * p_ptr->lev / 3);
 
-	(void)sprintf(xinfra, "%d feet", p_ptr->flags.see_infra * 10);
+	(void)sprintf(xinfra, "%d feet", p_ptr->see_infra * 10);
 
 	(void)fprintf(file1, "(Miscellaneous Abilities)\n\n");
 	(void)fprintf(file1, " Fighting    : %-10s", likert(xbth, 12));
@@ -652,7 +651,7 @@ int file_character(cptr filename1)
 	/* Write out the character's history     */
 	(void)fprintf(file1, "Character Background\n");
 	for (i = 0; i < 4; i++) {
-	    (void)fprintf(file1, " %s\n", p_ptr->misc.history[i]);
+	    (void)fprintf(file1, " %s\n", p_ptr->history[i]);
 	}
 
 	/* Write out the equipment list.	     */
@@ -726,8 +725,8 @@ int file_character(cptr filename1)
 	}
 	(void)fprintf(file1, "%c", CTRL('L'));
 
-	fprintf(file1, "  [%s%s Home Inventory]\n\n", p_ptr->misc.name,
-		(toupper(p_ptr->misc.name[strlen(p_ptr->misc.name)-1]) == 'S' ? "'" : "'s"));
+	fprintf(file1, "  [%s%s Home Inventory]\n\n", p_ptr->name,
+		(toupper(p_ptr->name[strlen(p_ptr->name)-1]) == 'S' ? "'" : "'s"));
 	if (store[MAX_STORES-1].store_ctr == 0) {
 	    (void) fprintf(file1, "  Character has no objects at home.\n");
 	}
@@ -762,7 +761,7 @@ int file_character(cptr filename1)
  */
 long total_points(void)
 {
-    return (p_ptr->misc.max_exp + (100 * p_ptr->misc.max_dlv));
+    return (p_ptr->max_exp + (100 * p_ptr->max_dlv));
 }
 
 
@@ -806,7 +805,7 @@ static void print_tomb()
 #endif
 #endif
 		fprintf(fp, "%s\n%d\n%d\n%d",
-		  p_ptr->misc.name, p_ptr->misc.mhp, p_ptr->misc.prace, p_ptr->misc.pclass);
+		  p_ptr->name, p_ptr->mhp, p_ptr->prace, p_ptr->pclass);
 		if (fp) fclose(fp);
 	    }
 	} else {
@@ -825,7 +824,7 @@ static void print_tomb()
     put_str("/", 5, 11);
     put_str("\\  : _;,,,;_    :   :", 5, 41);
     (void)sprintf(str, "/%s\\,;_          _;,,,;_",
-		  center_string(tmp_str, p_ptr->misc.name));
+		  center_string(tmp_str, p_ptr->name));
     put_str(str, 6, 10);
     put_str("|               the               |   ___", 7, 9);
     p = total_winner ? "Magnificent" : title_string();
@@ -834,9 +833,9 @@ static void print_tomb()
     put_str("|", 9, 9);
     put_str("|  :   :", 9, 43);
     if (!total_winner) {
-	p = class[p_ptr->misc.pclass].title;
+	p = class[p_ptr->pclass].title;
     }
-    else if (p_ptr->misc.male) {
+    else if (p_ptr->male) {
 	p = "*King*";
     }
     else {
@@ -845,13 +844,13 @@ static void print_tomb()
 
     (void)sprintf(str, "| %s | _;,,,;_   ____", center_string(tmp_str, p));
     put_str(str, 10, 9);
-    (void)sprintf(str, "Level : %d", (int)p_ptr->misc.lev);
+    (void)sprintf(str, "Level : %d", (int)p_ptr->lev);
     (void)sprintf(str, "| %s |          /    \\", center_string(tmp_str, str));
     put_str(str, 11, 9);
-    (void)sprintf(str, "%ld Exp", (long)p_ptr->misc.exp);
+    (void)sprintf(str, "%ld Exp", (long)p_ptr->exp);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
     put_str(str, 12, 9);
-    (void)sprintf(str, "%ld Au", (long)p_ptr->misc.au);
+    (void)sprintf(str, "%ld Au", (long)p_ptr->au);
     (void)sprintf(str, "| %s |          :    :", center_string(tmp_str, str));
     put_str(str, 13, 9);
     (void)sprintf(str, "Died on Level : %d", dun_level);
@@ -871,6 +870,18 @@ static void print_tomb()
     put_str("*|   *     *     *    *   *     *  | *", 18, 8);
     put_str("________)/\\\\_)_/___(\\/___(//_\\)/_\\//__\\\\(/_|_)_______",
 	       19, 0);
+}
+
+
+/*
+ * Display some character info
+ */
+static void show_info(void)
+{
+    int i, j, k;
+    inven_type *i_ptr;
+    store_type *st_ptr;
+    vtype t1, t2, str;
 
     /* Flush all input keys */
     flush();
@@ -878,7 +889,7 @@ static void print_tomb()
     put_str("(ESC to abort, return to print on screen, or file name)", 23, 0);
     put_str("Character record?", 22, 0);
 
-    if (get_string(str, 22, 18, 60)) {
+    if (!get_string(str, 22, 18, 60)) return;
 
 
     /* Know everything the player is wearing/carrying */
@@ -897,48 +908,57 @@ static void print_tomb()
 
     put_str("Type ESC to skip the inventory:", 23, 0);
 
-    if (inkey() != ESCAPE) {
-	    clear_screen();
-	    msg_print("You are using:");
-	    (void)show_equip(TRUE, 0);
-	    msg_print(NULL);
-	    if (inven_ctr) {
-		msg_print("You are carrying:");
-		clear_from(1);
-		(void)show_inven(0, inven_ctr - 1, TRUE, 0, 0);
-		msg_print(NULL);
-	    }
-          msg_print ("You have stored at your house:");
-          clear_from (1);
-	{ /* show home's inventory... */
-            store_type *s_ptr = &store[7]; /* home */
-            int ii = 0, j = 0;
-            vtype t1, t2;
-            
-            while ( ii <s_ptr->store_ctr) {
-              j = 0;
-              sprintf(t2, "(page %d)", (ii==0?1:2));
-              prt(t2, 1, 3);
-              while ((ii<s_ptr->store_ctr) && (j<12)){
-                known1(&s_ptr->store_inven[ii].sitem);
-                known2(&s_ptr->store_inven[ii].sitem);
-                objdes(t1, &s_ptr->store_inven[ii].sitem, TRUE);
-                sprintf(t2, "%c) %s", 'a'+j, t1);
-                prt(t2, j+2, 4); 
-                j++;
-                ii++;
-	    } /* items 1-12, 13-24 loop */
-              if (ii < s_ptr->store_ctr) { /* if we're done, skip this */
-                msg_print(NULL);
-                msg_print("Home inventory:");
-                clear_from (1);
-	    }
-	  } /* outer while loop */
-            msg_print(NULL);
-	} /* scope block of display-home inventory code -CFT */
+    if (inkey() == ESCAPE) return;
 
-	}
+
+    /* Show equipment and inventory */
+
+	clear_screen();
+	msg_print("You are using:");
+	show_equip(TRUE, 0);
+	msg_print(NULL);
+
+    /* Inventory -- no assumptions */
+    if (inven_ctr) {
+	msg_print("You are carrying:");
+	clear_from(1);
+	show_inven(0, inven_ctr - 1, TRUE, 0, 0);
+	msg_print(NULL);
     }
+
+    msg_print ("You have stored at your house:");
+    clear_from (1);
+
+    { /* show home's inventory... */
+    /* Access the home */
+	store_type *s_ptr = &store[7];
+
+	int ii = 0, j = 0;
+	vtype t1, t2;
+
+	while ( ii < s_ptr->store_ctr) {
+	    j = 0;
+	    sprintf(t2, "(page %d)", (ii==0?1:2));
+	    prt(t2, 1, 3);
+	    while ((ii<s_ptr->store_ctr) && (j<12)){
+		known1(&s_ptr->store_inven[ii].sitem);
+		known2(&s_ptr->store_inven[ii].sitem);
+		objdes(t1, &s_ptr->store_inven[ii].sitem, TRUE);
+		sprintf(t2, "%c) %s", 'a'+j, t1);
+		prt(t2, j+2, 4); 
+		j++;
+		ii++;
+	    } /* items 1-12, 13-24 loop */
+	    if (ii < s_ptr->store_ctr) { /* if we're done, skip this */
+		msg_print(NULL);
+		msg_print("Home inventory:");
+		clear_from (1);
+	    }
+	} /* outer while loop */
+	    /* Flush it */
+	msg_print(NULL);
+    } /* scope block of display-home inventory code -CFT */
+
 }
 
 
@@ -986,16 +1006,16 @@ static errr top_twenty(void)
 
     myscore.points = total_points();
     myscore.dun_level = dun_level;
-    myscore.lev = p_ptr->misc.lev;
-    myscore.max_lev = p_ptr->misc.max_dlv;
-    myscore.mhp = p_ptr->misc.mhp;
-    myscore.chp = p_ptr->misc.chp;
+    myscore.lev = p_ptr->lev;
+    myscore.max_lev = p_ptr->max_dlv;
+    myscore.mhp = p_ptr->mhp;
+    myscore.chp = p_ptr->chp;
     myscore.uid = player_uid;
 /* First character of sex, lower case */
-    myscore.sex = p_ptr->misc.male;
-    myscore.prace = p_ptr->misc.prace;
-    myscore.pclass = p_ptr->misc.pclass;
-    (void)strcpy(myscore.name, p_ptr->misc.name);
+    myscore.sex = p_ptr->male;
+    myscore.prace = p_ptr->prace;
+    myscore.pclass = p_ptr->pclass;
+    (void)strcpy(myscore.name, p_ptr->name);
     (void)strncpy(myscore.died_from, died_from, strlen(died_from));
     myscore.died_from[strlen(died_from)] = '\0';
 /* Get rid of '.' at end of death description */
@@ -1071,6 +1091,7 @@ static errr top_twenty(void)
     return (0);
 }
 
+
 /*
  * Enters a players name on the hi-score table     SM	 
  */
@@ -1143,16 +1164,16 @@ static void kingly()
 {
     register cptr p;
 
-    /* Change the character attributes.		 */
+    /* Hack -- retire in town */
     dun_level = 0;
 
     /* Change the character attributes.		 */
     (void)strcpy(died_from, "Ripe Old Age");
     (void)restore_level();
-    s_ptr->misc.lev += MAX_PLAYER_LEVEL;
-    s_ptr->misc.au += 250000L;
-    s_ptr->misc.max_exp += 5000000L;
-    s_ptr->misc.exp = s_ptr->misc.max_exp;
+    p_ptr->lev += MAX_PLAYER_LEVEL;
+    p_ptr->au += 250000L;
+    p_ptr->max_exp += 5000000L;
+    p_ptr->exp = p_ptr->max_exp;
 
     /* Let the player know that he did good.	 */
     clear_screen();
@@ -1171,7 +1192,7 @@ static void kingly()
     put_str(p, 12, 24);
     put_str("Veni, Vidi, Vici!", 15, 26);
     put_str("I came, I saw, I conquered!", 16, 21);
-    if (s_ptr->misc.male) {
+    if (p_ptr->male) {
 	put_str("All Hail the Mighty King!", 17, 22);
     }
     else {
@@ -1213,6 +1234,9 @@ void exit_game(void)
 	/* You are dead */
 	print_tomb();
 
+	/* Show more info */
+	show_info();
+    
 	/* Handle score, show Top scores */
 	if (!wizard && !to_be_wizard)
 	top_twenty();

@@ -431,7 +431,7 @@ s32b sell_price(int snum, s32b *max_sell, s32b *min_sell, inven_type *item)
     if ((item->cost > 0) && (i > 0)) {
 
     /* Get the "basic value" */
-    i = i * rgold_adj[owners[s_ptr->owner].owner_race][p_ptr->misc.prace] / 100;
+    i = i * rgold_adj[owners[s_ptr->owner].owner_race][p_ptr->prace] / 100;
 
     /* Nothing becomes free */
     if (i < 1) i = 1;
@@ -843,7 +843,7 @@ static void store_prt_gold(void)
 {
     vtype out_val;
 
-    (void)sprintf(out_val, "Gold Remaining : %ld", (long)p_ptr->misc.au);
+    (void)sprintf(out_val, "Gold Remaining : %ld", (long)p_ptr->au);
     prt(out_val, 18, 17);
 }
 
@@ -1239,7 +1239,7 @@ static int sell_haggle(int store_num, s32b price, inven_type *i_ptr)
 
     cost = cost * (200 - chr_adj()) / 100;
 
-    cost = cost * (200 - rgold_adj[o_ptr->owner_race][p_ptr->misc.prace]) / 100;
+    cost = cost * (200 - rgold_adj[o_ptr->owner_race][p_ptr->prace]) / 100;
 
     if (cost < 1) cost = 1;
     max_sell = cost * o_ptr->max_inflate / 100;
@@ -1427,10 +1427,10 @@ static int store_purchase(int store_num, int *cur_top)
 		} else
 		    choice = purchase_haggle(store_num, &price, &sell_obj);
 		if (choice == 0) {
-		    if (p_ptr->misc.au >= price) {
+		    if (p_ptr->au >= price) {
 			prt_comment1();
 			decrease_insults(store_num);
-			p_ptr->misc.au -= price;
+			p_ptr->au -= price;
 			item_new = inven_carry(&sell_obj);
 			i = s_ptr->store_ctr;
 			store_destroy(store_num, item_val, TRUE);
@@ -1541,7 +1541,7 @@ static int store_sell(int store_num, int *cur_top)
 
 			prt_comment1();
 			decrease_insults(store_num);
-			p_ptr->misc.au += price;
+			p_ptr->au += price;
 
 			cost = item_value(&sold_obj);
 
@@ -1737,7 +1737,7 @@ void enter_store(int store_num)
 		  case 'w':	   /* Wear			 */
 		  case 'X':
 		  case 'x':	   /* Switch weapon		 */
-		    tmp_chr = p_ptr->stats.use_stat[A_CHR];
+		    tmp_chr = p_ptr->use_stat[A_CHR];
 		    do {
 			in_store_flag = TRUE;
 			inven_command(command);
@@ -1746,7 +1746,7 @@ void enter_store(int store_num)
 		    }
 		    while (command);
 		/* redisplay store prices if charisma changes */
-		    if (tmp_chr != p_ptr->stats.use_stat[A_CHR])
+		    if (tmp_chr != p_ptr->use_stat[A_CHR])
 			display_inventory(store_num, cur_top);
 		    free_turn_flag = FALSE;	/* No free moves here. -CJS- */
 		    break;

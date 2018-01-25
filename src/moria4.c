@@ -62,7 +62,7 @@ void target()
     exit = FALSE;
     exit2 = FALSE;
 
-    if (p_ptr->flags.blind > 0)
+    if (p_ptr->blind > 0)
 	msg_print("You can't see anything to target!");
     else {
 
@@ -433,7 +433,7 @@ int get_dir(cptr prompt, int *dir)
 int direction(int *dir)
 {
     if (get_dir(NULL, dir)) {
-	if (p_ptr->flags.confused > 0) {
+	if (p_ptr->confused > 0) {
 	    msg_print("You are confused.");
 	    do {
 		*dir = randint(9);
@@ -457,10 +457,10 @@ void search_on()
     change_speed(1);
     
     /* Visual feedback */
-    p_ptr->flags.status |= PY_SEARCH;
+    p_ptr->status |= PY_SEARCH;
     prt_state();
     prt_speed();
-    p_ptr->flags.food_digested++;
+    p_ptr->food_digested++;
 }
 
 void search_off(void)
@@ -470,10 +470,10 @@ void search_off(void)
     change_speed(-1);
     
     /* Visual feedback */
-    p_ptr->flags.status &= ~PY_SEARCH;
+    p_ptr->status &= ~PY_SEARCH;
     prt_state();
     prt_speed();
-    p_ptr->flags.food_digested--;
+    p_ptr->food_digested--;
 }
 
 
@@ -486,9 +486,9 @@ void disturb(int stop_search, int light_change)
 {
     command_count = 0;
 
-    if (stop_search && (p_ptr->flags.status & PY_SEARCH)) search_off();
+    if (stop_search && (p_ptr->status & PY_SEARCH)) search_off();
 
-    if (p_ptr->flags.rest != 0) rest_off();
+    if (p_ptr->rest != 0) rest_off();
 
     if (light_change || find_flag) {
 	find_flag = FALSE;
@@ -566,16 +566,16 @@ void search(int y, int x, int chance)
 
 void rest_off()
 {
-    p_ptr->flags.rest = 0;
+    p_ptr->rest = 0;
 
     /* Hack -- update the state */
-    p_ptr->flags.status &= ~PY_REST;
+    p_ptr->status &= ~PY_REST;
     prt_state();
 
     /* flush last message, or delete "press any key" message */
     msg_print(NULL);
 
-    p_ptr->flags.food_digested++;
+    p_ptr->food_digested++;
 }
 
 
@@ -605,7 +605,7 @@ void carry(int y, int x, int pickup)
 
     /* There's GOLD in them thar hills!      */
     if (i == TV_GOLD) {
-	p_ptr->misc.au += i_ptr->cost;
+	p_ptr->au += i_ptr->cost;
 	objdes(tmp_str, i_ptr, TRUE);
 	(void)sprintf(out_val,
 		      "You have found %ld gold pieces worth of %s.",
@@ -717,7 +717,7 @@ static void area_affect(int dir, int y, int x)
     register cave_type *c_ptr;
 
     /* We must be able to see... */
-    if (p_ptr->flags.blind < 1) {
+    if (p_ptr->blind < 1) {
 
 	option = 0;
 	option2 = 0;
@@ -908,7 +908,7 @@ void move_player(int dir, int do_pickup)
     register int        i, j;
     register cave_type *c_ptr, *d_ptr;
 
-    if (((p_ptr->flags.confused > 0) || (p_ptr->flags.stun > 0)) &&	/* Confused/Stunned?  */
+    if (((p_ptr->confused > 0) || (p_ptr->stun > 0)) &&	/* Confused/Stunned?  */
 	(randint(4) > 1) &&	   /* 75% random movement */
 	(dir != 5)) {		   /* Never random if sitting */
 	dir = randint(9);
@@ -947,17 +947,17 @@ void move_player(int dir, int do_pickup)
 		    area_affect(dir, char_row, char_col);
 	    /* Check to see if he notices something  */
 	    /* fos may be negative if have good rings of searching */
-		if ((p_ptr->misc.fos <= 1) || (randint(p_ptr->misc.fos) == 1) ||
-		    (p_ptr->flags.status & PY_SEARCH))
-		    search(char_row, char_col, p_ptr->misc.srh);
+		if ((p_ptr->fos <= 1) || (randint(p_ptr->fos) == 1) ||
+		    (p_ptr->status & PY_SEARCH))
+		    search(char_row, char_col, p_ptr->srh);
 	    /* A room of light should be lit.	     */
 		if ((c_ptr->fval == LIGHT_FLOOR) ||
 		    (c_ptr->fval == NT_LIGHT_FLOOR)) {
-		    if (!c_ptr->pl && !p_ptr->flags.blind)
+		    if (!c_ptr->pl && !p_ptr->blind)
 			lite_room(char_row, char_col);
 		}
 	    /* In doorway of light-room?	       */
-		else if (c_ptr->lr && (p_ptr->flags.blind < 1)) {
+		else if (c_ptr->lr && (p_ptr->blind < 1)) {
 		    byte lit = FALSE;	/* only call lite_room once... -CFT */
 
 		    for (i = (char_row - 1); !lit && i <= (char_row + 1); i++)
@@ -1028,7 +1028,7 @@ void move_player(int dir, int do_pickup)
 	    /* did not do anything this turn */
 		free_turn_flag = TRUE;
 	    } else {
-		if (p_ptr->flags.afraid < 1)	/* Coward?	 */
+		if (p_ptr->afraid < 1)	/* Coward?	 */
 		    py_attack(y, x);
 		else		   /* Coward!	 */
 		    msg_print("You are too afraid!");
@@ -1200,7 +1200,7 @@ void find_init(int dir)
 	find_flag = 1;
 	find_breakright = find_breakleft = FALSE;
 	find_prevdir = dir;
-	if (p_ptr->flags.blind < 1) {
+	if (p_ptr->blind < 1) {
 	    i = chome[dir];
 	    deepleft = deepright = FALSE;
 	    shortright = shortleft = FALSE;

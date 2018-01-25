@@ -922,7 +922,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (!(((randint(2) == 1) || (good == 666)) &&
 			      !not_unique && unique_armour(i_ptr))) {
 			i_ptr->flags1 |= (TR1_STR | TR1_DEX | TR1_CON);
-			i_ptr->flags |= (TR2_FREE_ACT);
+			i_ptr->flags2 |= (TR2_FREE_ACT);
 			i_ptr->pval = randint(3);	/* +N STR/DEX/CON */
 			i_ptr->cost += 1000 + i_ptr->pval * 500;
 			i_ptr->name2 = EGO_MIGHT;
@@ -1205,7 +1205,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		i_ptr->todam -= m_bonus(2, 15, level + 10);
 		i_ptr->cost = 0;
 	    }
-	    i_ptr->flags |= TR3_CURSED;
+	    i_ptr->flags3 |= TR3_CURSED;
 	}
 	break;
 
