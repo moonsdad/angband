@@ -11,7 +11,7 @@
  */
 
 #include "angband.h"
-
+#define SPEC_DEST        2
 
 
 typedef struct coords {

@@ -44,7 +44,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 
     res = NO_RES;		/* assume until we know different -CFT */
     switch ( typ ){		/* check for resists... */
-      case GF_MAGIC_MISSILE:	/* pure damage, no resist possible */
+      case GF_MISSILE:	/* pure damage, no resist possible */
 	break;
       case GF_ELEC:
 	if (r_ptr->cflags2 & MF2_IM_ELEC) {
@@ -272,7 +272,7 @@ static void spell_hit_monster(monster_type *m_ptr, int typ, int *dam, int rad, i
 	    *dam /= (randint(6)+6); /* from .427 to .25 -CFT */
         }
 	break;
-      case GF_LIGHT:
+      case GF_LITE:
 	if (r_ptr->spells3 & MS3_BR_LITE){ /* breathe light to res light */
 	    res = RESIST;
 	    *dam *= 2;
@@ -452,7 +452,7 @@ static void ball_destroy(int typ, int (**destroy) ())
       case GF_HOLY_ORB:	   /* DGK */
 	*destroy = set_holy_destroy;	/* cursed stuff -DGK */
 	break;
-      case GF_MAGIC_MISSILE:
+      case GF_MISSILE:
       case GF_POIS:
       case GF_ARROW:
       case GF_NETHER:
@@ -462,7 +462,7 @@ static void ball_destroy(int typ, int (**destroy) ())
       case GF_DISENCHANT:
       case GF_NEXUS:
       case GF_INERTIA:
-      case GF_LIGHT:
+      case GF_LITE:
       case GF_DARK:
       case GF_TIME:
       case GF_GRAVITY:
@@ -574,7 +574,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
     /* if wielding a bow as main/aux weapon, then ammo will be "right" ammo
      * more often than not of the time -CFT */
     if (inventory[INVEN_WIELD].tval == TV_BOW) i_ptr=&inventory[INVEN_WIELD];
-    else if (inventory[INVEN_AUX].tval == TV_BOW) i_ptr=&inventory[INVEN_AUX];
+    else if (inventory[INVEN_BOW].tval == TV_BOW) i_ptr=&inventory[INVEN_BOW];
 
     if (i_ptr && (randint(2)==1)){
 	if ((t_ptr->tval == TV_SHOT) &&

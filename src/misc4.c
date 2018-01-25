@@ -2110,6 +2110,9 @@ int attack_blows(int weight, int *wtohit)
 {
     int adj_weight, str_index, dex_index;
 
+    /* Number of blows */
+    int b = 0;
+    
     /* Start with the strength/dexterity */
     int s = p_ptr->stats.use_stat[A_STR];
     int d = p_ptr->stats.use_stat[A_DEX];
@@ -2171,29 +2174,30 @@ int attack_blows(int weight, int *wtohit)
 	else str_index = 10;
 
 	s = 0;				/* do Weapons of Speed */
-	for (d = INVEN_WIELD; d < INVEN_AUX; d++)
+	for (d = INVEN_WIELD; d < INVEN_BOW; d++)
 	    if (inventory[d].flags2 & TR1_ATTACK_SPD)
 		s += inventory[d].pval;
 
-	d = (int)blows_table[str_index][dex_index];
+	/* Use the blows table */
+	b = (int)blows_table[str_index][dex_index];
 
 	/* Non-warrior attack penalty */
 	if (p_ptr->misc.pclass != 0) {
-	    if (d > 5) d = 5;
+	    if (b > 5) b = 5;
 	}
 	
 	/* Mage attack penalty */
 	if (p_ptr->misc.pclass == 1) {
-	    if (d > 4) d = 4;
+	    if (b > 4) b = 4;
 	}
 
-	d += s;
+	b += s;
 
     /* Always get at least one attack */
-    if (d < 1) d = 1;
+    if (b < 1) b = 1;
 
     /* Return the attack count */
-	return (d);
+    return (b);
     }
 }
 

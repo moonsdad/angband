@@ -1934,7 +1934,7 @@ int lose_all_info(void)
     inven_type          *i_ptr;
 
     /* Forget info about objects */
-    for (i = 0; i <= INVEN_AUX; i++) {
+    for (i = 0; i <= INVEN_BOW; i++) {
 
 	i_ptr = &inventory[i];
 
@@ -2337,7 +2337,7 @@ void identify_pack()
     inven_type         *i_ptr;
 
     /* Simply identify and know every item */
-    for (i = 0; i <= INVEN_AUX; i++) {
+    for (i = 0; i <= INVEN_BOW; i++) {
 	i_ptr = &inventory[i];
 	if (i_ptr->tval != TV_NOTHING) {
 	    inven_aware(i_ptr);
@@ -3749,7 +3749,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			    msg_print("You are hit by something hot!");
 			fire_dam(dam_hp, ddesc);
 			break;
-		      case GF_MAGIC_MISSILE:
+		      case GF_MISSILE:
 			if (blind)
 			    msg_print("You are hit by something!");
 			take_hit(dam_hp, ddesc);
@@ -3963,7 +3963,7 @@ void bolt(int typ, int y, int x, int dam_hp, char *ddesc, monster_type *ptr, int
 			}
 			take_hit(dam_hp, ddesc);
 			break;
-		      case GF_LIGHT:
+		      case GF_LITE:
 			if (blind)
 			    msg_print("You are hit by something!");
 			if (p_ptr->flags.resist_lite) {
@@ -4244,7 +4244,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			  case GF_FIRE:
 			    fire_dam(dam, ddesc);
 			    break;
-			  case GF_MAGIC_MISSILE:
+			  case GF_MISSILE:
 			    take_hit(dam, ddesc);
 			    break;
 			  case GF_HOLY_ORB:
@@ -4516,7 +4516,7 @@ void breath(int typ, int y, int x, int dam_hp, char *ddesc, int monptr)
 			    }
 			    take_hit(dam, ddesc);
 			    break;
-			  case GF_LIGHT:
+			  case GF_LITE:
 			    if (p_ptr->flags.resist_lite) {
 				dam *= 4;
 				dam /= (randint(6) + 6);

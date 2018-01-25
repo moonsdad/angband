@@ -673,10 +673,10 @@ void cast()
 	  case 1:
 	    if (get_dir(NULL, &dir))
 			if (randint(100) < (chance-10))
-			    line_spell(GF_MAGIC_MISSILE, dir, char_row, char_col,
+			    line_spell(GF_MISSILE, dir, char_row, char_col,
 				       damroll(3 + ((p_ptr->misc.lev - 1) / 5), 4) );
 			else
-			    fire_bolt(GF_MAGIC_MISSILE, dir, char_row, char_col,
+			    fire_bolt(GF_MISSILE, dir, char_row, char_col,
 				      damroll(3 + ((p_ptr->misc.lev - 1) / 5), 4));
 	    break;
 

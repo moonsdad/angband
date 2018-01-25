@@ -1561,50 +1561,16 @@ void do_cmd_aim_wand(void)
 		done_effect = 1;
 	    break;
 
-	case SV_WAND_DRAGON_FIRE:
-	    fire_ball(GF_FIRE, dir, y, x, 100, 3);
-	    ident = TRUE;
-		done_effect = 1;
-	    break;
-
-    case SV_WAND_DRAGON_COLD:
-	    fire_ball(GF_COLD, dir, y, x, 80, 3);
-	    ident = TRUE;
-		done_effect = 1;
-	    break;
-
-	case SV_WAND_DRAGON_BREATH:
-		switch (randint(5)) {
-		  case 1:
-		    fire_ball(GF_FIRE, dir, y, x, 100, 3);
-		    break;
-		  case 2:
-		    fire_ball(GF_COLD, dir, y, x, 80, 3);
-		    break;
-		  case 3:
-		    fire_ball(GF_ACID, dir, y, x, 90, 3);
-		    break;
-		  case 4:
-		    fire_ball(GF_ELEC, dir, y, x, 70, 3);
-		    break;
-		  default:
-		    fire_ball(GF_POIS, dir, y, x, 70, 3);
-		    break;
-		}
-	    ident = TRUE;
-		done_effect = 1;
-	    break;
-
-	case WD_AC_BLTS:	/* Acid , New */
+	case SV_WAND_ACID:	/* Acid  */
 		if (randint(5)==1)
-		    line_spell(GF_ACID,dir,y,x,damroll(5,8));
+		    line_spell(GF_ACID, dir,y,x, damroll(5,8));
 		else
 		    fire_bolt(GF_ACID,dir,y,x,damroll(5,8));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
 
-	case SV_WAND_LITE_BLTS:	/* Lightning */
+	case SV_WAND_ELEC:	/* Lightning */
 		if (randint(6)==1)
 		    line_spell(GF_ELEC,dir,y,x,damroll(3,8));
 		else
@@ -1613,7 +1579,7 @@ void do_cmd_aim_wand(void)
 		done_effect = 1;
 	    break;
 
-	case WD_FT_BLTS:	/* Frost */
+	case SV_WAND_COLD:	/* Frost */
 		if (randint(6)==1)
 		    line_spell(GF_ELEC,dir,y,x,damroll(3,8));
 		else
@@ -1622,7 +1588,7 @@ void do_cmd_aim_wand(void)
 		done_effect = 1;
 	    break;
 
-	case WD_FR_BLTS:	/* Fire */
+	case SV_WAND_FIRE:	/* Fire */
 		if (randint(4)==1)
 		    line_spell(GF_FIRE,dir,y,x,damroll(6,8));
 		else
@@ -1671,11 +1637,6 @@ void do_cmd_aim_wand(void)
 		done_effect = 1;
 	    break;
 
-	case SV_WAND_ANNIHILATION:
-	    ident = drain_life(dir,y,x,125);
-		done_effect = 1;
-	    break;
-
 	case SV_WAND_TRAP_DOOR_DEST:
 	    ident = td_destroy2(dir,y,x);
 		done_effect = 1;
@@ -1683,9 +1644,9 @@ void do_cmd_aim_wand(void)
 
 	case SV_WAND_MAGIC_MISSILE:
 		if (randint(6)==1)
-		    line_spell(GF_MAGIC_MISSILE,dir,y,x,damroll(2,6));
+		    line_spell(GF_MISSILE,dir,y,x,damroll(2,6));
 		else
-		    fire_bolt(GF_MAGIC_MISSILE, dir,y,x, damroll(2,6));
+		    fire_bolt(GF_MISSILE, dir,y,x, damroll(2,6));
 	    ident = TRUE;
 		done_effect = 1;
 	    break;
@@ -1742,6 +1703,45 @@ void do_cmd_aim_wand(void)
 
 	case SV_WAND_WONDER:
 	    sval = randint(23);
+	    break;
+
+	case SV_WAND_DRAGON_FIRE:
+	    fire_ball(GF_FIRE, dir, y, x, 100, 3);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case SV_WAND_DRAGON_COLD:
+	    fire_ball(GF_COLD, dir, y, x, 80, 3);
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case SV_WAND_DRAGON_BREATH:
+	    switch (randint(5)) {
+	      case 1:
+		fire_ball(GF_FIRE, dir, y, x, 100, 3);
+		break;
+	      case 2:
+		fire_ball(GF_COLD, dir, y, x, 80, 3);
+		break;
+	      case 3:
+		fire_ball(GF_ACID, dir, y, x, 90, 3);
+		break;
+	      case 4:
+		fire_ball(GF_ELEC, dir, y, x, 70, 3);
+		break;
+	      default:
+		fire_ball(GF_POIS, dir, y, x, 70, 3);
+		break;
+	    }
+	    ident = TRUE;
+		done_effect = 1;
+	    break;
+
+	case SV_WAND_ANNIHILATION:
+	    ident = drain_life(dir,y,x,125);
+		done_effect = 1;
 	    break;
 
 	default:
@@ -2152,7 +2152,7 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 30;
 	break;
 
-      case RD_AC_BLTS:	   /* Acid , New */
+      case SV_ROD_ACID:	   /* Acid , New */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(10)==1)
 	    line_spell(GF_ACID,dir,y,x,damroll(6,8));
@@ -2162,7 +2162,7 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 12;
 	break;
 
-      case SV_ROD_LIGHT_BLTS:	   /* Lightning */
+      case SV_ROD_ELEC:	   /* Lightning */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(12)==1)
 	    line_spell(GF_ELEC, dir, y, x, damroll(3, 8));
@@ -2172,7 +2172,7 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 11;
 	break;
 
-      case RD_FT_BLTS:	   /* Frost */
+      case SV_ROD_COLD:	   /* Frost */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(10)==1)
 	    line_spell(GF_COLD, dir, y, x, damroll(5, 8));
@@ -2182,7 +2182,7 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 13;
 	break;
 
-      case RD_FR_BLTS:	   /* Fire */
+      case SV_ROD_FIRE:	   /* Fire */
 	if (!direction(&dir)) goto no_charge;
 	if (randint(8)==1)
 	    line_spell(GF_FIRE, dir, y, x, damroll(8, 8));
@@ -2249,7 +2249,7 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 30;
 	break;
 
-      case RD_AC_BALL:
+      case SV_ROD_ACID_BALL:
 	if (!direction(&dir)) goto no_charge;
 	fire_ball(GF_ACID, dir, y, x, 60, 2);
 	ident = TRUE;
@@ -2364,7 +2364,7 @@ void do_cmd_zap_rod(void)
 	break;
 
 #if 0
-      case RD_MK_WALL:	   /* JLS */
+      case SV_ROD_MK_WALL:	   /* JLS */
 	if (!direction(&dir)) goto no_charge;
 	ident = build_wall(dir, y, x);
 	/* don't want people to abuse this -JLS */
@@ -2873,7 +2873,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_bolt(GF_MAGIC_MISSILE, dir, char_row, char_col,
+			fire_bolt(GF_MISSILE, dir, char_row, char_col,
 				  damroll(2, 6));
 			inventory[i].timeout = 2;
 		    }
@@ -3247,7 +3247,7 @@ static void activate(void)
 		    sprintf(tmp2, "You breathe %s...",
 			    ((choice == 1 ? "light" : "darkness")));
 		    msg_print(tmp2);
-		    fire_ball((choice == 1 ? GF_LIGHT : GF_DARK), dir,
+		    fire_ball((choice == 1 ? GF_LITE : GF_DARK), dir,
 			      char_row, char_col, 200, 2);
 		    inventory[i].timeout = 300 + randint(300);
 		}
@@ -3273,7 +3273,7 @@ static void activate(void)
 				dir = randint(9);
 			    } while (dir == 5);
 			}
-			fire_ball(GF_MAGIC_MISSILE, dir, char_row, char_col, 300, 2);
+			fire_ball(GF_MISSILE, dir, char_row, char_col, 300, 2);
 			inventory[i].timeout = 300 + randint(300);
 		    }
 		}

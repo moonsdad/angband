@@ -2421,7 +2421,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Magic missile.");
 	    else (void)strcat(cdesc, "mumbles, and you feel an arrow hit you.");
 	    msg_print(cdesc);
-	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
+	    bolt(GF_MISSILE, char_row, char_col,
 		 damroll(2, 6) + (r_list[m_ptr->r_idx].level / 3)
 		 ,ddesc, m_ptr, m_idx);
 	    break;
@@ -2460,7 +2460,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "casts a Mana bolt.");
 	    else (void)strcat(cdesc, "mumbles, and you feel a magical blast.");
 	    msg_print(cdesc);
-	    bolt(GF_MAGIC_MISSILE, char_row, char_col,
+	    bolt(GF_MISSILE, char_row, char_col,
 		 randint((r_list[m_ptr->r_idx].level * 7) / 2) + 50, ddesc, m_ptr,
 		 m_idx);
 	    break;
@@ -2946,7 +2946,7 @@ static void mon_cast_spell(int m_idx, int *took_turn)
 	    if (!blind) (void)strcat(cdesc, "breathes light.");
 	    else (void)strcat(cdesc, "breathes.");
 	    msg_print(cdesc);
-	    breath(GF_LIGHT, char_row, char_col,
+	    breath(GF_LITE, char_row, char_col,
 		((m_ptr->hp / 6) > 400 ? 400 : (m_ptr->hp / 6)), ddesc, m_idx);
 	    break;
 

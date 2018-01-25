@@ -612,11 +612,11 @@ inven_kind k_list[MAX_OBJECTS] = {
  7500,	   3,	64,   1,  10,	0,   0,	 0,   0, {2,6}	,  1, 0, 0x0L},
 {"Light"			,SV_WAND_LITE,	        TV_WAND, '-',	/*269*/
     0,	 200,	0,   1,  10,	0,   0,	 0,   0, {1,1}	,  2, 0, 0x0L},
-{"Lightning Bolts"		,SV_WAND_LITE_BLTS,	TV_WAND, '-',	/*270*/
+{"Lightning Bolts"		,SV_WAND_ELEC,	TV_WAND, '-',	/*270*/
     0,	 600,	1,   1,  10,	0,   0,	 0,   0, {1,1}	, 15, 0, 0x0L},
-{"Frost Bolts"			,WD_FT_BLTS,	TV_WAND, '-',	/*271*/
+{"Frost Bolts"			,SV_WAND_COLD,	TV_WAND, '-',	/*271*/
     0,	 800,	2,   1,  10,	0,   0,	 0,   0, {1,1}	, 20, 0, 0x0L},
-{"Fire Bolts"			,WD_FR_BLTS,	TV_WAND, '-',	/*272*/
+{"Fire Bolts"			,SV_WAND_FIRE,	TV_WAND, '-',	/*272*/
     0,	1000,	3,   1,  10,	0,   0,	 0,   0, {1,1}	, 30, 0, 0x0L},
 {"Stone to Mud"			,SV_WAND_STONE_TO_MUD,	TV_WAND, '-',	/*273*/
     0,	 300,	4,   1,  10,	0,   0,	 0,   0, {1,1}	, 12, 0, 0x0L},
@@ -660,7 +660,7 @@ inven_kind k_list[MAX_OBJECTS] = {
     0,	 250,	23,   1,  10,	0,   0,	 0,   0, {1,1}	,  2, 0, 0x0L},
 {"Light"			,SV_STAFF_LITE,	TV_STAFF, '_',	/*293*/
     0,	 250,	0,    1,  50,	0,   0,	 0,   0, {1,2}	,  5, 0, 0x0L},
-{"Acid Bolts"			,WD_AC_BLTS,	TV_WAND, '-',   /*294*/
+{"Acid Bolts"			,SV_WAND_ACID,	TV_WAND, '-',   /*294*/
     0,	950,	28,   1,  10,   0,   0,  0,   0, {1,1}	, 30, 0, 0x0L},
 {"Dragon's Flame"	     	,SV_WAND_DRAGON_FIRE,	TV_WAND, '-',   /*295*/
     0,	2400,	24,   1,  10,	0,   0,	 0,   0, {1,1}	, 50, 3, 0x0L},
@@ -786,11 +786,11 @@ inven_kind k_list[MAX_OBJECTS] = {
     0,	   0,	13,   1,   3,	0,   0,	 0,   0, {1,1}	,  0, 0, 0x0L},
 {"Light"			,SV_ROD_LIGHT,	        TV_ROD, '-',	/*356*/
     0,	 600,	0,   1,  15,	0,   0,	 0,   0, {1,1}	, 12, 0, 0x800L},
-{"Lightning Bolts"		,SV_ROD_LIGHT_BLTS,	TV_ROD , '-',	/*357*/
+{"Lightning Bolts"		,SV_ROD_ELEC,	TV_ROD , '-',	/*357*/
     0,	1800,	1,   1,  15,	0,   0,	 0,   0, {1,1}	, 20, 0, 0x800L},
-{"Frost Bolts"			,RD_FT_BLTS,	TV_ROD , '-',	/*358*/
+{"Frost Bolts"			,SV_ROD_COLD,	TV_ROD , '-',	/*358*/
     0,	2400,	2,   1,  15,	0,   0,	 0,   0, {1,1}	, 23, 0, 0x800L},
-{"Fire Bolts"			,RD_FR_BLTS,	TV_ROD , '-',	/*359*/
+{"Fire Bolts"			,SV_ROD_FIRE,	TV_ROD , '-',	/*359*/
     0,	3000,	3,   1,  15,	0,   0,	 0,   0, {1,1}	, 29, 0, 0x800L},
 {"Polymorph"			,SV_ROD_POLYMORPH,	TV_ROD , '-',	/*360*/
     0,	1200,	4,   1,  15,	0,   0,	 0,   0, {1,1}	, 35, 0, 0x800L},
@@ -810,9 +810,9 @@ inven_kind k_list[MAX_OBJECTS] = {
     0,	4500,	11,   1,  15,	0,   0,	 0,   0, {1,1}	, 60, 0, 0x800L},
 {"Fire Balls"			,SV_ROD_FIRE_BALL,	TV_ROD , '-',	/*368*/
     0,	4800,	12,   1,  15,	0,   0,	 0,   0, {1,1}	, 75, 0, 0x800L},
-{"Acid Balls"			,RD_AC_BALL,	TV_ROD , '-',	/*369*/
+{"Acid Balls"			,SV_ROD_ACID_BALL,	TV_ROD , '-',	/*369*/
     0,	4600,	13,   1,  15,	0,   0,	 0,   0, {1,1}	, 70, 0, 0x800L},
-{"Acid Bolts"			,RD_AC_BLTS,	TV_ROD , '-',   /*370*/
+{"Acid Bolts"			,SV_ROD_ACID,	TV_ROD , '-',   /*370*/
     0,	3000,   14,   1,  15,   0,   0,  0,   0, {1,1}	, 38, 0, 0x800L},
 {"Enlightenment"        	,SV_ROD_MAPPING,	TV_ROD , '-',   /*371*/
     0,	10000,   15,   1,  15,   0,   0,  0,   0, {1,1}	, 63, 4, 0x800L},

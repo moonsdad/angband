@@ -48,7 +48,7 @@ cptr describe_use(int i)
 
     switch (i) {
       case INVEN_WIELD: p = "wielding"; break;
-      case INVEN_AUX:   p = "holding ready by your side"; break;
+      case INVEN_BOW:   p = "holding ready by your side"; break;
       case INVEN_LEFT:  p = "wearing on your left hand"; break;
       case INVEN_RIGHT: p = "wearing on your right hand"; break;
       case INVEN_NECK:  p = "wearing around your neck"; break;
@@ -210,7 +210,7 @@ int show_equip(int weight, int col)
 	      case INVEN_LITE:
 		prt1 = "Light source";
 		break;
-	      case INVEN_AUX:
+	      case INVEN_BOW:
 		prt1 = "Spare weapon";
 		break;
 	      default:
@@ -792,7 +792,7 @@ void takeoff(int item_val, int posn)
     inven_weight -= t_ptr->weight * t_ptr->number;
     p_ptr->flags.status |= PY_STR_WGT;
 
-    if (item_val == INVEN_WIELD || item_val == INVEN_AUX) p = "Was wielding ";
+    if (item_val == INVEN_WIELD || item_val == INVEN_BOW) p = "Was wielding ";
     else if (item_val == INVEN_LITE) p = "Light source was ";
     else p = "Was wearing ";
 
@@ -802,7 +802,7 @@ void takeoff(int item_val, int posn)
     else if (posn == -1)
 	(void)sprintf(out_val, "%s%s.", p, prt2);
     msg_print(out_val);
-    if (item_val != INVEN_AUX)	   /* For secondary weapon  */
+    if (item_val != INVEN_BOW)	   /* For secondary weapon  */
 	py_bonuses(t_ptr, -1);
     invcopy(t_ptr, OBJ_NOTHING);
 }
@@ -970,7 +970,7 @@ void inven_command(int command)
 	    break;
 	  case 'x':
 	    if (inventory[INVEN_WIELD].tval == TV_NOTHING &&
-		inventory[INVEN_AUX].tval == TV_NOTHING)
+		inventory[INVEN_BOW].tval == TV_NOTHING)
 		msg_print("But you are wielding no weapons.");
 	    else if (TR3_CURSED & inventory[INVEN_WIELD].flags3) {
 		objdes(prt1, &inventory[INVEN_WIELD], FALSE);
@@ -979,12 +979,12 @@ void inven_command(int command)
 		msg_print(prt2);
 	    } else {
 		free_turn_flag = FALSE;
-		tmp_obj = inventory[INVEN_AUX];
-		inventory[INVEN_AUX] = inventory[INVEN_WIELD];
+		tmp_obj = inventory[INVEN_BOW];
+		inventory[INVEN_BOW] = inventory[INVEN_WIELD];
 		inventory[INVEN_WIELD] = tmp_obj;
 		if (scr_state == EQUIP_SCR)
 		    scr_left = show_equip(show_inven_weight, scr_left);
-		py_bonuses(&inventory[INVEN_AUX], -1);	/* Subtract bonuses */
+		py_bonuses(&inventory[INVEN_BOW], -1);	/* Subtract bonuses */
 		py_bonuses(&inventory[INVEN_WIELD], 1);	/* Add bonuses    */
 
 		if (inventory[INVEN_WIELD].tval != TV_NOTHING) {
