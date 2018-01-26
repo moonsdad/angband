@@ -1990,8 +1990,7 @@ static void make_move(int m_idx, int *mm, u32b *rcflags1)
 
 		    /* if artifact, or wearable & hurts this monster -CWS */
 			if ((i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT) ||
-			    ( (i_list[c_ptr->i_idx].tval >= TV_MIN_WEAR) &&
-			      (i_list[c_ptr->i_idx].tval <= TV_MAX_WEAR) &&
+			    ( (wearable_p(&i_list[c_ptr->i_idx])) &&
 			      (r_list[m_ptr->r_idx].cflags2 & t) )) {
 
 /* FIXME: should use new line-splitting code */

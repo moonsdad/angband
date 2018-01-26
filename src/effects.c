@@ -1253,6 +1253,7 @@ void read_scroll(void)
 
 		    /* Shatter the weapon */
 		    py_bonuses(j_ptr, -1);	/* take off current bonuses -CFT */
+		    j_ptr->name1 = 0;
 		    j_ptr->name2 = EGO_SHATTERED;
 		    j_ptr->tohit = (-randint(5) - randint(5));
 		    j_ptr->todam = (-randint(5) - randint(5));
@@ -1367,6 +1368,7 @@ void read_scroll(void)
 
 		/* Blast the armor */
 		py_bonuses(j_ptr, -1);	/* take off current bonuses -CFT */
+		j_ptr->name1 = 0;
 		j_ptr->name2 = EGO_BLASTED;
 		j_ptr->flags3 = TR3_CURSED;
 		j_ptr->flags2 = 0;
@@ -2423,6 +2425,8 @@ static void activate(void)
 	free_turn_flag = TRUE;
 	return;
     }
+
+    /* Get an activatable item */
     sprintf(out_str, "Activate which item? (%c-%c, * to list, ESC to exit) ?",
 	    'a', 'a' + (num - 1));
     flag = FALSE;
@@ -2512,7 +2516,7 @@ static void activate(void)
 	      case (395):
 	      case (396):	   /* The dreaded daggers:-> */
 	      case (397):
-		if (inventory[i].name2 == ART_NARTHANC) {
+		if (inventory[i].name1 == ART_NARTHANC) {
 		    msg_print("Your dagger is covered in fire...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2524,7 +2528,7 @@ static void activate(void)
 			fire_bolt(GF_FIRE, dir, char_row, char_col, damroll(9, 8));
 			inventory[i].timeout = 5 + randint(10);
 		    }
-		} else if (inventory[i].name2 == ART_NIMTHANC) {
+		} else if (inventory[i].name1 == ART_NIMTHANC) {
 		    msg_print("Your dagger is covered in frost...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2536,7 +2540,7 @@ static void activate(void)
 			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
-		} else if (inventory[i].name2 == ART_DETHANC) {
+		} else if (inventory[i].name1 == ART_DETHANC) {
 		    msg_print("Your dagger is covered in sparks...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2548,7 +2552,7 @@ static void activate(void)
 			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
-		} else if (inventory[i].name2 == ART_RILIA) {
+		} else if (inventory[i].name1 == ART_RILIA) {
 		    msg_print("Your dagger throbs deep green...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2560,7 +2564,7 @@ static void activate(void)
 			fire_ball(GF_POIS, dir, char_row, char_col, 12, 3);
 			inventory[i].timeout = 3 + randint(3);
 		    }
-		} else if (inventory[i].name2 == ART_BELANGIL) {
+		} else if (inventory[i].name1 == ART_BELANGIL) {
 		    msg_print("Your dagger is covered in frost...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2575,7 +2579,7 @@ static void activate(void)
 		}
 		break;
 	      case (91):
-		if (inventory[i].name2 == ART_DAL) {
+		if (inventory[i].name1 == ART_DAL) {
 		    msg_print("You feel energy flow through your feet...");
 		    remove_fear();
 		    cure_poison();
@@ -2584,7 +2588,7 @@ static void activate(void)
 		break;
 	      case (42):
 	      case (43):
-		if (inventory[i].name2 == ART_RINGIL) {
+		if (inventory[i].name1 == ART_RINGIL) {
 		    msg_print("Your sword glows an intense blue...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2596,7 +2600,7 @@ static void activate(void)
 			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 300;
 		    }
-		} else if (inventory[i].name2 == ART_ANDURIL) {
+		} else if (inventory[i].name1 == ART_ANDURIL) {
 		    msg_print("Your sword glows an intense red...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2611,7 +2615,7 @@ static void activate(void)
 		}
 		break;
 	      case (52):
-		if (inventory[i].name2 == ART_FIRESTAR) {
+		if (inventory[i].name1 == ART_FIRESTAR) {
 		    msg_print("Your morningstar rages in fire...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2626,13 +2630,13 @@ static void activate(void)
 		}
 		break;
 	      case (92):
-		if (inventory[i].name2 == ART_FEANOR) {
+		if (inventory[i].name1 == ART_FEANOR) {
 		    p_ptr->fast += randint(25) + 15;
 		    inventory[i].timeout = 200;
 		}
 		break;
 	      case (59):
-		if (inventory[i].name2 == ART_THEODEN) {
+		if (inventory[i].name1 == ART_THEODEN) {
 		    msg_print("The blade of your axe glows black...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2647,7 +2651,7 @@ static void activate(void)
 		}
 		break;
 	      case (62):
-		if (inventory[i].name2 == ART_TURMIL) {
+		if (inventory[i].name1 == ART_TURMIL) {
 		    msg_print("The head of your hammer glows white...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2662,14 +2666,14 @@ static void activate(void)
 		}
 		break;
 	      case (111):
-		if (inventory[i].name2 == ART_CASPANION) {
+		if (inventory[i].name1 == ART_CASPANION) {
 		    msg_print("Your mail magically disarms traps...");
 		    td_destroy();
 		    inventory[i].timeout = 10;
 		}
 		break;
 	      case (71):
-		if (inventory[i].name2 == ART_AVAVIR) {
+		if (inventory[i].name1 == ART_AVAVIR) {
 		    if (p_ptr->word_recall == 0) {
 			p_ptr->word_recall = 15 + randint(20);
 			msg_print("The air about you becomes charged...");
@@ -2681,30 +2685,30 @@ static void activate(void)
 		}
 		break;
 	      case (53):
-		if (inventory[i].name2 == ART_TARATOL) {
+		if (inventory[i].name1 == ART_TARATOL) {
 		    if (p_ptr->fast == 0)
 			p_ptr->fast += randint(30) + 15;
 		    inventory[i].timeout = 166;
 		}
 		break;
 	      case (54):
-		if (inventory[i].name2 == ART_ERIRIL) {
+		if (inventory[i].name1 == ART_ERIRIL) {
 		    ident_spell();
 		    inventory[i].timeout = 10;
-		} else if (inventory[i].name2 == ART_OLORIN) {
+		} else if (inventory[i].name1 == ART_OLORIN) {
 		    probing();
 		    inventory[i].timeout = 20;
 		}
 		break;
 	      case (67):
-		if (inventory[i].name2 == ART_EONWE) {
+		if (inventory[i].name1 == ART_EONWE) {
 		    msg_print("Your axe lets out a long, shrill note...");
 		    mass_genocide(TRUE);
 		    inventory[i].timeout = 1000;
 		}
 		break;
 	      case (68):
-		if (inventory[i].name2 == ART_LOTHARANG) {
+		if (inventory[i].name1 == ART_LOTHARANG) {
 		    msg_print("Your battle axe radiates deep purple...");
 		    hp_player(damroll(4, 7));
 		    if (p_ptr->cut > 0) {
@@ -2717,12 +2721,13 @@ static void activate(void)
 		}
 		break;
 	      case (75):
-		if (inventory[i].name2 == ART_CUBRAGOL) {
+		if (inventory[i].name1 == ART_CUBRAGOL) {
 		    for (a = 0; a < INVEN_WIELD; a++)
 /* search for bolts that are not cursed and are not already named -CWS */
 			if ((inventory[a].tval == TV_BOLT) &&
 			    !(inventory[a].flags3 & TR3_CURSED) &&
-			    (inventory[a].name2 == SN_NULL))
+			    (!inventory[a].name1) &&
+			    (!inventory[a].name2))
 			    break;
 		    if (a < INVEN_WIELD) {
 			i_ptr = &inventory[a];
@@ -2741,7 +2746,7 @@ static void activate(void)
 		break;
 	      case (34):
 	      case (35):
-		if (inventory[i].name2 == ART_ARUNRUTH) {
+		if (inventory[i].name1 == ART_ARUNRUTH) {
 		    msg_print("Your sword glows a pale blue...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2756,7 +2761,7 @@ static void activate(void)
 		}
 		break;
 	      case (64):
-		if (inventory[i].name2 == ART_AEGLOS) {
+		if (inventory[i].name1 == ART_AEGLOS) {
 		    msg_print("Your spear glows a bright white...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2768,7 +2773,7 @@ static void activate(void)
 			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 500;
 		    }
-		} else if (inventory[i].name2 == ART_OROME) {
+		} else if (inventory[i].name1 == ART_OROME) {
 		    msg_print("Your spear pulsates...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2783,7 +2788,7 @@ static void activate(void)
 		}
 		break;
 	      case (118):
-		if (inventory[i].name2 == ART_SOULKEEPER) {
+		if (inventory[i].name1 == ART_SOULKEEPER) {
 		    msg_print("Your armour glows a bright white...");
 		    msg_print("You feel much better...");
 		    hp_player(1000);
@@ -2791,25 +2796,25 @@ static void activate(void)
 		}
 		break;
 	      case (120):
-		if (inventory[i].name2 == ART_BELEGENNON) {
+		if (inventory[i].name1 == ART_BELEGENNON) {
 		    teleport(10);
 		    inventory[i].timeout = 2;
 		}
 		break;
 	      case (119):
-		if (inventory[i].name2 == ART_CELEBORN) {
+		if (inventory[i].name1 == ART_CELEBORN) {
 		    genocide(TRUE);
 		    inventory[i].timeout = 500;
 		}
 		break;
 	      case (124):
-		if (inventory[i].name2 == ART_LUTHIEN) {
+		if (inventory[i].name1 == ART_LUTHIEN) {
 		    restore_level();
 		    inventory[i].timeout = 450;
 		}
 		break;
 	      case (65):
-		if (inventory[i].name2 == ART_ULMO) {
+		if (inventory[i].name1 == ART_ULMO) {
 		    msg_print("Your trident glows deep red...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2825,7 +2830,7 @@ static void activate(void)
 		break;
 	      case (123):	   /* Cloak */
 	      case (411):
-		if (inventory[i].name2 == ART_COLLUIN) {
+		if (inventory[i].name1 == ART_COLLUIN) {
 		    msg_print("Your cloak glows many colours...");
 		    msg_print("You feel you can resist anything.");
 		    p_ptr->oppose_fire += randint(20) + 20;
@@ -2834,21 +2839,21 @@ static void activate(void)
 		    p_ptr->oppose_pois += randint(20) + 20;
 		    p_ptr->oppose_acid += randint(20) + 20;
 		    inventory[i].timeout = 111;
-		} else if (inventory[i].name2 == ART_HOLCOLLETH) {
+		} else if (inventory[i].name1 == ART_HOLCOLLETH) {
 		    msg_print("You momentarily disappear...");
 		    sleep_monsters1(char_row, char_col);
 		    inventory[i].timeout = 55;
-		} else if (inventory[i].name2 == ART_THINGOL) {
+		} else if (inventory[i].name1 == ART_THINGOL) {
 		    msg_print("You hear a low humming noise...");
 		    recharge(60);
 		    inventory[i].timeout = 70;
-		} else if (inventory[i].name2 == ART_COLANNON) {
+		} else if (inventory[i].name1 == ART_COLANNON) {
 		    teleport(100);
 		    inventory[i].timeout = 45;
 		}
 		break;
 	      case (50):	   /* Flail */
-		if (inventory[i].name2 == ART_TOTILA) {
+		if (inventory[i].name1 == ART_TOTILA) {
 		    msg_print("Your flail glows in scintillating colours...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2863,7 +2868,7 @@ static void activate(void)
 		}
 		break;
 	      case (125):	   /* Gloves */
-		if (inventory[i].name2 == ART_CAMMITHRIM) {
+		if (inventory[i].name1 == ART_CAMMITHRIM) {
 		    msg_print("Your gloves glow extremely brightly...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2879,7 +2884,7 @@ static void activate(void)
 		}
 		break;
 	      case (126):	   /* Gauntlets */
-		if (inventory[i].name2 == ART_PAURHACH) {
+		if (inventory[i].name1 == ART_PAURHACH) {
 		    msg_print("Your gauntlets are covered in fire...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2894,7 +2899,7 @@ static void activate(void)
 			    fire_bolt(GF_FIRE, dir, char_row, char_col, damroll(9,8));
 			inventory[i].timeout = 5 + randint(10);
 		    }
-		} else if (inventory[i].name2 == ART_PAURNIMMEN) {
+		} else if (inventory[i].name1 == ART_PAURNIMMEN) {
 		    msg_print("Your gauntlets are covered in frost...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2906,7 +2911,7 @@ static void activate(void)
 			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
-		} else if (inventory[i].name2 == ART_PAURAEGEN) {
+		} else if (inventory[i].name1 == ART_PAURAEGEN) {
 		    msg_print("Your gauntlets are covered in sparks...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2918,7 +2923,7 @@ static void activate(void)
 			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
-		} else if (inventory[i].name2 == ART_PAURNEN) {
+		} else if (inventory[i].name1 == ART_PAURNEN) {
 		    msg_print("Your gauntlets look very acidic...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2933,7 +2938,7 @@ static void activate(void)
 		}
 		break;
 	      case (127):
-		if (inventory[i].name2 == ART_FINGOLFIN) {
+		if (inventory[i].name1 == ART_FINGOLFIN) {
 		    msg_print("Magical spikes appear on your cesti...");
 		    if (get_dir(NULL, &dir)) {
 			if (p_ptr->confused > 0) {
@@ -2948,14 +2953,14 @@ static void activate(void)
 		}
 		break;
 	      case (96):
-		if (inventory[i].name2 == ART_HOLHENNETH) {
+		if (inventory[i].name1 == ART_HOLHENNETH) {
 		    msg_print("You close your eyes and an image forms in your mind...");
 		    detection();
 		    inventory[i].timeout = 55 + randint(55);
 		}
 		break;
 	      case (99):
-		if (inventory[i].name2 == ART_GONDOR) {
+		if (inventory[i].name1 == ART_GONDOR) {
 		    msg_print("You feel a warm tingling inside...");
 		    hp_player(500);
 		    inventory[i].timeout = 500;
@@ -3125,7 +3130,7 @@ static void activate(void)
 		}
 		break;
 	      case (394):	   /* Multi-hued */
-		if (inventory[i].name2 == ART_RAZORBACK) {
+		if (inventory[i].name1 == ART_RAZORBACK) {
 		    msg_print("A storm of lightning spikes fires in all directions...");
 		    starball(char_row, char_col);
 		    inventory[i].timeout = 1000;
@@ -3252,7 +3257,7 @@ static void activate(void)
 		}
 		break;
 	      case (419):	   /* Power Dragon Scale Mail */
-		if (inventory[i].name2 == ART_BLADETURNER) {
+		if (inventory[i].name1 == ART_BLADETURNER) {
 		    msg_print("Your armour glows many colours...");
 		    msg_print("You enter a berserk rage...");
 		    p_ptr->hero += randint(50) + 50;

@@ -679,7 +679,6 @@ void do_cmd_open()
 		    flag = TRUE;
 		if (flag) {
 		    t_ptr->flags2 &= ~CH2_LOCKED;
-		    t_ptr->name2 = SN_EMPTY;
 		    known2(t_ptr);
 		    t_ptr->cost = 0;
 		}
@@ -1098,10 +1097,7 @@ void do_cmd_disarm()
 		} else if (CH2_TRAP_MASK & i_ptr->flags2) {
 		    if ((tot - level) > randint(100)) {
 			i_ptr->flags2 &= ~CH2_TRAP_MASK;
-			if (CH2_LOCKED & i_ptr->flags2)
-			    i_ptr->name2 = SN_LOCKED;
-			else
-			    i_ptr->name2 = SN_DISARMED;
+
 			msg_print("You have disarmed the chest.");
 			known2(i_ptr);
 			p_ptr->exp += level;
@@ -1364,8 +1360,11 @@ void do_cmd_fire()
     /* Some things are just meant to be thrown */
 	if ((t->tval == TV_FLASK) || (t->tval == TV_SHOT) ||
 	    (t->tval == TV_ARROW) || (t->tval == TV_BOLT) ||
-	    (t->tval == TV_SPIKE) || (t->tval == TV_MISC))
-	    ok_throw = TRUE;
+	    (t->tval == TV_SPIKE) || (t->tval == TV_MISC)) {
+
+	ok_throw = TRUE;
+    }
+
 	else if (((t->tval == TV_FOOD) || (t->tval == TV_POTION1) ||
 		  (t->tval == TV_POTION2)) && known1_p(t) &&
 		 /* almost all potions do 1d1 damage when thrown.  I want the code	*/
@@ -1378,18 +1377,21 @@ void do_cmd_fire()
 		 /* later test...) -CFT */
 		 (t->dd > 1) && (t->ds > 1))
 	    ok_throw = TRUE; /* if it's a mushroom or potion that does damage when thrown... */
+
 	else if (!known2_p(t) && (t->ident & ID_DAMD))
-	    ok_throw = TRUE;  /* Not IDed, but user knows it's cursed... */
-	else if ((t->tval >= TV_MIN_WEAR) && (t->tval <= TV_MAX_WEAR) &&
-		 (t->flags3 & TR3_CURSED) && known2_p(t))
+	    ok_throw = TRUE;
+
+    /* Not IDed, but user knows it's cursed... */
+	else if (cursed_p(t) && known2_p(t))
 	    ok_throw = TRUE; /* if user wants to throw cursed, let him */
+
 	else if ((k_list[t->index].cost <= 0) && known1_p(t) &&
 		 !(known2_p(t) && (t->cost > 0)))
 	    ok_throw = TRUE;
 	else if ((t->cost <= 0) && known2_p(t))
 	    ok_throw = TRUE; /* it's junk, let him throw it */
 	else if ((t->tval >= TV_HAFTED) &&
-		 (t->tval <= TV_DIGGING) && !(t->name2))
+		 (t->tval <= TV_DIGGING) && !((t->name1)||(t->name2)))
 	    ok_throw = TRUE; /* non ego/art weapons are okay to just throw, since
 				they are damaging (Moral of story: wield your weapon
 				if you're worried that you might throw it away!) */

@@ -1,5 +1,7 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
 
+Added field "name1" for artifact identities
+Used "name2" only for "ego-items" (not artifacts or chests)
 Addition of another flag set for items.
 Reorganization of the flags for items.
 
@@ -25,6 +27,7 @@ Rewrote the "monster recall" code some more, genericized it some.
 Reorganized the source to make the files more "self-contained".
 
 Threw out the "Bill Cosby" message.  "Cute" is not "good".
+Considered writing an "artifact template" file.
 Added monster race fields for "current/max" population per level.
 Considered using this instead of the old "reproduction limits".
 Cleaned up the use of "hack_monptr" in a BIG way.

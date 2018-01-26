@@ -255,7 +255,8 @@ struct _inven_type {
 
   u16b timeout;		/* Timeout counter: wait before reactivating an Artifact		*/
   byte tchar;			/* Character representation */
-  byte name2;			/* Object Special name, if any	*/
+  byte name1;			/* Artifact type, if any	*/
+  byte name2;			/* Special type, if any		*/
   byte ident;			/* Identification info		*/
   byte number;			/* Number of items		*/
   u16b weight;			/* Weight			*/

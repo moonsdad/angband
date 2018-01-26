@@ -488,7 +488,6 @@
  * All the "Bad" Ego-Items are at the end.
  * The holes were left by artifacts and old ego-items.
  */
-#define SN_NULL                 0
 
 #define EGO_R			1
 #define EGO_RESIST_A		2
@@ -719,10 +718,15 @@
 
 
 /*
- * The values for treasure type values (tval)
+ * The values for type values (tval) field of various objects.
+ * This value is the primary means by which items are sorted in the
+ * player inventory.  It also groups things for MIN_WEAR/MAX_WEAR.
  *
- * Note that all items between TV_MIN_WEAR and TV_MAX_WEAR
- * use the same flag bits, see the TR_* defines
+ * Note that all items with tval from 10 to 50 are "wearable_p()",
+ * which means that the special "TR#_*" flags apply to them.  Note
+ * that shots/arrows/bolts have no slot to be wielded into, and that
+ * bows are wielded into the special "bow slot".  This leaves the real
+ * "weapon" slot for shovels, swords, polearms, and hafted weapons.
  *
  * TV_MIN_ENCHANT items tested for enchantments,
  * i.e. the MAGIK inscription, see the enchanted() procedure
@@ -889,22 +893,33 @@
 
 #define SN_BELEG               101
 #define SN_BLINDNESS            35
-#define SN_DISARMED             53
 #define SN_DRAGONKIND           87
-#define SN_EMPTY                46
-#define SN_EXPLOSION_DEVICE     50
-#define SN_GAS_TRAP             49
-#define SN_LOCKED               47
-#define SN_MULTIPLE_TRAPS       52
-#define SN_POISON_NEEDLE        48
-#define SN_SUMMONING_RUNES      51
-#define SN_TIMIDNESS            36
-#define SN_UNLOCKED             54
+
+
 
 /*
  * The "TR_xxx" values apply ONLY to the items with tval's between
  * TV_MIN_WEAR and TV_MAX_WEAR, that is, items which can be wielded
- * or worn.  
+ * or worn.  Use the macro "wearable_p()" to check this condition.
+ * The macros "artifact_p()" and "cursed_p()" call "wearable_p()".
+ *
+ * Do NOT under any circumstances use these flags on any object which
+ * could conceivably be a book, scroll, potion, chest, etc.
+ *
+ * Note that chests no longer use the "TR_xxx" flags, see "CH2_xxx" below.
+ *
+ * Note that "flags1" contains all flags dependant on "pval" (including
+ * stat bonuses, but NOT stat sustainers), plus all "extra attack damage"
+ * flags (SLAY_XXX and BRAND_XXX).
+ *
+ * Note that "flags2" contains all "resistances" (including "Stat Sustainers",
+ * actual immunities, and resistances).  Note that "Hold Life" is really an
+ * "immunity" to ExpLoss, and "Free Action" is "immunity to paralysis".
+ *
+ * Note that "flags3" contains everything else -- including the "CURSED"
+ * flags, and the "BLESSED" flag, and flags which affect the player in a "general"
+ * way (LITE, TELEPATHY, SEE_INVIS, SLOW_DIGEST, REGEN), including the "general"
+ * curses (TELEPORT, AGGRAVATE, EXP_DRAIN).   Also "FEATHER" floating.
  */
 
 #define TR_STATS        0x0000003FL /* the stats must be the low 6 bits */

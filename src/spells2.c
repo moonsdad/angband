@@ -1197,7 +1197,7 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags3 & TR3_CURSED) &&
+		if (cursed_p(i_ptr) &&
 		    (i_ptr->tohit >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
 		    i_ptr->flags3 &= ~TR3_CURSED;
@@ -1218,7 +1218,7 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags3 & TR3_CURSED) &&
+		if (cursed_p(i_ptr) &&
 		    (i_ptr->todam >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
 		    i_ptr->flags3 &= ~TR3_CURSED;
@@ -1239,7 +1239,7 @@ int enchant(inven_type *i_ptr, int n, byte eflag)
 		res = TRUE;
 
 		/* only when you get it above -1 -CFT */
-		if ((i_ptr->flags3 & TR3_CURSED) &&
+		if (cursed_p(i_ptr) &&
 		    (i_ptr->toac >= 0) && (randint(4)==1)) {
 		    msg_print("The curse is broken! ");
 		    i_ptr->flags3 &= ~TR3_CURSED;
@@ -1772,9 +1772,9 @@ void self_knowledge()
 	if (f3 & TR3_CURSED) {
 	if (inventory[INVEN_WIELD].name2 == EGO_MORGUL)
 	    prt("Your weapon is truly foul.", i++, j);
-	else if (inventory[INVEN_WIELD].name2 == ART_CALRIS)
+	else if (inventory[INVEN_WIELD].name1 == ART_CALRIS)
 	    prt("Your bastard sword is wickedly accursed.", i++, j);
-	else if (inventory[INVEN_WIELD].name2 == ART_MORMEGIL)
+	else if (inventory[INVEN_WIELD].name1 == ART_MORMEGIL)
 	    prt("Your two-handed sword radiates an aura of unspeakable evil.", i++, j);
 	else
 	    prt("Your weapon is accursed.", i++, j);
@@ -2011,7 +2011,7 @@ int detect_magic()
 	    /* If so, check for plusses on weapons and armor ... */
 	    /* ... and check whether it is an artifact! ;)  */
 	    /* Is it otherwise magical? */
-	    if (((tv > 9) && (tv < 39)) &&
+	    if (wearable_p(i_ptr) &&
 	    (((i_ptr->tohit > 0) || (i_ptr->todam) || (i_ptr->toac) || 
 	    (i_ptr->flags2 & TR_ARTIFACT)) || 
 	    ((tv > 39) && (tv < 77)))) {
@@ -3148,7 +3148,6 @@ int disarm_all(int dir, int y, int x)
 		msg_print("Click!");
 		t_ptr->flags &= ~(CH2_TRAP_MASK | CH2_LOCKED);
 		disarm = TRUE;
-		t_ptr->name2 = SN_UNLOCKED;
 		known2(t_ptr);
 	    }
 	}
@@ -3178,7 +3177,6 @@ int td_destroy()
 		} else if (i_list[c_ptr->i_idx].tval == TV_CHEST) {
 		/* destroy traps on chest and unlock */
 		    i_list[c_ptr->i_idx].flags &= ~(CH2_TRAP_MASK | CH2_LOCKED);
-		    i_list[c_ptr->i_idx].name2 = SN_DISARMED;
 		    msg_print("You have disarmed the chest.");
 		    known2(&i_list[c_ptr->i_idx]);
 		    destroy = TRUE;

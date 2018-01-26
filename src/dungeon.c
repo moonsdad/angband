@@ -39,21 +39,29 @@ static cptr value_check(inven_type *i_ptr)
     if (known2_p(i_ptr)) return (NULL);
 
     if (store_bought_p(i_ptr)) return (NULL);
+
     if (i_ptr->ident & ID_MAGIK) return (NULL);
+
     if (i_ptr->ident & ID_DAMD) return (NULL);
+
     if (i_ptr->inscrip[0] != '\0') return (NULL);
-    if (i_ptr->flags3 & TR3_CURSED && i_ptr->name2 == SN_NULL) return "worthless";
-    if (i_ptr->flags3 & TR3_CURSED && i_ptr->name2 != SN_NULL) return "terrible";
+
+    if (i_ptr->flags3 & TR3_CURSED && !i_ptr->name2) return "worthless";
+
+    if (i_ptr->flags3 & TR3_CURSED && i_ptr->name2) return "terrible";
+
     if ((i_ptr->tval == TV_DIGGING) &&  /* also, good digging tools -CFT */
 	(i_ptr->flags1 & TR1_TUNNEL) &&
 	(i_ptr->pval > k_list[i_ptr->index].pval)) /* better than normal for this
 						       type of shovel/pick? -CFT */
 	return "good";
+
     if ((i_ptr->tohit<=0 && i_ptr->todam<=0 && i_ptr->toac<=0) &&
-	i_ptr->name2==SN_NULL)  /* normal shovels will also reach here -CFT */
+	!i_ptr->name2)  /* normal shovels will also reach here -CFT */
 	return "average";
-    if (i_ptr->name2 == SN_NULL)
-	return "good";
+
+    if (!i_ptr->name2) return "good";
+
     if ((i_ptr->name2 == EGO_R) || (i_ptr->name2 == EGO_RESIST_A) ||
 	(i_ptr->name2 == EGO_RESIST_F) || (i_ptr->name2 == EGO_RESIST_C) ||
 	(i_ptr->name2 == EGO_RESIST_E) || (i_ptr->name2 == EGO_SE) ||
@@ -79,6 +87,7 @@ static cptr value_check(inven_type *i_ptr)
 	(i_ptr->name2 == EGO_ELVENKIND) || (i_ptr->name2 == EGO_WOUNDING) ||
 	(i_ptr->name2 == EGO_BLESS_BLADE) || (i_ptr->name2 == EGO_ATTACKS))
 	return "excellent";
+
     return "special";
 }
 

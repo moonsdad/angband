@@ -1499,9 +1499,13 @@ void pray()
 
 	    /* you can't create an ego weapon from a cursed */
 	    /* object.  the curse would "taint" the magic -CFT */
-	    if ((i_ptr->tval != TV_NOTHING) &&
-		(i_ptr->name2 == SN_NULL) &&
-		(!(i_ptr->flags3 & TR3_CURSED))) {
+	    /* you also cannot double enchant anything, or */
+	    /* you would lose the first enchantment */
+	    /* And you cannot modify artifacts */
+	    if ((i_ptr->tval) &&
+		(!i_ptr->name1) &&
+		(!i_ptr->name2) &&
+		(!cursed_p(i_ptr))) {
 
 		int hot = randint(2)-1;
 		char tmp_str[100], out_val[100];

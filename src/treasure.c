@@ -1131,7 +1131,7 @@ inven_kind k_list[MAX_OBJECTS] = {
     1,  65000,  36,   1,   2,   0,   0,  0,   0, {0,0},    50, 0,0x02000000L}
 };
 
-cptr special_names[SN_ARRAY_SIZE] = {
+cptr special_names[SN_ARRAY_SIZE] = { //===> ego_names, v_list
 	NULL,			"of Resistance",	"of Resist Acid",
 	"of Resist Fire",	"of Resist Cold",	"of Resist Lightning",
 	"(Holy Avenger)",	"(Defender)",		"of Animal Slaying",

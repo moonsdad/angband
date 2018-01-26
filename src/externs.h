@@ -67,6 +67,23 @@
   ((((y) >= panel_row_min) && ((y) <= panel_row_max) && \
     ((x) >= panel_col_min) && ((x) <= panel_col_max)) ? (TRUE) : (FALSE))
 
+/*
+ * Determine if a given object is "wearable"
+ */
+#define wearable_p(T) \
+	(((T)->tval >= TV_MIN_WEAR) && ((T)->tval <= TV_MAX_WEAR))
+
+/*
+ * Only wearable items can be cursed.
+ */
+#define cursed_p(T) \
+	(wearable_p(T) && ((T)->flags3 & TR3_CURSED))
+
+/*
+ * Artifacts use the "name1" field
+ */
+#define artifact_p(T) \
+	((T)->name1 ? TRUE : FALSE)
 
 /**** Available macros ****/
 
@@ -342,6 +359,8 @@ extern int (*store_buy[MAX_STORES])();
 
 /*** Miscellaneous Information ***/
 
+extern cptr ego_names[EGO_MAX];		/* Ego-item Names */
+
 extern monster_attack a_list[MAX_A_IDX];	/* Monster attacks */
 
 extern byte blows_table[11][12];
@@ -372,7 +391,8 @@ extern byte object_ident[OBJECT_IDENT_SIZE];
 
 extern s16b t_level[MAX_K_LEV+1];
 
-extern cptr special_names[SN_ARRAY_SIZE];
+/* The "artifact" template array */
+extern inven_very *v_list;
 
 extern s16b sorted_objects[MAX_DUNGEON_OBJ];
 

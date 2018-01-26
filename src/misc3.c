@@ -1838,51 +1838,47 @@ void magic_treasure(int x, int level, int good, int not_unique)
 
       case TV_CHEST:
 
+	/* Chests have "goodness" based on the level */
+	/* Pick a trap (or set of traps) for the chest */
+	/* Note that the traps give an idea of the "value" */
+
 	switch (randint(level + 4)) {
 	  case 1:
 	    i_ptr->flags1 = 0L;
-	    i_ptr->name2 = SN_EMPTY;
+	    i_ptr->flags2 = 0L;
 	    break;
 	  case 2:
 	    i_ptr->flags2 |= CH2_LOCKED;
-	    i_ptr->name2 = SN_LOCKED;
 	    break;
 	  case 3:
 	  case 4:
 	    i_ptr->flags2 |= (CH2_LOSE_STR | CH2_LOCKED);
-	    i_ptr->name2 = SN_POISON_NEEDLE;
 	    break;
 	  case 5:
 	  case 6:
 	    i_ptr->flags2 |= (CH2_POISON | CH2_LOCKED);
-	    i_ptr->name2 = SN_POISON_NEEDLE;
 	    break;
 	  case 7:
 	  case 8:
 	  case 9:
 	    i_ptr->flags2 |= (CH2_PARALYSED | CH2_LOCKED);
-	    i_ptr->name2 = SN_GAS_TRAP;
 	    break;
 	  case 10:
 	  case 11:
 	    i_ptr->flags2 |= (CH2_EXPLODE | CH2_LOCKED);
-	    i_ptr->name2 = SN_EXPLOSION_DEVICE;
 	    break;
 	  case 12:
 	  case 13:
 	  case 14:
 	    i_ptr->flags2 |= (CH2_SUMMON | CH2_LOCKED);
-	    i_ptr->name2 = SN_SUMMONING_RUNES;
 	    break;
 	  case 15:
 	  case 16:
 	  case 17:
 	    i_ptr->flags2 |= (CH2_PARALYSED | CH2_POISON | CH2_LOSE_STR | CH2_LOCKED);
-	    i_ptr->name2 = SN_MULTIPLE_TRAPS;
 	    break;
 	  default:
 	    i_ptr->flags2 |= (CH2_SUMMON | CH2_EXPLODE | CH2_LOCKED);
-	    i_ptr->name2 = SN_MULTIPLE_TRAPS;
 	    break;
 	}
 	if (not_unique)		/* if bought from store - dbd */

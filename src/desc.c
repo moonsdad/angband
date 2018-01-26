@@ -536,7 +536,7 @@ void identify(int *item)
  */
 void unmagic_name(inven_type *i_ptr)
 {
-    i_ptr->name2 = SN_NULL;
+    i_ptr->name2 = 0;
 }
 
 
@@ -880,30 +880,56 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	else
 	    (void)strcpy(out_val, tmp_val);
     } else {
-	if (i_ptr->name2 != SN_NULL && known2_p(i_ptr)) {
+
+    /* Hack -- Append "Artifact" or "Special" names */
+    if (known2_p(i_ptr)) {
+
+	/* Hack -- grab the artifact name */
+	if (i_ptr->name1) {
 	    (void)strcat(tmp_val, " ");
-	    (void)strcat(tmp_val, special_names[i_ptr->name2]);
+	    (void)strcat(tmp_val, v_list[i_ptr->name1].name);
 	}
-	if (damstr[0] != '\0')
-	    (void)strcat(tmp_val, damstr);
-	if (known2_p(i_ptr)) {
+
+	/* Otherwise, grab the "ego-item" name */
+	else if (i_ptr->name2) {
+	    (void)strcat(tmp_val, " ");
+	    (void)strcat(tmp_val, ego_names[i_ptr->name2]);
+	}
+    }
+
+    /* Append the "damage info", if any */
+    if (damstr[0]) {
+	(void)strcat(tmp_val, damstr);
+    }
+
+
+    /* We know it, describe it */	
+    if (known2_p(i_ptr)) {
+
 	/* originally used %+d, but several machines don't support it */
-	    if (i_ptr->ident & TR3_SHOW_MODS)
-		(void)sprintf(tmp_str, " (%c%d,%c%d)",
+	if (i_ptr->flags3 & TR3_SHOW_MODS) {
+	    (void)sprintf(tmp_str, " (%c%d,%c%d)",
 			  (i_ptr->tohit < 0) ? '-' : '+', MY_ABS( i_ptr->tohit),
 			 (i_ptr->todam < 0) ? '-' : '+', MY_ABS(i_ptr->todam));
-	    else if (i_ptr->tohit != 0)
-		(void)sprintf(tmp_str, " (%c%d)",
-			 (i_ptr->tohit < 0) ? '-' : '+', MY_ABS(i_ptr->tohit));
-	    else if (i_ptr->todam != 0)
-		(void)sprintf(tmp_str, " (%c%d)",
-			 (i_ptr->todam < 0) ? '-' : '+', MY_ABS(i_ptr->todam));
-	    else
-		tmp_str[0] = '\0';
-	    (void)strcat(tmp_val, tmp_str);
 	}
-    /* Crowns have a zero base AC, so make a special test for them. */
-	if (i_ptr->ac != 0 || (i_ptr->tval == TV_HELM)) {
+
+	/* Show the tohit if needed */
+	else if (i_ptr->tohit ) {
+	    (void)sprintf(tmp_str, " (%c%d)",
+			 (i_ptr->tohit < 0) ? '-' : '+', MY_ABS(i_ptr->tohit));
+	}
+
+	/* Show the todam if needed */
+	else if (i_ptr->todam != 0) {
+	    (void)sprintf(tmp_str, " (%c%d)",
+			 (i_ptr->todam < 0) ? '-' : '+', MY_ABS(i_ptr->todam));
+	}
+	else tmp_str[0] = '\0';
+	(void)strcat(tmp_val, tmp_str);
+    }
+
+    /* Hack -- Crowns have a zero base AC, so make a special test for them. */
+    if (i_ptr->ac || (i_ptr->tval == TV_HELM)) {
 	    (void)sprintf(tmp_str, " [%d", i_ptr->ac);
 	    (void)strcat(tmp_val, tmp_str);
 	    if (known2_p(i_ptr)) {
@@ -1097,12 +1123,15 @@ void invcopy(inven_type *i_ptr, int k_idx)
     i_ptr->inscrip[0] = '\0';
 
     /* No artifact name */
+    i_ptr->name1 = 0;
 
     /* No special name */
-    i_ptr->name2 = SN_NULL;
+    i_ptr->name2 = 0;
+
+    /* No ident info yet */
+    i_ptr->ident = 0;
 
     i_ptr->level = k_ptr->level;
-    i_ptr->ident = 0;
 }
 
 
