@@ -477,7 +477,7 @@ int store_check_num(inven_type *t_ptr, int store_num)
     /* Check all the items */
     else if (t_ptr->sval >= ITEM_SINGLE_STACK_MIN)
 	for (i = 0; i < s_ptr->store_ctr; i++) {
-	    i_ptr = &s_ptr->store_inven[i].sitem;
+	    i_ptr = &s_ptr->store_item[i];
 
 	/* note: items with sval of gte ITEM_SINGLE_STACK_MAX only stack if
 	 * their svals match */
@@ -491,7 +491,7 @@ int store_check_num(inven_type *t_ptr, int store_num)
 /* But, wait.  If at home, don't let player drop 25th item, or he will lose it. -CFT */
     if (is_home && (t_ptr->sval >= ITEM_SINGLE_STACK_MIN))
 	for (i = 0; i < s_ptr->store_ctr; i++) {
-	    i_ptr = &s_ptr->store_inven[i].sitem;
+	    i_ptr = &s_ptr->store_item[i];
 	/* note: items with sval of gte ITEM_SINGLE_STACK_MAX only stack if
 	 * their svals match */
 	    if (i_ptr->tval == t_ptr->tval && i_ptr->sval == t_ptr->subval
@@ -528,7 +528,7 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 	subt = t_ptr->sval;
 	if (subt >= ITEM_SINGLE_STACK_MIN) { /* try to stack in store's inven */
 	    do {
-		i_ptr = &s_ptr->store_inven[item_val].sitem;
+		i_ptr = &s_ptr->store_item[item_val];
 		if (typ == i_ptr->tval)
 		{
 		    if (subt == i_ptr->sval && /* Adds to other item        */
@@ -544,7 +544,7 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 			if (subt > ITEM_GROUP_MIN)
 			{
 			    (void) sell_price (store_num, &icost, &dummy, i_ptr);
-			    s_ptr->store_inven[item_val].scost = -icost;
+			    s_ptr->store_item[item_val].scost = -icost;
 			}
 			/* must let group objects (except torches) stack over 24
 			   since there may be more than 24 in the group */
@@ -559,7 +559,7 @@ void store_carry(int store_num, int *ipos, inven_type *t_ptr)
 	if (!stacked) {		/* either never stacks, or didn't find a place to stack */
 	    item_val = 0;
 	    do {
-		i_ptr = &s_ptr->store_inven[item_val].sitem;
+		i_ptr = &s_ptr->store_item[item_val];
 		if ((typ > i_ptr->tval) || /* sort by desc tval, */
 		    ((typ == i_ptr->tval) &&
 		     ((t_ptr->level < i_ptr->level) || /* then by inc level, */
@@ -594,7 +594,7 @@ void store_destroy(int store_num, int item_val, int one_of)
     register inven_type *i_ptr;
 
     s_ptr = &store[store_num];
-    i_ptr = &s_ptr->store_inven[item_val].sitem;
+    i_ptr = &s_ptr->store_item[item_val];
 
 /* for single stackable objects, only destroy one half on average, this will
  * help ensure that general store and alchemist have reasonable selection of
@@ -613,9 +613,9 @@ void store_destroy(int store_num, int item_val, int one_of)
 	i_ptr->number -= number;
     else {
 	for (j = item_val; j < s_ptr->store_ctr - 1; j++)
-	    s_ptr->store_inven[j] = s_ptr->store_inven[j + 1];
-	invcopy(&s_ptr->store_inven[s_ptr->store_ctr - 1].sitem, OBJ_NOTHING);
-	s_ptr->store_inven[s_ptr->store_ctr - 1].scost = 0;
+	    s_ptr->store_item[j] = s_ptr->store_item[j + 1];
+	invcopy(&s_ptr->store_item[s_ptr->store_ctr - 1], OBJ_NOTHING);
+	s_ptr->store_item[s_ptr->store_ctr - 1].scost = 0;
 	s_ptr->store_ctr--;
     }
 }
@@ -775,7 +775,7 @@ static void display_inventory(int store_num, int start)
     if (stop > s_ptr->store_ctr)
 	stop = s_ptr->store_ctr;
     while (start < stop) {
-	i_ptr = &s_ptr->store_inven[start].sitem;
+	i_ptr = &s_ptr->store_item[start];
 	x = i_ptr->number;
 	if (!is_home) {
 	    if ((i_ptr->sval >= ITEM_SINGLE_STACK_MIN)
@@ -787,7 +787,7 @@ static void display_inventory(int store_num, int start)
 	(void)sprintf(out_val2, "%c) %s", 'a' + i, out_val1);
 	prt(out_val2, i + 5, 0);
 	if (!is_home) {
-	    x = s_ptr->store_inven[start].scost;
+	    x = s_ptr->store_item[start].scost;
 	    if (x < 0) {
 		s32b               value = (s32b)(-x);
 		
@@ -825,13 +825,13 @@ static void display_cost(int store_num, int pos)
 
     s_ptr = &store[store_num];
     i = (pos % 12);
-    if (s_ptr->store_inven[pos].scost < 0) {
-	j = (- (s_ptr->store_inven[pos]).scost);
+    if (s_ptr->store_item[pos].scost < 0) {
+	j = (- (s_ptr->store_item[pos]).scost);
 	j = j * chr_adj() / 100;
 	(void)sprintf(out_val, "%ld", (long) j);
     } else
 	(void)sprintf(out_val, "%9ld [Fixed]",
-		      (long) (s_ptr->store_inven[pos]).scost);
+		      (long) (s_ptr->store_item[pos]).scost);
     prt(out_val, i + 5, 59);
 }
 
@@ -1391,7 +1391,7 @@ static int store_purchase(int store_num, int *cur_top)
     bigvtype            out_val, tmp_str;
     register store_type *s_ptr;
     inven_type          sell_obj;
-    register inven_record *r_ptr;
+    register inven_type *r_ptr;
     int                 item_val, item_new, purchase;
 
     purchase = FALSE;
@@ -1418,11 +1418,11 @@ static int store_purchase(int store_num, int *cur_top)
 	/* TRUE item_val	 */
 	item_val = item_val + *cur_top;
 
-	take_one_item(&sell_obj, &s_ptr->store_inven[item_val].sitem);
+	take_one_item(&sell_obj, &s_ptr->store_item[item_val]);
 	if (inven_check_num(&sell_obj)) {
 	    if (!is_home) {
-		if (s_ptr->store_inven[item_val].scost > 0) {
-		    price = s_ptr->store_inven[item_val].scost;
+		if (s_ptr->store_item[item_val].scost > 0) {
+		    price = s_ptr->store_item[item_val].scost;
 		    choice = 0;
 		} else
 		    choice = purchase_haggle(store_num, &price, &sell_obj);
@@ -1444,7 +1444,7 @@ static int store_purchase(int store_num, int *cur_top)
 			    *cur_top = 0;
 			    display_inventory(store_num, *cur_top);
 			} else {
-			    r_ptr = &s_ptr->store_inven[item_val];
+			    r_ptr = &s_ptr->store_item[item_val];
 			    if (i == s_ptr->store_ctr) {
 				if (r_ptr->scost < 0) {
 				    r_ptr->scost = price;
@@ -1477,7 +1477,7 @@ static int store_purchase(int store_num, int *cur_top)
 		    *cur_top = 0;
 		    display_inventory(store_num, *cur_top);
 		} else {
-		    r_ptr = &s_ptr->store_inven[item_val];
+		    r_ptr = &s_ptr->store_item[item_val];
 
 #if 0
 			if (i == s_ptr->store_ctr) {
@@ -1798,9 +1798,9 @@ static void insert_store(int store_num, register int pos, s32b icost, inven_type
 
     s_ptr = &store[store_num];
     for (i = s_ptr->store_ctr - 1; i >= pos; i--)
-	s_ptr->store_inven[i + 1] = s_ptr->store_inven[i];
-    s_ptr->store_inven[pos].sitem = *i_ptr;
-    s_ptr->store_inven[pos].scost = (-icost);
+	s_ptr->store_item[i + 1] = s_ptr->store_item[i];
+    s_ptr->store_item[pos] = *i_ptr;
+    s_ptr->store_item[pos].scost = (-icost);
     s_ptr->store_ctr++;
 }
 
@@ -1883,27 +1883,27 @@ void store_maint(void)
 void store_init(void)
 {
     register int         j, k;
-    register store_type *s_ptr;
+    register store_type *st_ptr;
 
     /* Build each store */
     for (j = 0; j < MAX_STORES; j++) {
 
-	s_ptr = &store[j];
+	st_ptr = &store[j];
 
 	/* Pick an owner */
-	s_ptr->owner = MAX_STORES * rand_int(MAX_OWNERS / MAX_STORES) + j;
+	st_ptr->owner = MAX_STORES * rand_int(MAX_OWNERS / MAX_STORES) + j;
 
 	/* Initialize the store */
-	s_ptr->insult_cur = 0;
-	s_ptr->store_open = 0;
-	s_ptr->store_ctr = 0;
-	s_ptr->good_buy = 0;
-	s_ptr->bad_buy = 0;
+	st_ptr->insult_cur = 0;
+	st_ptr->store_open = 0;
+	st_ptr->store_ctr = 0;
+	st_ptr->good_buy = 0;
+	st_ptr->bad_buy = 0;
 
 	/* No items yet */
 	for (k = 0; k < STORE_INVEN_MAX; k++) {
-	    invcopy(&s_ptr->store_inven[k].sitem, OBJ_NOTHING);
-	    s_ptr->store_inven[k].scost = 0;
+	    invcopy(&st_ptr->store_item[k], OBJ_NOTHING);
+	    st_ptr->store_item[k].scost = 0;
 	}
     }
 }

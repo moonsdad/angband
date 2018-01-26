@@ -460,8 +460,8 @@ static int sv_write()
 	wr_short(st_ptr->bad_buy);
 
 	for (j = 0; j < st_ptr->store_ctr; j++) {
-	    wr_long((u32b) st_ptr->store_inven[j].scost);
-	    wr_item(&st_ptr->store_inven[j].sitem);
+	    wr_long((u32b) st_ptr->store_item[j].scost);
+	    wr_item(&st_ptr->store_item[j]);
 	}
     }
 
@@ -1306,8 +1306,8 @@ int load_player(int *generate)
 		goto error;
 	      }
 	      for (j = 0; j < st_ptr->store_ctr; j++) {
-		rd_long((u32b *) & st_ptr->store_inven[j].scost);
-		rd_item(&st_ptr->store_inven[j].sitem);
+		rd_long((u32b *) & st_ptr->store_item[j].scost);
+		rd_item(&st_ptr->store_item[j]);
 	      }
 	    }
 
@@ -1553,8 +1553,8 @@ int load_player(int *generate)
 		    goto error;
 		}
 		for (j = 0; j < st_ptr->store_ctr; j++) {
-		    rd_long((u32b *) & st_ptr->store_inven[j].scost);
-		    rd_item(&st_ptr->store_inven[j].sitem);
+		    rd_long((u32b *) & st_ptr->store_item[j].scost);
+		    rd_item(&st_ptr->store_item[j]);
 		}
 	    }
 

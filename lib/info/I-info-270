@@ -4,6 +4,7 @@ Added field "name1" for artifact identities
 Used "name2" only for "ego-items" (not artifacts or chests)
 Addition of another flag set for items.
 Reorganization of the flags for items.
+Made "store cost" a property of objects
 
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.

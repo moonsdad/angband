@@ -268,6 +268,7 @@ struct _inven_type {
   byte dd, ds;			/* Damage when hits dice/sides		*/
 
   s32b cost;			/* Cost of item			*/
+  s32b scost;			/* Store cost			*/
 
   u32b flags1;		/* Flags, set 1			*/
   u32b flags2;		/* Flags, set 2			*/
@@ -339,10 +340,8 @@ struct _owner_type {
   byte insult_max;
 };
 
-typedef struct inven_record {
-  s32b scost;
-  inven_type sitem;
-} inven_record;
+
+
 
 /*
  * A store.  Now holds some items, which themselves hold their store cost.
@@ -361,7 +360,7 @@ struct _store_type {
   u16b good_buy;
   u16b bad_buy;
 
-  inven_record store_inven[STORE_INVEN_MAX];
+  inven_type store_item[STORE_INVEN_MAX];
 };
 
 
