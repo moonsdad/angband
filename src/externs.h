@@ -779,15 +779,16 @@ void fix2_delete_monster(int);
 
 /* moria3.c */
 int twall(int, int, int, int);
-void look(void);
+void do_cmd_look(void);
+void do_cmd_rest(void); /* SIC RMHV */
 void do_cmd_open(void);
 void do_cmd_close(void);
-void tunnel(int);
+void do_cmd_tunnel(int);
 void do_cmd_disarm(void);
-void bash(void);
+void do_cmd_bash(void);
 void do_cmd_spike(void);
 void do_cmd_fire(void);
-void rest(void);
+void do_cmd_rest(void);
 void do_cmd_feeling(void);
 void artifact_check(void);
 void artifact_check_no_file(void);

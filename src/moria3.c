@@ -412,7 +412,7 @@ init_transparent:
  * all other things have been seen.  Only looks at rock types if the
  * notice_seams option is set. 
  */
-void look()
+void do_cmd_look()
 {
     register int        i, abort_look;
     int                 dir, dummy;
@@ -527,16 +527,50 @@ void look()
 
 
 
+/*
+ * Allocates objects upon opening a chest    -BEN-
+ *
+ * Chest treasure is allocated as if a creature
+ * had been killed.
+ */
+static void chest_death(int y, int x, inven_type *i_ptr)
+{
+
+    /* clear the cursed chest/monster win flag, so that people
+     * can not win by opening a cursed chest */
+    i_ptr->flags3 &= ~TR3_CURSED;
+
+    /* generate based on level chest was found on - dbd */
+    object_level = t_ptr->pval;
+
+    /* but let's not get too crazy with storebought chests -CWS */
+    if (i_ptr->ident & ID_STOREBOUGHT) {
+	if (object_level > 20) object_level = 20;
+    }
+
+    /* perform some sanity checking -CWS */
+    if (object_level < 0) object_level = 0;
+    if (object_level > MAX_K_LEV) object_level = MAX_K_LEV;
+
+    coin_type = 0;
+    opening_chest = TRUE; /* don't generate another chest -CWS */
+    monster_death(y, x, i_list[c_ptr->i_idx].flags, 0, 0);
+    i_list[c_ptr->i_idx].flags = 0;
+    opening_chest = FALSE;
+}
+
 
 /*
  * Chests have traps too.				-RAK-
- * Note: Chest traps are based on the FLAGS value
+ * Note: Chests now use "flags2" for their traps
+ * Exploding chest destroys contents, and traps.
+ * Note that the chest itself is never destroyed.
  */
-static void chest_trap(int y, int x)
+static void chest_trap(int y, int x, inven_type *i_ptr)
 {
     register int        i, j, k;
 
-    register inven_type *i_ptr = &i_list[cave[y][x].i_idx];
+    if (i_ptr->tval != TV_CHEST) return;
 
     if (i_ptr->flags2 & CH2_LOSE_STR) {
 	msg_print("A small needle has pricked you!");
@@ -581,7 +615,9 @@ static void chest_trap(int y, int x)
 
     if (i_ptr->flags2 & CH2_EXPLODE) {
 	msg_print("There is a sudden explosion!");
-	(void)delete_object(y, x);
+	msg_print("Everything inside the chest is destroyed!");
+	i_ptr->flags1 = 0L;
+	i_ptr->flags2 = 0L;
 	take_hit(damroll(5, 8), "an exploding chest");
     }
 }
@@ -596,136 +632,153 @@ static void chest_trap(int y, int x)
 void do_cmd_open()
 {
     int				y, x, i, dir;
-    int				flag, no_object;
+    int				flag;
     register cave_type		*c_ptr;
-    register inven_type		*t_ptr;
-
-    register monster_type	*m_ptr;
+    register inven_type		*i_ptr;
     vtype			m_name, out_val;
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
     target_mode = FALSE;
 #endif
-    if (get_dir(NULL, &dir)) {
+
+
+    /* Get a direction (or Escape) */
+    if (!get_dir(NULL, &dir)) {
+	/* Graceful exit */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+
+	/* Get requested grid */
+	y = char_row;
+	x = char_col;
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
-	no_object = FALSE;
-	if (c_ptr->m_idx > 1 && c_ptr->i_idx != 0 &&
-	    (i_list[c_ptr->i_idx].tval == TV_CLOSED_DOOR
-	     || i_list[c_ptr->i_idx].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->m_idx];
-	    if (m_ptr->ml) {
-		if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
-		    (void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
+
+	/* Get the object (if it exists) */
+	i_ptr = &i_list[c_ptr->i_idx];
+
+	/* Nothing is there */
+	if ((c_ptr->i_idx == 0) ||
+	    ((i_ptr->tval != TV_CLOSED_DOOR) &&
+	     (i_ptr->tval != TV_CHEST))) {
+	    msg_print("I do not see anything you can open there.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Monster in the way */
+	else if (c_ptr->m_idx > 1) {
+
+	    /* Acquire "Monster" (or "Something") */
+	    if (m_list[c_ptr->m_idx].ml) {
+		if (r_list[m_list[c_ptr->m_idx].r_idx].cflags2 & MF2_UNIQUE)
+		    (void)sprintf(m_name, "%s", r_list[m_list[c_ptr->m_idx].r_idx].name);
 		else
-		    (void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
+		    (void)sprintf(m_name, "The %s", r_list[m_list[c_ptr->m_idx].r_idx].name);
 	    } else
 		(void)strcpy(m_name, "Something");
 	    (void)sprintf(out_val, "%s is in your way!", m_name);
 	    msg_print(out_val);
-	} else if (c_ptr->i_idx != 0)
-	/* Closed door		 */
-	    if (i_list[c_ptr->i_idx].tval == TV_CLOSED_DOOR) {
-		t_ptr = &i_list[c_ptr->i_idx];
-		if (t_ptr->pval > 0) {
-		    i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-			+ (class_level_adj[p_ptr->pclass][CLA_DISARM]
-			   * p_ptr->lev / 3);
-	/* give a 1/50 chance of opening anything, anyway -CWS */
-		    if ((i - t_ptr->pval) < 2)
-			i = t_ptr->pval + 2;
-		    if (p_ptr->confused > 0)
-			msg_print("You are too confused to pick the lock.");
-		    else if ((i - t_ptr->pval) > randint(100)) {
-			msg_print("You have picked the lock.");
-			p_ptr->exp++;
-			prt_experience();
-			t_ptr->pval = 0;
-		    } else
-			count_msg_print("You failed to pick the lock.");
-		} else if (t_ptr->pval < 0)	/* It's stuck	  */
-		    msg_print("It appears to be stuck.");
-		if (t_ptr->pval == 0) {
-		    invcopy(&i_list[c_ptr->i_idx], OBJ_OPEN_DOOR);
-		    c_ptr->fval = CORR_FLOOR;
-		    lite_spot(y, x);
-		    check_view();
-		    command_count = 0;
+	}
+
+	/* Closed door */
+	else if (i_ptr->tval == TV_CLOSED_DOOR) {
+
+	    /* Stuck */
+	    if (i_ptr->pval < 0) {
+		msg_print("It appears to be stuck.");
+	    }
+
+	    /* Locked */
+	    else if (i_ptr->pval > 0) {
+
+		i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
+		    + (class_level_adj[p_ptr->pclass][CLA_DISARM]
+		       * p_ptr->lev / 3);
+
+		/* give a 1/50 chance of opening anything, anyway -CWS */
+		if ((i - i_ptr->pval) < 2) i = i_ptr->pval + 2;
+
+		if (p_ptr->confused > 0) {
+		    msg_print("You are too confused to pick the lock.");
+		}
+		else if ((i - i_ptr->pval) > randint(100)) {
+		    msg_print("You have picked the lock.");
+		    p_ptr->exp++;
+		    prt_experience();
+		    i_ptr->pval = 0;
+		}
+		else {
+		    count_msg_print("You failed to pick the lock.");
 		}
 	    }
-    /* Open a closed chest.		     */
-	    else if (i_list[c_ptr->i_idx].tval == TV_CHEST) {
-		i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-		    + (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
-		t_ptr = &i_list[c_ptr->i_idx];
+
+	    /* In any case, if the door is unlocked, open it */
+	    if (i_ptr->pval == 0) {
+
+		invcopy(i_ptr, OBJ_OPEN_DOOR);
+
+		/* The door is in a "corridor" */
+		c_ptr->fval = CORR_FLOOR;
+
+		/* Draw the door */
+		lite_spot(y, x);
+
+
+		/* Check the view */
+		check_view();
+
+		command_count = 0;
+	    }
+	}
+
+	/* Open a closed chest. */
+	else if (i_ptr->tval == TV_CHEST) {
+
+	    i = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT) +
+		(class_level_adj[p_ptr->pclass][CLA_DISARM] *
+		p_ptr->lev / 3);
+
+	    /* Assume opened successfully */
+	    flag = TRUE;
+
+	    /* Attempt to unlock it */
+	    if (i_ptr->flags2 & CH2_LOCKED) {
+
+		/* Assume locked, and thus not open */
 		flag = FALSE;
-		if (CH2_LOCKED & t_ptr->flags2)
-		    if (p_ptr->confused > 0)
-			msg_print("You are too confused to pick the lock.");
-		    else if ((i - (int)t_ptr->level) > randint(100)) {
-			msg_print("You have picked the lock.");
-			flag = TRUE;
-			p_ptr->exp += t_ptr->level;
-			prt_experience();
-		    } else
-			count_msg_print("You failed to pick the lock.");
-		else
+
+		/* Too confused */
+		if (p_ptr->confused > 0) {
+		    msg_print("You are too confused to pick the lock.");
+		}
+
+		/* Pick the lock, leave the traps */
+		else if ((i - i_ptr->level) > randint(100)) {
+		    msg_print("You have picked the lock.");
+		    i_ptr->flags2 &= ~CH2_LOCKED;
+		    p_ptr->exp += i_ptr->level;
+		    prt_experience();
 		    flag = TRUE;
-		if (flag) {
-		    t_ptr->flags2 &= ~CH2_LOCKED;
-		    known2(t_ptr);
-		    t_ptr->cost = 0;
 		}
-		flag = FALSE;
-	    /* Was chest still trapped?	 (Snicker)   */
-		if ((CH2_LOCKED & t_ptr->flags2) == 0) {
-		    chest_trap(y, x);
-		    if (c_ptr->i_idx != 0)
-			flag = TRUE;
+
+		/* Keep trying */
+		else {
+		    count_msg_print("You failed to pick the lock.");
 		}
-	    /* Chest treasure is allocated as if a creature   */
-	    /* had been killed.				   */
-		if (flag) {
-		/*
-		 * clear the cursed chest/monster win flag, so that people
-		 * can not win by opening a cursed chest 
-		 */
-		    t_ptr->flags3 &= ~TR3_CURSED;
+	    }
 
-		/* generate based on level chest was found on - dbd */
-		    object_level = t_ptr->pval;
+	    /* Allowed to open */
+	    if (flag) {
 
-	        /* but let's not get too crazy with storebought chests -CWS */
-		    if (t_ptr->ident & ID_STOREBOUGHT) {
-			if (object_level > 20)
-			    object_level = 20;
-		    }
+		/* Apply chest traps, if any */
+		if (i_ptr->flags2) chest_trap(y, x, i_ptr);
 
-		    if (object_level < 0) /* perform some sanity checking -CWS */
-			object_level = 0;
-		    if (object_level > MAX_K_LEV)
-			object_level = MAX_K_LEV;
-
-		    coin_type = 0;
-		    opening_chest = TRUE; /* don't generate another chest -CWS */
-		    (void)monster_death(y, x, i_list[c_ptr->i_idx].flags, 0, 0);
-		    i_list[c_ptr->i_idx].flags = 0;
-		    opening_chest = FALSE;
-		}
-	    } else
-		no_object = TRUE;
-	else
-	    no_object = TRUE;
-
-	if (no_object) {
-	    msg_print("I do not see anything you can open there.");
-	    free_turn_flag = TRUE;
+		/* Let the Chest drop items */
+		chest_death(y, x, i_ptr);
+	    }
 	}
     }
 #ifdef TARGET
@@ -739,55 +792,69 @@ void do_cmd_open()
  */
 void do_cmd_close()
 {
-    int                    y, x, dir, no_object;
+    int                    y, x, dir;
     vtype                  out_val, m_name;
     register cave_type    *c_ptr;
-    register monster_type *m_ptr;
+    inven_type		  *i_ptr;
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
     target_mode = FALSE;
 #endif
-    if (get_dir(NULL, &dir)) {
+
+
+    /* Get a "desired" direction, or Abort */
+    if (!get_dir(NULL, &dir)) {
+	/* Abort gracefully */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+	y = char_row;
+	x = char_col;
 	(void)mmove(dir, &y, &x);
 
 	c_ptr = &cave[y][x];
-	no_object = FALSE;
-	if (c_ptr->i_idx != 0)
-	    if (i_list[c_ptr->i_idx].tval == TV_OPEN_DOOR)
-		if (c_ptr->m_idx == 0)
-		    if (i_list[c_ptr->i_idx].pval == 0) {
-			invcopy(&i_list[c_ptr->i_idx], OBJ_CLOSED_DOOR);
-			c_ptr->fval = BLOCKED_FLOOR;
-			lite_spot(y, x);
-		    } else
-			msg_print("The door appears to be broken.");
-		else {
-		    m_ptr = &m_list[c_ptr->m_idx];
-		    if (m_ptr->ml) {
-			if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
-			    (void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
-			else
-			    (void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
-		    } else
-			(void)strcpy(m_name, "Something");
-		    (void)sprintf(out_val, "%s is in your way!", m_name);
-		    msg_print(out_val);
-		}
-	    else
-		no_object = TRUE;
-	else
-	    no_object = TRUE;
+	i_ptr = &i_list[c_ptr->i_idx];
 
-	if (no_object) {
+
+	if ((c_ptr->i_idx == 0) ||
+	    (i_ptr->tval != TV_OPEN_DOOR)) {
+
 	    msg_print("I do not see anything you can close there.");
 	    free_turn_flag = TRUE;
 	}
+
+	/* Handle broken doors */
+	else if (i_ptr->pval) {
+	    msg_print("The door appears to be broken.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Monster in the way */
+	else if (c_ptr->m_idx > 1) {
+	    /* Acquire "Monster" (or "Something") */
+	    if (m_ptr->ml) {
+	        if (r_list[m_list[c_ptr->m_idx].r_idx].cflags2 & MF2_UNIQUE)
+		    sprintf(m_name, "%s", r_list[m_list[c_ptr->m_idx].r_idx].name);
+	    else sprintf(m_name, "The %s", r_list[m_list[c_ptr->m_idx].r_idx].name);
+	    } else (void)strcpy(m_name, "Something");
+	    (void)sprintf(out_val, "%s is in your way!", m_name);
+	    msg_print(out_val);
+	}
+
+	/* Close it */
+	else {
+
+	    /* Hack -- kill the old object */
+	    i_ptr = &i_list[c_ptr->i_idx];
+	    invcopy(i_ptr, OBJ_CLOSED_DOOR);
+
+	    c_ptr->fval = BLOCKED_FLOOR;
+
+	    /* Redisplay */
+	    lite_spot(y, x);
+
     }
 #ifdef TARGET
     target_mode = temp;
@@ -872,7 +939,7 @@ int twall(int y, int x, int t1, int t2)
  * Tunnels through rubble and walls			-RAK-
  * Must take into account: secret doors,  special tools
  */
-void tunnel(int dir)
+void do_cmd_tunnel(int dir)
 {
     register int        i, tabil;
     register cave_type *c_ptr;
@@ -884,52 +951,55 @@ void tunnel(int dir)
     if ((p_ptr->confused > 0) && /* Confused?	     */
 	(randint(4) > 1))	   /* 75% random movement   */
 	dir = randint(9);
-    y = char_row;
-    x = char_col;
-    (void)mmove(dir, &y, &x);
 
-    c_ptr = &cave[y][x];
-/* Compute the digging ability of player; based on	   */
-/* strength, and type of tool used			   */
-    tabil = p_ptr->use_stat[A_STR];
-    i_ptr = &inventory[INVEN_WIELD];
+	y = char_row;
+	x = char_col;
+	(void)mmove(dir, &y, &x);
+	c_ptr = &cave[y][x];
+
+	/* Compute the digging ability of player; based on strength */
+	tabil = p_ptr->use_stat[A_STR];
+
+	/* and type of tool used */
+	i_ptr = &inventory[INVEN_WIELD];
 
 /* Don't let the player tunnel somewhere illegal, this is necessary to
  * prevent the player from getting a free attack by trying to tunnel
- * somewhere where it has no effect.  
- */
+ * somewhere where it has no effect.  */
     if (c_ptr->fval < MIN_CAVE_WALL
 	&& (c_ptr->i_idx == 0 || (i_list[c_ptr->i_idx].tval != TV_RUBBLE
 			  && i_list[c_ptr->i_idx].tval != TV_SECRET_DOOR))) {
 	if (c_ptr->i_idx == 0) {
-	    msg_print("Tunnel through what?  Empty air?!?");
 	    free_turn_flag = TRUE;
+	    msg_print("Tunnel through what?  Empty air?!?");
 	}
-
-    else {
+	else {
 	    msg_print("You can't tunnel through that.");
 	    free_turn_flag = TRUE;
 	}
 	return;
     }
-    if (c_ptr->m_idx > 1) {
-	m_ptr = &m_list[c_ptr->m_idx];
-	if (m_ptr->ml) {
-	    if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
-		(void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
-	    else
-		(void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
-	} else
-	    (void)strcpy(m_name, "Something");
-	(void)sprintf(out_val, "%s is in your way!", m_name);
-	msg_print(out_val);
 
-    /* let the player attack the creature */
-	if (p_ptr->afraid < 1)
-	    py_attack(y, x);
-	else
-	    msg_print("You are too afraid!");
-    } else if (i_ptr->tval != TV_NOTHING) {
+	/* A monster is in the way */
+	else if (c_ptr->m_idx > 1) {
+
+	    /* Acquire "Monster" (or "Something") */
+	    m_ptr = &m_list[c_ptr->m_idx];
+	    if (m_ptr->ml) {
+	        if (r_list[m_ptr->r_idx].cflags2 & MF2_UNIQUE)
+	    	    (void)sprintf(m_name, "%s", r_list[m_ptr->r_idx].name);
+	        else
+		    (void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
+	    } else (void)strcpy(m_name, "Something");
+	    (void)sprintf(out_val, "%s is in your way!", m_name);
+	    msg_print(out_val);
+
+	    /* Attempt an attack */
+	    if (p_ptr->afraid < 1) py_attack(y, x);
+	    else msg_print("You are too afraid!");
+	}
+
+    else if (i_ptr->tval != TV_NOTHING) {
 	if (TR1_TUNNEL & i_ptr->flags1)
 	    tabil += 25 + i_ptr->pval * 50;
 	else {
@@ -939,15 +1009,22 @@ void tunnel(int dir)
 	    tabil >>= 1;
 	}
 
+	/* Hack -- Penalize heavy weapon */
 	if (weapon_heavy) {
 	    tabil += (p_ptr->use_stat[A_STR] * 15) - i_ptr->weight;
-	    if (tabil < 0)
-		tabil = 0;
+	    if (tabil < 0) tabil = 0;
 	}
-    /* Regular walls; Granite, magma intrusion, quartz vein  */
-    /* Don't forget the boundary walls, made of titanium (255) */
+
+	    /* Regular walls; Granite, magma intrusion, quartz vein  */
+	    /* Don't forget the boundary walls, made of titanium (255) */
+
 	switch (c_ptr->fval) {
+	  case BOUNDARY_WALL:
+	    msg_print("This seems to be permanent rock.");
+	    break;
+
 	  case GRANITE_WALL:
+
 	    i = randint(1200) + 80;
 	    if (twall(y, x, tabil, i)) {
 		msg_print("You have finished the tunnel.");
@@ -955,7 +1032,9 @@ void tunnel(int dir)
 	    } else
 		count_msg_print("You tunnel into the granite wall.");
 	    break;
+
 	  case MAGMA_WALL:
+
 	    i = randint(600) + 10;
 	    if (twall(y, x, tabil, i)) {
 		msg_print("You have finished the tunnel.");
@@ -963,7 +1042,9 @@ void tunnel(int dir)
 	    } else
 		count_msg_print("You tunnel into the magma intrusion.");
 	    break;
+
 	  case QUARTZ_WALL:
+
 	    i = randint(400) + 10;
 	    if (twall(y, x, tabil, i)) {
 		msg_print("You have finished the tunnel.");
@@ -971,37 +1052,42 @@ void tunnel(int dir)
 	    } else
 		count_msg_print("You tunnel into the quartz vein.");
 	    break;
-	  case BOUNDARY_WALL:
-	    msg_print("This seems to be permanent rock.");
-	    break;
+
 	  default:
 	/* Is there an object in the way?  (Rubble and secret doors) */
 	    if (c_ptr->i_idx != 0) {
-	    /* Rubble.     */
-		if (i_list[c_ptr->i_idx].tval == TV_RUBBLE) {
-		    if (tabil > randint(180)) {
-			(void)delete_object(y, x);
-			msg_print("You have removed the rubble.");
-			if (randint(10) == 1) {
-			    place_object(y, x);
-			    if (test_lite(y, x))
-				msg_print("You have found something!");
-			}
-			lite_spot(y, x);
-			check_view();
-		    } else
-			count_msg_print("You dig in the rubble.");
-		}
+
 	    /* Secret doors. */
-		else if (i_list[c_ptr->i_idx].tval == TV_SECRET_DOOR) {
-		    count_msg_print("You tunnel into the granite wall.");
-		    search(char_row, char_col, p_ptr->srh);
+	    if (i_list[c_ptr->i_idx].tval == TV_SECRET_DOOR) {
+		count_msg_print("You tunnel into the granite wall.");
+		search(char_row, char_col, p_ptr->srh);
+	    }
+
+	    /* Rubble */
+	    else if (i_list[c_ptr->i_idx].tval == TV_RUBBLE) {
+		if (tabil > randint(180)) {
+		    delete_object(y, x);
+		    msg_print("You have removed the rubble.");
+		    if (randint(10) == 1) {
+			place_object(y, x);
+			if (test_lite(y, x)) {
+			     msg_print("You have found something!");
+			}
+		    }
+		    lite_spot(y, x);
+		    check_view();
 		}
 		else {
-		    msg_print("You can't tunnel through that.");
-		    free_turn_flag = TRUE;
+		    count_msg_print("You dig in the rubble.");
 		}
 	    }
+
+	    /* Anything else is illegal */
+	    else {
+		msg_print("You can't tunnel through that.");
+		free_turn_flag = TRUE;
+	    }
+	}
 
 	    else {
 		msg_print("Tunnel through what?  Empty air?!?");
@@ -1019,40 +1105,59 @@ void tunnel(int dir)
  */
 void do_cmd_disarm()
 {
-    int                 y, x, level, tmp, dir, no_disarm;
-    register int        tot, i;
+    int                 y, x, tmp, dir;
+    register int        tot;
     register cave_type *c_ptr;
     register inven_type *i_ptr;
-    monster_type       *m_ptr;
     vtype               m_name, out_val;
+
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
     target_mode = FALSE;
 #endif
-    if (get_dir(NULL, &dir)) {
+
+    if (!get_dir(NULL, &dir)) {
+	/* Abort Gracefully */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+
+	y = char_row;
+	x = char_col;
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
-	no_disarm = FALSE;
-	if (c_ptr->m_idx > 1 && c_ptr->i_idx != 0 &&
-	    (i_list[c_ptr->i_idx].tval == TV_VIS_TRAP
-	     || i_list[c_ptr->i_idx].tval == TV_CHEST)) {
-	    m_ptr = &m_list[c_ptr->m_idx];
-	    if (m_ptr->ml)
-		(void)sprintf(m_name, "The %s", r_list[m_ptr->r_idx].name);
+
+	i_ptr = &i_list[c_ptr->i_idx];
+
+
+	/* Nothing useful there */
+	if ((c_ptr->i_idx == 0) ||
+	    ((i_ptr->tval != TV_VIS_TRAP) &&
+	     (i_ptr->tval != TV_CHEST))) {
+
+	    msg_print("I do not see anything to disarm there.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Monster in the way */
+	else if (c_ptr->m_idx > 1) {
+	    /* Acquire "Monster" (or "Something") */
+	    if (m_list[c_ptr->m_idx].ml)
+		(void)sprintf(m_name, "The %s", r_list[m_list[c_ptr->m_idx].r_idx].name);
 	    else
 		(void)strcpy(m_name, "Something");
 	    (void)sprintf(out_val, "%s is in your way!", m_name);
 	    msg_print(out_val);
-	} else if (c_ptr->i_idx != 0) {
+	}
 
-	    tot = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT)
-		+ (class_level_adj[p_ptr->pclass][CLA_DISARM] * p_ptr->lev / 3);
+	/* Normal disarm */
+	else {
+
+	    tot = p_ptr->disarm + 2 * todis_adj() + stat_adj(A_INT) +
+		  (class_level_adj[p_ptr->pclass][CLA_DISARM] *
+		  p_ptr->lev / 3);
 
 	    if ((p_ptr->blind > 0) || (no_lite())) {
 		tot = tot / 10;
@@ -1064,65 +1169,78 @@ void do_cmd_disarm()
 		tot = tot / 10;
 	    }
 
-	    i_ptr = &i_list[c_ptr->i_idx];
-	    i = i_ptr->tval;
-	    level = i_ptr->level;
-	    if (i == TV_VIS_TRAP) {/* Floor trap    */
-		if ((tot + 100 - level) > randint(100)) {
+	    /* Floor trap */
+	    if (i_ptr->tval == TV_VIS_TRAP) {
+
+		/* Success */
+		if ((tot + 100 - i_ptr->level) > randint(100)) {
 		    msg_print("You have disarmed the trap.");
 		    p_ptr->exp += i_ptr->pval;
-		    (void)delete_object(y, x);
-		/* make sure we move onto the trap even if confused */
+		    delete_object(y, x);
+		    /* make sure we move onto the trap even if confused */
 		    tmp = p_ptr->confused;
 		    p_ptr->confused = 0;
 		    move_player(dir, FALSE);
 		    p_ptr->confused = tmp;
 		    prt_experience();
 		}
-	    /* avoid randint(0) call */
-		else if ((tot > 5) && (randint(tot) > 5))
+
+		/* Keep trying -- avoid randint(0) call */
+		else if ((tot > 5) && (randint(tot) > 5)) {
 		    count_msg_print("You failed to disarm the trap.");
+		}
+
+		/* Oops */
 		else {
 		    msg_print("You set the trap off!");
-		/* make sure we move onto the trap even if confused */
+		    /* make sure we move onto the trap even if confused */
 		    tmp = p_ptr->confused;
 		    p_ptr->confused = 0;
 		    move_player(dir, FALSE);
 		    p_ptr->confused += tmp;
 		}
-	    } else if (i == TV_CHEST) {
+	    }
+
+	    /* Disarm chest */
+	    else if (i_ptr->tval == TV_CHEST) {
+
+		/* Must find the trap first. */
 		if (!known2_p(i_ptr)) {
 		    msg_print("I don't see a trap.");
 		    free_turn_flag = TRUE;
-		} else if (CH2_TRAP_MASK & i_ptr->flags2) {
-		    if ((tot - level) > randint(100)) {
-			i_ptr->flags2 &= ~CH2_TRAP_MASK;
+		}
 
-			msg_print("You have disarmed the chest.");
-			known2(i_ptr);
-			p_ptr->exp += level;
-			prt_experience();
-		    } else if ((tot > 5) && (randint(tot) > 5))
-			count_msg_print("You failed to disarm the chest.");
-		    else {
-			msg_print("You set a trap off!");
-			known2(i_ptr);
-			chest_trap(y, x);
-		    }
-		} else {
+		/* No traps to find. */
+		else if (!(i_ptr->flags2 & CH2_TRAP_MASK)) {
 		    msg_print("The chest was not trapped.");
 		    free_turn_flag = TRUE;
 		}
-	    } else
-		no_disarm = TRUE;
-	} else
-	    no_disarm = TRUE;
 
-	if (no_disarm) {
-	    msg_print("I do not see anything to disarm there.");
-	    free_turn_flag = TRUE;
+		/* Successful Disarm */
+		else if ((tot - i_ptr->level) > randint(100)) {
+		    i_ptr->flags2 &= ~CH2_TRAP_MASK;
+		    i_ptr->flags2 |= CH2_DISARMED;
+		    msg_print("You have disarmed the chest.");
+		    known2(i_ptr);
+		    p_ptr->exp += i_ptr->level;
+		    prt_experience();
+		}
+
+		/* Keep trying */
+		else if ((tot > 5) && (randint(tot) > 5)) {
+		    count_msg_print("You failed to disarm the chest.");
+		}
+
+		/* Oops */
+		else {
+		    msg_print("You set a trap off!");
+		    known2(i_ptr);
+		    chest_trap(y, x, i_ptr);
+		}
+	    }
 	}
     }
+
 #ifdef TARGET
     target_mode = temp;
 #endif
@@ -1134,8 +1252,8 @@ void do_cmd_disarm()
  *
  * Note: Affected by strength and weight of character 
  *
- * For a closed door, pval is positive if locked; negative if stuck. A disarm
- * spell unlocks and unjams doors! 
+ * For a closed door, pval is positive if locked; negative if stuck.
+ * A disarm spell unlocks and unjams doors! 
  *
  * For an open door, pval is positive for a broken door. 
  *
@@ -1152,8 +1270,11 @@ void do_cmd_disarm()
  * unlock or unstick a door.  
  *
  * A creature with no such ability will attempt to bash a non-secret door. 
+ *
+ * Can't give free turn, or else player could try directions
+ * until he found invisible creature  
  */
-void bash()
+void do_cmd_bash()
 {
     int                 y, x, tmp, dir;
     register cave_type  *c_ptr;
@@ -1161,22 +1282,28 @@ void bash()
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
-#endif
-
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
     target_mode = FALSE;
 #endif
 
-    if (get_dir(NULL, &dir)) {
+
+
+    /* Get a direction (or Escape) */
+    if (!get_dir(NULL, &dir)) {
+	/* Graceful abort */
+	free_turn_flag = TRUE;
+    }
+
+    /* Execute the bash */
+    else {
+
 	if (p_ptr->confused > 0) {
 	    msg_print("You are confused.");
-	    do {
-		dir = randint(9);
-	    }
-	    while (dir == 5);
+	    do { dir = randint(9); } while (dir == 5);
 	}
+
+	/* Bash location */
+	y = char_row;
+	x = char_col;
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
 
@@ -1220,19 +1347,25 @@ void bash()
 		    if (p_ptr->confused == 0) {
 			move_player(dir, FALSE);
 		    }
-		    else
-			lite_spot(y, x);
+		    else lite_spot(y, x);
 
 		    /* Check the view */
 		    check_view();
 		}
+
 		else if (randint(150) > p_ptr->use_stat[A_DEX]) {
-		    msg_print("You are off-balance.");
 		    p_ptr->paralysis = 1 + randint(2);
+		    msg_print("You are off-balance.");
 		}
-		else if (command_count == 0)
+
+		else {
+		    if (command_count == 0)
 		    msg_print("The door holds firm.");
-	    } else if (i_ptr->tval == TV_CHEST) {
+		}
+	    }
+
+	    /* Semi-Hack -- Bash a Chest */
+	    else if (i_ptr->tval == TV_CHEST) {
 		if (randint(10) == 1) {
 		    msg_print("You have destroyed the chest and its contents!");
 		    i_ptr->index = OBJ_RUINED_CHEST;
@@ -1242,20 +1375,25 @@ void bash()
 		    msg_print("The lock breaks open!");
 		    i_ptr->flags2 &= ~CH2_LOCKED;
 		}
-		else
+		else {
 		    count_msg_print("The chest holds firm.");
-	    } else
-	    /*
-	     * Can't give free turn, or else player could try directions
-	     * until he found invisible creature 
-	     */
+		}
+	    }
+
+	    /* Bash something else (including secret doors) */
+	    else {
 		msg_print("You bash it, but nothing interesting happens.");
-	} else {
-	    if (c_ptr->fval < MIN_CAVE_WALL)
-		msg_print("You bash at empty space.");
-	    else
-	    /* same message for wall as for secret door */
-		msg_print("You bash it, but nothing interesting happens.");
+	    }
+	}
+
+	/* Empty Air */
+	else if (c_ptr->fval < MIN_CAVE_WALL) {
+	    msg_print("You bash at empty space.");
+	}
+
+	/* same message for wall as for secret door */
+	else {
+	    msg_print("You bash it, but nothing interesting happens.");
 	}
     }
 #ifdef TARGET
@@ -1266,65 +1404,89 @@ void bash()
 
 /*
  * Jam a closed door with a spike -RAK-
+ *
+ * Be sure not to allow the user to "find" ghosts by spiking
+ * Thus, anything that could indicate a monster takes a turn
  */
 void do_cmd_spike()
 {
     int                  y, x, dir, i, j;
     register cave_type  *c_ptr;
     register inven_type *i_ptr;
-    char                 tmp_str[80];
+    char		m_name[80];
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir.. -CFT */
+    target_mode = FALSE; /* turn off target mode, restore later */
 #endif /* TARGET */
 
-    free_turn_flag = TRUE;
-    y = char_row;
-    x = char_col;
-#ifdef TARGET
-    target_mode = FALSE; /* turn off target mode, restore later */
-#endif
-    if (get_dir(NULL, &dir)) {
+
+    if (!get_dir(NULL, &dir)) {    
+	/* Abort gracefully */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+
+	/* Get the grid of the thing to jam */
+	y = char_row;
+	x = char_col;
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
-	if (c_ptr->i_idx != 0) {
 
 	/* What is it? */
 	i_ptr = &i_list[c_ptr->i_idx];
 
-	    if (i_ptr->tval == TV_CLOSED_DOOR)
-		if (c_ptr->m_idx == 0) {
-		    if (find_range(TV_SPIKE, TV_NEVER, &i, &j)) {
-			free_turn_flag = FALSE;
-			count_msg_print("You jam the door with a spike.");
-			if (i_ptr->pval > 0)
-			    i_ptr->pval = (-i_ptr->pval);	/* Make locked to stuck. */
-		    /* Successive spikes have a progressively smaller effect.
-		     * Series is: 0 20 30 37 43 48 52 56 60 64 67 70 ... */
-			i_ptr->pval -= 1 + 190 / (10 - i_ptr->pval);
-			i_ptr = &inventory[i];
-			if (i_ptr->number > 1) {
-			    i_ptr->number--;
-			    inven_weight -= i_ptr->weight;
-			} else
-			    inven_destroy(i);
-		    } else
-			msg_print("But you have no spikes.");
-		} else {
-		    free_turn_flag = FALSE;
-		    (void)sprintf(tmp_str, "The %s is in your way!",
-				  r_list[m_list[c_ptr->m_idx].r_idx].name);
-		    msg_print(tmp_str);
-		}
-	    else if (i_ptr->tval == TV_OPEN_DOOR)
-		msg_print("The door must be closed first.");
-	    else
-		msg_print("That isn't a door!");
-	} else
-	    msg_print("That isn't a door!");
+	/* Nothing there? */
+	if ((c_ptr->i_idx == 0) ||
+	    ((i_ptr->tval != TV_OPEN_DOOR) &&
+	     (i_ptr->tval != TV_CLOSED_DOOR))) {
+
+	    msg_print("I see no door there.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Open doors must be closed */
+	else if (i_ptr->tval == TV_OPEN_DOOR) {
+	    msg_print("The door must be closed first.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Make sure the player has spikes */
+	else if (!find_range(TV_SPIKE, TV_NEVER, &i, &j)) {
+	    msg_print("But you have no spikes.");
+	    free_turn_flag = TRUE;
+	}
+
+	/* Is a monster in the way? */
+	else if (c_ptr->m_idx != 0) {
+	    sprintf(m_name, "The %s is in your way!",
+	        r_list[m_list[c_ptr->m_idx].r_idx].name);
+	    msg_print(m_name);
+	}
+
+	/* Go for it */
+	else {
+
+	    /* Successful jamming */
+	    count_msg_print("You jam the door with a spike.");
+
+	    /* Make locked to stuck. */
+	    if (i_ptr->pval > 0) i_ptr->pval = (-i_ptr->pval);
+
+	    /* Successive spikes have a progressively smaller effect. */
+	    /* Series is: 0 20 30 37 43 48 52 56 60 64 67 70 ... */
+	    i_ptr->pval -= 1 + 190 / (10 - i_ptr->pval);
+
+	    if (i_ptr->number > 1) {
+	        i_ptr->number--;
+	        inven_weight -= i_ptr->weight;
+	    } else inven_destroy(i);
+	}
+    }
+
 #ifdef TARGET
 	target_mode = temp;
 #endif
-    }
 }
 
 
@@ -1568,7 +1730,7 @@ void do_cmd_fire()
 /*
  * Resting allows a player to safely restore his hp	-RAK-	 
  */
-void rest(void)
+void do_cmd_rest(void)
 {
     int   rest_num;
     vtype rest_str;

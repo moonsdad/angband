@@ -735,7 +735,7 @@ void do_command(char com_val)
 	move_player(5, do_pickup);
 	if (command_count > 1) {
 	    command_count--;
-	    rest();
+	    do_cmd_rest();
 	}
 	break;
 
@@ -763,7 +763,7 @@ void do_command(char com_val)
 #endif
 
       case 'f':			/* (f)orce		(B)ash */
-	bash();
+	do_cmd_bash();
 	break;
 
       case 'A':			/* (A)ctivate		(A)ctivate */
@@ -865,7 +865,7 @@ void do_command(char com_val)
 	break;
 
       case 'R':			/* (R)est a while */
-	rest();
+	do_cmd_rest();
 	break;
 
       case '#':			/* (#) search toggle	(S)earch toggle */
@@ -877,28 +877,28 @@ void do_command(char com_val)
 	break;
 
       case CTRL('B'):		/* (^B) tunnel down left	(T 1) */
-	tunnel(1);
+	do_cmd_tunnel(1);
 	break;
 
       case CTRL('M'):		/* cr must be treated same as lf. */
       case CTRL('J'):		/* (^J) tunnel down		(T 2) */
-	tunnel(2);
+	do_cmd_tunnel(2);
 	break;
 
       case CTRL('N'):		/* (^N) tunnel down right	(T 3) */
-	tunnel(3);
+	do_cmd_tunnel(3);
 	break;
 
       case CTRL('H'):		/* (^H) tunnel left		(T 4) */
-	tunnel(4);
+	do_cmd_tunnel(4);
 	break;
 
       case CTRL('L'):		/* (^L) tunnel right		(T 6) */
-	tunnel(6);
+	do_cmd_tunnel(6);
 	break;
 
       case CTRL('Y'):		/* (^Y) tunnel up left		(T 7) */
-	tunnel(7);
+	do_cmd_tunnel(7);
 	break;
 
       case CTRL('K'):		/* (^K) tunnel up		(T 8) */
@@ -906,7 +906,7 @@ void do_command(char com_val)
 	break;
 
       case CTRL('U'):		/* (^U) tunnel up right		(T 9) */
-	tunnel(9);
+	do_cmd_tunnel(9);
 	break;
 
       case 'z':			/* (z)ap a wand		(a)im a wand */
@@ -952,7 +952,7 @@ void do_command(char com_val)
 	break;
 
       case 'x':			/* e(x)amine surrounds	(l)ook about */
-	look();
+	do_cmd_look();
 	free_turn_flag = TRUE;
 	break;
 
