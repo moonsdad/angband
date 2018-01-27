@@ -463,6 +463,10 @@ static void do_cmd_options()
 /*
  */
 /*
+ */
+
+
+/*
  * Parse and execute the current command
  * Give "Warning" on illegal commands.
  */
@@ -538,282 +542,288 @@ void do_command(char com_val)
 
 
 	 
-      case 'Q':			/* (Q)uit		(^K)ill */
-	flush();
-	if ((!total_winner) ? get_check("Do you really want to quit?")
-	    : get_check("Do you want to retire?")) {
-	    new_level_flag = TRUE;
-	    death = TRUE;
-	    (void)strcpy(died_from, "Quitting");
-	}
-	free_turn_flag = TRUE;
-	break;
-
-      case CTRL('P'):		/* (^P)revious message. */
-	if (command_count > 0) {
-	    i = command_count;
-	    if (i > MAX_SAVE_MSG)
-		i = MAX_SAVE_MSG;
-	    command_count = 0;
-	} else if (last_command != 16)
-	    i = 1;
-	else
-	    i = MAX_SAVE_MSG;
-	j = last_msg;
-	if (i > 1) {
-	    save_screen();
-	    x = i;
-	    while (i > 0) {
-		i--;
-		prt(old_msg[j], i, 0);
-		if (j == 0)
-		    j = MAX_SAVE_MSG - 1;
-		else
-		    j--;
+	/*** Wizard Commands ***/
+	    
+	/* (^W)izard Mode */
+	case CTRL('W'):
+	    free_turn_flag = TRUE;
+	    if (wizard) {
+		wizard = FALSE;
+		msg_print("Wizard mode off.");
 	    }
-	    erase_line(x, 0);
-	    pause_line(x);
-	    restore_screen();
-	} else {
-	/* Distinguish real and recovered messages with a '>'. -CJS- */
-	    put_str(">", 0, 0);
-	    prt(old_msg[j], 0, 1);
-	}
-	free_turn_flag = TRUE;
+	    else if (enter_wiz_mode()) {
+		msg_print("Wizard mode on.");
+	    }
+	    prt_winner();
+	    break;
+
+
+
+	/*** Extra commands ***/
+
+
+
+
+	/*** Inventory Commands ***/
+
+	/* (w)ear or wield */
+	case 'w':
+	    inven_command('w'); break;
+
+	/* (T)ake off something */
+	case 'T':	
+	    inven_command('t'); break;
+
+	/* e(X)change weapons */
+	case 'X':
+	    inven_command('x'); break;
+
+	/* (d)rop something */
+	case 'd':
+	    inven_command('d'); break;
+
+	/* (e)quipment list */
+	case 'e':
+	    inven_command('e'); break;
+
+	/* (i)nventory list */
+	case 'i':
+	    inven_command('i'); break;
+
+
+	/*** Standard "Movement" Commands ***/
+
+	/* (^B) tunnel down left	(T 1) */
+	case CTRL('B'):
+	    do_cmd_tunnel(1); break;
+	/* (^J) tunnel down		(T 2) */
+	case CTRL('M'): /* cr must be treated same as lf. */
+	case CTRL('J'):
+	    do_cmd_tunnel(2); break;
+	/* (^N) tunnel down right	(T 3) */
+	case CTRL('N'):
+	    do_cmd_tunnel(3); break;
+	/* (^H) tunnel left		(T 4) */
+	case CTRL('H'):
+	    do_cmd_tunnel(4); break;
+	/* (^L) tunnel right		(T 6) */
+	case CTRL('L'):
+	    do_cmd_tunnel(6); break;
+	/* (^Y) tunnel up left		(T 7) */
+	case CTRL('Y'):
+	    do_cmd_tunnel(7); break;
+	/* (^K) tunnel up		(T 8) */
+	case CTRL('K'):
+	    tunnel(8); break;
+	/* (^U) tunnel up right		(T 9) */
+	case CTRL('U'):
+	    do_cmd_tunnel(9); break;
+
+	/* (b) down, left	(1) */
+	case 'b':
+	    move_player(1, do_pickup); break;
+	/* (j) down		(2) */
+	case 'j':
+	    move_player(2, do_pickup); break;
+	/* (n) down, right	(3) */
+	case 'n':
+	    move_player(3, do_pickup); break;
+	/* (h) left		(4) */
+	case 'h':
+	    move_player(4, do_pickup); break;
+	/* (l) right		(6) */
+	case 'l':
+	    move_player(6, do_pickup); break;
+	/* (y) up, left		(7) */
+	case 'y':
+	    move_player(7, do_pickup); break;
+	/* (k) up		(8) */
+	case 'k':
+	    move_player(8, do_pickup); break;
+	/* (u) up, right	(9) */
+	case 'u':
+	    move_player(9, do_pickup); break;
+
+
+	/*** Commands that "re-interpret" the repeat count ***/
+
+	/* (B) run down, left	(. 1) */
+	case 'B':
+	    find_init(1); break;
+	/* (J) run down		(. 2) */
+	case 'J':
+	    find_init(2); break;
+	/* (N) run down, right	(. 3) */
+	case 'N':
+	    find_init(3); break;
+	/* (H) run left		(. 4) */
+	case 'H':
+	    find_init(4); break;
+	/* (L) run right	(. 6) */
+	case 'L':
+	    find_init(6); break;
+	/* (Y) run up, left	(. 7) */
+	case 'Y':
+	    find_init(7);break;
+	/* (K) run up		(. 8) */
+	case 'K':
+	    find_init(8); break;
+	/* (U) run up, right	(. 9) */
+	case 'U':
+	    find_init(9); break;
+
+	/* (.) stay in one place (5) */
+	case '.':
+	    move_player(5, do_pickup);
+	    if (command_count > 1) {
+	        command_count--;
+	        do_cmd_rest();
+	    }
 	break;
 
-      case CTRL('F'):		/* Repeat (^F)eeling */
-	free_turn_flag = TRUE;
-	do_cmd_feeling();
+	/* (R)est a while */
+	case 'R':
+	    do_cmd_rest(); break;
+
+
+
+	/*** Searching, Resting ***/
+
+	/* (g)et an object... */
+	case 'g':
+	    if (prompt_carry_flag) {
+	    if (cave[char_row][char_col].i_idx != 0)	/* minor change -CFT */
+	        carry(char_row, char_col, TRUE);
+	    } else free_turn_flag = TRUE;
 	break;
 
-      case CTRL('W'):		/* (^W)izard mode */
-	if (wizard) {
-	    wizard = FALSE;
-	    msg_print("Wizard mode off.");
-	} else if (enter_wiz_mode())
-	    msg_print("Wizard mode on.");
-	prt_winner();
-	free_turn_flag = TRUE;
+	/* Toggle search status */
+	case '#':
+	    if (p_ptr->status & PY_SEARCH) search_off();
+	    else search_on();
+	    free_turn_flag = TRUE;
 	break;
 
-      case CTRL('X'):		/* e(^X)it and save */
-	if (total_winner) {
-	    msg_print("You are a Total Winner,  your character must be retired.");
-	    if (rogue_like_commands)
-		msg_print("Use 'Q' to when you are ready to retire.");
-	    else
-		msg_print("Use <Control>-K when you are ready to retire.");
-	} else {
-	    (void)strcpy(died_from, "(saved)");
-	    msg_print("Saving game...");
-	    if (save_player())
-		exit_game();
-	    msg_print("Save failed...");
-	    (void)strcpy(died_from, "(alive and well)");
-	}
-	free_turn_flag = TRUE;
-	break;
+	/* (s)earch for a turn */
+	case 's':
+	    search(char_row, char_col, p_ptr->srh); break;
 
-      case CTRL('R'):
-	if (p_ptr->image > 0)
-	    msg_print("You cannot be sure what is real and what is not!");
-	else {
-	    draw_cave();
-	    update_monsters();	  /* draw monsters */
-	    prt_equippy_chars();  /* redraw equippy chars */
-	}
-	free_turn_flag = TRUE;
-	break;
 
-#ifdef TARGET
-/* select a target (sorry, no intuitive letter keys were left: a/A for aim,
- * t/T for target, f/F for focus, s/S for select, c/C for choose and p/P for pick
- *  were all already taken.  Wiz light command moved to '$', which was unused. -CFT
- */
-      case '*':
-	target();		/* target code taken from Morgul -CFT */
-	free_turn_flag = TRUE;
-	break;    			
-#endif
+	/*** Stairs and Doors and Chests and Traps ***/
 
-      case '=':			/* (=) set options */
-	save_screen();
-	do_cmd_options();
-	restore_screen();
-	free_turn_flag = TRUE;
-	break;
+	/* Go up staircases */
+	case '<':
+	    do_cmd_go_up(); break;
 
-      case '{':			/* ({) inscribe an object    */
+	/* Go down staircases */
+	case '>':
+	    do_cmd_go_down(); break;
+
+	/* Open something */
+	case 'o':
+	    do_cmd_open(); break;
+
+	/* Close something */
+	case 'c':
+	    do_cmd_close(); break;
+
+	/* Spike a door */
+	case 'S':
+	    do_cmd_spike(); break;
+
+	/* Force a door or Bash a monster. */
+	case 'f':
+	    do_cmd_bash(); break;
+
+	/* Disarm a trap */
+	case 'D':
+	    do_cmd_disarm(); break;
+
+
+	/*** Magic and Prayers ***/
+
+	/* Peruse a Book */
+	free_turn_flag = TRUE;
+	case 'P':
+	    do_cmd_browse(); break;
+
+	/* Gain some spells */
+	case 'G':
+	    gain_spells(); break;
+
+	/* Cast a magic spell */
+	case 'm':
+	    cast(); break;
+
+	/* Pray a prayer */
+	case 'p':
+	    pray(); break;
+
+
+	/*** Use various objects ***/
+
+	/* Inscribe an object */
+	case '{':
 	scribe_object();
 	free_turn_flag = TRUE;
 	break;
 
-      case '!':			/* (!) escape to the shell */
-	if (!wizard)
-#ifdef MSDOS			/* Let's be a little more accurate... */
-	    msg_print("Sorry, Angband doesn't leave enough free memory for a subshell.");
-#else
-	    msg_print("Sorry, inferior shells are not allowed from ANGBAND.");
-#endif
-	else
-	    rerate();
-	free_turn_flag = TRUE;
-	break;
+	/* Activate an artifact */
+	case 'A':
+	    activate(); break;
+
+	/* Eat some food */
+	case 'E':
+	    eat(); break;
+
+	/* (F)ill lamp */
+	case 'F':
+	    do_cmd_refill_lamp(); break;
+
+	/* Throw something */
+	case 't':
+	    do_cmd_fire(); break;
+
+	/* Zap a wand */
+	case 'z':
+	    do_cmd_aim_wand(); break;
+
+	/* Activate a rod */
+	case 'a':
+	    do_cmd_zap_rod(); break;
+
+	/* Quaff a potion */
+	case 'q':
+	    quaff(); break;
+
+	/* Read a scroll */
+	case 'r':
+	    read_scroll(); break;
+
+	/* Zap a staff */
+	case 'Z':
+	    use(); break;
 
 
+	/*** Looking at Things (nearby or on map) ***/
 
-      case 'b':			/* (b) down, left	(1) */
-	move_player(1, do_pickup);
-	break;
-
-      case 'j':			/* (j) down		(2) */
-	move_player(2, do_pickup);
-	break;
-
-      case 'n':			/* (n) down, right	(3) */
-	move_player(3, do_pickup);
-	break;
-
-      case 'h':			/* (h) left		(4) */
-	move_player(4, do_pickup);
-	break;
-
-      case 'l':			/* (l) right		(6) */
-	move_player(6, do_pickup);
-	break;
-
-      case 'y':			/* (y) up, left		(7) */
-	move_player(7, do_pickup);
-	break;
-
-      case 'k':			/* (k) up		(8) */
-	move_player(8, do_pickup);
-	break;
-
-      case 'u':			/* (u) up, right	(9) */
-	move_player(9, do_pickup);
-	break;
-
-      case 'B':			/* (B) run down, left	(. 1) */
-	find_init(1);
-	break;
-
-      case 'J':			/* (J) run down		(. 2) */
-	find_init(2);
-	break;
-
-      case 'N':			/* (N) run down, right	(. 3) */
-	find_init(3);
-	break;
-
-      case 'H':			/* (H) run left		(. 4) */
-	find_init(4);
-	break;
-
-      case 'L':			/* (L) run right	(. 6) */
-	find_init(6);
-	break;
-
-      case 'Y':			/* (Y) run up, left	(. 7) */
-	find_init(7);
-	break;
-      case 'K':			/* (K) run up		(. 8) */
-	find_init(8);
-	break;
-
-      case 'U':			/* (U) run up, right	(. 9) */
-	find_init(9);
-	break;
-
-      case '/':			/* (/) identify a symbol */
-	ident_char();
-	free_turn_flag = TRUE;
-	break;
-
-      case '.':			/* (.) stay in one place (5) */
-	move_player(5, do_pickup);
-	if (command_count > 1) {
-	    command_count--;
-	    do_cmd_rest();
-	}
-	break;
-
-      case '<':			/* (<) go down a staircase */
-	do_cmd_go_up();
-	break;
-
-      case '>':			/* (>) go up a staircase */
-	do_cmd_go_down();
-	break;
-
-      case '?':			/* (?) help with commands */
-	if (rogue_like_commands)
-	    helpfile(ANGBAND_R_HELP);
-	else
-	    helpfile(ANGBAND_O_HELP);
-	free_turn_flag = TRUE;
-	break;
-
-#ifdef ALLOW_SCORE
-      case 'v':   /* score patch originally by Mike Welsh mikewe@acacia.cs.pdx.edu */
-	sprintf(prt1,"Your current score is: %ld", total_points());
-	msg_print(prt1);
-	break;
-#endif
-
-      case 'f':			/* (f)orce		(B)ash */
-	do_cmd_bash();
-	break;
-
-      case 'A':			/* (A)ctivate		(A)ctivate */
-	activate();
-	break;
-
-      case 'C':			/* (C)haracter description */
-	save_screen();
-	change_name();
-	restore_screen();
-	free_turn_flag = TRUE;
-	break;
-
-      case 'D':			/* (D)isarm trap */
-	do_cmd_disarm();
-	break;
-
-      case 'E':			/* (E)at food */
-	eat();
-	break;
-
-      case 'F':			/* (F)ill lamp */
-	do_cmd_refill_lamp();
-	break;
-
-      case 'G':			/* (G)ain magic spells */
-	gain_spells();
-	break;
-
-      case 'g':			/* (g)et an object... */
-	if (prompt_carry_flag) {
-	    if (cave[char_row][char_col].i_idx != 0)	/* minor change -CFT */
-		carry(char_row, char_col, TRUE);
-	} else
+	case 'M':
+	    screen_map();
 	    free_turn_flag = TRUE;
-	break;
+	    break;
 
-      case 'W':			/* (W)here are we on the map	(L)ocate on map */
-	if ((p_ptr->blind > 0) || no_lite())
+	/* Locate player on the map */	
+	case 'W':
+	    if ((p_ptr->blind > 0) || no_lite())
 	    msg_print("You can't see your map.");
-	else {
+	    else {
 	    int                 cy, cx, p_y, p_x;
 #ifdef TARGET
 /* If in target_mode, player will not be given a chance to pick a direction.
- * So we save it, force it off, and then ask for the direction -CFT
- */
+ * So we save it, force it off, and then ask for the direction -CFT */
 	    int temp = target_mode;
 	    target_mode = FALSE;
 #endif
-
 	    y = char_row;
 	    x = char_col;
 	    if (get_panel(y, x, TRUE))
@@ -830,16 +840,14 @@ void do_command(char com_val)
 			     p_y < cy ? " North" : p_y > cy ? " South" : "",
 			      p_x < cx ? " West" : p_x > cx ? " East" : "");
 		(void)sprintf(out_val,
-      "Map sector [%d,%d], which is%s your sector. Look which direction?",
+	        "Map sector [%d,%d], which is%s your sector. Look which direction?",
 			      p_y, p_x, tmp_str);
-		if (!get_dir(out_val, &dir_val))
-		    break;
+		if (!get_dir(out_val, &dir_val)) break;
 
-/* -CJS- Should really use the move function, but what the hell. This is nicer,
- * as it moves exactly to the same place in another section. The direction
- * calculation is not intuitive. Sorry.
- */
-		for (;;) {
+	    /* -CJS- Should really use the move function, but what the hell. This is nicer,
+	     * as it moves exactly to the same place in another section. The direction
+	     * calculation is not intuitive. Sorry. */
+	    for (;;) {
 		    x += ((dir_val - 1) % 3 - 1) * SCREEN_WIDTH / 2;
 		    y -= ((dir_val - 1) / 3 - 1) * SCREEN_HEIGHT / 2;
 		    if (x < 0 || y < 0 || x >= cur_width || y >= cur_width) {
@@ -854,168 +862,187 @@ void do_command(char com_val)
 		    }
 		}
 	    }
-	/* Move to a new panel - but only if really necessary. */
+	    /* Move to a new panel - but only if really necessary. */
 	    if (get_panel(char_row, char_col, FALSE))
 		prt_map();
 #ifdef TARGET
 	    target_mode = temp; /* restore target mode... */
 #endif
-	}
-	free_turn_flag = TRUE;
+	    }
+	    free_turn_flag = TRUE;
+	    break;
+
+	/* Examine surroundings */
+	case 'x':
+	    do_cmd_look();
+	    free_turn_flag = TRUE;
+	    break;
+
+#ifdef TARGET
+/* select a target (sorry, no intuitive letter keys were left: a/A for aim,
+ * t/T for target, f/F for focus, s/S for select, c/C for choose and p/P for pick
+ *  were all already taken.  Wiz light command moved to '$', which was unused. -CFT */
+	case '*':
+	    target(); /* target code taken from Morgul -CFT */
+	    free_turn_flag = TRUE;
+	    break;
+#endif
+
+	/*** Help and Such ***/
+
+	/* Help */
+	case '?':
+	    if (rogue_like_commands) helpfile(ANGBAND_R_HELP);
+	    else helpfile(ANGBAND_O_HELP);
+	    free_turn_flag = TRUE;
+	    break;
+
+	/* Identify Symbol */
+	case '/':
+	    ident_char();
+	    free_turn_flag = TRUE;
+	    break;
+
+	/* Character Description */
+	case 'C':
+	    save_screen();
+	    change_name();
+	    restore_screen();
+	    free_turn_flag = TRUE;
+	    break;
+
+
+	/*** System Commands ***/
+
+	/* Game Version */
+	case 'V':
+	    helpfile(ANGBAND_VERSION);
+	    free_turn_flag = TRUE;
+	    break;
+
+	/* Repeat Feeling */
+	case CTRL('F'):
+	    free_turn_flag = TRUE;
+	    do_cmd_feeling();
+	    break;
+
+	/* Previous message(s). */
+	case CTRL('P'):
+	    if (command_count > 0) {
+	    i = command_count;
+	    if (i > MAX_SAVE_MSG) i = MAX_SAVE_MSG;
+	    command_count = 0;
+	    } else if (last_command != 16)
+	    i = 1;
+	    else i = MAX_SAVE_MSG;
+	    j = last_msg;
+	    if (i > 1) {
+	    save_screen();
+	    x = i;
+	    while (i > 0) {
+		i--;
+		prt(old_msg[j], i, 0);
+		if (j == 0)
+		    j = MAX_SAVE_MSG - 1;
+		else
+		    j--;
+	    }
+	    erase_line(x, 0);
+	    pause_line(x);
+	    restore_screen();
+	    } else {
+	    /* Distinguish real and recovered messages with a '>'. -CJS- */
+	    put_str(">", 0, 0);
+	    prt(old_msg[j], 0, 1);
+	    }
+	    free_turn_flag = TRUE;
+	    break;
+
+	/* Commit Suicide and Quit */
+	case 'Q':
+	    flush();
+	    if ((!total_winner) ? get_check("Do you really want to quit?")
+	       : get_check("Do you want to retire?")) {
+	       new_level_flag = TRUE;
+	       death = TRUE;
+	       (void)strcpy(died_from, "Quitting");
+	    }
+	    free_turn_flag = TRUE;
 	break;
 
-      case 'R':			/* (R)est a while */
-	do_cmd_rest();
-	break;
+	/* Save and Quit */
+	case CTRL('X'):
+	    if (total_winner) {
+	        msg_print("You are a Total Winner,  your character must be retired.");
+	        if (rogue_like_commands)
+	            msg_print("Use 'Q' to when you are ready to retire.");
+	        else
+	            msg_print("Use <Control>-K when you are ready to retire.");
+	    } else {
+	        (void)strcpy(died_from, "(saved)");
+	        msg_print("Saving game...");
+	        if (save_player()) exit_game();
+	        msg_print("Save failed...");
+	        (void)strcpy(died_from, "(alive and well)");
+	    }
+	    free_turn_flag = TRUE;
+	    break;
 
-      case '#':			/* (#) search toggle	(S)earch toggle */
-	if (p_ptr->status & PY_SEARCH)
-	    search_off();
-	else
-	    search_on();
-	free_turn_flag = TRUE;
-	break;
+	/* Redraw the screen */
+	case CTRL('R'):
+	    if (p_ptr->image > 0)
+	        msg_print("You cannot be sure what is real and what is not!");
+	    else {
+	        draw_cave();
+	        update_monsters();	  /* draw monsters */
+	        prt_equippy_chars();  /* redraw equippy chars */
+	    }
+	    free_turn_flag = TRUE;
+	    break;
 
-      case CTRL('B'):		/* (^B) tunnel down left	(T 1) */
-	do_cmd_tunnel(1);
-	break;
-
-      case CTRL('M'):		/* cr must be treated same as lf. */
-      case CTRL('J'):		/* (^J) tunnel down		(T 2) */
-	do_cmd_tunnel(2);
-	break;
-
-      case CTRL('N'):		/* (^N) tunnel down right	(T 3) */
-	do_cmd_tunnel(3);
-	break;
-
-      case CTRL('H'):		/* (^H) tunnel left		(T 4) */
-	do_cmd_tunnel(4);
-	break;
-
-      case CTRL('L'):		/* (^L) tunnel right		(T 6) */
-	do_cmd_tunnel(6);
-	break;
-
-      case CTRL('Y'):		/* (^Y) tunnel up left		(T 7) */
-	do_cmd_tunnel(7);
-	break;
-
-      case CTRL('K'):		/* (^K) tunnel up		(T 8) */
-	tunnel(8);
-	break;
-
-      case CTRL('U'):		/* (^U) tunnel up right		(T 9) */
-	do_cmd_tunnel(9);
-	break;
-
-      case 'z':			/* (z)ap a wand		(a)im a wand */
-	do_cmd_aim_wand();
-	break;
-
-      case 'a':			/* (a)ctivate a rod	(z)ap a rod */
-	do_cmd_zap_rod();
-	break;
-
-      case 'M':
-	screen_map();
-	free_turn_flag = TRUE;
-	break;
-
-      case 'P':			/* (P)eruse a book	(B)rowse in a book */
-	do_cmd_browse();
-	free_turn_flag = TRUE;
-	break;
-
-      case 'c':			/* (c)lose an object */
-	do_cmd_close();
-	break;
-
-      case 'd':			/* (d)rop something */
-	inven_command('d');
-	break;
-
-      case 'e':			/* (e)quipment list */
-	inven_command('e');
-	break;
-
-      case 't':			/* (t)hrow something	(f)ire something */
-	do_cmd_fire();
-	break;
-
-      case 'i':			/* (i)nventory list */
-	inven_command('i');
-	break;
-
-      case 'S':			/* (S)pike a door	(j)am a door */
-	do_cmd_spike();
-	break;
-
-      case 'x':			/* e(x)amine surrounds	(l)ook about */
-	do_cmd_look();
-	free_turn_flag = TRUE;
-	break;
-
-      case 'm':			/* (m)agic spells */
-	cast();
-	break;
-
-      case 'o':			/* (o)pen something */
-	do_cmd_open();
-	break;
-
-      case 'p':			/* (p)ray */
-	pray();
-	break;
-
-      case 'q':			/* (q)uaff */
-	quaff();
-	break;
-
-      case 'r':			/* (r)ead */
-	read_scroll();
-	break;
-
-      case 's':			/* (s)earch for a turn */
-	search(char_row, char_col, p_ptr->srh);
-	break;
-
-      case 'T':			/* (T)ake off something	(t)ake off */
-	inven_command('t');
-	break;
-
-      case 'Z':			/* (Z)ap a staff	(u)se a staff */
-	use();
-	break;
-
-      case 'V':			/* (V)ersion of game */
-	helpfile(ANGBAND_VERSION);
-	free_turn_flag = TRUE;
-	break;
-
-      case 'w':			/* (w)ear or wield */
-	inven_command('w');
-	break;
-
-      case 'X':			/* e(X)change weapons	e(x)change */
-	inven_command('x');
-	break;
+	/* Set options */
+	case '=':
+	    save_screen();
+	    do_cmd_options();
+	    restore_screen();
+	    free_turn_flag = TRUE;
+	    break;
 
 #ifdef ALLOW_CHECK_ARTIFACTS /* -CWS */
-      case '~':
+	/* Check artifacts */
+	case '~':
 	if ((!wizard) && (dun_level != 0)) {
 	    msg_print("You need to be on the town level to check artifacts!");
 	    msg_print(NULL);		/* make sure can see the message -CWS */
-	} else
-	    artifact_check_no_file();
+	} else artifact_check_no_file();
+	break;
+#endif
+
+#ifdef ALLOW_CHECK_UNIQUES /* -CWS */
+	/* Check uniques */
+	case '|':
+	    do_cmd_check_uniques(); break;
+#endif
+
+#ifdef ALLOW_SCORE
+      case 'v':   /* score patch originally by Mike Welsh mikewe@acacia.cs.pdx.edu */
+	sprintf(prt1,"Your current score is: %ld", total_points());
+	msg_print(prt1);
+	break;
+#endif	
+
+      case '!':			/* (!) escape to the shell */
+	if (!wizard)
+#ifdef MSDOS			/* Let's be a little more accurate... */
+	    msg_print("Sorry, Angband doesn't leave enough free memory for a subshell.");
+#else
+	    msg_print("Sorry, inferior shells are not allowed from ANGBAND.");
+#endif
+	else
+	    rerate();
+	free_turn_flag = TRUE;
 	break;
 
-#endif
-#ifdef ALLOW_CHECK_UNIQUES /* -CWS */
-      case '|':
-	do_cmd_check_uniques();
-	break;
-#endif
 
       default:
 	if (wizard) {
