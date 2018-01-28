@@ -697,7 +697,7 @@ int file_character(cptr filename1)
 		      case INVEN_LITE:
 			p = "Light source is";
 			break;
-		      case INVEN_BOW:
+		      case INVEN_AUX:
 			p = "Secondary weapon";
 			break;
 		      default:

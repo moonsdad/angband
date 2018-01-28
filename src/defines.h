@@ -322,7 +322,7 @@
  * Inventory slot values (do not change these)
  */
 #define INVEN_WIELD	23		/* must be first item in equipment list */
-#define INVEN_BOW       24
+#define INVEN_AUX       24
 #define INVEN_LEFT      25
 #define INVEN_RIGHT     26
 #define INVEN_NECK      27

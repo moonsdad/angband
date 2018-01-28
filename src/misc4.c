@@ -2174,7 +2174,7 @@ int attack_blows(int weight, int *wtohit)
 	else str_index = 10;
 
 	s = 0;				/* do Weapons of Speed */
-	for (d = INVEN_WIELD; d < INVEN_BOW; d++)
+	for (d = INVEN_WIELD; d < INVEN_AUX; d++)
 	    if (inventory[d].flags2 & TR1_ATTACK_SPD)
 		s += inventory[d].pval;
 

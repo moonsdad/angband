@@ -1928,7 +1928,7 @@ int lose_all_info(void)
     inven_type          *i_ptr;
 
     /* Forget info about objects */
-    for (i = 0; i <= INVEN_BOW; i++) {
+    for (i = 0; i <= INVEN_AUX; i++) {
 
 	i_ptr = &inventory[i];
 
@@ -2331,7 +2331,7 @@ void identify_pack()
     inven_type         *i_ptr;
 
     /* Simply identify and know every item */
-    for (i = 0; i <= INVEN_BOW; i++) {
+    for (i = 0; i <= INVEN_AUX; i++) {
 	i_ptr = &inventory[i];
 	if (i_ptr->tval != TV_NOTHING) {
 	    inven_aware(i_ptr);

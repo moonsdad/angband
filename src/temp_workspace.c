@@ -574,7 +574,7 @@ static void magic_ammo(inven_type *t_ptr, int good, int chance, int special, int
     /* if wielding a bow as main/aux weapon, then ammo will be "right" ammo
      * more often than not of the time -CFT */
     if (inventory[INVEN_WIELD].tval == TV_BOW) i_ptr=&inventory[INVEN_WIELD];
-    else if (inventory[INVEN_BOW].tval == TV_BOW) i_ptr=&inventory[INVEN_BOW];
+    else if (inventory[INVEN_AUX].tval == TV_BOW) i_ptr=&inventory[INVEN_AUX];
 
     if (i_ptr && (randint(2)==1)){
 	if ((t_ptr->tval == TV_SHOT) &&
