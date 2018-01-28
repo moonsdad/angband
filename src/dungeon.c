@@ -207,13 +207,11 @@ void dungeon(void)
 {
     int                    i, find_count;
 
+    register cave_type		*c_ptr;
     register inven_type		*i_ptr;
 
     /* Regenerate hp and mana */
     int                    regen_amount;
-
-    /* Last command           */
-    char                   command;
 
     /* init pointers. */
     i_ptr = &inventory[INVEN_LITE];
@@ -242,7 +240,10 @@ void dungeon(void)
     opening_chest  = FALSE;
 
     /* Reset the "command" vars (again, mostly overkill) */
-    command_count  = 0;
+    command_cmd		= 0;
+    command_old		= 0;
+    command_rep		= 0;
+    command_dir		= -1;
     find_count     = 0;
     coin_type      = 0;
     old_lite       = -1;
@@ -259,25 +260,27 @@ void dungeon(void)
     /* Make a stairway. */
     if (create_up_stair || create_down_stair) {
 
-	register cave_type *c_ptr;
 	register int        cur_pos;
 
 	c_ptr = &cave[char_row][char_col];
+	i_ptr = &i_list[c_ptr->i_idx];
 
+	/* Normal objects are obliterated  */
 	if ((c_ptr->i_idx == 0) ||
-	    ((i_list[c_ptr->i_idx].tval != TV_STORE_DOOR) && /* if not store */
-	     ((i_list[c_ptr->i_idx].tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
-	      (i_list[c_ptr->i_idx].tval > TV_MIN_WEAR) ||
-	      !(i_list[c_ptr->i_idx].flags2 & TR_ARTIFACT)))) {
+	    ((i_ptr->tval != TV_STORE_DOOR) && /* if not store */
+	     ((i_ptr->tval < TV_MIN_WEAR) ||   /* if no artifact here -CFT */
+	      (i_ptr->tval > TV_MIN_WEAR) ||
+	      !(i_ptr->flags2 & TR_ARTIFACT)))) {
 	    if (c_ptr->i_idx != 0)
 	    delete_object(char_row, char_col);
 	    cur_pos = i_pop();
+	    i_ptr = &i_list[cur_pos];
 	    c_ptr->i_idx = cur_pos;
 	    if (create_up_stair) {
-		invcopy(&i_list[cur_pos], OBJ_UP_STAIR);
+		invcopy(i_ptr, OBJ_UP_STAIR);
 	    }
 	    else if (create_down_stair && !is_quest(dun_level)) {
-		invcopy(&i_list[cur_pos], OBJ_DOWN_STAIR);
+		invcopy(i_ptr, OBJ_DOWN_STAIR);
 	    }
 	} else
 	    msg_print("The object resists your attempt to transform it into a stairway.");
@@ -319,7 +322,7 @@ void dungeon(void)
 
 
 	/* Exit when new_level_flag is set */
-	if (new_level_flag II eof_flag) break;
+	if (eof_flag || new_level_flag) break;
 
 
 	/*** Process the player ***/
@@ -386,7 +389,10 @@ void dungeon(void)
 
 	if (player_light)
 	    if (i_ptr->pval > 0) {
-		if (!(i_ptr->flags3 & TR3_LITE))   /* don't dec if perm light -CFT */
+
+	    /* don't dec if perm light -CFT */
+	    if (!(i_ptr->flags3 & TR3_LITE))
+
 		/* Decrease life-span */
 		    i_ptr->pval--;
 
@@ -618,8 +624,8 @@ void dungeon(void)
 		prt_poisoned();
 	    }
 	    p_ptr->poisoned--;
-	    if (p_ptr->poisoned == 0 ||
-		 p_ptr->immune_pois ||
+	    if (p_ptr->immune_pois ||
+		p_ptr->poisoned == 0 ||
 		p_ptr->resist_pois ||
 		p_ptr->oppose_pois) {
 		p_ptr->poisoned = 0;
@@ -705,50 +711,6 @@ void dungeon(void)
 		disturb(0, 0);
 	    }
 	}
-    /* Resting is over?      */
-	if (p_ptr->rest > 0 || p_ptr->rest == -1 || p_ptr->rest == -2) {
-	    if (p_ptr->rest > 0) {
-		p_ptr->rest--;
-		if (p_ptr->rest == 0)	/* Resting over */
-		    rest_off();
-	    } else if (p_ptr->rest == -1) {
-		if (p_ptr->chp == p_ptr->mhp && p_ptr->cmana == p_ptr->mana) {
-		    p_ptr->rest = 0;
-		    rest_off();
-		}
-	    } else if (p_ptr->rest == -2) {	/* rest until
-						 * blind/conf/stun/
-						 * HP/mana/fear/halluc over */
-		if ((p_ptr->blind < 1) && (p_ptr->confused < 1) &&
-		    (p_ptr->afraid < 1) && (p_ptr->stun < 1) &&
-		    (p_ptr->image < 1) && (p_ptr->word_recall < 1) &&
-		    (p_ptr->slow < 1) && (p_ptr->chp == p_ptr->mhp) &&
-		    (p_ptr->cmana == p_ptr->mana)) {
-		    p_ptr->rest = 0;
-		    rest_off();
-		}
-	    }
-	}
-    /* Check for interrupts to find or rest. */
-	if ((command_count > 0 || find_flag || p_ptr->rest > 0 || p_ptr->rest == -1
-	     || p_ptr->rest == -2)
-#if defined(MSDOS) || defined(VMS) /* stolen from Um55 src -CFT */
-	    && kbhit()
-#else
-	    && (check_input(find_flag ? 0 : 10000))
-#endif
-	    ) {
-#ifdef MSDOS
-	    (void)msdos_getch();
-#endif
-#ifdef VMS
-	/* Get and ignore the key used to interrupt resting/running.  */
-	    (void)vms_getch();
-#endif
-	    disturb(0, 0);
-	}
-
-
 
 
 	/*** All good things must come to an end... ***/
@@ -972,29 +934,6 @@ void dungeon(void)
 		}
 	}
 
-	/* Timeout Artifacts */
-	for (i = 22; i < (INVEN_TOTAL - 1); i++) {
-	    i_ptr = &inventory[i];
-	    if (i_ptr->tval != TV_NOTHING && (i_ptr->flags3 & TR3_ACTIVATE)) {
-		if (i_ptr->timeout > 0)
-		    i_ptr->timeout--;
-		if ((i_ptr->tval == TV_RING) &&
-		    (!stricmp(k_list[i_ptr->index].name, "Power")) &&
-		    (randint(20) == 1) && (p_ptr->exp > 0))
-		    p_ptr->exp--, p_ptr->max_exp--, prt_experience();
-	    }
-	}
-
-	/* Timeout rods */
-	for (i = 0; i < 22; i++) {
-	    i_ptr = &inventory[i];
-	    if (i_ptr->tval == TV_ROD && (i_ptr->flags3 & TR3_ACTIVATE)) {
-		if (i_ptr->timeout > 0)
-		    i_ptr->timeout--;
-	    }
-	}
-
-
 
 	/*** Involuntary Movement ***/
 
@@ -1018,7 +957,53 @@ void dungeon(void)
 	    }
 	}
 
-	/* Random teleportation  */
+
+	/*** Handle Resting ***/
+
+	/* Resting is over? Check "Resting" status */
+	if (p_ptr->rest > 0 || p_ptr->rest == -1 || p_ptr->rest == -2) {
+
+	    /* +n -> rest for n turns */
+	    if (p_ptr->rest > 0) {
+		p_ptr->rest--;
+		if (p_ptr->rest == 0) {	/* Resting over */
+		    rest_off();
+		}
+	    }
+
+	    /* -1 -> rest until HP/mana restored */
+	    else if (p_ptr->rest == -1) {
+		if ((p_ptr->chp == p_ptr->mhp) &&
+		    (p_ptr->cmana == p_ptr->mana)) {
+
+		    p_ptr->rest = 0;
+		    rest_off();
+		}
+	    }
+
+	   /* rest until blind/conf/stun/HP/mana/fear/halluc over */
+	    else if (p_ptr->rest == -2) {
+		if ((p_ptr->blind < 1) && (p_ptr->confused < 1) &&
+		    (p_ptr->afraid < 1) && (p_ptr->stun < 1) &&
+		    (p_ptr->image < 1) && (p_ptr->word_recall < 1) &&
+		    (p_ptr->slow < 1) &&
+		    (p_ptr->chp == p_ptr->mhp) &&
+		    (p_ptr->cmana == p_ptr->mana)) {
+
+		    p_ptr->rest = 0;
+		    rest_off();
+		}
+	    }
+	}
+	/* Check for interrupts to find or rest. */
+	if ((command_rep > 0 || find_flag || p_ptr->rest > 0 || p_ptr->rest == -1
+	    || p_ptr->rest == -2)
+	    && (check_input(find_flag ? 0 : 10000))) {
+		disturb(0, 0);
+	}
+
+
+	/* Random teleportation */
 	if ((p_ptr->teleport) && (randint(100) == 1)) {
 	    disturb(0, 0);
 	    teleport(40);
@@ -1053,13 +1038,17 @@ void dungeon(void)
 	    prt_state();
 	}
 
-	if ((p_ptr->status & PY_STATS)) {
-	    for (i = 0; i < 6; i++)
-		if ((PY_STR << i) & p_ptr->status) prt_stat(i);
+	if (p_ptr->status & PY_STATS) {
+	    if (p_ptr->status & PY_STR) prt_stat(A_STR);
+	    if (p_ptr->status & PY_INT) prt_stat(A_INT);
+	    if (p_ptr->status & PY_WIS) prt_stat(A_WIS);
+	    if (p_ptr->status & PY_DEX) prt_stat(A_DEX);
+	    if (p_ptr->status & PY_CON) prt_stat(A_CON);
+	    if (p_ptr->status & PY_CHR) prt_stat(A_CHR);
 	    p_ptr->status &= ~PY_STATS;
 	}
 
-	if ((p_ptr->status & PY_ARMOR)) {
+	if (p_ptr->status & PY_ARMOR) {
 	    p_ptr->dis_ac = p_ptr->pac + p_ptr->dis_tac;	/* use updated ac */
 	    p_ptr->status &= ~PY_ARMOR;
 	    prt_pac();
@@ -1070,19 +1059,58 @@ void dungeon(void)
 	    prt_mhp();
 	    prt_chp();
 	}
+
 	if (p_ptr->status & PY_MANA) {
 	    p_ptr->status &= ~PY_MANA;
 	    prt_cmana();
 	}
 
 
+	/*** Process Inventory ***/
+
+	/* Timeout Artifacts */
+	for (i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
+
+	    /* Get the object */
+	    i_ptr = &inventory[i];
+
+	    if (i_ptr->tval != TV_NOTHING && (i_ptr->flags3 & TR3_ACTIVATE)) {
+
+	    /* Let activatable objects recharge */
+	    if (i_ptr->timeout > 0) i_ptr->timeout--;
+
+	    if ((i_ptr->tval == TV_RING) &&
+		(!stricmp(k_list[i_ptr->index].name, "Power")) &&
+		(randint(20) == 1) && (p_ptr->exp > 0)) {
+		    p_ptr->exp--;
+		    p_ptr->max_exp--;
+		    prt_experience();
+		}
+	    }
+	}
+
+	/* Timeout rods */
+	for (i = 0; i < 22; i++) {
+
+	    i_ptr = &inventory[i];
+	    if (i_ptr->tval == TV_ROD && (i_ptr->flags3 & TR3_ACTIVATE)) {
+
+		/* Charge it a little */
+		if (i_ptr->timeout > 0) {
+
+		    /* Charge it */
+		    i_ptr->timeout--;
+		}
+	    }
+	}
+
+
 	/*** Auto-Detect-Enchantment ***/
 
-    /* Allow for a slim chance of detect enchantment -CJS- */
-    /*
-     * for 1st level char, check once every 2160 turns for 40th level char,
-     * check once every 416 turns 
-     */
+	/* Allow for a slim chance of detect enchantment -CJS- */
+	/*
+	* for 1st level char, check once every 2160 turns for 40th level char,
+	* check once every 416 turns */
 	if (p_ptr->pclass == 2 ?
 	    ((p_ptr->confused == 0) && (p_ptr->pclass != 0) &&
 	(randint((int)(10000 / (p_ptr->lev * p_ptr->lev + 40)) + 1) == 1))
@@ -1232,13 +1260,45 @@ void dungeon(void)
 
 	/*** Handle actual user input ***/
 
-	if (!(p_ptr->paralysis < 1) ||
-	    !(p_ptr->rest == 0) ||
-	    !(p_ptr->stun < 100) ||
-	    (death)){
+	/* Check for interrupts to repetition, or running, or resting. */
+	if (command_rep || find_flag || p_ptr->rest) {
+
+	    /* Hack -- move the cursor onto the player */
+	    move_cursor_relative(char_row, char_col);
+
+	    /* Flush output, check for keypress */
+	    if (Term_kbhit()) {
+
+		/* Flush input */
+		flush();
+
+		/* Disturb the resting, running, and repeating */
+		disturb(0, 0);
+
+		/* XXX Message */
+		msg_print("Cancelled.");
+	    }
+	}
+
+#if 0
+	/* Hack -- Wait for a bit */
+	if (command_rep || p_ptr->rest) delay(10);
+#endif
+
+	/* Resting -- Voluntary trade of moves for regeneration */
+	/* Mega-Stunned -- Unable to do anything but stagger */
+	/* Paralyzed -- Not allowed to do anything */
+	/* Dead -- Not really able to do anything */
+
+	if ((p_ptr->rest) ||
+	    (p_ptr->stun >= 100) ||
+	    (p_ptr->paralysis > 0) ||
+	    (death) ) {
 
 	    /* Hack -- if paralyzed, resting, or dead, flush output */
 	    /* but first move the cursor onto the player, for aesthetics */
+
+	    /* Hilite the player */
 	    move_cursor_relative(char_row, char_col);
 
 	    /* Flush output */
@@ -1249,151 +1309,100 @@ void dungeon(void)
 	/* Accept a command and execute it */
 	else {
 
-	    do {
-		if (p_ptr->status & PY_REPEAT)
-		    prt_state();
-		default_dir = FALSE;
+	    /* Hack -- Notice "disturbances" */
+	    if (screen_change) {
+		
+		/* Forget the interuption */
+		screen_change = FALSE;
+
+		/* Just flush the changes */
+		{
+		
+		    /* Hilite the player */
+		    move_cursor_relative(char_row, char_col);
+
+		    /* Flush the changes */
+		    Term_fresh();
+		}	
+	    }
+
+
+	    /* Repeat until the turn ends */
+	    while (1) {
+
+		/* Commands are assumed to take time */
 		free_turn_flag = FALSE;
+
+		/* Update the "repeat" count */
+		if (p_ptr->status & PY_REPEAT) prt_state();
 
 		if ((old_lite >= 0) && (!find_flag)) {
 		    cur_lite = old_lite;
 		    old_lite = (-1);
 		}
+
+		/* Hack -- If running, run some more */
 		if (find_flag) {
-		    find_run();
+
+		    /* Take a step */
+		    find_step();
+
 		    find_count--;
-		    if (find_count == 0)
-			end_find();
+		    if (find_count == 0) end_find();
 
 		    /* Flush the changes */
 		    Term_fresh();
-		} else if (doing_inven)
-		    inven_command(doing_inven);
+
+		}
+
+		else if (doing_inven) inven_command(doing_inven);
+
+		/* Else, get a command from the user */
 		else {
 
-		    /* move the cursor to the players character */
-		    move_cursor_relative(char_row, char_col);
+		    /* XXX XXX  */
+		    
+		    
+		    /* Get a command (new or old) */
+		    request_command();
 
-		    if (command_count > 0) {
-			command_count--;
-			msg_flag = FALSE;
-			default_dir = TRUE;
-		    } else {
-#ifdef TARGET
-/* This bit of targetting code taken from Morgul -CFT */
-/* If we are in targetting mode, with a creature target, make the targetted */
-/* row and column match the creature's.  This optimizes a lot of code.  CDW */
-			if ((target_mode)&&(target_mon<(unsigned) m_max)) {
-			    target_row = m_list[target_mon].fy;
-			    target_col = m_list[target_mon].fx;
-			}
-#endif
-			msg_flag = FALSE;
-			command = inkey();
-			i = 0;
-		    /* Get a count for a command. */
-			if ((rogue_like_commands
-			     && command >= '0' && command <= '9')
-			    || (!rogue_like_commands && command == '#')) {
-			    char                tmp[8];
-
-			    prt("Repeat count:", 0, 0);
-			    if (command == '#')
-				command = '0';
-			    i = 0;
-
-			    while (TRUE) {
-				if (command == DELETE || command == CTRL('H')) {
-				    i = i / 10;
-				    (void)sprintf(tmp, "%d", i);
-				    prt(tmp, 0, 14);
-				} else if (command >= '0' && command <= '9') {
-				    if (i > 99)
-					bell();
-				    else {
-					i = i * 10 + command - '0';
-					(void)sprintf(tmp, "%d", i);
-					prt(tmp, 0, 14);
-				    }
-				} else
-				    break;
-				command = inkey();
-			    }
-			    if (i == 0) {
-				i = 99;
-				(void)sprintf(tmp, "%d", i);
-				prt(tmp, 0, 14);
-			    }
-			/* a special hack to allow numbers as commands */
-			    if (command == ' ') {
-				prt("Command:", 0, 20);
-				command = inkey();
-			    }
-			}
-		    /* Another way of typing control codes -CJS- */
-			if (command == '^') {
-			    if (command_count > 0)
-				prt_state();
-			    if (get_com("Control-", &command)) {
-				if (command >= 'A' && command <= 'Z')
-				    command -= 'A' - 1;
-				else if (command >= 'a' && command <= 'z')
-				    command -= 'a' - 1;
-				else {
-				    msg_print("Type ^ <letter> for a control char");
-				    command = ' ';
-				}
-			    } else
-				command = ' ';
-			}
-		    /* move cursor to player char again, in case it moved */
-			move_cursor_relative(char_row, char_col);
-		    /* Commands are always converted to rogue form. -CJS- */
-			if (rogue_like_commands == FALSE)
-			    command = original_commands(command);
-			if (i > 0) {
-			    if (!valid_countcommand(command)) {
-				free_turn_flag = TRUE;
-				msg_print("Invalid command with a count.");
-				command = ' ';
-			    } else {
-				command_count = i;
-				prt_state();
-				command_count--;	/* count this pass as
-							 * one */
-			    }
-			}
-		    }
-		/* Flash the message line. */
-		    erase_line(MSG_LINE, 0);
-		    /* Hack -- Hilite the player */
-		    move_cursor_relative(char_row, char_col);
+		    /* Process the command */
+		    process_command();
 
 		    /* Hack -- flush old output */
 		    Term_fresh();
 
-		    do_command(command);
-		/* Find is counted differently, as the command changes. */
+		    /* Find is counted differently, as the command changes. */
 		    if (find_flag) {
-			find_count = command_count;
-			command_count = 0;
+			find_count = command_rep;
+			command_rep = 0;
 		    } else if (old_lite >= 0) {
 			cur_lite = old_lite;
 			old_lite = (-1);
 		    }
 		    if (free_turn_flag)
-			command_count = 0;
+			command_rep = 0;
 		}
-	    /* End of commands				     */
+    
+
+		/* Exit when a "real" command is executed */
+		if (!free_turn_flag) break;
+		
+		/* Notice death and new levels */
+		if (death || new_level_flag) break;
 	    }
-	    while (free_turn_flag && !new_level_flag && !eof_flag);
 	}
+
+
+	/* Hack -- notice death and new levels */
+	if (death || new_level_flag) break;
 
 	/* Mega-Hack -- process teleport traps */
 	if (teleport_flag) teleport(100);
 
-	/* Move the creatures */
-	if (!new_level_flag) process_monsters();
+
+	/* Process all of the monsters */
+	process_monsters();
     }
 }
 

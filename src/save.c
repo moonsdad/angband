@@ -109,51 +109,33 @@ static int sv_write()
 	death = FALSE;
 
     l = 0;
-    if (find_cut)
-	l |= 1;
-    if (find_examine)
-	l |= 2;
-    if (find_prself)
-	l |= 4;
-    if (find_bound)
-	l |= 8;
-    if (prompt_carry_flag)
-	l |= 16;
-    if (rogue_like_commands)
-	l |= 32;
-    if (show_inven_weight)
-	l |= 64;
-    if (notice_seams)
-	l |= 128;
-    if (find_ignore_doors)
-	l |= 0x100L;
-    if (no_haggle_flag)
-	l |= 0x200L; 
-    if (!carry_query_flag)
-	l |= 0x400L;
-    if (unfelt)
-	l |= 0x0001000L;
-    if (delay_spd > 10)
-	delay_spd = 10;		/* bounds for delay_speed -CWS */
-    if (delay_spd < 0)
-	delay_spd = 0;
+    if (find_cut) l |= 1;
+    if (find_examine) l |= 2;
+    if (find_prself) l |= 4;
+    if (find_bound) l |= 8;
+    if (always_repeat) l |= 10;
+    if (prompt_carry_flag) l |= 16;
+    if (rogue_like_commands) l |= 32;
+    if (show_inven_weight) l |= 64;
+    if (notice_seams) l |= 128;
+    if (find_ignore_doors) l |= 0x100L;
+    if (no_haggle_flag) l |= 0x200L; 
+    if (!carry_query_flag) l |= 0x400L;
+    if (unfelt) l |= 0x0001000L;
+    if (delay_spd > 10) delay_spd = 10; /* bounds for delay_speed -CWS */
+    if (delay_spd < 0) delay_spd = 0;
     l |= ((delay_spd & 0xf) << 13);
     l |= ((hitpoint_warn & 0xf) << 17);
-    if (plain_descriptions)	/* don't do "black Mushroom of Curing" -CWS */
-	l |= 0x00400000L;
-    if (show_equip_weight)
-	l |= 0x00800000L;
+    if (plain_descriptions) l |= 0x00400000L;	/* don't do "black Mushroom of Curing" -CWS */
+    if (show_equip_weight) l |= 0x00800000L;
     if (feeling > 10)
-	feeling = 0;		/* bounds for level feelings -CWS */
-    if (feeling < 0)
-	feeling = 0;
+	feeling = 0; /* bounds for level feelings -CWS */
+    if (feeling < 0) feeling = 0;
     l |= ((feeling & 0xf) << 24);
-    if (equippy_chars)		/* equippy chars option -CWS */
-	l |= 0x20000000L;
-    if (quick_messages)		/* quick messages option -CWS */
-	l |= 0x40000000L;
-    if (death)
-	l |= 0x80000000L;	/* Sign bit */
+    if (equippy_chars) l |= 0x20000000L; /* equippy chars option -CWS */
+    if (quick_messages) l |= 0x40000000L; /* quick messages option -CWS */
+    if (death) l |= 0x80000000L; /* Sign bit */
+
     wr_long(GROND);
     wr_long(RINGIL);
     wr_long(AEGLOS);
@@ -1050,84 +1032,53 @@ int load_player(int *generate)
 	    prt("Loaded Options Memory", 7, 0);
 	Term_fresh();
 
-	if (l & 1)
-	    find_cut = TRUE;
-	else
-	    find_cut = FALSE;
-	if (l & 2)
-	    find_examine = TRUE;
-	else
-	    find_examine = FALSE;
-	if (l & 4)
-	    find_prself = TRUE;
-	else
-	    find_prself = FALSE;
-	if (l & 8)
-	    find_bound = TRUE;
-	else
-	    find_bound = FALSE;
-	if (l & 16)
-	    prompt_carry_flag = TRUE;
-	else
-	    prompt_carry_flag = FALSE;
-	if (l & 32)
-	    rogue_like_commands = TRUE;
-	else
-	    rogue_like_commands = FALSE;
-	if (l & 64)
-	    show_inven_weight = TRUE;
-	else
-	    show_inven_weight = FALSE;
-	if (l & 128)
-	    notice_seams = TRUE;
-	else
-	    notice_seams = FALSE;
-	if (l & 0x100L)
-	    find_ignore_doors = TRUE;
-	else
-	    find_ignore_doors = FALSE;
-	
-	if (l & 0x200L)
-	    no_haggle_flag = TRUE;
-	else
-	    no_haggle_flag = FALSE; 
-	if (l & 0x400L)
-	    carry_query_flag = FALSE;
-	else
-	    carry_query_flag = TRUE;
-	if (l & 0x1000L)
-	    unfelt = TRUE;
-	else
-	    unfelt = FALSE;
+
+	find_cut = (l & 1)? TRUE: FALSE;
+
+	find_examine = (l & 2)? TRUE: FALSE;
+
+	find_prself = (l & 4)? TRUE: FALSE;
+
+	find_bound = l & 8)? TRUE: FALSE;
+
+	always_repeat = (l & 10)? TRUE: FALSE;
+
+	prompt_carry_flag = (l & 16)? TRUE: FALSE;
+
+	rogue_like_commands = (l & 32)? TRUE: FALSE;
+
+	show_inven_weight = (l & 64)? TRUE: FALSE;
+
+	notice_seams = (l & 128)? TRUE: FALSE;
+
+	find_ignore_doors = (l & 0x100L)? TRUE: FALSE;
+
+	no_haggle_flag = (l & 0x200L)? TRUE: FALSE;
+
+	carry_query_flag = (l & 0x400L)? FALSE: TRUE;
+
+	unfelt = (l & 0x1000L)? TRUE: FALSE;
+
 	delay_spd = ((l >> 13) & 0xf);
 	if (delay_spd > 10)
 	    delay_spd = 10;	   /* bounds check for delay_speed -CWS */
 	if (delay_spd < 0)
 	    delay_spd = 0;
 	hitpoint_warn = ((l >> 17) & 0xf);
-	if (l & 0x00400000L)	   /* don't do "black Mushroom of Curing" */
-	    plain_descriptions = TRUE;
-	else
-	    plain_descriptions = FALSE;
-	if (l & 0x00800000L)
-	    show_equip_weight = TRUE;
-	else
-	    show_equip_weight = FALSE;
+
+	plain_descriptions = (l & 0x00400000L)? TRUE: FALSE;	   /* don't do "black Mushroom of Curing" */
+
+	show_equip_weight =  (l & 0x00800000L)? TRUE: FALSE;
+
 	feeling = ((l >> 24) & 0xf);
 	if (feeling > 10)
 	    feeling = 0;	    /* bounds for level feelings -CWS */
 	if (feeling < 0)
 	    feeling = 0;
 
-	if (l & 0x20000000L)
-	    equippy_chars = TRUE;   /* equippy chars option -CWS */
-	else
-	    equippy_chars = FALSE;
+	equippy_chars = (l & 0x20000000L)? TRUE : FALSE; /* equippy chars option -CWS */
 
-	if (l & 0x40000000L)
-	    quick_messages = TRUE;  /* quick messages option -CWS */
-	else
-	    quick_messages = FALSE;
+	quick_messages = (l & 0x40000000L)? TRUE : FALSE; /* quick messages option -CWS */
 
 	if (to_be_wizard && (l & 0x80000000L)
 	    && get_check("Resurrect a dead character?"))

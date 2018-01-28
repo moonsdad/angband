@@ -256,6 +256,7 @@ static opt_desc options_interface[] = {
     { "Quick messages",		                &quick_messages },
     { "(g)et-key to pickup objects", 		&prompt_carry_flag },
     { "Prompt before pickup", 			&carry_query_flag },
+    { "Repeat obvious commands",		&always_repeat },
 
     { "Use new screen layout",                  &new_screen_layout },
     { "Display Equippy chars",		        &equippy_chars },
@@ -470,7 +471,7 @@ static void do_cmd_options()
  * Parse and execute the current command
  * Give "Warning" on illegal commands.
  */
-void do_command(char com_val)
+void process_command(void)
 {
     int                    dir_val, do_pickup;
     int                    y, x, i, j = 0;
@@ -478,9 +479,9 @@ void do_command(char com_val)
     char                   prt1[80];
 
 /* hack for move without pickup.  Map '-' to a movement command. */
-    if (com_val == '-') {
+    if (command_cmd == '-') {
 	do_pickup = FALSE;
-	i = command_count;
+	i = command_rep;
 #ifdef TARGET
 	{
 /* If in target_mode, player will not be given a chance to pick a direction.
@@ -490,47 +491,27 @@ void do_command(char com_val)
 	target_mode = FALSE;
 #endif
 	if (get_dir(NULL, &dir_val)) {
-	    command_count = i;
+	    command_rep = i;
 	    switch (dir_val) {
-	      case 1:
-		com_val = 'b';
-		break;
-	      case 2:
-		com_val = 'j';
-		break;
-	      case 3:
-		com_val = 'n';
-		break;
-	      case 4:
-		com_val = 'h';
-		break;
-	      case 6:
-		com_val = 'l';
-		break;
-	      case 7:
-		com_val = 'y';
-		break;
-	      case 8:
-		com_val = 'k';
-		break;
-	      case 9:
-		com_val = 'u';
-		break;
-	      default:
-		com_val = '(';
-		break;
+	      case 1: command_cmd = 'b'; break;
+	      case 2: command_cmd = 'j'; break;
+	      case 3: command_cmd = 'n'; break;
+	      case 4: command_cmd = 'h'; break;
+	      case 6: command_cmd = 'l'; break;
+	      case 7: command_cmd = 'y'; break;
+	      case 8: command_cmd = 'k'; break;
+	      case 9: command_cmd = 'u'; break;
+	      default: command_cmd = '('; break;
 	    }
-	} else
-	    com_val = ' ';
+	} else command_cmd = ' ';
 #ifdef TARGET
 	target_mode = temp;
 	}
 #endif
-    } else
-	do_pickup = TRUE;
+    } else do_pickup = TRUE;
 
     /* Parse the command */
-    switch (com_val) {
+    switch (command_cmd) {
 
 	/* (ESC) do nothing. */
 	case ESCAPE:
@@ -544,7 +525,7 @@ void do_command(char com_val)
 	 
 	/*** Wizard Commands ***/
 	    
-	/* (^W)izard Mode */
+	/* Toggle Wizard Mode */
 	case CTRL('W'):
 	    free_turn_flag = TRUE;
 	    if (wizard) {
@@ -566,33 +547,34 @@ void do_command(char com_val)
 
 	/*** Inventory Commands ***/
 
-	/* (w)ear or wield */
+	/* Wear or wield something */
 	case 'w':
 	    inven_command('w'); break;
 
-	/* (T)ake off something */
-	case 'T':	
+	/* Take something off */
+	case 'T':
 	    inven_command('t'); break;
 
-	/* e(X)change weapons */
+	/* Exchange primary and aux weapons */
 	case 'X':
 	    inven_command('x'); break;
 
-	/* (d)rop something */
+	/* Drop something */
 	case 'd':
 	    inven_command('d'); break;
 
-	/* (e)quipment list */
+	/* Equipment list */
 	case 'e':
 	    inven_command('e'); break;
 
-	/* (i)nventory list */
+	/* Inventory */
 	case 'i':
 	    inven_command('i'); break;
 
 
 	/*** Standard "Movement" Commands ***/
 
+	/* Dig a tunnel */
 	/* (^B) tunnel down left	(T 1) */
 	case CTRL('B'):
 	    do_cmd_tunnel(1); break;
@@ -619,6 +601,7 @@ void do_command(char com_val)
 	case CTRL('U'):
 	    do_cmd_tunnel(9); break;
 
+	/* Move (picking up) */
 	/* (b) down, left	(1) */
 	case 'b':
 	    move_player(1, do_pickup); break;
@@ -647,6 +630,7 @@ void do_command(char com_val)
 
 	/*** Commands that "re-interpret" the repeat count ***/
 
+	/* Begin Running */
 	/* (B) run down, left	(. 1) */
 	case 'B':
 	    find_init(1); break;
@@ -672,16 +656,16 @@ void do_command(char com_val)
 	case 'U':
 	    find_init(9); break;
 
-	/* (.) stay in one place (5) */
+	/* Stay in one place (5) */
 	case '.':
 	    move_player(5, do_pickup);
-	    if (command_count > 1) {
-	        command_count--;
+	    if (command_rep > 1) {
+	        command_rep--;
 	        do_cmd_rest();
 	    }
 	break;
 
-	/* (R)est a while */
+	/* Rest a while */
 	case 'R':
 	    do_cmd_rest(); break;
 
@@ -689,7 +673,7 @@ void do_command(char com_val)
 
 	/*** Searching, Resting ***/
 
-	/* (g)et an object... */
+	/* Pick up an object */
 	case 'g':
 	    if (prompt_carry_flag) {
 	    if (cave[char_row][char_col].i_idx != 0)	/* minor change -CFT */
@@ -704,7 +688,7 @@ void do_command(char com_val)
 	    free_turn_flag = TRUE;
 	break;
 
-	/* (s)earch for a turn */
+	/* Search the adjoining grids */
 	case 's':
 	    search(char_row, char_col, p_ptr->srh); break;
 
@@ -776,7 +760,7 @@ void do_command(char com_val)
 	case 'E':
 	    eat(); break;
 
-	/* (F)ill lamp */
+	/* Fill the lamp */
 	case 'F':
 	    do_cmd_refill_lamp(); break;
 
@@ -928,11 +912,11 @@ void do_command(char com_val)
 
 	/* Previous message(s). */
 	case CTRL('P'):
-	    if (command_count > 0) {
-	    i = command_count;
+	    if (command_rep > 0) {
+	    i = command_rep;
 	    if (i > MAX_SAVE_MSG) i = MAX_SAVE_MSG;
-	    command_count = 0;
-	    } else if (last_command != 16)
+	    command_rep = 0;
+	    } else if (command_old != 16)
 	    i = 1;
 	    else i = MAX_SAVE_MSG;
 	    j = last_msg;
@@ -1066,38 +1050,28 @@ void do_command(char com_val)
 		(void)hp_player(2000);
 		p_ptr->food = PLAYER_FOOD_MAX;
 
-		if (p_ptr->slow > 1)
-		    p_ptr->slow = 1;
-		if (p_ptr->image > 1)
-		    p_ptr->image = 1;
-		if (p_ptr->cut > 1)
-		    p_ptr->cut = 1;
-		if (p_ptr->stun > 1)
-		    p_ptr->stun = 1;
+		if (p_ptr->slow > 1) p_ptr->slow = 1;
+		if (p_ptr->image > 1) p_ptr->image = 1;
+		if (p_ptr->cut > 1) p_ptr->cut = 1;
+		if (p_ptr->stun > 1) p_ptr->stun = 1;
 		break;
 
 	      case CTRL('D'):	/* ^D = up/down */
-		if (command_count > 0) {
-		    if (command_count > 99)
-			i = 0;
-		    else
-			i = command_count;
-		    command_count = 0;
+		if (command_rep > 0) {
+		    if (command_rep > 99 i = 0;
+		    else i = command_rep;
+		    command_rep = 0;
 		} else {
 		    prt("Go to which level (0-10000) ? ", 0, 0);
 		    i = (-1);
-		    if (get_string(tmp_str, 0, 27, 10))
-			i = atoi(tmp_str);
-		    if (i > 10000)
-			i = 10000;
+		    if (get_string(tmp_str, 0, 27, 10)) i = atoi(tmp_str);
+		    if (i > 10000) i = 10000;
 		}
 		if (i > -1) {
 		    dun_level = i;
-		    if (dun_level > 10000)
-			dun_level = 10000;
+		    if (dun_level > 10000) dun_level = 10000;
 		    new_level_flag = TRUE;
-		} else
-		    erase_line(MSG_LINE, 0);
+		} else erase_line(MSG_LINE, 0);
 		break;
 
 	      case CTRL('E'):	/* ^E = wizchar */
@@ -1106,11 +1080,10 @@ void do_command(char com_val)
 		break;
 
 	      case CTRL('G'):	/* ^G = treasure */
-		if (command_count > 0) {
-		    i = command_count;
-		    command_count = 0;
-		} else
-		    i = 1;
+		if (command_rep > 0) {
+		    i = command_rep;
+		    command_rep = 0;
+		} else i = 1;
 		random_object(char_row, char_col, i);
 		prt_map();
 		break;
@@ -1128,11 +1101,10 @@ void do_command(char com_val)
 		break;
 
 	      case CTRL('V'):	/* ^V special treasure */
-		if (command_count > 0) {
-		    i = command_count;
-		    command_count = 0;
-		} else
-		    i = 1;
+		if (command_rep > 0) {
+		    i = command_rep;
+		    command_rep = 0;
+		} else i = 1;
 		special_random_object(char_row, char_col, i);
 		prt_map();
 		break;
@@ -1175,10 +1147,8 @@ void do_command(char com_val)
 	      case '*':		/* '*' = identify all up to a level */
 		prt("Identify objects upto which level (0-200) ? ", 0, 0);
 		i = (-1);
-		if (get_string(tmp_str, 0, 47, 10))
-		    i = atoi(tmp_str);
-		if (i > 200)
-		    i = 200;
+		if (get_string(tmp_str, 0, 47, 10)) i = atoi(tmp_str);
+		if (i > 200) i = 200;
 		if (i > -1) {
 		    int                 temp;
 		    inven_type          inv;
@@ -1194,9 +1164,9 @@ void do_command(char com_val)
 		break;
 
 	      case '+':
-		if (command_count > 0) {
-		    p_ptr->exp = command_count;
-		    command_count = 0;
+		if (command_rep > 0) {
+		    p_ptr->exp = command_rep;
+		    command_rep = 0;
 		} else if (p_ptr->exp == 0)
 		    p_ptr->exp = 1;
 		else
@@ -1212,6 +1182,233 @@ void do_command(char com_val)
 	    free_turn_flag = TRUE;
 	}
     }
-    last_command = com_val;
+
+
+    /* Save the command */
+    command_old = command_cmd;
 }
+
+
+
+
+
+/*
+ * XXX An explanation of the "Angband Keypress" concept. XXX
+ *
+ * Inherently, many Angband commands consist not only of a basic action
+ * (such as "tunnel"), but also a direction (such as "north-east"), and
+ * even a "repeat" count
+ *
+ * These components are thus explicitly represented, with globals.
+ *
+ * The "base command" (see below) is stored in "command_cmd"
+ * The "desired direction" is stored in "command_dir".
+ * The "repeat count" is stored in "command_rep"
+ *
+ * Hack -- a "command_dir" of "zero" means "the current target".
+ *
+ *
+ * The last command successfully executed is stored in "command_old".
+ */
+
+
+
+
+
+/*
+ * Request a command from the user.
+ *
+ * Sets command_cmd, command_dir, command_rep
+ *
+ * Note that "caret" ("^") is treated special, and is used to
+ * allow manual input of control characters.  This can be used
+ * on many machines to request repeated tunneling (Ctrl-H) and
+ * on the Macintosh to request "Control-Caret".
+ */
+void request_command(void)
+{
+    int i = 0;z
+    char cmd;
+
+    /*  Hack -- Illuminate the players character */
+    move_cursor_relative(char_row, char_col);
+
+
+    /* Hack -- process "repeated" commands */
+    if (command_rep > 0) {
+
+	/* Count this execution */
+	command_rep--;
+
+	/* Hack -- Flush the output */
+	Term_fresh();
+
+	/* Hack -- Assume messages were seen */
+	msg_flag = FALSE;
+
+	/* All done */
+	return;
+    }
+
+
+    /* No command yet */
+    command_cmd = 0;
+
+    /* Hack -- no direction yet */
+    command_dir = -1;
+
+
+#ifdef TARGET
+    /* This bit of targetting code taken from Morgul -CFT */
+    /* If we are in targetting mode, with a creature target, make the targetted */
+    /* row and column match the creature's.  This optimizes a lot of code.  CDW */
+    if ((target_mode)&&(target_mon<(unsigned) m_max)) {
+        target_row = m_list[target_mon].fy;
+        target_col = m_list[target_mon].fx;
+    }
+#endif
+
+
+    /* Get a keypress in "command" mode */
+	msg_flag = FALSE;
+	cmd = inkey();
+
+    /* Get a count for a command. */
+    if ((rogue_like_commands
+    && command_cmd >= '0' && command_cmd <= '9')
+    || (!rogue_like_commands && command_cmd == '#')) {
+    char                tmp[8];
+
+    /* Analyze the keypress */
+    command_cmd = cmd;
+    if (command_cmd == '#') command_cmd = '0';
+
+    /* Special command -- Get a "count" for another command */
+
+	/* Begin the input */
+	prt("Repeat count:", 0, 0);
+
+	/* Get a command count */
+	while (1) {
+
+	    /* Simple editing */
+	    if (cmd == DELETE || cmd == CTRL('H')) {
+		i = i / 10;
+		(void)sprintf(tmp, "%d", i);
+		prt(tmp, 0, 14);
+	    }
+
+	    /* Actual numeric data */
+	    else if (cmd >= '0' && cmd <= '9') {
+
+		/* Allow counts up to 999 */
+		if (i > 99) {
+		    bell();
+		}
+
+		/* Incorporate that digit */
+		else {
+		    i = i * 10 + cmd - '0';
+		    (void)sprintf(tmp, "%d", i);
+		    prt(tmp, 0, 14);
+		}
+	    }
+
+	    /* Exit on "unusable" input */
+	    else {
+		break;
+	    }
+	    cmd = inkey();
+	}
+
+	/* Let a "non-count" default to 99 repetitions */
+	if (i == 0) {
+	    i = 99;
+	    (void)sprintf(tmp, "%d", i);
+	    prt(tmp, 0, 14);
+	}
+
+	    /* a special hack to allow numbers as commands */
+	    if (cmd == ' ') {
+		prt("Command:", 0, 20);
+		cmd = inkey();
+	    }
+
+	/* Analyze the keypress */
+	command_cmd = cmd;
+    }
+
+    /* Another way of typing control codes -CJS- */
+    if (command_cmd == '^') {
+
+	if (command_rep > 0) prt_state();
+
+	/* Get a char to "cast" into a control char */
+	if (get_com("Control-", &cmd)) {
+
+	    if (cmd >= 'A' && cmd <= 'Z') cmd -= 'A' - 1;
+	    else if (cmd >= 'a' && cmd <= 'z') cmd -= 'a' - 1;
+	    else {
+		msg_print("Type ^ <letter> for a control char");
+		cmd = ' ';
+	    }
+	}
+	else cmd = ' ';
+
+	/* Analyze the keypress */
+	command_cmd = cmd;
+    }
+
+
+    /* Move cursor to player char again, in case it moved */
+    move_cursor_relative(char_row, char_col);
+
+    /* Hack -- let some commands get repeated by default */
+    if (always_repeat && (i <= 0)) {
+
+	/* Hack -- Tunnel gets 99 tries */
+	if (command_cmd == '+') i = 99;
+	
+	/* Bash, Disarm, Open, Search get 99 tries */
+	else if (strchr("BDos", command_cmd)) i = 99;
+    }
+
+    /* Commands are always converted to rogue form. -CJS- */
+    if (rogue_like_commands == FALSE)
+    command_cmd = original_commands(command_cmd);
+
+    /* Make sure a "Count" is legal for this command */
+    if (i > 0) {
+
+	/* Commands that can be repeated */
+	if (valid_countcommand(command_cmd)) {
+
+	    /* Save and display the count */
+	    command_rep = i;
+	    prt_state();
+
+	    /* count this pass as one */
+	    command_rep--;
+	}
+
+	/* Invalid combination */
+	else {
+
+	    /* Abort gracefully */
+	    free_turn_flag = TRUE;
+	    msg_print("Invalid command with a count.");
+
+	    /* Forget the command */
+	    command_cmd = ' ';
+	}
+    }
+    
+    /* Flash the message line. */
+    erase_line(MSG_LINE, 0);
+
+    /* Hack -- Hilite the player */
+    move_cursor_relative(char_row, char_col);
+}
+
+
 

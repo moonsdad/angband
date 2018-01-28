@@ -371,6 +371,18 @@ int get_alldir(cptr prompt, int *dir)
 /*
  * Prompts for a direction				-RAK-
  * Direction memory added, for repeated commands.  -CJS
+ * This function should be used by anyone who wants a direction
+ * Hack -- it can also be used to get the "direction" of "here"
+ *
+ * It takes an optional prompt, a pointer to a dir
+ * and returns "Did something besides 'Escape' happen?".  The dir is loaded
+ * with -1 (on abort) or 0 (for target) or 1-9 (for a "keypad" direction)
+ * including 5 (for "here").
+ *
+ * Note that if (command_dir > 0), it will pre-empt user interaction
+ *
+ * Note: We change neither command_rep nor free_turn_flag
+ * Note: We assume our caller correctly handles the "abort" case
  */
 int get_dir(cptr prompt, int *dir)
 {
@@ -378,52 +390,99 @@ int get_dir(cptr prompt, int *dir)
     int         save;
     static char prev_dir;  /* Direction memory. -CJS- */
 
-    if (default_dir) {		   /* used in counted commands. -CJS- */
-	*dir = prev_dir;
-	return TRUE;
+    /* Use global command_dir (if set) in counted commands. -CJS- */
+    if (command_dir > 0) {
+	*dir = command_dir;
     }
+
 #ifdef TARGET
-/* This targetting code stolen from Morgul -CFT */
-/* Aggle.  Gotta be target mode and either (valid monster and line of sight*/
-/* to monster) or (not valid monster and line of sight to position).  CDW */
-/* Also, for monster targetting, monster must be lit!  Otherwise player can
-   "lock phasers" on an invis monster while a potion of see inv lasts,
-   and then continue to hit it when the see inv goes away.  Also,
-   targetting mode shouldn't help the player shoot a monster in a
-   dark room.  If he can't see it, he shouldn't be able to aim... -CFT */
-    if ((target_mode)&&
+    /* Use "old target" if possible */
+    /* This targetting code stolen from Morgul -CFT */
+    /* Aggle.  Gotta be target mode and either (valid monster and line of sight*/
+    /* to monster) or (not valid monster and line of sight to position).  CDW */
+    /* Also, for monster targetting, monster must be lit!  Otherwise player can
+       "lock phasers" on an invis monster while a potion of see inv lasts,
+       and then continue to hit it when the see inv goes away.  Also,
+       targetting mode shouldn't help the player shoot a monster in a
+       dark room.  If he can't see it, he shouldn't be able to aim... -CFT */
+    else if ((target_mode)&&
 	(((target_mon<MAX_M_IDX)&& m_list[target_mon].ml &&
 	  (los(char_row,char_col,m_list[target_mon].fy,m_list[target_mon].fx))||
 	  ((target_mon>=MAX_M_IDX) &&
 	   (los(char_row,char_col,target_row,target_col)))))) {
       /* It don't get no better than this */
-	*dir=0;
-	return TRUE;
+	*dir = 0;
     }
+#endif
+
+    /* Ask user for a direction */
     else {
-#endif
-    if (prompt == NULL)
-	prompt = "Which direction?";
-    for (;;) {
-	save = command_count;	   /* Don't end a counted command. -CJS- */
-	if (!get_com(prompt, &command))
-	{
-	    free_turn_flag = TRUE;
-	    return FALSE;
-	}
-	command_count = save;
-	if (rogue_like_commands)
-	    command = map_roguedir(command);
-	if (command >= '1' && command <= '9' && command != '5') {
-	    prev_dir = command - '0';
-	    *dir = prev_dir;
-	    return TRUE;
-	}
-	bell();
-    }
+
+	/* Start with a non-direction */
+	*dir = -1;
+
+    if (prompt == NULL) prompt = "Which direction?";
+
+	/* Ask until satisfied */    
+	while (1) {
+
+
+	    /* Get a command (or Escape) */
+	    if (!get_com(prompt, &command)) command = ESCAPE;
+
+	    /* Escape yields "cancel" */
+	    if (command == ESCAPE) return (FALSE);
+
+	    /* Convert various keys to "standard" keys */
+	    switch (command) {
+
+		/* Standard directions */
+		case '1': case 'B': case 'b': command = '1'; break;
+		case '2': case 'J': case 'j': command = '2'; break;
+		case '3': case 'N': case 'n': command = '3'; break;
+		case '4': case 'H': case 'h': command = '4'; break;
+		case '6': case 'L': case 'l': command = '6'; break;
+		case '7': case 'Y': case 'y': command = '7'; break;
+		case '8': case 'K': case 'k': command = '8'; break;
+		case '9': case 'U': case 'u': command = '9'; break;
+
 #ifdef TARGET
-    }
+		/* Central "direction" often means "target" */
+		case '5': case '.': command = '5'; break;
+
+		/* This is the underlying "target" command */
+		case 'T': case 't': case '0': command = '0'; break;
+
+		/* Re-target */
+		case '*': command = '*'; break;
 #endif
+
+		/* Unused -- Help */
+		case '?': command = '?'; break;
+
+		/* Ignore other commands */
+		default: command = ' '; break;
+	    }
+
+	    /* If not accepting '5' as itself, convert it */
+	    if (command == '5') command = '0';
+
+	    /* Always accept actual directions (command != '5') */
+	    if (command >= '1' && command <= '9') {
+		*dir = command - '0'; break;
+	    }
+
+	    /* Optional "help" */
+	    else if (command == '?') {
+		/* XXX No help yet */
+	    }
+
+	    /* Errors */
+	    bell();
+	}
+    }
+    /* A "valid" direction was entered */    
+    return (TRUE);
 }
 
 
@@ -484,19 +543,25 @@ void search_off(void)
  */
 void disturb(int stop_search, int light_change)
 {
-    command_count = 0;
+    /* Always cancel repeated commands */
+    if (command_rep) command_rep = 0;
 
+    /* Hack -- Cancel Search Mode if requested */
     if (stop_search && (p_ptr->status & PY_SEARCH)) search_off();
 
     if (p_ptr->rest != 0) rest_off();
 
+    /* If running, cancel it and fix lights */
     if (light_change || find_flag) {
 	find_flag = FALSE;
 	check_view();
     }
 
-    /* Flush the output */
+    /* Flush the input */
     flush();
+    
+    /* Hack -- Flush the output */
+    Term_fresh();
 }
 
 
@@ -1161,13 +1226,17 @@ void move_player(int dir, int do_pickup)
 
 
 /*
+ * Walk one step along the current running direction
+ *
  * Note that move_player() may modify command_dir via "area_affect"
  * Note that the "running" routines now use "command_dir" instead
  * of "find_direction"
+ *
+ * This routine had better not be called if find_flag is off.
  */
-void find_run(void)
+void find_step(void)
 {
-    /* prevent infinite loops in find mode, will stop after moving 100 times */
+    /* Hack -- prevent infinite loops in find mode, will stop after moving 100 times */
     if (find_flag++ > 100) {
 	msg_print("You stop running to catch your breath.");
 	end_find();
@@ -1180,6 +1249,9 @@ void find_run(void)
 /*
  * Initialize the running algorithm, do NOT take any steps.
  *
+ *
+ * The player is not allowed to run with a full light pattern.
+ * This reduces the number of things that can cancel running.
  */
 void find_init(int dir)
 {
@@ -1262,13 +1334,12 @@ void find_init(int dir)
 #endif
 
     move_player(dir, TRUE);
-    if (find_flag == FALSE)
-	command_count = 0;
+    if (find_flag == FALSE) command_rep = 0;
 }
 
 
 /*
- * Switch off the run flag. Hack -- fix the lights. -CJS-
+ * Stop running.  Hack -- fix the lights. -CJS-
  */
 void end_find()
 {

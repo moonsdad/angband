@@ -4,6 +4,7 @@ Added field "name1" for artifact identities
 Used "name2" only for "ego-items" (not artifacts or chests)
 Addition of another flag set for items.
 Reorganization of the flags for items.
+Made artifacts MUCH more resistant to "death by throwing" :-)
 Made "store cost" a property of objects
 
 Simplified "feelings" about levels
@@ -25,6 +26,8 @@ Renamed a LOT of variables/fields to more "consistent" forms.
 Forced "flag constants" to refer to theie "flag set" explicitly.
 Fixed a few old bugs based in misplacement of certain flags.
 Rewrote the "monster recall" code some more, genericized it some.
+Declined to add the "auto-direction" chooser for open/disarm/etc.
+Added option "always repeat" to allow "open/disarm/etc until done".
 Rewrote the "something is in your way" (and related) checkers.
 Reorganized the source to make the files more "self-contained".
 

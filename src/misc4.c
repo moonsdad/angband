@@ -456,7 +456,7 @@ void prt_state(void)
     }
 
     /* Then comes repeating */
-    else if (command_count > 0) {
+    else if (command_rep > 0) {
 
 	/* Hack -- we need to redraw this */
 	p_ptr->status |= PY_REPEAT;
@@ -465,7 +465,7 @@ void prt_state(void)
 	/* if (PY_SEARCH & p_ptr->status) ... */
 
 
-	    (void)sprintf(text, "Repeat %3d", command_count); /* "repeat 999" is 10 characters */
+	    (void)sprintf(text, "Repeat %3d", command_rep); /* "repeat 999" is 10 characters */
     }
 
     else if (PY_SEARCH & p_ptr->status) {

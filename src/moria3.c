@@ -643,6 +643,9 @@ void do_cmd_open()
 #endif
 
 
+    /* Assume we will not continue repeating this command */
+    int more = FALSE;
+
     /* Get a direction (or Escape) */
     if (!get_dir(NULL, &dir)) {
 	/* Graceful exit */
@@ -711,7 +714,9 @@ void do_cmd_open()
 		    i_ptr->pval = 0;
 		}
 		else {
-		    count_msg_print("You failed to pick the lock.");
+		    /* We may keep trying */
+		    more = TRUE;
+		    msg_print("You failed to pick the lock.");
 		}
 	    }
 
@@ -730,7 +735,7 @@ void do_cmd_open()
 		/* Check the view */
 		check_view();
 
-		command_count = 0;
+		command_rep = 0;
 	    }
 	}
 
@@ -766,7 +771,9 @@ void do_cmd_open()
 
 		/* Keep trying */
 		else {
-		    count_msg_print("You failed to pick the lock.");
+		    /* We may continue repeating */
+		    more = TRUE;
+		    msg_print("You failed to pick the lock.");
 		}
 	    }
 
@@ -781,6 +788,9 @@ void do_cmd_open()
 	    }
 	}
     }
+
+    /* Cancel repeat unless we may continue */
+    if (!more) command_rep = 0;
 #ifdef TARGET
     target_mode = temp;
 #endif
@@ -948,6 +958,9 @@ void do_cmd_tunnel(int dir)
     monster_type       *m_ptr;
     vtype               out_val, m_name;
 
+    /* Assume we cannot continue */
+    int more = FALSE;
+
     if ((p_ptr->confused > 0) && /* Confused?	     */
 	(randint(4) > 1))	   /* 75% random movement   */
 	dir = randint(9);
@@ -957,10 +970,8 @@ void do_cmd_tunnel(int dir)
 	(void)mmove(dir, &y, &x);
 	c_ptr = &cave[y][x];
 
-	/* Compute the digging ability of player; based on strength */
-	tabil = p_ptr->use_stat[A_STR];
 
-	/* and type of tool used */
+	/* Apply the current weapon type */
 	i_ptr = &inventory[INVEN_WIELD];
 
 /* Don't let the player tunnel somewhere illegal, this is necessary to
@@ -969,16 +980,16 @@ void do_cmd_tunnel(int dir)
     if (c_ptr->fval < MIN_CAVE_WALL
 	&& (c_ptr->i_idx == 0 || (i_list[c_ptr->i_idx].tval != TV_RUBBLE
 			  && i_list[c_ptr->i_idx].tval != TV_SECRET_DOOR))) {
-	if (c_ptr->i_idx == 0) {
-	    free_turn_flag = TRUE;
-	    msg_print("Tunnel through what?  Empty air?!?");
-	}
-	else {
-	    msg_print("You can't tunnel through that.");
-	    free_turn_flag = TRUE;
-	}
-	return;
-    }
+		if (c_ptr->i_idx == 0) {
+		    free_turn_flag = TRUE;
+		    msg_print("Tunnel through what?  Empty air?!?");
+		}
+		else {
+		    free_turn_flag = TRUE;
+		    msg_print("You can't tunnel through that.");
+		}
+		return;
+    	}
 
 	/* A monster is in the way */
 	else if (c_ptr->m_idx > 1) {
@@ -999,68 +1010,107 @@ void do_cmd_tunnel(int dir)
 	    else msg_print("You are too afraid!");
 	}
 
-    else if (i_ptr->tval != TV_NOTHING) {
-	if (TR1_TUNNEL & i_ptr->flags1)
-	    tabil += 25 + i_ptr->pval * 50;
-	else {
-	    tabil += (i_ptr->dd * i_ptr->ds) + i_ptr->tohit
-		+ i_ptr->todam;
-	/* divide by two so that digging without shovel isn't too easy */
-	    tabil >>= 1;
+	/* You cannot dig without a weapon */        
+	else if (i_ptr->tval == TV_NOTHING) {
+	    msg_print("You dig with your hands, making no progress.");
 	}
 
-	/* Hack -- Penalize heavy weapon */
-	if (weapon_heavy) {
-	    tabil += (p_ptr->use_stat[A_STR] * 15) - i_ptr->weight;
-	    if (tabil < 0) tabil = 0;
-	}
+	/* Okay, try digging */
+	else {
+
+	    /* Compute the digging ability of player based on strength */
+	    tabil = p_ptr->use_stat[A_STR];
+
+	    /* Special diggers (includes all shovels, etc) */
+	    if (i_ptr->flags1 & TR1_TUNNEL) {
+
+		/* The "pval" is really important */
+		tabil += 25 + i_ptr->pval * 50;
+	    }
+
+	    /* Normal weapon */
+	    else {
+
+		/* Good weapons make digging easier */
+		tabil += (i_ptr->dd * i_ptr->ds);
+
+		/* The weapon bonuses help too */
+		tabil += (i_ptr->tohit + i_ptr->todam);
+
+		/* But without a shovel, digging is hard */
+		tabil = tabil / 2;
+	    }
+
+	    /* Penalize heavy weapon */
+	    if (weapon_heavy) {
+	        tabil += (p_ptr->use_stat[A_STR] * 15) - i_ptr->weight;
+	        if (tabil < 0) tabil = 0;
+	    }
 
 	    /* Regular walls; Granite, magma intrusion, quartz vein  */
 	    /* Don't forget the boundary walls, made of titanium (255) */
 
-	switch (c_ptr->fval) {
-	  case BOUNDARY_WALL:
-	    msg_print("This seems to be permanent rock.");
+	    switch (c_ptr->fval) {
+
+	    case BOUNDARY_WALL:
+		msg_print("This seems to be permanent rock.");
 	    break;
 
-	  case GRANITE_WALL:
+	    case GRANITE_WALL:
 
-	    i = randint(1200) + 80;
-	    if (twall(y, x, tabil, i)) {
+		i = randint(1200) + 80;
+		if (twall(y, x, tabil, i)) {
+		    msg_print("You have finished the tunnel.");
+		    check_view();
+		}
+		else {
+		    /* We may continue tunelling */
+		    msg_print("You tunnel into the granite wall.");
+		    more = TRUE;
+		}
+	    break;
+
+	    case MAGMA_WALL:
+
+		i = randint(600) + 10;
+		if (twall(y, x, tabil, i)) {
 		msg_print("You have finished the tunnel.");
 		check_view();
-	    } else
-		count_msg_print("You tunnel into the granite wall.");
+		}
+		else {
+		    /* We may continue tunelling */
+		    msg_print("You tunnel into the magma intrusion.");
+		    more = TRUE;
+		}
 	    break;
 
-	  case MAGMA_WALL:
+	    case QUARTZ_WALL:
 
-	    i = randint(600) + 10;
-	    if (twall(y, x, tabil, i)) {
+		i = randint(400) + 10;
+		if (twall(y, x, tabil, i)) {
 		msg_print("You have finished the tunnel.");
 		check_view();
-	    } else
-		count_msg_print("You tunnel into the magma intrusion.");
+		}
+		else {
+		    /* We may continue tunelling */
+		    msg_print("You tunnel into the quartz vein.");
+		    more = TRUE;
+		}
 	    break;
 
-	  case QUARTZ_WALL:
-
-	    i = randint(400) + 10;
-	    if (twall(y, x, tabil, i)) {
-		msg_print("You have finished the tunnel.");
-		check_view();
-	    } else
-		count_msg_print("You tunnel into the quartz vein.");
-	    break;
-
-	  default:
-	/* Is there an object in the way?  (Rubble and secret doors) */
-	    if (c_ptr->i_idx != 0) {
+	    default:
+	    /* Empty air */
+	    if (c_ptr->i_idx == 0) {
+		msg_print("Tunnel through what?  Empty air?!?");
+	    }
+	    /* Is there an object in the way?  (Rubble and secret doors) */
 
 	    /* Secret doors. */
-	    if (i_list[c_ptr->i_idx].tval == TV_SECRET_DOOR) {
-		count_msg_print("You tunnel into the granite wall.");
+	    else if (i_list[c_ptr->i_idx].tval == TV_SECRET_DOOR) {
+		/* We may continue tunelling */
+		msg_print("You tunnel into the granite wall.");
 		search(char_row, char_col, p_ptr->srh);
+		more = TRUE;
 	    }
 
 	    /* Rubble */
@@ -1078,30 +1128,28 @@ void do_cmd_tunnel(int dir)
 		    check_view();
 		}
 		else {
-		    count_msg_print("You dig in the rubble.");
+		    /* We may continue tunelling */
+		    more = TRUE;
+		    msg_print("You dig in the rubble.");
 		}
 	    }
 
 	    /* Anything else is illegal */
 	    else {
 		msg_print("You can't tunnel through that.");
-		free_turn_flag = TRUE;
 	    }
 	}
 
-	    else {
-		msg_print("Tunnel through what?  Empty air?!?");
-		free_turn_flag = TRUE;
-	    }
 	    break;
-	}
-    } else
-	msg_print("You dig with your hands, making no progress.");
+    }
+
+    /* Cancel repetition unless we can continue */
+    if (!more) command_rep = 0;
 }
 
 
 /*
- * Disarms a trap	-RAK-	
+ * Disarms a trap, or chest	-RAK-	
  */
 void do_cmd_disarm()
 {
@@ -1111,12 +1159,16 @@ void do_cmd_disarm()
     register inven_type *i_ptr;
     vtype               m_name, out_val;
 
+    /* Assume we cannot continue repeating */
+    int more = FALSE;
+
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
     target_mode = FALSE;
 #endif
 
+    /* Get a direction (or abort) */
     if (!get_dir(NULL, &dir)) {
 	/* Abort Gracefully */
 	free_turn_flag = TRUE;
@@ -1187,7 +1239,9 @@ void do_cmd_disarm()
 
 		/* Keep trying -- avoid randint(0) call */
 		else if ((tot > 5) && (randint(tot) > 5)) {
-		    count_msg_print("You failed to disarm the trap.");
+		    /* We may keep trying */
+		    more = TRUE;
+		    msg_print("You failed to disarm the trap.");
 		}
 
 		/* Oops */
@@ -1228,7 +1282,9 @@ void do_cmd_disarm()
 
 		/* Keep trying */
 		else if ((tot > 5) && (randint(tot) > 5)) {
-		    count_msg_print("You failed to disarm the chest.");
+		    /* We may keep trying */
+		    more = TRUE;
+		    msg_print("You failed to disarm the chest.");
 		}
 
 		/* Oops */
@@ -1241,6 +1297,9 @@ void do_cmd_disarm()
 	}
     }
 
+
+    /* Cancel repeat unless told not to */
+    if (!more) command_rep = 0;
 #ifdef TARGET
     target_mode = temp;
 #endif
@@ -1279,13 +1338,15 @@ void do_cmd_bash()
     int                 y, x, tmp, dir;
     register cave_type  *c_ptr;
     register inven_type *i_ptr;
+
+    /* Assume we cannot keep bashing */
+    int more = FALSE;
+
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir, so we save
 			       target_mode, then turn it off -CFT */
     target_mode = FALSE;
 #endif
-
-
 
     /* Get a direction (or Escape) */
     if (!get_dir(NULL, &dir)) {
@@ -1326,7 +1387,7 @@ void do_cmd_bash()
 	    /* Bash a closed door */
 	    if (i_ptr->tval == TV_CLOSED_DOOR) {
 
-		count_msg_print("You smash into the door!");
+		msg_print("You smash into the door!");
 
 		tmp = p_ptr->use_stat[A_STR] + p_ptr->wt / 2;
 
@@ -1337,29 +1398,34 @@ void do_cmd_bash()
 		    msg_print("The door crashes open!");
 
 		    /* Hack -- drop on the old object */
-		    invcopy(&i_list[c_ptr->i_idx], OBJ_OPEN_DOOR);
+		    invcopy(i_ptr, OBJ_OPEN_DOOR);
 
 		    /* 50% chance of breaking door */
 		    i_ptr->pval = 1 - randint(2);
 		    c_ptr->fval = CORR_FLOOR;
 
+		    /* Show the door */
+		    lite_spot(y, x);
+
 		    /* If not confused, fall through the door */
 		    if (p_ptr->confused == 0) {
 			move_player(dir, FALSE);
 		    }
-		    else lite_spot(y, x);
+
 
 		    /* Check the view */
 		    check_view();
 		}
 
 		else if (randint(150) > p_ptr->use_stat[A_DEX]) {
+		    /* Note: this will cancel "repeat" */
 		    p_ptr->paralysis = 1 + randint(2);
 		    msg_print("You are off-balance.");
 		}
 
 		else {
-		    if (command_count == 0)
+		    /* Allow repeated bashing until dizzy */
+		    more = TRUE;
 		    msg_print("The door holds firm.");
 		}
 	    }
@@ -1376,7 +1442,9 @@ void do_cmd_bash()
 		    i_ptr->flags2 &= ~CH2_LOCKED;
 		}
 		else {
-		    count_msg_print("The chest holds firm.");
+		    /* We may continue */
+		    more = TRUE;
+		    msg_print("The chest holds firm.");
 		}
 	    }
 
@@ -1391,11 +1459,14 @@ void do_cmd_bash()
 	    msg_print("You bash at empty space.");
 	}
 
-	/* same message for wall as for secret door */
+	/* Walls and secret doors yield same message */
 	else {
 	    msg_print("You bash it, but nothing interesting happens.");
 	}
     }
+
+    /* Unless valid action taken, cancel bash */
+    if (!more) command_rep = 0;
 #ifdef TARGET
     target_mode = temp;
 #endif
@@ -1414,12 +1485,16 @@ void do_cmd_spike()
     register cave_type  *c_ptr;
     register inven_type *i_ptr;
     char		m_name[80];
+
+    /* Assume we will not continue with the repeating */
+    int			more = FALSE;
+
 #ifdef TARGET
     int temp = target_mode; /* targetting will screw up get_dir.. -CFT */
     target_mode = FALSE; /* turn off target mode, restore later */
 #endif /* TARGET */
 
-
+    /* Get a direction (or cancel) */
     if (!get_dir(NULL, &dir)) {    
 	/* Abort gracefully */
 	free_turn_flag = TRUE;
@@ -1467,8 +1542,11 @@ void do_cmd_spike()
 	/* Go for it */
 	else {
 
+	    /* We may continue spiking (unless out of spikes) */
+	    more = TRUE;
+
 	    /* Successful jamming */
-	    count_msg_print("You jam the door with a spike.");
+	    msg_print("You jam the door with a spike.");
 
 	    /* Make locked to stuck. */
 	    if (i_ptr->pval > 0) i_ptr->pval = (-i_ptr->pval);
@@ -1484,6 +1562,8 @@ void do_cmd_spike()
 	}
     }
 
+    /* Cancel repetition unless it worked */
+    if (!more) command_rep = 0;
 #ifdef TARGET
 	target_mode = temp;
 #endif
@@ -1504,65 +1584,87 @@ void do_cmd_fire()
     int flag, visible;
     int thits, max_shots;
     int ok_throw = FALSE; /* used to prompt user with, so doesn't throw wrong thing */
-    bigvtype            out_val, tmp_str;
-    inven_type          throw_obj;
+    inven_type *i_ptr,throw_obj;
     register cave_type *c_ptr;
     register monster_type *m_ptr;
     register int        i;
     char                tchar;
 
+    /* Assume free turn */
+    free_turn_flag = TRUE;
+
     if (inven_ctr == 0) {
 	msg_print("But you are not carrying anything.");
-	free_turn_flag = TRUE;
+	return;
     }
 
-    else if (get_item(&item_val, "Fire/Throw which one?", 0, inven_ctr - 1, 0)) {
-	inven_type *t = &inventory[item_val];
-	
+    /* Get an item */
+    if (!get_item(&item_val, "Fire/Throw which one?", 0, inven_ctr - 1, 0)) return;
+
+    i_ptr = &inventory[item_val];
+
     /* Some things are just meant to be thrown */
-	if ((t->tval == TV_FLASK) || (t->tval == TV_SHOT) ||
-	    (t->tval == TV_ARROW) || (t->tval == TV_BOLT) ||
-	    (t->tval == TV_SPIKE) || (t->tval == TV_MISC)) {
+    else if ((i_ptr->tval == TV_FLASK) || (i_ptr->tval == TV_SHOT) ||
+	     (i_ptr->tval == TV_ARROW) || (i_ptr->tval == TV_BOLT) ||
+	     (i_ptr->tval == TV_SPIKE) || (i_ptr->tval == TV_MISC)) {
 
 	ok_throw = TRUE;
     }
 
-	else if (((t->tval == TV_FOOD) || (t->tval == TV_POTION1) ||
-		  (t->tval == TV_POTION2)) && known1_p(t) &&
-		 /* almost all potions do 1d1 damage when thrown.  I want the code	*/
-		 /* to ask before throwing away potions of DEX, *Healing*, etc.	*/
-		 /* This also means it will ask before throwing potions of slow	*/
-		 /* poison, and other low value items that the player is likely to	*/
-		 /* not care about.  This code will mean that mushrooms/molds of	*/
-		 /* unhealth, potions of detonations and death are the only	*/
-		 /* always-throwable food/potions.  (plus known bad ones, in a	*/
-		 /* later test...) -CFT */
-		 (t->dd > 1) && (t->ds > 1))
-	    ok_throw = TRUE; /* if it's a mushroom or potion that does damage when thrown... */
-
-	else if (!known2_p(t) && (t->ident & ID_DAMD))
-	    ok_throw = TRUE;
+    else if (!known2_p(i_ptr) && (i_ptr->ident & ID_DAMD))
+	ok_throw = TRUE;
 
     /* Not IDed, but user knows it's cursed... */
-	else if (cursed_p(t) && known2_p(t))
-	    ok_throw = TRUE; /* if user wants to throw cursed, let him */
+    else if (cursed_p(i_ptr) &&
+	     known2_p(i_ptr)) {
+	ok_throw = TRUE;
+    }
 
-	else if ((k_list[t->index].cost <= 0) && known1_p(t) &&
-		 !(known2_p(t) && (t->cost > 0)))
-	    ok_throw = TRUE;
-	else if ((t->cost <= 0) && known2_p(t))
-	    ok_throw = TRUE; /* it's junk, let him throw it */
-	else if ((t->tval >= TV_HAFTED) &&
-		 (t->tval <= TV_DIGGING) && !((t->name1)||(t->name2)))
-	    ok_throw = TRUE; /* non ego/art weapons are okay to just throw, since
-				they are damaging (Moral of story: wield your weapon
-				if you're worried that you might throw it away!) */
-	else { /* otherwise double-check with user before throwing -CFT */
-	    objdes(tmp_str, t, TRUE);
-	    sprintf(out_val, "Really throw %s?", tmp_str);
-	    ok_throw = get_check(out_val);
-	}
-    } /* if selected an item to throw */
+    /* If the player knows that it is junk, throw it */
+    else if (known2_p(i_ptr) && (i_ptr->cost <= 0)) {
+	ok_throw = TRUE;
+    }
+
+    /* Known Artifacts and ego objects are never "okay" */
+    else if (known2_p(i_ptr) &&
+	     ((i_ptr->name1) || (i_ptr->name2) || artifact_p(i_ptr))) {
+	ok_throw = FALSE;
+    }
+
+    /* Normal weapons are okay to throw, since they do damage */
+    /* (Moral of story: wield your weapon if you're worried */
+    /* that you might throw it away!) */
+    else if ((i_ptr->tval >= TV_HAFTED) && (i_ptr->tval <= TV_DIGGING) &&
+	     !((i_ptr->name1)||(i_ptr->name2))) {
+	ok_throw = TRUE;
+    }
+
+    /* Most food/potions do 1d1 damage when thrown.  I want the code	*/
+    /* to ask before throwing away potions of DEX, *Healing*, etc.	*/
+    /* This also means it will ask before throwing potions of slow	*/
+    /* poison, and other cheap items that the player is likely to	*/
+    /* not care about.  This test means that mushrooms/molds of	*/
+    /* unhealth, potions of detonations and death are the only	*/
+    /* always-throwable food/potions.  (plus known bad ones, in a	*/
+    /* later test...) -CFT */
+    else if (((i_ptr->tval == TV_FOOD) || (i_ptr->tval == TV_POTION1) ||
+	     (i_ptr->tval == TV_POTION2)) && known1_p(i_ptr) &&
+	     (i_ptr->dd > 1) && (i_ptr->ds > 1)) {
+	ok_throw = TRUE; /* if it's a mushroom or potion that does damage when thrown... */
+    }
+
+    else if ((k_list[i_ptr->index].cost <= 0) && known1_p(i_ptr) &&
+	     !(known2_p(t) && (t->cost > 0)))
+	ok_throw = TRUE;
+
+    /* If the object looks "not okay", verify it */
+    if (!ok_throw) {
+	char tmp_str[128], out_val[128];
+	objdes(tmp_str, i_ptr, TRUE);
+	sprintf(out_val, "Really throw %s?", tmp_str);
+	ok_throw = get_check(out_val);
+    }
+
 
     /* If they really want to, get a direction and throw it */
     if (ok_throw) { /* can only be true if selected item, and it either looked
@@ -1574,21 +1676,16 @@ void do_cmd_fire()
 	    desc_remain(item_val);
 	    if (p_ptr->confused > 0) {
 		msg_print("You are confused.");
-		do {
-		    dir = randint(9);
-		}
-		while (dir == 5);
+		do { dir = randint(9); } while (dir == 5);
 	    }
 	    max_shots = inventory[item_val].number;
 	    inven_throw(item_val, &throw_obj);
 	    facts(&throw_obj, &tbth, &tpth, &tdam, &tdis, &thits);
-	    if (thits > max_shots)
-		thits = max_shots;
+	    if (thits > max_shots) thits = max_shots;
 	    tchar = throw_obj.tchar;
-	/* EAM Start loop over multiple shots */
+	    /* EAM Start loop over multiple shots */
 	    while (thits-- > 0) {
-		if (inventory[INVEN_WIELD].sval == 12)
-		    tpth -= 10;
+		if (inventory[INVEN_WIELD].sval == 12) tpth -= 10;
 		flag = FALSE;
 		y = char_row;
 		x = char_col;
@@ -1599,18 +1696,16 @@ void do_cmd_fire()
 		    (void)mmove(dir, &y, &x);
 		    cur_dis++;
 		    lite_spot(oldy, oldx);
-		    if (cur_dis > tdis)
-			flag = TRUE;
+		    if (cur_dis > tdis) flag = TRUE;
 		    c_ptr = &cave[y][x];
 		    if ((c_ptr->fval <= MAX_OPEN_SPACE) && (!flag)) {
 			if (c_ptr->m_idx > 1) {
 			    flag = TRUE;
 			    m_ptr = &m_list[c_ptr->m_idx];
 			    tbth = tbth - cur_dis;
-			/* if monster not lit, make it much more difficult to
-			 * hit, subtract off most bonuses, and reduce bthb
-			 * depending on distance 
-			 */
+			    /* if monster not lit, make it much more difficult to
+			     * hit, subtract off most bonuses, and reduce bthb
+			     * depending on distance */
 			    if (!m_ptr->ml)
 				tbth = (tbth / (cur_dis + 2))
 				    - (p_ptr->lev *
@@ -1620,7 +1715,7 @@ void do_cmd_fire()
 				   (int)r_list[m_ptr->r_idx].ac, CLA_BTHB)) {
 				i = m_ptr->r_idx;
 				objdes(tmp_str, &throw_obj, FALSE);
-			    /* Does the player know what he's fighting?	   */
+				/* Does the player know what he's fighting?	   */
 				if (!m_ptr->ml) {
 				    (void)sprintf(out_val,
 					   "The %s finds a mark.", tmp_str);
@@ -1638,12 +1733,8 @@ void do_cmd_fire()
 				tdam = tot_dam(&throw_obj, tdam, i);
 				tdam = critical_blow((int)throw_obj.weight,
 						     tpth, tdam, CLA_BTHB);
-				if (tdam < 0)
-				    tdam = 0;
-			    /*
-			     * always print fear msgs, so player can stop
-			     * shooting -CWS 
-			     */
+				if (tdam < 0) tdam = 0;
+				/* always print fear msgs, so player can stop shooting -CWS  */
 				i = mon_take_hit((int)c_ptr->m_idx, tdam, TRUE);
 				if (i < 0) {
 				    char                buf[100];
@@ -1675,14 +1766,12 @@ void do_cmd_fire()
 				    prt_experience();
 				}
 				if (stays_when_throw(&throw_obj))
-/* should it land on floor?  Or else vanish forever? */
+				/* should it land on floor?  Or else vanish forever? */
 				    drop_throw(oldy, oldx, &throw_obj);
 			    }
-			    else
-				drop_throw(oldy, oldx, &throw_obj);
-			}
-			else
-			{   /* do not test c_ptr->fm here */
+			    else drop_throw(oldy, oldx, &throw_obj);
+			} else {
+			    /* do not test c_ptr->fm here */
 			    if (panel_contains(y, x) && (p_ptr->blind < 1)
 				&& (c_ptr->tl || c_ptr->pl)) {
 				print(tchar, y, x);
@@ -1696,16 +1785,14 @@ void do_cmd_fire()
 		    }
 		    oldy = y;
 		    oldx = x;
-		}
-		while (!flag);
+		} while (!flag);
 		if (thits > 0) {   /* triple crossbow check -- not really needed */
 		    if (inventory[INVEN_WIELD].sval != 12) {
 			(void)sprintf(out_val, "Keep shooting?");
 			if (get_check(out_val)) {
 			    desc_remain(item_val);
 			    inven_throw(item_val, &throw_obj);
-			} else
-			    thits = 0;
+			} else thits = 0;
 		    } else {
 			desc_remain(item_val);
 			inven_throw(item_val, &throw_obj);
@@ -1736,9 +1823,9 @@ void do_cmd_rest(void)
     vtype rest_str;
     char ch;
 
-    if (command_count > 0) {
-	rest_num = command_count;
-	command_count = 0;
+    if (command_rep > 0) {
+	rest_num = command_rep;
+	command_rep = 0;
     } else {
 
 	/* Ask the question (perhaps a "prompt" routine would be good) */
@@ -2199,13 +2286,3 @@ void do_cmd_check_uniques()
 
 
 
-
-/* Print a message so as not to interrupt a counted command. -CJS- */
-void count_msg_print(cptr p)
-{
-    int i;
-
-    i = command_count;
-    msg_print(p);
-    command_count = i;
-}

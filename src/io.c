@@ -299,6 +299,7 @@ void flush(void)
 /*
  * Get a keypress from the user. 
  *
+ * Hack -- special treatment of "inkey()" from "request_command()"
  */
 char inkey(void)
 {
@@ -307,11 +308,11 @@ char inkey(void)
     /* Flush the output */
     Term_fresh(); /* Dump IO buffer */
 
-    command_count = 0;		   /* Just to be safe -CJS- */
-
     /* Get a keypress */
     for (i = 0; !i; i = inkey_aux());
 
+    /* Hack -- convert back-quote into escape */
+    if (i == '`') i = ESCAPE;
 
     /* Return the keypress */
     return (i);
@@ -395,7 +396,6 @@ void msg_print(cptr msg)
 	    /* Let other messages share the line */
 	    len = strlen(msg) + 1;
 	    msg_flag = TRUE;
-	    command_count = 0;
 
 	    /* Memorize the message */
 	    last_msg++;
@@ -414,7 +414,6 @@ void msg_print(cptr msg)
 	    /* Let other messages share the line */
 	    len += strlen(msg) + 1;
 	    msg_flag = TRUE;
-	    command_count = 0;
 
 	    /* Memorize the message */
 	    last_msg++;
@@ -451,7 +450,6 @@ void msg_print(cptr msg)
 	    Term_putstr(0, MSG_LINE, -1, TERM_WHITE, msg);
 
 	    /* Let other messages share the line */
-	    command_count = 0;
 	    len = strlen(msg) + 1;
 
 	    /* Memorize it */

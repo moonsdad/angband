@@ -160,6 +160,7 @@ extern int rogue_like_commands;	/* Pick initial keyset */
 extern int quick_messages;		/* Quick messages -CWS */
 extern int prompt_carry_flag;		/* Require "g" key to pick up */
 extern int carry_query_flag;		/* Prompt for pickup */
+extern int always_repeat;		/* Always repeat commands */
 
 extern int new_screen_layout;	/* Use the new screen layout */
 extern int equippy_chars;	/* do equipment characters -CWS */
@@ -268,9 +269,10 @@ extern int peek;			/* Peek like a wizard */
 extern int be_nasty;
 extern int monster_is_afraid;	/* redo monster fear messages -CWS */
 
-
-extern int command_count;		/* Repetition of commands. -CJS- */
-extern int default_dir;			/* Use last direction in repeated commands */
+extern int command_cmd;			/* Current command */
+extern int command_old;			/* Last command */
+extern int command_rep;			/* Repetition of commands. -CJS- */
+extern int command_dir;			/* Use last direction in repeated commands */
 
 extern s16b noscore;			/* Don't score this game. -CJS- */
 
@@ -422,9 +424,6 @@ extern int quests[MAX_QUESTS];
 
 extern monster_type blank_monster; /* Blank monster values	*/
 
-/* dungeon.c */
-extern char last_command;		/* Memory of previous command. */
-
 /* moria1.c */
 /* Track if temporary light about player.  */
 extern int light_flag;
@@ -512,6 +511,8 @@ void desc_remain(int);
 s16b object_offset(inven_type *);
 
 /* command.c */
+void process_command(void);
+void request_command(void);
 
 /* dungeon.c */
 void dungeon(void);
@@ -807,8 +808,8 @@ void search(int, int, int);
 void rest_off(void);
 void carry(int, int, int);
 void move_player(int, int);
-void find_run(void);
-void find_init(int);
+void find_step(void);
+void find_init(void);
 void end_find(void);
 
 /* potions.c */

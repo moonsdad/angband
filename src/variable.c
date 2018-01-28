@@ -40,9 +40,10 @@ int LOAD = 0;			/* Hack -- used for CHECK_LOAD */
 u32b randes_seed;		/* Hack -- consistent object colors */
 u32b town_seed;		/* Hack -- consistent town layout */
 
-int command_count;		/* Gives repetition of commands. -CJS- */
-char last_command = ' ';  	/* Memory of previous command. */
-int default_dir = FALSE;	/* Use last direction for repeated command */
+int command_cmd = 0;		/* Current "Angband Command" */
+int command_old = 0;		/* Memory of previous command. */
+int command_rep = 0;		/* Gives repetition of commands. -CJS- */
+int command_dir = -1;		/* Use last direction for repeated command */
 
 int create_up_stair = FALSE;
 int create_down_stair = FALSE;
@@ -100,6 +101,7 @@ int rogue_like_commands = FALSE;	/* Pick initial keyset */
 int quick_messages = FALSE;		/* Quick messages -CWS */
 int prompt_carry_flag = FALSE;		/* Require "g" key to pick up */
 int carry_query_flag = FALSE;		/* Prompt for pickup */
+int always_repeat = FALSE;		/* Always repeat commands */
 
 int new_screen_layout = TRUE;	/* Use the new screen layout */
 int equippy_chars = TRUE;	/* do equipment characters -CWS */
