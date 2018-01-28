@@ -1500,16 +1500,13 @@ void do_cmd_aim_wand(void)
     /* Get the item */
     i_ptr = &inventory[item_val];
 
+
+    /* Allow direction to be cancelled for free */
+    if (!get_dir_c(NULL, &dir)) return;
+
+
     /* The turn is not free */
     free_turn_flag = FALSE;
-
-    if (!get_dir(NULL, &dir)) return;
-    if (p_ptr->confused > 0) {
-	msg_print("You are confused.");
-	do {
-	    dir = randint(9);
-	} while (dir == 5);
-    }
 
 
     /* Chance of success */
@@ -2105,10 +2102,7 @@ void do_cmd_zap_rod(void)
     /* Get the item */
     i_ptr = &inventory[item_val];
 
-    free_turn_flag = FALSE;
 
-    /* Not identified yet */
-    ident = FALSE;
 
     /* Calculate the chance */
     chance = (p_ptr->save + (stat_adj(A_INT) * 2) - (int)((i_ptr->level > 70) ? 70 : i_ptr->level) +
@@ -2127,20 +2121,33 @@ void do_cmd_zap_rod(void)
     /* Fail to use */
     if (randint(chance) < USE_DEVICE) {
 	msg_print("You failed to use the rod properly.");
+	free_turn_flag = FALSE;
 	return;
     }
 
-    if (i_ptr->timeout <= 0) {
+    /* Still charging */
+    if (i_ptr->timeout) {
+	msg_print("The rod is currently exhausted.");
+	free_turn_flag = FALSE;
+	return;
+    }
+
+    /* Not identified yet */
+    ident = FALSE;
 
     /* Starting location */
     y = char_row;
     x = char_col;
 
+
+    /* Assume the turn is free */
+    free_turn_flag = FALSE;
+
     /* Activate it */
     switch (i_ptr->flags) {
 
       case SV_ROD_LIGHT:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	msg_print("A line of blue shimmering light appears.");
 	lite_line(dir, char_row, char_col);
 	ident = TRUE;
@@ -2153,8 +2160,8 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 30;
 	break;
 
-      case SV_ROD_ACID:	   /* Acid , New */
-	if (!direction(&dir)) goto no_charge;
+      case SV_ROD_ACID:
+	if (!get_dir_c(NULL, &dir)) return;
 	if (randint(10)==1)
 	    line_spell(GF_ACID,dir,y,x,damroll(6,8));
 	else
@@ -2163,8 +2170,8 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 12;
 	break;
 
-      case SV_ROD_ELEC:	   /* Lightning */
-	if (!direction(&dir)) goto no_charge;
+      case SV_ROD_ELEC:
+	if (!get_dir_c(NULL, &dir)) return;
 	if (randint(12)==1)
 	    line_spell(GF_ELEC, dir, y, x, damroll(3, 8));
 	else
@@ -2173,8 +2180,8 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 11;
 	break;
 
-      case SV_ROD_COLD:	   /* Frost */
-	if (!direction(&dir)) goto no_charge;
+      case SV_ROD_COLD:
+	if (!get_dir_c(NULL, &dir)) return;
 	if (randint(10)==1)
 	    line_spell(GF_COLD, dir, y, x, damroll(5, 8));
 	else
@@ -2183,8 +2190,8 @@ void do_cmd_zap_rod(void)
 	i_ptr->timeout = 13;
 	break;
 
-      case SV_ROD_FIRE:	   /* Fire */
-	if (!direction(&dir)) goto no_charge;
+      case SV_ROD_FIRE:
+	if (!get_dir_c(NULL, &dir)) return;
 	if (randint(8)==1)
 	    line_spell(GF_FIRE, dir, y, x, damroll(8, 8));
 	else
@@ -2194,64 +2201,64 @@ void do_cmd_zap_rod(void)
 	break;
 
       case SV_ROD_POLYMORPH:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = poly_monster(dir, y, x);
 	i_ptr->timeout = 25;
 	break;
 
       case SV_ROD_SLOW_MONSTER:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = speed_monster(dir, y, x, -1);
 	i_ptr->timeout = 20;
 	break;
 
       case SV_ROD_SLEEP_MONSTER:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = sleep_monster(dir, y, x);
 	i_ptr->timeout = 18;
 	break;
 
       case SV_ROD_DRAIN_LIFE:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = drain_life(dir, y, x, 75);
 	i_ptr->timeout = 23;
 	break;
 
       case SV_ROD_TELEPORT_AWAY:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = teleport_monster(dir, y, x);
 	i_ptr->timeout = 25;
 	break;
 
       case SV_ROD_DISARMING:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = disarm_all(dir, y, x);
 	i_ptr->timeout = 30;
 	break;
 
       case SV_ROD_ELEC_BALL:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	fire_ball(GF_ELEC, dir, y, x, 32, 2);
 	ident = TRUE;
 	i_ptr->timeout = 23;
 	break;
 
       case SV_ROD_COLD_BALL:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	fire_ball(GF_COLD, dir, y, x, 48, 2);
 	ident = TRUE;
 	i_ptr->timeout = 25;
 	break;
 
       case SV_ROD_FIRE_BALL:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	fire_ball(GF_FIRE, dir, y, x, 72, 2);
 	ident = TRUE;
 	i_ptr->timeout = 30;
 	break;
 
       case SV_ROD_ACID_BALL:
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	fire_ball(GF_ACID, dir, y, x, 60, 2);
 	ident = TRUE;
 	i_ptr->timeout = 27;
@@ -2366,7 +2373,7 @@ void do_cmd_zap_rod(void)
 
 #if 0
       case SV_ROD_MK_WALL:	   /* JLS */
-	if (!direction(&dir)) goto no_charge;
+	if (!get_dir_c(NULL, &dir)) return;
 	ident = build_wall(dir, y, x);
 	/* don't want people to abuse this -JLS */
 	i_ptr->timeout = 999;
@@ -2378,48 +2385,52 @@ void do_cmd_zap_rod(void)
 	break;
     }
 
+
+    /* The turn is not free */
+    free_turn_flag = FALSE;
+
     /* Successfully determined the object function */
     if (ident) {
 	if (!known1_p(i_ptr)) {
 	/* round half-way case up */
 	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
-
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
     } else if (!known1_p(i_ptr)) {
 	sample(i_ptr);
     }
-
-    no_charge:;
-	} else {
-	    msg_print("The rod is currently exhausted.");
-	}
 }
 
-
-static void activate(void)
+/*
+ * Activate a wielded object.
+ *
+ * Currently, only (some) artifacts, and Dragon Scale Mail, can be activated.
+ * But one could, for example, easily make an activatable "Ring of Plasma".
+ *
+ */
+void do_cmd_activate(void)
 {
-    int          i, a, flag, first, num, j, redraw, dir, test = FALSE;
-    char         out_str[200], tmp[200], tmp2[200], choice;
+    int          i, flag= FALSE, first, num = 0, j, redraw= FALSE, test = FALSE;
+    int         a, dir, chance;
     inven_type  *i_ptr;
+    char         out_str[200], tmp[200], tmp2[200];
+    
+    /* Assume the turn is free */
+    free_turn_flag = TRUE;
 
-    flag = FALSE;
-    redraw = FALSE;
-    num = 0;
     first = 0;
-    for (i = 22; i < (INVEN_TOTAL - 1); i++) {
+    for (i = INVEN_WIELD; i < INVEN_TOTAL; i++) {
+
 	if ((inventory[i].flags3 & TR3_ACTIVATE) && (known2_p(&(inventory[i])))) {
 	    num++;
-	    if (!flag)
-		first = i;
+	    if (!flag) first = i;
 	    flag = TRUE;
 	}
     }
 
     /* Nothing found */
-    
     if (!flag) {
 	msg_print("You are not wearing/wielding anything that can be activated.");
 	free_turn_flag = TRUE;
@@ -2427,8 +2438,7 @@ static void activate(void)
     }
 
     /* Get an activatable item */
-    sprintf(out_str, "Activate which item? (%c-%c, * to list, ESC to exit) ?",
-	    'a', 'a' + (num - 1));
+    sprintf(out_str, "Activate which item? (%c-%c, * to list, ESC to exit) ?", 'a', 'a' + (num - 1));
     flag = FALSE;
     while (!flag){
 	if (!get_com(out_str, &choice))  /* on escape, get_com returns false: */
@@ -2458,7 +2468,9 @@ static void activate(void)
 		redraw = TRUE;
 		continue;
 	    }
-	} else {
+	}
+
+	else {
 	    if (choice >= 'A' && choice <= ('A' + (num - 1))) {
 		choice -= 'A';
 		test = TRUE; /* test to see if he means it */
@@ -2481,36 +2493,47 @@ static void activate(void)
 		restore_screen();
 		redraw = FALSE;
 	    }
-	    if (choice > num)
-		continue;
+	    if (choice > num) continue;
 	    flag = TRUE;
 	    j = 0;
+
 	    for (i = first; i < (INVEN_TOTAL - 1); i++) {
 		if ((inventory[i].flags3 & TR3_ACTIVATE) && known2_p(&(inventory[i]))) {
-		    if (j == choice)
-			break;
+		    if (j == choice) break;
 		    j++;
 		}
 	    }
 
-	    if ( (test && verify("Activate", i)) || !test)
-		flag = TRUE;
+	    if ( (test && verify("Activate", i)) || !test) flag = TRUE;
 	    else {
 		flag = TRUE;           /* exit loop, he didn't want to try it... */
 		free_turn_flag = TRUE; /* but he didn't do anything either */
 		continue;
 	    }
 
-	    if (inventory[i].timeout > 0) {
-		msg_print("It whines, glows and fades...");
-		break;
-	    }
-	    if (p_ptr->use_stat[A_INT] < randint(18) &&
-	     randint(k_list[inventory[i].index].level) > p_ptr->lev) {
-		msg_print("You fail to activate it properly.");
-		break;
-	    }
-	    msg_print("You activate it...");
+    /* Get the item */
+    i_ptr = &inventory[what];
+
+    /* Check the recharge */
+    if (i_ptr->timeout > 0) {
+	msg_print("It whines, glows and fades...");
+	free_turn_flag = FALSE;
+	return;
+    }
+
+    /* Are we smart enough? */
+    if (p_ptr->use_stat[A_INT] < randint(18) &&
+	randint(k_list[i_ptr->.index].level) > p_ptr->lev) {
+	msg_print("You fail to activate it properly.");
+	free_turn_flag = FALSE;
+	return;
+    }
+
+
+    /* Wonder Twin Powers... Activate! */
+    msg_print("You activate it...");
+
+
 	    switch (inventory[i].index) {
 	      case (29):
 	      case (395):
@@ -2518,61 +2541,31 @@ static void activate(void)
 	      case (397):
 		if (inventory[i].name1 == ART_NARTHANC) {
 		    msg_print("Your dagger is covered in fire...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_FIRE, dir, char_row, char_col, damroll(9, 8));
 			inventory[i].timeout = 5 + randint(10);
 		    }
 		} else if (inventory[i].name1 == ART_NIMTHANC) {
 		    msg_print("Your dagger is covered in frost...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
 		} else if (inventory[i].name1 == ART_DETHANC) {
 		    msg_print("Your dagger is covered in sparks...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
 		} else if (inventory[i].name1 == ART_RILIA) {
 		    msg_print("Your dagger throbs deep green...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_POIS, dir, char_row, char_col, 12, 3);
 			inventory[i].timeout = 3 + randint(3);
 		    }
 		} else if (inventory[i].name1 == ART_BELANGIL) {
 		    msg_print("Your dagger is covered in frost...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_COLD, dir, char_row, char_col, 48, 2);
 			inventory[i].timeout = 3 + randint(7);
 		    }
@@ -2590,25 +2583,13 @@ static void activate(void)
 	      case (43):
 		if (inventory[i].name1 == ART_RINGIL) {
 		    msg_print("Your sword glows an intense blue...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 300;
 		    }
 		} else if (inventory[i].name1 == ART_ANDURIL) {
 		    msg_print("Your sword glows an intense red...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_FIRE, dir, char_row, char_col, 72, 2);
 			inventory[i].timeout = 400;
 		    }
@@ -2617,13 +2598,7 @@ static void activate(void)
 	      case (52):
 		if (inventory[i].name1 == ART_FIRESTAR) {
 		    msg_print("Your morningstar rages in fire...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_FIRE, dir, char_row, char_col, 72, 3);
 			inventory[i].timeout = 100;
 		    }
@@ -2638,13 +2613,8 @@ static void activate(void)
 	      case (59):
 		if (inventory[i].name1 == ART_THEODEN) {
 		    msg_print("The blade of your axe glows black...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
+
 			drain_life(dir, char_row, char_col, 120);
 			inventory[i].timeout = 400;
 		    }
@@ -2653,13 +2623,8 @@ static void activate(void)
 	      case (62):
 		if (inventory[i].name1 == ART_TURMIL) {
 		    msg_print("The head of your hammer glows white...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
+
 			drain_life(dir, char_row, char_col, 90);
 			inventory[i].timeout = 70;
 		    }
@@ -2748,13 +2713,7 @@ static void activate(void)
 	      case (35):
 		if (inventory[i].name1 == ART_ARUNRUTH) {
 		    msg_print("Your sword glows a pale blue...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(12, 8));
 			inventory[i].timeout = 500;
 		    }
@@ -2763,25 +2722,13 @@ static void activate(void)
 	      case (64):
 		if (inventory[i].name1 == ART_AEGLOS) {
 		    msg_print("Your spear glows a bright white...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_COLD, dir, char_row, char_col, 100, 2);
 			inventory[i].timeout = 500;
 		    }
 		} else if (inventory[i].name1 == ART_OROME) {
 		    msg_print("Your spear pulsates...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			wall_to_mud(dir, char_row, char_col);
 			inventory[i].timeout = 5;
 		    }
@@ -2816,13 +2763,7 @@ static void activate(void)
 	      case (65):
 		if (inventory[i].name1 == ART_ULMO) {
 		    msg_print("Your trident glows deep red...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			teleport_monster(dir, char_row, char_col);
 			inventory[i].timeout = 150;
 		    }
@@ -2855,13 +2796,7 @@ static void activate(void)
 	      case (50):	   /* Flail */
 		if (inventory[i].name1 == ART_TOTILA) {
 		    msg_print("Your flail glows in scintillating colours...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			confuse_monster(dir, char_row, char_col, 20);
 			inventory[i].timeout = 15;
 		    }
@@ -2870,13 +2805,7 @@ static void activate(void)
 	      case (125):	   /* Gloves */
 		if (inventory[i].name1 == ART_CAMMITHRIM) {
 		    msg_print("Your gloves glow extremely brightly...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_MISSILE, dir, char_row, char_col,
 				  damroll(2, 6));
 			inventory[i].timeout = 2;
@@ -2886,13 +2815,7 @@ static void activate(void)
 	      case (126):	   /* Gauntlets */
 		if (inventory[i].name1 == ART_PAURHACH) {
 		    msg_print("Your gauntlets are covered in fire...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			if (randint(4)==1)
 			    line_spell(GF_FIRE, dir, char_row, char_col, damroll(9,8));
 			else
@@ -2901,37 +2824,19 @@ static void activate(void)
 		    }
 		} else if (inventory[i].name1 == ART_PAURNIMMEN) {
 		    msg_print("Your gauntlets are covered in frost...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_COLD, dir, char_row, char_col, damroll(6, 8));
 			inventory[i].timeout = 4 + randint(8);
 		    }
 		} else if (inventory[i].name1 == ART_PAURAEGEN) {
 		    msg_print("Your gauntlets are covered in sparks...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_ELEC, dir, char_row, char_col, damroll(4, 8));
 			inventory[i].timeout = 3 + randint(7);
 		    }
 		} else if (inventory[i].name1 == ART_PAURNEN) {
 		    msg_print("Your gauntlets look very acidic...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_ACID, dir, char_row, char_col, damroll(5, 8));
 			inventory[i].timeout = 4 + randint(7);
 		    }
@@ -2940,13 +2845,7 @@ static void activate(void)
 	      case (127):
 		if (inventory[i].name1 == ART_FINGOLFIN) {
 		    msg_print("Magical spikes appear on your cesti...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_ARROW, dir, char_row, char_col, 150);
 			inventory[i].timeout = 88 + randint(88);
 		    }
@@ -2968,39 +2867,21 @@ static void activate(void)
 		break;
 	      case (SPECIAL_OBJ - 1):	/* Narya */
 		msg_print("The ring glows deep red...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_FIRE, dir, char_row, char_col, 120, 3);
 		    inventory[i].timeout = 222 + randint(222);
 		}
 		break;
 	      case (SPECIAL_OBJ): /* Nenya */
 		msg_print("The ring glows bright white...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_COLD, dir, char_row, char_col, 200, 3);
 		    inventory[i].timeout = 222 + randint(333);
 		}
 		break;
 	      case (SPECIAL_OBJ + 1):	/* Vilya */
 		msg_print("The ring glows deep blue...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_ELEC, dir, char_row, char_col, 250, 3);
 		    inventory[i].timeout = 222 + randint(444);
 		}
@@ -3041,24 +2922,12 @@ static void activate(void)
 		  case 8:
 		  case 9:
 		  case 10:
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_MANA, dir, char_row, char_col, 300, 3);
 		    }
 		    break;
 		  default:
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_bolt(GF_MANA, dir, char_row, char_col, 250);
 		    }
 		}
@@ -3066,65 +2935,36 @@ static void activate(void)
 		break;
 	      case (389):	   /* Blue */
 		msg_print("You breathe lightning...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_ELEC, dir, char_row, char_col, 100, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (390):	   /* White */
 		msg_print("You breathe frost...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_COLD, dir, char_row, char_col, 110, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (391):	   /* Black */
 		msg_print("You breathe acid...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_ACID, dir, char_row, char_col, 130, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (392):	   /* Gas */
 		msg_print("You breathe poison gas...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_POIS, dir, char_row, char_col, 150, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (393):	   /* Fire */
 		msg_print("You breathe fire...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
+
 		    fire_ball(GF_FIRE, dir, char_row, char_col, 200, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
@@ -3135,13 +2975,7 @@ static void activate(void)
 		    starball(char_row, char_col);
 		    inventory[i].timeout = 1000;
 		} else {
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			choice = randint(5);
 			sprintf(tmp2, "You breathe %s...",
 				((choice == 1) ? "lightning" :
@@ -3160,38 +2994,20 @@ static void activate(void)
 		break;
 	      case (408):	   /* Bronze */
 		msg_print("You breathe confusion...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_CONFUSION, dir, char_row, char_col, 120, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (409):	   /* Gold */
 		msg_print("You breathe sound...");
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    fire_ball(GF_SOUND, dir, char_row, char_col, 130, 2);
 		    inventory[i].timeout = 444 + randint(444);
 		}
 		break;
 	      case (415):	   /* Chaos */
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    choice = randint(2);
 		    sprintf(tmp2, "You breathe %s...",
 			    ((choice == 1 ? "chaos" : "disenchantment")));
@@ -3202,13 +3018,7 @@ static void activate(void)
 		}
 		break;
 	      case (416):	   /* Law */
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    choice = randint(2);
 		    sprintf(tmp2, "You breathe %s...",
 			    ((choice == 1 ? "sound" : "shards")));
@@ -3219,13 +3029,7 @@ static void activate(void)
 		}
 		break;
 	      case (417):	   /* Balance */
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    choice = randint(4);
 		    sprintf(tmp2, "You breathe %s...",
 			    ((choice == 1) ? "chaos" :
@@ -3240,13 +3044,7 @@ static void activate(void)
 		}
 		break;
 	      case (418):	   /* Shining */
-		if (get_dir(NULL, &dir)) {
-		    if (p_ptr->confused > 0) {
-			msg_print("You are confused.");
-			do {
-			    dir = randint(9);
-			} while (dir == 5);
-		    }
+		if (get_dir_c(NULL, &dir)) {
 		    choice = randint(2);
 		    sprintf(tmp2, "You breathe %s...",
 			    ((choice == 1 ? "light" : "darkness")));
@@ -3270,13 +3068,7 @@ static void activate(void)
 		    inventory[i].timeout = 400;
 		} else {
 		    msg_print("You breathe the elements...");
-		    if (get_dir(NULL, &dir)) {
-			if (p_ptr->confused > 0) {
-			    msg_print("You are confused.");
-			    do {
-				dir = randint(9);
-			    } while (dir == 5);
-			}
+		    if (get_dir_c(NULL, &dir)) {
 			fire_ball(GF_MISSILE, dir, char_row, char_col, 300, 2);
 			inventory[i].timeout = 300 + randint(300);
 		    }

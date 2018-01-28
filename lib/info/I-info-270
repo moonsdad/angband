@@ -13,6 +13,7 @@ Added floating point (yuck!) to "standard deviation" code.
 Added extra "options", for "color", "disturb", and others
 Implemented the "new_screen_layout" option (as an option).
 Added a "Show depth in feet (vs actual level)" option.
+Redid the targetting code, and the direction code.
 Fixed more "gender" bugs in the monster recall code.
 Wrote a true "output buffer" for I/O, no longer depends on Curses
 Made it easy to add a "screen manager" for any "platform".

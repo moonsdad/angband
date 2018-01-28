@@ -523,6 +523,7 @@ void rerate(void);
 void eat(void);
 void do_cmd_aim_wand(void);
 void do_cmd_zap_rod(void);
+void do_cmd_activate(void);
 
 /* files.c */
 void init_files(void);
@@ -801,11 +802,15 @@ void artifact_check_no_file(void);
 void do_cmd_check_uniques(void);
 
 /* moria4.c */
-int target_at(int, int); /* target fns stolen from Morgul -CFT */
-void target(void); /* target fns stolen from Morgul -CFT */
+void target_update(void);
+int target_at(int, int);
+int target_okay(void);
+int target_set(void);
 void mmove2(int *, int *, int, int, int, int);
-int get_alldir(cptr, int *);
+void confuse_dir(int *, int);
+int get_a_dir(cptr, int *, int);
 int get_dir(cptr, int *);
+int get_dir_c(cptr, int *);
 void disturb(int, int);
 void search_on(void);
 void search_off(void);

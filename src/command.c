@@ -402,7 +402,16 @@ static void do_cmd_target()
 
 #ifdef TARGET
 
-    target(); /* target code taken from Morgul -CFT */
+    /* Be sure we can see */
+    if (p_ptr->blind > 0) {
+	msg_print("You can't see anything to target!");
+    }
+    else if (!target_set()) {
+	msg_print("Target Aborted");
+    }
+    else {
+	msg_print("Target Selected");
+    }
 
 #else
 
@@ -831,7 +840,7 @@ void process_command(void)
 
 	/* Activate an artifact */
 	case 'A':
-	    activate(); break;
+	    do_cmd_activate(); break;
 
 	/* Eat some food */
 	case 'E':

@@ -275,50 +275,7 @@ static char original_commands(char command)
       case CTRL('P'):		/* ^P = repeat  */
       case CTRL('W'):		/* ^W = enter wizard mode */
       case CTRL('X'):		/* ^X = save    */
-      case '.': {
-#ifdef TARGET
-/* If in target_mode, player will not be given a chance to pick a direction.
- * So we save it, force it off, and then ask for the direction -CFT */
-	  int temp = target_mode;
-	  target_mode = FALSE;
-#endif
-	  if (get_dir(NULL, &dir_val))
-	    switch (dir_val) {
-	      case 1:
-		command = 'B';
-		break;
-	      case 2:
-		command = 'J';
-		break;
-	      case 3:
-		command = 'N';
-		break;
-	      case 4:
-		command = 'H';
-		break;
-	      case 6:
-		command = 'L';
-		break;
-	      case 7:
-		command = 'Y';
-		break;
-	      case 8:
-		command = 'K';
-		break;
-	      case 9:
-		command = 'U';
-		break;
-	      default:
-		command = ' ';
-		break;
-	    }
-	else
-	    command = ' ';
-#ifdef TARGET
-	  target_mode = temp; /* restore old target code ... -CFT */
-#endif
-        }
-	break;
+      case '.': 
       case '/':
       case '<':
       case '>':
@@ -364,55 +321,9 @@ static char original_commands(char command)
       case 'F':
       case 'G':
       case 'g':
-	break;
       case 'M':
       case 'R':
-	break;
-      case 'T': {
-#ifdef TARGET
-/* If in target_mode, player will not be given a chance to pick a direction.
- * So we save it, force it off, and then ask for the direction -CFT
- */
-	int temp = target_mode;
-	target_mode = FALSE;
-#endif
-	if (get_dir(NULL, &dir_val))
-	    switch (dir_val) {
-	      case 1:
-		command = CTRL('B');
-		break;
-	      case 2:
-		command = CTRL('J');
-		break;
-	      case 3:
-		command = CTRL('N');
-		break;
-	      case 4:
-		command = CTRL('H');
-		break;
-	      case 6:
-		command = CTRL('L');
-		break;
-	      case 7:
-		command = CTRL('Y');
-		break;
-	      case 8:
-		command = CTRL('K');
-		break;
-	      case 9:
-		command = CTRL('U');
-		break;
-	      default:
-		command = ' ';
-		break;
-	    }
-	else
-	    command = ' ';
-#ifdef TARGET
-	  target_mode = temp;
-#endif
-        }
-	break;
+      case 'T': break;
       case 'a':
 	command = 'z';
 	break;
@@ -452,7 +363,7 @@ static char original_commands(char command)
 	command = 'X';
 	break;
 
-    /* wizard mode commands follow */
+    /* wizard mode commands follow */ // XXX
       case '\\':		/* \ = wizard help */
       case CTRL('A'):		/* ^A = cure all */
       case CTRL('D'):		/* ^D = up/down */

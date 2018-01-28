@@ -427,7 +427,8 @@ void do_cmd_look()
 	msg_print("You can't believe what you are seeing! It's like a dream!");
     }
 
-    else if (get_alldir("Look which direction? ", &dir)) {
+    /* Get a direction (or "5"), ignoring target and confusion */
+    else if (get_a_dir("Look which direction? ", &dir, 0x04)) {
 
 	abort_look = FALSE;
 	gl_nseen = 0;
@@ -609,11 +610,10 @@ void do_cmd_locate()
 	    p_y, p_x, tmp_str);
 
 	/* Get a direction (or Escape) */
-	if (!get_dir(out_val, &dir_val)) break;
+	if (!get_a_dir(out_val, &dir_val, 0)) break;
 
-	/* -CJS- Should really use the move function, but what the hell. This is nicer,
-	 * as it moves exactly to the same place in another section. The direction
-	 * calculation is not intuitive. Sorry. */
+
+	/* Keep "moving" until the panel changes */
 	while (1) {
 
 	    /* Apply the direction */
@@ -643,6 +643,8 @@ void do_cmd_locate()
     target_mode = temp; /* restore target mode... */
 #endif
 }
+
+
 
 
 /*
@@ -754,23 +756,22 @@ void do_cmd_open()
     register cave_type		*c_ptr;
     register inven_type		*i_ptr;
     vtype			m_name, out_val;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-    target_mode = FALSE;
-#endif
 
 
     /* Assume we will not continue repeating this command */
     int more = FALSE;
 
     /* Get a direction (or Escape) */
-    if (!get_dir(NULL, &dir)) {
+    if (!get_a_dir(NULL, &command_dir, 0)) {
 	/* Graceful exit */
 	free_turn_flag = TRUE;
     }
 
     else {
+
+	/* Apply partial confusion */
+	dir = command_dir;
+	confuse_dir(&dir, 0x02);
 
 	/* Get requested grid */
 	y = char_row;
@@ -852,8 +853,6 @@ void do_cmd_open()
 
 		/* Check the view */
 		check_view();
-
-		command_rep = 0;
 	    }
 	}
 
@@ -909,9 +908,6 @@ void do_cmd_open()
 
     /* Cancel repeat unless we may continue */
     if (!more) command_rep = 0;
-#ifdef TARGET
-    target_mode = temp;
-#endif
 }
 
 
@@ -924,20 +920,19 @@ void do_cmd_close()
     vtype                  out_val, m_name;
     register cave_type    *c_ptr;
     inven_type		  *i_ptr;
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-    target_mode = FALSE;
-#endif
-
 
     /* Get a "desired" direction, or Abort */
-    if (!get_dir(NULL, &dir)) {
+    if (!get_a_dir(NULL, &command_dir, 0)) {
 	/* Abort gracefully */
 	free_turn_flag = TRUE;
     }
 
     else {
+
+	/* Apply partial confusion */
+	dir = command_dir;
+	confuse_dir(&dir, 0x02);
+
 	y = char_row;
 	x = char_col;
 	(void)mmove(dir, &y, &x);
@@ -984,12 +979,7 @@ void do_cmd_close()
 	    lite_spot(y, x);
 
     }
-#ifdef TARGET
-    target_mode = temp;
-#endif
 }
-
-
 
 
 /*
@@ -1090,9 +1080,7 @@ void do_cmd_tunnel()
 
 	/* Take partial confusion into account */
 	dir = command_dir;
-	if ((p_ptr->confused > 0) && /* Confused?	     */
-	(randint(4) > 1))	   /* 75% random movement   */
-	dir = randint(9);
+	confuse_dir(&dir, 0x02);
 
 	y = char_row;
 	x = char_col;
@@ -1291,19 +1279,16 @@ void do_cmd_disarm()
     /* Assume we cannot continue repeating */
     int more = FALSE;
 
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-    target_mode = FALSE;
-#endif
-
     /* Get a direction (or abort) */
-    if (!get_dir(NULL, &dir)) {
+    if (!get_a_dir(NULL, &command_dir, 0)) {
 	/* Abort Gracefully */
 	free_turn_flag = TRUE;
     }
 
     else {
+
+	dir = command_dir;
+	confuse_dir(&dir, 0x02);
 
 	y = char_row;
 	x = char_col;
@@ -1358,11 +1343,8 @@ void do_cmd_disarm()
 		    msg_print("You have disarmed the trap.");
 		    p_ptr->exp += i_ptr->pval;
 		    delete_object(y, x);
-		    /* make sure we move onto the trap even if confused */
-		    tmp = p_ptr->confused;
-		    p_ptr->confused = 0;
+		    /* move the player onto the trap */
 		    move_player(dir, FALSE);
-		    p_ptr->confused = tmp;
 		    prt_experience();
 		}
 
@@ -1376,11 +1358,8 @@ void do_cmd_disarm()
 		/* Oops */
 		else {
 		    msg_print("You set the trap off!");
-		    /* make sure we move onto the trap even if confused */
-		    tmp = p_ptr->confused;
-		    p_ptr->confused = 0;
+		    /* Move the player onto the trap */
 		    move_player(dir, FALSE);
-		    p_ptr->confused += tmp;
 		}
 	    }
 
@@ -1429,9 +1408,6 @@ void do_cmd_disarm()
 
     /* Cancel repeat unless told not to */
     if (!more) command_rep = 0;
-#ifdef TARGET
-    target_mode = temp;
-#endif
 }
 
 
@@ -1471,14 +1447,8 @@ void do_cmd_bash()
     /* Assume we cannot keep bashing */
     int more = FALSE;
 
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir, so we save
-			       target_mode, then turn it off -CFT */
-    target_mode = FALSE;
-#endif
-
     /* Get a direction (or Escape) */
-    if (!get_dir(NULL, &dir)) {
+    if (!get_a_dir(NULL, &command_dir, 0)) {
 	/* Graceful abort */
 	free_turn_flag = TRUE;
     }
@@ -1486,10 +1456,9 @@ void do_cmd_bash()
     /* Execute the bash */
     else {
 
-	if (p_ptr->confused > 0) {
-	    msg_print("You are confused.");
-	    do { dir = randint(9); } while (dir == 5);
-	}
+	/* Extract bash direction, apply partial confusion */
+	dir = command_dir;
+	confuse_dir(&dir, 0x02);
 
 	/* Bash location */
 	y = char_row;
@@ -1596,9 +1565,6 @@ void do_cmd_bash()
 
     /* Unless valid action taken, cancel bash */
     if (!more) command_rep = 0;
-#ifdef TARGET
-    target_mode = temp;
-#endif
 }
 
 
@@ -1618,18 +1584,17 @@ void do_cmd_spike()
     /* Assume we will not continue with the repeating */
     int			more = FALSE;
 
-#ifdef TARGET
-    int temp = target_mode; /* targetting will screw up get_dir.. -CFT */
-    target_mode = FALSE; /* turn off target mode, restore later */
-#endif /* TARGET */
-
     /* Get a direction (or cancel) */
-    if (!get_dir(NULL, &dir)) {    
+    if (!get_a_dir(NULL, &command_dir, 0)) {    
 	/* Abort gracefully */
 	free_turn_flag = TRUE;
     }
 
     else {
+
+	/* Confuse the direction (partially) */
+	dir = command_dir;
+	confuse_dir (&dir, 0x02);
 
 	/* Get the grid of the thing to jam */
 	y = char_row;
@@ -1693,9 +1658,6 @@ void do_cmd_spike()
 
     /* Cancel repetition unless it worked */
     if (!more) command_rep = 0;
-#ifdef TARGET
-	target_mode = temp;
-#endif
 }
 
 
@@ -1800,13 +1762,9 @@ void do_cmd_fire()
 		     * okay, or user said yes... */
 
 	/* Get a direction (or Abort), apply confusion */
-	if (get_dir(NULL, &dir)) {
+	if (get_dir_c(NULL, &dir)) {
 
 	    desc_remain(item_val);
-	    if (p_ptr->confused > 0) {
-		msg_print("You are confused.");
-		do { dir = randint(9); } while (dir == 5);
-	    }
 	    max_shots = inventory[item_val].number;
 	    inven_throw(item_val, &throw_obj);
 	    facts(&throw_obj, &tbth, &tpth, &tdam, &tdis, &thits);
@@ -1959,7 +1917,9 @@ void do_cmd_walk(int pickup)
     /* Attempt to walk */
     else {
 
+	/* Apply partial confusion */
 	dir = command_dir;
+	confuse_dir(&dir, 0x02);
 
 	/* Actually move the character */
 	move_player(dir, pickup);
@@ -2167,6 +2127,7 @@ void do_cmd_inscribe(void)
     /* Free move */
     free_turn_flag = TRUE; 
 
+    /* Require some objects */
     if (!inven_ctr && !equip_ctr) {
 	msg_print("You are not carrying anything to inscribe.");
 	return;

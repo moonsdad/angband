@@ -19,6 +19,40 @@
 /*** Targetting Code ***/
 
 
+#ifdef TARGET
+
+/*
+ * Be sure that the target_row & target_col vars are correct
+ * Also be sure that a targetted creature, if any, is "legal".
+ */
+void target_update()
+{
+    /* This bit of targetting code taken from Morgul -CFT */
+    /* If we are in targetting mode, with a creature target, */
+    /* make the targetted row and column match the creature's. */
+    /* Note that with ESP, there is no reason to have ESP */
+    /* All that matters is that a "lock" can be acheived */
+    /* Thus, all target locations are "valid".  This is not */
+    /* so bad, since "aim at target" must be explicitly chosen */
+
+    /* Is there a target monster? */
+    if (target_mode && (target_mon > 0)) {
+
+	monster_type *m_ptr = &m_list[target_mon];
+
+	/* Assume invalid target */
+	target_mode = FALSE;
+
+	/* Monsters MUST be visible */
+	if (m_ptr->ml) {
+	    target_mode = TRUE;
+	    target_row = m_ptr->fy;
+	    target_col = m_ptr->fx;
+	}
+    }
+}
+
+#endif
 
 
 /*
@@ -30,6 +64,8 @@ int target_at(int row,int col)
 
 #ifdef TARGET
 
+    /* Update the target */
+    target_update();
 
     /* Compare the locations */
     if (target_mode && (row==target_row) && (col==target_col)) {
@@ -43,175 +79,222 @@ int target_at(int row,int col)
 }
 
 
-
-
-
 /*
  * This targetting code stolen from Morgul -CFT
- * Targetting routine 					CDW
+ * Gotta be target mode and either (valid monster and line of sight
+ * to monster) or (not valid monster and line of sight to position).  CDW
+ * Also, for monster targetting, monster must be lit!  Otherwise player can
+ * "lock phasers" on an invis monster while a potion of see inv lasts,
+ * and then continue to hit it when the see inv goes away.  Also,
+ * targetting mode shouldn't help the player shoot a monster in a
+ * dark room.  If he can't see it, he shouldn't be able to aim... -CFT
  */
-void target()
+
+/*
+ * Simple query -- is the "target" okay to use?
+ * Obviously, if target mode is disabled, it is not.
+ */
+int target_okay()
 {
 
 #ifdef TARGET
 
-    int m_idx,exit,exit2;
+    /* Update the target */
+    target_update();
+
+    /* Is the target still okay? */
+    if (target_mode) return (TRUE);
+
+#endif
+
+    /* The "target" is invalid */
+    return (FALSE);
+}
+
+
+
+
+
+
+/*
+ * Set a new target.  This code can be called from get_a_dir()
+ *
+ * This targetting code stolen from Morgul -CFT
+ * Targetting routine 					CDW
+ */
+int target_set()
+{
+
+#ifdef TARGET
+
+    int row, col;
+    int m_idx,exit_1;
     char query;
     vtype desc;
 
-    exit = FALSE;
-    exit2 = FALSE;
-
-    if (p_ptr->blind > 0)
-	msg_print("You can't see anything to target!");
-    else {
+    exit_1 = FALSE;
 
     /* Go ahead and turn off target mode */
     target_mode = FALSE;
 
     /* Check monsters first */
-	for (m_idx = 0; (m_idx < m_max) && (!exit); m_idx++) {
+    for (m_idx = MIN_M_IDX; (m_idx < m_max) && (!exit_1); m_idx++) {
 
-	    if (m_list[m_idx].cdis<MAX_SIGHT) {
-		if ((m_list[m_idx].ml)&&
-		    (los(char_row,char_col,m_list[m_idx].fy,m_list[m_idx].fx))) {
-		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
-		    (void) sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
-				   r_list[m_list[m_idx].r_idx].name);
-		    prt(desc,0,0);
-		    move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
-		    query = inkey();
-		    while ((query == 'r')||(query == 'R')) {
-			save_screen();
-			query = roff_recall(m_list[m_idx].r_idx);
-			restore_screen();
-			move_cursor_relative(m_list[m_idx].fy,m_list[m_idx].fx);
-			query = inkey();
-		    }
-		    switch (query) {
-		    case ESCAPE:
-			exit = TRUE;
-			exit2 = TRUE;
-			break;
-		    case '.':	/* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
-		    case 't': case 'T':
-			target_mode = TRUE;
-			target_mon  = m_idx;
-			target_row  = m_list[m_idx].fy;
-			target_col  = m_list[m_idx].fx;
-			exit2 = TRUE;
-		    case 'l': case'L':
-			exit = TRUE;
-		    default:
-			break;
-		    }
-		}
+	monster_type *m_ptr = &m_list[m_idx];
+
+	/* Ignore "unseen" monsters */
+	if (!(m_ptr->cdis<MAX_SIGHT) || !m_ptr->ml || 
+	    !(los(char_row,char_col,m_ptr->fy,m_ptr->fx))) continue;
+
+	/* Access monster location */
+	row = m_ptr->fy;
+	col = m_ptr->fx;
+
+	    /* Describe, prompt for recall */
+	    sprintf(desc, "%s [(r)ecall] [(t)arget] [(l)ocation] [ESC quits]",
+		    r_list[m_list[m_idx].r_idx].name);
+	    prt(desc,0,0);
+	    move_cursor_relative(row,col);
+
+	    /* Get a command, processing recall requests */
+	    query = inkey();
+	    while ((query == 'r') || (query == 'R')) {
+
+		/* Recall on screen */
+		save_screen();
+		query = roff_recall(m_list[m_idx].r_idx);
+		restore_screen();
+
+		/* XXX This is done by "good" restore_screen() */
+		move_cursor_relative(row, col);
+		query = inkey();
 	    }
 	}
-	if (exit2 == FALSE) {
-	    prt("Use cursor to designate target. [(t)arget]",0,0);
-	    target_row = char_row;
-	    target_col = char_col;
-	    for (exit = FALSE; exit==FALSE ;) {
-		move_cursor_relative(target_row, target_col);
-		query=inkey();
-		if (rogue_like_commands==FALSE) {
-		    switch (query) {
-		    case '1':
-			query = 'b';
-			break;
-		    case '2':
-			query = 'j';
-			break;
-		    case '3':
-			query = 'n';
-			break;
-		    case '4':
-			query = 'h';
-			break;
-		    case '5':
-			query = '.';
-		    case '6':
-			query = 'l';
-			break;
-		    case '7':
-			query = 'y';
-			break;
-		    case '8':
-			query = 'k';
-			break;
-		    case '9':
-			query = 'u';
-			break;
-		    default:
-			break;
-		    }
-		}
-		switch (query) {
-		case ESCAPE:
-		    case'q':
-		case 'Q':
-		    exit = TRUE;
-		    break;
-		case '.':	/* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
-		case 't':
-		case 'T':
-		    if (distance(char_row,char_col,target_row,target_col)>MAX_SIGHT)
-			prt(
-			    "Target beyond range. Use cursor to designate target. [(t)arget].",
-			    0,0);
-		    else if (cave[target_row][target_col].fval>CORR_FLOOR)
-			prt(
-			    "Invalid target. Use cursor to designate target. [(t)arget].",
-			    0,0);
-		    else {
-			target_mode = TRUE;
-			target_mon  = MAX_M_IDX;
-			exit = TRUE;
-		    }
-		    break;
-		case 'b':
-		    target_col--;
-		case 'j':
-		    target_row++;
-		    break;
-		case 'n':
-		    target_row++;
-		case 'l':
-		    target_col++;
-		    break;
-		case 'y':
-		    target_row--;
-		case 'h':
-		    target_col--;
-		    break;
-		case 'u':
-		    target_col++;
-		case 'k':
-		    target_row--;
-		    break;
-		default:
-		    break;
-		}
-		if ((target_col>MAX_WIDTH-2)||(target_col>panel_col_max))
-		    target_col--;
-		else if ((target_col<1)||(target_col<panel_col_min))
-		    target_col++;
-		if ((target_row>MAX_HEIGHT-2)||(target_row>panel_row_max))
-		    target_row--;
-		else if ((target_row<1)||(target_row<panel_row_min))
-		    target_row++;
+
+
+	/* Analyze (non "recall") command */
+	switch (query) {
+
+	    case ESCAPE:
+		return (FALSE);
+
+	    case '.':	/* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
+	    case 'T': case 't':
+		target_mode = TRUE;
+		target_mon  = m_idx;
+		target_row  = row;
+		target_col  = col;
+		return (TRUE);
+
+	    case 'l': case'L':
+		exit_1 = TRUE;
+	}
+    }
+
+
+    /* Now try a location */
+    prt("Use cursor to designate target. [(t)arget]",0,0);
+
+    /* Start on the player */
+    row = char_row;
+    col = char_col;
+
+    /* Query until done */
+    while (TRUE) {
+
+	/* Light up the current location */
+	move_cursor_relative(row, col);
+
+	/* Get a command, and convert it to standard form */
+	query = inkey();
+
+	/* Analyze the keypress */
+	switch (query) {
+
+	    case ESCAPE: break;
+	    case 'Q': case 'q': query = ESCAPE; break;
+
+	    /* Nowhere means "target" */
+	    case '5': case '.': query = '0'; break;
+
+	    /* Target means "target" */
+	    case '.': /* for NetHack players, '.' is used to select a target, so I'm changing this... -CFT */
+	    case 'T': case 't': case '0': query = '0'; break;
+
+	    /* Real directions */
+	    case '1': case 'B': case 'b': query = '1'; break;
+	    case '2': case 'J': case 'j': query = '2'; break;
+	    case '3': case 'N': case 'n': query = '3'; break;
+	    case '4': case 'H': case 'h': query = '4'; break;
+	    case '6': case 'L': case 'l': query = '6'; break;
+	    case '7': case 'Y': case 'y': query = '7'; break;
+	    case '8': case 'K': case 'k': query = '8'; break;
+	    case '9': case 'U': case 'u': query = '9'; break;
+
+	    /* Ignore all other keys */
+	    default: query = ' '; break;
+	}
+
+	/* Analyze the command */
+	switch (query) {
+
+	    case ESCAPE:
+		return (FALSE);
+
+	    case '0':
+	    if (distance(char_row,char_col,row,col)>MAX_SIGHT)
+		prt(
+		    "Target beyond range. Use cursor to designate target. [(t)arget].",
+		    0,0);
+	    else if (cave[row][col].fval>CORR_FLOOR)
+		prt(
+		    "Invalid target. Use cursor to designate target. [(t)arget].",
+		    0,0);
+	    else {
+		target_mode = TRUE;
+		target_mon  = MAX_M_IDX;
+		return (TRUE);
+	    }
+	    return (FALSE);
+
+	    case '1':
+		col--;
+	    case '2':
+		row++;
+		break;
+	    case '3':
+		row++;
+	    case '6':
+		col++;
+		break;
+	    case '7':
+		row--;
+	    case '4':
+		col--;
+		break;
+	    case '9':
+		col++;
+	    case '8':
+		row--;
+		break;
 		
-	    }
+	    default:
+		break;
 	}
-	if (target_mode==TRUE)
-	    msg_print("Target selected.");
-	else
-	    msg_print("Aborting Target.");
+
+	/* Verify column */
+	if ((col>MAX_WIDTH-2) || (col>panel_col_max)) col--;
+	else if ((col<=0) || (col<panel_col_min)) col++;
+
+	/* Verify row */
+	if ((row>MAX_HEIGHT-2) || (row>panel_row_max)) row--;
+	else if ((row<=0) || (row<panel_row_min)) row++;
     }
 
 #endif /* TARGET */
 
+    /* Assume no target */
+    return (FALSE);
 }
 
 
@@ -281,7 +364,11 @@ int mmove(int dir, int *y, int *x)
     switch (dir) {
 
 #ifdef TARGET
-      case 0:			/* targetting code stolen from Morgul -CFT */
+
+      case 0:
+
+	target_update();
+
 	new_row = *y;
 	new_col = *x;
 	mmove2(&new_row, &new_col,
@@ -344,26 +431,31 @@ int mmove(int dir, int *y, int *x)
 
 
 /*
- * Similar to get_dir, except that no memory exists, and it is		-CJS-
- * allowed to enter the null direction. 
+ * Given a direction, apply "confusion" to it
+ *
+ * Mode is as in "get_a_dir()" below, using:
+ *   0x01 = Apply total Confusion
+ *   0x02 = Apply partial Confusion (75%)
+ *   0x04 = Allow the direction "5"
+ *   0x08 = ??? Handle stun like confused
  */
-int get_alldir(cptr prompt, int *dir)
+void confuse_dir (int *dir, int mode)
 {
-    char command;
+    /* Check for confusion */
+    if (p_ptr->confused > 0) {
 
-    for (;;) {
-	if (!get_com(prompt, &command))
-	{
-	    free_turn_flag = TRUE;
-	    return FALSE;
+	/* Does the confusion get a chance to activate? */
+	if ((mode & 0x01) ||
+	    ((mode & 0x02) && (randint(4) > 1))) {
+
+	    /* Warn the user */
+	    msg_print("You are confused.");
+
+	    /* Pick a random (valid) direction */
+	    do {
+		*dir = randint(9);
+	    } while (!(mode & 0x04) && (*dir == 5));
 	}
-	if (rogue_like_commands)
-	    command = map_roguedir(command);
-	if (command >= '1' && command <= '9') {
-	    *dir = command - '0';
-	    return TRUE;
-	}
-	bell();
     }
 }
 
@@ -374,21 +466,56 @@ int get_alldir(cptr prompt, int *dir)
  * This function should be used by anyone who wants a direction
  * Hack -- it can also be used to get the "direction" of "here"
  *
- * It takes an optional prompt, a pointer to a dir
+ * It takes an optional prompt, a pointer to a dir, and a mode (see below),
  * and returns "Did something besides 'Escape' happen?".  The dir is loaded
  * with -1 (on abort) or 0 (for target) or 1-9 (for a "keypad" direction)
  * including 5 (for "here").
  *
+ * The mode indicates whether "5" is a legal direction, and also
+ * how to handle confusion (always, most times, or never).  There
+ * is an extra bit, perhaps for "treat stun as confusion".
+ *
+ * The mode allows indication of whether target mode is enforced,
+ * or if not, if it is optional, and if so, if it can be interactively
+ * re-oriented, and how confusion should affect targetting.
+ *
  * Note that if (command_dir > 0), it will pre-empt user interaction
+ * Note that "Force Target", if set, will pre-empt user interaction
+ *
+ * So, currently, there is no account taken of "remember that we
+ * are currently shooting at the target" (except via "Force Target").
+ *
+ * Note that confusion (if requested) over-rides any other choice.
+ * "Force Target" + "Always Confused" yields ugly situation for user...
+ *
+ * Note that use of the "Force Target" plus "Repeated Commands"
+ * and/or "Confusion" + "Repeated Commands" could be really messy
  *
  * Note: We change neither command_rep nor free_turn_flag
  * Note: We assume our caller correctly handles the "abort" case
+ *
+ * Although we seem to correctly handle the (dir == &command_dir) case,
+ * it is not recommended to use this with the "Confusion" flags,
+ * since the users "preferred" direction is then lost.
+ *
+ * However, note that if we are given "&command_dir" as our "dir" arg,
+ * we will correctly reset it to -1 on cancellation.  However, if we
+ * are also requested to handle confusion, things may get ugly.
+ *
+ * Modes are composed of the or-ing of these bit flags:
+ *   0x01 = Apply total Confusion
+ *   0x02 = Apply partial Confusion (75%)
+ *   0x04 = Allow the "here" direction ('5')
+ *   0x08 = ??? Handle stun like confused
+ *   0x10 = Allow use of Use-Target command ('t','0','5')
+ *   0x20 = Allow use of Set-Target command ('*')
+ *   0x40 = ???
+ *   0x80 = ???
  */
-int get_dir(cptr prompt, int *dir)
+int get_a_dir(cptr prompt, int *dir, int mode)
 {
     char        command;
-    int         save;
-    static char prev_dir;  /* Direction memory. -CJS- */
+    char	pbuf[80];
 
     /* Use global command_dir (if set) in counted commands. -CJS- */
     if (command_dir > 0) {
@@ -397,20 +524,7 @@ int get_dir(cptr prompt, int *dir)
 
 #ifdef TARGET
     /* Use "old target" if possible */
-    /* This targetting code stolen from Morgul -CFT */
-    /* Aggle.  Gotta be target mode and either (valid monster and line of sight*/
-    /* to monster) or (not valid monster and line of sight to position).  CDW */
-    /* Also, for monster targetting, monster must be lit!  Otherwise player can
-       "lock phasers" on an invis monster while a potion of see inv lasts,
-       and then continue to hit it when the see inv goes away.  Also,
-       targetting mode shouldn't help the player shoot a monster in a
-       dark room.  If he can't see it, he shouldn't be able to aim... -CFT */
-    else if ((target_mode)&&
-	(((target_mon<MAX_M_IDX)&& m_list[target_mon].ml &&
-	  (los(char_row,char_col,m_list[target_mon].fy,m_list[target_mon].fx))||
-	  ((target_mon>=MAX_M_IDX) &&
-	   (los(char_row,char_col,target_row,target_col)))))) {
-      /* It don't get no better than this */
+    else if (target_mode && (mode & 0x10) && target_okay()) {
 	*dir = 0;
     }
 #endif
@@ -421,14 +535,24 @@ int get_dir(cptr prompt, int *dir)
 	/* Start with a non-direction */
 	*dir = -1;
 
-    if (prompt == NULL) prompt = "Which direction?";
-
 	/* Ask until satisfied */    
 	while (1) {
 
+	    if (prompt) {
+		strcpy(pbuf, prompt);
+	    }
+	    else if (!(mode & 0x10) || !(target_mode)) {
+		sprintf(pbuf, "Direction (%sEscape to cancel)? ",
+			(mode & 0x20) ? "'*' to choose a target, " : "");
+	    }
+	    else {
+		sprintf(pbuf, "Direction (%s%sEscape to cancel)? ",
+			(mode & 0x10) ? "'5' for target, " : "", 
+			(mode & 0x20) ? "'*' to re-target, " : "");
+	    }
 
 	    /* Get a command (or Escape) */
-	    if (!get_com(prompt, &command)) command = ESCAPE;
+	    if (!get_com(pbuf, &command)) command = ESCAPE;
 
 	    /* Escape yields "cancel" */
 	    if (command == ESCAPE) return (FALSE);
@@ -446,7 +570,6 @@ int get_dir(cptr prompt, int *dir)
 		case '8': case 'K': case 'k': command = '8'; break;
 		case '9': case 'U': case 'u': command = '9'; break;
 
-#ifdef TARGET
 		/* Central "direction" often means "target" */
 		case '5': case '.': command = '5'; break;
 
@@ -455,7 +578,6 @@ int get_dir(cptr prompt, int *dir)
 
 		/* Re-target */
 		case '*': command = '*'; break;
-#endif
 
 		/* Unused -- Help */
 		case '?': command = '?'; break;
@@ -464,10 +586,29 @@ int get_dir(cptr prompt, int *dir)
 		default: command = ' '; break;
 	    }
 
+	    /* Hack -- Perhaps accept '5' as itself */
+	    if ((mode & 0x04) && (command == '5')) {
+		*dir = 5; break;
+	    }
+
 	    /* If not accepting '5' as itself, convert it */
 	    if (command == '5') command = '0';
 
-	    /* Always accept actual directions (command != '5') */
+	    /* Perhaps allow "use-target" */
+	    if ((mode & 0x10) && (command == '0')) {
+		if (target_okay()) {
+		    *dir = 0; break;
+		}
+	    }
+
+	    /* Perhaps allow "set-target" */
+	    if ((mode & 0x20) && (command == '*')) {
+		if (target_set() && target_okay()) {
+		    *dir = 0; break;
+		}
+	    }
+
+	    /* Always accept actual directions (command != '5') */	
 	    if (command >= '1' && command <= '9') {
 		*dir = command - '0'; break;
 	    }
@@ -481,6 +622,10 @@ int get_dir(cptr prompt, int *dir)
 	    bell();
 	}
     }
+
+    /* Confuse the direction */
+    confuse_dir(dir, mode);
+
     /* A "valid" direction was entered */    
     return (TRUE);
 }
@@ -489,21 +634,37 @@ int get_dir(cptr prompt, int *dir)
 
 
 
-int direction(int *dir)
+/*
+ * See "get_a_dir" above
+ */
+int get_dir(cptr prompt, int *dir)
 {
-    if (get_dir(NULL, dir)) {
-	if (p_ptr->confused > 0) {
-	    msg_print("You are confused.");
-	    do {
-		*dir = randint(9);
-	    } while (*dir == 5);
-	}
-	return 1;
-    }
-    return 0;
+    /* Allow use of "target" commands.  Forbid the "5" direction. */
+    if (get_a_dir(prompt, dir, 0x30)) return (TRUE);
+
+    /* XXX Mega-Hack -- allow commands to be careless */
+    free_turn_flag = TRUE;
+
+    /* Command aborted */
+    return FALSE;
 }
 
 
+/*
+ * Like get_dir(), but if "confused", pick randomly
+ */
+
+int get_dir_c(cptr prompt, int *dir)
+{
+    /* Allow "Target".  Forbid "5".  Handle "total" confusion */
+    if (get_a_dir(prompt, dir, 0x31)) return (TRUE);
+
+    /* Hack -- allow commands to be careless */
+    free_turn_flag = TRUE;
+
+    /* Command aborted */
+    return FALSE;
+}
 
 
 
@@ -575,9 +736,9 @@ void search(int y, int x, int chance)
     register inven_type   *i_ptr;
     bigvtype               tmp_str, tmp_str2;
 
-    if ((p_ptr->flag.blind > 0) || no_lite()) chance = chance / 10;
-    if (p_ptr->flag.confused > 0) chance = chance / 10;
-    if (p_ptr->flag.image > 0) chance = chance / 10;
+    if ((p_ptr->blind > 0) || no_lite()) chance = chance / 10;
+    if (p_ptr->confused > 0) chance = chance / 10;
+    if (p_ptr->image > 0) chance = chance / 10;
 
     /* Search the nearby grids, which are always in bounds */
     for (i = (y - 1); i <= (y + 1); i++) {
@@ -727,7 +888,7 @@ void carry(int y, int x, int pickup)
 static int cycle[] = {1, 2, 3, 6, 9, 8, 7, 4, 1, 2, 3, 6, 9, 8, 7, 4, 1};
 static int chome[] = {-1, 8, 9, 10, 7, -1, 11, 6, 5, 4};
 static int find_openarea, find_breakright, find_breakleft, find_prevdir;
-static int command_dir;/* Keep a record of which way we are going. */
+
 
 
 /*
@@ -1236,13 +1397,24 @@ void move_player(int dir, int do_pickup)
  */
 void find_step(void)
 {
+    int dir;
+
     /* Hack -- prevent infinite loops in find mode, will stop after moving 100 times */
     if (find_flag++ > 100) {
 	msg_print("You stop running to catch your breath.");
 	end_find();
     }
 
-     else move_player(command_dir, TRUE);
+    /* Take a step (pick up if necessary) */
+    else {
+
+	/* Take account of partial confusion */
+	dir = command_dir;
+	confuse_dir(&dir, 0x02);
+
+	/* Move the player, picking up as you go */
+	move_player(dir, TRUE);
+    }
 }
 
 

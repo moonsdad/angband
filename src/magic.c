@@ -654,10 +654,13 @@ void cast()
     }
 
     /* Get a spell book */
-    if (get_item(&item_val, "Use which spell-book?", i, j, 0)) {
+    if (!get_item(&item_val, "Use which Spell Book? ", i, j, 0)) return;
 
     /* Ask for a spell */
     result = cast_spell("Cast which spell?", item_val, &choice, &chance);
+
+    /* Cancelled */
+    if (!result) return;
 
     /* Unknown */    
     if (result < 0) {
@@ -669,9 +672,7 @@ void cast()
     if (p_ptr->stun > 50) chance += 25;
     else if (p_ptr->stun > 0) chance += 15;
 
-	if (result > 0) {
-	    s_ptr = &magic_spell[p_ptr->pclass - 1][choice];
-	    free_turn_flag = FALSE;
+    s_ptr = &magic_spell[p_ptr->pclass - 1][choice];
 
     /* Failed spell */
     if (randint(100) <= chance) {
@@ -689,13 +690,13 @@ void cast()
 	switch (choice + 1) {
 
 	  case 1:
-	    if (get_dir(NULL, &dir))
-			if (randint(100) < (chance-10))
-			    line_spell(GF_MISSILE, dir, char_row, char_col,
-				       damroll(3 + ((p_ptr->lev - 1) / 5), 4) );
-			else
-			    fire_bolt(GF_MISSILE, dir, char_row, char_col,
-				      damroll(3 + ((p_ptr->lev - 1) / 5), 4));
+	    if (!get_dir(NULL, &dir)) return;
+	    if (randint(100) < (chance-10))
+	        line_spell(GF_MISSILE, dir, char_row, char_col,
+	            damroll(3 + ((p_ptr->lev - 1) / 5), 4) );
+	    else
+	        fire_bolt(GF_MISSILE, dir, char_row, char_col,
+	            damroll(3 + ((p_ptr->lev - 1) / 5), 4));
 	    break;
 
 	  case 2:
@@ -1014,7 +1015,6 @@ void cast()
 	}
 
     /* End of spells.				     */
-	if (!free_turn_flag) {
 
 	/* A spell was cast */
 	if (choice < 32) {
@@ -1031,10 +1031,10 @@ void cast()
 		prt_experience();
 	    }
 	}
-	}
     }
 
-    if (!free_turn_flag) {
+    /* Take a turn */
+    free_turn_flag = FALSE;
 
     /* Use some mana */
     if (s_ptr->smana > p_ptr->cmana) {
@@ -1053,10 +1053,6 @@ void cast()
 
     /* Display current mana */
     prt_cmana();
-    
-	}
-	}
-	}
 }
 
 
@@ -1105,7 +1101,7 @@ void pray()
     }
 
     /* Choose a book */
-    if (get_item(&item_val, "Use which Holy Book?", i, j, 0)) {
+    if (!get_item(&item_val, "Use which Holy Book?", i, j, 0)) return;
 
     /* Choose a spell */
     result = cast_spell("Recite which prayer?", item_val, &choice, &chance);
@@ -1117,10 +1113,9 @@ void pray()
 	return;
     }
 
-	else if (result > 0) {
+
 
     s_ptr = &magic_spell[p_ptr->pclass - 1][choice];
-    free_turn_flag = FALSE;
 
     if (p_ptr->stun > 50) chance += 25;
     else if (p_ptr->stun > 0) chance += 15;
@@ -1161,8 +1156,7 @@ void pray()
 	    (void)lite_area(char_row, char_col,
 		            damroll(2, (p_ptr->lev / 2)), (p_ptr->lev / 10) + 1);
 	    break;
-/* FIXME: hammer? */
-    
+	    
 	  case 6:
 	    (void)detect_trap();
 	    break;
@@ -1176,7 +1170,7 @@ void pray()
 	    break;
 	    
 	  case 9:
-	    if (get_dir(NULL, &dir))
+	    if (!get_dir(NULL, &dir)) return;
 	    (void)fear_monster(dir, char_row, char_col, p_ptr->lev);
 	    break;
 	    
@@ -1458,12 +1452,12 @@ void pray()
 		int                 tmp[100];
 
 		/* Build a list of armor */
-		if (inventory[INVEN_BODY].tval != TV_NOTHING) tmp[k++] = INVEN_BODY;
-		if (inventory[INVEN_OUTER].tval != TV_NOTHING) tmp[k++] = INVEN_OUTER;
-		if (inventory[INVEN_ARM].tval != TV_NOTHING) tmp[k++] = INVEN_ARM;
-		if (inventory[INVEN_HEAD].tval != TV_NOTHING) tmp[k++] = INVEN_HEAD;
-		if (inventory[INVEN_HANDS].tval != TV_NOTHING) tmp[k++] = INVEN_HANDS;
-		if (inventory[INVEN_FEET].tval != TV_NOTHING) tmp[k++] = INVEN_FEET;
+		if (inventory[INVEN_BODY].tval)  tmp[k++] = INVEN_BODY;
+		if (inventory[INVEN_OUTER].tval) tmp[k++] = INVEN_OUTER;
+		if (inventory[INVEN_ARM].tval)   tmp[k++] = INVEN_ARM;
+		if (inventory[INVEN_HEAD].tval)  tmp[k++] = INVEN_HEAD;
+		if (inventory[INVEN_HANDS].tval) tmp[k++] = INVEN_HANDS;
+		if (inventory[INVEN_FEET].tval)  tmp[k++] = INVEN_FEET;
 
 		if (k > 0)
 		    l = tmp[randint(k) - 1];
@@ -1530,7 +1524,7 @@ void pray()
 		enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);
 		calc_bonuses();
 	    }
-		else {
+	    else {
 		msg_print("The Branding fails.");
 	    }
 	    break;
@@ -1572,7 +1566,6 @@ void pray()
 	}
 
 	/* End of prayers.				 */
-	if (!free_turn_flag) {
 	if (choice < 32) {
 	    if ((spell_worked & (1L << choice)) == 0) {
 		spell_worked |= (1L << choice);
@@ -1585,12 +1578,12 @@ void pray()
 		 spell_worked2 |= (1L << (choice - 32));
 		 p_ptr->exp += s_ptr->sexp << 2;
 		 prt_experience();
-			}
-		    }
-		}
 	    }
+	}
+    }
 
-    if (!free_turn_flag) {
+    /* Take a turn */
+    free_turn_flag = FALSE;
 
     /* Reduce mana */
     if (s_ptr->smana > p_ptr->cmana) {
@@ -1609,8 +1602,5 @@ void pray()
     
     /* Display current mana */
     prt_cmana();
-	    }
-	}
-    }
 }
 
