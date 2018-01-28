@@ -913,10 +913,10 @@ void quaff(void)
 /*
  * Read a scroll -RAK-
  */
-void read_scroll(void)
+void do_cmd_read_scroll(void)
 {
-    u32b                i;
-    int                   item_val, y, x;
+    u32b                flg;
+    int                   item_val, i1, i2;
     int			  j, k;
     int                   used_up, ident, l;
     int                   tmp[6];
@@ -945,18 +945,16 @@ void read_scroll(void)
 	return;
     }
 
-    if (!find_range(TV_SCROLL1, TV_SCROLL2, &j, &k)) {
+    if (!find_range(TV_SCROLL1, TV_SCROLL2, &i1, &i2)) {
 	msg_print("You are not carrying any scrolls!");
 	return;
     }
     
     /* Get a scroll */
-    if (get_item(&item_val, "Read which scroll?", j, k, 0)) {
+    if (!get_item(&item_val, "Read which scroll? ", i1, i2, 0)) return;
 
     /* Get the item */
     i_ptr = &inventory[item_val];
-
-	free_turn_flag = FALSE;
 
     /* Assume the scroll will get used up */
     used_up = TRUE;
@@ -965,12 +963,11 @@ void read_scroll(void)
     ident = FALSE;
 
     /* Apply the first set of scroll effects */
-    for (i = i_ptr->flags; i; ) {
+    for (flg = i_ptr->flags1; flg; ) {
 
 	/* Extract the next effect bit-flag */
-	    j = bit_pos(&i);
-	    if (i_ptr->tval == TV_SCROLL2)
-		j += 32;
+	j = bit_pos(&flg);
+	if (i_ptr->tval == TV_SCROLL2) j += 32;
 
 	/* Scrolls. */
 	switch (j+1) {
@@ -998,7 +995,7 @@ void read_scroll(void)
 	    i_ptr = &inventory[INVEN_WIELD];
 
 	    /* Enchant */
-	    if (i_ptr->tval != TV_NOTHING) {
+	    if (i_ptr->tval) {
 		objdes(tmp_str, i_ptr, FALSE);
 		(void) sprintf(out_val, "Your %s glows faintly! ", tmp_str);
 		msg_print(out_val);
@@ -1014,12 +1011,12 @@ void read_scroll(void)
 	    /* Hack -- make a "list" of "armor" indexes, size is "k" */
 	    k = 0;
 		l = 0;
-	    if (inventory[INVEN_BODY].tval != TV_NOTHING)  tmp[k++] = INVEN_BODY;
-	    if (inventory[INVEN_ARM].tval != TV_NOTHING)   tmp[k++] = INVEN_ARM;
-	    if (inventory[INVEN_OUTER].tval != TV_NOTHING) tmp[k++] = INVEN_OUTER;
-	    if (inventory[INVEN_HANDS].tval != TV_NOTHING) tmp[k++] = INVEN_HANDS;
-	    if (inventory[INVEN_HEAD].tval != TV_NOTHING)  tmp[k++] = INVEN_HEAD;
-	    if (inventory[INVEN_FEET].tval != TV_NOTHING)  tmp[k++] = INVEN_FEET;
+	    if (inventory[INVEN_BODY].tval)  tmp[k++] = INVEN_BODY;
+	    if (inventory[INVEN_ARM].tval)   tmp[k++] = INVEN_ARM;
+	    if (inventory[INVEN_OUTER].tval) tmp[k++] = INVEN_OUTER;
+	    if (inventory[INVEN_HANDS].tval) tmp[k++] = INVEN_HANDS;
+	    if (inventory[INVEN_HEAD].tval)  tmp[k++] = INVEN_HEAD;
+	    if (inventory[INVEN_FEET].tval)  tmp[k++] = INVEN_FEET;
 
 		/* Pick a random item */
 		if (k > 0)
@@ -1039,17 +1036,17 @@ void read_scroll(void)
 		if (l > 0) {
 		    i_ptr = &inventory[l];
 
-		    /* Visual effect (known) */
-		    objdes(tmp_str, i_ptr, FALSE);
-		    (void) sprintf(out_val, "Your %s glows faintly! ", tmp_str);
-		    msg_print(out_val);
+	    /* Visual effect (known) */
+	    objdes(tmp_str, i_ptr, FALSE);
+	    (void) sprintf(out_val, "Your %s glows faintly! ", tmp_str);
+	    msg_print(out_val);
+	    ident = TRUE;
 
-		    /* Attempt to enchant */
-		    if (!enchant(i_ptr, 1, ENCH_TOAC)) {
-			msg_print("The enchantment fails. ");
-		    }
-		    ident = TRUE;
-		}
+	    /* Attempt to enchant */
+	    if (!enchant(i_ptr, 1, ENCH_TOAC)) {
+		msg_print("The enchantment fails. ");
+	    }
+	    }
 
 	    break;
 
@@ -1446,6 +1443,10 @@ void read_scroll(void)
 	}
     }
 
+
+    /* The turn is not free */
+    free_turn_flag = FALSE;
+
     /* An identification was made */
 	i_ptr = &inventory[item_val];
     if (ident) {
@@ -1466,7 +1467,6 @@ void read_scroll(void)
     /* Destroy the scroll */
     desc_remain(item_val);
     inven_destroy(item_val);
-    }
 }
 
 

@@ -1253,10 +1253,18 @@ void find_step(void)
  * The player is not allowed to run with a full light pattern.
  * This reduces the number of things that can cancel running.
  */
-void find_init(int dir)
+void find_init()
 {
-    int          row, col, deepleft, deepright;
+    int          dir, row, col, deepleft, deepright;
     register int i, shortleft, shortright;
+
+
+    /* Start running */
+    find_flag = 1;
+
+
+    /* Extract the desired direction */
+    dir = command_dir;
 
     darken_player(char_row, char_col);
     old_lite = cur_lite;
@@ -1317,24 +1325,6 @@ void find_init(int dir)
 	    }
 	}
     }
-
-/*
- * We must erase the player symbol '@' here, because sub3_move_light() does
- * not erase the previous location of the player when in find mode and when
- * find_prself is FALSE.  The player symbol is not draw at all in this case
- * while moving, so the only problem is on the first turn of find mode, when
- * the initial position of the character must be erased. Hence we must do the
- * erasure here.  
- */
-    if (!light_flag && !find_prself)
-#ifdef TC_COLOR
-	lite_spot(char_row, char_col);
-#else
-	print(loc_symbol(char_row, char_col), char_row, char_col);
-#endif
-
-    move_player(dir, TRUE);
-    if (find_flag == FALSE) command_rep = 0;
 }
 
 

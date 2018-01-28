@@ -527,6 +527,124 @@ void do_cmd_look()
 
 
 
+
+/*
+ * Support code for the "Locate ourself on the Map" command
+ */
+void do_cmd_view_map()
+{
+    /* Free move */
+    free_turn_flag = TRUE;
+
+    /* Are we blind? */
+    if ((p_ptr->blind > 0) || no_lite()) {
+	msg_print("You can't see your map.");
+	return;
+    }
+
+    /* Look at the map */
+    screen_map();
+
+    /* We should probably get a key, but screen_map does it */
+}
+
+
+/*
+ * Support code for the "Locate ourself on the Map" command
+ */
+
+void do_cmd_locate()
+{
+
+    int cy, cx, p_y, p_x;
+    int temp;
+
+    /* Free move */
+    free_turn_flag = TRUE;
+
+    /* Are we blind? */
+    if ((p_ptr->blind > 0) || no_lite()) {
+	msg_print("You can't see your map.");
+	return;
+    }
+
+#ifdef TARGET
+/* If in target_mode, player will not be given a chance to pick a direction.
+* So we save it, force it off, and then ask for the direction -CFT */
+    temp = target_mode;
+    target_mode = FALSE;
+#endif
+
+    /* Save character location */
+    y = char_row;
+    x = char_col;
+
+    if (get_panel(y, x, TRUE)) prt_map();
+
+    /* Extract (original) panel info */
+    cy = panel_row;
+    cx = panel_col;
+
+
+    /* Show panels until done */
+    while (1) {
+
+	p_y = panel_row;
+	p_x = panel_col;
+
+	/* Describe the location */
+	if ((p_y == cy) && (p_x == cx)) {
+	    tmp_str[0] = '\0';
+	}
+	else {
+	    (void)sprintf(tmp_str, "%s%s of",
+		(p_y < cy) ? " North" : (p_y > cy) ? " South" : "",
+		(p_x < cx) ? " West" : (p_x > cx) ? " East" : "");
+	}
+
+
+	/* Prepare to ask which way to look */
+	(void)sprintf(out_val,
+	    "Map sector [%d,%d], which is%s your sector. Look which direction?",
+	    p_y, p_x, tmp_str);
+
+	/* Get a direction (or Escape) */
+	if (!get_dir(out_val, &dir_val)) break;
+
+	/* -CJS- Should really use the move function, but what the hell. This is nicer,
+	 * as it moves exactly to the same place in another section. The direction
+	 * calculation is not intuitive. Sorry. */
+	while (1) {
+
+	    /* Apply the direction */
+	    x += ((dir_val - 1) % 3 - 1) * SCREEN_WIDTH / 2;
+	    y -= ((dir_val - 1) / 3 - 1) * SCREEN_HEIGHT / 2;
+
+	    /* No motion off map */
+	    if (x < 0 || y < 0 || x >= cur_width || y >= cur_width) {
+		msg_print("You've gone past the end of your map.");
+		x -= ((dir_val - 1) % 3 - 1) * SCREEN_WIDTH / 2;
+		y += ((dir_val - 1) / 3 - 1) * SCREEN_HEIGHT / 2;
+		break;
+	    }
+
+	    if (get_panel(y, x, TRUE)) {
+		prt_map();
+		break;
+	    }
+	}
+    }
+
+
+    /* Move to a new panel - but only if really necessary. */
+    if (get_panel(char_row, char_col, FALSE))
+	prt_map();
+#ifdef TARGET
+    target_mode = temp; /* restore target mode... */
+#endif
+}
+
+
 /*
  * Allocates objects upon opening a chest    -BEN-
  *
@@ -949,19 +1067,30 @@ int twall(int y, int x, int t1, int t2)
  * Tunnels through rubble and walls			-RAK-
  * Must take into account: secret doors,  special tools
  */
-void do_cmd_tunnel(int dir)
+void do_cmd_tunnel()
 {
     register int        i, tabil;
     register cave_type *c_ptr;
     register inven_type *i_ptr;
-    int                 y, x;
+    int                 y, x, dir;
     monster_type       *m_ptr;
     vtype               out_val, m_name;
 
     /* Assume we cannot continue */
     int more = FALSE;
 
-    if ((p_ptr->confused > 0) && /* Confused?	     */
+    /* Get a direction to tunnel, or Abort */
+    if (!get_a_dir (NULL, &command_dir, 0)) {
+
+	/* Abort the tunnel, be graceful */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+
+	/* Take partial confusion into account */
+	dir = command_dir;
+	if ((p_ptr->confused > 0) && /* Confused?	     */
 	(randint(4) > 1))	   /* 75% random movement   */
 	dir = randint(9);
 
@@ -974,9 +1103,9 @@ void do_cmd_tunnel(int dir)
 	/* Apply the current weapon type */
 	i_ptr = &inventory[INVEN_WIELD];
 
-/* Don't let the player tunnel somewhere illegal, this is necessary to
- * prevent the player from getting a free attack by trying to tunnel
- * somewhere where it has no effect.  */
+	/* Don't let the player tunnel somewhere illegal, this is necessary to
+	 * prevent the player from getting a free attack by trying to tunnel
+	 * somewhere where it has no effect.  */
     if (c_ptr->fval < MIN_CAVE_WALL
 	&& (c_ptr->i_idx == 0 || (i_list[c_ptr->i_idx].tval != TV_RUBBLE
 			  && i_list[c_ptr->i_idx].tval != TV_SECRET_DOOR))) {
@@ -1319,7 +1448,7 @@ void do_cmd_disarm()
  * A closed door can be opened - harder if locked. Any door might be 
  * bashed open (and thereby broken). Bashing a door is (potentially)
  * faster! You move into the door way. To open a stuck door, it must 
- * be bashed. A closed door can be jammed.
+ * be bashed. A closed door can be jammed (see do_cmd_spike()).
  * (which makes it stuck if previously locked). 
  *
  * Creatures can also open doors. A creature with open door ability will
@@ -1813,6 +1942,88 @@ void do_cmd_fire()
 }
 
 
+/*
+ * Support code for the "Walk" and "Jump" commands
+ */
+void do_cmd_walk(int pickup)
+{
+    int dir;
+
+    /* Get the initial direction (or Abort) */
+    if (!get_a_dir (NULL, &command_dir, 0)) {
+	/* Graceful abort */
+	free_turn_flag = TRUE;
+	command_rep = 0;
+    }
+
+    /* Attempt to walk */
+    else {
+
+	dir = command_dir;
+
+	/* Actually move the character */
+	move_player(dir, pickup);
+    }
+}
+
+
+/*
+ * Stay still (but check for treasure, traps, re-light, etc)
+ */
+
+void do_cmd_stay(int pickup)
+{
+    /* Actually "move" the character (overkill, but it works) */
+    move_player(5, pickup);
+}
+
+
+
+/*
+ * Do the first (or next) step of the run (given max distance)
+ * If distance is non positive, assume max distance of 1000.
+ *
+ * We must erase the player symbol '@' here, because sub3_move_light() does
+ * not erase the previous location of the player when in find mode and when
+ * find_prself is FALSE.  The player symbol is not draw at all in this case
+ * while moving, so the only problem is on the first turn of find mode, when
+ * the initial position of the character must be erased. Hence we must do the
+ * erasure here.
+ */
+
+void do_cmd_run()
+{
+    /* Get the initial direction (or Abort) */
+    if (!get_a_dir (NULL, &command_dir, 0)) {
+	/* Graceful abort */
+	free_turn_flag = TRUE;
+    }
+
+    else {
+
+	/* Prepare to Run */
+	find_init();
+
+	/* Save the max run-distance (default to 1000 steps) */
+	if (command_arg <= 0) command_arg = 1000;
+
+	/* Take the first step */
+	find_step();
+    }
+}
+
+
+/*
+ * Simple command to "search" for one turn
+ */
+void do_cmd_search(void)
+{
+    /* Use the current location, and ability */
+    search(char_row, char_col, p_ptr->srh);
+}
+
+
+
 
 /*
  * Resting allows a player to safely restore his hp	-RAK-	 
@@ -1946,30 +2157,45 @@ void add_inscribe(inven_type *i_ptr, int type)
 /*
  * Add a comment to an object description.		-CJS- 
  */
-void scribe_object(void)
+void do_cmd_inscribe(void)
 {
     int   item_val, j;
+    inven_type *i_ptr;
     vtype out_val, tmp_str;
 
-    if (inven_ctr > 0 || equip_ctr > 0) {
-	if (get_item(&item_val, "Which one? ", 0, INVEN_TOTAL, 0)) {
-	    objdes(tmp_str, &inventory[item_val], TRUE);
-	    (void)sprintf(out_val, "Inscribing %s.", tmp_str);
-	    msg_print(out_val);
-	    if (inventory[item_val].inscrip[0] != '\0')
-		(void)sprintf(out_val, "Replace \"%s\" with the inscription: ",
-			      inventory[item_val].inscrip);
-	    else
-		(void)strcpy(out_val, "Inscription: ");
-	    j = 78 - strlen(tmp_str);
-	    if (j > 12)
-		j = 12;
-	    prt(out_val, 0, 0);
-	    if (get_string(out_val, 0, strlen(out_val), j))
-		inscribe(&inventory[item_val], out_val);
-	}
-    } else
+
+    /* Free move */
+    free_turn_flag = TRUE; 
+
+    if (!inven_ctr && !equip_ctr) {
 	msg_print("You are not carrying anything to inscribe.");
+	return;
+    }
+    
+    /* Require a choice */
+    if (!get_item(&item_val, "Which one? ", 0, INVEN_TOTAL, 0)) return;
+
+    /* Get the item */
+    i_ptr = &inventory[item_val];
+
+    /* Describe the activity */
+    objdes(tmp_str, i_ptr, TRUE);
+    (void)sprintf(out_val, "Inscribing %s.", tmp_str);
+    msg_print(out_val);
+
+    /* Prompt for an inscription */
+    if (i_ptr->inscrip[0]) {
+	(void)sprintf(out_val, "Replace \"%s\" with the inscription: ",
+		      i_ptr->inscrip);
+	prt(out_val, 0, 0);
+    }
+    else {
+	prt("Inscription: ", 0, 0);
+    }
+
+    j = 78 - strlen(tmp_str);
+    if (j > 12) j = 12;
+    if (get_string(out_val, 0, strlen(out_val), j)) inscribe(i_ptr, out_val);
 }
 
 

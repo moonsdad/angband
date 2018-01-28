@@ -501,7 +501,7 @@ int store_bought_p(inven_type *);
 void sample(struct inven_type *);
 void identify(int *);
 void unmagic_name(inven_type *);
-void scribe_object(void);
+void do_cmd_inscribe(void);
 void add_inscribe(inven_type *, int);
 void inscribe(inven_type *, cptr);
 void objdes(char *, struct inven_type *, int);
@@ -516,7 +516,6 @@ void request_command(void);
 
 /* dungeon.c */
 void dungeon(void);
-int special_check(inven_type *);
 int is_quest(int);
 void rerate(void);
 
@@ -550,8 +549,6 @@ void lite_spot(int, int);
 
 void screen_map(void);
 
-/* help.c */
-void ident_char(void);
 
 /* io.c */
 
@@ -781,16 +778,24 @@ void fix2_delete_monster(int);
 /* moria3.c */
 int twall(int, int, int, int);
 void do_cmd_look(void);
+void do_cmd_locate(void);
+void do_cmd_view_map(void);
 void do_cmd_rest(void); /* SIC RMHV */
+void do_cmd_view_map(void); /* SIC RMHV */
 void do_cmd_open(void);
 void do_cmd_close(void);
-void do_cmd_tunnel(int);
+void do_cmd_tunnel(void);
 void do_cmd_disarm(void);
 void do_cmd_bash(void);
 void do_cmd_spike(void);
 void do_cmd_fire(void);
+void do_cmd_walk(int);
+void do_cmd_stay(int);
+void do_cmd_run(void);
+void do_cmd_search(void);
 void do_cmd_rest(void);
 void do_cmd_feeling(void);
+void do_cmd_inscribe(void);
 void artifact_check(void);
 void artifact_check_no_file(void);
 void do_cmd_check_uniques(void);
@@ -821,6 +826,7 @@ void pray(void);
 /* recall.c */
 int roff_recall(int);
 int bool_roff_recall(int);
+void do_cmd_query_symbol(void);
 
 /* rnd.c is unused now -CWS */
 /* random.c */
@@ -839,7 +845,7 @@ int _save_player(char *);
 int load_player(int *);
 
 /* scrolls.c */
-void read_scroll(void);
+void do_cmd_read_scroll(void);
 
 /* sets.c */
 int set_room(int);

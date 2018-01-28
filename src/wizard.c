@@ -1504,3 +1504,191 @@ void unique_screen_full(int *i, int j)
 }
 
 
+
+/*
+ * Ask for and parse a "wizard command"
+ * We return "FALSE" on unknown commands.
+ */
+int do_wiz_command(void)
+{
+    char		cmd;
+    int			y, x;
+
+
+    /* All wizard commands are "free" */
+    free_turn_flag = TRUE;
+
+    /* Get a "wizard command" */
+    if (!get_com("Wizard Command: ", &cmd)) cmd = ESCAPE;
+
+    /* Analyze the command */
+    switch (cmd) {
+
+      /* Wizard Help */
+      case '\\':
+	helpfile(ANGBAND_W_HELP);
+
+	/* Cure all maladies */
+      case CTRL('A'):
+	(void)remove_all_curse();
+	(void)cure_blindness();
+	(void)cure_confusion();
+	(void)cure_poison();
+	(void)remove_fear();
+	(void)res_stat(A_STR);
+	(void)res_stat(A_INT);
+	(void)res_stat(A_WIS);
+	(void)res_stat(A_CON);
+	(void)res_stat(A_DEX);
+	(void)res_stat(A_CHR);
+	(void)restore_level();
+	(void)hp_player(2000);
+	p_ptr->food = PLAYER_FOOD_MAX;
+
+	if (p_ptr->slow > 1) p_ptr->slow = 1;
+	if (p_ptr->image > 1) p_ptr->image = 1;
+	if (p_ptr->cut > 1) p_ptr->cut = 1;
+	if (p_ptr->stun > 1) p_ptr->stun = 1;
+	break;
+
+	/* ^D = up/down */
+      case CTRL('D'):
+	if (command_rep > 0) {
+	    if (command_rep > 99 i = 0;
+	    else i = command_rep;
+	    command_rep = 0;
+	} else {
+	    prt("Go to which level (0-10000) ? ", 0, 0);
+	    i = (-1);
+	    if (get_string(tmp_str, 0, 27, 10)) i = atoi(tmp_str);
+	    if (i > 10000) i = 10000;
+	}
+	if (i > -1) {
+	    dun_level = i;
+	    if (dun_level > 10000) dun_level = 10000;
+	    new_level_flag = TRUE;
+	} else erase_line(MSG_LINE, 0);
+	break;
+
+	/* ^E = wizchar */
+      case CTRL('E'):
+	change_character();
+	erase_line(MSG_LINE, 0); /* from um55 -CFT */
+	break;
+
+	/* ^G = treasure */
+      case CTRL('G'):
+	if (command_rep > 0) {
+	    i = command_rep;
+	    command_rep = 0;
+	} else i = 1;
+	random_object(char_row, char_col, i);
+	prt_map();
+	break;
+
+	/* ^I = identify */
+      case CTRL('I'):
+	(void)ident_spell();
+	break;
+
+	/* ^O = objects */
+      case CTRL('O'):
+	print_objects();
+	break;
+
+	/* ^T = teleport */
+      case CTRL('T'):
+	teleport(100);
+	break;
+
+	/* ^V special treasure */
+      case CTRL('V'):
+	if (command_rep > 0) {
+	    i = command_rep;
+	    command_rep = 0;
+	} else i = 1;
+	special_random_object(char_row, char_col, i);
+	prt_map();
+	break;
+
+	/* ^Z = genocide */
+      case CTRL('Z'):
+	(void)mass_genocide(FALSE);
+	break;
+
+      case ':':
+	map_area();
+	break;
+
+      case '~':
+	artifact_check_no_file();
+	break;
+
+      case '|':
+	do_cmd_check_uniques();
+	break;
+
+      case '@':
+	wizard_create();
+	break;
+
+	   /* $ = wiz light */
+      case '$':
+	wiz_lite(TRUE);
+	break;
+
+	   /* self-knowledge */
+      case '%':
+	self_knowledge();
+	break;
+
+	   /* & = summon  */
+      case '&':
+	y = char_row;
+	x = char_col;
+	(void)summon_monster(&y, &x, TRUE);
+	update_monsters();
+	break;
+
+	/* '*' = identify all up to a level */
+      case '*':	
+	prt("Identify objects upto which level (0-200) ? ", 0, 0);
+	i = (-1);
+	if (get_string(tmp_str, 0, 47, 10)) i = atoi(tmp_str);
+	if (i > 200) i = 200;
+	if (i > -1) {
+	    int                 temp;
+	    inven_type          inv;
+
+	    for (temp = 0; temp < MAX_DUNGEON_OBJ; temp++) {
+		if (k_list[temp].level <= i) {
+		    invcopy(&inv, temp);
+		    known1(&inv);
+		}
+	    }
+	}
+	erase_line(MSG_LINE, 0);
+	break;
+
+      case '+':
+	if (command_rep > 0) {
+	    p_ptr->exp = command_rep;
+	    command_rep = 0;
+	} else if (p_ptr->exp == 0)
+	    p_ptr->exp = 1;
+	else
+	    p_ptr->exp = p_ptr->exp * 2;
+	prt_experience();
+	break;
+
+	default:
+	    msg_print("That is not a valid wizard command.");
+	    return (FALSE);
+	    break;
+    }
+
+    /* Success */
+    return (TRUE);
+}
+
+

@@ -1308,3 +1308,20 @@ int roff_recall(int r_idx)
 }
 
 
+/*
+ * Identify a character, allow recall of monnsters
+ * XXX Original command somehow lost RMHV
+ */
+void do_cmd_query_symbol(void)
+{
+
+    /* The turn is free */
+    free_turn_flag = TRUE;
+    /* Get a character, or abort */
+
+    /* Find that character info, and describe it */
+
+    /* Allow access to monster memory. */
+
+}
+
