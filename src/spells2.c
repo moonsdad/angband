@@ -2463,18 +2463,18 @@ int recharge(int num)
 	res = TRUE;
 	if (i_ptr->tval == TV_ROD) {
 	    /* now allow players to speed up recharge time of rods -CFT */
-	    u16b              t_o = i_ptr->timeout, t;
+	    u16b              t_o = i_ptr->pval, t;
 
 	    if (randint((100 - i_ptr->level + num) / 5) == 1) {	/* not today... */
 		msg_print("The recharge backfires, and drains the rod further!");
 		if (t_o < 32000)   /* don't overflow... */
-		    i_ptr->timeout = (t_o + 100) * 2;
+		    i_ptr->pval = (t_o + 100) * 2;
 	    } else {
 		t = (u16b) (num * damroll(2, 4));	/* rechange amount */
 		if (t_o < t)
-		    i_ptr->timeout = 0;
+		    i_ptr->pval = 0;
 		else
-		    i_ptr->timeout = t_o - t;
+		    i_ptr->pval = t_o - t;
 	    }
 	}
 	 /* if recharge rod... */ 

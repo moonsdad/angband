@@ -6,6 +6,7 @@ Addition of another flag set for items.
 Reorganization of the flags for items.
 Made artifacts MUCH more resistant to "death by throwing" :-)
 Made "store cost" a property of objects
+Used "pval" (not "timeout") for rods, which are NOT activated.
 
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.

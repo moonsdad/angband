@@ -1096,10 +1096,10 @@ void dungeon(void)
 	    if (i_ptr->tval == TV_ROD && (i_ptr->flags3 & TR3_ACTIVATE)) {
 
 		/* Charge it a little */
-		if (i_ptr->timeout > 0) {
+		if (i_ptr->pval > 0) {
 
 		    /* Charge it */
-		    i_ptr->timeout--;
+		    i_ptr->pval--;
 		}
 	    }
 	}
