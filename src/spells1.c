@@ -6,6 +6,215 @@
 
 
 
+
+
+
+int set_acid_affect(inven_type *e)		   /* changed -CFT */
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_BOLT:
+      case TV_ARROW:
+      case TV_BOW:
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_BOOTS:
+      case TV_GLOVES:
+      case TV_CLOAK:
+      case TV_SOFT_ARMOR:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_MISC:
+      case TV_CHEST:
+	return (TRUE);
+    }
+    return (FALSE);
+}
+
+
+
+int set_corrodes(inven_type *e)			   /* changed -CFT */
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_SWORD:
+      case TV_HELM:
+      case TV_SHIELD:
+      case TV_HARD_ARMOR:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_WAND:
+	return (TRUE);
+    }
+    return (FALSE);
+}
+
+
+
+
+
+int set_flammable(inven_type *e)		   /* changed -CFT */
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_ARROW:
+      case TV_BOW:
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_BOOTS:
+      case TV_GLOVES:
+      case TV_CLOAK:
+      case TV_SOFT_ARMOR:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_FIRE)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_FIRE))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_STAFF:
+      case TV_SCROLL1:
+      case TV_SCROLL2:
+      case TV_FLASK:
+	return (TRUE);
+      case TV_LITE:
+	if (e->sval >= 192)	   /* only torches... -CFT */
+	    return (TRUE);
+	else
+	    return (FALSE);
+    }
+    return (FALSE);
+}
+
+
+
+
+
+
+
+
+
+/*
+ * Melt something
+ */
+int set_acid_destroy(inven_type *e)		   /* changed -CFT */
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_ARROW:
+      case TV_BOW:
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_BOOTS:
+      case TV_GLOVES:
+      case TV_CLOAK:
+      case TV_HELM:
+      case TV_SHIELD:
+      case TV_HARD_ARMOR:
+      case TV_SOFT_ARMOR:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_ACID)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ACID))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_SCROLL1:
+      case TV_SCROLL2:
+      case TV_FOOD:
+      case TV_OPEN_DOOR:
+      case TV_CLOSED_DOOR:
+      case TV_STAFF:
+	return (TRUE);
+    }
+    return (FALSE);
+}
+
+/*
+ * Electrical damage
+ */
+int set_lightning_destroy(inven_type *e)	   /* changed -CFT */
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_RING:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_ELEC)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_ELEC))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_WAND:
+	return (TRUE);
+    }
+    return (FALSE);
+}
+
+
+/*
+ * Burn something
+ */
+int set_fire_destroy(e)		   /* changed -CFT */
+inven_type *e;
+{
+    int element = e->tval;
+
+    switch (element) {
+      case TV_ARROW:
+      case TV_BOW:
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_BOOTS:
+      case TV_GLOVES:
+      case TV_CLOAK:
+      case TV_SOFT_ARMOR:
+	if ((e->flags2 & TR_ARTIFACT)	/* shouldn't kill artifacts -CFT */
+	    ||(e->flags & TR2_RES_FIRE)	/* can't check outside, because flags */
+	    ||(e->flags2 & TR2_IM_FIRE))	/* used differently in potions/etc */
+	    return (FALSE);
+	return (TRUE);
+      case TV_STAFF:
+      case TV_SCROLL1:
+      case TV_SCROLL2:
+      case TV_POTION1:
+      case TV_POTION2:
+      case TV_FLASK:
+      case TV_FOOD:
+      case TV_OPEN_DOOR:
+      case TV_CLOSED_DOOR:
+	return (TRUE);
+      case TV_LITE:
+	if (e->sval >= 192)	   /* only torches... -CFT */
+	    return (TRUE);
+	else
+	    return (FALSE);
+    }
+    return (FALSE);
+}
+
+
+/*
+ * Freeze things
+ */
+int set_frost_destroy(inven_type *e)		   /* changed -CFT */
+{
+    int element = e->tval;
+
+    if ((element == TV_POTION1) || (element == TV_POTION2)
+	|| (element == TV_FLASK))
+	return (TRUE);
+    return (FALSE);
+}
+
+
+
+
 /* This seems like a pretty standard "typedef" */
 /* For some reason, it was not being used on Unix */
 typedef int (*inven_func)(inven_type *);
