@@ -95,7 +95,7 @@ int unique_armour(inven_type *t_ptr)
 	else
 	    good_item_flag = TRUE;
 	t_ptr->flags1 |= (TR1_DEX);
-	t_ptr->flags2 |= (TR2_FREE_ACT | TR_SUST_STAT | TR2_RES_ACID | TR_ARTIFACT | TR2_RES_NETHER | TR2_RES_CHAOS);
+	t_ptr->flags2 |= (TR2_FREE_ACT | TR2_RES_ACID | TR_ARTIFACT | TR2_RES_NETHER | TR2_RES_CHAOS); //XXX TR_SUST_STAT removed RMHV
 	t_ptr->flags3 |= (TR3_ACTIVATE);
 	t_ptr->name2 = ART_DAL;
 	t_ptr->pval = 5;
@@ -166,8 +166,7 @@ int unique_armour(inven_type *t_ptr)
 	    good_item_flag = TRUE;
 	if (wizard || peek)
 	    msg_print("Anarion");
-	t_ptr->flags2 |= (TR2_RES_ACID | TR2_RES_FIRE | TR2_RES_COLD | TR2_RES_LITE |
-			 TR_SUST_STAT);
+	t_ptr->flags2 |= (TR2_RES_ACID | TR2_RES_FIRE | TR2_RES_COLD | TR2_RES_LITE ); //XXX TR_SUST_STAT removed RMHV
 	t_ptr->flags2 |= (TR_ARTIFACT);
 	t_ptr->name2 = ART_ANARION;
 	t_ptr->pval = 10;
@@ -223,7 +222,7 @@ int unique_armour(inven_type *t_ptr)
 		msg_print("Cammithrim");
 	    else
 		good_item_flag = TRUE;
-	    t_ptr->flags |= (TR_SUST_STAT | TR2_FREE_ACT);
+	    t_ptr->flags |= (TR2_FREE_ACT); //XXX TR_SUST_STAT removed RMHV
 	    t_ptr->flags2 |= (TR3_LITE | TR2_RES_LITE | TR_ARTIFACT);
 	    t_ptr->flags3 |= (TR3_ACTIVATE);
 	    t_ptr->name2 = ART_CAMMITHRIM;

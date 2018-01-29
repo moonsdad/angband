@@ -524,7 +524,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD | 
 				      TR2_RES_ACID | TR2_RES_FIRE |
 				      TR2_HOLD_LIFE |
-				      TR_SUST_STAT);
+				      TR2_SUST_STR | TR2_SUST_DEX |
+				      TR2_SUST_CON | TR2_SUST_INT |
+				      TR2_SUST_WIS | TR2_SUST_CHR);
 		    i_ptr->flags3 |= (TR3_IGNORE_FIRE | TR3_IGNORE_COLD |
 				      TR3_IGNORE_ELEC | TR3_IGNORE_ACID);
 		    i_ptr->ident |= ID_NOSHOW_P1;
@@ -861,6 +863,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 
 		      if (!((randint(2) == 1) && !not_unique && unique_armour(i_ptr))) {
 			i_ptr->flags1 |= TR1_INT;
+			i_ptr->flags2 |= TR2_SUST_INT;
 			i_ptr->pval = randint(2);	/* +N INT */
 			i_ptr->cost += i_ptr->pval * 500;
 			i_ptr->name2 = EGO_INTELLIGENCE;
@@ -872,6 +875,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      else if (tmp < 6) {
 			if (!((randint(2) == 1) && !not_unique && unique_armour(i_ptr))) {
 			i_ptr->flags1 |= TR1_WIS;
+			i_ptr->flags2 |= TR2_SUST_WIS;
 			i_ptr->pval = randint(2);	/* +N Wis */
 			i_ptr->cost += i_ptr->pval * 500;
 			i_ptr->name2 = EGO_WISDOM;
@@ -933,7 +937,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			if (!(((randint(2) == 1) || (good == 666)) &&
 			      !not_unique && unique_armour(i_ptr))) {
 			i_ptr->flags1 |= (TR1_STR | TR1_DEX | TR1_CON);
-			i_ptr->flags2 |= (TR2_FREE_ACT);
+			i_ptr->flags2 |= (TR2_FREE_ACT | TR2_SUST_STR |
+					  TR2_SUST_DEX | TR2_SUST_CON);
 			i_ptr->pval = randint(3);	/* +N STR/DEX/CON */
 			i_ptr->cost += 1000 + i_ptr->pval * 500;
 			i_ptr->name2 = EGO_MIGHT;
@@ -944,6 +949,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 
 		      case 2:
 			i_ptr->flags1 |= (TR1_CHR | TR1_WIS);
+			i_ptr->flags2 |= (TR2_SUST_CHR | TR2_SUST_WIS);
 			i_ptr->pval = randint(3);	/* +N WIS/CHR */
 			i_ptr->cost += 1000 + i_ptr->pval * 500;
 			i_ptr->name2 = EGO_LORDLINESS;
@@ -954,7 +960,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		      case 3:
 			i_ptr->flags1 |= (TR1_INT);
 			i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD |
-					  TR2_RES_ACID | TR2_RES_FIRE);
+					  TR2_RES_ACID | TR2_RES_FIRE |
+					  TR2_SUST_INT);
 			i_ptr->flags3 |= (TR3_IGNORE_ELEC | TR3_IGNORE_COLD |
 					  TR3_IGNORE_ACID | TR3_IGNORE_FIRE);
 			i_ptr->pval = randint(3);	/* +N INT */
@@ -966,6 +973,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 
 		      case 4:
 			i_ptr->flags1 |= TR1_CHR;
+			i_ptr->flags2 |= TR2_SUST_CHR;
 			i_ptr->pval = randint(4);	/* +N CHR */
 			i_ptr->cost += 750;
 			i_ptr->name2 = EGO_BEAUTY;
@@ -1306,9 +1314,13 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->todam += 5;
 		    i_ptr->toac += randint(4);
 
-		    /* Hack --the value in pval is used for stat increase */
-		    /* pval is also used for sustain stat */
-		    i_ptr->flags2 |= TR_SUST_STAT
+		    /* Obsolete Hack -- Pick "Sustain" based on "Pval" */
+		    switch (i_ptr->pval) {
+			case 1: i_ptr->flags2 |= (TR2_SUST_STR); break;
+			case 2: i_ptr->flags2 |= (TR2_SUST_INT); break;
+			case 3: i_ptr->flags2 |= (TR2_SUST_WIS); break;
+			case 4: i_ptr->flags2 |= (TR2_SUST_DEX); break;
+		    }
 
 		    i_ptr->cost += i_ptr->pval * 500;
 		    i_ptr->cost += 10000L;

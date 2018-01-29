@@ -9,6 +9,8 @@ Removal of the "Resist Acid" properties of various items.
 Made artifacts MUCH more resistant to "death by throwing" :-)
 Made "store cost" a property of objects
 Used "pval" (not "timeout") for rods, which are NOT activated.
+Made rings/amulets of Strength/etc also do "Sustain Strength" etc.
+Realized that the preceding change was probably a mistake.
 
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.
@@ -26,6 +28,7 @@ Incorporated the "color" code from MacAngband 2.6.1
 Cleaned up the "screen layout update" code.
 Cleaned up the header files (a lot).
 Separated out some generic "non-angband" files (like random.c).
+Added flags SUST_STR, SUST_INT, etc, to reduce "silliness".
 Renamed a LOT of variables/fields to more "consistent" forms.
 Forced "flag constants" to refer to theie "flag set" explicitly.
 Fixed a few old bugs based in misplacement of certain flags.

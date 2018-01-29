@@ -838,10 +838,34 @@ again:
 	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_RES_BLIND;
 	} else if (ch == '\033') goto end;
 
-	if (get_com("Sustain a stat (Magic value 10 for all stats)? [yn]: ", &ch)) {
-	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SUST_STAT;
+	if (get_com("Sustain Any Stats? ", &ch)) {
+	if (ch == 'y' || ch == 'Y') {
+
+	    if (get_com("Sustain strength? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_STR;
 	} else if (ch == '\033') goto end;
 
+	    if (get_com("Sustain intelligence? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_INT;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Sustain wisdom? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_WIS;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Sustain dexterity? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_DEX;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Sustain constitution? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_CON;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Sustain charisma? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR2_SUST_CHR;
+	} else if (ch == '\033') goto end;
+	}
+	}
 	    if (get_com("Ignore Acid? ", &ch)) {
 	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_IGNORE_ACID;
 	} else if (ch == '\033') goto end;
