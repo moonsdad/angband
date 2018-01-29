@@ -842,6 +842,22 @@ again:
 	    if (ch == 'y' || ch == 'Y') i_ptr->flags2 |= TR_SUST_STAT;
 	} else if (ch == '\033') goto end;
 
+	    if (get_com("Ignore Acid? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_IGNORE_ACID;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Ignore Lightning? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_IGNORE_ELEC;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Ignore Fire? ", &ch)) return;
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_IGNORE_FIRE;
+	} else if (ch == '\033') goto end;
+
+	    if (get_com("Ignore Cold? ", &ch)) {
+	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_IGNORE_COLD;
+	} else if (ch == '\033') goto end;
+
 	if (get_com("See invisible? [yn]: ", &ch)) {
 	    if (ch == 'y' || ch == 'Y') i_ptr->flags3 |= TR3_SEE_INVIS;
 	} else if (ch == '\033') goto end;

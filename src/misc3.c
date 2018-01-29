@@ -520,19 +520,24 @@ void magic_treasure(int x, int level, int good, int not_unique)
 	    if (!stricmp(k_list[i_ptr->index].name, "& Robe") &&
 		((magik(special) && randint(30) == 1)
 		 || (good == 666 && magik(special)))) {
-		i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD | TR2_RES_ACID |
-				 TR2_RES_FIRE | TR_SUST_STAT);
-		i_ptr->flags2 |= TR2_HOLD_LIFE;
-		i_ptr->ident |= ID_NOSHOW_P1;
-		give_1_hi_resist(i_ptr);	/* JLS */
-		i_ptr->pval = 10;
-		i_ptr->toac += 10 + randint(5);
-		i_ptr->name2 = EGO_MAGI;
-		i_ptr->cost = 10000L + (i_ptr->toac * 100);
-		rating += 30;
-		if (wizard || peek) msg_print("Robe of the Magi");
+
+		    i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD | 
+				      TR2_RES_ACID | TR2_RES_FIRE |
+				      TR2_HOLD_LIFE |
+				      TR_SUST_STAT);
+		    i_ptr->flags3 |= (TR3_IGNORE_FIRE | TR3_IGNORE_COLD |
+				      TR3_IGNORE_ELEC | TR3_IGNORE_ACID);
+		    i_ptr->ident |= ID_NOSHOW_P1;
+		    i_ptr->toac += 10 + randint(5);
+		    i_ptr->cost = 10000L + (i_ptr->toac * 100);
+		    give_1_hi_resist(i_ptr);	/* JLS */
+		    i_ptr->name2 = EGO_MAGI;
+		    i_ptr->pval = 10;
+		    rating += 30;
+		    if (wizard || peek) msg_print("Robe of the Magi");
 	    } else if (magik(special) || good == 666)
 
+		/* Make it "Excellent" */
 		switch (randint(9)) {
 
 		  case 1:
@@ -541,6 +546,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			break;
 		    i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD |
 				      TR2_RES_ACID | TR2_RES_FIRE);
+		    i_ptr->flags3 |= (TR3_IGNORE_ELEC | TR3_IGNORE_COLD |
+				      TR3_IGNORE_ACID | TR3_IGNORE_FIRE);
 		    if (randint(3) == 1) {
 			i_ptr->flags1 |= TR1_STEALTH;
 			i_ptr->pval = randint(3);
@@ -570,6 +577,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 				 "Adamantite", 10))
 			break;
 		    i_ptr->flags2 |= (TR2_RES_ACID);
+		    i_ptr->flags3 |= (TR3_IGNORE_ACID);
 		    i_ptr->cost += 1000L;
 		    i_ptr->name2 = EGO_RESIST_A;
 		    rating += 15;
@@ -581,6 +589,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			unique_armour(i_ptr))
 			break;
 		    i_ptr->flags2 |= (TR2_RES_FIRE);
+		    i_ptr->flags3 |= (TR3_IGNORE_FIRE);
 		    i_ptr->cost += 600L;
 		    i_ptr->name2 = EGO_RESIST_F;
 		    rating += 17;
@@ -592,6 +601,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			unique_armour(i_ptr))
 			break;
 		    i_ptr->flags2 |= (TR2_RES_COLD);
+		    i_ptr->flags3 |= (TR3_IGNORE_COLD);
 		    i_ptr->cost += 600L;
 		    i_ptr->name2 = EGO_RESIST_C;
 		    rating += 16;
@@ -603,6 +613,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			unique_armour(i_ptr))
 			break;
 		    i_ptr->flags2 |= (TR2_RES_ELEC);
+		    i_ptr->flags3 |= (TR3_IGNORE_ELEC);
 		    i_ptr->cost += 500L;
 		    i_ptr->name2 = EGO_RESIST_E;
 		    rating += 15;
@@ -944,6 +955,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->flags1 |= (TR1_INT);
 			i_ptr->flags2 |= (TR2_RES_ELEC | TR2_RES_COLD |
 					  TR2_RES_ACID | TR2_RES_FIRE);
+			i_ptr->flags3 |= (TR3_IGNORE_ELEC | TR3_IGNORE_COLD |
+					  TR3_IGNORE_ACID | TR3_IGNORE_FIRE);
 			i_ptr->pval = randint(3);	/* +N INT */
 			i_ptr->cost += 3000 + i_ptr->pval * 500;
 			i_ptr->name2 = EGO_MAGI;
@@ -1161,9 +1174,10 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		}
 		if (!made_art_cloak) {
 		    if (randint(2) == 1) {
-			i_ptr->name2 = EGO_PROTECTION;
+		    i_ptr->flags3 |= (TR3_IGNORE_ACID);
 			i_ptr->toac += m_bonus(0, 10, level) + (5 + randint(3));
 			i_ptr->cost += 250L;
+			i_ptr->name2 = EGO_PROTECTION;
 			rating += 8;
 		    } else if (randint(10) < 10) {
 			i_ptr->toac += m_bonus(3, 10, level);
@@ -1177,6 +1191,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			i_ptr->pval = randint(3);
 			i_ptr->flags1 |= (TR1_STEALTH);
 			i_ptr->flags2 |= (TR2_RES_ACID);
+		    i_ptr->flags3 |= (TR3_IGNORE_ACID);
 			i_ptr->name2 = EGO_AMAN;
 			i_ptr->cost += 4000 + (100 * i_ptr->toac);
 			rating += 16;
@@ -1258,7 +1273,8 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    && randint(2)==1) {
 
 		    i_ptr->flags1 |= (TR1_BRAND_FIRE);
-		    i_ptr->flags2 |= (TR2_RES_FIRE);
+		    i_ptr->flags3 |= (TR3_IGNORE_FIRE);
+
 		    /* Better stats */
 		    i_ptr->tohit += 5;
 		    i_ptr->todam += 5;
@@ -1309,7 +1325,9 @@ void magic_treasure(int x, int level, int good, int not_unique)
 		    i_ptr->flags2 |= (TR2_FREE_ACT |
 				      TR2_RES_FIRE | TR2_RES_COLD |
 				      TR2_RES_ELEC | TR2_RES_ACID);
-		    i_ptr->flags3 |= (TR3_FEATHER | TR3_REGEN | TR3_SEE_INVIS);
+		    i_ptr->flags3 |= (TR3_FEATHER | TR3_REGEN | TR3_SEE_INVIS |
+				      TR3_IGNORE_FIRE | TR3_IGNORE_COLD |
+				      TR3_IGNORE_ELEC | TR3_IGNORE_ACID);
 		    i_ptr->tohit += 3;
 		    i_ptr->todam += 3;
 		    i_ptr->toac += 5 + randint(5);
@@ -1328,6 +1346,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    unique_weapon(i_ptr)) break;
 		    i_ptr->flags1 |= (TR1_BRAND_FIRE);
 		    i_ptr->flags2 |= (TR2_RES_FIRE);
+		    i_ptr->flags2 |= (TR3_IGNORE_FIRE);
 		    i_ptr->tohit += 2;
 		    i_ptr->todam += 3;
 		    i_ptr->cost += 3000L;
@@ -1341,6 +1360,7 @@ void magic_treasure(int x, int level, int good, int not_unique)
 			    unique_weapon(i_ptr)) break;
 		    i_ptr->flags1 |= (TR1_BRAND_COLD);
 		    i_ptr->flags2 |= (TR2_RES_COLD);
+		    i_ptr->flags3 |= (TR3_IGNORE_COLD);
 		    i_ptr->tohit += 2;
 		    i_ptr->todam += 2;
 		    i_ptr->cost += 2200L;

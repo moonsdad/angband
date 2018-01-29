@@ -1512,6 +1512,7 @@ void pray()
 		    i_ptr->name2 = EGO_FT;
 		    i_ptr->flags1 |= (TR1_BRAND_FIRE);
 		    i_ptr->flags2 |= (TR2_RES_FIRE);
+		    i_ptr->flags3 |= (TR3_IGNORE_FIRE);
 		}
 		else {
 		    sprintf(out_val, "Your %s glows deep, icy blue!",
@@ -1519,6 +1520,7 @@ void pray()
 		    i_ptr->name2 = EGO_FB;
 		    i_ptr->flags1 |= (TR1_BRAND_COLD);
 		    i_ptr->flags2 |= (TR2_RES_COLD);
+		    i_ptr->flags3 |= (TR3_IGNORE_COLD);
 		}
 		msg_print(out_val);
 		enchant(i_ptr, 3+randint(3), ENCH_TOHIT|ENCH_TODAM);

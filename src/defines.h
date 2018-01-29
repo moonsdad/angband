@@ -919,7 +919,10 @@
  * Note that "flags3" contains everything else -- including the "CURSED"
  * flags, and the "BLESSED" flag, and flags which affect the player in a "general"
  * way (LITE, TELEPATHY, SEE_INVIS, SLOW_DIGEST, REGEN), including the "general"
- * curses (TELEPORT, AGGRAVATE, EXP_DRAIN).   Also "FEATHER" floating.
+ * curses (TELEPORT, AGGRAVATE, EXP_DRAIN).  It also contains four new flags
+ * called "ITEM_IGNORE_XXX" which lets an item specify that it can not be
+ * affected by various forms of destruction.  This is NOT as powerful as
+ * actually granting resistance to the wearer.  Also "FEATHER" floating.
  */
 
 #define TR_STATS        0x0000003FL /* the stats must be the low 6 bits */
@@ -987,6 +990,10 @@
 #define TR3_TELEPATHY		0x00008000L	/* Telepathy */
 #define TR3_SLOW_DIGEST		0x00010000L	/* Item slows down digestion */
 #define TR3_REGEN		0x00020000L	/* Item induces regeneration */
+#define TR3_IGNORE_ACID		0x00100000L	/* Item ignores Acid Damage */
+#define TR3_IGNORE_ELEC		0x00200000L	/* Item ignores Elec Damage */
+#define TR3_IGNORE_FIRE		0x00400000L	/* Item ignores Fire Damage */
+#define TR3_IGNORE_COLD		0x00800000L	/* Item ignores Cold Damage */
 #define TR3_ACTIVATE		0x01000000L	/* Item can be activated */
 #define TR3_TELEPORT		0x04000000L	/* Item teleports player */
 #define TR3_AGGRAVATE		0x08000000L	/* Item aggravates monsters */
