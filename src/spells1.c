@@ -7,6 +7,166 @@
 
 
 
+/*
+ * Apply disenchantment to the player's stuff
+ *
+ * The "mode" is currently unused.
+ *
+ * Return "TRUE" if the player notices anything
+ */
+bool apply_disenchant(int mode)
+{
+    int                t = 0;
+    inven_type         *i_ptr;
+    vtype               t1, t2;
+
+
+    /* Pick a random slot */
+    switch (randint(8)) {
+	 case 1: t = INVEN_WIELD; break;
+	 case 2: t = INVEN_AUX; break;
+	 case 3: t = INVEN_BODY; break;
+	 case 4: t = INVEN_OUTER; break;
+	 case 5: t = INVEN_ARM; break;
+	 case 6: t = INVEN_HEAD; break;
+	 case 7: t = INVEN_HANDS; break;
+	 case 8: t = INVEN_FEET; break;
+    }
+
+    /* Get the item */                                
+    i_ptr = &inventory[t];
+
+    /* No item, nothing happens */
+    if (i_ptr->tval == TV_NOTHING) return (FALSE);
+
+
+    /* Nothing to disenchant */
+    if ((i_ptr->tohit <= 0) && (i_ptr->todam <= 0) && (i_ptr->toac <= 0)) {
+
+	/* Nothing to notice */
+	return (FALSE);
+    }
+
+
+    /* Describe the object */
+    objdes(t1, i_ptr, FALSE);
+
+    /* Artifacts have chance to resist */
+    if (artifact_p(i_ptr) && !(randint(5) < 3)) {
+
+	/* Message */
+	sprintf(t2, "Your %s (%c) %s disenchantment!",
+		t1, t+'a'-INVEN_WIELD,
+		(i_ptr->number != 1) ? "resist" : "resists");
+	msg_print(t2);
+
+	/* Notice */
+	return (TRUE);
+    }
+
+
+    /* Disenchant tohit */
+    i_ptr->tohit -= randint(2);
+    /* don't send it below zero */
+    if (i_ptr->tohit < 0) i_ptr->tohit = 0;
+
+    /* Disenchant todam */
+    i_ptr->todam -= randint(2);
+    /* don't send it below zero */
+    if (i_ptr->todam < 0) i_ptr->todam = 0;
+
+    /* Disenchant toac */
+    i_ptr->toac  -= randint(2);
+    /* don't send it below zero */
+    if (i_ptr->toac < 0) i_ptr->toac = 0;
+
+
+    sprintf(t2, "Your %s (%c) %s disenchanted!",
+	    t1, t+'a'-INVEN_WIELD,
+	    (i_ptr->number != 1) ? "were" : "was");
+    msg_print(t2);
+
+    /* Recalculate bonuses */
+    calc_bonuses();
+
+    /* Notice */
+    return (TRUE);
+}
+
+
+/*
+ * Apply Nexus
+ */
+static void apply_nexus(monster_type *m_ptr)
+{
+    int max1, cur1, max2, cur2, ii, jj;
+
+    switch (randint(7)) {
+
+	case 1: case 2: case 3:
+
+	    teleport(200);
+	    break;
+
+	case 4: case 5:
+
+	    teleport_to((int)m_ptr->fy, (int)m_ptr->fx);
+	    break;
+
+	case 6:
+
+	    if (player_saves()) {
+		msg_print("You resist the effects.");
+		break;
+	    } else {          
+
+	    /* Teleport Level */
+	    int k = dun_level;
+
+	    if (dun_level == Q_PLANE) dun_level = 0;
+	    else if (is_quest(dun_level)) dun_level -= 1;
+	    else dun_level += (-3) + 2 * randint(2);
+	    if (dun_level < 0) dun_level = 0;
+	    if (k == Q_PLANE)
+	        msg_print("You warp through a cross-dimension gate.");
+	    else if (k < dun_level)
+	        msg_print("You sink through the floor.");
+	    else
+	        msg_print("You rise up through the ceiling.");
+	    new_level_flag = TRUE;
+	    } break;
+
+	case 7:
+
+	    if (player_saves() && randint(2) == 1) {
+		msg_print("You resist the effects.");
+		break;
+	    }
+
+	    msg_print("Your body starts to scramble...");
+
+	    /* Pick a pair of stats */
+	    ii = randint(6) - 1;
+	    for (jj = ii; jj == ii; jj = randint(6) - 1);
+
+	    max1 = p_ptr->max_stat[ii];
+	    cur1 = p_ptr->cur_stat[ii];
+	    max2 = p_ptr->max_stat[jj];
+	    cur2 = p_ptr->cur_stat[jj];
+
+	    p_ptr->max_stat[ii] = max2;
+	    p_ptr->cur_stat[ii] = cur2;
+	    p_ptr->max_stat[jj] = max1;
+	    p_ptr->cur_stat[jj] = cur1;
+
+	    set_use_stat(ii);
+	    set_use_stat(jj);
+	    prt_stat(ii);
+	    prt_stat(jj);
+
+	    break;
+    }
+}
 
 
 

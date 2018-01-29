@@ -1309,9 +1309,8 @@ static void make_attack(int m_idx)
 		    i_ptr = &inventory[i];
 
 		    /* Don't steal artifacts  -CFT */
-		    if ((inventory[i].tval >= TV_MIN_WEAR) &&
-			(inventory[i].tval <= TV_MAX_WEAR) &&
-			(inventory[i].flags2 & TR_ARTIFACT)) break;
+		    if (artifact_p(i_ptr)) break;
+
 
 		    /* Get a description */
 		    objdes(t1, i_ptr, FALSE);
@@ -1429,62 +1428,12 @@ static void make_attack(int m_idx)
 
 		/* Allow complete resist */
 		if (!p_ptr->resist_disen) {
-		    byte               chance = 0;
 
 		    /* Take some damage */
 		    take_hit(damage, ddesc);
 
-		    flag = FALSE;
-		    switch (randint(7)) {
-		      case 1: i = INVEN_WIELD; break;
-		      case 2: i = INVEN_BODY; break;
-		      case 3: i = INVEN_ARM; break;
-		      case 4: i = INVEN_OUTER; break;
-		      case 5: i = INVEN_HANDS; break;
-		      case 6: i = INVEN_HEAD; break;
-		      case 7: i = INVEN_FEET; break;
-		    }
-		    i_ptr = &inventory[i];
-		    if (i_ptr->tval != TV_NOTHING) {
-			if (i_ptr->flags2 & TR_ARTIFACT)
-			    chance = randint(5);
-			if ((i_ptr->tohit > 0) && (chance < 3)){
-			    i_ptr->tohit -= randint(2);
-			    /* don't send it below zero */
-			    if (i_ptr->tohit < 0)
-				i_ptr->tohit = 0;
-			    flag = TRUE;
-			}
-			if ((i_ptr->todam > 0) && (chance < 3)) {
-			    i_ptr->todam -= randint(2);
-			    /* don't send it below zero */
-			    if (i_ptr->todam < 0)
-				i_ptr->todam = 0;
-			    flag = TRUE;
-			}
-			if ((i_ptr->toac > 0) && (chance < 3)) {
-			    i_ptr->toac  -= randint(2);
-			    /* don't send it below zero */
-			    if (i_ptr->toac < 0)
-				i_ptr->toac = 0;
-			    flag = TRUE;
-			}
-			if (flag || (chance > 2)) {
-			    vtype t1, t2;
-			    objdes(t1, &inventory[i], FALSE);
-			    if (chance < 3)
-				sprintf(t2, "Your %s (%c) %s disenchanted!", t1,
-					i+'a'-INVEN_WIELD,
-					(inventory[i].number != 1) ? "were":"was");
-			    else
-				sprintf(t2, "Your %s (%c) %s disenchantment!", t1,
-					i+'a'-INVEN_WIELD,
-					(inventory[i].number != 1) ? "resist":"resists");
-			    msg_print (t2);
-			    calc_bonuses ();
-			}
-			else notice = FALSE;
-		    }
+		    /* Apply disenchantment */
+		    if (!apply_disenchant(0)) notice = FALSE;
 		}
 		break;
 
@@ -1502,7 +1451,7 @@ static void make_attack(int m_idx)
 	      /* Eat light */
 	      case 23:
 		i_ptr = &inventory[INVEN_LITE];
-		if ((i_ptr->pval > 0) && ((i_ptr->flags2 & TR_ARTIFACT) == 0)) {
+		if ((i_ptr->pval > 0) && (!artifact_p(i_ptr))) {
 		    i_ptr->pval -= (250 + randint(250));
 		    if (i_ptr->pval < 1) i_ptr->pval = 1;
 		    if (p_ptr->blind < 1) {

@@ -37,6 +37,7 @@ Reorganized the source to make the files more "self-contained".
 
 Made "low level" spell books susceptible to "fire damage".
 Did other related modifications to the "inventory damage" routines.
+Extracted the "disenchantment", "nexus", and other such functions.
 Threw out the "Bill Cosby" message.  "Cute" is not "good".
 Considered writing an "artifact template" file.
 Added monster race fields for "current/max" population per level.
