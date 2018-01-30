@@ -244,7 +244,7 @@ typedef struct _inven_type inven_type;
 
 struct _inven_type {
 
-  u16b index;			/* Index to k_list	*/
+  u16b k_idx;			/* Index to k_list	*/
 
   byte level;			/* Level item first found	*/
 

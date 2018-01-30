@@ -1693,7 +1693,7 @@ wr_shorts(u16b *s, register int count)
 
 static void wr_item(register inven_type *item)
 {
-    wr_short(item->index);
+    wr_short(item->k_idx);
     wr_byte(i_ptr->name1);
     wr_byte(item->name2);
     wr_string(item->inscrip);
@@ -1814,7 +1814,7 @@ static void rd_shorts(u16b *ptr, register int count)
 
 static void rd_item(register inven_type *item)
 {
-    rd_short(&item->index);
+    rd_short(&item->k_idx);
     wr_byte(i_ptr->name1);
     rd_byte(&item->name2);
     rd_string(item->inscrip);

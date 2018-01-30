@@ -1532,7 +1532,7 @@ void do_cmd_bash()
 	    else if (i_ptr->tval == TV_CHEST) {
 		if (randint(10) == 1) {
 		    msg_print("You have destroyed the chest and its contents!");
-		    i_ptr->index = OBJ_RUINED_CHEST;
+		    i_ptr->k_idx = OBJ_RUINED_CHEST;
 		    i_ptr->flags2 = 0;
 		}
 		else if ((i_ptr->flags2 & CH2_LOCKED) && (randint(10) == 1)) {
@@ -1744,7 +1744,7 @@ void do_cmd_fire()
 	ok_throw = TRUE; /* if it's a mushroom or potion that does damage when thrown... */
     }
 
-    else if ((k_list[i_ptr->index].cost <= 0) && known1_p(i_ptr) &&
+    else if ((k_list[i_ptr->k_idx].cost <= 0) && known1_p(i_ptr) &&
 	     !(known2_p(t) && (t->cost > 0)))
 	ok_throw = TRUE;
 

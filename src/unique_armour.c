@@ -4,7 +4,7 @@ int unique_armour(inven_type *t_ptr)
 
     if (be_nasty)
 	return 0;
-    name = k_list[t_ptr->index].name;
+    name = k_list[t_ptr->k_idx].name;
     if (!strncmp("Adamantite", name, 10)) {
 	if (SOULKEEPER)
 	    return 0;

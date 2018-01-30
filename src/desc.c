@@ -580,7 +580,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
 
     /* Extract the (default) "base name" */
-    basenm = k_list[i_ptr->index].name;
+    basenm = k_list[i_ptr->k_idx].name;
 
     /* Assume no modifier string */
     modstr = NULL;
@@ -718,7 +718,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	pval_use = CHARGES;
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Wand";
-	    modstr = wand_adj[indexx];
+	    modstr = wand_adj[k_idxx];
 	    if (!modify)
 	    append_name = TRUE;
 	}
@@ -731,7 +731,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
       case TV_ROD:
 	if (modify || !(plain_descriptions || store_bought_p(i_ptr))) {
 	    basenm = "& %s Rod";
-	    modstr = wand_adj[indexx];
+	    modstr = wand_adj[k_idxx];
 	    if (!modify)
 	    append_name = TRUE;
 	}
@@ -826,12 +826,12 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
       case TV_VIS_TRAP:
       case TV_UP_STAIR:
       case TV_DOWN_STAIR:
-	(void)strcpy(out_val, k_list[i_ptr->index].name);
+	(void)strcpy(out_val, k_list[i_ptr->k_idx].name);
     /* (void) strcat(out_val, "."); avoid ".." bug -CWS */
 	return;
 
       case TV_STORE_DOOR:
-	sprintf(out_val, "the entrance to the %s", k_list[i_ptr->index].name);
+	sprintf(out_val, "the entrance to the %s", k_list[i_ptr->k_idx].name);
 	return;
 
       /* Used in the "inventory" routine */
@@ -853,7 +853,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
     /* Append the "kind name" to the "base name" */
     if (append_name) {
 	(void)strcat(tmp_val, " of ");
-	(void)strcat(tmp_val, k_list[i_ptr->index].name);
+	(void)strcat(tmp_val, k_list[i_ptr->k_idx].name);
     }
 
 
@@ -1089,8 +1089,8 @@ void invcopy(inven_type *i_ptr, int k_idx)
     /* Get the object template */
     k_ptr = &k_list[k_idx];
 
-    /* Save the kind index */
-    i_ptr->index = k_idx;
+    /* Save the kind k_idx */
+    i_ptr->k_idx = k_idx;
 
     /* Quick access to tval/sval */
     i_ptr->tval = k_ptr->tval;

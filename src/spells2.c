@@ -1374,7 +1374,7 @@ int remove_curse()
 	    (i_ptr->name2 != EGO_MORGUL) &&
 	    (i_ptr->name2 != ART_CALRIS) &&
 	    (i_ptr->name2 != ART_MORMEGIL)) {
-	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
+	    if (!(!stricmp(k_list[i_ptr->k_idx].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
 		i_ptr->flags3 &= ~TR3_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */
@@ -1396,7 +1396,7 @@ int remove_all_curse()
     for (i = INVEN_WIELD; i <= INVEN_OUTER; i++) {
 	i_ptr = &inventory[i];
 	if (TR3_CURSED & i_ptr->flags3) {
-	    if (!(!stricmp(k_list[i_ptr->index].name, "Power") &&
+	    if (!(!stricmp(k_list[i_ptr->k_idx].name, "Power") &&
 		  (i_ptr->tval == TV_RING))) {
 		i_ptr->flags3 &= ~TR3_CURSED;
 		i_ptr->ident &= ~ID_DAMD;	/* DGK */

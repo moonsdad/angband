@@ -4,7 +4,7 @@ int unique_weapon(inven_type *t_ptr)
 
     if (be_nasty)
 	return 0;
-    name = k_list[t_ptr->index].name;
+    name = k_list[t_ptr->k_idx].name;
     if (!stricmp("& Longsword", name)) {
 	switch (randint(15)) {
 	  case 1:

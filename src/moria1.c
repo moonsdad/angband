@@ -94,7 +94,7 @@ int show_inven(int r1, int r2, int weight, int col, int (*test) ())
     k = 0;
     for (i = r1; i <= r2; i++) {
 	if (test) {
-	    if ((*test) (k_list[inventory[i].index].tval)) {
+	    if ((*test) (k_list[inventory[i].k_idx].tval)) {
 		objdes(tmp_val, &inventory[i], TRUE);
 		tmp_val[lim] = 0;  /* Truncate if too long. */
 		(void)sprintf(out_val[i], "  %c) %s", 'a' + i, tmp_val);

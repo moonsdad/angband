@@ -477,7 +477,7 @@ void print_objects()
 			if (k_list[tmp].level > level)
 			    continue;
 			invcopy(&i_list[j], tmp);
-			if (k_list[t_list[j].index].tval == TV_HARD_ARMOR)
+			if (k_list[t_list[j].k_idx].tval == TV_HARD_ARMOR)
 			    i_list[j].toac += 10 + randint(10);
 			i_ptr = &i_list[j];
 			store_bought(i_ptr);

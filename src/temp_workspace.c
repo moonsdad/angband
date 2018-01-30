@@ -738,15 +738,15 @@ void py_bonuses(register inven_type *t_ptr, register int factor)
     if (TR1_SPEED & t_ptr->flags) {
 	if ((t_ptr->tval == TV_RING) &&
 	    !stricmp("Speed",
-		     k_list[t_ptr->index].name) &&
+		     k_list[t_ptr->k_idx].name) &&
 	    (t_ptr->pval > 0))
 	    if ((inventory[INVEN_RIGHT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 k_list[inventory[INVEN_RIGHT].index].name) &&
+			 k_list[inventory[INVEN_RIGHT].k_idx].name) &&
 		(inventory[INVEN_RIGHT].pval > 0) &&
 		(inventory[INVEN_LEFT].tval == TV_RING) &&
 		!stricmp("Speed",
-			 k_list[inventory[INVEN_LEFT].index].name) &&
+			 k_list[inventory[INVEN_LEFT].k_idx].name) &&
 		(inventory[INVEN_RIGHT].pval > 0))
 		return;
 	change_speed(-amount);
@@ -1021,7 +1021,7 @@ void change_trap(register int y, register int x)
 	lite_spot(y, x);
     } else if (t_ptr->tval == TV_SECRET_DOOR) {
     /* change secret door to closed door */
-	t_ptr->index = OBJ_CLOSED_DOOR;
+	t_ptr->k_idx = OBJ_CLOSED_DOOR;
 	t_ptr->tval = k_list[OBJ_CLOSED_DOOR].tval;
 	t_ptr->tchar = k_list[OBJ_CLOSED_DOOR].tchar;
 	lite_spot(y, x);

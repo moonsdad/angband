@@ -328,7 +328,7 @@ s32b item_value(inven_type *i_ptr)
     else if (((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) ||
 	     ((i_ptr->tval >= TV_BOOTS) && (i_ptr->tval <= TV_SOFT_ARMOR))) {
 
-	if (!known2_p(i_ptr)) value = k_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = k_list[i_ptr->k_idx].cost;
 
 	else if ((i_ptr->tval >= TV_BOW) && (i_ptr->tval <= TV_SWORD)) {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -345,7 +345,7 @@ s32b item_value(inven_type *i_ptr)
 
 	else if (((i_ptr->tval >= TV_SHOT) && (i_ptr->tval <= TV_ARROW))
 	       || (i_ptr->tval == TV_SPIKE)) {	/* Ammo			 */
-	if (!known2_p(i_ptr)) value = k_list[i_ptr->index].cost;
+	if (!known2_p(i_ptr)) value = k_list[i_ptr->k_idx].cost;
 
 	else {
 	    if (i_ptr->tohit < 0) value = 0;
@@ -377,7 +377,7 @@ s32b item_value(inven_type *i_ptr)
 	/* player knows what type of ring, but does not know whether it is
 	 * cursed or not, if refuse to buy cursed objects here, then player
 	 * can use this to 'identify' cursed objects  */
-	    value = k_list[i_ptr->index].cost;
+	    value = k_list[i_ptr->k_idx].cost;
 
 				/* Wands and staffs */
     } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
@@ -392,7 +392,7 @@ s32b item_value(inven_type *i_ptr)
 				/* picks and shovels */
     else if (i_ptr->tval == TV_DIGGING) {
 	if (!known2_p(i_ptr))
-	    value = k_list[i_ptr->index].cost;
+	    value = k_list[i_ptr->k_idx].cost;
 
 	else {
 	    if (i_ptr->pval < 0) value = 0;
