@@ -476,7 +476,7 @@
 #define ID_MAGIK        0x1
 #define ID_DAMD         0x2
 #define ID_EMPTY        0x4	/* Item is now "empty" */
-#define ID_KNOWN2       0x8	/* Item is fully "known" */
+#define ID_KNOWN       0x8	/* Item is fully "known" */
 #define ID_STOREBOUGHT  0x10
 #define TR3_SHOW_MODS  0x20
 #define ID_NOSHOW_P1    0x40    /* don't show (+x) even if pval != 0 -CWS   */

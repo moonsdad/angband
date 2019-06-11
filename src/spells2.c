@@ -1936,7 +1936,7 @@ int lose_all_info(void)
 	if (i_ptr->tval == TV_NOTHING) continue;
 
 	    /* Clear the "known" flag */
-	    i_ptr->ident &= ~ID_KNOWN2;
+	    i_ptr->ident &= ~ID_KNOWN;
     }
 
     /* Forget the map */

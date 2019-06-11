@@ -417,19 +417,19 @@ int known1_p(inven_type *i_ptr)
 void known2(inven_type *i_ptr)
 {
     unsample(i_ptr);
-    i_ptr->ident |= ID_KNOWN2;
+    i_ptr->ident |= ID_KNOWN;
 }
 
 
 int known2_p(inven_type *i_ptr)
 {
-    return (i_ptr->ident & ID_KNOWN2);
+    return (i_ptr->ident & ID_KNOWN);
 }
 
 
 void clear_known2(inven_type *i_ptr)
 {
-    i_ptr->ident &= ~ID_KNOWN2;
+    i_ptr->ident &= ~ID_KNOWN;
 }
 
 
