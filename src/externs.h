@@ -496,7 +496,7 @@ void known2(inven_type *);
 int known2_p(inven_type *);
 void store_bought(inven_type *);
 int store_bought_p(inven_type *);
-void sample(struct inven_type *);
+void inven_tried(struct inven_type *);
 void identify(int *);
 void unmagic_name(inven_type *);
 void do_cmd_inscribe(void);

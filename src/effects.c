@@ -348,7 +348,7 @@ void eat(void)
 		i_ptr = &inventory[item_val];
 	    }
 	} else if (!inven_aware_p(i_ptr))
-	    sample(i_ptr);
+	    inven_tried(i_ptr);
 
     /* Consume the food */
     add_food(i_ptr->pval);
@@ -896,7 +896,7 @@ void quaff(void)
 		i_ptr = &inventory[item_val];
 	    }
 	} else if (!inven_aware_p(i_ptr))
-	    sample(i_ptr);
+	    inven_tried(i_ptr);
 
     /* Potions can feed the player */
     add_food(i_ptr->pval);
@@ -1459,7 +1459,7 @@ void do_cmd_read_scroll(void)
 		i_ptr = &inventory[item_val];
 	    }
 	} else if (!inven_aware_p(i_ptr))
-	    sample(i_ptr);
+	    inven_tried(i_ptr);
 
     /* Hack -- allow certain scrolls to be "preserved" */
     if (!used_up) return;
@@ -1758,7 +1758,7 @@ void do_cmd_aim_wand(void)
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
-    } else if (!inven_aware_p(i_ptr)) sample(i_ptr);
+    } else if (!inven_aware_p(i_ptr)) inven_tried(i_ptr);
 
 
     /* Use a single charge */
@@ -2055,7 +2055,7 @@ void use(void)
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
-    } else if (!inven_aware_p(i_ptr)) sample(i_ptr);
+    } else if (!inven_aware_p(i_ptr)) inven_tried(i_ptr);
 
 
     /* Use a single charge */
@@ -2399,7 +2399,7 @@ void do_cmd_zap_rod(void)
 	i_ptr = &inventory[item_val];
 	}
     } else if (!inven_aware_p(i_ptr)) {
-	sample(i_ptr);
+	inven_tried(i_ptr);
     }
 }
 

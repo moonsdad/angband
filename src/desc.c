@@ -454,7 +454,7 @@ int store_bought_p(inven_type *i_ptr)
 /* unquote() is no longer needed */
 
 /* Somethings been sampled -CJS- */
-void sample(inven_type *i_ptr)
+void inven_tried(inven_type *i_ptr)
 {
     s16b offset;
     byte indexx;
