@@ -490,13 +490,14 @@ int look_line(int);
 
 /* desc.c */
 void flavor_init(void);
-void inven_aware(inven_type *);
+s16b flavor_p(inven_type *);
 int inven_aware_p(inven_type *);
-void known2(inven_type *);
+void inven_aware(inven_type *);
+void inven_tried(struct inven_type *);
 int known2_p(inven_type *);
+void known2(inven_type *);
 void store_bought(inven_type *);
 int store_bought_p(inven_type *);
-void inven_tried(struct inven_type *);
 void identify(int *);
 void unmagic_name(inven_type *);
 void do_cmd_inscribe(void);
@@ -506,7 +507,6 @@ void objdes(char *, struct inven_type *, int);
 void invcopy(inven_type *, int);
 void inven_item_charges(int);
 void inven_item_describe(int);
-s16b flavor_p(inven_type *);
 
 /* command.c */
 void process_command(void);

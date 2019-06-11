@@ -378,37 +378,15 @@ s16b flavor_p(inven_type *t_ptr)
     }
 }
 
-/* Remove "Secret" symbol for identity of object			 */
-void inven_aware(inven_type *i_ptr)
-{
-    s16b offset;
-    byte indexx;
 
-    if ((offset = flavor_p(i_ptr)) < 0)
-	return;
-    offset <<= 6;
-    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    object_ident[offset + indexx] |= OD_KNOWN1;
-/* clear the tried flag, since it is now known */
-    object_ident[offset + indexx] &= ~OD_TRIED;
-}
-
-int inven_aware_p(inven_type *i_ptr)
-{
-    s16b offset;
-    byte indexx;
-
-/* Items which don't have a 'color' are always known, so that they can be
- * carried in order in the inventory.  
+/*
+ * Is a given item "fully identified"?
  */
-    if ((offset = flavor_p(i_ptr)) < 0)
-	return OD_KNOWN1;
-    if (store_bought_p(i_ptr))
-	return OD_KNOWN1;
-    offset <<= 6;
-    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    return (object_ident[offset + indexx] & OD_KNOWN1);
+int known2_p(inven_type *i_ptr)
+{
+    return (i_ptr->ident & ID_KNOWN);
 }
+
 
 
 /*
@@ -432,9 +410,43 @@ void known2(inven_type *i_ptr)
 }
 
 
-int known2_p(inven_type *i_ptr)
+
+
+/*
+ */
+int inven_aware_p(inven_type *i_ptr)
 {
-    return (i_ptr->ident & ID_KNOWN);
+    s16b offset;
+    byte indexx;
+
+/* Items which don't have a 'color' are always known, so that they can be
+ * carried in order in the inventory.  
+ */
+    if ((offset = flavor_p(i_ptr)) < 0)
+	return OD_KNOWN1;
+    if (store_bought_p(i_ptr))
+	return OD_KNOWN1;
+    offset <<= 6;
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
+    return (object_ident[offset + indexx] & OD_KNOWN1);
+}
+
+
+/*
+ * Remove "Secret" symbol for identity of object.
+ */
+void inven_aware(inven_type *i_ptr)
+{
+    s16b offset;
+    byte indexx;
+
+    if ((offset = flavor_p(i_ptr)) < 0)
+	return;
+    offset <<= 6;
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
+    object_ident[offset + indexx] |= OD_KNOWN1;
+/* clear the tried flag, since it is now known */
+    object_ident[offset + indexx] &= ~OD_TRIED;
 }
 
 
@@ -451,9 +463,10 @@ int store_bought_p(inven_type *i_ptr)
 }
 
 
-/* unquote() is no longer needed */
 
-/* Somethings been sampled -CJS- */
+/* 
+ * Somethings been sampled -CJS-
+ */
 void inven_tried(inven_type *i_ptr)
 {
     s16b offset;
