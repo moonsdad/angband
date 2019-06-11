@@ -508,7 +508,7 @@ void objdes(char *, struct inven_type *, int);
 void invcopy(inven_type *, int);
 void inven_item_charges(int);
 void inven_item_describe(int);
-s16b object_offset(inven_type *);
+s16b flavor_p(inven_type *);
 
 /* command.c */
 void process_command(void);
