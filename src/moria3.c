@@ -1739,12 +1739,13 @@ void do_cmd_fire()
     /* always-throwable food/potions.  (plus known bad ones, in a	*/
     /* later test...) -CFT */
     else if (((i_ptr->tval == TV_FOOD) || (i_ptr->tval == TV_POTION1) ||
-	     (i_ptr->tval == TV_POTION2)) && known1_p(i_ptr) &&
+	     (i_ptr->tval == TV_POTION2)) &&
+	     (inven_aware_p(i_ptr)) &&
 	     (i_ptr->dd > 1) && (i_ptr->ds > 1)) {
 	ok_throw = TRUE; /* if it's a mushroom or potion that does damage when thrown... */
     }
 
-    else if ((k_list[i_ptr->k_idx].cost <= 0) && known1_p(i_ptr) &&
+    else if ((k_list[i_ptr->k_idx].cost <= 0) && inven_aware_p(i_ptr) &&
 	     !(known2_p(t) && (t->cost > 0)))
 	ok_throw = TRUE;
 

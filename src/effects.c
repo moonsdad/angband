@@ -337,7 +337,7 @@ void eat(void)
 	}
 
 	if (ident) {
-	    if (!known1_p(i_ptr)) {
+	    if (!inven_aware_p(i_ptr)) {
 
 	    /* The player is now aware of the object */
 	    /* round half-way case up */
@@ -347,7 +347,7 @@ void eat(void)
 		identify(&item_val);
 		i_ptr = &inventory[item_val];
 	    }
-	} else if (!known1_p(i_ptr))
+	} else if (!inven_aware_p(i_ptr))
 	    sample(i_ptr);
 
     /* Consume the food */
@@ -888,14 +888,14 @@ void quaff(void)
 
     /* An identification was made */
     if (ident) {
-	if (!known1_p(i_ptr)) {
+	if (!inven_aware_p(i_ptr)) {
 	    /* round half-way case up */
 		p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 		prt_experience();
 		identify(&item_val);
 		i_ptr = &inventory[item_val];
 	    }
-	} else if (!known1_p(i_ptr))
+	} else if (!inven_aware_p(i_ptr))
 	    sample(i_ptr);
 
     /* Potions can feed the player */
@@ -1450,7 +1450,7 @@ void do_cmd_read_scroll(void)
     /* An identification was made */
 	i_ptr = &inventory[item_val];
     if (ident) {
-	    if (!known1_p(i_ptr)) {
+	    if (!inven_aware_p(i_ptr)) {
 	/* round half-way case up */
 	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
@@ -1458,7 +1458,7 @@ void do_cmd_read_scroll(void)
 		identify(&item_val);
 		i_ptr = &inventory[item_val];
 	    }
-	} else if (!known1_p(i_ptr))
+	} else if (!inven_aware_p(i_ptr))
 	    sample(i_ptr);
 
     /* Hack -- allow certain scrolls to be "preserved" */
@@ -1751,14 +1751,14 @@ void do_cmd_aim_wand(void)
 
     /* Apply identification */
     if (ident) {
-	if (!known1_p(i_ptr)) {
+	if (!inven_aware_p(i_ptr)) {
 	/* round half-way case up */
 	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
-    } else if (!known1_p(i_ptr)) sample(i_ptr);
+    } else if (!inven_aware_p(i_ptr)) sample(i_ptr);
 
 
     /* Use a single charge */
@@ -2048,14 +2048,14 @@ void use(void)
 
     /* An identification was made */
     if (ident) {
-	if (!known1_p(i_ptr)) {
+	if (!inven_aware_p(i_ptr)) {
 	/* round half-way case up */
 	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
-    } else if (!known1_p(i_ptr)) sample(i_ptr);
+    } else if (!inven_aware_p(i_ptr)) sample(i_ptr);
 
 
     /* Use a single charge */
@@ -2391,14 +2391,14 @@ void do_cmd_zap_rod(void)
 
     /* Successfully determined the object function */
     if (ident) {
-	if (!known1_p(i_ptr)) {
+	if (!inven_aware_p(i_ptr)) {
 	/* round half-way case up */
 	p_ptr->exp += (i_ptr->level + (p_ptr->lev >> 1)) / p_ptr->lev;
 	prt_experience();
 	identify(&item_val);
 	i_ptr = &inventory[item_val];
 	}
-    } else if (!known1_p(i_ptr)) {
+    } else if (!inven_aware_p(i_ptr)) {
 	sample(i_ptr);
     }
 }

@@ -2305,8 +2305,8 @@ int ident_spell()
 	    if ((i_ptr->flags3 & TR3_CURSED) && (i_ptr->tval != TV_MAGIC_BOOK) &&
 		(i_ptr->tval != TV_PRAYER_BOOK))
 		add_inscribe(i_ptr, ID_DAMD);
-	    if (!known1_p(i_ptr))
-		known1(i_ptr);
+	    if (!inven_aware_p(i_ptr))
+		inven_aware(i_ptr);
 	    /* end of identify-code */
 	    known2(i_ptr);
 	    objdes(tmp_str, i_ptr, TRUE);

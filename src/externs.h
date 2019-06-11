@@ -490,8 +490,8 @@ int look_line(int);
 
 /* desc.c */
 void flavor_init(void);
-void known1(inven_type *);
-int known1_p(inven_type *);
+void inven_aware(inven_type *);
+int inven_aware_p(inven_type *);
 void known2(inven_type *);
 int known2_p(inven_type *);
 void clear_known2(inven_type *);

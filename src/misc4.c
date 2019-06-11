@@ -1551,7 +1551,7 @@ int inven_check_num(inven_type *t_ptr)
 	/* they always stack (sval < 192), or else they have same pval */
 		((t_ptr->sval < ITEM_GROUP_MIN) || (inventory[i].pval == t_ptr->pval))
 	/* only stack if both or neither are identified */
-		&& (known1_p(&inventory[i]) == known1_p(t_ptr)))
+		&& (inven_aware_p(&inventory[i]) == inven_aware_p(t_ptr)))
 		return TRUE;
     }
 
@@ -1585,8 +1585,8 @@ int inven_carry(inven_type *i_ptr)
 
     typ = i_ptr->tval;
     subt = i_ptr->sval;
-    known1p = known1_p(i_ptr);
-    always_known1p = (object_offset(i_ptr) == -1);
+    known1p = inven_aware_p(i_ptr);
+    always_known1p = (flavor_p(i_ptr) == -1);
 
     if (inven_ctr >= INVEN_WIELD) /* sanity checking to prevent the inv from */
 	inven_ctr = INVEN_WIELD;  /* running over the equipment list -CWS */
@@ -1609,7 +1609,7 @@ int inven_carry(inven_type *i_ptr)
 	/* they always stack (sval < 192), or else they have same pval */
 		((subt < ITEM_GROUP_MIN) || (j_ptr->pval == i_ptr->pval))
 	/* only stack if both or neither are identified */
-		&& (known1_p(&inventory[slot]) == known1p)) {
+		&& (inven_aware_p(&inventory[slot]) == known1p)) {
 		stacked = TRUE;	   /* note that we did process the item -CFT */
 
 	    /* Add together the item counts */

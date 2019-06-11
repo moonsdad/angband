@@ -379,7 +379,7 @@ s16b object_offset(inven_type *t_ptr)
 }
 
 /* Remove "Secret" symbol for identity of object			 */
-void known1(inven_type *i_ptr)
+void inven_aware(inven_type *i_ptr)
 {
     s16b offset;
     byte indexx;
@@ -393,12 +393,12 @@ void known1(inven_type *i_ptr)
     object_ident[offset + indexx] &= ~OD_TRIED;
 }
 
-int known1_p(inven_type *i_ptr)
+int inven_aware_p(inven_type *i_ptr)
 {
     s16b offset;
     byte indexx;
 
-/* Items which don't have a 'color' are always known1, so that they can be
+/* Items which don't have a 'color' are always known, so that they can be
  * carried in order in the inventory.  
  */
     if ((offset = object_offset(i_ptr)) < 0)
@@ -500,8 +500,8 @@ void identify(int *item)
 	(i_ptr->tval != TV_PRAYER_BOOK))
 	add_inscribe(i_ptr, ID_DAMD);
 
-    if (!known1_p(i_ptr)) {
-	known1(i_ptr);
+    if (!inven_aware_p(i_ptr)) {
+	inven_aware(i_ptr);
 	x1 = i_ptr->tval;
 	x2 = i_ptr->sval;
 	if (x2 < ITEM_SINGLE_STACK_MIN || x2 >= ITEM_GROUP_MIN)
@@ -596,7 +596,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
     /* Assume no display of "pval" */
     pval_use = IGNORED;
 
-    modify = (known1_p(i_ptr) ? FALSE : TRUE);
+    modify = (inven_aware_p(i_ptr) ? FALSE : TRUE);
 
     /* Analyze the object */
     switch (i_ptr->tval) {

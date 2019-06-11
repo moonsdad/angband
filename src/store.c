@@ -361,15 +361,15 @@ s32b item_value(inven_type *i_ptr)
 				/* Potions, Scrolls, and Food */
     } else if ((i_ptr->tval == TV_SCROLL1) || (i_ptr->tval == TV_SCROLL2) ||
 	       (i_ptr->tval == TV_POTION1) || (i_ptr->tval == TV_POTION2)) {
-	if (!known1_p(i_ptr)) value = 20;
+	if (!inven_aware_p(i_ptr)) value = 20;
 
     } else if (i_ptr->tval == TV_FOOD) {
 	if ((i_ptr->sval < (ITEM_SINGLE_STACK_MIN + MAX_SHROOM))
-	    && !known1_p(i_ptr)) value = 1;
+	    && !inven_aware_p(i_ptr)) value = 1;
 
 				/* Rings and amulets */
     } else if ((i_ptr->tval == TV_AMULET) || (i_ptr->tval == TV_RING)) {
-	if (!known1_p(i_ptr))
+	if (!inven_aware_p(i_ptr))
 	/* player does not know what type of ring/amulet this is */
 	    value = 45;
 
@@ -381,7 +381,7 @@ s32b item_value(inven_type *i_ptr)
 
 				/* Wands and staffs */
     } else if ((i_ptr->tval == TV_STAFF) || (i_ptr->tval == TV_WAND)) {
-	if (!known1_p(i_ptr)) {
+	if (!inven_aware_p(i_ptr)) {
 
 	    if (i_ptr->tval == TV_WAND) value = 50;
 	    else value = 70;
