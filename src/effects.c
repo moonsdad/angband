@@ -357,7 +357,7 @@ void eat(void)
     p_ptr->status &= ~(PY_WEAK | PY_HUNGRY);
     prt_hunger();
 
-	desc_remain(item_val);
+	inven_item_describe(item_val);
 	inven_destroy(item_val);
 
 }
@@ -902,7 +902,7 @@ void quaff(void)
     add_food(i_ptr->pval);
 
     /* Destroy the potion */
-    desc_remain(item_val);
+    inven_item_describe(item_val);
     inven_destroy(item_val);
     }
 }
@@ -1465,7 +1465,7 @@ void do_cmd_read_scroll(void)
     if (!used_up) return;
 
     /* Destroy the scroll */
-    desc_remain(item_val);
+    inven_item_describe(item_val);
     inven_destroy(item_val);
 }
 

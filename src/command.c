@@ -338,7 +338,7 @@ static void do_cmd_refill_lamp()
 	else {
 	    msg_print("Your lamp is less than half full.");
 	}
-	desc_remain(i);
+	inven_item_describe(i);
 	inven_destroy(i);
     }
 }

@@ -507,7 +507,7 @@ void inscribe(inven_type *, cptr);
 void objdes(char *, struct inven_type *, int);
 void invcopy(inven_type *, int);
 void inven_item_charges(int);
-void desc_remain(int);
+void inven_item_describe(int);
 s16b object_offset(inven_type *);
 
 /* command.c */

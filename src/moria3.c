@@ -1764,7 +1764,7 @@ void do_cmd_fire()
 	/* Get a direction (or Abort), apply confusion */
 	if (get_dir_c(NULL, &dir)) {
 
-	    desc_remain(item_val);
+	    inven_item_describe(item_val);
 	    max_shots = inventory[item_val].number;
 	    inven_throw(item_val, &throw_obj);
 	    facts(&throw_obj, &tbth, &tpth, &tdam, &tdis, &thits);
@@ -1877,11 +1877,11 @@ void do_cmd_fire()
 		    if (inventory[INVEN_WIELD].sval != 12) {
 			(void)sprintf(out_val, "Keep shooting?");
 			if (get_check(out_val)) {
-			    desc_remain(item_val);
+			    inven_item_describe(item_val);
 			    inven_throw(item_val, &throw_obj);
 			} else thits = 0;
 		    } else {
-			desc_remain(item_val);
+			inven_item_describe(item_val);
 			inven_throw(item_val, &throw_obj);
 		    }
 		}

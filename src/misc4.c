@@ -1487,7 +1487,7 @@ void inven_item_charges(int item_val)
 /*
  * Describe amount of item remaining.			-RAK-	
  */
-void desc_remain(int i_idx)
+void inven_item_describe(int i_idx)
 {
     inven_type *i_ptr;
     bigvtype tmp_str;
