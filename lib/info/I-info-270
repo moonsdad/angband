@@ -2,6 +2,7 @@
 
 Added field "name1" for artifact identities
 Used "name2" only for "ego-items" (not artifacts or chests)
+Rewrote object description code.
 Addition of another flag set for items.
 Reorganization of the flags for items.
 Addition of "IGNORE" flags to allow items to "ignore" damage.

@@ -549,19 +549,21 @@ void unmagic_name(inven_type *i_ptr)
 /*
  * defines for pval_use, determine how the pval field is printed 
  */
-#define IGNORED  0		/* never show (+x) */
-#define CHARGES  1		/* show pval as charges */
-#define PLUSSES  2		/* show pval as (+x) only */
-#define LIGHT    3		/* show pval as turns of light */
-#define FLAGS    4		/* show pval as (+x of yyy) */
-#define Z_PLUSSES 5             /* always show pval as (+x), even if x==0 -CWS */
+#define IGNORED     0		/* never show (+x) */
+#define Z_PLUSSES   1		/* always show pval as (+x), even if x==0 -CWS */
+#define PLUSSES     2		/* show pval as (+x) only */
+#define FLAGS       3		/* show pval as (+x of yyy) */
+#define CHARGES     5		/* show pval as charges */
+#define USE_LITE    7		/* show pval as turns of light */
 
 
 /*
- * Returns a description of item for inventory
- * pref indicates that there should be an article added (prefix)
+ * Creates a description of the item "i_ptr", and stores it in "out_val".
  *
- * note that since out_val can easily exceed 80 characters, objdes must
+ * If "pref" is TRUE, the description is verbose, and has an article (or number,
+ * or "no more") prefixed to the description.
+ *
+ * Note that since out_val can easily exceed 80 characters, objdes must
  * always be called with a bigvtype as the first paramter 
  *****
  * Note that objdes now never returns a description ending with punctuation
@@ -582,6 +584,9 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
     /* Extract the (default) "base name" */
     basenm = k_list[i_ptr->k_idx].name;
 
+    /* Assume we will NOT append the "kind" name */
+    append_name = FALSE;
+
     /* Assume no modifier string */
     modstr = NULL;
 
@@ -592,30 +597,34 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
     pval_use = IGNORED;
 
     modify = (known1_p(i_ptr) ? FALSE : TRUE);
-    append_name = FALSE;
 
     /* Analyze the object */
     switch (i_ptr->tval) {
 
+      /* Some objects are easy to describe */
       case TV_MISC:
-      case TV_CHEST:
+      case TV_SPIKE:
+      case TV_FLASK:
 	break;
-      case TV_SHOT:
-      case TV_BOLT:
-      case TV_ARROW:
+
+      case TV_CHEST:
+
+	break;
+
+
+      /* Weapons have a damage string, and flags */
+      case TV_HAFTED:
+      case TV_POLEARM:
+      case TV_SWORD:
+	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
+	pval_use = FLAGS;
+	break;
+      case TV_DIGGING:
+	pval_use = Z_PLUSSES;
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
-      case TV_LITE:
-	pval_use = LIGHT;
-	if (!stricmp("The Phial of Galadriel", basenm) && !known2_p(i_ptr))
-	    basenm = "a Shining Phial";
-	if (!stricmp("The Star of Elendil", basenm) && !known2_p(i_ptr))
-	    basenm = "a Shining Gem";
-	if (!stricmp("The Arkenstone of Thrain", basenm) && !known2_p(i_ptr))
-	    basenm = "a Shining Gem";
-	break;
-      case TV_SPIKE:
-	break;
+
+      /* Bows get a special "damage string" */
       case TV_BOW:
 	switch(i_ptr->sval) { /* whole new code -CFT */
 	  case 20: case 1: /* sling, sh. bow */
@@ -637,15 +646,11 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	    pval_use = FLAGS;
 	break;
 
-      /* Weapons have a damage string, and flags */
-      case TV_HAFTED:
-      case TV_POLEARM:
-      case TV_SWORD:
-	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
-	pval_use = FLAGS;
-	break;
-      case TV_DIGGING:
-	pval_use = Z_PLUSSES;
+
+      /* Missiles have a damage string */
+      case TV_SHOT:
+      case TV_BOLT:
+      case TV_ARROW:
 	(void)sprintf(damstr, " (%dd%d)", i_ptr->dd, i_ptr->ds);
 	break;
 
@@ -660,6 +665,19 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
       case TV_HARD_ARMOR:
 	pval_use = FLAGS;
 	break;
+
+
+      /* Lites (including a few "Specials") */
+      case TV_LITE:
+	pval_use = LIGHT;
+	if (!stricmp("The Phial of Galadriel", basenm) && !known2_p(i_ptr))
+	    basenm = "a Shining Phial";
+	if (!stricmp("The Star of Elendil", basenm) && !known2_p(i_ptr))
+	    basenm = "a Shining Gem";
+	if (!stricmp("The Arkenstone of Thrain", basenm) && !known2_p(i_ptr))
+	    basenm = "a Shining Gem";
+	break;
+
 
       /* Amulets (including a few "Specials") */
       case TV_AMULET:
@@ -767,9 +785,6 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	    basenm = "& Potion~";
 	    append_name = TRUE;
 	}
-	break;
-
-      case TV_FLASK:
 	break;
 
       case TV_FOOD:
