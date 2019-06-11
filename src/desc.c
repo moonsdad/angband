@@ -438,17 +438,6 @@ int known2_p(inven_type *i_ptr)
 }
 
 
-void clear_known2(inven_type *i_ptr)
-{
-    i_ptr->ident &= ~ID_KNOWN;
-}
-
-
-void clear_empty(inven_type *i_ptr)
-{
-    i_ptr->ident &= ~ID_EMPTY;
-}
-
 void store_bought(inven_type *i_ptr)
 {
     i_ptr->ident |= ID_STOREBOUGHT;

@@ -2489,9 +2489,12 @@ int recharge(int num)
 	    } else {
 		num = (num / (i_ptr->level + 2)) + 1;
 		i_ptr->pval += 2 + randint(num);
-		if (known2_p(i_ptr))
-		    clear_known2(i_ptr);
-		clear_empty(i_ptr);
+
+		/* Hack -- we no longer "know" the item */
+		if (known2_p(i_ptr)) i_ptr->ident &= ~ID_KNOWN;
+
+		/* Hack -- we no longer think the item is empty */
+		i_ptr->ident &= ~ID_EMPTY;
 	    }
 	}
     }

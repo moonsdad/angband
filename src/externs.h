@@ -494,8 +494,6 @@ void inven_aware(inven_type *);
 int inven_aware_p(inven_type *);
 void known2(inven_type *);
 int known2_p(inven_type *);
-void clear_known2(inven_type *);
-void clear_empty(inven_type *);
 void store_bought(inven_type *);
 int store_bought_p(inven_type *);
 void sample(struct inven_type *);
