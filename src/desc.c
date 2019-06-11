@@ -416,7 +416,18 @@ int inven_aware_p(inven_type *i_ptr)
  */
 void known2(inven_type *i_ptr)
 {
-    unsample(i_ptr);
+    s16b offset;
+    byte indexx;
+
+/* Remove an automatically generated inscription.	-CJS- */
+/* used to clear ID_DAMD flag, but I think it should remain set */
+    i_ptr->ident &= ~(ID_MAGIK | ID_EMPTY);
+    if ((offset = flavor_p(i_ptr)) < 0)
+	return;
+    offset <<= 6;
+    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
+    object_ident[offset + indexx] &= ~OD_TRIED;
+
     i_ptr->ident |= ID_KNOWN;
 }
 
@@ -450,22 +461,6 @@ int store_bought_p(inven_type *i_ptr)
     return (i_ptr->ident & ID_STOREBOUGHT);
 }
 
-/*
- * Remove an automatically generated inscription.	-CJS-
- */
-static void unsample(inven_type *i_ptr)
-{
-    s16b offset;
-    byte indexx;
-
-/* used to clear ID_DAMD flag, but I think it should remain set */
-    i_ptr->ident &= ~(ID_MAGIK | ID_EMPTY);
-    if ((offset = flavor_p(i_ptr)) < 0)
-	return;
-    offset <<= 6;
-    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    object_ident[offset + indexx] &= ~OD_TRIED;
-}
 
 /* unquote() is no longer needed */
 
