@@ -1,0 +1,6 @@
+# File: k_list
+
+##### The "empty" item #####
+
+N:0:(nothing)
+I: :d:0:0:0:0:0:0:0

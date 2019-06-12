@@ -1,0 +1,8 @@
+# File: r_list.txt
+
+# Purpose: A parsable list of the Angband monsters
+
+
+# Note that (for now) the monsters MUST be sorted by level.
+
+##### Normal monsters #####

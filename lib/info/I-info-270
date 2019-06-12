@@ -1,5 +1,6 @@
 === Basic "changes" from Angband 2.6.1 to Angband 2.7.0 ===
 
+Parsing of Item kinds from text files
 Added field "name1" for artifact identities
 Used "name2" only for "ego-items" (not artifacts or chests)
 Rewrote object description code.
@@ -14,6 +15,7 @@ Used "pval" (not "timeout") for rods, which are NOT activated.
 Made rings/amulets of Strength/etc also do "Sustain Strength" etc.
 Realized that the preceding change was probably a mistake.
 
+Parsing of monster race info from a text file.
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.
 Added floating point (yuck!) to "standard deviation" code.
