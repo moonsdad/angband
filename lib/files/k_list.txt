@@ -13,133 +13,133 @@ F::
 N:1:Blindness
 I:,::80:65:500:1:1:9:0
 A:9/0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:2:Paranoia
 I:,::80:66:500:1:1:9:0
 A:9/0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:3:Confusion
 I:,::80:67:500:1:1:7:0
 A:7/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:4:Hallucination
 I:,::80:68:500:1:1:13:0
 A:13/0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:5:Cure Poison
 I:,::80:69:500:1:1:8:60
 A:8/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:6:Cure Blindness
 I:,::80:70:500:1:1:10:50
 A:10/0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:7:Cure Paranoia
 I:,::80:71:500:1:1:12:25
 A:12/0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:8:Cure Confusion
 I:,::80:72:500:1:1:6:50
 A:6/0
-F:0x00000100L:0x0L
+F:0x100:0x0
 
 N:9:Weakness
 I:,::80:73:500:1:1:7:0
 A:7/0
-F:0x04000200L:0x0L
+F:0x200:0x0
 
 N:10:Unhealth
 I:,::80:74:500:1:1:15:50
 A:15/0
 P:0:10d10:0:0:0
-F:0x04000400L:0x0L
+F:0x400:0x0
 
 N:11:Restore Constitution
 I:,::80:75:500:1:1:20:350
 A:20/0
-F:0x00010000L:0x0L
+F:0x10000:0x0
 
 N:12:Restoring
 I:,::80:79:500:1:1:20:1000
 A:20/0
-F:0x001F8040L:0x0L
+F:0x1F8040:0x0
 
 N:15:Poison
 I:,::80:80:1200:1:1:15:0
 A:15/0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 ##### Molds #####
 
 N:16:Poison
 I:,::80:80:1200:1:1:15:0
 A:15/0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 N:17:Hallucinations
 I:,::80:81:1200:1:1:18:0
 A:18/0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:18:Cure Poison
 I:,::80:82:1200:1:1:19:75
 A:19/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:19:Unhealth
 I:,::80:83:1200:1:1:28:25
 A:28/0
 P:0:6d8:0:0:0
-F:0x00000400L:0x0L
+F:0x400:0x0
 
 N:20:Cure Serious Wounds
 I:,::80:84:1200:1:2:16:75
 A:16/0
-F:0x02000000L:0x0L
+F:0x2000000:0x0
 
 ##### Normal Food #####
 
 N:21:& Ration~ of Food
 I:,::80:90:5000:1:10:0:3
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:22:& Ration~ of Food
 I:,::80:90:5000:1:10:5:3
 A:5/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:23:& Ration~ of Food
 I:,::80:90:5000:1:10:10:3
 A:10/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:24:& Slime Mold~
 I:,::80:91:3000:1:5:1:2
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:25:& Piece~ of Elvish Waybread
 I:,::80:92:7500:1:3:6:10
 A:6/0
-F:0x02000020L:0x0L
+F:0x2000020:0x0
 
 N:26:& Piece~ of Elvish Waybread
 I:,::80:92:7500:1:3:12:10
 A:12/0
-F:0x02000020L:0x0L
+F:0x2000020:0x0
 
 N:27:& Piece~ of Elvish Waybread
 I:,::80:92:7500:1:3:20:10
 A:20/0
-F:0x02000020L:0x0L
+F:0x2000020:0x0
 
 ##### Edged Weapons #####
 
@@ -147,37 +147,37 @@ N:30:& Broken dagger
 I:|::23:5:0:1:15:0:0
 A:0/0
 P:0:1d1:-2:-4:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:31:& Bastard Sword
 I:|::23:7:0:1:140:14:350
 A:14/0
 P:0:3d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:32:& Scimitar
 I:|::23:25:0:1:130:8:250
 A:8/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:33:& Tulwar
 I:|::23:26:0:1:100:6:200
 A:6/0
 P:0:2d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:34:& Broadsword
 I:|::23:10:0:1:150:9:255
 A:9/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:35:& Broadsword
 I:|::23:27:0:1:150:15:255
 A:15/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 # XXX MULTI_HUED
 
@@ -185,73 +185,73 @@ N:36:& Blade of Chaos
 I:|::23:30:0:1:180:70:4000
 A:70/5
 P:0:6d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:37:& Two-Handed Sword
 I:|::23:11:0:1:200:30:775
 A:30/0
 P:0:3d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:28:& Main Gauche
 I:|::23:1:0:1:30:2:25
 A:2/0
 P:0:1d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:39:& Cutlass
 I:|::23:12:0:1:110:7:85
 A:7/0
 P:0:1d7:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:40:& Executioner:s Sword
 I:|::23:14:0:1:260:40:850
 A:40/0
 P:0:4d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:41:& Katana
 I:|::23:17:0:1:120:18:400
 A:18/0
 P:0:3d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:42:& Longsword
 I:|::23:18:0:1:130:12:300
 A:12/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:29:& Dagger
 I:|::23:3:0:1:12:0:10
 A:0/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:44:& Rapier
 I:|::23:20:0:1:40:4:42
 A:4/0
 P:0:1d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:45:& Sabre
 I:|::23:21:0:1:50:5:50
 A:5/0
 P:0:1d7:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:46:& Small sword
 I:|::23:22:0:1:75:5:48
 A:5/0
 P:0:1d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:47:& Broken sword
 I:|::23:24:0:1:75:0:0
 A:0/0
 P:0:1d1:-2:-4:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 ##### Hafted Weapons #####
 
@@ -259,67 +259,67 @@ N:48:& Ball and Chain
 I:\::21:1:0:1:150:20:200
 A:20/0
 P:0:2d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:49:& Whip
 I:\::21:10:0:1:30:3:30
 A:3/0
 P:0:1d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:50:& Flail
 I:\::21:4:0:1:150:12:353
 A:12/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:51:& Two-Handed Great Flail
 I:\::21:5:0:1:280:45:590
 A:45/0
 P:0:3d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:52:& Morningstar
 I:\::21:6:0:1:150:10:396
 A:10/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:53:& Mace
 I:\::21:7:0:1:120:6:130
 A:6/0
 P:0:2d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:54:& Quarterstaff
 I:\::21:11:0:1:150:8:200
 A:8/0
 P:0:1d10:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:55:& War Hammer
 I:\::21:8:0:1:120:5:225
 A:5/0
 P:0:3d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:56:& Lead-filled Mace
 I:\::21:9:0:1:180:15:502
 A:15/0
 P:0:3d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:57:& Mace of Disruption
 I:\::21:12:0:1:400:80:4300
 A:80/4
 P:0:4d10:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:62:& Lucerne Hammer
 I:\::21:13:0:1:120:11:376
 A:11/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 ##### Polearms #####
 
@@ -327,85 +327,85 @@ N:59:& Beaked Axe
 I:/::22:2:0:1:180:15:408
 A:15/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:60:& Glaive
 I:/::22:4:0:1:190:20:363
 A:20/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:61:& Halberd
 I:/::22:5:0:1:190:22:430
 A:22/0
 P:0:3d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:58:& Awl-Pike
 I:/::22:1:0:1:160:8:340
 A:8/0
 P:0:1d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:63:& Pike
 I:/::22:7:0:1:160:15:358
 A:15/0
 P:0:2d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:64:& Spear
 I:/::22:8:0:1:50:5:36
 A:5/0
 P:0:1d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:65:& Trident
 I:/::22:15:0:1:70:8:65
 A:8/0
 P:0:1d9:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:66:& Lance
 I:/::22:9:0:1:300:10:230
 A:10/0
 P:0:2d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:67:& Great Axe
 I:/::22:11:0:1:230:40:500
 A:40/0
 P:0:4d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:68:& Battle Axe
 I:/::22:12:0:1:170:13:334
 A:13/0
 P:0:2d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:69:& Lochaber Axe
 I:/::22:13:0:1:250:45:750
 A:45/0
 P:0:3d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:70:& Broad Axe
 I:/::22:14:0:1:160:17:304
 A:17/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:71:& Scythe
 I:/::22:16:0:1:250:45:800
 A:45/0
 P:0:5d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:72:& Scythe of Slicing
 I:/::22:17:0:1:250:60:3500
 A:60/4
 P:0:8d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Bows:Crossbows:Slings #####
@@ -413,28 +413,28 @@ F:0x00000000L:0x0L
 N:73:& Short Bow
 I:}::19:1:2:1:30:3:50
 A:3/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:74:& Long Bow
 I:}::19:2:3:1:40:10:120
 A:10/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:75:& Light Crossbow
 I:}::19:10:5:1:110:15:140
 A:15/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:76:& Heavy Crossbow
 I:}::19:11:6:1:200:30:300
 A:30/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:77:& Sling
 I:}::19:20:1:1:5:1:5
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Missiles #####
@@ -443,37 +443,37 @@ N:78:& Arrow~
 I:{::17:193:0:1:2:2:1
 A:2/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:79:& Seeker Arrow~
 I:{::17:194:0:1:2:55:20
 A:55/2
 P:0:4d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:80:& Bolt~
 I:{::18:193:0:1:3:2:2
 A:2/0
 P:0:1d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:81:& Seeker Bolt~
 I:{::18:194:0:1:3:65:25
 A:65/3
 P:0:4d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:82:& Rounded Pebble~
 I:{::16:193:0:1:4:0:1
 A:0/0
 P:0:1d2:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:83:& Iron Shot~
 I:{::16:194:0:1:5:3:2
 A:3/0
 P:0:1d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Shovels and Picks #####
@@ -482,25 +482,25 @@ N:89:& Gnomish Shovel
 I:\::20:5:1:1:50:20:10
 A:20/0
 P:0:1d2:0:0:0
-F:0x20000000L:0x0L
+F:0x20000000:0x0
 
 N:90:& Dwarven Shovel
 I:\::20:6:2:1:120:40:50
 A:40/0
 P:0:1d3:0:0:0
-F:0x20000000L:0x0L
+F:0x20000000:0x0
 
 N:87:& Orcish Pick
 I:\::20:2:2:1:180:20:300
 A:20/0
 P:0:1d3:0:0:0
-F:0x20000000L:0x0L
+F:0x20000000:0x0
 
 N:88:& Dwarven Pick
 I:\::20:3:3:1:200:50:900
 A:50/0
 P:0:1d4:0:0:0
-F:0x20000000L:0x0L
+F:0x20000000:0x0
 
 ##### Armor #####
 
@@ -508,55 +508,55 @@ N:91:& Pair of Soft Leather Boots
 I:]::30:2:0:1:20:4:7
 A:4/0
 P:2:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:92:& Pair of Hard Leather Boots
 I:]::30:3:0:1:40:6:12
 A:6/0
 P:3:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:93:& Pair of Metal Shod Boots
 I:]::30:4:0:1:80:20:50
 A:20/0
 P:6:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:94:& Hard Leather Cap
 I:]::33:2:0:1:15:4:12
 A:4/0
 P:2:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:95:& Metal Cap
 I:]::33:3:0:1:20:7:30
 A:7/0
 P:3:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:96:& Iron Helm
 I:]::33:4:0:1:75:20:75
 A:20/0
 P:5:1d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:97:& Steel Helm
 I:]::33:5:0:1:60:40:200
 A:40/0
 P:6:1d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:98:& Iron Crown
 I:]::33:6:0:1:20:44:500
 A:44/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:99:& Golden Crown
 I:]::33:7:0:1:30:47:1000
 A:47/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 # MULTI_HUED
 
@@ -564,133 +564,133 @@ N:100:& Jewel Encrusted Crown
 I:]::33:8:0:1:40:50:2000
 A:50/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:101:& Robe
 I:(::36:1:0:1:20:1:4
 A:1/0
 P:2:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:102:& Robe
 I:(::36:6:0:1:20:50:4
 A:50/0
 P:2:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:103:Soft Leather Armour
 I:(::36:2:0:1:80:2:18
 A:2/0
 P:4:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:104:Soft Studded Leather
 I:(::36:3:0:1:90:3:35
 A:3/0
 P:5:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:105:Hard Leather Armour
 I:(::36:4:0:1:100:5:55
 A:5/0
 P:6:1d1:-1:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:106:Hard Studded Leather
 I:(::36:5:0:1:110:7:100
 A:7/0
 P:7:1d2:-1:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:107:Leather Scale Mail
 I:(::36:9:0:1:140:14:330
 A:14/0
 P:11:1d1:-1:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:108:Metal Scale Mail
 I:[::37:1:0:1:250:24:430
 A:24/0
 P:13:1d4:-2:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:109:Chain Mail
 I:[::37:2:0:1:220:26:530
 A:26/0
 P:14:1d4:-2:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:110:Rusty Chain Mail
 I:[::37:3:0:1:200:26:0
 A:26/0
 P:14:1d4:-5:0:-8
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:111:Augmented Chain Mail
 I:[::37:5:0:1:270:30:675
 A:30/0
 P:16:1d4:-2:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:112:Bar Chain Mail
 I:[::37:6:0:1:280:34:720
 A:34/0
 P:18:1d4:-2:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:113:Metal Brigandine Armour
 I:[::37:7:0:1:290:36:775
 A:36/0
 P:19:1d4:-3:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:114:Partial Plate Armour
 I:[::37:9:0:1:260:42:900
 A:42/0
 P:22:1d6:-3:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:115:Metal Lamellar Armour
 I:[::37:10:0:1:340:44:950
 A:44/0
 P:23:1d6:-3:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:116:Full Plate Armour
 I:[::37:11:0:1:380:48:1050
 A:48/0
 P:25:2d4:-3:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:117:Ribbed Plate Armour
 I:[::37:12:0:1:380:50:1200
 A:50/0
 P:28:2d4:-3:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:118:Adamantite Plate Mail
 I:[::37:13:0:1:420:75:20000
 A:75/7
 P:40:2d4:-4:0:0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:119:Mithril Plate Mail
 I:[::37:14:0:1:300:60:15000
 A:60/5
 P:35:2d4:-3:0:0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:120:Mithril Chain Mail
 I:[::37:15:0:1:150:55:7000
 A:55/4
 P:28:1d4:-1:0:0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:121:Double Chain Mail
 I:[::37:16:0:1:250:30:630
 A:30/0
 P:16:1d4:-2:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 # This shield does not belong here
@@ -699,7 +699,7 @@ N:122:Shield of Deflection
 I:[::34:17:0:1:100:70:10000
 A:70/6
 P:10:1d1:0:0:10
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ### The Cloaks ###
@@ -708,13 +708,13 @@ N:123:& Cloak
 I:(::35:1:0:1:10:1:3
 A:1/0
 P:1:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:124:& Shadow Cloak
 I:(::35:2:0:1:5:60:4000
 A:60/3
 P:6:0d0:0:0:4
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ### The Gloves ###
@@ -723,19 +723,19 @@ N:125:& Set of Leather Gloves
 I:]::31:1:0:1:5:1:3
 A:1/0
 P:1:0d0:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:126:& Set of Gauntlets
 I:]::31:2:0:1:25:12:35
 A:12/0
 P:2:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:127:& Set of Cesti
 I:]::31:3:0:1:40:50:100
 A:50/0
 P:5:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ### The shields ###
@@ -744,25 +744,25 @@ N:128:& Small Leather Shield
 I:)::34:1:0:1:50:3:30
 A:3/0
 P:2:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:129:& Large Leather Shield
 I:)::34:3:0:1:100:15:120
 A:15/0
 P:4:1d2:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:130:& Small Metal Shield
 I:)::34:4:0:1:65:10:50
 A:10/0
 P:3:1d2:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:131:& Large Metal Shield
 I:)::34:6:0:1:120:30:200
 A:30/0
 P:5:1d3:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Rings #####
@@ -770,210 +770,210 @@ F:0x00000000L:0x0L
 N:132:Strength
 I:=::45:0:0:1:2:30:400
 A:30/0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 N:133:Dexterity
 I:=::45:1:0:1:2:30:400
 A:30/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:134:Constitution
 I:=::45:2:0:1:2:30:400
 A:30/0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:135:Intelligence
 I:=::45:3:0:1:2:30:350
 A:30/0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:136:Speed
 I:=::45:4:0:1:2:100:300000
 A:100/2
-F:0x00001000L:0x0L
+F:0x1000:0x0
 
 N:137:Searching
 I:=::45:5:0:1:2:7:250
 A:7/0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:138:Teleportation
 I:=::45:6:0:1:2:7:0
 A:7/0
-F:0x80000400L:0x0L
+F:0x80000400:0x0
 
 N:139:Slow Digestion
 I:=::45:7:0:1:2:7:250
 A:7/0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:140:Resist Fire
 I:=::45:8:0:1:2:14:250
 A:14/0
-F:0x00080000L:0x0L
+F:0x80000:0x0
 
 N:141:Resist Cold
 I:=::45:9:0:1:2:14:250
 A:14/0
-F:0x00200000L:0x0L
+F:0x200000:0x0
 
 N:142:Feather Falling
 I:=::45:10:0:1:2:7:200
 A:7/0
-F:0x04000000L:0x0L
+F:0x4000000:0x0
 
 N:143:Poison Resistance
 I:=::45:11:0:1:2:55:16000
 A:55/0
-F:0x10000000L:0x0L
+F:0x10000000:0x0
 
 N:414:Free Action
 I:=::45:37:0:1:2:20:1500
 A:20/0
-F:0x00800000L:0x0L
+F:0x800000:0x0
 
 N:145:Weakness
 I:=::45:13:-5:1:2:7:0
 A:7/0
-F:0x80000001L:0x0L
+F:0x80000001:0x0
 
 N:146:Flames
 I:=::45:14:0:1:2:50:3000
 A:50/0
 P:0:0d0:0:0:15
-F:0x00080000L:0x0L
+F:0x80000:0x0
 
 N:147:Acid
 I:=::45:15:0:1:2:50:3000
 A:50/0
 P:0:0d0:0:0:15
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:148:Ice
 I:=::45:16:0:1:2:50:3000
 A:50/0
 P:0:0d0:0:0:15
-F:0x00200000L:0x0L
+F:0x200000:0x0
 
 N:149:WOE
 I:=::45:17:-5:1:2:50:0
 A:50/0
 P:0:0d0:0:0:-3
-F:0x80000644L:0x0L
+F:0x80000644:0x0
 
 N:150:Stupidity
 I:=::45:18:-5:1:2:7:0
 A:7/0
-F:0x80000002L:0x0L
+F:0x80000002:0x0
 
 N:151:Damage
 I:=::45:19:0:1:2:20:500
 A:20/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:152:Accuracy
 I:=::45:20:0:1:2:20:500
 A:20/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:153:Protection
 I:=::45:21:0:1:2:10:500
 A:10/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:154:Aggravate Monster
 I:=::45:22:0:1:2:7:0
 A:7/0
-F:0x80000200L:0x0L
+F:0x80000200:0x0
 
 N:155:See Invisible
 I:=::45:23:0:1:2:30:340
 A:30/0
-F:0x01000000L:0x0L
+F:0x1000000:0x0
 
 N:156:Sustain Strength
 I:=::45:24:1:1:2:28:750
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:157:Sustain Intelligence
 I:=::45:25:2:1:2:28:600
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:158:Sustain Wisdom
 I:=::45:26:3:1:2:28:600
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:159:Sustain Constitution
 I:=::45:27:4:1:2:28:750
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:160:Sustain Dexterity
 I:=::45:28:5:1:2:28:750
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:161:Sustain Charisma
 I:=::45:29:6:1:2:28:500
 A:28/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:162:Slaying
 I:=::45:30:0:1:2:40:1000
 A:40/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 ##### Amulets #####
 
 N:163:Wisdom
 I:"::40:0:0:1:3:20:300
 A:20/0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:164:Charisma
 I:"::40:1:0:1:3:20:250
 A:20/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 
 N:165:Searching
 I:"::40:2:0:1:3:14:250
 A:14/0x40
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:166:Teleportation
 I:"::40:3:0:1:3:14:0
 A:14/0
-F:0x80000400L:0x0L
+F:0x80000400:0x0
 
 N:167:Slow Digestion
 I:"::40:4:0:1:3:14:200
 A:14/0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:168:Resist Acid
 I:"::40:5:0:1:3:24:300
 A:24/0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:169:Adornment
 I:"::40:6:0:1:3:16:20
 A:16/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:171:the Magi
 I:"::40:8:0:1:3:50:30000
 A:50/0
 P:0:0d0:0:0:3
-F:0x01800040L:0x0L
+F:0x1800040:0x0
 
 N:172:DOOM
 I:"::40:9:-5:1:3:50:0
 A:50/0
-F:0x8000007FL:0x0L
+F:0x8000007FL:0x0
 
 
 ##### Scrolls #####
@@ -981,248 +981,248 @@ F:0x8000007FL:0x0L
 N:173:Enchant Weapon To-Hit
 I:?::70:64:0:1:5:12:125
 A:12/0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 N:174:Enchant Weapon To-Dam
 I:?::70:65:0:1:5:12:125
 A:12/0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:175:Enchant Armour
 I:?::70:66:0:1:5:12:125
 A:12/0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:176:Identify
 I:?::70:67:0:1:5:1:50
 A:1/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:177:Identify
 I:?::70:67:0:1:5:5:50
 A:5/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:178:Identify
 I:?::70:67:0:1:5:10:50
 A:10/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:179:Identify
 I:?::70:67:0:1:5:30:50
 A:30/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:180:Remove Curse
 I:?::70:68:0:1:5:7:100
 A:7/0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:181:Light
 I:?::70:69:0:1:5:0:15
 A:0/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:182:Light
 I:?::70:69:0:1:5:3:15
 A:3/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:183:Light
 I:?::70:69:0:1:5:7:15
 A:7/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:184:Summon Monster
 I:?::70:70:0:1:5:1:0
 A:1/0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:185:Phase Door
 I:?::70:71:0:1:5:1:15
 A:1/0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:186:Teleport
 I:?::70:72:0:1:5:10:40
 A:10/0
-F:0x00000100L:0x0L
+F:0x100:0x0
 
 N:187:Teleport Level
 I:?::70:73:0:1:5:20:50
 A:20/0
-F:0x00000200L:0x0L
+F:0x200:0x0
 
 N:188:Monster Confusion
 I:?::70:74:0:1:5:5:30
 A:5/0
-F:0x00000400L:0x0L
+F:0x400:0x0
 
 N:189:Magic Mapping
 I:?::70:75:0:1:5:5:40
 A:5/0
-F:0x00000800L:0x0L
+F:0x800:0x0
 
 N:190:Rune of Protection
 I:?::70:77:0:1:5:90:500
 A:90/3
-F:0x00002000L:0x0L
+F:0x2000:0x0
 
 N:191:Rune of Protection
 I:?::70:77:0:1:5:60:500
 A:60/2
-F:0x00002000L:0x0L
+F:0x2000:0x0
 
 N:192:Treasure Detection
 I:?::70:78:0:1:5:0:15
 A:0/0
-F:0x00004000L:0x0L
+F:0x4000:0x0
 
 N:193:Object Detection
 I:?::70:79:0:1:5:0:15
 A:0/0
-F:0x00008000L:0x0L
+F:0x8000:0x0
 
 N:194:Trap Detection
 I:?::70:80:0:1:5:5:35
 A:5/0
-F:0x00010000L:0x0L
+F:0x10000:0x0
 
 N:195:Trap Detection
 I:?::70:80:0:1:5:8:35
 A:8/0
-F:0x00010000L:0x0L
+F:0x10000:0x0
 
 N:196:Trap Location
 I:-::66:25:0:1:15:5:100
 A:5/0
 P:0:1d1:0:0:0
-F:SV_ROD_TRAP_LOC:0x800L
+F:SV_ROD_TRAP_LOC:0x800
 
 N:197:Door/Stair Location
 I:?::70:81:0:1:5:5:35
 A:5/0
-F:0x00020000L:0x0L
+F:0x20000:0x0
 
 N:198:Door/Stair Location
 I:?::70:81:0:1:5:10:35
 A:10/0
-F:0x00020000L:0x0L
+F:0x20000:0x0
 
 N:199:Door/Stair Location
 I:?::70:81:0:1:5:15:35
 A:15/0
-F:0x00020000L:0x0L
+F:0x20000:0x0
 
 N:200:Mass Genocide
 I:?::70:82:0:1:5:50:1000
 A:50/4
-F:0x00040000L:0x0L
+F:0x40000:0x0
 
 N:201:Detect Invisible
 I:?::70:83:0:1:5:1:15
 A:1/0
-F:0x00080000L:0x0L
+F:0x80000:0x0
 
 N:202:Aggravate Monster
 I:?::70:84:0:1:5:5:0
 A:5/0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:203:Trap Creation
 I:?::70:85:0:1:5:12:0
 A:12/0
-F:0x00200000L:0x0L
+F:0x200000:0x0
 
 N:204:Trap/Door Destruction
 I:?::70:86:0:1:5:12:50
 A:12/0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:205:*Enchant Armour*
 I:?::71:96:0:1:5:50:500
 A:50/0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:206:Recharging
 I:?::70:88:0:1:5:40:200
 A:40/0
-F:0x01000000L:0x0L
+F:0x1000000:0x0
 
 N:207:Genocide
 I:?::70:89:0:1:5:37:750
 A:37/3
-F:0x02000000L:0x0L
+F:0x2000000:0x0
 
 N:208:Darkness
 I:?::70:90:0:1:5:1:0
 A:1/0
-F:0x04000000L:0x0L
+F:0x4000000:0x0
 
 N:209:Protection from Evil
 I:?::70:91:0:1:5:30:50
 A:30/0
-F:0x08000000L:0x0L
+F:0x8000000:0x0
 
 N:210:Satisfy Hunger
 I:?::70:92:0:1:5:5:10
 A:5/0
-F:0x10000000L:0x0L
+F:0x10000000:0x0
 
 N:211:Dispel Undead
 I:?::70:93:0:1:5:40:200
 A:40/0
-F:0x20000000L:0x0L
+F:0x20000000:0x0
 
 N:212:*Enchant Weapon*
 I:?::71:94:0:1:5:50:500
 A:50/0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 N:213:Curse Weapon
 I:?::71:95:0:1:5:50:0
 A:50/0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:214:*Enchant Armour*
 I:?::71:96:0:1:5:50:500
 A:50/0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:215:Curse Armour
 I:?::71:97:0:1:5:50:0
 A:50/0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:216:Summon Undead
 I:?::71:98:0:1:5:15:0
 A:15/0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:217:Blessing
 I:?::71:99:0:1:5:1:15
 A:1/0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:218:Holy Chant
 I:?::71:100:0:1:5:12:40
 A:12/0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:219:Holy Prayer
 I:?::71:101:0:1:5:24:80
 A:24/0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:220:Word of Recall
 I:?::71:102:0:1:5:5:150
 A:5/0
-F:0x00000100L:0x0L
+F:0x100:0x0
 
 N:221:*Destruction*
 I:?::71:103:0:1:5:40:250
 A:40/0
-F:0x00000200L:0x0L
+F:0x200:0x0
 
 ##### Potions #####
 
@@ -1230,265 +1230,265 @@ N:222:Slime Mold Juice
 I:!::75:64:400:1:4:0:2
 A:0/0
 P:0:1d1:0:0:0
-F:0x30000000L:0x0L
+F:0x30000000:0x0
 
 N:223:Apple Juice
 I:!::75:65:250:1:4:0:1
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:224:Water
 I:!::75:66:200:1:4:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:225:Strength
 I:!::75:67:0:1:4:30:8000
 A:30/0
 P:0:1d1:0:0:0
-F:0x00000001L:0x0L
+F:0x1:0x0
 
 N:226:Weakness
 I:!::75:68:0:1:4:3:0
 A:3/0
 P:0:1d1:0:0:0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:227:Restore Strength
 I:!::75:69:0:1:4:25:300
 A:25/0
 P:0:1d1:0:0:0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:228:Intelligence
 I:!::75:70:0:1:4:32:8000
 A:32/0
 P:0:1d1:0:0:0
-F:0x00000008L:0x0L
+F:0x8:0x0
 
 N:229:Stupidity
 I:!::75:71:0:1:4:20:0
 A:20/0
 P:0:1d1:0:0:0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:230:Restore Intelligence
 I:!::75:72:0:1:4:26:300
 A:26/0
 P:0:1d1:0:0:0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:231:Wisdom
 I:!::75:73:0:1:4:32:8000
 A:32/0
 P:0:1d1:0:0:0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:232:Naivety
 I:!::75:74:0:1:4:20:0
 A:20/0
 P:0:1d1:0:0:0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:233:Restore Wisdom
 I:!::75:75:0:1:4:26:300
 A:26/0
 P:0:1d1:0:0:0
-F:0x00000100L:0x0L
+F:0x100:0x0
 
 N:234:Charisma
 I:!::75:76:0:1:4:20:1000
 A:20/0
 P:0:1d1:0:0:0
-F:0x00000200L:0x0L
+F:0x200:0x0
 
 N:235:Ugliness
 I:!::75:77:0:1:4:20:0
 A:20/0
 P:0:1d1:0:0:0
-F:0x00000400L:0x0L
+F:0x400:0x0
 
 N:236:Restore Charisma
 I:!::75:78:0:1:4:20:300
 A:20/0
 P:0:1d1:0:0:0
-F:0x00000800L:0x0L
+F:0x800:0x0
 
 N:237:Cure Light Wounds
 I:!::75:79:50:1:4:0:15
 A:0/0
 P:0:1d1:0:0:0
-F:0x10001000L:0x0L
+F:0x10001000:0x0
 
 N:240:Cure Serious Wounds
 I:!::75:80:100:1:4:3:40
 A:3/0
 P:0:1d1:0:0:0
-F:0x30002000L:0x0L
+F:0x30002000:0x0
 
 N:241:Cure Critical Wounds
 I:!::75:81:100:1:4:5:100
 A:5/0
 P:0:1d1:0:0:0
-F:0x70004000L:0x0L
+F:0x70004000:0x0
 
 N:242:Healing
 I:!::75:82:200:1:4:12:200
 A:12/0
 P:0:1d1:0:0:0
-F:0x70008000L:0x0L
+F:0x70008000:0x0
 
 N:243:Constitution
 I:!::75:83:0:1:4:30:8000
 A:30/0
 P:0:1d1:0:0:0
-F:0x00010000L:0x0L
+F:0x10000:0x0
 
 N:244:Experience
 I:!::75:84:0:1:4:65:25000
 A:65/0
 P:0:1d1:0:0:0
-F:0x00020000L:0x0L
+F:0x20000:0x0
 
 N:245:Sleep
 I:!::75:85:100:1:4:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00040000L:0x0L
+F:0x40000:0x0
 
 N:246:Blindness
 I:!::75:86:0:1:4:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00080000L:0x0L
+F:0x80000:0x0
 
 N:247:Confusion
 I:!::75:87:50:1:4:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00100000L:0x0L
+F:0x100000:0x0
 
 N:248:Poison
 I:!::75:88:0:1:4:3:0
 A:3/0
 P:0:1d1:0:0:0
-F:0x00200000L:0x0L
+F:0x200000:0x0
 
 N:249:Speed
 I:!::75:89:0:1:4:1:75
 A:1/0
 P:0:1d1:0:0:0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:250:Slowness
 I:!::75:90:50:1:4:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00800000L:0x0L
+F:0x800000:0x0
 
 N:251:Dexterity
 I:!::75:91:0:1:4:30:8000
 A:30/0
 P:0:1d1:0:0:0
-F:0x02000000L:0x0L
+F:0x2000000:0x0
 
 N:252:Restore Dexterity
 I:!::75:92:0:1:4:25:300
 A:25/0
 P:0:1d1:0:0:0
-F:0x04000000L:0x0L
+F:0x4000000:0x0
 
 N:253:Restore Constitution
 I:!::75:93:0:1:4:25:300
 A:25/0
 P:0:1d1:0:0:0
-F:0x68000000L:0x0L
+F:0x68000000:0x0
 
 N:254:Lose Memories
 I:!::76:95:0:1:4:10:0
 A:10/0
 P:0:1d1:0:0:0
-F:0x00000002L:0x0L
+F:0x2:0x0
 
 N:255:Salt Water
 I:!::76:96:0:1:4:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000004L:0x0L
+F:0x4:0x0
 
 N:256:Speed
 I:!::75:89:0:1:4:40:75
 A:40/0
 P:0:1d1:0:0:0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:257:Heroism
 I:!::76:98:0:1:4:1:35
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000010L:0x0L
+F:0x10:0x0
 
 N:258:Berserk Strength
 I:!::76:99:0:1:4:3:100
 A:3/0
 P:0:1d1:0:0:0
-F:0x00000020L:0x0L
+F:0x20:0x0
 
 N:259:Boldness
 I:!::76:100:0:1:4:1:10
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000040L:0x0L
+F:0x40:0x0
 
 N:260:Restore Life Levels
 I:!::76:101:0:1:4:40:400
 A:40/0
 P:0:1d1:0:0:0
-F:0x00000080L:0x0L
+F:0x80:0x0
 
 N:261:Resist Heat
 I:!::76:102:0:1:4:1:30
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000100L:0x0L
+F:0x100:0x0
 
 N:262:Resist Cold
 I:!::76:103:0:1:4:1:30
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000200L:0x0L
+F:0x200:0x0
 
 N:263:Detect Invisible
 I:!::76:104:0:1:4:3:50
 A:3/0
 P:0:1d1:0:0:0
-F:0x00000400L:0x0L
+F:0x400:0x0
 
 N:264:Slow Poison
 I:!::76:105:0:1:4:1:25
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000800L:0x0L
+F:0x800:0x0
 
 N:265:Neutralize Poison
 I:!::76:106:0:1:4:5:75
 A:5/0
 P:0:1d1:0:0:0
-F:0x00001000L:0x0L
+F:0x1000:0x0
 
 N:266:Restore Mana
 I:!::76:107:0:1:4:25:350
 A:25/0
 P:0:1d1:0:0:0
-F:0x00002000L:0x0L
+F:0x2000:0x0
 
 N:267:Infra-vision
 I:!::76:108:0:1:4:3:20
 A:3/0
 P:0:1d1:0:0:0
-F:0x00004000L:0x0L
+F:0x4000:0x0
 
 
 ##### Wands #####
@@ -1497,187 +1497,187 @@ N:269:Light
 I:-::65:0:0:1:10:2:200
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_LITE:0x0L
+F:SV_WAND_LITE:0x0
 
 N:270:Lightning Bolts
 I:-::65:1:0:1:10:15:600
 A:15/0
 P:0:1d1:0:0:0
-F:SV_WAND_ELEC:0x0L
+F:SV_WAND_ELEC:0x0
 
 N:271:Frost Bolts
 I:-::65:2:0:1:10:20:800
 A:20/0
 P:0:1d1:0:0:0
-F:SV_WAND_COLD:0x0L
+F:SV_WAND_COLD:0x0
 
 N:272:Fire Bolts
 I:-::65:3:0:1:10:30:1000
 A:30/0
 P:0:1d1:0:0:0
-F:SV_WAND_FIRE:0x0L
+F:SV_WAND_FIRE:0x0
 
 N:273:Stone to Mud
 I:-::65:4:0:1:10:12:300
 A:12/0
 P:0:1d1:0:0:0
-F:SV_WAND_STONE_TO_MUD:0x0L
+F:SV_WAND_STONE_TO_MUD:0x0
 
 N:274:Polymorph
 I:-::65:5:0:1:10:20:400
 A:20/0
 P:0:1d1:0:0:0
-F:SV_WAND_POLYMORPH:0x0L
+F:SV_WAND_POLYMORPH:0x0
 
 N:275:Heal Monster
 I:-::65:6:0:1:10:2:0
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_HEAL_MONSTER:0x0L
+F:SV_WAND_HEAL_MONSTER:0x0
 
 N:276:Haste Monster
 I:-::65:7:0:1:10:2:0
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_HASTE_MONSTER:0x0L
+F:SV_WAND_HASTE_MONSTER:0x0
 
 N:277:Slow Monster
 I:-::65:8:0:1:10:2:500
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_SLOW_MONSTER:0x0L
+F:SV_WAND_SLOW_MONSTER:0x0
 
 N:278:Confuse Monster
 I:-::65:9:0:1:10:2:400
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_CONFUSE_MONSTER:0x0L
+F:SV_WAND_CONFUSE_MONSTER:0x0
 
 N:279:Sleep Monster
 I:-::65:10:0:1:10:7:500
 A:7/0
 P:0:1d1:0:0:0
-F:SV_WAND_SLEEP_MONSTER:0x0L
+F:SV_WAND_SLEEP_MONSTER:0x0
 
 N:280:Drain Life
 I:-::65:11:0:1:10:50:1200
 A:50/0
 P:0:1d1:0:0:0
-F:SV_WAND_DRAIN_LIFE:0x0L
+F:SV_WAND_DRAIN_LIFE:0x0
 
 N:281:Trap/Door Destruction
 I:-::65:12:0:1:10:12:100
 A:12/0
 P:0:1d1:0:0:0
-F:SV_WAND_TRAP_DOOR_DEST:0x0L
+F:SV_WAND_TRAP_DOOR_DEST:0x0
 
 N:282:Magic Missile
 I:-::65:13:0:1:10:2:200
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_MAGIC_MISSILE:0x0L
+F:SV_WAND_MAGIC_MISSILE:0x0
 
 N:283:Clone Monster
 I:-::65:15:0:1:10:15:0
 A:15/0
 P:0:1d1:0:0:0
-F:SV_WAND_CLONE_MONSTER:0x0L
+F:SV_WAND_CLONE_MONSTER:0x0
 
 N:284:Clone Monster
 I:-::65:15:0:1:10:50:0
 A:50/0
 P:0:1d1:0:0:0
-F:SV_WAND_CLONE_MONSTER:0x0L
+F:SV_WAND_CLONE_MONSTER:0x0
 
 N:285:Teleport Away
 I:-::65:16:0:1:10:20:350
 A:20/0
 P:0:1d1:0:0:0
-F:SV_WAND_TELEPORT_AWAY:0x0L
+F:SV_WAND_TELEPORT_AWAY:0x0
 
 N:286:Disarming
 I:-::65:17:0:1:10:20:700
 A:20/0
 P:0:1d1:0:0:0
-F:SV_WAND_DISARMING:0x0L
+F:SV_WAND_DISARMING:0x0
 
 N:287:Lightning Balls
 I:-::65:18:0:1:10:35:1200
 A:35/0
 P:0:1d1:0:0:0
-F:SV_WAND_ELEC_BALL:0x0L
+F:SV_WAND_ELEC_BALL:0x0
 
 N:288:Cold Balls
 I:-::65:19:0:1:10:40:1500
 A:40/0
 P:0:1d1:0:0:0
-F:SV_WAND_COLD_BALL:0x0L
+F:SV_WAND_COLD_BALL:0x0
 
 N:289:Fire Balls
 I:-::65:20:0:1:10:50:1800
 A:50/0
 P:0:1d1:0:0:0
-F:SV_WAND_FIRE_BALL:0x0L
+F:SV_WAND_FIRE_BALL:0x0
 
 N:290:Stinking Cloud
 I:-::65:21:0:1:10:5:400
 A:5/0
 P:0:1d1:0:0:0
-F:SV_WAND_STINKING_CLOUD:0x0L
+F:SV_WAND_STINKING_CLOUD:0x0
 
 N:291:Acid Balls
 I:-::65:22:0:1:10:48:1650
 A:48/0
 P:0:1d1:0:0:0
-F:SV_WAND_ACID_BALL:0x0L
+F:SV_WAND_ACID_BALL:0x0
 
 N:292:Wonder
 I:-::65:23:0:1:10:2:250
 A:2/0
 P:0:1d1:0:0:0
-F:SV_WAND_WONDER:0x0L
+F:SV_WAND_WONDER:0x0
 
 N:293:Light
 I:_::55:0:0:1:50:5:250
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_LITE:0x0L
+F:SV_STAFF_LITE:0x0
 
 N:294:Acid Bolts
 I:-::65:28:0:1:10:30:950
 A:30/0
 P:0:1d1:0:0:0
-F:SV_WAND_ACID:0x0L
+F:SV_WAND_ACID:0x0
 
 N:295:Dragon:s Flame
 I:-::65:24:0:1:10:50:2400
 A:50/3
 P:0:1d1:0:0:0
-F:SV_WAND_DRAGON_FIRE:0x0L
+F:SV_WAND_DRAGON_FIRE:0x0
 
 N:296:Dragon:s Frost
 I:-::65:25:0:1:10:50:2400
 A:50/3
 P:0:1d1:0:0:0
-F:SV_WAND_DRAGON_COLD:0x0L
+F:SV_WAND_DRAGON_COLD:0x0
 
 N:297:Dragon:s Breath
 I:-::65:26:0:1:10:50:2400
 A:50/2
 P:0:1d1:0:0:0
-F:SV_WAND_DRAGON_BREATH:0x0L
+F:SV_WAND_DRAGON_BREATH:0x0
 
 N:298:Annihilation
 I:-::65:27:0:1:10:50:3000
 A:50/4
 P:0:1d1:0:0:0
-F:SV_WAND_ANNIHILATION:0x0L
+F:SV_WAND_ANNIHILATION:0x0
 
 N:299:Door/Stair Location
 I:_::55:1:0:1:50:10:350
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DOOR_STAIR_LOC:0x0L
+F:SV_STAFF_DOOR_STAIR_LOC:0x0
 
 ##### Staffs #####
 
@@ -1685,187 +1685,187 @@ N:300:Trap Location
 I:_::55:2:0:1:50:10:350
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_TRAP_LOC:0x0L
+F:SV_STAFF_TRAP_LOC:0x0
 
 N:301:Treasure Location
 I:_::55:3:0:1:50:5:200
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_TREASURE_LOC:0x0L
+F:SV_STAFF_TREASURE_LOC:0x0
 
 N:302:Object Location
 I:_::55:4:0:1:50:5:200
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_OBJECT_LOC:0x0L
+F:SV_STAFF_OBJECT_LOC:0x0
 
 N:303:Teleportation
 I:_::55:5:0:1:50:20:2000
 A:20/0
 P:0:1d2:0:0:0
-F:SV_STAFF_TELEPORTATION:0x0L
+F:SV_STAFF_TELEPORTATION:0x0
 
 N:304:Earthquakes
 I:_::55:6:0:1:50:40:350
 A:40/0
 P:0:1d2:0:0:0
-F:SV_STAFF_EARTHQUAKES:0x0L
+F:SV_STAFF_EARTHQUAKES:0x0
 
 N:305:Summoning
 I:_::55:7:0:1:50:10:0
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SUMMONING:0x0L
+F:SV_STAFF_SUMMONING:0x0
 
 N:306:Summoning
 I:_::55:7:0:1:50:50:0
 A:50/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SUMMONING:0x0L
+F:SV_STAFF_SUMMONING:0x0
 
 N:307:*Destruction*
 I:_::55:8:0:1:50:50:2500
 A:50/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DESTRUCTION:0x0L
+F:SV_STAFF_DESTRUCTION:0x0
 
 N:308:Starlight
 I:_::55:9:0:1:50:20:800
 A:20/0
 P:0:1d2:0:0:0
-F:SV_STAFF_STARLITE:0x0L
+F:SV_STAFF_STARLITE:0x0
 
 N:309:Haste Monsters
 I:_::55:10:0:1:50:10:0
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_HASTE_MONSTERS:0x0L
+F:SV_STAFF_HASTE_MONSTERS:0x0
 
 N:310:Slow Monsters
 I:_::55:11:0:1:50:10:800
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SLOW_MONSTERS:0x0L
+F:SV_STAFF_SLOW_MONSTERS:0x0
 
 N:311:Sleep Monsters
 I:_::55:12:0:1:50:10:700
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SLEEP_MONSTERS:0x0L
+F:SV_STAFF_SLEEP_MONSTERS:0x0
 
 N:312:Cure Light Wounds
 I:_::55:13:0:1:50:5:350
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_CURE_LIGHT:0x0L
+F:SV_STAFF_CURE_LIGHT:0x0
 
 N:313:Detect Invisible
 I:_::55:14:0:1:50:5:200
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DETECT_INVIS:0x0L
+F:SV_STAFF_DETECT_INVIS:0x0
 
 N:314:Speed
 I:_::55:15:0:1:50:40:1000
 A:40/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SPEED:0x0L
+F:SV_STAFF_SPEED:0x0
 
 N:315:Slowness
 I:_::55:16:0:1:50:40:0
 A:40/0
 P:0:1d2:0:0:0
-F:SV_STAFF_SLOWNESS:0x0L
+F:SV_STAFF_SLOWNESS:0x0
 
 N:316:*Destruction*
 I:_::55:8:0:1:50:70:2500
 A:70/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DESTRUCTION:0x0L
+F:SV_STAFF_DESTRUCTION:0x0
 
 N:317:Remove Curse
 I:_::55:18:0:1:50:47:500
 A:47/0
 P:0:1d2:0:0:0
-F:SV_STAFF_REMOVE_CURSE:0x0L
+F:SV_STAFF_REMOVE_CURSE:0x0
 
 N:318:Detect Evil
 I:_::55:19:0:1:50:20:350
 A:20/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DETECT_EVIL:0x0L
+F:SV_STAFF_DETECT_EVIL:0x0
 
 N:319:Curing
 I:_::55:20:0:1:50:25:1000
 A:25/0
 P:0:1d2:0:0:0
-F:SV_STAFF_CURING:0x0L
+F:SV_STAFF_CURING:0x0
 
 N:320N:Dispel Evil
 I:_::55:1:0:1:50:10:350
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DISPEL_EVIL:0x0L
+F:SV_STAFF_DISPEL_EVIL:0x0
 
 N:407:Probing
 I:_::55:30:0:1:50:30:2000
 A:30/1
 P:0:1d2:0:0:0
-F:SV_STAFF_PROBING:0x0L
+F:SV_STAFF_PROBING:0x0
 
 N:321:Darkness
 I:_::55:22:0:1:50:50:0
 A:50/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DARKNESS:0x0L
+F:SV_STAFF_DARKNESS:0x0
 
 N:322:Darkness
 I:_::55:22:0:1:50:5:0
 A:5/0
 P:0:1d2:0:0:0
-F:SV_STAFF_DARKNESS:0x0L
+F:SV_STAFF_DARKNESS:0x0
 
 N:323:Genocide
 I:_::55:23:0:1:50:70:3500
 A:70/4
 P:0:1d2:0:0:0
-F:SV_STAFF_GENOCIDE:0x0L
+F:SV_STAFF_GENOCIDE:0x0
 
 N:324:Power
 I:_::55:24:0:1:50:70:4000
 A:70/2
 P:0:1d2:0:0:0
-F:SV_STAFF_POWER:0x0L
+F:SV_STAFF_POWER:0x0
 
 N:325:the Magi
 I:_::55:25:0:1:50:70:4500
 A:70/2
 P:0:1d2:0:0:0
-F:SV_STAFF_THE_MAGI:0x0L
+F:SV_STAFF_THE_MAGI:0x0
 
 N:326:Perceptions
 I:_::55:26:0:1:50:10:400
 A:10/0
 P:0:1d2:0:0:0
-F:SV_STAFF_IDENTIFY:0x0L
+F:SV_STAFF_IDENTIFY:0x0
 
 N:327:Holiness
 I:_::	55:27:0:1:50:70:4500
 A:70/2
 P:0:1d2:0:0:0
-F:SV_STAFF_HOLINESS:0x0L
+F:SV_STAFF_HOLINESS:0x0
 
 N:328:Enlightenment
 I:_::55:28:0:1:50:22:750
 A:22/0
 P:0:1d2:0:0:0
-F:SV_STAFF_MAPPING:0x0L
+F:SV_STAFF_MAPPING:0x0
 
 N:329:Healing
 I:_::55:29:0:1:50:70:5000
 A:70/2
 P:0:1d2:0:0:0
-F:SV_STAFF_HEALING:0x0L
+F:SV_STAFF_HEALING:0x0
 
 
 ##### Basic Books #####
@@ -1874,49 +1874,49 @@ N:330:[Magic for Beginners]
 I:?::90:64:0:1:30:5:25
 A:5/0
 P:0:1d1:0:0:0
-F:0x000001FFL:0x0L
+F:0x1FFL:0x0
 
 N:331:[Conjurings and Tricks]
 I:?::90:65:0:1:30:10:100
 A:10/0
 P:0:1d1:0:0:0
-F:0x0003FE00L:0x0L
+F:0x03FE00:0x0
 
 N:332:[Incantations and Illusions]
 I:?::90:66:0:1:30:20:400
 A:20/0
 P:0:1d1:0:0:0
-F:0x03FC0000L:0x0L
+F:0x03FC0000:0x0
 
 N:333:[Sorcery and Evocations]
 I:?::90:67:0:1:30:25:800
 A:25/0
 P:0:1d1:0:0:0
-F:0xFC000000L:0x01L
+F:0xFC000000:0x1
 
 N:334:[Beginners Handbook]
 I:?::91:64:0:1:30:5:25
 A:5/0
 P:0:1d1:0:0:0
-F:0x000000FFL:0x0L
+F:0x0FFL:0x0
 
 N:335:[Words of Wisdom]
 I:?::91:65:0:1:30:10:100
 A:10/0
 P:0:1d1:0:0:0
-F:0x0000FF00L:0x0L
+F:0x0FF00:0x0
 
 N:336:[Chants and Blessings]
 I:?::91:66:0:1:30:20:300
 A:20/0
 P:0:1d1:0:0:0
-F:0x01FF0000L:0x0L
+F:0x1FF0000:0x0
 
 N:337:[Exorcism and Dispelling]
 I:?::91:67:0:1:30:25:900
 A:25/0
 P:0:1d1:0:0:0
-F:0x7E000000L:0x0L
+F:0x7E000000:0x0
 
 ##### Chests #####
 
@@ -1924,42 +1924,42 @@ N:338:& Small wooden chest
 I:~::7:1:0:1:250:7:20
 A:7/0
 P:0:2d3:0:0:0
-F:0x0F000000L:0x0L
+F:0x0F000000:0x0
 
 N:339:& Large wooden chest
 I:~::7:4:0:1:500:15:60
 A:15/0
 P:0:2d5:0:0:0
-F:0x15000000L:0x0L
+F:0x15000000:0x0
 
 N:340:& Small iron chest
 I:~::7:7:0:1:300:25:100
 A:25/0
 P:0:2d4:0:0:0
-F:0x0F000000L:0x0L
+F:0x0F000000:0x0
 
 N:341:& Large iron chest
 I:~::7:10:0:1,1000:0:0:150
-A:0/0x0L
+A:0/0x0
 P:0:35:0:0:2d6
-F:0x1F000000L:
+F:0x1F000000:
 
 N:342:& Small steel chest
 I:~::7:13:0:1:500:45:200
 A:45/0
 P:0:2d4:0:0:0
-F:0x0F000000L:0x0L
+F:0x0F000000:0x0
 
 N:343:& Large steel chest
 I:~::7:16:0:1,1000:0:0:250
-A:0/0x0L
+A:0/0x0
 P:0:50:0:0:2d6
-F:0x23000000L:
+F:0x23000000:
 
 N:+76:& ruined chest
 I:~::7:0:0:1:250:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Various Stuff #####
@@ -1968,31 +1968,31 @@ N:84:& Iron Spike~
 I:~::5:193:0:1:10:1:1
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:86:& Wooden Torch~
 I:~::10:193:4000:1:30:1:2
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:85:& Brass Lantern~
 I:~::10:1:7500:1:50:1:35
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:268:& Flask~ of oil
 I:!::77:64:7500:1:10:1:3
 A:1/0
 P:0:2d6:0:0:0
-F:0x00040000L:0x0L
+F:0x40000:0x0
 
 N:347:& empty bottle
 I:!::1:4:0:1:2:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 
@@ -2002,143 +2002,143 @@ N:406:Probing
 I:-::66:23:0:1:15:40:4000
 A:40/4
 P:0:1d1:0:0:0
-F:SV_ROD_PROBING:0x800L
+F:SV_ROD_PROBING:0x800
 
 N:410:Recall
 I:-::66:24:0:1:15:30:4000
 A:30/4
 P:0:1d1:0:0:0
-F:SV_ROD_RECALL:0x800L
+F:SV_ROD_RECALL:0x800
 
 N:405:Illumination
 I:-::66:22:0:1:15:20:1000
 A:20/5
 P:0:1d1:0:0:0
-F:SV_ROD_ILLUMINATION:0x800L
+F:SV_ROD_ILLUMINATION:0x800
 
 N:356:Light
 I:-::66:0:0:1:15:12:600
 A:12/0
 P:0:1d1:0:0:0
-F:SV_ROD_LIGHT:0x800L
+F:SV_ROD_LIGHT:0x800
 
 N:357:Lightning Bolts
 I:-::66 :1:0:1:15:20:1800
 A:20/0
 P:0:1d1:0:0:0
-F:SV_ROD_ELEC:0x800L
+F:SV_ROD_ELEC:0x800
 
 N:358:Frost Bolts
 I:-::66 :2:0:1:15:23:2400
 A:23/0
 P:0:1d1:0:0:0
-F:SV_ROD_COLD:0x800L
+F:SV_ROD_COLD:0x800
 
 N:359:Fire Bolts
 I:-::66 :3:0:1:15:29:3000
 A:29/0
 P:0:1d1:0:0:0
-F:SV_ROD_FIRE:0x800L
+F:SV_ROD_FIRE:0x800
 
 N:360:Polymorph
 I:-::66 :4:0:1:15:35:1200
 A:35/0
 P:0:1d1:0:0:0
-F:SV_ROD_POLYMORPH:0x800L
+F:SV_ROD_POLYMORPH:0x800
 
 N:361:Slow Monster
 I:-::66 :5:0:1:15:32:1500
 A:32/0
 P:0:1d1:0:0:0
-F:SV_ROD_SLOW_MONSTER:0x800L
+F:SV_ROD_SLOW_MONSTER:0x800
 
 N:362:Sleep Monster
 I:-::66 :6:0:1:15:33:1500
 A:33/0
 P:0:1d1:0:0:0
-F:SV_ROD_SLEEP_MONSTER:0x800L
+F:SV_ROD_SLEEP_MONSTER:0x800
 
 N:363:Drain Life
 I:-::66 :7:0:1:15:75:3600
 A:75/3
 P:0:1d1:0:0:0
-F:SV_ROD_DRAIN_LIFE:0x800L
+F:SV_ROD_DRAIN_LIFE:0x800
 
 N:364:Teleport Away
 I:-::66 :8:0:1:15:45:1400
 A:45/2
 P:0:1d1:0:0:0
-F:SV_ROD_TELEPORT_AWAY:0x800L
+F:SV_ROD_TELEPORT_AWAY:0x800
 
 N:365:Disarming
 I:-::66 :9:0:1:15:35:2100
 A:35/0
 P:0:1d1:0:0:0
-F:SV_ROD_DISARMING:0x800L
+F:SV_ROD_DISARMING:0x800
 
 N:366:Lightning Balls
 I:-::66 :10:0:1:15:55:3600
 A:55/0
 P:0:1d1:0:0:0
-F:SV_ROD_ELEC_BALL:0x800L
+F:SV_ROD_ELEC_BALL:0x800
 
 N:367:Cold Balls
 I:-::66 :11:0:1:15:60:4500
 A:60/0
 P:0:1d1:0:0:0
-F:SV_ROD_COLD_BALL:0x800L
+F:SV_ROD_COLD_BALL:0x800
 
 N:368:Fire Balls
 I:-::66 :12:0:1:15:75:4800
 A:75/0
 P:0:1d1:0:0:0
-F:SV_ROD_FIRE_BALL:0x800L
+F:SV_ROD_FIRE_BALL:0x800
 
 N:369:Acid Balls
 I:-::66 :13:0:1:15:70:4600
 A:70/0
 P:0:1d1:0:0:0
-F:SV_ROD_ACID_BALL:0x800L
+F:SV_ROD_ACID_BALL:0x800
 
 N:370:Acid Bolts
 I:-::66 :14:0:1:15:38:3000
 A:38/0
 P:0:1d1:0:0:0
-F:SV_ROD_ACID:0x800L
+F:SV_ROD_ACID:0x800
 
 N:371:Enlightenment
 I:-::66 :15:0:1:15:63:10000
 A:63/4
 P:0:1d1:0:0:0
-F:SV_ROD_MAPPING:0x800L
+F:SV_ROD_MAPPING:0x800
 
 N:372:Perceptions
 I:-::66 :16:0:1:15:49:13000
 A:49/8
 P:0:1d1:0:0:0
-F:SV_ROD_IDENTIFY:0x800L
+F:SV_ROD_IDENTIFY:0x800
 
 N:373:Curing
 I:-::66 :17:0:1:15:65:15000
 A:65/8
 P:0:1d1:0:0:0
-F:SV_ROD_CURING:0x800L
+F:SV_ROD_CURING:0x800
 
 N:374:Healing
 I:-::66 :18:0:1:15:77,13:20000
-A:77,13/0x800L
+A:77,13/0x800
 P:0:1d1:0:0:0
 F:SV_ROD_HEALING:
 
 N:375:Detection
 I:-::66 :19:0:1:15:30,11:3500
-A:30,11/0x800L
+A:30,11/0x800
 P:0:1d1:0:0:0
 F:SV_ROD_DETECTION:
 
 N:376:Restoration
 I:-::66 :20:0:1:15:80,15:25000
-A:80,15/0x800L
+A:80,15/0x800
 P:0:1d1:0:0:0
 F:SV_ROD_RESTORATION:
 
@@ -2146,14 +2146,14 @@ N:377:Speed
 I:-::66 :21:0:1:15:99:30000
 A:99/9
 P:0:1d1:0:0:0
-F:SV_ROD_SPEED:0x800L
+F:SV_ROD_SPEED:0x800
 
 
 ##### Special Books #####
 
 N:379:[Resistance of Scarabtarices]
 I:?::0:1:8000:30:0:0:68
-A:0/0x03E0000L
+A:0/0x03E0000
 P:0:30:0:0:1d1
 F:90:
 
@@ -2161,55 +2161,55 @@ N:380:[Mordenkainen:s Escapes]
 I:?::90:71:0:1:30:50:10000
 A:50/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x000003EL
+F:0x0:0x03EL
 
 N:381:[Kelek:s Grimoire of Power]
 I:?::90:70:0:1:30:60:30000
 A:60/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x001F000L
+F:0x0:0x1F000
 
 N:382:[Tenser:s Transformations]
 I:?::90:69:0:1:30:80:50000
 A:80/2
 P:0:1d1:0:0:0
-F:0x00000000L:0x7C00000L
+F:0x0:0x7C00000
 
 N:383:[Raal:s Tome of Destruction]
 I:?::90:72:0:1:30:100:100000
 A:100/4
 P:0:1d1:0:0:0
-F:0x00000000L:0x0000FC0L
+F:0x0:0x0FC0
 
 N:384:[Ethereal Openings]
 I:?::91:68:0:1:30:30:7000
 A:30/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x3F00000L
+F:0x0:0x3F00000
 
 N:385:[Godly Insights]
 I:?::91:69:0:1:30:50:9000
 A:50/0
 P:0:1d1:0:0:0
-F:0x80000000L:0x000000FL
+F:0x80000000:0x0FL
 
 N:386:[Purifications and Healing]
 I:?::91:70:0:1:30:60:25000
 A:60/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x00001F0L
+F:0x0:0x1F0
 
 N:387:[Holy Infusions]
 I:?::91:71:0:1:30:80:50000
 A:80/3
 P:0:1d1:0:0:0
-F:0x00000000L:0x00FC000L
+F:0x0:0x0FC000
 
 N:388:[Wrath of God]
 I:?::91:72:0:1:30:100:100000
 A:100/4
 P:0:1d1:0:0:0
-F:0x00000000L:0x0003E00L
+F:0x0:0x03E00
 
 
 ##### Junk #####
@@ -2218,13 +2218,13 @@ N:348:some shards of pottery
 I:~::1:5:0:1:5:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:355:& broken stick
 I:~::1:13:0:1:3:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Skeletons #####
@@ -2233,49 +2233,49 @@ N:353:& broken set of teeth
 I:s::1:11:0:1:3:0:0
 A:0/0
 P:0:1d5:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:354:& large broken bone
 I:s::1:12:0:1:2:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:345:& Giant Centipede Skeleton
 I:s::1:2:0:1:25:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:344:& Rat Skeleton
 I:s::1:1:0:1:10:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:349:& Human Skeleton
 I:s::1:7:0:1:50:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:350:& Dwarf Skeleton
 I:s::1:8:0:1:60:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:351:& Elf Skeleton
 I:s::1:9:0:1:40:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:352:& Gnome Skeleton
 I:s::1:10:0:1:25:1:0
 A:1/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Dragon Scale Mail #####
@@ -2284,63 +2284,63 @@ N:391:Black Dragon Scale Mail
 I:[::37:19:0:1:200:60:30000
 A:60/8
 P:30:2d4:-2:0:10
-F:0x00100000L:0x00000800L
+F:0x100000:0x800
 
 N:389:Blue Dragon Scale Mail
 I:[::37:17:0:1:200:40:35000
 A:40/8
 P:30:2d4:-2:0:10
-F:0x02100000L:0x00000800L
+F:0x2100000:0x800
 
 N:390:White Dragon Scale Mail
 I:[::37:18:0:1:200:50:40000
 A:50/8
 P:30:2d4:-2:0:10
-F:0x00300000L:0x00000800L
+F:0x0300000:0x800
 
 N:393:Red Dragon Scale Mail
 I:[::37:21:0:1:200:80:100000
 A:80/8
 P:30:2d4:-2:0:10
-F:0x00180000L:0x00000800L
+F:0x180000:0x800
 
 N:392:Green Dragon Scale Mail
 I:[::37:20:0:1:200:70,10:80000
-A:70,10/0x00000800L
+A:70,10/0x800
 P:30:2d4:-2:0:10
-F:0x10100000L:
+F:0x10100000:
 
 # MULTI_HUED
 
 N:394:Multi-Hued Dragon Scale Mail
 I:[::37:22:0:1:200:100,20:150000
-A:100,20/0x00000800L
+A:100,20/0x800
 P:30:2d4:-2:0:10
-F:0x12380000L:
+F:0x12380000:
 
 N:418:Shining Dragon Scale Mail
 I:[::37:28:0:1:200:65:60000
 A:65/12
 P:30:2d4:-2:0:10
-F:0x00100000L:0x00060800L
+F:0x100000:0x060800
 
 N:416:Law Dragon Scale Mail
 I:[::37:26:0:1:200:80:80000
 A:80/20
 P:30:2d4:-2:0:10
-F:0x00100000L:0x00210800L
+F:0x100000:0x210800
 
 N:408:Bronze Dragon Scale Mail
 I:[::37:23:0:1:200:55,8:30000
-A:55,8/0x00008800L
+A:55,8/0x8800
 P:30:2d4:-2:0:10
-F:0x00100000L:
+F:0x100000:
 
 N:409:Gold Dragon Scale Mail
 I:[::37:24:0:1:200:65,8:40000
-A:65,8/0x00010800L
+A:65,8/0x10800
 P:30:2d4:-2:0:10
-F:0x00100000L:
+F:0x100000:
 
 # MULTI_HUED
 
@@ -2348,21 +2348,21 @@ N:415:Chaos Dragon Scale Mail
 I:[::37:25:0:1:200:75:70000
 A:75/20
 P:30:2d4:-2:0:10
-F:0x00100000L:0x00180800L
+F:0x100000:0x180800
 
 N:417:Balance Dragon Scale Mail
 I:[::37:1:0,100000:200:-2:20:27
-A:20/0x00390800L
+A:20/0x0390800
 P:10:90:0:30:2d4
-F:0x00100000L:
+F:0x100000:
 
 # MULTI_HUED
 
 N:419:Power Dragon Scale Mail
 I:[::37:1:0,300000:200:-3:40:29
-A:40/0x014E0800L
+A:40/0x14E0800
 P:15:110:0:40:2d4
-F:0x12380000L:
+F:0x12380000:
 
 ##### Extra potions #####
 
@@ -2370,49 +2370,49 @@ N:401:Death
 I:!::76:109:0:1:4:55:0
 A:55/2
 P:0:1d1:0:0:0
-F:0x00020000L:0x0L
+F:0x20000:0x0
 
 N:404:Ruination
 I:!::76:112:0:1:4:40,12:0
-A:40,12/0x0L
+A:40,12/0x0
 P:0:1d1:0:0:0
-F:0x00100000L:
+F:0x100000:
 
 N:400:Detonations
 I:!::76:97:0:1:4:60:10000
 A:60/6
 P:0:2525:0:0:0
-F:0x00010000L:0x0L
+F:0x10000:0x0
 
 N:403:Augmentation
 I:!::76:111:0:1:4:40,12:60000
-A:40,12/0x0L
+A:40,12/0x0
 P:0:1d1:0:0:0
-F:0x00080000L:
+F:0x80000:
 
 N:422:*Healing*
 I:!::76:115:0:1:4:40:1500
 A:40/3
 P:0:1d1:0:0:0
-F:0x00800000L:0x0LZ
+F:0x800000:0x0Z
 
 N:402:Life
 I:!::76:110:0:1:4:60:5000
 A:60/3
 P:0:1d1:0:0:0
-F:0x00040000L:0x0L
+F:0x40000:0x0
 
 N:421:Self Knowledge
 I:!::76:114:0:1:4:40:2000
 A:40/0
 P:0:1d1:0:0:0
-F:0x00400000L:0x0L
+F:0x400000:0x0
 
 N:399:*Enlightenment*
 I:!::76:94:0:1:4:70:80000
 A:70/4
 P:0:1d1:0:0:0
-F:0x00008000L:0x0L
+F:0x8000:0x0
 
 
 ##### Special
@@ -2431,73 +2431,73 @@ N:+23:& open door
 I:\::104:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+24:& closed door
 I:+::118:19:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+25:& secret door
 I:#::110:19:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+26:an up staircase
 I:<::107:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+27:a down staircase
 I:>::108:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 ##### Store Doors #####
 
 N:+28:General Store
 I:1::110:101:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+29:Armoury
 I:2::110:102:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+30:Weapon Smiths
 I:3::110:103:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:Temple
 I:4::110:104:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:Alchemy Shop
 I:5::110:105:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:Magic Shop
 I:6::110:106:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:Black Market
 I:7::110:107:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:Home
 I:8::110:108:0:1:0:0:0
 A:0/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### Special trap #####
@@ -2505,7 +2505,7 @@ F:0x00000000L:0x0L
 N:+56:a strange rune
 I:^::102:99:0:1:0:10:0
 A:10/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 
@@ -2515,106 +2515,106 @@ N:+36:an open pit
 I:::102:1:1:1:0:50:0
 A:50/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a covered pit
 I:^::101:3:2:1:0:60:0
 A:60/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a trap door
 I:^::101:4:5:1:0:75:0
 A:75/0
 P:0:2d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a gas trap
 I:^::101:5:3:1:0:95:0
 A:95/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a loose rock
 I:;::101:6:0:1:0:10:0
 A:10/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a dart trap
 I:^::101:7:5:1:0:110:0
 A:110/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a strange rune
 I:^::101:8:5:1:0:90:0
 A:90/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:some loose rock
 I:^::101:9:5:1:0:90:0
 A:90/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a gas trap
 I:^::101:10:10:1:0:105:0
 A:105/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+46:a strange rune
 I:^::101:11:5:1:0:90:0
 A:90/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a blackened spot
 I:^::101:12:10:1:0:110:0
 A:110/0
 P:0:4d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:some corroded rock
 I:^::101:13:10:1:0:110:0
 A:110/0
 P:0:4d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a gas trap
 I:^::101:14:5:1:0:105:0
 A:105/0
 P:0:2d6:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a gas trap
 I:^::101:15:5:1:0:110:0
 A:110/0
 P:0:1d4:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a gas trap
 I:^::101:16:5:1:0:105:0
 A:105/0
 P:0:1d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:a dart trap
 I:^::101:17:5:1:0:110:0
 A:110/0
 P:0:1d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N::+53:a dart trap
 I:^::101:18:5:1:0:110:0
 A:110/0
 P:0:1d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:an arrow trap
 I:^::101:2:3:1:0:90:0
 A:90/0
 P:0:1d8:0:0:0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 
 ##### And here starts the gold/gems #####
@@ -2622,90 +2622,90 @@ F:0x00000000L:0x0L
 N:+57:copper
 I:$::100:1:0:1:0:1:3
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:copper
 I:$::100:2:0:1:0:1:4
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:copper
 I:$::100:3:0:1:0:1:5
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:silver
 I:$::100:4:0:1:0:1:6
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:silver
 I:$::100:5:0:1:0:1:7
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:silver
 I:$::100:6:0:1:0:1:8
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:garnets
 I:*::100:7:0:1:0:1:9
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:garnets
 I:*::100:8:0:1:0:1:10
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:gold
 I:$::100:9:0:1:0:1:12
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+66:gold
 I:$::100:10:0:1:0:1:14
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:gold
 I:$::100:11:0:1:0:1:16
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:opals
 I:*::100:12:0:1:0:1:18
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:sapphires
 I:*::100:13:0:1:0:1:20
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:rubies
 I:*::100:14:0:1:0:1:24
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:diamonds
 I:*::100:15:0:1:0:1:28
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:emeralds
 I:*::100:16:0:1:0:1:32
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:mithril
 I:$::100:17:0:1:0:1:40
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
 N:+74:adamantite
 I:$::100:18:0:1:0:1:80
 A:1/0
-F:0x00000000L:0x0L
+F:0x0:0x0
 
