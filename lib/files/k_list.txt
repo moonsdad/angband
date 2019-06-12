@@ -3,9 +3,7 @@
 ##### The "empty" item #####
 
 N:0:(nothing)
-I:d::::::::
-A:/
-P:::::
+I: ::0:0:0:0:0:0:0
 
 ##### Mushrooms #####
 
@@ -200,7 +198,7 @@ A:7/0
 P:0:1d7:0:0:0
 F:0x0:0x0
 
-N:40:& Executioner:s Sword
+N:40:& Executioner's Sword
 I:|::23:14:0:1:260:40:850
 A:40/0
 P:0:4d5:0:0:0
@@ -403,7 +401,7 @@ P:0:8d4:0:0:0
 F:0x0:0x0
 
 
-##### Bows:Crossbows:Slings #####
+##### Bows, Crossbows, Slings #####
 
 N:73:& Short Bow
 I:}::19:1:2:1:30:3:50
@@ -1606,19 +1604,19 @@ A:30/0
 P:0:1d1:0:0:0
 F:SV_WAND_ACID:0x0
 
-N:295:Dragon:s Flame
+N:295:Dragon's Flame
 I:-::65:24:0:1:10:50:2400
 A:50/3
 P:0:1d1:0:0:0
 F:SV_WAND_DRAGON_FIRE:0x0
 
-N:296:Dragon:s Frost
+N:296:Dragon's Frost
 I:-::65:25:0:1:10:50:2400
 A:50/3
 P:0:1d1:0:0:0
 F:SV_WAND_DRAGON_COLD:0x0
 
-N:297:Dragon:s Breath
+N:297:Dragon's Breath
 I:-::65:26:0:1:10:50:2400
 A:50/2
 P:0:1d1:0:0:0
@@ -2107,30 +2105,30 @@ F:SV_ROD_SPEED:0x800
 ##### Special Books #####
 
 N:379:[Resistance of Scarabtarices]
-I:?::0:1:8000:30:0:0:68
-A:0/0x03E0000
-P:0:30:0:0:1d1
-F:90:
+I:?::90:68:0:1:30:30:8000
+A:30/0
+P:0:1d1:0:0:0
+F:0x0:0x3e0000:0x0
 
-N:380:[Mordenkainen:s Escapes]
+N:380:[Mordenkainen's Escapes]
 I:?::90:71:0:1:30:50:10000
 A:50/0
 P:0:1d1:0:0:0
 F:0x0:0x3e:0x0
 
-N:381:[Kelek:s Grimoire of Power]
+N:381:[Kelek's Grimoire of Power]
 I:?::90:70:0:1:30:60:30000
 A:60/0
 P:0:1d1:0:0:0
 F:0x0:0x1f000:0x0
 
-N:382:[Tenser:s Transformations]
+N:382:[Tenser's Transformations]
 I:?::90:69:0:1:30:80:50000
 A:80/2
 P:0:1d1:0:0:0
 F:0x0:0x7c00000:0x0
 
-N:383:[Raal:s Tome of Destruction]
+N:383:[Raal's Tome of Destruction]
 I:?::90:72:0:1:30:100:100000
 A:100/4
 P:0:1d1:0:0:0
