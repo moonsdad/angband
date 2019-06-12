@@ -212,6 +212,8 @@ monster_lore *l_list;
 struct unique_mon u_list[MAX_R_IDX];
 
 
+/* Extra item "memory" */ 
+inven_xtra *x_list;
 
 static player_type p_body;	/* Static player info record */
 player_type *p_ptr = &p_body;	/* Pointer to the player info */

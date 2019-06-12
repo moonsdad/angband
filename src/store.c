@@ -621,7 +621,9 @@ void store_destroy(int store_num, int item_val, int one_of)
 }
 
 
-/* Creates an item and inserts it into store's inven	-RAK-	 */
+/* 
+ * Creates an item and inserts it into store's inven	-RAK-	
+ */
 static void store_create(int store_num)
 {
     register int         i, tries;
@@ -642,8 +644,6 @@ static void store_create(int store_num)
 	    if (store_check_num(t_ptr, store_num)) {
 		if ((t_ptr->cost > 0) &&	/* Item must be good	 */
 		    (t_ptr->cost < owners[s_ptr->owner].max_cost)) {
-
-/* equivalent to calling ident_spell(), except will not change the object_ident array */
 		    store_bought(t_ptr);
 		    special_offer(t_ptr);
 		    store_carry(store_num, &dummy, t_ptr);
@@ -658,10 +658,6 @@ static void store_create(int store_num)
 	    t_ptr = &i_list[cur_pos];
 	    if (store_check_num(t_ptr, store_num)) {
 		if (t_ptr->cost > 0) {	/* Item must be good	 */
-		/*
-		 * equivalent to calling ident_spell(), except will not
-		 * change the object_ident array 
-		 */
 		    store_bought(t_ptr);
 		    special_offer(t_ptr);
 		    store_carry(store_num, &dummy, t_ptr);
@@ -1545,7 +1541,7 @@ static int store_sell(int store_num, int *cur_top)
 
 			cost = item_value(&sold_obj);
 
-		    /* identify object in inventory to set object_ident */
+		    /* identify object in inventory to set aware */
 			identify(&item_val);
 		    /* retake sold_obj so that it will be identified */
 			take_one_item(&sold_obj, &inventory[item_val]);

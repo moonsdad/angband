@@ -1,6 +1,6 @@
-/* File: save.c */
+/* File: save-old.c */
 
-/* Purpose: save and restore games and monster memory info */
+/* Purpose: support for loading pre-2.7.0 savefiles */
 
 /*
  * Copyright (c) 1989 James E. Wilson, Robert A. Koeneke 
@@ -19,6 +19,9 @@
  *
  * and has been completely rewritten again by	 -CJS-
  * and completely rewritten again! for portability by -JEW-
+ *
+ * This file is only used to parse pre-2.7.0 savefiles.
+ * See the file "save.c" for more recent methods.
  */
 
 
@@ -1863,3 +1866,56 @@ static void rd_monster(register monster_type *mon)
 }
 
 
+static errr rd_savefile_old()
+{
+
+/* ... */
+
+    /* Hack -- analyze the "object_ident" array. */
+    for (i = 0; i < 1024; i++) {            
+
+	int k, tval, sval, tried, aware;
+
+	rd_byte(&tmp8u);
+	if (!tmp8u) continue;
+
+	/* Extract the flags */
+	tried = (tmp8u & 0x01) ? 1 : 0;
+	aware = (tmp8u & 0x02) ? 1 : 0;
+
+	/* Extract the identity */
+	switch (i >> 6) {
+	    case 0: tval = TV_AMULET; break;
+	    case 1: tval = TV_RING; break;
+	    case 2: tval = TV_STAFF; break;
+	    case 3: tval = TV_WAND; break;
+	    case 4: tval = TV_SCROLL; break;
+	    case 5: tval = TV_POTION; break;
+	    case 6: tval = TV_FOOD; break;
+	    case 7: tval = TV_ROD; break;
+	    default: tval = TV_NOTHING;
+	}
+
+	/* No type? */
+	if (tval == TV_NOTHING) continue;
+
+	/* Extract the sub-type */
+	sval = i % 64; 
+
+	/* Find the object this refers to */
+	for (k = 0; k < MAX_K_IDX; k++) {
+
+	    inven_kind *k_ptr = &k_list[k];
+
+	    /* Set the object info */
+	    if ((tval == k_ptr->tval) &&
+		(sval == k_ptr->sval % 64)) {
+		x_list[k].tried = tried;
+		x_list[k].aware = aware;
+	    }
+	}
+    }
+    if (say) prt_note(-1, "Parsed old 'known1' flags");
+
+/* ... */
+}

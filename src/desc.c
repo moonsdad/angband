@@ -390,22 +390,18 @@ int known2_p(inven_type *i_ptr)
 
 
 /*
- * Remove "Secret" symbol for identity of plusses			
+ * Remove "Secret" symbol for identity of plusses.
  */
 void known2(inven_type *i_ptr)
 {
-    s16b offset;
-    byte indexx;
+    /* Remove an automatically generated inscription.	-CJS- */
+    /* used to clear ID_DAMD flag, but I think it should remain set */
+    i_ptr->ident &= ~ID_MAGIK;
 
-/* Remove an automatically generated inscription.	-CJS- */
-/* used to clear ID_DAMD flag, but I think it should remain set */
-    i_ptr->ident &= ~(ID_MAGIK | ID_EMPTY);
-    if ((offset = flavor_p(i_ptr)) < 0)
-	return;
-    offset <<= 6;
-    indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    object_ident[offset + indexx] &= ~OD_TRIED;
+    /* Clear the "Empty" info */
+    i_ptr->ident &= ~ID_EMPTY;
 
+    /* Now we know all about it */
     i_ptr->ident |= ID_KNOWN;
 }
 
@@ -423,12 +419,14 @@ int inven_aware_p(inven_type *i_ptr)
  * carried in order in the inventory.  
  */
     if ((offset = flavor_p(i_ptr)) < 0)
-	return OD_KNOWN1;
+	return (TRUE);
     if (store_bought_p(i_ptr))
-	return OD_KNOWN1;
+	return (TRUE);
     offset <<= 6;
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    return (object_ident[offset + indexx] & OD_KNOWN1);
+
+    /* Check the "x_list" */
+    return (x_list[offset + indexx].aware);
 }
 
 
@@ -444,9 +442,10 @@ void inven_aware(inven_type *i_ptr)
 	return;
     offset <<= 6;
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    object_ident[offset + indexx] |= OD_KNOWN1;
-/* clear the tried flag, since it is now known */
-    object_ident[offset + indexx] &= ~OD_TRIED;
+    /* Fully aware of the effects */
+    x_list[offset + indexx].aware = TRUE;
+    /* clear the tried flag, since it is now known */
+    x_list[offset + indexx].tried = FALSE;
 }
 
 
@@ -476,7 +475,8 @@ void inven_tried(inven_type *i_ptr)
 	return;
     offset <<= 6;
     indexx = i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1);
-    object_ident[offset + indexx] |= OD_TRIED;
+    /* Mark it as tried (even if "aware") */
+    x_list[offset + indexx].tried = TRUE;
 }
 
 /*
@@ -1050,7 +1050,7 @@ void objdes(char *out_val, inven_type *i_ptr, int pref)
 	    indexx = (indexx <<= 6) +
 		(i_ptr->sval & (ITEM_SINGLE_STACK_MIN - 1));
 	/* don't print tried string for store bought items */
-	    if ((object_ident[indexx] & OD_TRIED) && !store_bought_p(i_ptr))
+	    if ((x_list[indexx].tried) && !store_bought_p(i_ptr))
 		(void)strcat(tmp_str, "tried ");
 	}
 	if ((i_ptr->ident & (ID_MAGIK | ID_EMPTY | ID_DAMD)) &&

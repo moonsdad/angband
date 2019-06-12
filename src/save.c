@@ -1863,3 +1863,27 @@ static void rd_monster(register monster_type *mon)
 }
 
 
+
+/*
+ * Read/Write the "xtra" info for objects
+ */
+
+static void rd_xtra(inven_xtra *xtra)
+{
+    byte tmp8u;
+
+    rd_byte(&tmp8u);
+
+    xtra->aware = (tmp8u & 0x01) ? TRUE: FALSE;
+    xtra->tried = (tmp8u & 0x02) ? TRUE: FALSE;
+}
+
+static void wr_xtra(inven_xtra *xtra)
+{
+    byte tmp8u = 0;
+
+    if (xtra->aware) tmp8u |= 0x01;
+    if (xtra->tried) tmp8u |= 0x02;
+
+    wr_byte(tmp8u);
+}

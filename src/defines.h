@@ -467,10 +467,6 @@
  */
 
 
-/* id's used for object description, stored in object_ident */
-#define OD_TRIED        0x1
-#define OD_KNOWN1       0x2
-
 /* id's used for item description, stored in i_ptr->ident */
 
 #define ID_MAGIK        0x1

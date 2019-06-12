@@ -389,7 +389,8 @@ extern inven_type i_list[MAX_I_IDX];
 
 extern inven_kind k_list[MAX_OBJECTS];
 
-extern byte object_ident[OBJECT_IDENT_SIZE];
+/* The "xtra" array ("extra" object info) */
+extern inven_xtra x_list[OBJECT_IDENT_SIZE];
 
 extern s16b t_level[MAX_K_LEV+1];
 
