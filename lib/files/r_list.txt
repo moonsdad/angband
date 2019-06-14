@@ -14,7 +14,7 @@
 
 N::Filthy street urchin
 I:p::11:1d4:4:1:40:1:0:0:m
-A:72:148:0:0
+A:72:148
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:He looks squalid and thoroughly revolting.
 
@@ -22,523 +22,523 @@ D:He looks squalid and thoroughly revolting.
 
 N::Filthy street urchin
 I:p::11:1d4:4:1:40:2:0:0:m
-A:72:148:0:0
+A:72:148
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP|GROUP
 D:He looks squalid and thoroughly revolting.
 
 N::Scrawny cat
 I:f::11:1d2:30:1:10:3:0:0:n
-A:49:0:0:0
+A:49
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:A skinny little furball with sharp claws and a menacing look.
 
 N::Scruffy little dog
 I:C::11:1d3:20:1:5:3:0:0:n
-A:24:0:0:0
+A:24
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:A thin flea-ridden mutt, growling as you get close.
 
 N::Farmer Maggot
 I:h::11:25d15:40:10:3:4:0:0:m
-A:283:283:0:0
+A:283:283
 F:MV_ATT_NORM|CARRY_OBJ|HAS_90|UNIQUE|MAX_HP|CHARM_SLEEP|GOOD
 D:He's lost his dogs.  He's had his mushrooms stolen.  He's not a happy hobbit!
 
 N::Blubbering idiot
 I:p::11:1d2:6:1:0:1:0:0:m
-A:79:0:0:0
+A:79
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:He tends to blubber a lot.
 
 N::Boil-covered wretch
 I:p::11:1d2:6:1:0:1:0:0:m
-A:79:0:0:0
+A:79
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:Ugly doesn't begin to describe him.
 
 N::Village idiot
 I:p::12:4d4:6:1:0:1:0:0:m
-A:79:0:0:0
+A:79
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:Drooling and comical, but then, what do you expect?
 
 N::Pitiful looking beggar
 I:p::11:1d4:10:1:40:1:0:0:m
-A:72:0:0:0
+A:72
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:You just can't help feeling sorry for him.
 
 N::Mangy looking leper
 I:p::11:1d1:10:1:50:1:0:0:m
-A:72:0:0:0
+A:72
 F:MV_ATT_NORM|MV_20|THRO_DR|PICK_UP
 D:You feel it isn't safe to touch him.
 
 N::Squint eyed rogue
 I:p::11:2d8:10:8:99:1:0:0:m
-A:5:149:0:0
+A:5:149
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|MV_ATT_NORM|THRO_DR|PICK_UP|EVIL
 D:A hardy, street-wise crook that knows an easy catch when it sees one.
 
 N::Singing
 I:11::1:pd2:0:10:0:0:0:NONE8:1
-A:3:72:0:0
+A:3:72
 F: happy drunk|CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP
 D:He makes you glad to be sober
 
 N::Aimless looking merchant
 I:p::11:3d3:10:1:255:1:0:0:m
-A:2:0:0:0
+A:2
 F:CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP
 D:The typical ponce around town, with purse jingling, and looking for more amulets of adornment to buy.
 
 N::Mean looking mercenary
 I:p::11:5d8:10:20:250:1:0:0:m
-A:9:0:0:0
+A:9
 F:CARRY_GOLD|CARRY_OBJ|HAS_90|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP|EVIL
 D:No job is too low for him.
 
 N::Battle scarred veteran
 I:p::11:7d8:10:30:250:1:0:0:m
-A:15:0:0:0
+A:15
 F:CARRY_GOLD|CARRY_OBJ|HAS_90|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP
 D:He doesn't take to strangers kindly.
 
 N::Grey mold
 I:m::11:1d2:2:1:0:1:1:3:n
-A:3:3:0:0
+A:3:3
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:A small strange growth.
 
 N::Grey mushroom patch
 I:::11:d1:2:1:0:1:0:1:1
-A:2:91:0:0
+A:2:91
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:Yum!  It looks quite tasty.
 
 N::Giant yellow centipede
 I:c::11:2d6:8:12:30:1:1:2:n
-A:26:60:0:0
+A:26:60
 F:MV_ATT_NORM|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::Giant white centipede
 I:c::11:3d5:7:10:40:1:1:2:n
-A:25:59:0:0
+A:25:59
 F:MV_ATT_NORM|MV_40|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::White icky thing
 I:i::11:3d5:12:7:10:1:1:2:n
-A:63:0:0:0
+A:63
 F:MV_ATT_NORM|MV_75|ANIMAL
 D:It is a sort of pile of slime on legs.
 
 N::Clear icky thing
 I:i::11:2d5:12:6:10:1:1:1:n
-A:63:0:0:0
+A:63
 F:MV_ATT_NORM|MV_75|MV_INVIS|ANIMAL
 D:It is a smallish, slimy, icky, blobby creature.
 
 N::Giant white mouse
 I:r::11:1d3:8:4:20:1:1:1:n
-A:25:0:0:0
+A:25
 F:MV_ATT_NORM|MV_40|MULTIPLY|ANIMAL
 D:It is about three feet long with large teeth.
 
 N::Large brown snake
 I:R::10:4d6:4:35:99:1:1:3:n
-A:26:73:0:0
+A:26:73
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is about eight feet long.
 
 N::Large white snake
 I:R::11:3d6:4:30:99:1:1:2:n
-A:24:0:0:0
+A:24
 F:MV_ATT_NORM|MV_40|ANIMAL
 D:It is about eight feet long.
 
 N::Small kobold
 I:k::11:2d7:20:16:10:1:1:5:n
-A:4:0:0:0
+A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|EVIL|IM_POIS
 D:It is a squat and ugly humanoid figure.
 
 N::Kobold
 I:k::11:3d7:20:16:10:1:1:5:n
-A:5:0:0:0
+A:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|EVIL|IM_POIS
 D:It is a small, dog-headed humanoid.
 
 N::White worm mass
 I:w::10:4d4:7:1:10:1:1:2:p
-A:173:0:0:0
+A:173
 F:MULTIPLY|MV_75|MV_ATT_NORM|ANIMAL|HURT_LITE|IM_POIS|MINDLESS
 D:They are a large slimy pile of worms.
 
 N::Floating eye
 I:e::11:3d6:2:6:10:1:1:1:n
-A:146:0:0:0
+A:146
 F:MV_ONLY_ATT|ANIMAL|HURT_LITE
 D:A disembodied eye floating a few feet above the ground.
 
 N::Rock lizard
 I:R::11:3d4:20:4:15:1:1:2:n
-A:24:0:0:0
+A:24
 F:MV_ATT_NORM|ANIMAL
 D:It is a small lizard with a hardened hide.
 
 N::Jackal
 I:C::11:1d4:10:3:10:1:1:1:n
-A:24:0:0:0
+A:24
 F:MV_ATT_NORM|ANIMAL|GROUP
 D:It is a yapping snarling dog, dangerous when in a pack.
 
 N::Soldier ant
 I:a::11:2d5:10:3:10:1:1:3:n
-A:25:0:0:0
+A:25
 F:MV_ATT_NORM|ANIMAL
 D:A large ant with powerful mandibles.
 
 N::Fruit bat
 I:b::12:1d6:20:3:10:1:1:1:n
-A:24:0:0:0
+A:24
 F:MV_ATT_NORM|ANIMAL
 D:A fast-moving pest.
 
 N::Shrieker mushroom patch
 I:::11:d1:2:1:0:2:0:1:1
-A:1:203:0:0
+A:1:203
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:Yum!  These look quite tasty.
 
 N::Blubbering icky thing
 I:i::11:5d6:14:4:10:1:2:8:n
-A:174:210:0:0
+A:174:210
 F:CARRY_GOLD|CARRY_OBJ|HAS_90|PICK_UP|THRO_CREAT|MV_40|MV_ATT_NORM|ANIMAL|IM_POIS
 D:It is a smallish, slimy, icky creature.
 
 N::Metallic green centipede
 I:c::12:4d4:5:4:10:1:2:3:n
-A:68:0:0:0
+A:68
 F:MV_40|MV_ATT_NORM|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::Novice warrior
 I:p::11:9d4:20:16:5:1:2:6:m
-A:6:5:0:0
+A:6:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM
 D:He looks inexperienced but tough.
 
 N::Novice rogue
 I:p::11:8d4:20:12:5:1:2:6:m
-A:5:148:0:0
+A:5:148
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL
 D:A rather shifty individual.
 
 N::Novice priest
 I:p::11:7d4:20:10:10:1:2:7:m
-A:4:0:0:0
+A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0xCL|MS1_CAUSE_1|MS1_FEAR|MS2_HEAL
 D:He is tripping over his priestly robes.
 
 N::Novice mage
 I:p::11:6d4:20:6:5:1:2:7:m
-A:3:0:0:0
+A:3
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0xCL|MS1_CONF|MS1_ARROW_1|MS1_BLINK
 D:He is leaving behind a trail of dropped spell components.
 
 N::Yellow mushroom patch
 I:::11:d1:2:1:0:2:0:2:1
-A:1:100:0:0
+A:1:100
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|IM_POIS|MINDLESS
 D:Yum!  It looks quite tasty.
 
 N::White jelly
 I:j::12:8d8:2:1:99:1:2:10:n
-A:168:0:0:0
+A:168
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|HURT_LITE|IM_POIS|MINDLESS
 D:Its a large pile of white flesh.
 
 N::Giant green frog
 I:R::11:2d8:12:8:30:1:2:6:n
-A:26:0:0:0
+A:26
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is as big as a wolf.
 
 N::Giant black ant
 I:a::11:3d6:8:20:80:1:2:8:n
-A:27:0:0:0
+A:27
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is about three feet long.
 
 N::Salamander
 I:R::11:4d6:8:20:80:1:2:10:n
-A:105:0:0:0
+A:105
 F:MV_ATT_NORM|MV_20|IM_FIRE|ANIMAL
 D:A black and yellow lizard....WATCH OUT!
 
 N::White harpy
 I:H::11:2d5:16:17:10:1:2:5:f
-A:49:49:25:0
+A:49:49:25
 F:MV_ATT_NORM|MV_40|ANIMAL|EVIL
 D:A flying, screeching bird with a woman's face.
 
 N::Blue yeek
 I:y::11:2d6:18:14:10:1:2:4:n
-A:4:0:0:0
+A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ANIMAL
 D:A small humanoid figure.
 
 N::Grip
 I:12::30:Cd5:0:30:30:2:0:NONE8:1
-A:5:27:0:0
+A:5:27
 F: Farmer Maggots dog|MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
 D:A rather vicious dog belonging to Farmer Maggot.  It thinks you are stealing mushrooms.
 
 N::Fang
 I:12::30:Cd5:0:30:30:2:0:NONE8:1
-A:5:27:0:0
+A:5:27
 F: Farmer Maggots dog|MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
 D:A rather vicious dog belonging to Farmer Maggot.  It thinks you are stealing mushrooms.
 
 N::Green worm mass
 I:w::10:6d4:7:3:10:1:2:3:p
-A:140:0:0:0
+A:140
 F:MULTIPLY|MV_75|MV_ATT_NORM|ANIMAL|HURT_LITE|IM_ACID|MINDLESS
 D:They are a large slimy pile of worms.
 
 N::Large black snake
 I:R::10:4d8:5:38:75:1:2:9:n
-A:27:74:0:0
+A:27:74
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is about ten feet long.
 
 N::Cave spider
 I:S::12:2d6:8:16:80:1:2:7:n
-A:27:0:0:0
+A:27
 F:MV_ATT_NORM|ANIMAL|GROUP
 D:It is a black spider that moves in fits and starts.
 
 N::Wild cat
 I:f::12:3d5:40:12:0:2:2:8:n
-A:51:51:0:0
+A:51:51
 F:MV_ATT_NORM|ANIMAL
 D:A larger than normal feline, hissing loudly.  Its velvet claws conceal a fistful of needles.
 
 N::Smeagol
 I:h::13:11d4:20:12:5:2:3:16:m
-A:3:148:0:0
+A:3:148
 F:HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|MV_75|MV_ATT_NORM|MV_INVIS|EVIL|UNIQUE
 D:He's been sneaking, and he wants his 'precious.'
 
 N::Green ooze
 I:j::12:3d4:8:16:80:2:3:4:n
-A:140:0:0:0
+A:140
 F:HAS_90|CARRY_GOLD|CARRY_OBJ|MV_75|MV_ATT_NORM|CHARM_SLEEP|ANIMAL|IM_ACID|IM_POIS|MINDLESS
 D:It's green and it's oozing.
 
 N::Poltergeist
 I:G::13:2d5:8:15:10:1:3:8:n
-A:93:0:0:0
+A:93
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|HAS_90|PICK_UP|MV_INVIS|THRO_WALL|MV_40|MV_75|MV_ATT_NORM|MS1_BLINK|0xFL|CHARM_SLEEP|HURT_LITE|EVIL|NO_INFRA|UNDEAD|IM_COLD|IM_POIS
 D:It is a ghastly, ghostly form.
 
 N::Metallic blue centipede
 I:c::12:4d5:6:6:15:1:3:7:n
-A:69:0:0:0
+A:69
 F:MV_40|MV_ATT_NORM|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::Giant white louse
 I:l::12:1d1:6:5:10:1:3:1:n
-A:24:0:0:0
+A:24
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL
 D:It is six inches long.
 
 N::Black naga
 I:n::11:6d8:16:40:120:1:3:20:f
-A:75:0:0:0
+A:75
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_20|EVIL
 D:A large black serpent's body with a female torso.
 
 N::Spotted mushroom patch
 I:::11:d1:2:1:0:3:0:3:1
-A:1:175:0:0
+A:1:175
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|IM_POIS|MINDLESS
 D:Yum!  It looks quite tasty.
 
 N::Silver jelly
 I:j::12:10d8:2:1:99:2:3:12:n
-A:213:213:0:0
+A:213:213
 F:MV_ONLY_ATT|0xFL|MS1_MANA_DRAIN|CHARM_SLEEP|ANIMAL|HURT_LITE|IM_POIS|MINDLESS
 D:It is a large pile of silver flesh that sucks all light from its surroundings.
 
 N::Yellow jelly
 I:j::12:10d8:2:1:99:1:3:12:n
-A:169:0:0:0
+A:169
 F:MV_ONLY_ATT|0xFL|MS1_MANA_DRAIN|CHARM_SLEEP|ANIMAL|HURT_LITE|IM_POIS|MINDLESS
 D:It's a large pile of yellow flesh.
 
 N::Scruffy looking hobbit
 I:h::11:3d5:16:8:10:1:3:4:m
-A:3:148:0:0
+A:3:148
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL
 D:A short little guy, in bedraggled clothes.  He asks you if you know of a good tavern nearby.
 
 N::Giant white ant
 I:a::11:3d6:8:16:80:1:3:7:n
-A:27:0:0:0
+A:27
 F:MV_ATT_NORM|ANIMAL
 D:It is about two feet long and has sharp pincers.
 
 N::Yellow mold
 I:m::11:8d8:2:10:99:1:3:9:n
-A:3:0:0:0
+A:3
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:It is a strange growth on the dungeon floor.
 
 N::Metallic red centipede
 I:c::12:4d8:8:9:20:1:3:12:n
-A:69:0:0:0
+A:69
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::Yellow worm mass
 I:w::10:4d8:7:4:10:2:3:4:p
-A:182:0:0:0
+A:182
 F:MULTIPLY|MV_75|MV_ATT_NORM|ANIMAL|HURT_LITE|MINDLESS
 D:They are a large slimy pile of worms.
 
 N::Clear worm mass
 I:w::10:4d4:7:1:10:2:3:4:p
-A:173:0:0:0
+A:173
 F:MULTIPLY|MV_INVIS|MV_75|MV_ATT_NORM|ANIMAL|HURT_LITE|IM_POIS|MINDLESS
 D:They are a disgusting mass of poisonous worms.
 
 N::Radiation eye
 I:e::11:3d6:2:6:10:1:3:6:n
-A:88:0:0:0
+A:88
 F:MV_ONLY_ATT|0xBL|MS1_MANA_DRAIN|ANIMAL|HURT_LITE
 D:A glowing eye that seems to crackle with energy.
 
 N::Cave lizard
 I:R::11:3d6:8:16:80:1:4:8:n
-A:28:0:0:0
+A:28
 F:MV_ATT_NORM|ANIMAL
 D:It is an armoured lizard with a powerful bite.
 
 N::Novice ranger
 I:p::11:6d8:20:6:5:1:4:18:m
-A:4:4:0:0
+A:4:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0x9L|MS1_ARROW_1
 D:An agile hunter, ready and relaxed.
 
 N::Novice paladin
 I:p::11:6d8:20:16:5:2:4:20:m
-A:6:6:0:0
+A:6:6
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0x9L|MS1_CAUSE_1|MS1_FEAR
 D:An adventurer both devoutly religious and skillful in combat.
 
 N::Blue jelly
 I:j::11:12d8:2:1:99:1:4:14:n
-A:125:0:0:0
+A:125
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|HURT_LITE|IM_COLD|NO_INFRA|MINDLESS
 D:It's a large pile of pulsing blue flesh.
 
 N::Creeping copper coins
 I:$::10:7d8:3:24:10:2:4:9:p
-A:3:170:0:0
+A:3:170
 F:HAS_1D2|CARRY_GOLD|MV_ATT_NORM|CHARM_SLEEP|ANIMAL|IM_POIS|NO_INFRA
 D:A strange pile of moving coins.
 
 N::Giant white rat
 I:r::11:2d2:8:7:30:1:4:1:n
-A:153:0:0:0
+A:153
 F:MULTIPLY|MV_20|MV_ATT_NORM|ANIMAL
 D:It is a very vicious rodent.
 
 N::Blue worm mass
 I:w::10:5d8:7:12:10:1:4:5:p
-A:129:0:0:0
+A:129
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL|HURT_LITE|IM_COLD|NO_INFRA|MINDLESS
 D:They are a large slimy pile of worms.
 
 N::Large grey snake
 I:R::10:6d8:6:41:50:1:4:14:n
-A:28:75:0:0
+A:28:75
 F:MV_20|MV_ATT_NORM|ANIMAL
 D:It slithers and moves towards you.
 
 N::Bullroarer the Hobbit
 I:h::12:8d8:16:8:10:3:5:90:m
-A:5:149:148:0
+A:5:149:148
 F:CARRY_OBJ|HAS_2D2|THRO_DR|MV_ATT_NORM|UNIQUE|GOOD|MAX_HP
 D:He is a sturdy hobbit who is renowned for his unusual strength and vigour.  He can prove a troublesome opponent.
 
 N::Novice mage
 I:p::11:6d4:20:6:20:1:5:7:m
-A:3:0:0:0
+A:3
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0xCL|MS1_CONF|MS1_ARROW_1|MS1_BLINK|MS1_BLIND|GROUP
 D:He is leaving behind a trail of dropped spell components.
 
 N::Green naga
 I:n::11:9d8:18:40:120:1:5:30:f
-A:75:118:0:0
+A:75:118
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|PICK_UP|MV_ATT_NORM|MV_20|EVIL|IM_ACID
 D:A large green serpent with a female's torso.  Her green skin glistens with acid.
 
 N::Blue ooze
 I:j::11:3d4:8:16:80:1:3:7:n
-A:129:0:0:0
+A:129
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|MV_75|MV_ATT_NORM|CHARM_SLEEP|ANIMAL|IM_COLD|MINDLESS| NONE8
 D:It's blue and it's oozing.
 
 N::Green glutton ghost
 I:G::13:3d4:10:20:10:1:5:15:n
-A:211:0:0:0
+A:211
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|HAS_90|THRO_WALL|MV_INVIS|MV_ATT_NORM|MV_40|MV_75|CHARM_SLEEP|EVIL|NO_INFRA|UNDEAD
 D:It is a very ugly green ghost with a voracious appetite.
 
 N::Green jelly
 I:j::12:22d8:2:1:99:1:5:18:n
-A:136:0:0:0
+A:136
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|HURT_LITE|IM_ACID|MINDLESS
 D:It is a large pile of pulsing green flesh.
 
 N::Large kobold
 I:k::11:13d9:20:32:30:1:5:25:n
-A:9:0:0:0
+A:9
 F:CARRY_OBJ|CARRY_GOLD|HAS_90|THRO_DR|MV_ATT_NORM|EVIL|IM_POIS
 D:It a man-sized figure with the all too recognizable face of a kobold.
 
 N::Skeleton kobold
 I:s::11:5d8:20:26:40:1:5:12:n
-A:5:0:0:0
+A:5
 F:THRO_DR|MV_ATT_NORM|CHARM_SLEEP|UNDEAD|EVIL|IM_COLD|NO_INFRA|IM_POIS|MINDLESS
 D:It is a small animated kobold skeleton.
 
 N::Grey icky thing
 I:i::11:4d8:14:12:15:1:5:10:n
-A:66:0:0:0
+A:66
 F:MV_ATT_NORM|MV_40|ANIMAL
 D:It is a smallish, slimy, icky creature.
 
 N::Disenchanter eye
 I:e::10:7d8:2:10:10:2:5:20:n
-A:207:0:0:0
+A:207
 F:MV_ONLY_ATT|MS1_MANA_DRAIN|0x9L|ANIMAL|HURT_LITE
 D:A large white floating eye that crackles with magic.
 
 N::Red worm mass
 I:w::10:5d8:7:12:10:1:5:6:p
-A:111:0:0:0
+A:111
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL|HURT_LITE|IM_FIRE|MINDLESS
 D:They are a large slimy pile of worms.
 
 N::Copperhead snake
 I:R::11:4d6:6:20:1:1:5:15:n
-A:158:0:0:0
+A:158
 F:MV_ATT_NORM|MV_40|ANIMAL|IM_POIS
 D:It has a copper head and sharp venomous fangs.
 
@@ -550,133 +550,133 @@ D:Yum!  It looks quite tasty.
 
 N::Novice priest
 I:p::11:7d4:20:10:5:2:6:7:m
-A:4:0:0:0
+A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0xCL|MS1_CAUSE_1|MS1_FEAR|GROUP|MS2_HEAL
 D:He is tripping over his priestly robes.
 
 N::Novice warrior
 I:p::11:9d4:20:16:5:2:6:6:m
-A:6:5:0:0
+A:6:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|GROUP
 D:He looks inexperienced but tough.
 
 N::Novice rogue
 I:p::11:8d4:20:12:5:2:6:6:m
-A:5:148:0:0
+A:5:148
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|EVIL|GROUP
 D:A rather shifty individual.
 
 N::Brown mold
 I:m::11:15d8:2:12:99:1:6:20:n
-A:89:0:0:0
+A:89
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:A strange brown growth on the dungeon floor.
 
 N::Giant brown bat
 I:b::13:3d8:10:15:30:1:6:10:n
-A:26:0:0:0
+A:26
 F:MV_40|MV_20|MV_ATT_NORM|ANIMAL
 D:It screeches as it attacks.
 
 N::Novice archer
 I:p::12:6d8:20:10:5:2:6:20:m
-A:3:3:0:0
+A:3:3
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|HAS_1D2|0x3L|MS3_ARROW_3
 D:A nasty little fellow with a bow and arrow.
 
 N::Creeping silver coins
 I:$::10:12d8:4:30:10:2:6:18:p
-A:5:171:0:0
+A:5:171
 F:HAS_1D2|CARRY_GOLD|HAS_60|MV_ATT_NORM|CHARM_SLEEP|ANIMAL|IM_POIS|NO_INFRA
 D:A pile of silver coins that moves on thousands of tiny legs.
 
 N::Snaga
 I:o::11:8d8:20:32:30:1:6:15:m
-A:7:0:0:0
+A:7
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ORC|EVIL|GROUP|HURT_LITE
 D:He is one of the many weaker 'slave' orcs, often mistakenly known as a goblin.
 
 N::Rattlesnake
 I:R::11:6d7:6:24:1:1:6:20:n
-A:159:0:0:0
+A:159
 F:MV_ATT_NORM|MV_40|ANIMAL|IM_POIS
 D:It is recognized by the hard-scaled end of its body that is often rattled to frighten its prey.
 
 N::Cave orc
 I:o::11:11d9:20:32:30:1:7:20:m
-A:7:0:0:0
+A:7
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ORC|EVIL|GROUP|HURT_LITE
 D:He is often found in huge numbers in deep caves.
 
 N::Wood spider
 I:S::12:3d6:8:16:80:3:7:15:n
-A:26:165:0:0
+A:26:165
 F:MV_ATT_NORM|ANIMAL|GROUP|IM_POIS
 D:It creeps towards you.
 
 N::Manes
 I:I::11:8d8:20:32:30:2:7:16:n
-A:7:0:0:0
+A:7
 F:THRO_DR|MV_ATT_NORM|DEMON|EVIL|GROUP|IM_FIRE
 D:It is a minor but aggressive demon.
 
 N::Bloodshot eye
 I:e::11:5d8:2:6:10:3:7:15:n
-A:143:0:0:0
+A:143
 F:MV_ONLY_ATT|0x7L|MS1_MANA_DRAIN|ANIMAL|HURT_LITE
 D:A large floating bloodshot eye.
 
 N::Red naga
 I:n::11:11d8:20:40:120:2:7:40:f
-A:76:82:0:0
+A:76:82
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|MV_ATT_NORM|MV_20|PICK_UP|EVIL
 D:A large red snake with a woman's torso.
 
 N::Red jelly
 I:j::11:26d8:2:1:99:1:7:26:n
-A:87:0:0:0
+A:87
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|HURT_LITE|MINDLESS
 D:It is a large pulsating mound of red flesh.
 
 N::Giant red frog
 I:R::11:5d8:12:16:50:1:7:16:n
-A:83:0:0:0
+A:83
 F:MV_ATT_NORM|MV_40|ANIMAL
 D:It looks poisonous.
 
 N::Green icky thing
 I:i::11:5d8:14:12:20:2:7:18:n
-A:137:0:0:0
+A:137
 F:MV_ATT_NORM|MV_40|ANIMAL|IM_ACID
 D:It is a smallish, slimy, icky creature.
 
 N::Zombie kobold
 I:z::11:6d8:20:14:30:1:7:14:n
-A:1:1:0:0
+A:1:1
 F:THRO_DR|MV_ATT_NORM|CHARM_SLEEP|UNDEAD|EVIL|IM_COLD|NO_INFRA|MINDLESS|IM_POIS
 D:It is an animated kobold corpse.  Flesh falls off in large chunks as it shambles forward.
 
 N::Lost soul
 I:G::11:2d8:12:10:10:2:7:18:n
-A:11:185:0:0
+A:11:185
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|HAS_90|PICK_UP|MV_INVIS|THRO_WALL|MV_ATT_NORM|MV_20|MV_40|0xFL|TELE|MS1_MANA_DRAIN|CHARM_SLEEP|UNDEAD|EVIL|IM_COLD|NO_INFRA
 D:It is almost insubstantial.
 
 N::Dark elf
 I:h::11:7d10:20:16:20:2:7:25:m
-A:5:5:0:0
+A:5:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_90|THRO_DR|MV_ATT_NORM|0xAL|MS1_CONF|EVIL|HURT_LITE|MS2_DARKNESS
 D:An elven figure with jet black skin and white hair, his eyes are large and twisted with evil.
 
 N::Night lizard
 I:R::11:4d8:20:16:30:2:7:35:n
-A:29:29:0:0
+A:29:29
 F:MV_ATT_NORM|ANIMAL
 D:It is a black lizard with overlapping scales and a powerful jaw.
 
 N::Mughash the Kobold Lord
 I:k::11:12d12:20:20:20:3:7:100:m
-A:9:9:9:0
+A:9:9:9
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:Strong and powerful, for a kobold.
 
@@ -694,121 +694,121 @@ D:A captain of a regiment of weaker orcs, Lagduf keeps his troop in order with d
 
 N::Brown yeek
 I:y::11:4d8:18:18:10:1:8:11:n
-A:5:0:0:0
+A:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ANIMAL
 D:It is a strange small humanoid.
 
 N::Novice ranger
 I:p::11:6d8:20:6:5:1:8:18:m
-A:4:4:0:0
+A:4:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0x9L|MS1_ARROW_1|GROUP
 D:An agile hunter, ready and relaxed.
 
 N::Giant salamander
 I:R::11:6d7:6:40:1:1:8:50:n
-A:106:0:0:0
+A:106
 F:MV_ATT_NORM|MV_20|0x9L|MS1_BR_FIRE|ANIMAL|IM_FIRE
 D:A large black and yellow lizard.  You'd better run away!
 
 N::Green mold
 I:m::11:21d8:2:14:75:2:8:28:n
-A:94:0:0:0
+A:94
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|IM_ACID|IM_POIS|MINDLESS
 D:It is a strange growth on the dungeon floor.
 
 N::Skeleton orc
 I:s::11:10d8:20:36:40:1:8:26:n
-A:14:0:0:0
+A:14
 F:MV_ATT_NORM|THRO_DR|CHARM_SLEEP|ORC|UNDEAD|EVIL|IM_POIS|IM_COLD|NO_INFRA|MINDLESS
 D:It is an animated orc skeleton.
 
 N::Seedy looking human
 I:p::11:8d9:20:26:20:1:8:22:m
-A:17:0:0:0
+A:17
 F:HAS_1D2|CARRY_OBJ|CARRY_GOLD|THRO_DR|MV_ATT_NORM|EVIL
 D:He is covered in scars and looks disreputable.
 
 N::Lemure
 I:I::11:13d9:20:32:30:3:8:16:n
-A:7:0:0:0
+A:7
 F:THRO_DR|MV_ATT_NORM|DEMON|EVIL|GROUP|IM_FIRE
 D:It is the larval form of a major demon.
 
 N::Hill orc
 I:o::11:13d9:20:32:30:1:8:25:m
-A:9:0:0:0
+A:9
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ORC|EVIL|GROUP
 D:He is a hardy well-weathered survivor.
 
 N::Bandit
 I:p::11:8d8:20:24:10:2:8:26:m
-A:13:148:0:0
+A:13:148
 F:HAS_1D2|CARRY_OBJ|CARRY_GOLD|THRO_DR|MV_ATT_NORM|EVIL
 D:He is after your cash!
 
 N::Yeti
 I:Y::11:11d9:20:24:10:3:9:30:n
-A:51:51:27:0
+A:51:51:27
 F:THRO_DR|MV_ATT_NORM|ANIMAL|IM_COLD
 D:A large white figure covered in shaggy fur.
 
 N::Bloodshot icky thing
 I:i::11:7d8:14:18:20:3:9:24:n
-A:65:139:0:0
+A:65:139
 F:MV_ATT_NORM|MV_40|0xBL|MS1_MANA_DRAIN|ANIMAL|IM_POIS
 D:It is a slimy, icky creature.
 
 N::Giant grey rat
 I:r::11:2d3:8:12:20:1:9:2:n
-A:154:0:0:0
+A:154
 F:MULTIPLY|MV_ATT_NORM|MV_20|IM_POIS|ANIMAL
 D:It is a rodent of unusual size.
 
 N::Black harpy
 I:H::12:3d8:16:22:10:1:9:19:f
-A:50:50:26:0
+A:50:50:26
 F:MV_ATT_NORM|MV_20|EVIL|ANIMAL
 D:A woman's face on the body of a vicious black bird.
 
 N::Orc shaman
 I:o::11:9d8:20:15:20:1:9:30:n
-A:5:5:0:0
+A:5:5
 F:CARRY_OBJ|CARRY_GOLD|HAS_90|THRO_DR|MV_ATT_NORM|0x8L|MS1_ARROW_1|MS1_CAUSE_1|MS1_BLINK|EVIL|ORC|HURT_LITE
 D:An orc dressed in skins who gestures wildly.
 
 N::Baby blue dragon
 I:d::11:10d10:20:30:70:2:9:35:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_ELEC|IM_ELEC|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales a pale blue.
 
 N::Baby white dragon
 I:d::11:10d10:20:30:70:2:9:35:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_COLD|IM_COLD|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales a pale white.
 
 N::Baby green dragon
 I:d::11:10d10:20:30:70:2:9:35:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_POIS|IM_POIS|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales a sickly green.
 
 N::Baby black dragon
 I:d::11:10d10:20:30:70:2:9:35:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_ACID|IM_ACID|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales a dull black.
 
 N::Baby red dragon
 I:d::11:10d11:20:30:70:2:9:35:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_FIRE|IM_FIRE|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales a pale red.
 
 N::Giant red ant
 I:a::11:4d8:12:34:60:2:9:22:n
-A:27:85:0:0
+A:27:85
 F:MV_ATT_NORM|ANIMAL
 D:It is large and has venomous mandibles.
 
@@ -820,7 +820,7 @@ D:A nasty piece of work, Brodda picks on defenseless women and children.
 
 N::King cobra
 I:R::11:8d10:8:30:1:2:9:28:n
-A:144:161:0:0
+A:144:161
 F:MV_ATT_NORM|MV_40|ANIMAL|IM_POIS
 D:It is a large snake with a hooded face.
 
@@ -832,7 +832,7 @@ D:It is a vast black spider whose bulbous body is bloated with poison.
 
 N::Dark elven mage
 I:h::12:7d10:20:16:20:1:10:50:m
-A:5:5:0:0
+A:5:5
 F:CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x5L|MS1_BLIND|MS1_ARROW_1|MS1_CONF|EVIL|IM_POIS|HURT_LITE|MS2_BA_POIS|MS2_DARKNESS
 D:A drow elven figure, dressed all in black, hurling spells at you.
 
@@ -844,13 +844,13 @@ D:He's just like daddy!  He knows mighty spells, but fortunately he is a yeek.
 
 N::Dark elven warrior
 I:h::11:10d11:20:16:20:1:10:50:m
-A:7:7:0:0
+A:7:7
 F:CARRY_OBJ|CARRY_GOLD|HAS_1D2|THRO_DR|MV_ATT_NORM|NONE|EVIL|HURT_LITE
 D:A drow elven figure in armour and ready with his sword.
 
 N::Clear mushroom patch
 I:::12:d1:4:1:0:10:0:3:2
-A:1:70:0:0
+A:1:70
 F:MULTIPLY|MV_ONLY_ATT|MV_INVIS|CHARM_SLEEP|ANIMAL|NO_INFRA
 D:Yum!  It looks quite tasty.
 
@@ -862,109 +862,109 @@ D:He is a cunning and devious orc with a chaotic nature.
 
 N::Giant white tick
 I:t::10:12d8:12:40:20:2:10:27:n
-A:160:0:0:0
+A:160
 F:MV_ATT_NORM|ANIMAL|IM_POIS
 D:It is moving slowly towards you.
 
 N::Hairy mold
 I:m::11:15d8:2:15:70:2:10:32:n
-A:151:0:0:0
+A:151
 F:MV_ONLY_ATT|ANIMAL|CHARM_SLEEP|MINDLESS|IM_POIS
 D:It is a strange hairy growth on the dungeon floor.
 
 N::Disenchanter mold
 I:m::11:16d8:2:20:70:2:10:40:n
-A:206:0:0:0
+A:206
 F:MV_ONLY_ATT|MS1_MANA_DRAIN|0xBL|ANIMAL|CHARM_SLEEP|MINDLESS|IM_POIS
 D:It is a strange glowing growth on the dungeon floor.
 
 N::Pseudo dragon
 I:d::11:22d9:20:30:40:2:10:150:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|CARRY_OBJ|CARRY_GOLD|HAS_60|0xBL|MS1_FEAR|MS1_CONF|DRAGON|MAX_HP|MS3_BR_LITE|MS3_BR_DARK
 D:A small relative of the dragon that inhabits dark caves.
 
 N::Tengu
 I:I::12:16d9:20:32:30:1:10:40:n
-A:7:0:0:0
+A:7
 F:THRO_DR|MV_ATT_NORM|0x3L|MS1_BLINK|MS1_TELE_TO|DEMON|EVIL|IM_FIRE
 D:It is a fast-moving demon that blinks quickly in and out of existence; no other demon matches its teleporting mastery.
 
 N::Creeping gold coins
 I:$::10:18d8:5:36:10:3:10:32:p
-A:14:172:0:0
+A:14:172
 F:MV_ATT_NORM|HAS_1D2|HAS_90|CARRY_GOLD|ANIMAL|IM_POIS|NO_INFRA|CHARM_SLEEP
 D:They are shambling forward on thousands of legs.
 
 N::Wolf
 I:C::12:6d6:30:30:20:1:10:30:n
-A:29:0:0:0
+A:29
 F:MV_ATT_NORM|MV_20|ANIMAL|GROUP
 D:It howls and snaps at you.
 
 N::Giant fruit fly
 I:F::12:2d2:8:14:10:6:10:4:n
-A:25:0:0:0
+A:25
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL
 D:A fast-breeding, annoying pest.
 
 N::Panther
 I:f::12:10d8:40:30:0:2:10:25:n
-A:54:54:0:0
+A:54:54
 F:MV_ATT_NORM|ANIMAL
 D:A large black cat, stalking you with intent.  It thinks you're its next meal.
 
 N::Brigand
 I:p::11:9d8:20:32:10:2:10:35:m
-A:13:149:0:0
+A:13:149
 F:HAS_1D2|CARRY_OBJ|CARRY_GOLD|THRO_DR|MV_ATT_NORM|EVIL
 D:He is eyeing your backpack.
 
 N::Baby multi-hued dragon
 I:d::11:10d13:20:30:70:2:11:45:n
-A:51:51:28:0
+A:51:51:28
 F:MV_ATT_NORM|HAS_1D2|CARRY_GOLD|HAS_60|THRO_DR|0xBL|MS1_BR_FIRE|MS1_BR_COLD|MS1_BR_POIS|MS1_BR_ACID|MS1_BR_ELEC|IM_FIRE|IM_COLD|IM_POIS|IM_ACID|IM_ELEC|EVIL|DRAGON|MAX_HP
 D:This hatchling dragon is still soft, its eyes unaccustomed to light and its scales shimmering with a hint of colour.
 
 N::Hippogriff
 I:H::11:20d9:12:14:10:1:11:30:n
-A:14:35:0:0
+A:14:35
 F:MV_ATT_NORM|ANIMAL
 D:A strange hybrid of eagle, lion and horse.  It looks weird.
 
 N::Orc zombie
 I:z::11:11d8:20:24:25:1:11:30:n
-A:3:3:3:0
+A:3:3:3
 F:THRO_DR|MV_ATT_NORM|CHARM_SLEEP|EVIL|UNDEAD|ORC|IM_COLD|NO_INFRA|IM_POIS|MINDLESS
 D:It is a shambling orcish corpse leaving behind a trail of flesh.
 
 N::Gnome mage
 I:h::11:7d8:18:20:10:2:11:38:m
-A:4:0:0:0
+A:4
 F:HAS_1D2|CARRY_OBJ|CARRY_GOLD|MV_ATT_NORM|THRO_DR|0x4L|MS1_BLINK|MS1_BO_COLD|MS1_S_MONSTER|EVIL|MS2_DARKNESS
 D:A mage of short stature.
 
 N::Black mamba
 I:R::12:10d8:10:32:1:3:12:40:n
-A:163:0:0:0
+A:163
 F:MV_ATT_NORM|MV_40|ANIMAL|IM_POIS
 D:It has glistening black skin, a sleek body and highly venomous fangs.
 
 N::White wolf
 I:C::12:7d7:30:30:20:1:12:30:n
-A:26:27:0:0
+A:26:27
 F:MV_ATT_NORM|MV_20|ANIMAL|GROUP|IM_COLD
 D:A large and muscled wolf from the northern wastes.  Its breath is cold and icy and its fur coated in frost.
 
 N::Grape jelly
 I:j::11:52d8:2:1:99:3:12:60:n
-A:186:0:0:0
+A:186
 F:MV_ONLY_ATT|MS1_MANA_DRAIN|0xBL|HURT_LITE|CHARM_SLEEP|IM_POIS|MINDLESS
 D:It is a pulsing mound of glowing flesh.
 
 N::Nether worm mass
 I:w::10:5d8:10:15:3:3:12:6:p
-A:186:0:0:0
+A:186
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL|HURT_LITE|MINDLESS
 D:They are a disgusting pile of dark worms, eating each other, the floor, the air, you....
 
@@ -976,79 +976,79 @@ D:A leader of a band of raiding orcs, he picks on hobbits.
 
 N::Master yeek
 I:y::11:12d9:18:24:10:2:12:28:n
-A:7:0:0:0
+A:7
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|THRO_DR|MV_ATT_NORM|0x4L|MS1_BLINK|TELE|MS1_S_MONSTER|MS1_BLIND|MS1_SLOW|ANIMAL|EVIL|MS2_BA_POIS
 D:A small humanoid that radiates some power.
 
 N::Priest
 I:p::11:12d8:20:22:40:1:12:36:m
-A:12:12:0:0
+A:12:12
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|MV_ATT_NORM|THRO_DR|0x3L|MS1_CAUSE_2|MS1_S_MONSTER|MS1_FEAR|EVIL|INTELLIGENT|MS2_HEAL
 D:A robed humanoid dedicated to his god.
 
 N::Dark elven priest
 I:h::12:7d10:20:30:30:1:12:50:m
-A:8:9:0:0
+A:8:9
 F:CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x5L|MS1_BLIND|MS1_CAUSE_2|MS1_CONF|EVIL|INTELLIGENT|HURT_LITE|MS2_HEAL|MS2_DARKNESS
 D:A drow elven figure, dressed all in black, chanting curses and waiting to deliver your soul to hell.
 
 N::Air spirit
 I:E::13:8d8:12:40:20:2:12:40:n
-A:2:0:0:0
+A:2
 F:THRO_DR|MV_INVIS|MV_ATT_NORM|MV_75|EVIL|NO_INFRA|IM_POIS|MINDLESS|CHARM_SLEEP
 D:A whirlwind of intelligent air.
 
 N::Skeleton human
 I:s::11:10d8:20:30:30:1:12:38:n
-A:7:0:0:0
+A:7
 F:THRO_DR|MV_ATT_NORM|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|NO_INFRA|MINDLESS|IM_POIS
 D:It is an animated human skeleton.
 
 N::Zombie human
 I:z::11:12d8:20:24:20:1:12:34:n
-A:3:3:0:0
+A:3:3
 F:THRO_DR|MV_ATT_NORM|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|NO_INFRA|MINDLESS|IM_POIS
 D:It is a shambling human corpse dropping chunks of flesh behind it.
 
 N::Tiger
 I:f::12:12d10:40:40:0:2:12:40:n
-A:54:54:29:0
+A:54:54:29
 F:MV_ATT_NORM|ANIMAL
 D:One of the largest of its species, a sleek orange and black shape creeps towards you, ready to pounce.
 
 N::Moaning spirit
 I:G::12:5d8:14:20:10:2:12:44:n
-A:99:178:0:0
+A:99:178
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|HAS_90|THRO_WALL|MV_INVIS|MV_ATT_NORM|MV_20|0xFL|TELE|MS1_FEAR|CHARM_SLEEP|EVIL|UNDEAD|IM_COLD|NO_INFRA
 D:A ghostly apparition that shrieks horribly.
 
 N::Swordsman
 I:p::11:12d8:20:34:20:1:12:40:m
-A:18:18:0:0
+A:18:18
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM
 D:A warrior of considerable skill.
 
 N::Stegocentipede
 I:c::12:13d8:12:30:30:2:12:40:n
-A:34:34:62:0
+A:34:34:62
 F:MV_ATT_NORM|ANIMAL
 D:It is a vast armoured centipede with massive mandibles and a spiked tail.
 
 N::Spotted jelly
 I:j::12:13d8:12:18:1:3:12:33:n
-A:115:138:138:0
+A:115:138:138
 F:THRO_DR|MV_ONLY_ATT|PICK_UP|IM_ACID|IM_POIS|ANIMAL|CHARM_SLEEP|NO_INFRA|HURT_LITE|MINDLESS
 D:A jelly thing.
 
 N::Drider
 I:S::11:10d13:8:30:80:2:13:55:n
-A:10:10:156:0
+A:10:10:156
 F:MV_ATT_NORM|0x8L|MS1_CAUSE_1|MS1_CONF|EVIL|IM_POIS|MS2_DARKNESS
 D:A dark elf twisted by the goddess Lolth.  A dark elven torso sits upon the bloated form of a giant spider.
 
 N::Killer brown beetle
 I:K::11:13d8:10:40:30:2:13:38:n
-A:41:0:0:0
+A:41
 F:MV_ATT_NORM|ANIMAL
 D:It is a vicious insect with a tough carapace.
 
@@ -1060,43 +1060,43 @@ D:A great yeek, powerful in magic and sorcery, but a yeek all the same.
 
 N::Ogre
 I:O::11:13d9:20:33:30:2:13:50:n
-A:16:0:0:0
+A:16
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|GROUP|GIANT
 D:A hideous, smallish giant that is often found near or with orcs.
 
 N::Creeping mithril coins
 I:$::11:20d8:5:50:10:4:13:45:p
-A:14:172:0:0
+A:14:172
 F:MV_ATT_NORM|HAS_2D2|HAS_90|CARRY_GOLD|ANIMAL|IM_POIS|NO_INFRA
 D:They are shambling forward on needle-sharp legs.
 
 N::Illusionist
 I:p::11:12d8:20:10:10:2:13:50:m
-A:11:0:0:0
+A:11
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x3L|MS1_BLINK|TELE|MS1_BLIND|MS1_CONF|MS1_SLOW|MS1_HOLD|EVIL|INTELLIGENT|MS2_HASTE|MS2_DARKNESS
 D:A deceptive spell caster.
 
 N::Druid
 I:p::11:12d12:20:10:10:2:13:50:m
-A:13:13:0:0
+A:13:13
 F:MV_ATT_NORM|CARRY_OBJ|CARRY_GOLD|HAS_1D2|THRO_DR|0x3L|MS1_BLINK|MS1_HOLD|MS1_BLIND|MS1_SLOW|MS1_BO_FIRE|EVIL|INTELLIGENT|MS2_HASTE|MS2_BO_ELEC
 D:A mystic at one with nature.  Om.
 
 N::Black orc
 I:o::11:12d10:20:36:20:2:13:45:m
-A:17:17:0:0
+A:17:17
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|ORC|GROUP|HURT_LITE
 D:He is a large orc with powerful arms and deep black skin.
 
 N::Ochre jelly
 I:j::12:13d8:12:18:1:3:13:40:n
-A:115:138:138:0
+A:115:138:138
 F:THRO_DR|MV_ATT_NORM|PICK_UP|IM_ACID|IM_POIS|ANIMAL|CHARM_SLEEP|NO_INFRA|MINDLESS
 D:A fast moving highly acidic jelly thing, that is eating away the floor it rests on.
 
 N::Giant flea
 I:F::12:2d2:8:25:10:1:14:4:n
-A:25:0:0:0
+A:25
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL
 D:It makes you itch just to look at it.
 
@@ -1108,7 +1108,7 @@ D:A strong orc guarding the pass of Cirith Ungol.  He is mortally afraid of spid
 
 N::Giant white dragon fly
 I:F::11:5d8:20:20:50:3:14:60:n
-A:122:0:0:0
+A:122
 F:MV_ATT_NORM|MV_40|MS1_BR_COLD|0xAL|ANIMAL|IM_COLD
 D:It is a large fly that drips frost.
 
@@ -1120,127 +1120,127 @@ D:A strange icky creature with rudimentary intelligence but evil cunning.  It hu
 
 N::Hill giant
 I:P::11:16d10:20:45:50:1:14:60:n
-A:19:19:0:0
+A:19:19
 F:MV_ATT_NORM|HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|GIANT
 D:A ten foot tall humanoid with powerful muscles.
 
 N::Flesh golem
 I:g::11:12d8:12:30:10:1:14:50:n
-A:5:5:0:0
+A:5:5
 F:MV_ATT_NORM|IM_ELEC|CHARM_SLEEP|MINDLESS
 D:A shambling humanoid monster with long scars.
 
 N::Warg
 I:C::12:8d8:20:20:40:2:14:40:n
-A:31:0:0:0
+A:31
 F:MV_ATT_NORM|MV_20|ANIMAL|EVIL|GROUP
 D:It is a large wolf with eyes full of cunning.
 
 N::Giant black louse
 I:l::12:1d2:6:7:10:1:14:3:n
-A:25:0:0:0
+A:25
 F:MULTIPLY|MV_ATT_NORM|MV_40
 D:It makes you itch just to look at it.
 
 N::Lurker
 I:.::11:20d10:30:25:10:3:14:80:n
-A:7:7:0:0
+A:7:7
 F:MV_ONLY_ATT|MV_INVIS|NO_INFRA|CHARM_SLEEP|MAX_HP|MINDLESS
 D:A strange creature that merges with the dungeon floor, trapping its victims by enveloping them within its perfectly disguised form.
 
 N::Wererat
 I:r::11:20d8:10:10:10:2:15:45:n
-A:54:54:36:0
+A:54:54:36
 F:MV_ATT_NORM|CARRY_GOLD|HAS_60|THRO_DR|0x9L|MS1_CAUSE_2|MS1_BLINK|MS1_BO_COLD|EVIL|ANIMAL|MS2_BA_POIS
 D:A large rat with glowing red eyes.  The wererat is a disgusting creature, relishing in filth and disease.
 
 N::Black ogre
 I:O::11:20d9:20:33:30:2:15:75:n
-A:16:16:0:0
+A:16:16
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|MV_20|EVIL|GROUP|GIANT
 D:A massive orc-like figure with black skin and powerful arms.
 
 N::Magic mushroom patch
 I:::13:d1:40:10:0:15:0:10:2
-A:1:0:0:0
+A:1
 F:MV_ONLY_ATT|0x1L|MS1_BLINK|MS1_FEAR|MS1_SLOW|ANIMAL|GROUP|CHARM_SLEEP|MINDLESS|MS2_DARKNESS
 D:Yum!  It looks quite tasty.  But, wait...it seems to glow with an unusual light.
 
 N::Guardian naga
 I:n::11:24d11:20:65:120:2:15:80:f
-A:77:31:31:0
+A:77:31:31
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|HAS_60|THRO_DR|MV_ATT_NORM|MV_20|EVIL
 D:A giant snake-like figure with a woman's torso.
 
 N::Light hound
 I:Z::11:6d6:30:30:0:1:15:50:n
-A:29:0:0:0
+A:29
 F:MV_ATT_NORM|0x5L|ANIMAL|GROUP|MS3_BR_LITE
 D:A brilliant canine form whose light hurts your eyes, even at this distance.
 
 N::Dark hound
 I:Z::11:6d6:30:30:0:1:15:50:n
-A:29:0:0:0
+A:29
 F:MV_ATT_NORM|0x5L|ANIMAL|GROUP|MS3_BR_DARK
 D:A hole in the air in the shape of a huge hound.  No light falls upon its form.
 
 N::Half-orc
 I:o::11:16d10:20:40:20:3:15:50:m
-A:17:17:0:0
+A:17:17
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|ORC|GROUP
 D:He is a hideous deformed cross-breed with man and orc, combining man's strength and cunning with orcish evil.
 
 N::Giant tarantula
 I:S::12:10d15:8:32:80:3:15:70:n
-A:156:156:156:0
+A:156:156:156
 F:MV_ATT_NORM|ANIMAL|IM_POIS
 D:A giant spider with hairy black and red legs.
 
 N::Giant clear centipede
 I:c::11:5d8:12:30:30:2:15:30:n
-A:34:62:0:0
+A:34:62
 F:MV_INVIS|MV_ATT_NORM|ANIMAL
 D:It is about four feet long and carnivorous.
 
 N::Mirkwood spider
 I:S::12:9d8:15:25:80:2:15:25:n
-A:31:156:156:0
+A:31:156:156
 F:MV_ATT_NORM|ANIMAL|GROUP|IM_POIS
 D:A strong and powerful spider from Mirkwood forest.  Cunning and evil, it seeks to taste your juicy insides.
 
 N::Frost giant
 I:P::11:17d10:20:50:50:1:15:75:n
-A:120:16:0:0
+A:120:16
 F:MV_ATT_NORM|HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|IM_COLD|GIANT
 D:A twelve foot tall giant covered in furs.
 
 N::Griffon
 I:H::11:30d8:12:15:10:1:15:70:n
-A:17:36:0:0
+A:17:36
 F:MV_ATT_NORM|ANIMAL
 D:It is half lion, half eagle.  It flies menacingly towards you.
 
 N::Homonculous
 I:I::11:8d8:20:32:30:3:15:40:n
-A:145:9:0:0
+A:145:9
 F:THRO_DR|MV_ATT_NORM|DEMON|EVIL|IM_FIRE
 D:It is a small demonic spirit full of malevolence.
 
 N::Gnome mage
 I:h::11:7d8:20:20:20:2:15:40:m
-A:4:0:0:0
+A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|MV_ATT_NORM|THRO_DR|0x4L|MS1_BLINK|MS1_BO_COLD|MS1_S_MONSTER|EVIL|GROUP|MS2_DARKNESS
 D:A mage of short stature.
 
 N::Ethereal hound
 I:Z::11:10d6:30:30:0:2:15:50:n
-A:29:29:29:0
+A:29:29:29
 F:MV_ATT_NORM|MV_INVIS|ANIMAL|GROUP
 D:A pale white hound.  You can see straight through it.  Pulsing red lines and strange fluorescent light hints at internal organs best left to the imagination.
 
 N::Clay golem
 I:g::11:14d8:12:30:10:2:15:50:n
-A:7:7:0:0
+A:7:7
 F:MV_ATT_NORM|HURT_ROCK|IM_FIRE|IM_ELEC|IM_COLD|MINDLESS|IM_POIS|NO_INFRA|CHARM_SLEEP
 D:It is a massive statue-like figure made out of hardened clay.
 
@@ -1252,31 +1252,31 @@ D:It is like a huge beetle with glaring eyes and large mandibles capable of slic
 
 N::Orc captain
 I:o::11:20d10:20:59:20:3:16:40:m
-A:17:17:17:0
+A:17:17:17
 F:HAS_90|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|ORC
 D:An armoured orc with an air of authority.
 
 N::Gelatinous cube
 I:j::11:45d8:12:18:1:4:16:80:n
-A:115:115:115:0
+A:115:115:115
 F:THRO_DR|MV_ATT_NORM|PICK_UP|HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_60|HAS_90|IM_ACID|IM_FIRE|IM_ELEC|IM_POIS|IM_COLD|ANIMAL|CHARM_SLEEP|MAX_HP|NO_INFRA|MINDLESS
 D:It is a strange, vast gelatinous structure that assumes cubic proportions as it lines all four walls of the corridors it patrols.  Through its transparent jelly structure you can see treasures it has engulfed, and a few corpses as well.
 
 N::Giant green dragon fly
 I:F::11:3d8:12:20:50:2:16:70:n
-A:156:0:0:0
+A:156
 F:MV_ATT_NORM|MV_75|MS1_BR_POIS|0xAL|IM_POIS|ANIMAL
 D:A vast, foul-smelling dragonfly.
 
 N::Fire giant
 I:P::11:20d8:20:60:50:2:16:54:n
-A:102:102:0:0
+A:102:102
 F:MV_ATT_NORM|HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|IM_FIRE|GIANT
 D:A glowing fourteen foot tall giant.  Flames drip from its red skin.
 
 N::Hummerhorn
 I:F::12:2d2:8:14:10:5:16:4:n
-A:234:0:0:0
+A:234
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL
 D:A giant buzzing wasp, its stinger drips venom.
 
@@ -1288,19 +1288,19 @@ D:A short and swarthy Easterling.
 
 N::Quasit
 I:I::11:6d8:20:30:20:2:16:50:n
-A:176:51:51:0
+A:176:51:51
 F:MV_ATT_NORM|MV_20|MV_INVIS|CARRY_OBJ|HAS_1D2|0xAL|MS1_BLINK|MS1_TELE_TO|TELE|MS1_FEAR|MS1_CONF|MS1_BLIND|INTELLIGENT|DEMON|IM_FIRE|EVIL|MS2_TELE_LEVEL
 D:The chaotic evil master's favourite pet.
 
 N::Imp
 I:I::11:6d8:20:30:20:2:17:55:n
-A:152:152:0:0
+A:152:152
 F:MV_ATT_NORM|MV_20|MV_INVIS|CARRY_OBJ|HAS_1D2|0xAL|MS1_BLINK|MS1_TELE_TO|TELE|MS1_FEAR|MS1_CONF|MS1_BLIND|DEMON|IM_FIRE|EVIL|NO_INFRA|INTELLIGENT|MS2_TELE_LEVEL
 D:The lawful evil master's favourite pet.
 
 N::Forest troll
 I:T::11:20d10:20:50:40:1:17:70:m
-A:3:3:29:0
+A:3:3:29
 F:MV_ATT_NORM|THRO_DR|HAS_60|CARRY_GOLD|CARRY_OBJ|TROLL|EVIL|HURT_LITE|GROUP
 D:He is green skinned and ugly.
 
@@ -1312,67 +1312,67 @@ D:This dwarf became so obsessed by gold that Morgoth tricked him into betraying 
 
 N::2-headed hydra
 I:R::11:100d3:20:60:20:2:17:80:n
-A:36:36:0:0
+A:36:36
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|HAS_1D2|0xBL|MS1_FEAR|ANIMAL
 D:A strange reptilian hybrid with two heads, guarding its hoard.
 
 N::Water spirit
 I:E::12:9d8:12:28:40:1:17:58:n
-A:13:13:0:0
+A:13:13
 F:MV_ATT_NORM|MV_20|EVIL|IM_POIS|NO_INFRA|CHARM_SLEEP|MINDLESS
 D:A whirlpool of sentient liquid.
 
 N::Giant brown scorpion
 I:S::11:11d8:12:44:20:1:17:62:n
-A:34:86:0:0
+A:34:86
 F:MV_ATT_NORM|ANIMAL
 D:It is fast and poisonous.
 
 N::Earth spirit
 I:E::12:13d8:10:40:50:2:17:64:n
-A:7:7:0:0
+A:7:7
 F:MV_ATT_NORM|MV_20|THRO_WALL|THRO_DR|PICK_UP|EVIL|HURT_ROCK|IM_POIS|NO_INFRA|IM_FIRE|IM_COLD|IM_ELEC|CHARM_SLEEP|MINDLESS
 D:It is humanoid in shape and made out of solid rock.
 
 N::Fire spirit
 I:E::12:10d9:16:30:20:2:18:75:n
-A:101:101:0:0
+A:101:101
 F:MV_ATT_NORM|MV_20|EVIL|IM_POIS|IM_FIRE|CHARM_SLEEP|MINDLESS
 D:It is composed of pure flame.
 
 N::Fire hound
 I:Z::11:10d6:30:30:0:1:18:70:n
-A:105:105:105:0
+A:105:105:105
 F:MV_ATT_NORM|0xAL|MS1_BR_FIRE|ANIMAL|GROUP|IM_FIRE
 D:Flames lick at its feet and its tongue is a blade of fire.  You can feel a furnace heat radiating from the creature.
 
 N::Cold hound
 I:Z::11:10d6:30:30:0:1:18:70:n
-A:122:54:29:0
+A:122:54:29
 F:MV_ATT_NORM|0xAL|MS1_BR_COLD|ANIMAL|GROUP|IM_COLD
 D:A hound as tall as a man, this creature appears to be composed of angular planes of ice.  Cold radiates from it and freezes your breath in the air.
 
 N::Energy hound
 I:Z::11:10d6:30:30:0:1:18:70:n
-A:131:131:131:0
+A:131:131:131
 F:MV_ATT_NORM|0xAL|MS1_BR_ELEC|ANIMAL|GROUP|IM_ELEC
 D:Saint Elmo's Fire forms a ghostly halo around this hound, and sparks sting your fingers as energy builds up in the air around you.
 
 N::Mimic
 I:!::11:10d10:25:30:0:3:18:60:n
-A:152:12:12:0
+A:152:12:12
 F:MV_ONLY_ATT|0x6L|MS1_BO_COLD|MS1_BLIND|MS1_FEAR|MS1_CONF|MS1_CAUSE_2|NO_INFRA|CHARM_SLEEP|MINDLESS
 D:A strange creature that disguises itself as discarded objects to lure unsuspecting adventurers within reach of its venomous claws.
 
 N::Blink dog
 I:C::12:8d8:20:20:10:2:18:50:n
-A:31:0:0:0
+A:31
 F:MV_ATT_NORM|MV_20|0x4L|MS1_BLINK|MS1_TELE_TO|ANIMAL|GROUP
 D:A strange magical member of the canine race, its form seems to shimmer and fade in front of your very eyes.
 
 N::Uruk-Hai
 I:o::11:10d8:20:50:20:1:18:68:m
-A:18:18:0:0
+A:18:18
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_60|ORC|EVIL|IM_POIS|MAX_HP|GROUP
 D:He is a cunning orc of power, as tall as a man, and stronger.  It fears little.
 
@@ -1396,31 +1396,31 @@ D:A pile of rotting vegetation that slides towards you with a disgusting stench,
 
 N::Stone giant
 I:P::11:24d8:20:75:50:1:18:90:n
-A:20:20:0:0
+A:20:20
 F:MV_ATT_NORM|PICK_UP|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_60|EVIL|GIANT
 D:It is eighteen feet tall and looking at you.
 
 N::Giant black dragon fly
 I:F::12:3d8:12:20:50:2:18:68:n
-A:0:0:0:0
+A:0
 F:MV_ATT_NORM|MV_75|MS1_BR_ACID|0x9L|IM_ACID|ANIMAL
 D:The size of a large bird, this fly drips caustic acid.
 
 N::Stone golem
 I:g::10:28d8:12:75:10:2:19:100:n
-A:9:9:0:0
+A:9:9
 F:MV_ATT_NORM|HURT_ROCK|IM_FIRE|IM_COLD|IM_ELEC|IM_POIS|CHARM_SLEEP|MINDLESS|NO_INFRA
 D:It is an animated statue.
 
 N::Red mold
 I:m::11:17d8:2:16:70:1:19:64:n
-A:108:0:0:0
+A:108
 F:MV_ONLY_ATT|IM_FIRE|IM_POIS|ANIMAL|MINDLESS
 D:It is a strange red growth on the dungeon floor; it seems to burn with flame.
 
 N::Giant gold dragon fly
 I:F::12:3d8:12:20:50:2:18:78:n
-A:26:0:0:0
+A:26
 F:MV_ATT_NORM|MV_75|0x9L|IM_FIRE|ANIMAL|MS2_BR_SOUN
 D:Large beating wings support this dazzling insect.  A loud buzzing noise pervades the air.
 
@@ -1432,13 +1432,13 @@ D:A large and powerful orc.  He looks just like his daddy.  He is tall and fast,
 
 N::Phase spider
 I:S::12:6d8:15:25:80:2:20:60:n
-A:31:156:156:0
+A:31:156:156
 F:MV_ATT_NORM|0x5L|MS1_BLINK|MS1_TELE_TO|ANIMAL|GROUP|IM_POIS
 D:A spider that never seems quite there.  Everywhere you look it is just half-seen in the corner of one eye.
 
 N::3-headed hydra
 I:R::12:100d5:20:65:20:2:20:350:n
-A:36:36:36:0
+A:36:36:36
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|HAS_2D2|HAS_1D2|0x9L|MS1_FEAR|ANIMAL
 D:A strange reptilian hybrid with three heads, guarding its hoard.
 
@@ -1468,37 +1468,37 @@ D:Liquid footprints follow this hound as it pads around the dungeon.  An acrid s
 
 N::Chimera
 I:H::11:13d8:12:15:10:1:20:200:n
-A:32:105:105:0
+A:32:105:105
 F:MV_ATT_NORM|0xAL|MS1_BR_FIRE|IM_FIRE
 D:It is a strange concoction of lion, dragon and goat.  It looks very odd but very avoidable.
 
 N::Quylthulg
 I:Q::11:6d8:10:1:0:1:20:250:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x4L|MS1_BLINK|MS1_S_MONSTER|CHARM_SLEEP|MINDLESS
 D:It is a strange pulsing mound of flesh.
 
 N::Sasquatch
 I:Y::12:20d19:15:40:10:3:20:180:n
-A:56:56:37:0
+A:56:56:37
 F:MV_ATT_NORM|THRO_DR|ANIMAL|IM_COLD
 D:A tall shaggy, furry humanoid, it could call the yeti brother.
 
 N::Werewolf
 I:C::11:20d22:15:30:70:1:20:150:n
-A:29:29:32:0
+A:29:29:32
 F:MV_ATT_NORM|MV_20|PICK_UP|THRO_DR|ANIMAL|EVIL
 D:It is a huge wolf with eyes that glow with manly intelligence.
 
 N::Dark elven lord
 I:h::12:18d15:20:40:30:2:20:500:m
-A:20:18:0:0
+A:20:18
 F:CARRY_OBJ|HAS_2D2|THRO_DR|MV_ATT_NORM|0x5L|MS1_BLIND|MS1_BO_COLD|MS1_BO_FIRE|MS1_CONF|EVIL|HURT_LITE|MS2_HASTE|MS2_DARKNESS
 D:A drow elven figure in armour and radiating evil power.
 
 N::Cloud giant
 I:P::11:24d10:20:60:50:1:20:125:n
-A:130:130:0:0
+A:130:130
 F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|CARRY_GOLD|HAS_90|EVIL|GIANT|IM_ELEC
 D:It is a twenty foot tall giant wreathed in clouds.
 
@@ -1516,7 +1516,7 @@ D:A strong and cunning orc warrior, Lugdush sneers as he insults your mother.
 
 N::Blue dragon bat
 I:b::13:4d4:12:26:50:1:21:54:n
-A:131:0:0:0
+A:131
 F:MV_ATT_NORM|MV_40|MS1_BR_ELEC|0x4L|ANIMAL|IM_ELEC
 D:It is a glowing blue bat with a sharp tail.
 
@@ -1528,61 +1528,61 @@ D:A strange creature that disguises itself as discarded objects to lure unsuspec
 
 N::Fire vortex
 I:v::11:9d9:100:30:0:1:21:100:n
-A:239:0:0:0
+A:239
 F:MV_ATT_NORM|MV_40|MS1_BR_FIRE|0x6L|IM_FIRE|CHARM_SLEEP|MINDLESS
 D:A whirling maelstrom of fire.
 
 N::Water vortex
 I:v::11:9d9:100:30:0:1:21:100:n
-A:240:0:0:0
+A:240
 F:MV_ATT_NORM|MV_40|MS1_BR_ACID|0x6L|IM_ACID|CHARM_SLEEP|MINDLESS
 D:A caustic spinning tower of water.
 
 N::Cold vortex
 I:v::11:9d9:100:30:0:1:21:100:n
-A:241:0:0:0
+A:241
 F:MV_ATT_NORM|MV_40|MS1_BR_COLD|0x6L|IM_COLD|CHARM_SLEEP|MINDLESS
 D:A twisting whirlpool of frost.
 
 N::Energy vortex
 I:v::11:12d12:100:30:0:1:21:130:n
-A:242:0:0:0
+A:242
 F:MV_ATT_NORM|MV_40|MS1_BR_ELEC|0x6L|IM_ELEC|CHARM_SLEEP|MINDLESS
 D:A shimmering tornado of air, sparks crackle along its length.
 
 N::Mummified orc
 I:M::11:15d8:20:28:75:1:21:56:n
-A:13:13:0:0
+A:13:13
 F:MV_ATT_NORM|CARRY_GOLD|CARRY_OBJ|HAS_90|THRO_DR|EVIL|ORC|UNDEAD|IM_COLD|NO_INFRA|MINDLESS|IM_POIS|CHARM_SLEEP
 D:It is an orcish figure covered in wrappings.
 
 N::Killer stag beetle
 I:K::11:20d8:12:55:30:1:22:80:n
-A:41:10:0:0
+A:41:10
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is a giant beetle with vicious claws.
 
 N::Iron golem
 I:g::11:80d12:12:80:10:2:22:160:n
-A:10:0:0:0
+A:10
 F:MV_ATT_NORM|MS1_SLOW|0x7L|IM_FIRE|IM_COLD|IM_ELEC|IM_POIS|MINDLESS|NO_INFRA|CHARM_SLEEP
 D:It is a giant metal statue that moves slowly towards you.
 
 N::Giant yellow scorpion
 I:S::11:12d8:12:38:20:1:22:60:n
-A:31:167:0:0
+A:31:167
 F:MV_ATT_NORM|ANIMAL
 D:It is a giant scorpion with a sharp stinger.
 
 N::Black ooze
 I:j::9:6d8:10:6:1:1:23:7:n
-A:138:0:0:0
+A:138
 F:CARRY_GOLD|CARRY_OBJ|HAS_60|PICK_UP|MULTIPLY|THRO_DR|THRO_CREAT|MV_ATT_NORM|MV_40|0xBL|MS1_MANA_DRAIN|IM_POIS|ANIMAL|MINDLESS
 D:It is a strangely moving puddle.
 
 N::Hardened warrior
 I:p::11:15d11:20:40:40:1:23:60:m
-A:18:18:0:0
+A:18:18
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL
 D:A scarred warrior who moves with confidence.
 
@@ -1594,31 +1594,31 @@ D:He is also known as the King of Khazad-dum.  His ego is renowned to be bigger 
 
 N::Master rogue
 I:p::12:15d9:20:30:40:2:23:110:m
-A:16:16:231:0
+A:16:16:231
 F:HAS_2D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL
 D:A thief of great power and shifty speed.
 
 N::Red dragon bat
 I:b::13:3d8:12:28:50:1:23:60:n
-A:105:0:0:0
+A:105
 F:MV_ATT_NORM|MV_40|MS1_BR_FIRE|0x4L|IM_FIRE|ANIMAL
 D:It is a sharp-tailed bat, wreathed in fire.
 
 N::Killer blue beetle
 I:K::11:20d8:14:55:30:1:23:85:n
-A:44:0:0:0
+A:44
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is looking for prey.
 
 N::Giant bronze dragon fly
 I:F::12:3d8:12:20:50:1:18:70:n
-A:0:0:0:0
+A:0
 F:MV_ATT_NORM|MV_75|0x9L|CHARM_SLEEP|ANIMAL|MS2_BR_CONF
 D:This vast gleaming bronze fly has wings which beat mesmerically fast.
 
 N::Forest wight
 I:W::11:12d8:20:30:30:1:24:140:n
-A:5:5:187:0
+A:5:5:187
 F:MV_ATT_NORM|MV_20|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_60|HAS_90|0xAL|MS1_FEAR|MS1_MANA_DRAIN|EVIL|NO_INFRA|UNDEAD|IM_COLD|IM_POIS|HURT_LITE|CHARM_SLEEP
 D:It is a ghostly apparition with a humanoid form.
 
@@ -1642,13 +1642,13 @@ D:A strange reptilian hybrid with four heads, guarding its hoard.
 
 N::Mummified human
 I:M::11:17d9:20:34:60:1:24:70:n
-A:13:13:0:0
+A:13:13
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_90|EVIL|NO_INFRA|UNDEAD|IM_COLD|MINDLESS|IM_POIS|CHARM_SLEEP
 D:It is a human form encased in mouldy wrappings.
 
 N::Vampire bat
 I:b::12:9d10:12:40:50:2:24:150:n
-A:236:236:0:0
+A:236:236
 F:MV_ATT_NORM|MV_40|EVIL|UNDEAD|IM_COLD|IM_POIS|CHARM_SLEEP|NO_INFRA
 D:An undead bat that flies at your neck hungrily.
 
@@ -1666,31 +1666,31 @@ D:A Black Numenorean who hates the men of the west.
 
 N::Banshee
 I:G::12:6d8:20:24:10:2:24:60:f
-A:99:188:0:0
+A:99:188
 F:MV_ATT_NORM|MV_20|MV_40|CARRY_GOLD|CARRY_OBJ|HAS_1D2|THRO_WALL|MV_INVIS|PICK_UP|0xFL|TELE|MS1_MANA_DRAIN|NO_INFRA|UNDEAD|EVIL|IM_COLD|CHARM_SLEEP|IM_POIS
 D:It is a ghostly woman's form that wails mournfully.
 
 N::Pukelman
 I:g::11:80d12:12:80:10:3:25:600:n
-A:10:19:0:0
+A:10:19
 F:MV_ATT_NORM|MS1_BO_ACID|MS1_SLOW|MS1_CONF|0x4L|IM_FIRE|IM_COLD|IM_ELEC|IM_POIS|MINDLESS|NO_INFRA|CHARM_SLEEP|HURT_ROCK
 D:A stumpy figure carved from stone, with glittering eyes, this sentinel strides towards you with deadly intent.
 
 N::Dark elven druid
 I:h::12:20d20:15:75:10:3:25:500:m
-A:6:6:20:0
+A:6:6:20
 F:MV_ATT_NORM|CARRY_OBJ|HAS_1D2|THRO_DR|0x6L|MS1_S_MONSTER|MS1_CONF|IM_POIS|CHARM_SLEEP|EVIL|HURT_LITE|MS2_HEAL|MS2_S_SPIDER|MS2_DARKNESS
 D:A powerful drow, with mighty nature-controlling enchantments.
 
 N::Stone troll
 I:T::11:23d10:20:40:50:1:25:85:m
-A:5:5:41:0
+A:5:5:41
 F:MV_ATT_NORM|THRO_DR|HAS_60|CARRY_GOLD|CARRY_OBJ|TROLL|EVIL|HURT_LITE|HURT_ROCK|GROUP
 D:He is a giant troll with scabrous black skin.
 
 N::Troll priest
 I:T::11:23d13:20:50:30:1:25:100:m
-A:7:7:41:0
+A:7:7:41
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_90|0x5L|MS1_CAUSE_1|MS1_BLINK|MS1_FEAR|MS1_ARROW_1|TROLL|EVIL|HURT_LITE|CHARM_SLEEP|MAX_HP|MS2_DARKNESS
 D:A troll who is so bright he knows how to read.
 
@@ -1702,19 +1702,19 @@ D:A huge wormlike shape dripping acid, twisted by evil sorcery into a foul monst
 
 N::Carrion crawler
 I:c::11:20d12:15:40:10:2:25:60:n
-A:253:253:0:0
+A:253:253
 F:MV_ATT_NORM|MV_20|ANIMAL|IM_POIS
 D:A hideous centipede covered in slime and with glowing tentacles around its head.
 
 N::Killer red beetle
 I:K::11:20d8:14:50:30:2:25:85:n
-A:84:0:0:0
+A:84
 F:MV_ATT_NORM|MV_20|ANIMAL
 D:It is a giant beetle with poisonous mandibles.
 
 N::Giant grey ant lion
 I:a::11:19d8:10:40:40:1:26:90:n
-A:39:0:0:0
+A:39
 F:MV_ATT_NORM|MV_20|THRO_CREAT|ANIMAL
 D:It is an ant encased in shaggy grey fur.
 
@@ -1732,19 +1732,19 @@ D:It is a huge black panther, clubbed tentacles sprouting from its shoulders.
 
 N::Giant fire tick
 I:t::11:16d8:14:54:20:1:26:90:n
-A:109:0:0:0
+A:109
 F:MV_ATT_NORM|MV_20|ANIMAL|IM_FIRE
 D:It is smoking and burning with great heat.
 
 N::Cave ogre
 I:O::11:30d9:20:33:30:1:26:42:n
-A:20:20:0:0
+A:20:20
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|EVIL|GROUP|GIANT
 D:A giant orc-like figure with an awesomely muscled frame.
 
 N::White wraith
 I:W::11:15d8:20:40:10:1:26:175:n
-A:5:5:189:0
+A:5:5:189
 F:CARRY_GOLD|CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x8L|MS1_FEAR|MS1_CAUSE_2|UNDEAD|EVIL|NO_INFRA|IM_COLD|IM_POIS|CHARM_SLEEP|HURT_LITE|MS2_DARKNESS
 D:It is a tangible but ghostly form made of white fog.
 
@@ -1762,7 +1762,7 @@ D:The last of his race, Mim is a petty dwarf.  Petty dwarves are strange creatur
 
 N::Killer fire beetle
 I:K::11:13d8:14:45:30:1:27:95:n
-A:41:110:0:0
+A:41:110
 F:MV_ATT_NORM|IM_FIRE|ANIMAL
 D:It is a giant beetle wreathed in flames.
 
@@ -1774,7 +1774,7 @@ D:A mass of shining coins slithering towards you... Quick!  Pick it up and put i
 
 N::Algroth
 I:T::11:21d12:20:60:40:1:27:150:n
-A:238:238:29:0
+A:238:238:29
 F:MV_ATT_NORM|THRO_DR|HAS_60|CARRY_GOLD|CARRY_OBJ|TROLL|EVIL|GROUP
 D:A powerful troll form.  Venom drips from its needlelike claws.
 
@@ -1804,7 +1804,7 @@ D:An ogre renowned for acts of surpassing cruelty, Lokkak quickly became the lea
 
 N::Vampire
 I:V::11:25d12:20:45:10:1:27:175:n
-A:5:5:190:0
+A:5:5:190
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|HAS_60|THRO_DR|MV_ATT_NORM|0x9L|MS1_HOLD|MS1_FEAR|MS1_TELE_TO|MS1_CAUSE_2|UNDEAD|EVIL|NO_INFRA|IM_COLD|IM_POIS|CHARM_SLEEP|HURT_LITE|MS2_MIND_BLAST|MS2_FORGET|MS2_DARKNESS
 D:It is a humanoid with an aura of power.  You notice a sharp set of front teeth.
 
@@ -1816,7 +1816,7 @@ D:The result of evil experiments, this travesty of nature should never be alive.
 
 N::Colbran
 I:g::12:80d12:12:80:10:2:27:900:n
-A:130:130:0:0
+A:130:130
 F:MV_ATT_NORM|0x3L|IM_ELEC|IM_POIS|NO_INFRA|CHARM_SLEEP|MS2_BO_ELEC
 D:A man-shaped form of living lightning, sparks and shocks crackle all over this madly capering figure.  It leaps and whirls around and about you....
 
@@ -1834,7 +1834,7 @@ D:A strange reptilian hybrid with five heads dripping venom.
 
 N::Black knight
 I:p::12:30d10:20:70:10:1:28:240:m
-A:23:23:23:0
+A:23:23:23
 F:HAS_1D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|CARRY_GOLD|0x8L|MS1_CAUSE_3|MS1_BLIND|MS1_FEAR|EVIL|MS2_DARKNESS
 D:He is a figure encased in deep black plate armour; he looks at you menacingly.
 
@@ -1846,13 +1846,13 @@ D:An evil and cunning man from the East.
 
 N::Mage
 I:p::11:15d8:20:40:10:1:28:150:m
-A:14:14:0:0
+A:14:14
 F:HAS_1D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x3L|TELE|MS1_TELE_TO|MS1_BLIND|MS1_BO_COLD|MS1_BO_FIRE|MS1_CONF|MS1_S_MONSTER|EVIL|INTELLIGENT|MS2_BO_ELEC|MS2_HASTE
 D:A mage of some power - you can tell by the size of his hat.
 
 N::Mind flayer
 I:p::11:18d8:20:60:10:1:28:200:n
-A:225:225:0:0
+A:225:225
 F:HAS_1D2|CARRY_OBJ|HAS_60|THRO_DR|MV_ATT_NORM|0x8L|MS1_HOLD|MS1_FEAR|MS1_BLIND|EVIL|CHARM_SLEEP|MAX_HP|MS2_MIND_BLAST|MS2_BRAIN_SMASH|MS2_FORGET
 D:A humanoid form with a gruesome head, tentacular mouth, and piercing eyes.  Claws reach out for you and you feel a presence invade your mind.
 
@@ -1876,7 +1876,7 @@ D:He is a white troll with powerfully clawed hands.
 
 N::Giant purple worm
 I:w::11:65d8:14:65:30:3:29:400:n
-A:7:113:166:0
+A:7:113:166
 F:MV_ATT_NORM|IM_ACID|ANIMAL
 D:It is a massive worm form, many feet in length.  Its vast maw drips acid and poison.
 
@@ -1900,25 +1900,25 @@ D:A strange creature that disguises itself as discarded objects to lure unsuspec
 
 N::Young blue dragon
 I:d::11:33d8:20:50:70:1:29:300:n
-A:52:52:29:0
+A:52:52:29
 F:MV_ATT_NORM|HAS_1D2|HAS_60|HAS_90|THRO_DR|CARRY_GOLD|CARRY_OBJ|0xBL|MS1_FEAR|MS1_BR_ELEC|IM_ELEC|EVIL|DRAGON|MAX_HP
 D:It has a form that legends are made of.  Its still-tender scales are a deep blue in hue.  Sparks crackle along its length.
 
 N::Young white dragon
 I:d::11:32d8:20:50:70:1:29:275:n
-A:52:52:29:0
+A:52:52:29
 F:MV_ATT_NORM|HAS_1D2|HAS_60|HAS_90|THRO_DR|CARRY_GOLD|CARRY_OBJ|0xBL|MS1_FEAR|MS1_BR_COLD|IM_COLD|EVIL|DRAGON|MAX_HP
 D:It has a form that legends are made of.  Its still-tender scales are a frosty white in hue.  Icy blasts of cold air come from it as it breathes.
 
 N::Young green dragon
 I:d::11:32d8:20:60:70:1:29:290:n
-A:52:52:29:0
+A:52:52:29
 F:MV_ATT_NORM|HAS_1D2|HAS_60|HAS_90|THRO_DR|CARRY_GOLD|CARRY_OBJ|0xBL|MS1_FEAR|MS1_BR_POIS|IM_POIS|EVIL|DRAGON|MAX_HP
 D:It has a form that legends are made of.  Its still-tender scales are a deep green in hue.  Foul gas seeps through its scales.
 
 N::Young bronze dragon
 I:d::11:34d8:20:63:150:3:29:310:n
-A:52:52:29:0
+A:52:52:29
 F:MV_ATT_NORM|HAS_2D2|HAS_60|HAS_90|CARRY_GOLD|CARRY_OBJ|THRO_DR|0xBL|MS1_FEAR|DRAGON|MAX_HP|CHARM_SLEEP|MS2_BR_CONF
 D:It has a form that legends are made of.  Its still-tender scales are a rich bronze hue, and its shape masks its true form.
 
@@ -1930,13 +1930,13 @@ D:This is a statue of truesilver!  Imagine how much that would be worth if you c
 
 N::Shadow drake
 I:d::11:20d10:25:50:30:2:30:700:n
-A:122:122:122:0
+A:122:122:122
 F:MV_ATT_NORM|MV_20|MV_INVIS|THRO_DR|HAS_2D2|CARRY_OBJ|PICK_UP|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|ANIMAL|EVIL|IM_COLD|DRAGON|MS2_HASTE|MS2_DARKNESS
 D:It is a dragon-like form wrapped in shadow.  Glowing red eyes shine out in the dark.
 
 N::Skeleton troll
 I:s::11:20d10:20:55:20:1:30:225:n
-A:5:5:41:0
+A:5:5:41
 F:MV_ATT_NORM|THRO_DR|UNDEAD|EVIL|TROLL|NO_INFRA|IM_COLD|CHARM_SLEEP|IM_POIS|MINDLESS
 D:It is a troll skeleton animated by dark dweomers.
 
@@ -1948,49 +1948,49 @@ D:It is a winged lion's body with a human torso and a tail covered in vicious sp
 
 N::Giant static ant
 I:a::11:8d8:10:50:60:2:30:80:n
-A:134:0:0:0
+A:134
 F:MV_ATT_NORM|MV_20|ANIMAL|IM_ELEC
 D:It is a giant ant that crackles with energy.
 
 N::Giant army ant
 I:a::12:19d6:10:40:40:3:30:90:n
-A:39:0:0:0
+A:39
 F:MV_ATT_NORM|MV_20|THRO_CREAT|ANIMAL|GROUP
 D:An armoured form moving with purpose.  Powerful on its own, flee when hordes of them march.
 
 N::Grave wight
 I:W::11:12d10:20:50:30:1:30:325:n
-A:6:6:191:0
+A:6:6:191
 F:MV_ATT_NORM|MV_20|THRO_DR|HAS_1D2|CARRY_OBJ|0x8L|MS1_CAUSE_3|MS1_FEAR|UNDEAD|EVIL|NO_INFRA|IM_COLD|IM_POIS|HURT_LITE|CHARM_SLEEP|MS2_DARKNESS
 D:It is a ghostly form with eyes that haunt you.
 
 N::Killer slicer beetle
 I:K::11:22d10:14:60:30:2:30:200:n
-A:48:48:0:0
+A:48:48
 F:MV_ATT_NORM|ANIMAL
 D:It is a beetle with deadly sharp cutting mandibles and a rock-hard carapace.
 
 N::Ghost
 I:G::12:13d8:20:30:10:1:31:350:n
-A:99:192:184:0
+A:99:192:184
 F:MV_ATT_NORM|MV_20|HAS_1D2|CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_WALL|PICK_UP|MV_INVIS|0xFL|MS1_HOLD|MS1_MANA_DRAIN|MS1_BLIND|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|IM_POIS
 D:You don't believe in them.
 
 N::Death watch beetle
 I:K::11:25d12:16:60:30:3:31:190:n
-A:47:67:0:0
+A:47:67
 F:MV_ATT_NORM|ANIMAL
 D:It is a giant beetle that produces a chilling sound.
 
 N::Ogre shaman
 I:O::11:14d10:20:55:30:2:32:250:n
-A:19:19:19:0
+A:19:19:19
 F:MV_ATT_NORM|THRO_DR|HAS_90|CARRY_OBJ|0x5L|TELE|MS1_HOLD|MS1_CAUSE_2|MS1_FEAR|MS1_S_MONSTER|MS1_BO_FIRE|EVIL|GIANT|MS2_TRAP_CREATE
 D:It is an ogre wrapped in furs and covered in grotesque body paints.
 
 N::Nexus quylthulg
 I:Q::11:10d12:10:1:0:1:32:300:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x1L|MS1_BLINK|CHARM_SLEEP|MINDLESS|MS2_TELE_AWAY
 D:It is a very unstable, strange pulsing mound of flesh.
 
@@ -2002,19 +2002,19 @@ D:Shelob is an enormous bloated spider, rumoured to have been one of the brood o
 
 N::Ninja
 I:p::12:13d12:20:60:10:2:32:300:m
-A:152:80:80:0
+A:152:80:80
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|CARRY_GOLD|HAS_1D2|EVIL|CHARM_SLEEP
 D:A humanoid clothed in black who moves with blinding speed.
 
 N::Memory moss
 I:::11:d1:30:1:5:32:0:150:3
-A:2:89:89:0
+A:2:89:89
 F:MV_ONLY_ATT|0x6L|CHARM_SLEEP|ANIMAL|MINDLESS|MS2_FORGET
 D:A mass of green vegetation.  You don't remember seeing anything like it before....
 
 N::Storm giant
 I:P::11:24d16:20:60:40:1:32:1500:n
-A:215:215:215:0
+A:215:215:215
 F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|CARRY_GOLD|HAS_1D2|0x8L|MS1_FEAR|MS1_CONF|MS1_BLINK|MS1_TELE_TO|EVIL|GIANT|IM_ELEC|IM_COLD|MAX_HP|MS2_BO_ELEC|MS2_BA_ELEC
 D:It is a twenty-five foot tall giant wreathed in lighting.
 
@@ -2038,7 +2038,7 @@ D:An adept at unarmed combat, the mystic strikes with stunning power.  He can su
 
 N::Barrow wight
 I:W::11:15d10:20:40:10:3:33:375:n
-A:7:7:193:0
+A:7:7:193
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|CARRY_GOLD|HAS_60|0x8L|MS1_CAUSE_2|MS1_HOLD|MS1_FEAR|EVIL|UNDEAD|NO_INFRA|IM_COLD|IM_POIS|HURT_LITE|CHARM_SLEEP|GROUP|MS2_DARKNESS
 D:It is a ghostly nightmare of a entity.
 
@@ -2050,55 +2050,55 @@ D:It is the animated form of a massive troll.
 
 N::Chaos drake
 I:d::11:50d10:25:100:30:3:33:700:n
-A:54:54:36:0
+A:54:54:36
 F:MV_ATT_NORM|THRO_DR|HAS_2D2|CARRY_OBJ|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_FIRE|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_DISE
 D:A dragon twisted by the forces of chaos.  It seems first ugly, then fair, as its form shimmers and changes in front of your eyes.
 
 N::Law drake
 I:d::11:50d11:25:100:30:3:33:700:n
-A:54:54:36:0
+A:54:54:36
 F:MV_ATT_NORM|THRO_DR|HAS_2D2|CARRY_OBJ|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_COLD|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_SHAR|MS2_BR_SOUN
 D:This dragon is clever and cunning.  It laughs at your puny efforts to disturb it.
 
 N::Balance drake
 I:d::11:50d12:25:100:30:3:33:700:n
-A:54:54:36:0
+A:54:54:36
 F:MV_ATT_NORM|THRO_DR|HAS_2D2|CARRY_OBJ|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_FIRE|IM_COLD|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_DISE|MS2_BR_SOUN|MS2_BR_SHAR
 D:A mighty dragon, the balance drake seeks to maintain the Cosmic Balance, and despises your feeble efforts to destroy evil.
 
 N::Ethereal drake
 I:d::11:50d9:25:100:15:3:33:700:n
-A:54:54:36:0
+A:54:54:36
 F:MV_ATT_NORM|THRO_DR|HAS_2D2|CARRY_OBJ|MV_INVIS|THRO_WALL|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|CHARM_SLEEP|MAX_HP|MS3_BR_LITE|MS3_BR_DARK
 D:A dragon of elemental power, with control over light and dark, the ethereal drake's eyes glare with white hatred from the shadows.
 
 N::Bert the Stone Troll
 I:T::11:55d20:20:70:50:7:33:2000:m
-A:23:38:33:0
+A:23:38:33
 F:MV_ATT_NORM|PICK_UP|THRO_DR|HAS_1D2|CARRY_OBJ|TROLL|EVIL|IM_POIS|MAX_HP|UNIQUE|HURT_ROCK|HURT_LITE|GOOD|IM_COLD
 D:Big, brawny, powerful and with a taste for hobbit.  He has friends called Bill and Tom.
 
 N::Bill the Stone Troll
 I:T::11:55d20:20:70:50:7:33:2000:m
-A:23:38:33:0
+A:23:38:33
 F:MV_ATT_NORM|PICK_UP|THRO_DR|HAS_1D2|CARRY_OBJ|TROLL|EVIL|IM_POIS|MAX_HP|UNIQUE|HURT_ROCK|HURT_LITE|GOOD|IM_COLD
 D:Big, brawny, powerful and with a taste for hobbit.  He has friends called Bert and Tom.
 
 N::Tom the Stone Troll
 I:T::11:55d20:20:70:50:7:33:2000:m
-A:23:38:33:0
+A:23:38:33
 F:MV_ATT_NORM|PICK_UP|THRO_DR|HAS_1D2|CARRY_OBJ|TROLL|EVIL|IM_POIS|MAX_HP|UNIQUE|HURT_ROCK|HURT_LITE|GOOD|IM_COLD
 D:Big, brawny, powerful and with a taste for hobbit.  He has friends called Bert and Bill.
 
 N::Shade
 I:G::12:14d20:20:30:10:3:33:350:n
-A:99:192:184:0
+A:99:192:184
 F:MV_ATT_NORM|MV_20|CARRY_OBJ|HAS_2D2|HAS_90|THRO_WALL|PICK_UP|MV_INVIS|0xFL|MS1_HOLD|MS1_MANA_DRAIN|MS1_BLIND|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|IM_POIS|MS2_FORGET
 D:A shadowy form clutches at you from the darkness.  A powerful undead with a deadly touch.
 
 N::Spectre
 I:G::12:14d20:20:30:10:3:33:350:n
-A:99:192:237:0
+A:99:192:237
 F:MV_ATT_NORM|MV_20|CARRY_OBJ|HAS_2D2|HAS_90|THRO_WALL|PICK_UP|MV_INVIS|0xFL|MS1_HOLD|MS1_MANA_DRAIN|MS1_BLIND|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|IM_POIS|MS2_FORGET
 D:A phantasmal shrieking spirit.  Its wail drives the intense cold of pure evil deep within your body.
 
@@ -2110,7 +2110,7 @@ D:He is a troll that reeks of brine.
 
 N::Fire elemental
 I:E::11:30d8:12:50:50:2:33:350:n
-A:103:103:0:0
+A:103:103
 F:MV_ATT_NORM|MV_20|THRO_CREAT|0x6L|MS1_BO_FIRE|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|MINDLESS
 D:It is a giant inferno of flames.
 
@@ -2122,19 +2122,19 @@ D:It is an angel moving very quickly, wielding a holy war hammer and casting a v
 
 N::Water elemental
 I:E::11:25d8:12:40:50:2:33:325:n
-A:9:9:9:0
+A:9:9:9
 F:MV_ATT_NORM|MV_20|THRO_CREAT|0x6L|MS1_BO_COLD|EVIL|IM_POIS|CHARM_SLEEP|NO_INFRA|MINDLESS
 D:It is a giant tempest of water.
 
 N::Invisible stalker
 I:E::13:19d12:20:46:20:3:34:300:n
-A:5:5:5:0
+A:5:5:5
 F:MV_ATT_NORM|MV_40|MV_INVIS|THRO_DR|IM_ELEC|EVIL|IM_POIS|CHARM_SLEEP|NO_INFRA
 D:It is impossible to define its form but its violence is legendary.
 
 N::Carrion crawler
 I:c::11:20d12:15:40:10:2:34:100:n
-A:253:253:0:0
+A:253:253
 F:MV_ATT_NORM|MV_20|ANIMAL|IM_POIS|GROUP
 D:A hideous centipede covered in slime and with glowing tentacles around its head.
 
@@ -2158,31 +2158,31 @@ D:It is a skeletal form dressed in robes.  It radiates vastly evil power.
 
 N::Master vampire
 I:V::11:28d12:20:60:10:3:34:750:n
-A:5:5:195:0
+A:5:5:195
 F:MV_ATT_NORM|THRO_DR|HAS_4D2|CARRY_OBJ|CARRY_GOLD|0x6L|MS1_TELE_TO|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_CONF|CHARM_SLEEP|HURT_LITE|EVIL|UNDEAD|IM_COLD|MAX_HP|IM_POIS|NO_INFRA|MS2_DARKNESS|MS2_MIND_BLAST|MS2_FORGET|MS2_BO_NETH
 D:It is a humanoid form dressed in robes.  Power emanates from its chilling frame.
 
 N::Giant red scorpion
 I:S::12:18d20:12:50:40:4:34:275:n
-A:29:165:0:0
+A:29:165
 F:MV_ATT_NORM|ANIMAL
 D:It is a giant red scorpion.  It looks poisonous.
 
 N::Earth elemental
 I:E::10:30d10:10:60:90:2:34:375:n
-A:22:22:22:0
+A:22:22:22
 F:THRO_WALL|PICK_UP|MV_ATT_NORM|0x8L|MS1_BO_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|MINDLESS|CHARM_SLEEP|HURT_ROCK|EVIL|NO_INFRA
 D:It is a giant form composed of rock with fists of awesome power.
 
 N::Air elemental
 I:E::12:30d5:12:50:50:2:34:390:n
-A:9:89:9:0
+A:9:89:9
 F:MV_ATT_NORM|MV_20|THRO_CREAT|0x8L|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|IM_COLD|MINDLESS|IM_ELEC|IM_ACID|IM_POIS|NO_INFRA|MS2_BO_ELEC
 D:It is a giant tornado of winds.
 
 N::Hell hound
 I:C::12:25d16:25:80:0:3:35:600:n
-A:107:107:107:0
+A:107:107:107
 F:MV_ATT_NORM|MV_20|0x5L|MS1_BR_FIRE|ANIMAL|EVIL|MAX_HP|IM_FIRE
 D:It is a giant dog that glows with heat.  Flames pour from its nostrils.
 
@@ -2230,43 +2230,43 @@ D:A deep blue shape is visible before you, its canine form strikes you with an a
 
 N::Dread
 I:G::12:25d20:20:30:10:2:35:600:n
-A:235:235:80:0
+A:235:235:80
 F:MV_ATT_NORM|MV_20|CARRY_OBJ|HAS_2D2|HAS_60|THRO_WALL|PICK_UP|MV_INVIS|0xFL|MS1_HOLD|MS1_MANA_DRAIN|MS1_BLIND|MS1_CONF|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|IM_POIS|MS2_BO_NETH
 D:It is a form that screams its presence against the eye.  Death incarnate, its hideous black body seems to struggle against reality as the universe itself struggles to banish it.
 
 N::Ooze elemental
 I:E::11:13d10:10:80:90:3:35:300:n
-A:115:115:115:0
+A:115:115:115
 F:MV_ATT_NORM|THRO_DR|0x5L|MS1_BO_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|IM_ACID|CHARM_SLEEP|EVIL|NO_INFRA|MINDLESS|MS2_BA_ACID
 D:Animated filth, an eyesore of ooze.
 
 N::Smoke elemental
 I:E::12:15d10:10:80:90:3:35:375:n
-A:36:36:0:0
+A:36:36
 F:MV_ATT_NORM|0x5L|MS1_BO_FIRE|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|MINDLESS|CHARM_SLEEP|EVIL|MS2_DARKNESS
 D:Its blackened form crackles with heat.
 
 N::Young black dragon
 I:d::11:32d8:20:60:50:1:35:620:n
-A:53:53:29:0
+A:53:53:29
 F:MV_ATT_NORM|HAS_1D2|HAS_60|HAS_90|CARRY_GOLD|CARRY_OBJ|THRO_DR|MS1_BR_ACID|0xBL|MS1_FEAR|EVIL|IM_ACID|DRAGON|MAX_HP
 D:It has a form that legends are made of.  Its still-tender scales are a darkest black hue.  Acid drips from its body.
 
 N::Mumak
 I:q::11:90d10:20:55:100:3:35:2100:n
-A:227:227:233:0
+A:227:227:233
 F:MV_ATT_NORM|ANIMAL
 D:A massive elephantine form with eyes twisted by madness.
 
 N::Giant red ant lion
 I:a::11:25d8:14:49:40:1:35:350:n
-A:107:107:0:0
+A:107:107
 F:MV_ATT_NORM|THRO_CREAT|ANIMAL|IM_FIRE|MAX_HP|GROUP
 D:A giant ant covered in shaggy fur.  Its powerful jaws glow with heat.
 
 N::Mature white dragon
 I:d::11:50d8:20:65:70:1:35:1000:n
-A:54:54:37:0
+A:54:54:37
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_2D2|0xAL|MS1_BR_COLD|MS1_FEAR|CHARM_SLEEP|IM_COLD|EVIL|DRAGON|MAX_HP
 D:A large dragon, scales gleaming bright white.
 
@@ -2290,13 +2290,13 @@ D:An unholy creature of darkness, the aura emanating from this evil being saps y
 
 N::Grey wraith
 I:W::11:24d8:20:50:10:1:36:700:n
-A:9:9:196:0
+A:9:9:196
 F:MV_ATT_NORM|THRO_DR|HAS_60|HAS_90|CARRY_GOLD|CARRY_OBJ|0x7L|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|UNDEAD|EVIL|NO_INFRA|CHARM_SLEEP|IM_COLD|MAX_HP|IM_POIS|MS2_DARKNESS
 D:A tangible but ghostly form, made of grey fog.  The air around it feels deathly cold.
 
 N::Young multi-hued dragon
 I:d::11:40d8:20:60:50:1:36:1320:n
-A:55:55:38:0
+A:55:55:38
 F:MV_ATT_NORM|HAS_4D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|HAS_60|HAS_90|0x5L|MS1_BR_POIS|MS1_BR_ELEC|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|MS1_FEAR|IM_COLD|IM_ACID|IM_POIS|IM_ELEC|IM_FIRE|EVIL|DRAGON|CHARM_SLEEP|MAX_HP
 D:It has a form that legends are made of.  Beautiful scales of shimmering and magical colours cover it.
 
@@ -2308,7 +2308,7 @@ D:An enormous construct resembling a titan made from stone.  It strides purposef
 
 N::Young gold dragon
 I:d::11:38d8:20:63:150:2:36:950:n
-A:54:54:37:0
+A:54:54:37
 F:MV_ATT_NORM|HAS_2D2|HAS_60|HAS_90|CARRY_GOLD|CARRY_OBJ|THRO_DR|0xBL|MS1_FEAR|DRAGON|MAX_HP|MS2_BR_SOUN
 D:It has a form that legends are made of.  Its still-tender scales are a tarnished gold hue, and light is reflected from its form.
 
@@ -2320,25 +2320,25 @@ D:A massive and cruel troll of great power, drool slides caustically down his mu
 
 N::Mature blue dragon
 I:d::11:49d8:20:75:70:1:36:1200:n
-A:54:54:38:0
+A:54:54:38
 F:HAS_2D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_ELEC|MS1_FEAR|EVIL|DRAGON|IM_ELEC|CHARM_SLEEP|MAX_HP
 D:A large dragon, scales tinted deep blue.
 
 N::Mature green dragon
 I:d::11:49d8:20:70:70:1:36:1100:n
-A:52:52:29:0
+A:52:52:29
 F:HAS_2D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_POIS|MS1_FEAR|EVIL|DRAGON|IM_POIS|CHARM_SLEEP|MAX_HP
 D:A large dragon, scales tinted deep green.
 
 N::Mature bronze dragon
 I:d::11:55d8:20:70:150:2:36:1300:n
-A:54:54:38:0
+A:54:54:38
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_FEAR|MS1_CONF|DRAGON|CHARM_SLEEP|MAX_HP|MS2_BR_CONF
 D:A large dragon with scales of rich bronze.
 
 N::Young red dragon
 I:d::11:36d8:20:63:50:1:36:640:n
-A:54:54:37:0
+A:54:54:37
 F:MV_ATT_NORM|HAS_1D2|HAS_60|HAS_90|CARRY_GOLD|CARRY_OBJ|THRO_DR|MS1_BR_FIRE|0xBL|MS1_FEAR|EVIL|IM_FIRE|DRAGON|MAX_HP
 D:It has a form that legends are made of.  Its still-tender scales are a deepest red hue.  Heat radiates from its form.
 
@@ -2350,19 +2350,19 @@ D:A larger cousin of the lurker, this creature traps unsuspecting victims and pa
 
 N::Bodak
 I:I::11:35d10:10:68:90:2:36:750:n
-A:103:103:224:0
+A:103:103:224
 F:PICK_UP|MV_ATT_NORM|THRO_DR|0x4L|MS1_BA_FIRE|MS1_BO_FIRE|MS1_S_DEMON|IM_POIS|IM_FIRE|CHARM_SLEEP|EVIL
 D:It is a humanoid form composed of flames and hatred.
 
 N::Ice elemental
 I:E::11:35d10:10:60:90:2:36:650:n
-A:121:22:121:0
+A:121:22:121
 F:PICK_UP|MV_ATT_NORM|0x5L|MS1_BA_COLD|IM_POIS|IM_COLD|IM_ELEC|MINDLESS|CHARM_SLEEP|EVIL|NO_INFRA|MS2_BO_ICEE
 D:It is a animated statue of ice.  It regards you disdainfully.
 
 N::Necromancer
 I:p::11:25d11:20:50:10:2:36:630:m
-A:15:15:0:0
+A:15:15
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x3L|TELE|MS1_TELE_TO|MS1_CAUSE_3|MS1_HOLD|MS1_S_UNDEAD|MS1_FEAR|MS1_BLIND|EVIL|MAX_HP|INTELLIGENT|MS2_BO_NETH|MS2_HASTE
 D:A gaunt figure, clothed in black robes.
 
@@ -2374,13 +2374,13 @@ D:A mighty warrior from the east, Lorgan hates everything that he cannot control
 
 N::Demonologist
 I:p::12:25d11:20:50:10:2:36:700:m
-A:15:15:14:0
+A:15:15:14
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x2L|TELE|MS1_HOLD|MS1_S_DEMON|EVIL|MAX_HP|INTELLIGENT
 D:A figure twisted by evil standing in robes of deepest crimson.
 
 N::Mummified troll
 I:M::11:19d10:20:50:50:1:37:420:n
-A:15:15:0:0
+A:15:15
 F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|UNDEAD|IM_COLD|CHARM_SLEEP|IM_POIS|MINDLESS|TROLL|EVIL|NO_INFRA|MAX_HP
 D:It is a massive figure clothed in wrappings.  You are wary of its massive fists.
 
@@ -2398,7 +2398,7 @@ D:A strange ball of glowing light.  It disappears and reappears and seems to dra
 
 N::Magma elemental
 I:E::11:35d10:10:70:90:2:37:950:n
-A:102:22:102:0
+A:102:22:102
 F:THRO_WALL|PICK_UP|MV_ATT_NORM|0x7L|MS1_BA_FIRE|IM_POIS|IM_FIRE|IM_ELEC|MINDLESS|CHARM_SLEEP|EVIL|MS2_BO_PLAS
 D:It is a glowing form of molten hate.
 
@@ -2410,55 +2410,55 @@ D:A lump of rotting black flesh that slurrrrrrrps across the dungeon floor.
 
 N::Iridescent beetle
 I:K::11:32d8:16:60:30:2:37:850:n
-A:45:10:146:0
+A:45:10:146
 F:MV_ATT_NORM|ANIMAL|IM_ELEC|MAX_HP
 D:It is a giant beetle, whose carapace shimmers with vibrant energies.
 
 N::Nexus vortex
 I:v::12:32d10:100:40:0:1:37:800:n
-A:244:0:0:0
+A:244
 F:MV_ATT_NORM|MV_75|0x6L|CHARM_SLEEP|MINDLESS|MS2_BR_NETH
 D:A maelstrom of potent magical energy.
 
 N::Plasma vortex
 I:v::12:32d10:100:40:0:1:37:800:n
-A:243:0:0:0
+A:243
 F:MV_ATT_NORM|MV_75|0x6L|IM_FIRE|CHARM_SLEEP|MINDLESS|MS3_BR_PLAS
 D:A whirlpool of intense flame, charring the stones at your feet.
 
 N::Mature red dragon
 I:d::11:60d8:20:80:30:1:37:1400:n
-A:52:56:39:0
+A:52:56:39
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_FIRE|MS1_FEAR|MS1_CONF|EVIL|DRAGON|IM_FIRE|CHARM_SLEEP|MAX_HP
 D:A large dragon, scales tinted deep red.
 
 N::Mature gold dragon
 I:d::11:70d8:20:80:150:2:37:1500:n
-A:52:56:39:0
+A:52:56:39
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_FEAR|MS1_CONF|DRAGON|CHARM_SLEEP|MAX_HP|MS2_BR_SOUN
 D:A large dragon with scales of gleaming gold.
 
 N::Crystal drake
 I:d::12:50d10:25:100:30:2:37:1500:n
-A:52:52:35:0
+A:52:52:35
 F:MV_ATT_NORM|MV_INVIS|THRO_DR|HAS_4D2|CARRY_OBJ|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_COLD|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_SHAR
 D:A dragon of strange crystalline form.  Light shines through it, dazzling your eyes with spectrums of colour.
 
 N::Mature black dragon
 I:d::11:58d8:20:55:30:1:37:1350:n
-A:54:54:38:0
+A:54:54:38
 F:HAS_2D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_ACID|MS1_FEAR|EVIL|DRAGON|IM_ACID|CHARM_SLEEP|MAX_HP
 D:A large dragon, with scales of deepest black.
 
 N::Mature multi-hued dragon
 I:d::11:81d8:20:65:50:2:38:1700:n
-A:56:56:39:0
+A:56:56:39
 F:MV_ATT_NORM|HAS_4D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|HAS_60|HAS_90|HAS_2D2|0x5L|MS1_BR_POIS|MS1_BR_ELEC|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|MS1_FEAR|MS1_CONF|MS1_BLIND|IM_COLD|IM_ACID|IM_POIS|IM_ELEC|IM_FIRE|EVIL|DRAGON|CHARM_SLEEP|MAX_HP
 D:A large dragon, scales shimmering many colours.
 
 N::Death knight
 I:p::12:30d20:20:100:10:1:38:1000:n
-A:235:23:23:0
+A:235:23:23
 F:HAS_2D2|HAS_1D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x5L|MS1_CAUSE_3|MS1_BLIND|MS1_FEAR|EVIL|IM_COLD|NO_INFRA|MAX_HP|INTELLIGENT|MS2_BO_NETH|MS2_S_SUMMON
 D:It is a humanoid form dressed in armour of an ancient form.  From beneath its helmet, eyes glow a baleful red and seem to pierce you like lances of fire.
 
@@ -2470,25 +2470,25 @@ D:A Black Numenorean who usurped the throne of Gondor, he is treacherous and evi
 
 N::Time vortex
 I:v::13:32d10:100:40:0:4:38:900:n
-A:244:0:0:0
+A:244
 F:MV_ATT_NORM|MV_75|0x6L|CHARM_SLEEP|MINDLESS|MS3_BR_TIME
 D:You haven't seen it yet.
 
 N::Shimmering vortex
 I:v::14:6d12:100:30:0:4:38:200:n
-A:203:203:0:0
+A:203:203
 F:MV_ATT_NORM|MV_75|0x6L|CHARM_SLEEP|MINDLESS|MS3_BR_LITE
 D:A strange pillar of shining light that hurts your eyes.  Its shape changes constantly as it cuts through the air towards you.  It is like a beacon, waking monsters from their slumber.
 
 N::Ancient blue dragon
 I:D::12:88d8:20:80:80:1:38:1500:n
-A:54:54:37:0
+A:54:54:37
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_ELEC|MS1_FEAR|MS1_BLIND|MS1_CONF|EVIL|DRAGON|IM_ELEC|CHARM_SLEEP|MAX_HP
 D:A huge draconic form.  Lightning crackles along its length.
 
 N::Ancient bronze dragon
 I:D::12:92d8:20:100:200:2:38:1700:n
-A:54:54:38:0
+A:54:54:38
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x6L|MS1_FEAR|MS1_BLIND|MS1_CONF|DRAGON|CHARM_SLEEP|MAX_HP|MS2_BR_CONF
 D:A huge draconic form enveloped in a cascade of colour.
 
@@ -2500,7 +2500,7 @@ D:It is a ball-like creature, with one main eye and twelve smaller eyes on stalk
 
 N::Emperor wight
 I:W::12:48d8:20:40:10:2:38:1600:n
-A:10:10:199:0
+A:10:10:199
 F:HAS_4D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x6L|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|IM_POIS|NO_INFRA|HURT_LITE|MS2_BO_NETH
 D:Your life force is torn from your body as this powerful unearthly being approaches.
 
@@ -2518,31 +2518,31 @@ D:A raging pillar of fire, Vargo burns every living thing beyond recognition.
 
 N::Black wraith
 I:W::12:50d10:20:55:10:2:38:1700:n
-A:10:10:199:0
+A:10:10:199
 F:HAS_2D2|CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x7L|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|IM_POIS|HURT_LITE|NO_INFRA|MS2_BO_NETH
 D:A figure that seems made of void, its strangely human shape is cloaked in shadow.  It reaches out at you.
 
 N::Erinyes
 I:&::11:30d8:20:50:80:2:38:1000:n
-A:17:87:0:0
+A:17:87
 F:MV_ATT_NORM|HAS_60|CARRY_OBJ|THRO_DR|0x7L|MS1_BLIND|MS1_CONF|MS1_BO_FIRE|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|IM_POIS
 D:It is a lesser demon of female form; however, she takes little time to show its true colours.
 
 N::Nether wraith
 I:W::12:60d8:20:55:10:2:39:1700:n
-A:10:10:202:0
+A:10:10:202
 F:HAS_4D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|MV_INVIS|THRO_WALL|0x6L|MS1_CAUSE_3|MS1_FEAR|MS1_BLIND|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|HURT_LITE|NO_INFRA|IM_POIS|MS2_BO_NETH|MS2_MIND_BLAST|MS2_DARKNESS
 D:A form that hurts the eye, death permeates the air around it.  As it nears you, a coldness saps your soul.
 
 N::Eldrak
 I:T::11:30d25:20:80:50:3:39:800:n
-A:17:17:17:0
+A:17:17:17
 F:MV_ATT_NORM|PICK_UP|THRO_DR|HAS_60|CARRY_OBJ|CARRY_GOLD|TROLL|EVIL|IM_POIS|MAX_HP|CHARM_SLEEP
 D:A massive troll, larger and stronger than many men together.  Usually a solitary creature.
 
 N::Ettin
 I:T::11:50d30:20:100:30:3:39:1000:n
-A:19:19:19:0
+A:19:19:19
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|TROLL|EVIL|IM_POIS|MAX_HP|CHARM_SLEEP
 D:A massive troll of huge strength.  Ettins are stupid but violent.
 
@@ -2560,13 +2560,13 @@ D:A large dragon with a selection of heads, all shouting and arguing as they loo
 
 N::Ancient white dragon
 I:D::12:88d8:20:90:80:1:39:2500:n
-A:55:55:39:0
+A:55:55:39
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_COLD|MS1_FEAR|MS1_BLIND|MS1_CONF|EVIL|DRAGON|IM_COLD|CHARM_SLEEP|MAX_HP
 D:A huge draconic form.  Frost covers it from head to tail.
 
 N::Ancient green dragon
 I:D::12:90d8:20:85:80:1:39:2400:n
-A:54:54:38:0
+A:54:54:38
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_POIS|MS1_FEAR|MS1_BLIND|MS1_CONF|EVIL|DRAGON|IM_POIS|CHARM_SLEEP|MAX_HP
 D:A huge draconic form enveloped in clouds of poisonous vapour.
 
@@ -2590,25 +2590,25 @@ D:A foul wind chills your bones as this ghastly figure approaches.
 
 N::Ancient black dragon
 I:D::12:90d8:20:90:70:1:39:2500:n
-A:55:55:38:0
+A:55:55:38
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x9L|MS1_BR_ACID|MS1_FEAR|MS1_BLIND|MS1_CONF|EVIL|DRAGON|IM_ACID|CHARM_SLEEP|MAX_HP
 D:A huge draconic form.  Pools of acid melt the floor around it.
 
 N::Disenchanter worms
 I:w::10:10d8:7:5:10:3:40:30:p
-A:208:0:0:0
+A:208
 F:MULTIPLY|MV_ATT_NORM|MV_40|ANIMAL|HURT_LITE|MINDLESS
 D:They are a strange mass of squirming worms.  Magical energy crackles around these disgusting forms.
 
 N::Rotting quylthulg
 I:Q::12:20d8:20:1:0:1:40:1500:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_S_UNDEAD|MS1_BLINK|TELE| ANIMAL|EVIL|MAX_HP|CHARM_SLEEP|MINDLESS
 D:It is a pulsing flesh mound that reeks of death and putrefaction.
 
 N::Spirit troll
 I:T::11:40d25:20:90:5:3:40:900:n
-A:19:18:18:0
+A:19:18:18
 F:MV_INVIS|MV_ATT_NORM|THRO_WALL|THRO_DR|CARRY_OBJ|CARRY_GOLD|HAS_90|EVIL|TROLL|IM_POIS|IM_COLD|MAX_HP|CHARM_SLEEP|IM_ELEC
 D:A weird troll from the elemental planes.
 
@@ -2626,19 +2626,19 @@ D:A strange reptilian hybrid with nine smouldering heads.
 
 N::Enchantress
 I:p::13:40d13:20:60:10:4:40:2100:f
-A:15:15:16:0
+A:15:15:16
 F:HAS_2D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x2L|MS1_S_DRAGON|MS1_BLIND|EVIL|CHARM_SLEEP|MAX_HP|GOOD
 D:This elusive female spellcaster has a special affinity for dragons, whom she rarely fights without.
 
 N::Archpriest
 I:p::12:40d13:20:60:10:2:40:1800:m
-A:17:17:18:0
+A:17:17:18
 F:HAS_2D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x2L|MS1_HOLD|MS1_BLIND|MS1_CONF|MS1_S_MONSTER|MS1_S_UNDEAD|MS1_CAUSE_3|INTELLIGENT|EVIL|CHARM_SLEEP|MAX_HP|MS2_HEAL
 D:An evil priest, dressed all in black.  Deadly spells hit you at an alarming rate as his black spiked mace rains down blow after blow on your pitiful frame.
 
 N::Sorceror
 I:p::13:40d13:20:60:10:2:40:2150:m
-A:16:16:16:0
+A:16:16:16
 F:HAS_4D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x2L|MS1_BLINK|MS1_TELE_TO|MS1_BLIND|MS1_CONF|MS1_S_MONSTER|MS1_S_UNDEAD|MS1_CAUSE_3|MS1_S_DRAGON|MS1_BA_FIRE|MS1_BA_COLD|MS1_BO_ACID|EVIL|CHARM_SLEEP|MAX_HP|MS2_TRAP_CREATE
 D:A human figure in robes, he moves with magically improved speed, and his hands are ablur with spell casting.
 
@@ -2650,7 +2650,7 @@ D:It is a tougher relative of the Xorn.  Its hide glitters with metal ores.
 
 N::Giant roc
 I:B::11:80d13:20:70:10:3:40:1000:n
-A:78:78:284:0
+A:78:78:284
 F:MV_ATT_NORM|ANIMAL|IM_ELEC
 D:A vast legendary bird, its iron talons rake the most impenetrable of surfaces and its screech echoes through the many winding dungeon corridors.
 
@@ -2674,49 +2674,49 @@ D:One of the original three ugly sisters.  Her face could sink a thousand ships.
 
 N::Death drake
 I:D::12:105d10:25:100:30:2:40:3500:n
-A:56:56:236:0
+A:56:56:236
 F:MV_ATT_NORM|MV_INVIS|THRO_DR|HAS_2D2|HAS_4D2|CARRY_OBJ|PICK_UP|THRO_WALL|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_COLD|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_LIFE
 D:It is a dragon-like form wrapped in darkness.  You cannot make out its true form but you sense its evil.
 
 N::Ancient red dragon
 I:D::12:105d10:20:100:70:1:40:2750:n
-A:56:56:40:0
+A:56:56:40
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x6L|MS1_BR_FIRE|MS1_FEAR|MS1_BLIND|MS1_CONF|EVIL|DRAGON|IM_FIRE|CHARM_SLEEP|MAX_HP
 D:A huge draconic form.  Wisps of smoke steam from its nostrils and the extreme heat surrounding it makes you gasp for breath.
 
 N::Ancient gold dragon
 I:D::12:150d10:20:100:200:2:40:4000:n
-A:56:56:40:0
+A:56:56:40
 F:HAS_4D2|CARRY_GOLD|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x6L|MS1_FEAR|MS1_BLIND|MS1_CONF|DRAGON|CHARM_SLEEP|MAX_HP|MS2_BR_SOUN
 D:A huge draconic form wreathed in a nimbus of light.
 
 N::Great crystal drake
 I:D::11:50d30:25:100:30:2:40:3500:n
-A:55:55:39:0
+A:55:55:39
 F:MV_ATT_NORM|MV_INVIS|THRO_DR|HAS_4D2|HAS_2D2|CARRY_OBJ|0x6L|MS1_FEAR|MS1_CONF|MS1_SLOW|EVIL|IM_COLD|CHARM_SLEEP|MAX_HP|DRAGON|MS2_BR_SHAR
 D:A huge crystalline dragon.  Its claws could cut you to shreds and its teeth are razor sharp.  Strange colours ripple through it as it moves in the light.
 
 N::Vrock
 I:&::11:20d20:20:50:80:2:40:1000:n
-A:17:78:78:0
+A:17:78:78
 F:MV_ATT_NORM|HAS_60|CARRY_OBJ|THRO_DR|0x8L|MS1_BLIND|MS1_CONF|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|GROUP
 D:It is a demon with a long neck and raking claws.
 
 N::Death quasit
 I:I::13:55d8:20:80:0:3:40:1000:n
-A:177:58:58:0
+A:177:58:58
 F:HAS_4D2|HAS_2D2|HAS_90|CARRY_OBJ|MV_INVIS|THRO_WALL|MV_ATT_NORM|0xAL|MS1_FEAR|MS1_CONF|MS1_BLIND|MS1_CAUSE_3|MS1_S_DEMON|EVIL|IM_POIS|CHARM_SLEEP|MAX_HP|DEMON|IM_FIRE|INTELLIGENT|MS2_FORGET
 D:It is a demon of small stature, but its armoured frame moves with lightning speed and its powers make it a tornado of death and destruction.
 
 N::Adunaphel the Quiet
 I:W::12:35d35:90:60:10:3:41:8000:f
-A:23:23:199:0
+A:23:23:199
 F:HAS_4D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|MV_INVIS|THRO_WALL|0x3L|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|MS1_S_MONSTER|MS1_BO_FIRE|MS1_BO_COLD|MS1_BO_ACID|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|UNIQUE|HURT_LITE|GOOD|NO_INFRA|IM_POIS|MS2_FORGET|MS2_BO_NETH
 D:A sorceress in life, Adunaphel quickly fell under Sauron's sway and the power of the rings.
 
 N::Dark elven sorceror
 I:h::13:40d20:20:70:10:2:41:3000:m
-A:16:16:16:0
+A:16:16:16
 F:HAS_4D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x2L|MS1_BLINK|MS1_TELE_TO|MS1_BLIND|MS1_CONF|MS1_S_MONSTER|MS1_S_UNDEAD|MS1_CAUSE_3|MS1_S_DEMON|MS1_BA_FIRE|MS1_BA_COLD|MS1_BO_ACID|EVIL|CHARM_SLEEP|INTELLIGENT|MAX_HP|HURT_LITE|MS2_HEAL|MS2_DARKNESS
 D:A drow elven figure, dressed in deepest black.  Power seems to crackle from his slender frame.
 
@@ -2728,7 +2728,7 @@ D:A skeletal form wrapped in robes.  Powerful magic crackles along its bony fing
 
 N::Hezrou
 I:&::11:35d15:20:40:80:3:41:1500:n
-A:17:17:0:0
+A:17:17
 F:MV_ATT_NORM|HAS_2D2|CARRY_OBJ|THRO_DR|0x9L|MS1_S_DEMON|MS1_BO_FIRE|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|GROUP
 D:It is a demon of lizard form with cruel-looking jaws.
 
@@ -2752,7 +2752,7 @@ D:Never a more heavenly being have you seen.  The very holiness of its presence 
 
 N::Glabrezu
 I:&::11:40d15:20:40:80:2:41:1750:n
-A:17:17:0:0
+A:17:17
 F:MV_ATT_NORM|HAS_90|CARRY_OBJ|THRO_DR|0x9L|MS1_S_DEMON|MS1_BO_FIRE|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP
 D:It is demon with arms and pincers, its form a true mockery of life.
 
@@ -2764,7 +2764,7 @@ D:Ren was an insane eastern king who believed himself to be the son of a volcano
 
 N::Nalfeshnee
 I:&::11:45d15:20:50:80:2:42:2000:n
-A:17:17:17:0
+A:17:17:17
 F:MV_ATT_NORM|HAS_1D2|CARRY_OBJ|THRO_DR|0x9L|MS1_BLIND|MS1_CONF|MS1_BR_FIRE|MS1_S_DEMON|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP
 D:It is a large demon with the head of a giant boar.  Flames run up and down its length.
 
@@ -2776,31 +2776,31 @@ D:A huge eyeball that floats in the air.  Black nether storms rage around its bl
 
 N::Dread
 I:G::12:25d20:20:30:10:1:35:600:n
-A:235:235:80:0
+A:235:235:80
 F:MV_ATT_NORM|MV_20|CARRY_OBJ|HAS_60|THRO_WALL|PICK_UP|MV_INVIS|0xFL|MS1_HOLD|MS1_MANA_DRAIN|MS1_BLIND|MS1_CONF|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|GROUP|IM_POIS|MS2_BO_NETH
 D:It is a form that screams its presence against the eye.  Death incarnate, its hideous black body seems to struggle against reality as the universe itself struggles to banish it.
 
 N::Mumak
 I:q::11:90d10:20:55:100:2:43:2100:n
-A:227:227:233:0
+A:227:227:233
 F:MV_ATT_NORM|ANIMAL|GROUP
 D:A massive elephantine form with eyes twisted by madness.
 
 N::Ancient multi-hued dragon
 I:D::12:52d40:20:100:70:1:43:13000:n
-A:57:57:42:0
+A:57:57:42
 F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|HAS_60|HAS_90|HAS_2D2|HAS_1D2|0x5L|MS1_BR_POIS|MS1_BR_ELEC|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|MS1_FEAR|MS1_CONF|MS1_BLIND|IM_COLD|IM_ACID|IM_POIS|IM_ELEC|IM_FIRE|EVIL|DRAGON|CHARM_SLEEP|MAX_HP
 D:A huge draconic form.  Many colours ripple down its massive frame.  Few live to see another.
 
 N::Ethereal dragon
 I:D::12:52d40:25:100:15:2:43:11000:n
-A:57:57:42:0
+A:57:57:42
 F:MV_ATT_NORM|THRO_DR|HAS_60|HAS_90|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|MV_INVIS|THRO_WALL|0x5L|MS1_CONF|MS1_BLIND|DRAGON|CHARM_SLEEP|MAX_HP|MS2_BR_CONF|MS3_BR_LITE|MS3_BR_DARK
 D:A huge dragon emanating from the elemental plains, the ethereal dragon is a master of light and dark.  Its form disappears from sight as it cloaks itself in unearthly shadows.
 
 N::Ji Indur Dawndeath
 I:W::12:35d50:90:70:10:4:43:12000:m
-A:23:23:199:0
+A:23:23:199
 F:HAS_4D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|MV_INVIS|0x3L|MS1_BA_FIRE|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|MS1_S_UNDEAD|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|UNIQUE|HURT_LITE|IM_FIRE|GOOD|IM_POIS|NO_INFRA|MS2_BA_NETH
 D:This Ringwraith was a weak-minded sorcerer-king who fell easily under Sauron's power.
 
@@ -2836,7 +2836,7 @@ D:A strange reptilian hybrid with eleven smouldering heads.
 
 N::Patriarch
 I:p::12:40d20:20:60:10:2:44:5000:m
-A:17:17:18:0
+A:17:17:18
 F:HAS_4D2|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x2L|MS1_HOLD|MS1_BLIND|MS1_S_UNDEAD|EVIL|CHARM_SLEEP|MAX_HP|INTELLIGENT|MS2_HEAL|MS2_BRAIN_SMASH|MS2_RAZOR|MS2_S_SUMMON
 D:A dark priest of the highest order.  Powerful and evil, beware his many spells.
 
@@ -2944,7 +2944,7 @@ D:The very air warps as pure elemental energy stalks towards you in the shape of
 
 N::Demonic quylthulg
 I:Q::12:60d8:20:1:0:1:51:3000:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_S_DEMON|MS1_BLINK|TELE|MAX_HP|CHARM_SLEEP|ANIMAL|EVIL|MINDLESS
 D:A pile of pulsing flesh that glows with an inner hellish fire.  The world itself seems to cry out against it.
 
@@ -3010,13 +3010,13 @@ D:This intensely evil creature bears the form of a gargantuan black worm.  Its g
 
 N::Hand druj
 I:s::13:30d20:20:110:10:4:55:12000:n
-A:0:0:0:0
+A:0
 F:MV_ONLY_ATT|0x1L|MS1_FEAR|MS1_BLIND|MS1_CONF|MS1_CAUSE_3|EVIL|NO_INFRA|IM_COLD|CHARM_SLEEP|MAX_HP|UNDEAD|INTELLIGENT|IM_POIS|MINDLESS|MS2_DARKNESS|MS2_FORGET|MS2_TELE_AWAY
 D:A skeletal hand floating in the air, motionless except for its flexing fingers.
 
 N::Eye druj
 I:s::13:40d25:20:90:10:4:55:24000:n
-A:246:246:0:0
+A:246:246
 F:MV_ONLY_ATT|0x1L|MS1_S_UNDEAD|MS1_BO_MANA|EVIL|UNDEAD|CHARM_SLEEP|NO_INFRA|MAX_HP|IM_COLD|IM_POIS|IM_FIRE|INTELLIGENT|MINDLESS|MS2_BO_NETH|MS2_BA_NETH
 D:A bloodshot eyeball floating in the air, you'd be forgiven for assuming it harmless.
 
@@ -3028,7 +3028,7 @@ D:A glowing skull possessed by sorcerous power.  It need not move, but merely bl
 
 N::Chaos vortex
 I:v::14:32d20:100:80:0:1:55:4000:n
-A:0:0:0:0
+A:0
 F:MV_ATT_NORM|MV_75|0x6L|CHARM_SLEEP|MINDLESS|MS2_BR_CHAO
 D:Void, nothingness, spinning destructively.
 
@@ -3058,7 +3058,7 @@ D:A vast dragon of immense power.  Fire leaps continuously from its huge form.  
 
 N::Draconic quylthulg
 I:Q::12:90d8:20:1:0:3:55:5500:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_S_DRAGON|MS1_BLINK|TELE|MAX_HP|ANIMAL|EVIL|MINDLESS|CHARM_SLEEP
 D:It looks like it was once a dragon corpse, now deeply infected with magical bacteria that make it pulse in a foul and degrading way.
 
@@ -3166,19 +3166,19 @@ D:A humanoid form,  black as night, advancing steadily and unstoppably.  Flee!
 
 N::Master quylthulg
 I:Q::12:100d20:20:1:0:3:71:12000:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_S_MONSTER|MS1_S_UNDEAD|MS1_S_DRAGON|CHARM_SLEEP|MINDLESS|ANIMAL|MAX_HP|EVIL|MS2_S_SUMMON|MS3_S_GUNDEAD|MS3_S_ANCIENTD
 D:A pulsating mound of flesh, shining with silver pulses of throbbing light.
 
 N::Greater draconic quylthulg
 I:Q::12:100d14:20:1:0:3:71:10500:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_BLINK|MS1_TELE_TO|ANIMAL|EVIL|MAX_HP|MINDLESS|CHARM_SLEEP|MS3_S_ANCIENTD
 D:A massive mound of scaled flesh, throbbing and pulsating with multi-hued light.
 
 N::Greater rotting quylthulg
 I:Q::12:100d14:20:1:0:3:71:10500:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|0x2L|MS1_BLINK|MS1_TELE_TO|ANIMAL|EVIL|MINDLESS|CHARM_SLEEP|MAX_HP|MS3_S_GUNDEAD
 D:A massive pile of rotting flesh.  A disgusting stench fills the air as it throbs and writhes.
 
@@ -3214,13 +3214,13 @@ D:The Mouth of Sauron is a mighty spell caster.  So old that even he cannot reme
 
 N::The Emperor Quylthulg
 I:Q::13:50d100:30:1:0:3:78:20000:n
-A:0:0:0:0
+A:0
 F:MV_INVIS|CARRY_OBJ|HAS_4D2|0x2L|ANIMAL|EVIL|MAX_HP|UNIQUE|CHARM_SLEEP|MS2_BRAIN_SMASH|MS3_S_GUNDEAD|MS3_S_ANCIENTD
 D:A huge seething mass of flesh with a rudimentary intelligence, the Emperor Quylthulg changes colours in front of your eyes.  Pulsating first one colour then the next, it knows only it must bring help to protect itself.
 
 N::Qlzqqlzuup
 I:13::1:Qd50:0:30:20000:78:0:MS3_S_REPTILE|MS3_S_ANT|MS3_S_GUNDEAD|MS3_S_ANCIENTD|MS3_S_UNIQUE|MS3_S_WRAITH:3
-A:100:0:0:0
+A:100
 F: the Lord of Flesh| MV_INVIS|CARRY_OBJ|HAS_4D2|0x1L|MS1_S_UNDEAD|MS1_S_DEMON|MS1_S_DRAGON|MS1_S_MONSTER|ANIMAL|EVIL|UNIQUE|MAX_HP|CHARM_SLEEP|MS2_S_SUMMON|MS2_S_ANGEL|MS2_S_SPIDER|MS2_S_HOUND
 D:This disgusting creature squeals and snorts as it writhes on the floor.  It pulsates with evil.  Its intent is to overwhelm you with monster after monster, until it can greedily dine on your remains.
 
@@ -3238,7 +3238,7 @@ D:A winged humanoid from the Planes of Hell, Pazuzu grins inhumanely at you as h
 
 N::Hell hound
 I:C::12:30d16:25:80:30:4:83:600:n
-A:107:107:107:0
+A:107:107:107
 F:MV_ATT_NORM|MV_20|0x5L|MS1_BR_FIRE|ANIMAL|EVIL|MAX_HP|IM_FIRE|GROUP
 D:It is a giant dog that glows with heat.  Flames pour from its nostrils.
 
