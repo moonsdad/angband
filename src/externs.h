@@ -356,7 +356,6 @@ extern u32b spellmasks[MAX_CLASS][2];	/* what spells can classes learn */
 
 extern owner_type owners[MAX_OWNERS];
 extern store_type store[MAX_STORES];
-extern u16b store_choice[MAX_STORES][STORE_CHOICES];
 extern int (*store_buy[MAX_STORES])();
 
 
