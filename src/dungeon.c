@@ -358,14 +358,18 @@ void dungeon(void)
 
 	/*** Update the Stores ***/
 	
-    /* turn over the store contents every, say, 1000 turns */
 	/* Perhaps only/always do this at dawn? */
 	/* Update the stores once a day */
-	if ((dun_level) && ((turn % 1000) == 0)) {
+	if ((dun_level) && ((turn % STORE_TURNS) == 0)) {
 
 	    if (peek) msg_print("Updating Stores...");
 
 	    store_maint();
+
+	    if (shuffle_owners && randint(STORE_SHUFFLE) == 1) {
+		if (peek) msg_print("Shuffling a Store...");
+		store_shuffle();
+	    }
 
 	    if (peek) msg_print("Done");
 	}

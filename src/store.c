@@ -1815,6 +1815,33 @@ void enter_store(int which)
 
 
 
+/*
+ * Shuffle one of the stores.
+ */
+void store_shuffle(void)
+{
+    int i, j, n;
+    register store_type *st_ptr;
+
+    /* Pick a real store to shuffle */
+    n = rand_int(MAX_STORES - 1);
+
+    /* Activate that store */
+    st_ptr = &store[n];
+
+    /* Pick a new owner */
+    for (j = st_ptr->owner; j == st_ptr->owner; ) {
+	st_ptr->owner = MAX_STORES * rand_int(MAX_OWNERS / MAX_STORES) + n;
+    }
+
+    /* Reset the owner data */
+    st_ptr->insult_cur = 0;
+    st_ptr->store_open = 0;
+    st_ptr->good_buy = 0;
+    st_ptr->bad_buy = 0;
+}
+
+
 /* Insert INVEN_MAX at given location	 */
 static void insert_store(int store_num, register int pos, s32b icost, inven_type *i_ptr)
 {

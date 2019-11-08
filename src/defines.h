@@ -133,9 +133,11 @@
 #define STORE_INVEN_MAX  24     /* Max number of discrete objs in inven  */
 #define STORE_CHOICES    30     /* NUMBER of items to choose stock from  */
 #define STORE_TURNOVER    9     /* Normal shop turnover, per day */
-#define STORE_MIN_KEEP   10     /* Min slots to "always" keep full */
+#define STORE_MIN_KEEP    6     /* Min slots to "always" keep full */
 #define STORE_MAX_KEEP   18     /* Max slots to "always" keep full */
 #define COST_ADJ         100    /* Adjust prices for buying and selling  */
+#define STORE_SHUFFLE	100	/* 1/Chance (per day) of an owner changing */
+#define STORE_TURNS    1000	/* Number of turns between turnovers	*/
 
 
 /*

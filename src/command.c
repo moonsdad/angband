@@ -477,6 +477,7 @@ static opt_desc options_disturb[] = {
 static opt_desc options_gameplay[] = {
 
     { "Disable haggling in stores",		&no_haggle_flag },
+    { "Shuffle store owners",                   &shuffle_owners },
 
     { "Show weights in inventory", 		&show_inven_weight },
     { "Show weights in equipment list",		&show_equip_weight },

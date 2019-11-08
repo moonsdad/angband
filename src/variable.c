@@ -127,6 +127,7 @@ int player_light;		/* Player carrying light */
 int light_flag = FALSE;		/* Track if temporary light about player.  */
 
 int no_haggle_flag = FALSE;	/* Cancel haggling */
+int shuffle_owners = FALSE;	/* Shuffle store owners occasionally */
 
 int show_inven_weight = TRUE;	/* Show weights in inven */
 int show_equip_weight = TRUE;	/* Show weights in equip */

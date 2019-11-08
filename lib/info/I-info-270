@@ -17,6 +17,7 @@ Realized that the preceding change was probably a mistake.
 
 Parsing of monster race info from a text file.
 Rewrote store "maintainance" code.
+Modified store "shuffle" code.
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.
 Added floating point (yuck!) to "standard deviation" code.

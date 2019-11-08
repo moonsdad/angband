@@ -182,6 +182,7 @@ extern int find_ignore_doors;	/* Run through doors */
 /* Option set 3 -- Gameplay */
 
 extern int no_haggle_flag;	/* Cancel haggling */
+extern int shuffle_owners;	/* Shuffle store owners occasionally */
 
 extern int show_inven_weight;	/* Show weights in inven */
 extern int show_equip_weight;	/* Show weights in equip */
@@ -976,6 +977,7 @@ void store_carry(int, int *, struct inven_type *);
 void store_destroy(int, int, int);
 void store_init(void);
 void store_maint(void);
+void store_shuffle(void);
 int noneedtobargain(int, s32b);
 void updatebargain(int, s32b, s32b);
 void enter_store(int);
