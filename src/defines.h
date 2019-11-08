@@ -523,9 +523,7 @@
 #define ID_EMPTY        0x4	/* Item is now "empty" */
 #define ID_KNOWN       0x8	/* Item is fully "known" */
 #define ID_STOREBOUGHT  0x10
-#define TR3_SHOW_MODS  0x20
 #define ID_NOSHOW_P1    0x40    /* don't show (+x) even if pval != 0 -CWS   */
-#define TR3_HIDE_TYPE  0x80    /* don't show (+x of yyy), just (+x) -CWS */
 
 /*
  * Ego-Item indexes
@@ -962,8 +960,9 @@
  * actual immunities, and resistances).  Note that "Hold Life" is really an
  * "immunity" to ExpLoss, and "Free Action" is "immunity to paralysis".
  *
- * Note that "flags3" contains everything else -- including the "CURSED"
- * flags, and the "BLESSED" flag, and flags which affect the player in a "general"
+ * Note that "flags3" contains everything else -- including the three "CURSED"
+ * flags, and the "BLESSED" flag, several "item display" parameters, 
+ * and flags which affect the player in a "general"
  * way (LITE, TELEPATHY, SEE_INVIS, SLOW_DIGEST, REGEN), including the "general"
  * curses (TELEPORT, AGGRAVATE, EXP_DRAIN).  It also contains four new flags
  * called "ITEM_IGNORE_XXX" which lets an item specify that it can not be
@@ -978,12 +977,16 @@
 #define TR1_DEX			0x00000008L	/* Uses "pval" */
 #define TR1_CON			0x00000010L	/* Uses "pval" */
 #define TR1_CHR			0x00000020L	/* Uses "pval" */
+#define TR1_PVAL_XXX1		0x00000040L	/* Later */
+#define TR1_PVAL_XXX2		0x00000080L	/* Later */
 #define TR1_STEALTH		0x00000100L	/* Uses "pval" */
 #define TR1_SEARCH		0x00000200L	/* Uses "pval" */
 #define TR1_INFRA		0x00000400L	/* Uses "pval" */
 #define TR1_TUNNEL		0x00000800L	/* Uses "pval" */
 #define TR1_SPEED		0x00001000L	/* Uses "pval" */
 #define TR1_ATTACK_SPD		0x00002000L	/* Uses "pval" extra attacks/round -DGK */
+#define TR1_PVAL_XXX3		0x00004000L
+#define TR1_PVAL_XXX4		0x00008000L
 #define TR1_SLAY_ANIMAL		0x00010000L
 #define TR1_SLAY_EVIL		0x00020000L
 #define TR1_SLAY_UNDEAD		0x00040000L
@@ -993,7 +996,9 @@
 #define TR1_SLAY_GIANT		0x00400000L
 #define TR1_SLAY_DRAGON		0x00800000L
 #define TR1_KILL_DRAGON		0x01000000L	/* Execute Dragon */
+#define TR1_XXX1		0x02000000L	/* Later */
 #define TR1_IMPACT		0x04000000L	/* Start Earthquakes */
+#define TR1_XXX2		0x08000000L	/* Later */
 #define TR1_BRAND_FIRE		0x40000000L
 #define TR1_BRAND_COLD		0x80000000L
 #define TR_ARTIFACT		0x02000000L	/* means "is an artifact" -CFT */
@@ -1004,11 +1009,14 @@
 #define TR2_SUST_DEX		0x00000008L
 #define TR2_SUST_CON		0x00000010L
 #define TR2_SUST_CHR		0x00000020L
+#define TR2_XXX1		0x00000040L	/* Later */
+#define TR2_XXX2		0x00000080L	/* Later */
 #define TR2_IM_ACID		0x00000100L
 #define TR2_IM_ELEC		0x00000200L
 #define TR2_IM_FIRE		0x00000400L
 #define TR2_IM_COLD		0x00000800L
 #define TR2_IM_POIS		0x00001000L
+#define TR2_IM_XXX1		0x00002000L	/* Later */
 #define TR2_FREE_ACT		0x00004000L	/* Free Action */
 #define TR2_HOLD_LIFE	 	0x00008000L	/* Hold Life */
 
@@ -1017,6 +1025,7 @@
 #define TR2_RES_FIRE		0x00040000L
 #define TR2_RES_COLD		0x00080000L
 #define TR2_RES_POIS		0x00100000L
+#define TR2_RES_XXX1		0x00200000L	/* Later */
 #define TR2_RES_LITE		0x00400000L	/* Oops */
 #define TR2_RES_DARK		0x00800000L	/* Oops */
 
@@ -1034,6 +1043,17 @@
 #define TR_EGO_WEAPON   0x0007E000L
 #define TR_LIGHTNING    0x00001000L
 
+#define TR3_FLAG_XXX1		0x00000001L	/* Later */
+#define TR3_FLAG_XXX2		0x00000002L	/* Later */
+#define TR3_FLAG_XXX3		0x00000004L	/* Later */
+#define TR3_FLAG_XXX4		0x00000008L	/* Later */
+#define TR3_FLAG_XXX5		0x00000010L	/* Later */
+#define TR3_FLAG_XXX6		0x00000020L	/* Later */
+#define TR3_FLAG_XXX7		0x00000040L	/* Later */
+#define TR3_FLAG_XXX8		0x00000080L	/* Later */
+#define TR3_EASY_KNOW		0x00000100L	/* Aware -> Known */
+#define TR3_HIDE_TYPE		0x00000200L	/* don't show (+x of yyy), just (+x) -CWS */
+#define TR3_SHOW_MODS		0x00000400L	/* Always show Tohit/Todam */
 #define TR3_FEATHER	 	0x00001000L	/* Feather Falling */
 #define TR3_LITE		0x00002000L	/* Permanent Light */
 #define TR3_SEE_INVIS		0x00004000L	/* See Invisible */
@@ -1049,6 +1069,17 @@
 #define TR3_AGGRAVATE		0x08000000L	/* Item aggravates monsters */
 #define TR3_BLESSED		0x10000000L	/* priests use w/o penalty -DGK*/
 #define TR3_CURSED		0x20000000L	/* Item is Cursed */
+
+
+/*
+ * These masks will "block" out flags which are dependant on "pval",
+ * since those flags are only "good" if "pval" is positive.
+ * Note that all "pval" dependant flags must be in "flags1".
+ */
+#define TR1_PVAL_MASK	\
+	(TR1_STR | TR1_INT | TR1_WIS | TR1_DEX | TR1_CON | TR1_CHR | \
+	 TR1_SEARCH | TR1_STEALTH | TR1_SPEED | TR1_ATTACK_SPD | TR1_INFRA)
+
 
 
 /* definitions for objects that can be worn */
