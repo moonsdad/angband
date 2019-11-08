@@ -154,40 +154,87 @@
 /*
  * Note that the following constants are all related, if you change one,
  * you must also change all succeeding ones.  Also, player_init[] and
- * store_choice[] may also have to be changed.
+ * store_choice[] may also have to be changed.  And most importantly,
+ * these constants are fixed by their index in the "k_list" file.
  */
 
-#define OBJ_NOTHING             (MAX_DUNGEON_OBJ+75)
+#define OBJ_NOTHING             0
 
-#define OBJ_MUSH                (MAX_DUNGEON_OBJ+55)
+#define OBJ_FOOD_RATION		21
 
-#define OBJ_RUINED_CHEST        (MAX_DUNGEON_OBJ+76)
+#define OBJ_BROAD_SWORD		34
+#define OBJ_DAGGER		43
+#define OBJ_SMALL_SWORD		46
+#define OBJ_MACE		53
+#define OBJ_LEAD_FILLED_MACE	56
+
+#define OBJ_LONG_BOW		74
+#define OBJ_ARROW		78
+#define OBJ_BOLT		80
+#define OBJ_SHOT		83
+
+#define OBJ_IRON_CROWN		98
+
+#define OBJ_SOFT_LEATHER	103
+#define OBJ_CHAIN_MAIL		109
+
+#define OBJ_ANTI_EVIL		209
+#define OBJ_SCROLL_RECALL	220
+
+#define OBJ_POTION_HEALING	242
+#define OBJ_POTION_BERSERK	258
+
+#define OBJ_SPELL_BOOK		330
+#define OBJ_PRAYER_BOOK		334
+
+#define OBJ_RUINED_CHEST        344
+
+#define OBJ_TORCH		346
+
+#define OBJ_PLAYER		440
+
+#define OBJ_FLOOR		441
+#define OBJ_GRANITE_WALL	442
+#define OBJ_QUARTZ_VEIN		443
+#define OBJ_MAGMA_VEIN		444
+
+#define OBJ_RUBBLE              445
+#define OBJ_OPEN_DOOR           446
+#define OBJ_CLOSED_DOOR         447
+#define OBJ_SECRET_DOOR         448
+#define OBJ_UP_STAIR            449
+#define OBJ_DOWN_STAIR          450
+
+#define OBJ_GLYPH               459
+#define OBJ_OPEN_PIT		460
+
+#define OBJ_STORE_LIST          451
+#define OBJ_TRAP_LIST           460
+#define OBJ_GOLD_LIST           480
 
 
-#define OBJ_RUBBLE              (MAX_DUNGEON_OBJ+54)
-#define OBJ_OPEN_DOOR           (MAX_DUNGEON_OBJ+23)
-#define OBJ_CLOSED_DOOR         (MAX_DUNGEON_OBJ+24)
-#define OBJ_SECRET_DOOR         (MAX_DUNGEON_OBJ+25)
-#define OBJ_UP_STAIR            (MAX_DUNGEON_OBJ+26)
-#define OBJ_DOWN_STAIR          (MAX_DUNGEON_OBJ+27)
+/* The "Morgoth" artifacts */
+
+#define OBJ_GROND		498
+#define OBJ_MORGOTH		499
 
 
-#define OBJ_STORE_DOOR          (MAX_DUNGEON_OBJ+28)
-#define OBJ_TRAP_LIST           (MAX_DUNGEON_OBJ+36)
-#define OBJ_GOLD_LIST           (MAX_DUNGEON_OBJ+57)
+/* Start of the "Special Objects" */
 
-#define OBJ_SCARE_MON           (MAX_DUNGEON_OBJ+56)
+#define OBJ_SPECIAL         	500
 
-#define OBJ_WIZARD              (MAX_DUNGEON_OBJ+77)
-
-/*Special start for rings amulets etc... */
-#define SPECIAL_OBJ         	(MAX_DUNGEON_OBJ+79)
-
-/* Total Number of objects for universe*/
-#define MAX_OBJECTS				(MAX_DUNGEON_OBJ+90)
+/* The actual special objects */
+#define OBJ_NARYA		(OBJ_SPECIAL + 8)
+#define OBJ_NENYA		(OBJ_SPECIAL + 9)
+#define OBJ_VILYA		(OBJ_SPECIAL + 10)
+#define OBJ_POWER		(OBJ_SPECIAL + 11)
 
 
-/* was 7*64, see flavor_p() in desc.c, could be MAX_OBJECTS o_o() rewritten
+/* Total Number of object kinds */
+#define MAX_K_IDX		512
+
+
+/* was 7*64, see flavor_p() in desc.c, could be MAX_K_IDX o_o() rewritten
  * now 8*64 beacuse of Rods
  */
 
@@ -585,6 +632,7 @@
 #define ART_NARYA		10
 #define ART_NENYA		11
 #define ART_VILYA		12
+#define ART_POWER		13
 
 	/* Dragon Scale */
 #define ART_RAZORBACK		16

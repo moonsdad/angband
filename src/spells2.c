@@ -780,7 +780,7 @@ void create_food(void)
     p_ptr->food = PLAYER_FOOD_MAX;
 #else
      /* add to food timer rather than create mush - cba */
-     add_food(k_list[OBJ_MUSH].pval);
+     add_food(k_list[OBJ_FOOD_RATION].pval);
 #endif
 
     /* Hack -- update the display */
@@ -977,7 +977,7 @@ void warding_glyph(void)
     if (c_ptr->i_idx == 0) {
 	i = i_pop();
 	c_ptr->i_idx = i;
-	invcopy(&i_list[i], OBJ_SCARE_MON);
+	invcopy(&i_list[i], OBJ_GLYPH);
     }
 }
 

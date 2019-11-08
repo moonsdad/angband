@@ -777,7 +777,7 @@ static void price_adjust()
     register int i;
 
     /* round half-way cases up */
-    for (i = 0; i < MAX_OBJECTS; i++)
+    for (i = 0; i < MAX_K_IDX; i++)
 	k_list[i].cost = ((object_list[i].cost * COST_ADJ) + 50) / 100;
 }
 #endif

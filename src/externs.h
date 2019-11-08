@@ -387,7 +387,7 @@ extern s16b i_max;
 
 extern inven_type i_list[MAX_I_IDX];
 
-extern inven_kind k_list[MAX_OBJECTS];
+extern inven_kind k_list[MAX_K_IDX];
 
 /* The "xtra" array ("extra" object info) */
 extern inven_xtra x_list[OBJECT_IDENT_SIZE];

@@ -2915,7 +2915,7 @@ static void build_store(int store_num, int y, int x)
     c_ptr->fval = CORR_FLOOR;
     cur_pos = i_pop();
     c_ptr->i_idx = cur_pos;
-    invcopy(&i_list[cur_pos], OBJ_STORE_DOOR + store_num);
+    invcopy(&i_list[cur_pos], OBJ_STORE_LIST + store_num);
 }
 
 

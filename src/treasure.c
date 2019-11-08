@@ -66,7 +66,7 @@
 	Traps are added randomly by flavor_init() in desc.c.	*/
 
 /* Object list (All objects must be defined here)		 */
-inven_kind k_list[MAX_OBJECTS] = {
+inven_kind k_list[MAX_K_IDX] = {
 /* Dungeon items from 0 to MAX_DUNGEON_OBJ */
 {"Poison"			,0x00000001L,	TV_FOOD, ',',	/*  0*/
   500,	   0,	64,   1,   1,	0,   0,	 0,   0, {0,0}	,  7, 0, 0x0L},
@@ -196,7 +196,7 @@ inven_kind k_list[MAX_OBJECTS] = {
 {"Power named Narya"		,0x01C008BFL,	TV_RING, '=',	/* +78 */
     1,	100000,	31,   1,   2,	0,   0,	 0,   0, {0,0}	, 80, 0, 0x02000848L},
 
-/* For some reason THIS is where SPECIAL_OBJ should point */    /* +79 */
+/* For some reason THIS is where OBJ_SPECIAL should point */    /* +79 */
 
 {"Power named Nenya"		,0x05C008BFL,	TV_RING, '=',	/*467*/
     2,	200000,	32,   1,   2,	0,   0,	 0,   0, {0,0}	, 90, 0, 0x02000888L},

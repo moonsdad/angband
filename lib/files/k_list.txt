@@ -1,5 +1,10 @@
 # File: k_list
 
+# Available slots:
+#   29, 29, 90, 177, 178, 179, 182, 183, 195, 196, 205,
+#   268, 284, 293, 299, 350, 351, 399, 413, 414, 423-444,
+#   478, 479, 512+
+
 ##### The "empty" item #####
 
 N:0:(nothing)
@@ -134,9 +139,15 @@ I:,::80:92:7500:1:3:20:10
 A:20/0
 F:0x2000020:0x0:0x0
 
+
+## XXX 28 XXX ##
+
+## XXX 29 XXX ##
+
+
 ##### Edged Weapons #####
 
-N:30:& Broken dagger
+N:30:& Broken Dagger
 I:|::23:5:0:1:15:0:0
 A:0/0
 P:0:1d1:-2:-4:0
@@ -186,7 +197,7 @@ A:30/0
 P:0:3d6:0:0:0
 F:0x0:0x0
 
-N:28:& Main Gauche
+N:38:& Main Gauche
 I:|::23:1:0:1:30:2:25
 A:2/0
 P:0:1d5:0:0:0
@@ -216,7 +227,7 @@ A:12/0
 P:0:2d5:0:0:0
 F:0x0:0x0
 
-N:29:& Dagger
+N:43:& Dagger
 I:|::23:3:0:1:12:0:10
 A:0/0
 P:0:1d4:0:0:0
@@ -308,7 +319,7 @@ A:80/4
 P:0:4d10:0:0:0
 F:0x0:0x0
 
-N:62:& Lucerne Hammer
+N:58:& Lucerne Hammer
 I:\::21:13:0:1:120:11:376
 A:11/0
 P:0:2d5:0:0:0
@@ -334,7 +345,7 @@ A:22/0
 P:0:3d4:0:0:0
 F:0x0:0x0
 
-N:58:& Awl-Pike
+N:62:& Awl-Pike
 I:/::22:1:0:1:160:8:340
 A:8/0
 P:0:1d8:0:0:0
@@ -471,29 +482,32 @@ F:0x0:0x0
 
 ##### Shovels and Picks #####
 
-N:89:& Gnomish Shovel
+N:85:& Gnomish Shovel
 I:\::20:5:1:1:50:20:10
 A:20/0
 P:0:1d2:0:0:0
 F:0x20000000:0x0
 
-N:90:& Dwarven Shovel
+N:86:& Dwarven Shovel
 I:\::20:6:2:1:120:40:50
 A:40/0
 P:0:1d3:0:0:0
 F:0x20000000:0x0
 
-N:87:& Orcish Pick
+N:88:& Orcish Pick
 I:\::20:2:2:1:180:20:300
 A:20/0
 P:0:1d3:0:0:0
 F:0x20000000:0x0
 
-N:88:& Dwarven Pick
+N:89:& Dwarven Pick
 I:\::20:3:3:1:200:50:900
 A:50/0
 P:0:1d4:0:0:0
 F:0x20000000:0x0
+
+## XXX 90 XXX ##
+
 
 ##### Armor #####
 
@@ -784,8 +798,10 @@ I:=::45:11:0:1:2:55:16000
 A:55/0
 F:0x10000000:0x0
 
-N:414:Free Action
-I:=::45:37:0:1:2:20:1500
+# Oops, this ring had an sval of "37" not "12"!
+
+N:144:Free Action
+I:=::45:12:0:1:2:20:1500
 A:20/0
 F:0x800000:0x0
 
@@ -895,6 +911,7 @@ I:"::40:1:0:1:3:20:250
 A:20/0
 F:0x20:0x0
 
+# XXX Is the rareness correct here?
 
 N:165:Searching
 I:"::40:2:0:1:3:14:250
@@ -960,15 +977,9 @@ I:?::70:67:0:1:5:5:50
 A:5/0
 F:0x8:0x0:0x0
 
-N:178:Identify
-I:?::70:67:0:1:5:10:50
-A:10/0
-F:0x8:0x0:0x0
+## XXX 178 XXX ##
 
-N:179:Identify
-I:?::70:67:0:1:5:30:50
-A:30/0
-F:0x8:0x0:0x0
+## XXX 179 XXX ##
 
 N:180:Remove Curse
 I:?::70:68:0:1:5:7:100
@@ -980,15 +991,9 @@ I:?::70:69:0:1:5:0:15
 A:0/0
 F:0x20:0x0:0x0
 
-N:182:Light
-I:?::70:69:0:1:5:3:15
-A:3/0
-F:0x20:0x0:0x0
+## XXX 182 XXX ##
 
-N:183:Light
-I:?::70:69:0:1:5:7:15
-A:7/0
-F:0x20:0x0:0x0
+## XXX 183 XXX ##
 
 N:184:Summon Monster
 I:?::70:70:0:1:5:1:0
@@ -1045,16 +1050,9 @@ I:?::70:80:0:1:5:5:35
 A:5/0
 F:0x10000:0x0:0x0
 
-N:195:Trap Detection
-I:?::70:80:0:1:5:8:35
-A:8/0
-F:0x10000:0x0:0x0
+## XXX 195 XXX ##
 
-N:196:Trap Location
-I:-::66:25:0:1:15:5:100
-A:5/0
-P:0:1d1:0:0:0
-F:SV_ROD_TRAP_LOC:0x800
+## XXX 196 XXX ##
 
 N:197:Door/Stair Location
 I:?::70:81:0:1:5:5:35
@@ -1096,10 +1094,7 @@ I:?::70:86:0:1:5:12:50
 A:12/0
 F:0x400000:0x0:0x0
 
-N:205:*Enchant Armour*
-I:?::71:96:0:1:5:50:500
-A:50/0
-F:0x4:0x0:0x0
+## XXX 205 XXX ##
 
 N:206:Recharging
 I:?::70:88:0:1:5:40:200
@@ -1445,6 +1440,8 @@ A:3/0
 P:0:1d1:0:0:0
 F:0x0:0x4000:0x0
 
+## XXX 268 XXX ##
+
 
 ##### Wands #####
 
@@ -1538,11 +1535,7 @@ A:15/0
 P:0:1d1:0:0:0
 F:SV_WAND_CLONE_MONSTER:0x0
 
-N:284:Clone Monster
-I:-::65:15:0:1:10:50:0
-A:50/0
-P:0:1d1:0:0:0
-F:SV_WAND_CLONE_MONSTER:0x0
+## XXX 284 XXX ##
 
 N:285:Teleport Away
 I:-::65:16:0:1:10:20:350
@@ -1592,11 +1585,7 @@ A:2/0
 P:0:1d1:0:0:0
 F:SV_WAND_WONDER:0x0
 
-N:293:Light
-I:_::55:0:0:1:50:5:250
-A:5/0
-P:0:1d2:0:0:0
-F:SV_STAFF_LITE:0x0
+## XXX 293 XXX ##
 
 N:294:Acid Bolts
 I:-::65:28:0:1:10:30:950
@@ -1628,11 +1617,8 @@ A:50/4
 P:0:1d1:0:0:0
 F:SV_WAND_ANNIHILATION:0x0
 
-N:299:Door/Stair Location
-I:_::55:1:0:1:50:10:350
-A:10/0
-P:0:1d2:0:0:0
-F:SV_STAFF_DOOR_STAIR_LOC:0x0
+## XXX 299 XXX ##
+
 
 ##### Staffs #####
 
@@ -1762,21 +1748,15 @@ A:10/0
 P:0:1d2:0:0:0
 F:SV_STAFF_DISPEL_EVIL:0x0
 
-N:407:Probing
+N:321:Probing
 I:_::55:30:0:1:50:30:2000
 A:30/1
 P:0:1d2:0:0:0
 F:SV_STAFF_PROBING:0x0
 
-N:321:Darkness
-I:_::55:22:0:1:50:50:0
-A:50/0
-P:0:1d2:0:0:0
-F:SV_STAFF_DARKNESS:0x0
-
 N:322:Darkness
-I:_::55:22:0:1:50:5:0
-A:5/0
+I:_::55:22:0:1:50:50:0
+A:5/0:50/0
 P:0:1d2:0:0:0
 F:SV_STAFF_DARKNESS:0x0
 
@@ -1805,7 +1785,7 @@ P:0:1d2:0:0:0
 F:SV_STAFF_IDENTIFY:0x0
 
 N:327:Holiness
-I:_::	55:27:0:1:50:70:4500
+I:_::55:27:0:1:50:70:4500
 A:70/2
 P:0:1d2:0:0:0
 F:SV_STAFF_HOLINESS:0x0
@@ -1951,19 +1931,23 @@ P:0:1d1:0:0:0
 
 ##### Here are the Rods #####
 
-N:406:Probing
+## XXX 350 XXX ##
+
+## XXX 351 XXX ##
+
+N:353:Probing
 I:-::66:23:0:1:15:40:4000
 A:40/4
 P:0:1d1:0:0:0
 F:SV_ROD_PROBING:0x800
 
-N:410:Recall
+N:354:Recall
 I:-::66:24:0:1:15:30:4000
 A:30/4
 P:0:1d1:0:0:0
 F:SV_ROD_RECALL:0x800
 
-N:405:Illumination
+N:355:Illumination
 I:-::66:22:0:1:15:20:1000
 A:20/5
 P:0:1d1:0:0:0
@@ -2167,12 +2151,12 @@ F:0x0:0x3e00:0x0
 
 ##### Junk #####
 
-N:348:some shards of pottery
+N:389:some shards of pottery
 I:~::1:5:0:1:5:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:355:& broken stick
+N:390:& broken stick
 I:~::1:13:0:1:3:0:0
 A:0/0
 P:0:1d1:0:0:0
@@ -2180,74 +2164,76 @@ P:0:1d1:0:0:0
 
 ##### Skeletons #####
 
-N:353:& broken set of teeth
+N:391:& broken set of teeth
 I:s::1:11:0:1:3:0:0
 A:0/0
 P:0:1d5:0:0:0
 
-N:354:& large broken bone
+N:392:& large broken bone
 I:s::1:12:0:1:2:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:345:& Giant Centipede Skeleton
+N:393:& Giant Centipede Skeleton
 I:s::1:2:0:1:25:1:0
 A:1/0
 P:0:1d1:0:0:0
 
-N:344:& Rat Skeleton
+N:394:& Rat Skeleton
 I:s::1:1:0:1:10:1:0
 A:1/0
 P:0:1d1:0:0:0
 
-N:349:& Human Skeleton
+N:395:& Human Skeleton
 I:s::1:7:0:1:50:1:0
 A:1/0
 P:0:1d1:0:0:0
 
-N:350:& Dwarf Skeleton
+N:396:& Dwarf Skeleton
 I:s::1:8:0:1:60:1:0
 A:1/0
 P:0:1d1:0:0:0
 
-N:351:& Elf Skeleton
+N:397:& Elf Skeleton
 I:s::1:9:0:1:40:1:0
 A:1/0
 P:0:1d1:0:0:0
 
-N:352:& Gnome Skeleton
+N:398:& Gnome Skeleton
 I:s::1:10:0:1:25:1:0
 A:1/0
 P:0:1d1:0:0:0
 
+## XXX 399 XXX ##
+
 
 ##### Dragon Scale Mail #####
 
-N:391:Black Dragon Scale Mail
+N:400:Black Dragon Scale Mail
 I:[::37:19:0:1:200:60:30000
 A:60/8
 P:30:2d4:-2:0:10
 F:0x100000:0x800
 
-N:389:Blue Dragon Scale Mail
+N:401:Blue Dragon Scale Mail
 I:[::37:17:0:1:200:40:35000
 A:40/8
 P:30:2d4:-2:0:10
 F:0x2100000:0x800
 
-N:390:White Dragon Scale Mail
+N:402:White Dragon Scale Mail
 I:[::37:18:0:1:200:50:40000
 A:50/8
 P:30:2d4:-2:0:10
 F:0x0300000:0x800
 
-N:393:Red Dragon Scale Mail
+N:403:Red Dragon Scale Mail
 I:[::37:21:0:1:200:80:100000
 A:80/8
 P:30:2d4:-2:0:10
 F:0x180000:0x800
 
-N:392:Green Dragon Scale Mail
+N:404:Green Dragon Scale Mail
 I:[::37:20:0:1:200:70,10:80000
 A:70,10/0x800
 P:30:2d4:-2:0:10
@@ -2255,19 +2241,19 @@ F:0x10100000:
 
 # MULTI_HUED
 
-N:394:Multi-Hued Dragon Scale Mail
+N:405:Multi-Hued Dragon Scale Mail
 I:[::37:22:0:1:200:100,20:150000
 A:100,20/0x800
 P:30:2d4:-2:0:10
 F:0x12380000:
 
-N:418:Shining Dragon Scale Mail
+N:406:Shining Dragon Scale Mail
 I:[::37:28:0:1:200:65:60000
 A:65/12
 P:30:2d4:-2:0:10
 F:0x100000:0x060800
 
-N:416:Law Dragon Scale Mail
+N:407:Law Dragon Scale Mail
 I:[::37:26:0:1:200:80:80000
 A:80/20
 P:30:2d4:-2:0:10
@@ -2287,13 +2273,13 @@ F:0x100000:
 
 # MULTI_HUED
 
-N:415:Chaos Dragon Scale Mail
+N:410:Chaos Dragon Scale Mail
 I:[::37:25:0:1:200:75:70000
 A:75/20
 P:30:2d4:-2:0:10
 F:0x100000:0x180800
 
-N:417:Balance Dragon Scale Mail
+N:411:Balance Dragon Scale Mail
 I:[::37:1:0,100000:200:-2:20:27
 A:20/0x0390800
 P:10:90:0:30:2d4
@@ -2301,45 +2287,50 @@ F:0x100000:
 
 # MULTI_HUED
 
-N:419:Power Dragon Scale Mail
+N:412:Power Dragon Scale Mail
 I:[::37:1:0,300000:200:-3:40:29
 A:40/0x14E0800
 P:15:110:0:40:2d4
 F:0x12380000:
 
+## XXX 413 XXX ##
+
+## XXX 414 XXX ##
+
+
 ##### Extra potions #####
 
-N:401:Death
+N:415:Death
 I:!::76:109:0:1:4:55:0
 A:55/2
 P:0:1d1:0:0:0
 F:0x0:0x20000:0x0
 
-N:404:Ruination
+N:416:Ruination
 I:!::76:112:0:1:4:40,12:0
 A:40,12/0x0
 P:0:1d1:0:0:0
 F:0x0:0x100000:0x0
 
-N:400:Detonations
+N:417:Detonations
 I:!::76:97:0:1:4:60:10000
 A:60/6
 P:0:2525:0:0:0
 F:0x0:0x10000:0x0
 
-N:403:Augmentation
+N:418:Augmentation
 I:!::76:111:0:1:4:40,12:60000
 A:40,12/0x0
 P:0:1d1:0:0:0
 F:0x0:0x80000:0x0
 
-N:422:*Healing*
+N:419:*Healing*
 I:!::76:115:0:1:4:40:1500
 A:40/3
 P:0:1d1:0:0:0
 F:0x0:0x800000:0x0
 
-N:402:Life
+N:420:Life
 I:!::76:110:0:1:4:60:5000
 A:60/3
 P:0:1d1:0:0:0
@@ -2351,59 +2342,91 @@ A:40/0
 P:0:1d1:0:0:0
 F:0x0:0x400000:0x0
 
-N:399:*Enlightenment*
+N:422:*Enlightenment*
 I:!::76:94:0:1:4:70:80000
 A:70/4
 P:0:1d1:0:0:0
 F:0x0:0x8000:0x0
 
+## XXX 423 XXX ##
 
-##### Special
+## XXX 424 XXX ##
+
+
+##### Items 425 to 439 unused #####
+
+
+##### Special "fake" objects (for visual effects) #####
+
+# Player
+
+N:440:& player~
+I:@::109:1:0:1:0:0:0
+
+# Floor
+
+N:441:& floor~
+I:.::101:1:0:1:0:0:0
+
+# Granite wall (and perma-wall)
+
+N:442:& granite wall~
+I:#::112:1:0:1:0:0:0
+
+# Quartz vein
+
+N:443:& quartz vein~
+I:%::113:1:0:1:0:0:0
+
+# Magma vein
+
+N:444:& magma vein~
+I:%::114:1:0:1:0:0:0
 
 
 ##### Dungeon features #####
 
-N:+23:& open door
+N:446:& open door
 I:\::104:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:+24:& closed door
+N:447:& closed door
 I:+::118:19:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:+25:& secret door
+N:448:& secret door
 I:#::110:19:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:+26:an up staircase
+N:449:an up staircase
 I:<::107:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
 
-N:+27:a down staircase
+N:450:a down staircase
 I:>::108:1:0:1:0:0:0
 A:0/0
 P:0:1d1:0:0:0
 
 ##### Store Doors #####
 
-N:+28:General Store
+N:451:General Store
 I:1::110:101:0:1:0:0:0
 A:0/0
 F:0x0:0x0
 
-N:+29:Armoury
+N:452:Armoury
 I:2::110:102:0:1:0:0:0
 A:0/0
 
-N:+30:Weapon Smiths
+N:453:Weapon Smiths
 I:3::110:103:0:1:0:0:0
 A:0/0
 
-N:Temple
+N:454:Temple
 I:4::110:104:0:1:0:0:0
 A:0/0
 
@@ -2411,22 +2434,22 @@ N:Alchemy Shop
 I:5::110:105:0:1:0:0:0
 A:0/0
 
-N:Magic Shop
+N:456:Magic Shop
 I:6::110:106:0:1:0:0:0
 A:0/0
 
-N:Black Market
+N:457:Black Market
 I:7::110:107:0:1:0:0:0
 A:0/0
 
-N:Home
+N:458:Home
 I:8::110:108:0:1:0:0:0
 A:0/0
 
 
 ##### Special trap #####
 
-N:+56:a strange rune
+N:459:a strange rune
 I:^::102:99:0:1:0:10:0
 A:10/0
 
@@ -2434,167 +2457,200 @@ A:10/0
 
 ##### Here are the (visible) traps. #####
 
-N:+36:an open pit
+N:460:an open pit
 I:::102:1:1:1:0:50:0
 A:50/0
 P:0:2d6:0:0:0
 
-N:a covered pit
+N:461:a covered pit
 I:^::101:3:2:1:0:60:0
 A:60/0
 P:0:2d6:0:0:0
 
-N:a trap door
+N:462:a trap door
 I:^::101:4:5:1:0:75:0
 A:75/0
 P:0:2d8:0:0:0
 
-N:a gas trap
+N:463:a gas trap
 I:^::101:5:3:1:0:95:0
 A:95/0
 P:0:1d4:0:0:0
 
-N:a loose rock
+N:464:a loose rock
 I:;::101:6:0:1:0:10:0
 A:10/0
 
-N:a dart trap
+N:465:a dart trap
 I:^::101:7:5:1:0:110:0
 A:110/0
 P:0:1d4:0:0:0
 
-N:a strange rune
+N:466:a strange rune
 I:^::101:8:5:1:0:90:0
 A:90/0
 
-N:some loose rock
+N:467:some loose rock
 I:^::101:9:5:1:0:90:0
 A:90/0
 P:0:2d6:0:0:0
 
-N:a gas trap
+N:468:a gas trap
 I:^::101:10:10:1:0:105:0
 A:105/0
 P:0:1d4:0:0:0
 
-N:+46:a strange rune
+N:469:a strange rune
 I:^::101:11:5:1:0:90:0
 A:90/0
 F:0x0:0x0
 
-N:a blackened spot
+N:470:a blackened spot
 I:^::101:12:10:1:0:110:0
 A:110/0
 P:0:4d6:0:0:0
 
-N:some corroded rock
+N:471:some corroded rock
 I:^::101:13:10:1:0:110:0
 A:110/0
 P:0:4d6:0:0:0
 
-N:a gas trap
+N:472:a gas trap
 I:^::101:14:5:1:0:105:0
 A:105/0
 P:0:2d6:0:0:0
 
-N:a gas trap
+N:473:a gas trap
 I:^::101:15:5:1:0:110:0
 A:110/0
 P:0:1d4:0:0:0
 
-N:a gas trap
+N:474:a gas trap
 I:^::101:16:5:1:0:105:0
 A:105/0
 P:0:1d8:0:0:0
 
-N:a dart trap
+N:475:a dart trap
 I:^::101:17:5:1:0:110:0
 A:110/0
 P:0:1d8:0:0:0
 
-N::+53:a dart trap
+N:476:a dart trap
 I:^::101:18:5:1:0:110:0
 A:110/0
 P:0:1d8:0:0:0
 
-N:an arrow trap
+N:477:an arrow trap
 I:^::101:2:3:1:0:90:0
 A:90/0
 P:0:1d8:0:0:0
 
+## XXX 478 XXX ##
+
+## XXX 479 XXX ##
+
 
 ##### And here starts the gold/gems #####
 
-N:+57:copper
+N:480:copper
 I:$::100:1:0:1:0:1:3
 A:1/0
 
-N:copper
+N:481:copper
 I:$::100:2:0:1:0:1:4
 A:1/0
 
-N:copper
+N:482:copper
 I:$::100:3:0:1:0:1:5
 A:1/0
 
-N:silver
+N:483:silver
 I:$::100:4:0:1:0:1:6
 A:1/0
 
-N:silver
+N:484:silver
 I:$::100:5:0:1:0:1:7
 A:1/0
 
-N:silver
+N:485:silver
 I:$::100:6:0:1:0:1:8
 A:1/0
 
-N:garnets
+N:486:garnets
 I:*::100:7:0:1:0:1:9
 A:1/0
 
-N:garnets
+N:487:garnets
 I:*::100:8:0:1:0:1:10
 A:1/0
 
-N:gold
+N:488:gold
 I:$::100:9:0:1:0:1:12
 A:1/0
 
-N:+66:gold
+N:489:gold
 I:$::100:10:0:1:0:1:14
 A:1/0
 
-N:gold
+N:490:gold
 I:$::100:11:0:1:0:1:16
 A:1/0
 
-N:opals
+N:491:opals
 I:*::100:12:0:1:0:1:18
 A:1/0
 
-N:sapphires
+N:492:sapphires
 I:*::100:13:0:1:0:1:20
 A:1/0
 
-N:rubies
+N:493:rubies
 I:*::100:14:0:1:0:1:24
 A:1/0
 
-N:diamonds
+N:494:diamonds
 I:*::100:15:0:1:0:1:28
 A:1/0
 
-N:emeralds
+N:495:emeralds
 I:*::100:16:0:1:0:1:32
 A:1/0
 F:0x0:0x0
 
-N:mithril
+N:496:mithril
 I:$::100:17:0:1:0:1:40
 A:1/0
 
-N:+74:adamantite
+N:497:adamantite
 I:$::100:18:0:1:0:1:80
 A:1/0
+
+##### Objects 498 and 499 are the "Morgoth Artifacts" #####
+
+
+##### Objects 500 to 511 are the "Special Artifacts" #####
+
+# The Ring of Power (Narya) -- see artifact list
+
+N:508:& Ring~
+I:=::45:34:0:1:2:80:100000
+F:INSTA_ART
+
+# The Ring of Power (Nenya) -- see artifact list
+
+N:509:& Ring~
+I:=::45:35:0:1:2:90:200000
+F:INSTA_ART
+
+# The Ring of Power (Vilya) -- see artifact list
+
+N:510:& Ring~
+I:=::45:36:0:1:2:100:300000
+F:INSTA_ART
+
+# The Ring of Power (The One Ring) -- see artifact list
+
+N:511:& Ring~
+I:=::45:37:0:1:2:110:5000000
+F:INSTA_ART
 
