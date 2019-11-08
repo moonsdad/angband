@@ -16,6 +16,7 @@ Made rings/amulets of Strength/etc also do "Sustain Strength" etc.
 Realized that the preceding change was probably a mistake.
 
 Parsing of monster race info from a text file.
+Rewrote store "maintainance" code.
 Simplified "feelings" about levels
 Rewrite of the "pathname constructor" code.
 Added floating point (yuck!) to "standard deviation" code.
