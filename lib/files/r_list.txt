@@ -80,10 +80,10 @@ A:5:149
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|MV_ATT_NORM|THRO_DR|PICK_UP|EVIL
 D:A hardy, street-wise crook that knows an easy catch when it sees one.
 
-N::Singing
-I:11::1:pd2:0:10:0:0:0:NONE8:1
-A:3:72
-F: happy drunk|CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP
+N::Singing, happy drunk
+I:p::11:2d3:10:1:0:1:0:0:m
+A:72
+F:CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_40|THRO_DR|PICK_UP
 D:He makes you glad to be sober
 
 N::Aimless looking merchant
@@ -111,8 +111,8 @@ F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:A small strange growth.
 
 N::Grey mushroom patch
-I:::11:d1:2:1:0:1:0:1:1
-A:2:91
+I:,::11:1d2:2:1:0:1:1:1:n
+A:91
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:Yum!  It looks quite tasty.
 
@@ -207,8 +207,8 @@ F:MV_ATT_NORM|ANIMAL
 D:A fast-moving pest.
 
 N::Shrieker mushroom patch
-I:::11:d1:2:1:0:2:0:1:1
-A:1:203
+I:,::11:1d1:2:1:0:1:2:1:n
+A:203
 F:MV_ONLY_ATT|IM_POIS|CHARM_SLEEP|ANIMAL|MINDLESS
 D:Yum!  These look quite tasty.
 
@@ -249,8 +249,8 @@ F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|0xCL|MS1_CONF|MS1_ARROW_1|MS1_
 D:He is leaving behind a trail of dropped spell components.
 
 N::Yellow mushroom patch
-I:::11:d1:2:1:0:2:0:2:1
-A:1:100
+I:,::11:1d1:2:1:0:1:2:2
+A:100
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|IM_POIS|MINDLESS
 D:Yum!  It looks quite tasty.
 
@@ -290,16 +290,16 @@ A:4
 F:CARRY_OBJ|CARRY_GOLD|HAS_60|THRO_DR|MV_ATT_NORM|ANIMAL
 D:A small humanoid figure.
 
-N::Grip
-I:12::30:Cd5:0:30:30:2:0:NONE8:1
-A:5:27
-F: Farmer Maggots dog|MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
+N::Grip, Farmer Maggot's dog
+I:C::12:5d5:30:30:0:1:2:30:n
+A:27
+F:MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
 D:A rather vicious dog belonging to Farmer Maggot.  It thinks you are stealing mushrooms.
 
-N::Fang
-I:12::30:Cd5:0:30:30:2:0:NONE8:1
-A:5:27
-F: Farmer Maggots dog|MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
+N::Fang, Farmer Maggot's dog
+I:C::2:5d5:30:30:0:1:2:30:n
+A:27
+F:MV_ATT_NORM|MV_20|UNIQUE|MAX_HP|CHARM_SLEEP|ANIMAL
 D:A rather vicious dog belonging to Farmer Maggot.  It thinks you are stealing mushrooms.
 
 N::Green worm mass
@@ -363,8 +363,8 @@ F:CARRY_OBJ|CARRY_GOLD|HAS_60|MV_ATT_NORM|MV_20|EVIL
 D:A large black serpent's body with a female torso.
 
 N::Spotted mushroom patch
-I:::11:d1:2:1:0:3:0:3:1
-A:1:175
+I:,::11:1d1:2:1:0:1:3:3:n
+A:175
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|IM_POIS|MINDLESS
 D:Yum!  It looks quite tasty.
 
@@ -543,8 +543,8 @@ F:MV_ATT_NORM|MV_40|ANIMAL|IM_POIS
 D:It has a copper head and sharp venomous fangs.
 
 N::Purple mushroom patch
-I:::11:d1:2:1:0:6:0:15:2
-A:1:183:183:183
+I:,::11:1d1:2:1:0:2:6:15:n
+A:183:183:183
 F:MV_ONLY_ATT|CHARM_SLEEP|ANIMAL|MINDLESS
 D:Yum!  It looks quite tasty.
 
@@ -680,16 +680,16 @@ A:9:9:9
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:Strong and powerful, for a kobold.
 
-N::Wormtongue
-I:11::30:pd25:20:20:150:8:0:NONE8:1
-A:10:4:4:148
-F: Agent of Saruman|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x5L|MS1_BO_COLD|MS1_SLOW|EVIL|MAX_HP|UNIQUE|SPECIAL|MS2_TRAP_CREATE|MS2_HEAL|MS2_BA_POIS
+N::Wormtongue, Agent of Saruman
+I:p::11:25d10:20:30:20:1:8:150:m
+A:4:4:148
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x5L|MS1_BO_COLD|MS1_SLOW|EVIL|MAX_HP|UNIQUE|SPECIAL|MS2_TRAP_CREATE|MS2_HEAL|MS2_BA_POIS
 D:He's been spying for Saruman.  He is a snivelling wretch with no morals and disgusting habits.
 
-N::Lagduf
-I:11::32:od16:30:20:80:8:8:NONE8:2
-A:12:9:9:8
-F: the Snaga|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|EVIL|MAX_HP|UNIQUE|GOOD
+N::Lagduf, the Snaga
+I:o::11:16d12:20:32:30:2:8:80:m
+A:9:9:8
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|EVIL|MAX_HP|UNIQUE|GOOD
 D:A captain of a regiment of weaker orcs, Lagduf keeps his troop in order with displays of excessive violence.
 
 N::Brown yeek
@@ -812,10 +812,10 @@ A:27:85
 F:MV_ATT_NORM|ANIMAL
 D:It is large and has venomous mandibles.
 
-N::Brodda
-I:11::25:pd30:20:20:100:9:10:NONE8:2
-A:7:10:10:10
-F: the Easterling|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|MAX_HP|UNIQUE|GOOD
+N::Brodda, the Easterling
+I:p::1:30d7:20:25:20:2:9:100:m
+A:10:10:10:10
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|MAX_HP|UNIQUE|GOOD
 D:A nasty piece of work, Brodda picks on defenseless women and children.
 
 N::King cobra
@@ -836,10 +836,10 @@ A:5:5
 F:CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x5L|MS1_BLIND|MS1_ARROW_1|MS1_CONF|EVIL|IM_POIS|HURT_LITE|MS2_BA_POIS|MS2_DARKNESS
 D:A drow elven figure, dressed all in black, hurling spells at you.
 
-N::Orfax
-I:12::20:yd12:10:18:80:10:268:NONE8:3
-A:10:8:7:268
-F: Son of Boldor|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x4L|MS1_S_MONSTER|MS1_TELE_TO|MS1_BLINK|MS1_CONF|MS1_SLOW|INTELLIGENT|ANIMAL|EVIL|UNIQUE|GOOD|MAX_HP|MS2_HEAL
+N::Orfax, Son of Boldor
+I:y::2:12d10:18:20:10:3:10:80:m
+A:8:7:268:268
+F:|CARRY_OBJ|HAS_90|THRO_DR|MV_ATT_NORM|0x4L|MS1_S_MONSTER|MS1_TELE_TO|MS1_BLINK|MS1_CONF|MS1_SLOW|INTELLIGENT|ANIMAL|EVIL|UNIQUE|GOOD|MAX_HP
 D:He's just like daddy!  He knows mighty spells, but fortunately he is a yeek.
 
 N::Dark elven warrior
@@ -849,15 +849,15 @@ F:CARRY_OBJ|CARRY_GOLD|HAS_1D2|THRO_DR|MV_ATT_NORM|NONE|EVIL|HURT_LITE
 D:A drow elven figure in armour and ready with his sword.
 
 N::Clear mushroom patch
-I:::12:d1:4:1:0:10:0:3:2
-A:1:70
+I:,::2:1d1:4:1:0:2:10:3:n
+A:70
 F:MULTIPLY|MV_ONLY_ATT|MV_INVIS|CHARM_SLEEP|ANIMAL|NO_INFRA
 D:Yum!  It looks quite tasty.
 
-N::Grishnakh
-I:11::20:od15:20:20:160:10:9:NONE8:3
-A:15:10:9:10
-F: the Hill Orc|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Grishnakh, the Hill Orc
+I:o::1:15d15:20:20:20:3:10:160:m
+A:10:9:10:9
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:He is a cunning and devious orc with a chaotic nature.
 
 N::Giant white tick
@@ -968,10 +968,10 @@ A:186
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL|HURT_LITE|MINDLESS
 D:They are a disgusting pile of dark worms, eating each other, the floor, the air, you....
 
-N::Golfimbul
-I:11::60:od30:20:20:230:12:9:NONE8:3
-A:8:10:10:9
-F: the Hill Orc Chief|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|IM_COLD|IM_FIRE|IM_ELEC|MAX_HP|UNIQUE|GOOD
+N::Golfimbul, the Hill Orc Chief
+I:o::1:30d8:20:60:20:3:12:230
+A:10:10:9:9
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|IM_COLD|IM_FIRE|IM_ELEC|MAX_HP|UNIQUE|GOOD
 D:A leader of a band of raiding orcs, he picks on hobbits.
 
 N::Master yeek
@@ -1052,10 +1052,10 @@ A:41
 F:MV_ATT_NORM|ANIMAL
 D:It is a vicious insect with a tough carapace.
 
-N::Boldor
-I:12::24:yd20:10:18:200:13:0:NONE8:3
-A:9:8:8:7
-F: King of the Yeeks|CARRY_OBJ|HAS_90|HAS_1D2|THRO_DR|MV_ATT_NORM|0x3L|MS1_BLINK|TELE|MS1_S_MONSTER|MS1_BLIND|MS1_SLOW|MAX_HP|INTELLIGENT|ANIMAL|EVIL|UNIQUE|GOOD|MS2_HEAL
+N::Boldor, King of the Yeeks
+I:y::2:20d9:18:24:10:3:13:200:m
+A:8:8:7
+F:CARRY_OBJ|HAS_90|HAS_1D2|THRO_DR|MV_ATT_NORM|0x3L|MS1_BLINK|TELE|MS1_S_MONSTER|MS1_BLIND|MS1_SLOW|MAX_HP|INTELLIGENT|ANIMAL|EVIL|UNIQUE|GOOD|MS2_HEAL
 D:A great yeek, powerful in magic and sorcery, but a yeek all the same.
 
 N::Ogre
@@ -1161,8 +1161,8 @@ F:HAS_60|CARRY_GOLD|CARRY_OBJ|THRO_DR|MV_ATT_NORM|MV_20|EVIL|GROUP|GIANT
 D:A massive orc-like figure with black skin and powerful arms.
 
 N::Magic mushroom patch
-I:::13:d1:40:10:0:15:0:10:2
-A:1
+I:,::13:1d1:40:10:0:2:15:10:n
+A:0
 F:MV_ONLY_ATT|0x1L|MS1_BLINK|MS1_FEAR|MS1_SLOW|ANIMAL|GROUP|CHARM_SLEEP|MINDLESS|MS2_DARKNESS
 D:Yum!  It looks quite tasty.  But, wait...it seems to glow with an unusual light.
 
@@ -1280,10 +1280,10 @@ A:234
 F:MULTIPLY|MV_ATT_NORM|MV_75|ANIMAL
 D:A giant buzzing wasp, its stinger drips venom.
 
-N::Ulfast
-I:11::40:pd20:40:20:200:16:18:NONE8:3
-A:17:18:18:18
-F: Son of Ulfang|HAS_90|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL|UNIQUE|GOOD|MAX_HP
+N::Ulfast, Son of Ulfang
+I:p::1:20d17:20:40:40:3:16:200:m
+A:18:18:18:18
+F:CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL|UNIQUE|GOOD|MAX_HP
 D:A short and swarthy Easterling.
 
 N::Quasit
@@ -1304,10 +1304,10 @@ A:3:3:29
 F:MV_ATT_NORM|THRO_DR|HAS_60|CARRY_GOLD|CARRY_OBJ|TROLL|EVIL|HURT_LITE|GROUP
 D:He is green skinned and ugly.
 
-N::Nar
-I:11::70:hd45:25:25:250:17:18:NONE8:2
-A:10:18:18:18
-F: the Dwarf|MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_1D2|0x6L|MS1_CAUSE_2|MS1_BLIND|MS1_CONF|CHARM_SLEEP|IM_POIS|IM_FIRE|IM_COLD|GOOD|MAX_HP|UNIQUE|MS2_MIND_BLAST|MS2_HEAL
+N::Nar, the Dwarf
+I:h::1:45d10:25:70:25:2:17:250:m
+A:18:18:18:18
+F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_1D2|0x6L|MS1_CAUSE_2|MS1_BLIND|MS1_CONF|CHARM_SLEEP|IM_POIS|IM_FIRE|IM_COLD|GOOD|MAX_HP|UNIQUE|MS2_MIND_BLAST|MS2_HEAL
 D:This dwarf became so obsessed by gold that Morgoth tricked him into betraying his friends.
 
 N::2-headed hydra
@@ -1376,21 +1376,21 @@ A:18:18
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_60|ORC|EVIL|IM_POIS|MAX_HP|GROUP
 D:He is a cunning orc of power, as tall as a man, and stronger.  It fears little.
 
-N::Shagrat
-I:11::60:od40:20:20:400:18:18:NONE8:2
-A:10:20:20:18
-F: the Orc Captain| MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Shagrat, the Orc Captain
+I:o::1:40d10:20:60:20:2:18:400:m
+A:20:20:18:18
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:He is an Uruk of power and great cunning.
 
-N::Gorbag
-I:11::60:od40:20:20:400:18:18:NONE8:3
-A:10:20:20:18
-F: the Orc Captain| MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Gorbag, the Orc Captain
+I:o::1:40d10:20:60:20:3:18:400:m
+A:20:20:18:18
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:A gruesomely ugly but cunning orc, his eyes regard you with hatred.  His powerful arms flex menacingly as he advances.
 
 N::Shambling mound
-I:::11:d20:20:16:40:18:0:75:2
-A:6:203:7:7
+I:,::1:20d6:20:16:40:2:18:75:n
+A:203:7:7
 F:MV_ATT_NORM|THRO_DR|CARRY_GOLD|HAS_90|CHARM_SLEEP|ANIMAL|EVIL|MINDLESS
 D:A pile of rotting vegetation that slides towards you with a disgusting stench, waking all it nears.
 
@@ -1424,10 +1424,10 @@ A:26
 F:MV_ATT_NORM|MV_75|0x9L|IM_FIRE|ANIMAL|MS2_BR_SOUN
 D:Large beating wings support this dazzling insect.  A loud buzzing noise pervades the air.
 
-N::Bolg
-I:12::50:od50:20:20:800:20:19:NONE8:4
-A:10:19:19:19
-F: Son of Azog|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Bolg, Son of Azog
+I:o::2:50d10:20:50:20:4:20:800:m
+A:19:19:19:19
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:A large and powerful orc.  He looks just like his daddy.  He is tall and fast, but fortunately blessed with orcish brains.
 
 N::Phase spider
@@ -1502,16 +1502,16 @@ A:130:130
 F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|CARRY_GOLD|HAS_90|EVIL|GIANT|IM_ELEC
 D:It is a twenty foot tall giant wreathed in clouds.
 
-N::Ugluk
-I:11::90:od40:20:20:550:20:18:NONE8:4
-A:16:18:18:18
-F: the Uruk-Hai|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Ugluk, the Uruk-Hai
+I:o::1:40d16:20:90:20:4:20:550:m
+A:18:18:18:18
+F:V_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:Another of Morgoth's servants, this orc is strong and cunning.  He is ugly and scarred from many power struggles.
 
-N::Lugdush
-I:11::95:od40:20:20:550:21:18:NONE8:3
-A:18:20:20:18
-F: the Uruk-Hai|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|IM_COLD|IM_FIRE|MAX_HP|GOOD|UNIQUE|CHARM_SLEEP
+N::Lugdush, the Uruk-Hai
+I:o::1:40d18:20:95:20:3:21:550:m
+A:20:20:18:18
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|ORC|EVIL|IM_POIS|IM_COLD|IM_FIRE|MAX_HP|GOOD|UNIQUE|CHARM_SLEEP
 D:A strong and cunning orc warrior, Lugdush sneers as he insults your mother.
 
 N::Blue dragon bat
@@ -1586,10 +1586,10 @@ A:18:18
 F:HAS_1D2|CARRY_GOLD|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL
 D:A scarred warrior who moves with confidence.
 
-N::Azog
-I:12::80:od60:20:20:1111:23:0:NONE8:5
-A:15:23:23:23
-F: King of the Uruk-Hai|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
+N::Azog, King of the Uruk-Hai
+I:o::2:60d15:20:80:20:5:23:1111:m
+A:23:23:23
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|ORC|EVIL|IM_POIS|MAX_HP|UNIQUE|GOOD
 D:He is also known as the King of Khazad-dum.  His ego is renowned to be bigger than his head.
 
 N::Master rogue
@@ -1622,16 +1622,16 @@ A:5:5:187
 F:MV_ATT_NORM|MV_20|THRO_DR|CARRY_GOLD|CARRY_OBJ|HAS_60|HAS_90|0xAL|MS1_FEAR|MS1_MANA_DRAIN|EVIL|NO_INFRA|UNDEAD|IM_COLD|IM_POIS|HURT_LITE|CHARM_SLEEP
 D:It is a ghostly apparition with a humanoid form.
 
-N::Ibun
-I:11::80:hd55:10:20:300:24:204:NONE8:2
-A:15:19:19:19
-F: Son of Mim|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x8L|MS1_SLOW|MS1_BO_FIRE|UNIQUE|IM_COLD|IM_FIRE|GOOD|CHARM_SLEEP|MAX_HP|MS2_HEAL
+N::Ibun, Son of Mim
+I:h::1:55d15:20:80:10:2:24:300:m
+A:19:19:19:204
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x8L|MS1_SLOW|MS1_BO_FIRE|UNIQUE|IM_COLD|IM_FIRE|GOOD|CHARM_SLEEP|MAX_HP|MS2_HEAL
 D:One of the last of the petty dwarves.  Ibun is a tricky sorcerous little being, full of mischief.
 
-N::Khim
-I:11::80:hd55:10:20:300:24:204:NONE8:2
-A:15:19:19:19
-F: Son of Mim|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x8L|MS1_SLOW|MS1_BO_FIRE|UNIQUE|IM_COLD|IM_FIRE|GOOD|CHARM_SLEEP|MAX_HP|MS2_HEAL
+N::Khim, Son of Mim
+I:h::1:55d15:20:80:10:2:24:300:m
+A:19:19:19:204
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x8L|MS1_SLOW|MS1_BO_FIRE|UNIQUE|IM_COLD|IM_FIRE|GOOD|CHARM_SLEEP|MAX_HP|MS2_HEAL
 D:One of the last of the petty dwarves.  Khim is a tricky sorcerous little being, full of mischief.
 
 N::4-headed hydra
@@ -1718,10 +1718,10 @@ A:39
 F:MV_ATT_NORM|MV_20|THRO_CREAT|ANIMAL
 D:It is an ant encased in shaggy grey fur.
 
-N::Ulwarth
-I:11::40:pd80:40:20:500:26:0:NONE8:4
-A:11:22:22:22
-F: Son of Ulfang|HAS_90|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL|UNIQUE|GOOD
+N::Ulwarth, Son of Ulfang
+I:p::1:80d11:20:40:40:4:26:500:m
+A:22:22:22
+F:HAS_90|CARRY_OBJ|THRO_DR|PICK_UP|MV_ATT_NORM|EVIL|UNIQUE|GOOD
 D:A short and swarthy Easterling.
 
 N::Displacer beast
@@ -1754,10 +1754,10 @@ A:17:17:17:17
 F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_2D2|0x3L|MS1_FEAR|MS1_BLIND|MS1_CONF|IM_POIS|IM_ACID|CHARM_SLEEP|MAX_HP|MS2_FORGET
 D:A lesser angel wearing little more than a loincloth - its steely skin provides all the protection it needs.
 
-N::Mim
-I:12::80:hd100:20:20:1000:27:204:NONE8:4
-A:11:20:20:20
-F: Betrayer of Turin|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|0x6L|MS1_FEAR|MS1_BO_ACID|EVIL|MAX_HP|IM_COLD|IM_FIRE|IM_POIS|IM_ACID|IM_ELEC|UNIQUE|GOOD|CHARM_SLEEP|MS2_BA_ACID|MS2_HEAL
+N::Mim, Betrayer of Turin
+I:h::2:100d11:20:80:20:4:27:1000:m
+A:20:20:20:204
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|0x6L|MS1_FEAR|MS1_BO_ACID|EVIL|MAX_HP|IM_COLD|IM_FIRE|IM_POIS|IM_ACID|IM_ELEC|UNIQUE|GOOD|CHARM_SLEEP|MS2_BA_ACID|MS2_HEAL
 D:The last of his race, Mim is a petty dwarf.  Petty dwarves are strange creatures, powerful in sorcery and originating in the East.  They were hunted to extinction by high elves.
 
 N::Killer fire beetle
@@ -1796,10 +1796,10 @@ A:20:20:20:20
 F:CARRY_GOLD|CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x4L|MS1_HOLD|MS1_BA_COLD|MS1_S_MONSTER|EVIL|GIANT|MS2_HEAL|MS2_TRAP_CREATE
 D:A hideous ogre wrapped in black sorcerous robes.
 
-N::Lokkak
-I:12::100:Od90:20:20:1500:27:0:NONE8:2
-A:16:235:235:235
-F: the Ogre Chieftain|MV_ATT_NORM|CARRY_OBJ|HAS_2D2|THRO_DR|GIANT|EVIL|IM_POIS|MAX_HP|GOOD|UNIQUE
+N::Lokkak, the Ogre Chieftain
+I:O::2:90d16:20:100:20:2:27:1500:m
+A:235:235:235
+F:MV_ATT_NORM|CARRY_OBJ|HAS_2D2|THRO_DR|GIANT|EVIL|IM_POIS|MAX_HP|GOOD|UNIQUE
 D:An ogre renowned for acts of surpassing cruelty, Lokkak quickly became the leader of a large band of violent ogres.
 
 N::Vampire
@@ -1856,10 +1856,10 @@ A:225:225
 F:HAS_1D2|CARRY_OBJ|HAS_60|THRO_DR|MV_ATT_NORM|0x8L|MS1_HOLD|MS1_FEAR|MS1_BLIND|EVIL|CHARM_SLEEP|MAX_HP|MS2_MIND_BLAST|MS2_BRAIN_SMASH|MS2_FORGET
 D:A humanoid form with a gruesome head, tentacular mouth, and piercing eyes.  Claws reach out for you and you feel a presence invade your mind.
 
-N::Draebor
-I:12::50:Id40:20:20:750:28:0:NONE8:5
-A:13:152:152:17
-F: the Imp|MV_ATT_NORM|MV_20|MV_INVIS|CARRY_OBJ|HAS_4D2|0x5L|MS1_BLINK|MS1_TELE_TO|TELE|MS1_FEAR|MS1_CONF|MS1_BLIND|DEMON|IM_FIRE|MAX_HP|EVIL|UNIQUE|GOOD|INTELLIGENT|MS2_TELE_LEVEL|MS2_TELE_AWAY
+N::Draebor, the Imp
+I:I::2:40d13:20:50:20:5:28:750:n
+A:152:152:17
+F:MV_ATT_NORM|MV_20|MV_INVIS|CARRY_OBJ|HAS_4D2|0x5L|MS1_BLINK|MS1_TELE_TO|TELE|MS1_FEAR|MS1_CONF|MS1_BLIND|DEMON|IM_FIRE|MAX_HP|EVIL|UNIQUE|GOOD|INTELLIGENT|MS2_TELE_LEVEL|MS2_TELE_AWAY
 D:An intensely irritating git of a monster.
 
 N::Basilisk
@@ -1994,10 +1994,10 @@ A:0
 F:MV_INVIS|0x1L|MS1_BLINK|CHARM_SLEEP|MINDLESS|MS2_TELE_AWAY
 D:It is a very unstable, strange pulsing mound of flesh.
 
-N::Shelob
-I:11::80:Sd120:80:8:1200:32:167:NONE8:3
-A:10:38:167:85
-F: Spider of Darkness|MV_ATT_NORM|CARRY_OBJ|HAS_2D2|HAS_1D2|0x2L|MS1_FEAR|MS1_BLIND|MS1_CONF|MS1_SLOW|MS1_CAUSE_3|ANIMAL|EVIL|UNIQUE|HURT_LITE|CHARM_SLEEP|MAX_HP|GOOD|INTELLIGENT|MS2_RAZOR|MS2_HEAL|MS2_S_SPIDER|MS2_TRAP_CREATE
+N::Shelob, Spider of Darkness
+I:S::1:120d10:8:80:80:3:32:1200:f
+A:38:167:85:167
+F:MV_ATT_NORM|CARRY_OBJ|HAS_2D2|HAS_1D2|0x2L|MS1_FEAR|MS1_BLIND|MS1_CONF|MS1_SLOW|MS1_CAUSE_3|ANIMAL|EVIL|UNIQUE|HURT_LITE|CHARM_SLEEP|MAX_HP|GOOD|INTELLIGENT|MS2_RAZOR|MS2_HEAL|MS2_S_SPIDER|MS2_TRAP_CREATE
 D:Shelob is an enormous bloated spider, rumoured to have been one of the brood of Ungoliant the Unlight.  Her poison is legendary, as is her ego, which may be her downfall.  She used to guard the pass through Cirith Ungol, but has not been seen there for many eons.
 
 N::Ninja
@@ -2007,8 +2007,8 @@ F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|CARRY_GOLD|HAS_1D2|EVIL|CHARM_SLEEP
 D:A humanoid clothed in black who moves with blinding speed.
 
 N::Memory moss
-I:::11:d1:30:1:5:32:0:150:3
-A:2:89:89
+I:,::1:1d2:30:1:5:3:32:150:n
+A:89:89
 F:MV_ONLY_ATT|0x6L|CHARM_SLEEP|ANIMAL|MINDLESS|MS2_FORGET
 D:A mass of green vegetation.  You don't remember seeing anything like it before....
 
@@ -2366,10 +2366,10 @@ A:15:15
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|0x3L|TELE|MS1_TELE_TO|MS1_CAUSE_3|MS1_HOLD|MS1_S_UNDEAD|MS1_FEAR|MS1_BLIND|EVIL|MAX_HP|INTELLIGENT|MS2_BO_NETH|MS2_HASTE
 D:A gaunt figure, clothed in black robes.
 
-N::Lorgan
-I:12::100:pd50:10:25:1200:36:20:NONE8:2
-A:35:235:235:20
-F: Chief of the Easterlings|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|0x4L|MS1_TELE_TO|EVIL|MAX_HP|CHARM_SLEEP|IM_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|GOOD|UNIQUE|MS2_S_SUMMON
+N::Lorgan, Chief of the Easterlings
+I:p::12:50d35:25:100:10:2:36:1200:m
+A:235:235:20:20
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_2D2|0x4L|MS1_TELE_TO|EVIL|MAX_HP|CHARM_SLEEP|IM_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|GOOD|UNIQUE|MS2_S_SUMMON
 D:A mighty warrior from the east, Lorgan hates everything that he cannot control.
 
 N::Demonologist
@@ -2510,10 +2510,10 @@ A:22:23:23:22
 F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_2D2|HAS_1D2|0xBL|MS1_CONF|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|INTELLIGENT|IM_ACID|IM_ELEC|CHARM_SLEEP|MAX_HP|MS2_HEAL|MS2_HASTE|MS2_S_SUMMON|MS2_TELE_AWAY|MS2_BO_PLAS|MS2_S_ANGEL
 D:It is an angel, fast and strong.  You are stunned by its extreme holiness and try to resist all desires to obey it.
 
-N::Vargo
-I:12::50:Ed60:50:12:3000:38:103:NONE8:3
-A:25:103:103:103
-F: Tyrant of Fire|MV_ATT_NORM|MV_20|THRO_CREAT|0x4L|MS1_BA_FIRE|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|MS2_BO_PLAS
+N::Vargo, Tyrant of Fire
+I:E::12:60d25:12:50:50:3:38:3000:n
+A:103:103:103:103
+F:MV_ATT_NORM|MV_20|THRO_CREAT|0x4L|MS1_BA_FIRE|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|MS2_BO_PLAS
 D:A raging pillar of fire, Vargo burns every living thing beyond recognition.
 
 N::Black wraith
@@ -2546,10 +2546,10 @@ A:19:19:19
 F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_1D2|TROLL|EVIL|IM_POIS|MAX_HP|CHARM_SLEEP
 D:A massive troll of huge strength.  Ettins are stupid but violent.
 
-N::Waldern
-I:12::40:Ed80:50:12:3250:39:23:NONE8:3
-A:25:23:23:23
-F: King of Water|MV_ATT_NORM|MV_20|THRO_CREAT|0x4L|MS1_BA_COLD|EVIL|IM_POIS|CHARM_SLEEP|MAX_HP|UNIQUE|NO_INFRA|MS2_BO_WATE|MS2_BA_WATE|MS2_BO_ICEE
+N::Waldern, King of Water
+I:E::12:80d25:12:40:50:3:39:3250:n
+A:23:23:23:23
+F:MV_ATT_NORM|MV_20|THRO_CREAT|0x4L|MS1_BA_COLD|EVIL|IM_POIS|CHARM_SLEEP|MAX_HP|UNIQUE|NO_INFRA|MS2_BO_WATE|MS2_BA_WATE|MS2_BO_ICEE
 D:A huge water elemental, Waldern is master of all things liquid.  Wave after wave drowns your frail body.
 
 N::Kavlax the Many-Headed
@@ -2666,10 +2666,10 @@ A:227:227:228:228
 F:MV_ATT_NORM|EVIL
 D:It is a cross between a human and a bull.
 
-N::Medusa
-I:12::100:nd40:5:30:9000:40:235:MS3_S_REPTILE:3
-A:60:246:267:235
-F: the Gorgon|MV_ATT_NORM|THRO_DR|HAS_2D2|HAS_1D2|CARRY_OBJ|0x2L|MS1_HOLD|MS1_CAUSE_3|MS1_BO_FIRE|MS1_FEAR|EVIL|IM_FIRE|CHARM_SLEEP|UNIQUE|INTELLIGENT|GOOD|IM_POIS|MAX_HP|IM_ACID|MS2_BO_PLAS|MS2_BA_ACID
+N::Medusa, the Gorgon
+I:n::12:40d60:30:100:5:3:40:9000:f
+A:246:267:235:235
+F:MV_ATT_NORM|THRO_DR|HAS_2D2|HAS_1D2|CARRY_OBJ|0x2L|MS1_HOLD|MS1_CAUSE_3|MS1_BO_FIRE|MS1_FEAR|EVIL|IM_FIRE|CHARM_SLEEP|UNIQUE|INTELLIGENT|GOOD|IM_POIS|MAX_HP|IM_ACID|MS2_BO_PLAS|MS2_BA_ACID|MS3_S_REPTILE
 D:One of the original three ugly sisters.  Her face could sink a thousand ships.  Her scales rattle as she slithers towards you, venom dripping from her ghastly mouth.
 
 N::Death drake
@@ -2738,10 +2738,10 @@ A:23:23:199:99
 F:HAS_4D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x3L|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|MS1_S_MONSTER|MS1_BO_FIRE|MS1_BO_COLD|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|UNIQUE|GOOD|IM_POIS|NO_INFRA|MS2_BO_NETH|MS2_DARKNESS
 D:A mighty sorcerer King, Akhorahil was blind in life.  With powerful enchantments, he created jewelled eyes that enabled him to see better than any ordinary man ever could.
 
-N::Gorlim
-I:12::120:pd80:40:20:7000:41:230:NONE8:3
-A:20:218:218:230
-F: Betrayer of Barahir|MV_ATT_NORM|HAS_2D2|CARRY_OBJ|THRO_DR|0x2L|MS1_CAUSE_3|MS1_BO_MANA|GOOD|UNIQUE|MAX_HP|INTELLIGENT|CHARM_SLEEP|IM_POIS|IM_COLD|IM_ACID|IM_FROST|IM_ELEC|MS2_BO_WATE
+N::Gorlim, Betrayer of Barahir
+I:p::12::80d20:20:120:40:3:41:7000:m
+A:218:218:230:230
+F:MV_ATT_NORM|HAS_2D2|CARRY_OBJ|THRO_DR|0x2L|MS1_CAUSE_3|MS1_BO_MANA|GOOD|UNIQUE|MAX_HP|INTELLIGENT|CHARM_SLEEP|IM_POIS|IM_COLD|IM_ACID|IM_FROST|IM_ELEC|MS2_BO_WATE
 D:This once-mighty warrior was so dominated by Morgoth's power that he became little more than a mindless creature of evil.
 
 N::Solar
@@ -2810,10 +2810,10 @@ A:19:19:19:19
 F:MV_ATT_NORM|HAS_1D2|CARRY_OBJ|THRO_DR|0x9L|MS1_CAUSE_2|MS1_BLIND|MS1_S_DEMON|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP
 D:She is a demon of female form with many arms, each bearing deadly weapons.
 
-N::Quaker
-I:11::97:Ed90:90:10:6000:43:235:NONE8:4
-A:20:212:235:235
-F: Master of Earth|THRO_WALL|PICK_UP|MV_ATT_NORM|0x6L|MS1_BO_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|CHARM_SLEEP|HURT_ROCK|EVIL|MAX_HP|NO_INFRA|DESTRUCT|UNIQUE|MS2_BA_ACID
+N::Quaker, Master of Earth
+I:E::11:90d20:10:97:90:4:43:6000:m
+A:212:235:235:235
+F:THRO_WALL|PICK_UP|MV_ATT_NORM|0x6L|MS1_BO_ACID|IM_POIS|IM_FIRE|IM_COLD|IM_ELEC|CHARM_SLEEP|HURT_ROCK|EVIL|MAX_HP|NO_INFRA|DESTRUCT|UNIQUE|MS2_BA_ACID
 D:A huge stone elemental stands before you.  The walls and ceiling are reduced to rubble as Quaker advances.
 
 N::Balor
@@ -2822,10 +2822,10 @@ A:101:22:101:23
 F:MV_ATT_NORM|HAS_2D2|HAS_1D2|CARRY_OBJ|THRO_DR|0x4L|MS1_CONF|MS1_BLIND|MS1_S_DEMON|MS1_BR_FIRE|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP
 D:It is a massive humanoid demon wreathed in flames.
 
-N::Ariel
-I:13::50:Ed60:50:12:8000:44:89:NONE8:4
-A:45:22:89:22
-F: Queen of Air|MV_ATT_NORM|MV_20|THRO_CREAT|0x5L|MS1_BA_COLD|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|IM_COLD|IM_ELEC|IM_ACID|IM_POIS|MAX_HP|UNIQUE|NO_INFRA|MS2_BA_ELEC|MS2_BO_ELEC
+N::Ariel, Queen of Air
+I:E::13::60d45:12:50:50:4:44:8000:f
+A:22:89:22:89
+F:V_ATT_NORM|MV_20|THRO_CREAT|0x5L|MS1_BA_COLD|EVIL|IM_POIS|CHARM_SLEEP|IM_FIRE|IM_COLD|IM_ELEC|IM_ACID|IM_POIS|MAX_HP|UNIQUE|NO_INFRA|MS2_BA_ELEC|MS2_BO_ELEC
 D:A whirlwind of destruction, Ariel, air elemental sorceress, avoids your blows with her extreme speed.
 
 N::11-headed hydra
@@ -2858,10 +2858,10 @@ A:56:56:56:276
 F:HAS_4D2|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x3L|MS1_BR_COLD|MS1_CAUSE_3|MS1_CONF|EVIL|DRAGON|IM_COLD|CHARM_SLEEP|MAX_HP|UNIQUE|GOOD
 D:An ancient and wise Dragon.  Scatha has grown clever over the long years.  His scales are covered with frost, and his breath sends a shower of ice into the air.
 
-N::Dwar
-I:12::90:Wd40:10:90:13000:44:99:NONE8:3
-A:50:23:23:199
-F: Dog Lord of Waw|HAS_4D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x3L|MS1_BA_FIRE|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|MS1_S_UNDEAD|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|UNIQUE|HURT_LITE|IM_FIRE|GOOD|INTELLIGENT|IM_POIS|NO_INFRA|MS2_BA_NETH|MS2_S_SUMMON|MS2_S_HOUND
+N::Dwar, Dog Lord of Waw
+I:W::12:40d50:90:90:10:3:44:13000:m
+A:23:23:199:99
+F:HAS_4D2|CARRY_OBJ|THRO_DR|MV_ATT_NORM|0x3L|MS1_BA_FIRE|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|MS1_S_UNDEAD|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|UNIQUE|HURT_LITE|IM_FIRE|GOOD|INTELLIGENT|IM_POIS|NO_INFRA|MS2_BA_NETH|MS2_S_SUMMON|MS2_S_HOUND
 D:Dwar had a special affinity for dogs in life, and can still command them at will.  He howls manically as he reaches out to destroy you.
 
 N::Smaug the Golden
@@ -2900,10 +2900,10 @@ A:56:56:276:277
 F:HAS_4D2|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x3L|MS1_BR_FIRE|MS1_CAUSE_3|MS1_CONF|EVIL|DRAGON|IM_FIRE|CHARM_SLEEP|MAX_HP|UNIQUE|GOOD
 D:A mighty ancient dragon, Itangast's form scorches your flesh.  Wisps of smoke curl up from his nostrils as he regards you with disdain.
 
-N::Glaurung
-I:12::120:Dd110:70:20:25000:48:279:NONE8:2
-A:25:272:272:279
-F: Father of the Dragons|HAS_4D2|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x5L|MS1_BR_FIRE|MS1_CAUSE_3|MS1_CONF|MS1_S_DRAGON|EVIL|DRAGON|IM_FIRE|CHARM_SLEEP|MAX_HP|UNIQUE|GOOD
+N::Glaurung, Father of the Dragons
+I:D::12:110d25:20:120:70:2:48:25000:m
+A:272:272:279:279
+F:HAS_4D2|CARRY_OBJ|HAS_90|HAS_2D2|HAS_60|MV_ATT_NORM|0x5L|MS1_BR_FIRE|MS1_CAUSE_3|MS1_CONF|MS1_S_DRAGON|EVIL|DRAGON|IM_FIRE|CHARM_SLEEP|MAX_HP|UNIQUE|GOOD
 D:Glaurung is the father of all dragons, and was for a long time the most powerful.  Nevertheless, he still has full command over his brood and can command them to appear whenever he so wishes.  He is the definition of dragonfire.
 
 N::Master mystic
@@ -2912,10 +2912,10 @@ A:266:266:264:265
 F:MV_ATT_NORM|HAS_2D2|HAS_1D2|CARRY_OBJ|MV_INVIS|0x3L|IM_COLD|IM_FIRE|IM_POIS|IM_ELEC|IM_ACID|MAX_HP|CHARM_SLEEP|MS2_HEAL|MS2_S_SPIDER
 D:A lord of all that is natural, skilled in the mystic ways.  He is a master of martial arts and is at one with nature, able to summon help from the wild if need be.
 
-N::Muar
-I:12::100:&d50:80:20:30000:50:0:NONE8:3
-A:60:104:78:214
-F: the Balrog|MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x4L|MS1_FEAR|MS1_S_UNDEAD|MS1_BR_FIRE|MS1_CONF|MS1_S_DEMON|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|GOOD
+N::Muar, the Balrog
+I:&::12:50d60:20:100:80:3:50:30000:m
+A:104:78:214
+F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x4L|MS1_FEAR|MS1_S_UNDEAD|MS1_BR_FIRE|MS1_CONF|MS1_S_DEMON|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|GOOD
 D:A huge balrog surrounded by raging pillars of fire, Muar is indeed a terrible opponent.  Wielding a great whip of fire and a blazing sword, his fury blisters your skin and melts your flesh!
 
 N::Nightwing
@@ -3068,16 +3068,16 @@ A:212:218:218:218
 F:HAS_4D2|CARRY_OBJ|HAS_1D2|MV_ATT_NORM|THRO_DR|0x4L|MS1_CAUSE_3|MS1_FEAR|MS1_BLIND|MS1_CONF|CHARM_SLEEP|MAX_HP|GOOD|IM_POIS|IM_COLD|IM_FIRE|IM_ACID|IM_ELEC|UNIQUE|MS2_FORGET|MS2_RAZOR|MS2_HEAL|MS2_S_SUMMON|MS2_BRAIN_SMASH
 D:He is one of the greatest dwarven priests to walk the earth.  Fundin has earned a high position in the church, and his skill with both weapon and spell only justify his position further.  His combination of both dwarven strength and priestly wisdom are a true match for any adventurer.
 
-N::Uriel
-I:13::160:Ad220:10:40:25000:56:212:NONE8:3
-A:25:220:103:212
-F: Angel of Fire|MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BR_FIRE|MS1_BA_FIRE|MS1_BO_FIRE|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL
+N::Uriel, Angel of Fire
+I:A::13::220d25:40:160:10:3:56:25000:m
+A:220:103:212:212
+F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BR_FIRE|MS1_BA_FIRE|MS1_BO_FIRE|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL
 D:A creature of godly appearance, you dare not challenge Uriel's supremacy.  Those who stood against him before are but a memory, cremated by his mastery of elemental fire.
 
-N::Azriel
-I:13::170:Ad240:10:40:30000:57:212:NONE8:3
-A:25:202:260:212
-F: Angel of Death|MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL|MS2_BR_LIFE|MS2_BO_NETH|MS2_BA_NETH
+N::Azriel, Angel of Death
+I:A::13:240d25:40:170:10:3:57:30000:m
+A:202:260:212:212
+F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL|MS2_BR_LIFE|MS2_BO_NETH|MS2_BA_NETH
 D:Azriel commands awesome power, his visage holy enough to shrivel your soul.  You shriek with disbelief as his mastery of death draws you to your grave.  It is truly beyond all but the mightiest of warriors to stand against him and live.
 
 N::Ancalagon the Black
@@ -3092,10 +3092,10 @@ A:256:256:257:257
 F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|0x4L|MS1_FEAR|MS1_S_UNDEAD|MS1_BLIND|MS1_BO_MANA|EVIL|UNDEAD|IM_COLD|IM_POIS|IM_ELEC|GOOD|IM_FIRE|CHARM_SLEEP|INTELLIGENT|NO_INFRA|MS2_BRAIN_SMASH|MS2_BA_NETH|MS2_BO_NETH
 D:A huge giant garbed in black, more massive than a titan and stronger than a dragon.  With terrible blows, it breaks your armour from your back, leaving you defenseless against its evil wrath.  It can smell your fear, and you in turn smell the awful stench of death as this ghastly figure strides towards you menacingly.
 
-N::Gabriel
-I:13::180:Ad140:10:40:35000:59:212:NONE8:3
-A:55:230:103:212
-F: the Messenger|MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL
+N::Gabriel, the Messenger
+I:A::13::140d55:40:180:10:3:59:35000:m
+A:230:103:212:212
+F:MV_ATT_NORM|THRO_DR|PICK_UP|CARRY_OBJ|HAS_4D2|HAS_2D2|HAS_1D2|0x2L|MS1_BLIND|MS1_TELE_TO|MS1_BO_MANA|IM_POIS|IM_FIRE|IM_COLD|IM_ACID|IM_ELEC|GOOD|INTELLIGENT|MAX_HP|UNIQUE|MS2_S_ANGEL
 D:Commanding a legion of Solars, Gabriel will destroy you for your sins.  He will crush you like the pitiful insignificant being he sees you to be.  Your very soul will be taken into judgement by his supreme authority as he cleanses the world of evil.
 
 N::Saruman of Many Colours
@@ -3146,16 +3146,16 @@ A:273:273:274:280
 F:HAS_1D2|HAS_4D2|HAS_2D2|CARRY_OBJ|HAS_90|HAS_60|MV_ATT_NORM|0x3L|MS1_FEAR|MS1_BLIND|MS1_S_DRAGON|MS1_CONF|DRAGON|CHARM_SLEEP|MAX_HP|GOOD|MS2_BR_SHAR|MS2_BR_SOUN|MS2_BR_CHAO|MS2_BR_DISE|MS3_S_ANCIENTD
 D:This massive dragon is the mightiest of dragonkind.  It is thousands of years old and seeks to maintain the Cosmic Balance.  It sees you as an upstart troublemaker without the wisdom to control your actions.  It will destroy you.
 
-N::Tselakus
-I:13::150:Gd100:10:20:35000:68:212:MS3_S_GUNDEAD|MS3_DARK_STORM|MS3_S_WRAITH:2
-A:67:81:81:212
-F: the Dreadlord|MV_ATT_NORM|HAS_4D2|CARRY_OBJ|HAS_2D2|THRO_WALL|MV_INVIS|HAS_1D2|0x3L|MS1_HOLD|MS1_BLIND|MS1_CONF|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|MAX_HP|IM_POIS|GOOD|UNIQUE|MS2_BA_NETH
+N::Tselakus, the Dreadlord
+I:G:13:100d67:20:150:10:2:68:35000:m
+A:81:81:212:212
+F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|HAS_2D2|THRO_WALL|MV_INVIS|HAS_1D2|0x3L|MS1_HOLD|MS1_BLIND|MS1_CONF|UNDEAD|EVIL|IM_COLD|NO_INFRA|CHARM_SLEEP|MAX_HP|IM_POIS|GOOD|UNIQUE|MS2_BA_NETH|MS3_S_GUNDEAD|MS3_DARK_STORM|MS3_S_WRAITH
 D:This huge affront to existence twists and tears at the fabric of space.  A master of mighty magic, Tselakus hungers for your tender flesh.  Darkness itself recoils from the touch of Tselakus as he leaves a trail of death and destruction.  Tselakus is a being of sneering contempt, laughing at your pitiful efforts to defy him.  Mighty claws rend reality as he annihilates all in his path to your soul!
 
-N::Tiamat
-I:13::125:Dd100:70:20:45000:70:281:MS3_S_ANCIENTD:4
-A:100:274:275:275
-F: Celestial Dragon of Evil|MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|HAS_60|HAS_90|HAS_2D2|HAS_1D2|0x2L|MS1_BR_POIS|MS1_BR_ELEC|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|MS1_FEAR|MS1_CONF|MS1_BLIND|IM_COLD|IM_ACID|IM_POIS|IM_ELEC|IM_FIRE|EVIL|DRAGON|CHARM_SLEEP|MAX_HP|UNIQUE|SPECIAL
+N::Tiamat, Celestial Dragon of Evil
+I:D:13::100d100:20:125:70:4:70:45000:f
+A:274:275:275:281
+F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|HAS_60|HAS_90|HAS_2D2|HAS_1D2|0x2L|MS1_BR_POIS|MS1_BR_ELEC|MS1_BR_ACID|MS1_BR_COLD|MS1_BR_FIRE|MS1_FEAR|MS1_CONF|MS1_BLIND|IM_COLD|IM_ACID|IM_POIS|IM_ELEC|IM_FIRE|EVIL|DRAGON|CHARM_SLEEP|MAX_HP|UNIQUE|SPECIAL|MS3_S_ANCIENTD
 D:Usually found guarding the first plane of Hell, Tiamat is a formidable opponent, her five heads breathing death to all who stand against her.
 
 N::Black reaver
@@ -3182,10 +3182,10 @@ A:0
 F:MV_INVIS|0x2L|MS1_BLINK|MS1_TELE_TO|ANIMAL|EVIL|MINDLESS|CHARM_SLEEP|MAX_HP|MS3_S_GUNDEAD
 D:A massive pile of rotting flesh.  A disgusting stench fills the air as it throbs and writhes.
 
-N::Vecna
-I:13::85:Ld90:50:20:30000:72:181:MS3_MANA_STORM:2
-A:50:181:201:214
-F: the Emperor Lich|MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_4D2|HAS_2D2|0x2L|MS1_FEAR|MS1_CONF|MS1_BLIND|MS1_HOLD|MS1_CAUSE_3|MS1_BO_MANA|MS1_TELE_TO|MS1_BLINK|MS1_S_UNDEAD|UNDEAD|IM_POIS|IM_COLD|EVIL|MAX_HP|CHARM_SLEEP|NO_INFRA|UNIQUE|GOOD|INTELLIGENT|MS2_BA_NETH|MS2_TRAP_CREATE|MS2_RAZOR|MS2_S_SUMMON|MS2_BRAIN_SMASH
+N::Vecna, the Emperor Lich
+I:L::13:90d50:20:85:50:2:72:30000:m
+A:181:201:214:181
+F:MV_ATT_NORM|THRO_DR|CARRY_OBJ|HAS_4D2|HAS_2D2|0x2L|MS1_FEAR|MS1_CONF|MS1_BLIND|MS1_HOLD|MS1_CAUSE_3|MS1_BO_MANA|MS1_TELE_TO|MS1_BLINK|MS1_S_UNDEAD|UNDEAD|IM_POIS|IM_COLD|EVIL|MAX_HP|CHARM_SLEEP|NO_INFRA|UNIQUE|GOOD|INTELLIGENT|MS2_BA_NETH|MS2_TRAP_CREATE|MS2_RAZOR|MS2_S_SUMMON|MS2_BRAIN_SMASH|MS3_MANA_STORM
 D:He is a highly cunning, extremely magical being, spoken of in legends.  This ancient shadow of death wilts any living thing it passes.
 
 N::Omarax the Eye Tyrant
@@ -3194,10 +3194,10 @@ A:223:224:225:226
 F:MV_ATT_NORM|0x2L|MS1_BO_FIRE|MS1_BO_COLD|MS1_BO_ACID|MS1_MANA_DRAIN|MS1_BLIND|MS1_CONF|MS1_FEAR|MS1_SLOW|ANIMAL|EVIL|CHARM_SLEEP|MAX_HP|IM_POIS|UNIQUE|INTELLIGENT|MS2_FORGET|MS2_MIND_BLAST|MS2_DARKNESS|MS3_DARK_STORM
 D:A vast baleful eye floating in the air.  His gaze seems to shred your soul and his spells crush your will.  He is ancient, his history steeped in forgotten evils, his atrocities numerous and sickening.
 
-N::Ungoliant
-I:12::160:Sd130:80:8:35000:75:167:MS3_DARK_STORM|MS3_BR_DARK:1
-A:100:162:162:167
-F: the Unlight|MV_ATT_NORM|CARRY_OBJ|HAS_4D2|0x3L|MS1_FEAR|MS1_BLIND|MS1_CONF|MS1_SLOW|MS1_BR_POIS|ANIMAL|EVIL|UNIQUE|HURT_LITE|MAX_HP|CHARM_SLEEP|GOOD|INTELLIGENT|IM_POIS|MS2_HEAL|MS2_S_SPIDER|MS2_DARKNESS
+N::Ungoliant, the Unlight
+I:S::12:130d100:8:160:80:1:75:35000:f
+A:162:162:167:167
+F:MV_ATT_NORM|CARRY_OBJ|HAS_4D2|0x3L|MS1_FEAR|MS1_BLIND|MS1_CONF|MS1_SLOW|MS1_BR_POIS|ANIMAL|EVIL|UNIQUE|HURT_LITE|MAX_HP|CHARM_SLEEP|GOOD|INTELLIGENT|IM_POIS|MS2_HEAL|MS2_S_SPIDER|MS2_DARKNESS|MS3_DARK_STORM|MS3_BR_DARK
 D:This enormous, hideous spirit of void is in the form of a spider of immense proportions.  She is surrounded by a cloud of Unlight as she sucks in all living light into her bloated body.  She is always ravenously hungry and would even eat herself to avoid starvation.  She is rumoured to have a foul and deadly breath.
 
 N::Aether hound
@@ -3218,22 +3218,22 @@ A:0
 F:MV_INVIS|CARRY_OBJ|HAS_4D2|0x2L|ANIMAL|EVIL|MAX_HP|UNIQUE|CHARM_SLEEP|MS2_BRAIN_SMASH|MS3_S_GUNDEAD|MS3_S_ANCIENTD
 D:A huge seething mass of flesh with a rudimentary intelligence, the Emperor Quylthulg changes colours in front of your eyes.  Pulsating first one colour then the next, it knows only it must bring help to protect itself.
 
-N::Qlzqqlzuup
-I:13::1:Qd50:0:30:20000:78:0:MS3_S_REPTILE|MS3_S_ANT|MS3_S_GUNDEAD|MS3_S_ANCIENTD|MS3_S_UNIQUE|MS3_S_WRAITH:3
-A:100
-F: the Lord of Flesh| MV_INVIS|CARRY_OBJ|HAS_4D2|0x1L|MS1_S_UNDEAD|MS1_S_DEMON|MS1_S_DRAGON|MS1_S_MONSTER|ANIMAL|EVIL|UNIQUE|MAX_HP|CHARM_SLEEP|MS2_S_SUMMON|MS2_S_ANGEL|MS2_S_SPIDER|MS2_S_HOUND
+N::Qlzqqlzuup, the Lord of Flesh
+I:Q::13:50d100:30:1:0:3:78:20000:n
+A:0
+F:MV_INVIS|CARRY_OBJ|HAS_4D2|0x1L|MS1_S_UNDEAD|MS1_S_DEMON|MS1_S_DRAGON|MS1_S_MONSTER|ANIMAL|EVIL|UNIQUE|MAX_HP|CHARM_SLEEP|MS2_S_SUMMON|MS2_S_ANGEL|MS2_S_SPIDER|MS2_S_HOUND|MS3_S_REPTILE|MS3_S_ANT|MS3_S_GUNDEAD|MS3_S_ANCIENTD|MS3_S_UNIQUE|MS3_S_WRAITH
 D:This disgusting creature squeals and snorts as it writhes on the floor.  It pulsates with evil.  Its intent is to overwhelm you with monster after monster, until it can greedily dine on your remains.
 
-N::Murazor
-I:13::120:Wd120:10:90:42000:80:199:MS3_S_WRAITH|MS3_S_ANCIENTD|MS3_S_GUNDEAD:3
-A:50:212:23:199
-F: the Witch-King of Angmar|HAS_4D2|HAS_2D2|CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x2L|MS1_BO_MANA|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|IM_POIS|HURT_LITE|UNIQUE|GOOD|NO_INFRA|INTELLIGENT|MS2_BA_NETH|MS2_BRAIN_SMASH|MS2_TELE_AWAY|MS2_S_SUMMON
+N::Murazor, the Witch-King of Angmar
+I:W::13:120d50:90:120:10:3:80:42000:m
+A:212:23:199:199
+F:HAS_4D2|HAS_2D2|CARRY_OBJ|HAS_1D2|THRO_DR|MV_ATT_NORM|0x2L|MS1_BO_MANA|MS1_CAUSE_3|MS1_HOLD|MS1_FEAR|MS1_BLIND|EVIL|UNDEAD|CHARM_SLEEP|IM_COLD|MAX_HP|IM_POIS|HURT_LITE|UNIQUE|GOOD|NO_INFRA|INTELLIGENT|MS2_BA_NETH|MS2_BRAIN_SMASH|MS2_TELE_AWAY|MS2_S_SUMMON|MS3_S_WRAITH|MS3_S_ANCIENTD|MS3_S_GUNDEAD
 D:The Chief of the Ringwraiths.  A fell being of devastating power.  His spells are lethal and his combat blows crushingly hard.  He moves at speed, and commands legions of evil to do his bidding.  It is said that he is fated never to die by the hand of mortal man.
 
-N::Pazuzu
-I:14::125:Bd100:10:40:30000:82:284:NONE8:2
-A:55:284:284:284
-F: Lord of Air|MV_ATT_NORM|THRO_DR|MV_INVIS|CARRY_OBJ|HAS_4D2|0x3L|MS1_BO_MANA|EVIL|DEMON|CHARM_SLEEP|MAX_HP|IM_COLD|IM_FIRE|IM_ELEC|IM_ACID|IM_POIS|GOOD|UNIQUE|MS2_BO_ELEC|MS2_BA_ELEC|MS2_MIND_BLAST
+N::Pazuzu, Lord of Air
+I:B::14:100d55:40:125:10:2:82:30000:m
+A:284:284:284:284
+F:MV_ATT_NORM|THRO_DR|MV_INVIS|CARRY_OBJ|HAS_4D2|0x3L|MS1_BO_MANA|EVIL|DEMON|CHARM_SLEEP|MAX_HP|IM_COLD|IM_FIRE|IM_ELEC|IM_ACID|IM_POIS|GOOD|UNIQUE|MS2_BO_ELEC|MS2_BA_ELEC|MS2_MIND_BLAST
 D:A winged humanoid from the Planes of Hell, Pazuzu grins inhumanely at you as he decides your fate.
 
 N::Hell hound
@@ -3242,10 +3242,10 @@ A:107:107:107
 F:MV_ATT_NORM|MV_20|0x5L|MS1_BR_FIRE|ANIMAL|EVIL|MAX_HP|IM_FIRE|GROUP
 D:It is a giant dog that glows with heat.  Flames pour from its nostrils.
 
-N::Cantoras
-I:14::120:sd150:80:20:45000:84:0:MS3_S_GUNDEAD:2
-A:45:246:172:172
-F: the Skeletal Lord|MV_ATT_NORM|HAS_4D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|HAS_2D2|HAS_1D2|0x1L|MS1_TELE_TO|MS1_BO_MANA|MS1_FEAR|MS1_SLOW|EVIL|UNIQUE|UNDEAD|CHARM_SLEEP|IM_COLD|NO_INFRA|MINDLESS|IM_POIS|IM_FIRE|MAX_HP|INTELLIGENT|SPECIAL|MS2_BA_WATE|MS2_RAZOR|MS2_BRAIN_SMASH|MS2_BO_ICEE|MS2_BA_NETH
+N::Cantoras, the Skeletal Lord
+I:s::14::150d45:20:120:802:84:45000:m
+A:246:172:172:0
+F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|HAS_2D2|HAS_1D2|0x1L|MS1_TELE_TO|MS1_BO_MANA|MS1_FEAR|MS1_SLOW|EVIL|UNIQUE|UNDEAD|CHARM_SLEEP|IM_COLD|NO_INFRA|MINDLESS|IM_POIS|IM_FIRE|MAX_HP|INTELLIGENT|SPECIAL|MS2_BA_WATE|MS2_RAZOR|MS2_BRAIN_SMASH|MS2_BO_ICEE|MS2_BA_NETH|MS3_S_GUNDEAD
 D:A legion of evil undead druj animating the skeleton of a once mighty sorcerer.  His power is devastating and his speed unmatched in the underworld.  Flee his wrath!
 
 N::The Tarrasque
@@ -3254,16 +3254,16 @@ A:212:212:214:214
 F:MV_ATT_NORM|HAS_4D2|HAS_2D2|THRO_DR|CARRY_OBJ|0x2L|MS1_BR_COLD|EVIL|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|GOOD|MS2_BR_DISE
 D:The Tarrasque is a massive reptile of legend, rumoured to be unkillable and immune to magic.  Fear its anger, for its devastation is unmatched!
 
-N::Lungorthin
-I:13::125:&d80:80:20:37000:85:214:MS3_S_GUNDEAD:2
-A:95:104:104:78
-F: the Balrog of White Fire|MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x4L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_BR_FIRE|MS1_CONF|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|GOOD
+N::Lungorthin, the Balrog of White Fire
+I:&:13::80d95:20:125:80:2:85:37000:m
+A:104:104:78:214
+F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x4L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_BR_FIRE|MS1_CONF|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|MAX_HP|UNIQUE|GOOD|MS3_S_GUNDEAD
 D:A massive form cloaked in flame.  Lungorthin stares balefully at you with eyes that smoulder red.  The dungeon floor where he stands is scorched by the heat of his body.
 
-N::Draugluin
-I:13::90:Cd100:90:80:40000:87:160:NONE8:2
-A:70:58:58:160
-F: Sire of All Werewolves|MV_ATT_NORM|MV_20|PICK_UP|THRO_DR|0x3L|MS1_FEAR|ANIMAL|EVIL|UNIQUE|IM_POIS|MAX_HP|GOOD|MS2_S_SUMMON|MS2_S_HOUND
+N::Draugluin, Sire of All Werewolves
+I:C::13:100d70:80:90:90:2:87:40000:m
+A:58:58:160:160
+F:MV_ATT_NORM|MV_20|PICK_UP|THRO_DR|0x3L|MS1_FEAR|ANIMAL|EVIL|UNIQUE|IM_POIS|MAX_HP|GOOD|MS2_S_SUMMON|MS2_S_HOUND
 D:Draugluin provides Sauron with a fearsome personal guard.  He is an enormous wolf inhabited with a human spirit.  He is chief of all his kind.
 
 N::Feagwath the Undead Sorceror
@@ -3272,32 +3272,32 @@ A:230:230:23:23
 F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x3L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|TELE|MS1_BA_FIRE|MS1_BO_MANA|EVIL|CHARM_SLEEP|IM_FIRE|IM_ELEC|IM_COLD|MAX_HP|UNIQUE|SPECIAL|IM_POIS|INTELLIGENT|NO_INFRA|UNDEAD|MS2_BRAIN_SMASH|MS2_RAZOR|MS2_S_SUMMON|MS3_MANA_STORM|MS3_S_GUNDEAD
 D:A stench of corruption and decay surrounds this sorcerer, who has clearly risen from the grave to continue his foul plots and schemes.
 
-N::Carcharoth
-I:13::110:Cd150:10:80:40000:92:163:NONE8:2
-A:50:58:58:163
-F: the Jaws of Thirst|MV_ATT_NORM|MV_20|PICK_UP|THRO_DR|0x4L|MS1_BR_FIRE|MS1_FEAR|ANIMAL|EVIL|UNIQUE|IM_POIS|IM_FIRE|MAX_HP|GOOD|CHARM_SLEEP|MS2_HEAL|MS2_BRAIN_SMASH|MS2_S_HOUND
+N::Carcharoth, the Jaws of Thirst
+I:C::13:150d50:80:110:10:2:92:40000:m
+A:58:58:163:163
+F:MV_ATT_NORM|MV_20|PICK_UP|THRO_DR|0x4L|MS1_BR_FIRE|MS1_FEAR|ANIMAL|EVIL|UNIQUE|IM_POIS|IM_FIRE|MAX_HP|GOOD|CHARM_SLEEP|MS2_HEAL|MS2_BRAIN_SMASH|MS2_S_HOUND
 D:The first guard of Angband, Carcharoth, also known as 'The Red Maw', is the largest wolf to ever walk the earth.  He is highly intelligent and a deadly opponent in combat.
 
-N::Cerberus
-I:13::160:Cd100:10:50:40000:94:220:MS3_DARK_STORM:1
-A:100:220:220:220
-F: Guardian of Hades|MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|0x3L|MS1_BR_FIRE|ANIMAL|EVIL|UNIQUE|IM_FIRE|MAX_HP|GOOD|CHARM_SLEEP|MS2_BR_LIFE|MS2_S_HOUND
+N::Cerberus, Guardian of Hades
+I:C::13::100d100:50:160:10:1:94:40000:n
+A:220:220:220:220
+F:MV_ATT_NORM|HAS_4D2|CARRY_OBJ|THRO_DR|0x3L|MS1_BR_FIRE|ANIMAL|EVIL|UNIQUE|IM_FIRE|MAX_HP|GOOD|CHARM_SLEEP|MS2_BR_LIFE|MS2_S_HOUND|MS3_DARK_STORM
 D:A two-headed hell hound of fearsome aspect.  Flame burns merrily from its hide as it snarls and roars its defiance.
 
-N::Gothmog
-I:13::140:&d100:0:100:43000:95:214:MS3_S_GUNDEAD:1
-A:80:220:220:78
-F: the High Captain of Balrogs|MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x3L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_BR_FIRE|MS1_CONF|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|IM_ELEC|MAX_HP|UNIQUE|SPECIAL
+N::Gothmog, the High Captain of Balrogs
+I:&::13:100d80:100:140:0:1:95:43000:m
+A:220:220:78:214
+F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x3L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_BR_FIRE|MS1_CONF|EVIL|DEMON|CHARM_SLEEP|IM_FIRE|IM_ELEC|MAX_HP|UNIQUE|SPECIAL|MS3_S_GUNDEAD
 D:Gothmog is the Chief Balrog in Morgoth's personal guard.  He is renowned for slaying Ecthelion the Warder of the Gates and he has never been defeated in combat.  With his whip of flame and awesome fiery breath he saved his master from Ungoliant's rage.
 
-N::Sauron
-I:13::160:pd99:0:100:50000:99:214:MS3_MANA_STORM|MS3_S_ANCIENTD|MS3_S_GUNDEAD:1
-A:105:270:270:214
-F: the Sorcerer|MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x2L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_CONF|TELE|MS1_BO_MANA|MS1_BA_FIRE|EVIL|CHARM_SLEEP|IM_FIRE|IM_ELEC|IM_COLD|MAX_HP|UNIQUE|SPECIAL|IM_POIS|QUESTOR|INTELLIGENT|MS2_BRAIN_SMASH|MS2_BA_NETH|MS2_BO_ICEE|MS2_BO_PLAS|MS2_BA_WATE|MS2_TELE_LEVEL|MS2_FORGET|MS2_DARKNESS|MS2_S_SUMMON|MS2_RAZOR
+N::Sauron, the Sorcerer
+I:p::13::90d105:100:160:0:1:99:50000:m
+A:270:270:214:214
+F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|0x2L|MS1_FEAR|MS1_BLIND|MS1_S_DEMON|MS1_CONF|TELE|MS1_BO_MANA|MS1_BA_FIRE|EVIL|CHARM_SLEEP|IM_FIRE|IM_ELEC|IM_COLD|MAX_HP|UNIQUE|SPECIAL|IM_POIS|QUESTOR|INTELLIGENT|MS2_BRAIN_SMASH|MS2_BA_NETH|MS2_BO_ICEE|MS2_BO_PLAS|MS2_BA_WATE|MS2_TELE_LEVEL|MS2_FORGET|MS2_DARKNESS|MS2_S_SUMMON|MS2_RAZOR|MS3_MANA_STORM|MS3_S_ANCIENTD|MS3_S_GUNDEAD
 D:He is Morgoth's most powerful servant.  Mighty in spells and enchantments, he created the One Ring.  His eyes glow with power and his gaze seeks to destroy your soul.  He has many servants, and rarely fights without them.
 
-N::Morgoth
-I:14::150:Pd180:0:100:60000:100:214:MS3_S_WRAITH|MS3_MANA_STORM|MS3_S_ANCIENTD|MS3_S_GUNDEAD|MS3_S_UNIQUE:10
-A:95:262:262:245
-F: Lord of Darkness|MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|WINNER|0x3L|MS1_BO_MANA|EVIL|CHARM_SLEEP|IM_FIRE|IM_ELEC|IM_COLD|IM_POIS|IM_ACID|MAX_HP|UNIQUE|SPECIAL|BREAK_WALL|DESTRUCT|INTELLIGENT|MS2_S_SUMMON|MS2_BRAIN_SMASH|MS2_BA_NETH
+N::Morgoth, Lord of Darkness
+I:P::14:180d95:100:150:0:10:100:60000:m
+A:262:262:245:214
+F:MV_ATT_NORM|HAS_4D2|HAS_2D2|HAS_1D2|CARRY_OBJ|HAS_60|HAS_90|THRO_DR|WINNER|0x3L|MS1_BO_MANA|EVIL|CHARM_SLEEP|IM_FIRE|IM_ELEC|IM_COLD|IM_POIS|IM_ACID|MAX_HP|UNIQUE|SPECIAL|BREAK_WALL|DESTRUCT|INTELLIGENT|MS2_S_SUMMON|MS2_BRAIN_SMASH|MS2_BA_NETH|MS3_S_WRAITH|MS3_MANA_STORM|MS3_S_ANCIENTD|MS3_S_GUNDEAD|MS3_S_UNIQUE
 D:He is the Master of the Pits of Angband.  His figure is like a black mountain crowned with Lightning.  He rages with everlasting anger, his body scarred by Fingolfin's eight mighty wounds.  He can never rest from his pain, but seeks forever to dominate all that is light and good in the world.  He is the origin of man's fear of darkness and created many foul creatures with his evil powers.  Orcs, Dragons, and Trolls are his most foul corruptions, causing much pain and suffering in the world to please him.  His disgusting visage, twisted with evil, is crowned with iron, the two remaining Silmarils forever burning him.  Grond, the mighty Hammer of the Underworld, cries defiance as he strides towards you to crush you to a pulp!
